@@ -6,6 +6,7 @@ one of these breaks, the product has started counting help as knowledge.
 
 from __future__ import annotations
 
+import json
 import uuid
 from collections.abc import AsyncIterator, Iterator
 
@@ -16,7 +17,7 @@ from sqlalchemy import text
 from app.config import Settings, get_settings
 from app.db import database_is_reachable, get_engine
 from app.main import app
-from app.routers.practice import _practice_history, _record_in
+from app.routers.practice import _figures, _practice_history, _prior_turns, _record_in
 
 pytestmark = pytest.mark.integration
 
@@ -686,3 +687,316 @@ async def test_the_history_is_one_row_per_question_not_per_attempt(
     assert mine[0].was_taught is True
     assert mine[0].was_correct is False
     assert mine[0].chose == "C"
+
+
+# --- the figure and the conversation ---------------------------------------------------
+
+#: A real reviewed figure from the bank, so the test exercises the file read rather than a
+#: fixture that only looks like one.
+A_REAL_FIGURE = "docs/questions/utme/mathematics/figures/" + (
+    "0037e3d10093a64618a4b996b26acd1db5802c432de803ddb6ecb2ff8878345d.png"
+)
+
+
+async def _attach_asset(version: str, **overrides: object) -> None:
+    row = {
+        "storage_uri": A_REAL_FIGURE,
+        "mime_type": "image/png",
+        "licence_status": "verified",
+        "alt_text": "A triangle with the right angle at B.",
+    } | overrides
+    async with get_engine().connect() as conn:
+        await conn.execute(
+            text(
+                """
+                INSERT INTO question_assets (question_version_id, storage_uri, mime_type,
+                  licence_status, alt_text)
+                VALUES (CAST(:v AS uuid), :storage_uri, :mime_type, :licence_status, :alt_text)
+                """
+            ),
+            {"v": version, **row},
+        )
+        await conn.commit()
+
+
+async def test_only_a_reviewed_image_is_sent_as_a_figure(
+    client: httpx.AsyncClient, fixture: dict[str, str], tutor_settings: None
+) -> None:
+    """Three filters, and each one is a way a bad file could reach the model.
+
+    An unverified licence is content we have not cleared to send anywhere. A non-image is not
+    a diagram. A path outside the asset tree is the one that matters most: `storage_uri` is a
+    string in a table, and resolving it without checking where it lands would let a bad row
+    read a file off the box and post it to a third party.
+    """
+    state = await start(client, fixture)
+    version = state["question"]["question_version_id"]
+
+    await _attach_asset(version, licence_status="pending")
+    await _attach_asset(version, mime_type="application/pdf")
+    await _attach_asset(version, storage_uri="../../../../../etc/passwd")
+    await _attach_asset(version, storage_uri="docs/questions/nothing-here.png")
+
+    async with get_engine().connect() as conn:
+        assert await _figures(conn, uuid.UUID(version)) == []
+
+    # And the good row does come through, or the filters above prove nothing.
+    await _attach_asset(version)
+    async with get_engine().connect() as conn:
+        figures = await _figures(conn, uuid.UUID(version))
+    assert len(figures) == 1
+    assert figures[0].mime_type == "image/png"
+    assert figures[0].alt_text == "A triangle with the right angle at B."
+    assert figures[0].data_uri.startswith("data:image/png;base64,iVBOR")
+
+
+async def test_the_conversation_is_this_question_in_this_sitting(
+    client: httpx.AsyncClient, fixture: dict[str, str], tutor_settings: None
+) -> None:
+    """Memory is scoped, and a fallback is not something the coach said.
+
+    Replaying a fallback as an assistant turn would have the coach building on an apology it
+    never wrote. Replaying another question's turns would put text from a different lesson
+    into this packet without anyone choosing to.
+    """
+    state = await start(client, fixture)
+    version = state["question"]["question_version_id"]
+    other_version = await _add_question_in_pool(
+        fixture, "practice", "A different question in the same subtopic."
+    )
+    session = state["session_id"]
+
+    async with get_engine().connect() as conn:
+        for asked, reply, source, version_id in [
+            ("first question", "first answer", "model", version),
+            ("a turn the coach could not take", "the reviewed step", "fallback", version),
+            ("about a different question", "different answer", "model", other_version),
+            ("second question", "second answer", "model", version),
+        ]:
+            await conn.execute(
+                text(
+                    """
+                    INSERT INTO tutor_turns (student_id, session_id, question_version_id,
+                      asked, reply, source, model)
+                    VALUES (CAST(:student AS uuid), CAST(:session AS uuid),
+                      CAST(:version AS uuid), :asked, :reply, :source, :model)
+                    """
+                ),
+                {
+                    "student": fixture["student"],
+                    "session": session,
+                    "version": version_id,
+                    "asked": asked,
+                    "reply": reply,
+                    "source": source,
+                    # The schema holds `source = 'model'` and a named model together.
+                    "model": "gpt-4o" if source == "model" else None,
+                },
+            )
+        await conn.commit()
+
+        turns = await _prior_turns(conn, uuid.UUID(session), uuid.UUID(version))
+
+    assert [turn.asked for turn in turns] == ["first question", "second question"]
+    assert [turn.replied for turn in turns] == ["first answer", "second answer"]
+
+
+# --- watching the coach write ----------------------------------------------------------
+
+
+async def ask_streaming(
+    client: httpx.AsyncClient, session: str, version: str, asked: str
+) -> tuple[int, list[tuple[str, dict]]]:
+    """Post to the streaming endpoint and read the frames back."""
+    events: list[tuple[str, dict]] = []
+    async with client.stream(
+        "POST",
+        f"/v1/practice/{session}/ask/stream",
+        json={"question_version_id": version, "step_index": 0, "asked": asked},
+    ) as response:
+        if response.status_code != 200:
+            await response.aread()
+            return response.status_code, events
+        body = "".join([chunk async for chunk in response.aiter_text()])
+
+    for frame in body.split("\n\n"):
+        rows = frame.splitlines()
+        name = next((row[7:] for row in rows if row.startswith("event: ")), None)
+        data = next((row[6:] for row in rows if row.startswith("data: ")), None)
+        if name and data:
+            events.append((name, json.loads(data)))
+    return 200, events
+
+
+async def test_the_streaming_coach_uses_the_same_door(
+    client: httpx.AsyncClient, fixture: dict[str, str], tutor_settings: None
+) -> None:
+    """The board guard is the whole of what keeps protected content out of the tutor.
+
+    A second way in that skipped it would be a way to ask about a question the student is
+    still answering, so the streaming endpoint is refused in exactly the places `/ask` is.
+    """
+    state = await start(client, fixture)
+    version = state["question"]["question_version_id"]
+
+    status, _ = await ask_streaming(client, state["session_id"], version, "how?")
+    assert status == 409
+
+    state = await answer(client, state["session_id"], state, "B")
+    status, _ = await ask_streaming(client, state["session_id"], version, "how?")
+    assert status == 409
+
+
+async def test_a_streamed_answer_is_written_and_stored(
+    client: httpx.AsyncClient, fixture: dict[str, str], tutor_settings: None
+) -> None:
+    """Whatever reaches the board also reaches the table.
+
+    There is no key in these tests, so the reviewed step stands in — which is the case worth
+    holding anyway: a fallback was fetched rather than written, so it arrives whole, and the
+    turn is stored exactly as the unstreamed endpoint stores it.
+    """
+    state = await start(client, fixture)
+    version = state["question"]["question_version_id"]
+    state = await answer(client, state["session_id"], state, "B")
+    state = await answer(client, state["session_id"], state, "C")
+    assert state["stage"] == "explain"
+
+    status, events = await ask_streaming(
+        client, state["session_id"], version, "why the first step?"
+    )
+    assert status == 200
+
+    names = [name for name, _ in events]
+    assert names[-1] == "done"
+    done = events[-1][1]
+    assert done["source"] == "fallback"
+    assert done["asks_left"] == 1
+
+    # The fallback arrives in both channels like any other answer: the reviewed step is put
+    # on the board, and the route to a person is said aloud.
+    board = [payload["text"] for name, payload in events if name == "board"]
+    said = " ".join(payload["text"] for name, payload in events if name == "say")
+    # Whatever the board was showing is what the coach writes back up, not a paraphrase.
+    assert board == [(state["solution_steps"] or [])[0]]
+    assert "ask a person" in said
+    # No key in these tests, so every spoken line says plainly that it has no voice. The
+    # client waits on this before revealing a line, so silence has to be stated rather than
+    # simply never arriving.
+    voices = [payload for name, payload in events if name == "voice"]
+    assert voices, "a spoken line must say whether it can be heard"
+    assert all(payload["url"] is None for payload in voices)
+
+    stored = await turns_for(fixture["student"])
+    assert len(stored) == 1
+    assert stored[0]["asked"] == "why the first step?"
+    assert stored[0]["source"] == "fallback"
+    assert stored[0]["model"] is None
+
+
+# --- the student's own voice, which is switched off ------------------------------------
+
+
+@pytest.fixture
+def listening_settings() -> Iterator[None]:
+    """The default: the mic on, and no key to transcribe with."""
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        openai_api_key="", ai_daily_calls_per_student=2, ai_listen=True
+    )
+    yield
+    app.dependency_overrides.pop(get_settings, None)
+
+
+@pytest.fixture
+def deaf_settings() -> Iterator[None]:
+    """A deployment that has deliberately switched the mic off."""
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        openai_api_key="", ai_daily_calls_per_student=2, ai_listen=False
+    )
+    yield
+    app.dependency_overrides.pop(get_settings, None)
+
+
+async def _speak_up(client: httpx.AsyncClient, session: str, version: str) -> httpx.Response:
+    return await client.post(
+        f"/v1/practice/{session}/listen",
+        data={"question_version_id": version},
+        files={"audio": ("question.webm", b"not really audio", "audio/webm")},
+    )
+
+
+async def test_a_deployment_can_switch_the_mic_off_entirely(
+    client: httpx.AsyncClient, fixture: dict[str, str], deaf_settings: None
+) -> None:
+    """Off is still a supported state, and 404 rather than 403 while it is.
+
+    A switched-off feature should not advertise that it exists, and `/v1/features` has to
+    agree with the endpoint — otherwise a client draws a microphone the server will refuse.
+    """
+    state = await start(client, fixture)
+    version = state["question"]["question_version_id"]
+    state = await answer(client, state["session_id"], state, "B")
+    state = await answer(client, state["session_id"], state, "C")
+    assert state["stage"] == "explain"
+
+    assert (await _speak_up(client, state["session_id"], version)).status_code == 404
+
+    # And the client is told the same thing, so it knows not to draw the button.
+    features = (await client.get("/v1/features")).json()
+    assert features["student_voice"] is False
+
+
+async def test_the_mic_answers_at_the_board_and_nowhere_else(
+    client: httpx.AsyncClient, fixture: dict[str, str], listening_settings: None
+) -> None:
+    """Switched on, it is still only reachable where the ask box is.
+
+    Without this the mic would be a way to spend a deployment's transcription budget from any
+    session, on any question, without ever being at a board.
+    """
+    state = await start(client, fixture)
+    version = state["question"]["question_version_id"]
+
+    assert (await _speak_up(client, state["session_id"], version)).status_code == 409
+
+    state = await answer(client, state["session_id"], state, "B")
+    assert (await _speak_up(client, state["session_id"], version)).status_code == 409
+
+    state = await answer(client, state["session_id"], state, "C")
+    assert state["stage"] == "explain"
+    # At the board it is reachable — and with no key there is nothing to transcribe with, so
+    # the student is told to type rather than left with a broken button.
+    assert (await _speak_up(client, state["session_id"], version)).status_code == 422
+
+    features = (await client.get("/v1/features")).json()
+    assert features["student_voice"] is True
+
+
+async def test_a_spoken_question_never_becomes_a_turn_on_its_own(
+    client: httpx.AsyncClient, fixture: dict[str, str], listening_settings: None
+) -> None:
+    """Transcribing is not asking. The words go in the box; the student presses Ask.
+
+    Transcription gets things wrong, and a question the student never approved should not
+    reach the coach — nor the stored record of what they asked.
+    """
+    state = await start(client, fixture)
+    version = state["question"]["question_version_id"]
+    state = await answer(client, state["session_id"], state, "B")
+    state = await answer(client, state["session_id"], state, "C")
+
+    await _speak_up(client, state["session_id"], version)
+    assert await turns_for(fixture["student"]) == []
+
+
+async def test_a_speech_handle_belongs_to_its_own_sitting(
+    client: httpx.AsyncClient, fixture: dict[str, str], tutor_settings: None
+) -> None:
+    """The handle is the permission, so it cannot be carried to another session.
+
+    It is only ever a sentence the student is about to hear anyway, but a handle that worked
+    anywhere would be a way to spend a deployment's speech budget from outside a lesson.
+    """
+    assert (
+        await client.get(f"/v1/practice/{uuid.uuid4()}/speech/not-a-real-handle")
+    ).status_code == 404

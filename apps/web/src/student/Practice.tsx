@@ -39,8 +39,18 @@ export function Practice({
   const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
   const [issue, setIssue] = useState<string | null>(null);
+  // Whether this deployment lets a student speak their question. Asked once, and assumed
+  // false until the server says otherwise, so a refused microphone is never drawn.
+  const [canSpeak, setCanSpeak] = useState(false);
   const askedAt = useRef<number>(Date.now());
   const finishRef = useRef(onFinished);
+
+  useEffect(() => {
+    api
+      .features()
+      .then((features) => setCanSpeak(features.student_voice))
+      .catch(() => setCanSpeak(false));
+  }, []);
 
   useEffect(() => {
     finishRef.current = onFinished;
@@ -151,10 +161,25 @@ export function Practice({
       <Board
         title={question.subtopic_name}
         subtitle={`${subjectName} · worked through`}
+        // The question, but never the passage: several paragraphs of comprehension text
+        // would bury the working underneath it.
+        question={question.stem}
         steps={state.solution_steps ?? []}
         answerLine={`The answer is ${state.correct_option_key}.`}
-        onAsk={(asked, stepIndex) =>
-          api.practiceAsk(sessionId, question.question_version_id, asked, stepIndex)
+        onListen={
+          canSpeak
+            ? (recording) =>
+                api.practiceListen(sessionId, question.question_version_id, recording)
+            : undefined
+        }
+        onAsk={(asked, stepIndex, handlers) =>
+          api.practiceAskStreaming(
+            sessionId,
+            question.question_version_id,
+            asked,
+            stepIndex,
+            handlers,
+          )
         }
         onDone={() => {
           setBusy(true);

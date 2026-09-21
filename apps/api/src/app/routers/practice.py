@@ -24,18 +24,33 @@ when they ask about it — `/ask`, once the question is already taught and its a
 shown, explaining the reviewed steps rather than replacing them. If that tutor is unavailable
 the steps are served in its place, so the lesson degrades and never breaks.
 
-WHAT IS NOT HERE YET. There is no voice: the coach writes and the student types, and student
-speech stays out until the legal review has ruled on recording a minor. And there is no
-working pad, so `attempts.working` stays null; the column exists so that the day the pad
-lands, the attempts already recorded have the shape it needs.
+VOICE GOES BOTH WAYS. The coach speaks — `/ask/stream` returns the explanation as audio
+beside the text, because the board is the summary and the talking is the lesson. The student
+can speak back: `/listen` turns a recording into words for them to check and send. The
+consent position for recording a minor is certified, so this is an ordinary feature now.
+
+WHAT STILL HOLDS AROUND IT. The recording never outlives the request that carried it — it is
+transcribed and dropped, and what reaches `tutor_turns` is the transcript, exactly as a typed
+question would. Every spoken line of the coach is captioned on screen whatever happens to the
+audio, so nothing it teaches exists only in the air.
+
+WHAT IS NOT HERE YET. There is no working pad, so `attempts.working` stays null; the column
+exists so that the day the pad lands, the attempts already recorded have the shape it needs.
 """
 
 from __future__ import annotations
 
+import base64
+import json
+import secrets
+import time
+from collections.abc import AsyncIterator
+from pathlib import Path
 from typing import Annotated, Any, Literal
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
@@ -48,6 +63,49 @@ from engine.projection import UnitStanding, project
 from engine.version import ENGINE_VERSION
 
 router = APIRouter(prefix="/v1/practice", tags=["practice"])
+
+#: Asset URIs are stored repo-relative, the way the importer wrote them.
+REPO_ROOT = Path(__file__).resolve().parents[5]
+
+#: What may be sent to the model as a picture. Anything else attached to a question is not
+#: an image we are willing to put in a packet.
+FIGURE_MIME_TYPES = {"image/png", "image/jpeg", "image/webp", "image/gif"}
+
+
+def _event(name: str, payload: dict[str, object]) -> str:
+    """One server-sent event. JSON so a newline in the text cannot end the frame early."""
+    return f"event: {name}\ndata: {json.dumps(payload)}\n\n"
+
+
+#: A line the coach has just written, waiting to be spoken, keyed by a handle the client
+#: fetches it with. The audio is not pushed down the lesson stream any more: the browser is
+#: far better at playing a sound that is still arriving than we are at reassembling one, so
+#: it is given a URL and left to stream it.
+#:
+#: In memory on purpose — it lives for seconds, it is worth nothing once spoken, and putting
+#: it in the database would mean storing a queue of sentences to say out loud. A deployment
+#: running more than one worker would need this shared; today there is one.
+_WAITING_TO_BE_SAID: dict[str, tuple[float, UUID, str]] = {}
+
+#: Long enough for a student to sit through the lesson before this line's turn comes, short
+#: enough that a handle is worthless by the time anyone could find it.
+SPEECH_HANDLE_SECONDS = 600.0
+
+
+def _remember_to_say(session_id: UUID, line: str) -> str:
+    """Put a line aside to be spoken, and return the handle that fetches it."""
+    now = time.monotonic()
+    for handle, (expires, _, _) in list(_WAITING_TO_BE_SAID.items()):
+        if expires < now:
+            del _WAITING_TO_BE_SAID[handle]
+    handle = secrets.token_urlsafe(16)
+    _WAITING_TO_BE_SAID[handle] = (now + SPEECH_HANDLE_SECONDS, session_id, line)
+    return handle
+
+
+#: Bigger than any figure in the bank. A file past this is a mistake in the store, not a
+#: diagram, and it is skipped rather than sent.
+MAX_FIGURE_BYTES = 4_000_000
 
 #: Questions this student has already met are never asked again, in any context.
 EXCLUDED_POOL = "held_out"
@@ -96,7 +154,11 @@ class AskIn(BaseModel):
 
 
 class TutorReply(BaseModel):
+    #: The tagged transcript, both channels, exactly as it was stored.
     reply: str
+    #: What was said aloud, and what was written up. Most of the teaching is in the first.
+    spoken: str = ""
+    board: list[str] = Field(default_factory=list)
     #: How the student got this answer: the tutor, or the reviewed steps standing in for it.
     source: tutor.Source
     #: Said out loud so the budget is a thing the student can see coming rather than a wall
@@ -649,9 +711,7 @@ async def _asks_used_today(conn: AsyncConnection, student_id: UUID) -> int:
     )
 
 
-async def _record_in(
-    conn: AsyncConnection, student_id: UUID, subtopic_id: str
-) -> dict[str, int]:
+async def _record_in(conn: AsyncConnection, student_id: UUID, subtopic_id: str) -> dict[str, int]:
     """Counts for this student in this subtopic, across every pool.
 
     Counts and nothing else. A skill-level result summary is what tutoring may receive from a
@@ -782,12 +842,87 @@ async def _practice_history(
     ]
 
 
+async def _figures(conn: AsyncConnection, version_id: UUID) -> list[tutor.Figure]:
+    """The reviewed diagrams printed with this question.
+
+    Only assets whose licence a human has verified, and only images: the coach is shown the
+    same picture the student is looking at, from our own store, read off disk here so that
+    `app.tutor` stays a module that does no IO. A missing or oversized file is skipped rather
+    than raised — a lesson does not fail because a figure did not load.
+    """
+    rows = await fetch_all(
+        conn,
+        """
+        SELECT storage_uri, mime_type, alt_text
+        FROM question_assets
+        WHERE question_version_id = :version AND licence_status = 'verified'
+        ORDER BY display_order, id
+        """,
+        version=version_id,
+    )
+
+    # Capped AFTER filtering, not before: a question whose first rows are an unverified
+    # licence and a PDF would otherwise send no figure at all, having spent the budget on
+    # two assets it then discarded.
+    figures: list[tutor.Figure] = []
+    for row in rows:
+        if len(figures) == tutor.MAX_FIGURES:
+            break
+        mime_type = str(row["mime_type"] or "")
+        if mime_type not in FIGURE_MIME_TYPES:
+            continue
+        # Resolved under the repo root and checked to still be under it, so a stored path
+        # cannot walk out of the asset tree and read something else off the box.
+        path = (REPO_ROOT / str(row["storage_uri"])).resolve()
+        if not path.is_relative_to(REPO_ROOT) or not path.is_file():
+            continue
+        if path.stat().st_size > MAX_FIGURE_BYTES:
+            continue
+        figures.append(
+            tutor.Figure(
+                mime_type=mime_type,
+                base64_data=base64.b64encode(path.read_bytes()).decode("ascii"),
+                alt_text=str(row["alt_text"]) if row["alt_text"] else None,
+            )
+        )
+    return figures
+
+
+async def _prior_turns(
+    conn: AsyncConnection, session_id: UUID, version_id: UUID
+) -> list[tutor.Turn]:
+    """What has already been said about this question, in this sitting, oldest first.
+
+    Scoped to the one question and the one session on purpose. A conversation is about the
+    thing in front of you; carrying yesterday's exchange into today's board would put text
+    from another lesson into this packet without anyone choosing to.
+
+    Fallback turns are left out. They are what the student read when the coach could not
+    answer, not something the coach said, and replaying them as its own words would have it
+    building on an apology it never made.
+    """
+    rows = await fetch_all(
+        conn,
+        """
+        SELECT asked, reply FROM tutor_turns
+        WHERE session_id = :session AND question_version_id = :version
+          AND source = 'model'
+        ORDER BY asked_at
+        """,
+        session=session_id,
+        version=version_id,
+    )
+    turns = [tutor.Turn(asked=str(row["asked"]), replied=str(row["reply"])) for row in rows]
+    return turns[-tutor.MEMORY_DEPTH :]
+
+
 async def _lesson_on_the_board(
     conn: AsyncConnection,
     session_id: UUID,
     student_id: UUID,
     version_id: UUID,
     step_index: int | None,
+    settings: Settings,
 ) -> tutor.Lesson:
     """Assemble what the tutor may see, from reviewed content and this session's attempts.
 
@@ -878,7 +1013,75 @@ async def _lesson_on_the_board(
         level=await _level_for(conn, student_id, subtopic_id),
         **await _record_in(conn, student_id, subtopic_id),
         history=await _practice_history(conn, student_id, subtopic_id, version_id),
+        figures=await _figures(conn, version_id) if settings.ai_send_figures else [],
+        prior=await _prior_turns(conn, session_id, version_id),
     )
+
+
+async def _must_be_at_the_board(conn: AsyncConnection, session_id: UUID, version_id: UUID) -> None:
+    """Refuse unless this session's own attempts say the question was missed twice.
+
+    The same test `_state` uses to decide something was taught rather than answered, read
+    from what is stored rather than from anything the client says. Both ask endpoints go
+    through here, so the streaming one cannot become the softer door.
+    """
+    standing = (
+        (
+            await conn.execute(
+                text(
+                    """
+                    SELECT count(*) AS tries,
+                           bool_and(coalesce(is_correct, false) IS FALSE) AS never_right
+                    FROM attempts
+                    WHERE session_id = :session AND question_version_id = :version
+                    """
+                ),
+                {"session": session_id, "version": version_id},
+            )
+        )
+        .mappings()
+        .first()
+    )
+    assert standing is not None
+    if int(standing["tries"]) < 2 or not standing["never_right"]:
+        raise HTTPException(
+            status_code=409, detail="the coach answers at the board, once a question is taught"
+        )
+
+
+async def _record_turn(
+    conn: AsyncConnection,
+    session_id: UUID,
+    student_id: UUID,
+    question: AskIn,
+    reply: tutor.Reply,
+) -> None:
+    """Store the turn. Assistance is recorded (REQ-05), and a reviewer reading a complaint
+    needs the lesson that happened rather than the one in the bank."""
+    await conn.execute(
+        text(
+            """
+            INSERT INTO tutor_turns (student_id, session_id, question_version_id, step_index,
+              asked, reply, source, model, input_tokens, output_tokens, latency_ms)
+            VALUES (:student, :session, :version, :step, :asked, :reply, :source, :model,
+              :input_tokens, :output_tokens, :latency_ms)
+            """
+        ),
+        {
+            "student": student_id,
+            "session": session_id,
+            "version": question.question_version_id,
+            "step": question.step_index,
+            "asked": question.asked,
+            "reply": reply.text,
+            "source": reply.source,
+            "model": reply.model,
+            "input_tokens": reply.input_tokens,
+            "output_tokens": reply.output_tokens,
+            "latency_ms": reply.latency_ms,
+        },
+    )
+    await conn.commit()
 
 
 @router.post(
@@ -906,32 +1109,15 @@ async def ask(
     reviewer reading a complaint needs the lesson that happened, not the one in the bank.
     """
     session = await _session(conn, session_id)
-
-    standing = (
-        (
-            await conn.execute(
-                text(
-                    """
-                    SELECT count(*) AS tries,
-                           bool_and(coalesce(is_correct, false) IS FALSE) AS never_right
-                    FROM attempts
-                    WHERE session_id = :session AND question_version_id = :version
-                    """
-                ),
-                {"session": session_id, "version": question.question_version_id},
-            )
-        )
-        .mappings()
-        .first()
-    )
-    assert standing is not None
-    if int(standing["tries"]) < 2 or not standing["never_right"]:
-        raise HTTPException(
-            status_code=409, detail="the coach answers at the board, once a question is taught"
-        )
+    await _must_be_at_the_board(conn, session_id, question.question_version_id)
 
     lesson = await _lesson_on_the_board(
-        conn, session_id, session["student_id"], question.question_version_id, question.step_index
+        conn,
+        session_id,
+        session["student_id"],
+        question.question_version_id,
+        question.step_index,
+        settings,
     )
 
     used = await _asks_used_today(conn, session["student_id"])
@@ -943,33 +1129,254 @@ async def ask(
     else:
         reply = await tutor.answer(lesson, question.asked, settings)
 
-    await conn.execute(
-        text(
-            """
-            INSERT INTO tutor_turns (student_id, session_id, question_version_id, step_index,
-              asked, reply, source, model, input_tokens, output_tokens, latency_ms)
-            VALUES (:student, :session, :version, :step, :asked, :reply, :source, :model,
-              :input_tokens, :output_tokens, :latency_ms)
-            """
-        ),
-        {
-            "student": session["student_id"],
-            "session": session_id,
-            "version": question.question_version_id,
-            "step": question.step_index,
-            "asked": question.asked,
-            "reply": reply.text,
-            "source": reply.source,
-            "model": reply.model,
-            "input_tokens": reply.input_tokens,
-            "output_tokens": reply.output_tokens,
-            "latency_ms": reply.latency_ms,
-        },
-    )
-    await conn.commit()
+    await _record_turn(conn, session_id, session["student_id"], question, reply)
 
     return TutorReply(
         reply=reply.text,
+        spoken=reply.spoken,
+        board=reply.board,
         source=reply.source,
         asks_left=max(0, allowance - (used + 1)),
+    )
+
+
+@router.post(
+    "/{session_id}/ask/stream",
+    summary="Ask the coach, and watch it teach — voice and board",
+)
+async def ask_streaming(
+    conn: Annotated[AsyncConnection, Depends(connection)],
+    settings: Annotated[Settings, Depends(get_settings)],
+    session_id: UUID,
+    question: AskIn,
+) -> StreamingResponse:
+    """The same answer as `/ask`, arriving as it is made, in two channels.
+
+    Same door. `_must_be_at_the_board` runs before anything opens, the same packet is built by
+    the same function, and the same row reaches `tutor_turns` when the writing stops. What
+    differs is that the student watches and hears it rather than waiting for a paragraph.
+
+    THE EVENTS. `say` is a line spoken aloud, `board` a line written up, each as soon as the
+    coach finishes it — so the board fills while the voice is still talking, the way a lesson
+    actually goes. `audio` carries the mp3 for a spoken line, by index, because the voice is
+    slower to make than the words are; the client plays them in order and shows the text
+    meanwhile. `reset` replaces everything when what was stored differs from what was
+    streamed — a reply cut at the ceiling, or a fallback, which was fetched rather than
+    written. `done` says how it was reached and what is left of the allowance.
+
+    THE VOICE IS NEVER REQUIRED. Audio that fails to make simply does not arrive; every
+    spoken line is on screen as text regardless, so a muted phone, a failed call or a
+    deployment with `ai_speak` off is a quieter lesson and never a missing one.
+    """
+    session = await _session(conn, session_id)
+    await _must_be_at_the_board(conn, session_id, question.question_version_id)
+
+    lesson = await _lesson_on_the_board(
+        conn,
+        session_id,
+        session["student_id"],
+        question.question_version_id,
+        question.step_index,
+        settings,
+    )
+
+    used = await _asks_used_today(conn, session["student_id"])
+    allowance = settings.ai_daily_calls_per_student
+    asks_left = max(0, allowance - (used + 1))
+
+    async def events() -> AsyncIterator[str]:
+        """Text and the handles to hear it, sent as the lesson is written.
+
+        The voice is not made here. Each spoken line is put aside with a handle, and the
+        client fetches it from `/speech/{handle}` — which streams the audio as it is made, so
+        the browser starts playing after the first fraction of a second rather than waiting
+        for a finished clip. An earlier version generated every clip here and pushed it down
+        this stream as base64, which meant a third more bytes and a wait for the whole thing.
+
+        THE EVENTS. `say` is a line spoken aloud and `board` a line written up, each as soon
+        as the coach finishes it, with `after` saying which spoken line a board line belongs
+        under. `voice` carries where to hear a spoken line, or says there is none. `reset`
+        replaces everything when what was stored differs from what was streamed. `done` says
+        how the answer was reached and what is left of the allowance.
+        """
+        spoken = 0
+        sent: list[tutor.Said] = []
+
+        def dispatch_line(line: tutor.Said) -> list[str]:
+            """Frames for one finished line: the words, and where to hear them."""
+            nonlocal spoken
+            sent.append(line)
+            if line.channel in ("board", "draw"):
+                # Which spoken line this belongs under, so the client can write it while that
+                # sentence is being said rather than dropping it in on its own.
+                return [_event(line.channel, {"after": spoken - 1, "text": line.text})]
+
+            index = spoken
+            spoken += 1
+            frames = [_event("say", {"index": index, "text": line.text})]
+            # The handle goes out with the line, before a single byte of audio exists. The
+            # client can start fetching immediately, which is the whole point: generating the
+            # voice and writing the next line now happen at the same time.
+            if settings.ai_speak and settings.openai_api_key:
+                handle = _remember_to_say(session_id, line.text)
+                frames.append(
+                    _event(
+                        "voice",
+                        {
+                            "index": index,
+                            "url": f"/v1/practice/{session_id}/speech/{handle}",
+                        },
+                    )
+                )
+            else:
+                # No voice here at all. Said explicitly, because the client holds a line back
+                # until it knows whether it can be heard and would otherwise wait forever.
+                frames.append(_event("voice", {"index": index, "url": None}))
+            return frames
+
+        def dispatch(text: str) -> list[str]:
+            frames = []
+            for line in tutor.parse(text):
+                frames += dispatch_line(line)
+            return frames
+
+        if used >= allowance:
+            settled = tutor.Reply(text=tutor.fallback_text(lesson), source="budget")
+            for frame in dispatch(settled.text):
+                yield frame
+        else:
+            # Lines are dispatched as they finish rather than as they arrive: half a LaTeX
+            # expression is not a board line, and half a sentence is not worth speaking.
+            buffered = ""
+            settled = None
+            async for delta, reply in tutor.write_on_the_board(lesson, question.asked, settings):
+                if reply is not None:
+                    settled = reply
+                    continue
+                buffered += delta
+                # Cut on the tags rather than on newlines: the model does not always put its
+                # lines on separate rows, and when it does not, splitting on "\n" hands over
+                # nothing until the whole answer has arrived.
+                finished, buffered = tutor.split_finished(buffered)
+                for line in finished:
+                    for frame in dispatch_line(line):
+                        yield frame
+            assert settled is not None
+
+            # The last line has no newline after it, so it is still in the buffer when the
+            # stream ends.
+            if buffered.strip():
+                for frame in dispatch(buffered):
+                    yield frame
+
+            # Compared as lines rather than as raw text: the same lesson laid out with
+            # different whitespace is the same lesson, and rebuilding the board for that
+            # would be a flicker for nothing.
+            if [(x.channel, x.text) for x in sent] != [
+                (x.channel, x.text) for x in tutor.parse(settled.text)
+            ]:
+                sent.clear()
+                spoken = 0
+                yield _event("reset", {})
+                for frame in dispatch(settled.text):
+                    yield frame
+
+        await _record_turn(conn, session_id, session["student_id"], question, settled)
+        yield _event("done", {"source": settled.source, "asks_left": asks_left})
+
+    return StreamingResponse(
+        events(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+class Heard(BaseModel):
+    """What the student was understood to have said."""
+
+    #: Put in the box for them to read and send, never sent on their behalf. Transcription
+    #: gets things wrong, and a student should see the question before it becomes one.
+    asked: str
+
+
+@router.post(
+    "/{session_id}/listen",
+    response_model=Heard,
+    summary="Turn a spoken question into words for the student to check",
+)
+async def listen(
+    conn: Annotated[AsyncConnection, Depends(connection)],
+    settings: Annotated[Settings, Depends(get_settings)],
+    session_id: UUID,
+    question_version_id: Annotated[UUID, Form()],
+    audio: Annotated[UploadFile, File()],
+) -> Heard:
+    """Transcribe a question the student spoke, and hand back the words.
+
+    A DEPLOYMENT CAN STILL TURN IT OFF. `ai_listen` defaults on, and where it is off this
+    refuses with 404 rather than 403 — a switched-off feature should not advertise that it
+    exists. `/v1/features` is what a client reads to decide whether to draw the button.
+
+    THE RECORDING IS NOT KEPT. It is read, transcribed and dropped inside this request. What
+    is stored is the transcript, and only once the student has read it back and pressed Ask —
+    the words reach `tutor_turns` by the ordinary route, as though they had typed them.
+
+    SAME DOOR AS ASKING. The mic lives in the ask box and the ask box only exists at the
+    board, so the same guard applies: a session that has not missed this question twice
+    cannot use this to spend the deployment's transcription budget.
+    """
+    if not settings.ai_listen:
+        raise HTTPException(status_code=404, detail="not found")
+
+    await _session(conn, session_id)
+    await _must_be_at_the_board(conn, session_id, question_version_id)
+
+    heard = await tutor.listen(
+        await audio.read(), audio.content_type or "application/octet-stream", settings
+    )
+    if heard is None:
+        raise HTTPException(
+            status_code=422, detail="I could not make that out. Try again, or type it."
+        )
+    return Heard(asked=heard)
+
+
+@router.get(
+    "/{session_id}/speech/{handle}",
+    summary="Hear one line the coach wrote, as it is spoken",
+)
+async def speech(
+    settings: Annotated[Settings, Depends(get_settings)],
+    session_id: UUID,
+    handle: str,
+) -> StreamingResponse:
+    """Stream the audio for one spoken line.
+
+    WHY THE BROWSER FETCHES THIS INSTEAD OF BEING SENT IT. An `<audio>` element plays a sound
+    that is still arriving; reassembling one from base64 down a lesson stream does not, and
+    costs a third more bytes to fail at. So the lesson stream hands out a handle the moment
+    the line is written, the browser starts fetching at once, and the voice is generated while
+    the next line is still being typed.
+
+    THE HANDLE IS THE PERMISSION. It is random, it is held in memory for ten minutes, and it
+    is bound to the session it was made for — a handle from one sitting cannot be replayed
+    against another. There is nothing behind it but a sentence the coach has just written and
+    the student is about to hear anyway.
+    """
+    waiting = _WAITING_TO_BE_SAID.get(handle)
+    if waiting is None or waiting[0] < time.monotonic() or waiting[1] != session_id:
+        raise HTTPException(status_code=404, detail="nothing to say")
+
+    line = waiting[2]
+
+    async def audio() -> AsyncIterator[bytes]:
+        async for chunk in tutor.speak_streaming(line, settings):
+            yield chunk
+
+    return StreamingResponse(
+        audio(),
+        media_type="audio/mpeg",
+        # The same line is fetched once and never changes, but it is also worth nothing to
+        # anyone later, so it is not worth a cache entry on the way either.
+        headers={"Cache-Control": "no-store", "X-Accel-Buffering": "no"},
     )

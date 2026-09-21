@@ -178,6 +178,8 @@ export interface PracticeState {
 
 export interface TutorReply {
   reply: string;
+  spoken: string;
+  board: string[];
   /** 'model' when the coach answered; otherwise the reviewed steps stood in for it. */
   source: 'model' | 'fallback' | 'budget';
   asks_left: number;
@@ -190,11 +192,29 @@ export interface PracticeAnswerIn {
   confidence: 'sure' | 'unsure' | 'guessed' | null;
 }
 
+export interface Features {
+  /** The coach speaks its explanation aloud. */
+  coach_voice: boolean;
+  /** The student may ask by speaking. Off until the legal review rules on recording a minor. */
+  student_voice: boolean;
+}
+
 export interface StudentIdentity {
   student_id: string;
   display_name: string;
   external_ref: string;
   consent_recorded: boolean;
+}
+
+/** The message behind a failed response, unwrapped from FastAPI's `detail` when it is there. */
+async function readError(response: Response): Promise<string> {
+  let detail = await response.text();
+  try {
+    detail = (JSON.parse(detail) as { detail?: string }).detail ?? detail;
+  } catch {
+    /* the body was not JSON; show it as it came */
+  }
+  return detail;
 }
 
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
@@ -203,13 +223,7 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
     ...init,
   });
   if (!response.ok) {
-    let detail = await response.text();
-    try {
-      detail = (JSON.parse(detail) as { detail?: string }).detail ?? detail;
-    } catch {
-      /* the body was not JSON; show it as it came */
-    }
-    throw new Error(detail);
+    throw new Error(await readError(response));
   }
   return (await response.json()) as T;
 }
@@ -228,6 +242,9 @@ export const api = {
       method: 'PUT',
       body: JSON.stringify(goal),
     }),
+  /** What this deployment has switched on. Asked rather than assumed, so a client never
+   *  draws a microphone the server would refuse. */
+  features: () => call<Features>('/features'),
   sittings: (studentId: string) => call<Sitting[]>(`/student/${studentId}/sittings`),
   start: (studentId: string, subjectId: string) =>
     call<CheckupState>('/checkup/start', {
@@ -279,4 +296,122 @@ export const api = {
         step_index: stepIndex,
       }),
     }),
+
+  /**
+   * Send a spoken question to be turned into words.
+   *
+   * The words come back for the student to read and send themselves; this never asks on
+   * their behalf. Transcription mishears things, and a question nobody approved should not
+   * reach the coach or the record of what was asked. The recording is not stored anywhere —
+   * it is transcribed inside the request and dropped.
+   */
+  practiceListen: async (
+    sessionId: string,
+    questionVersionId: string,
+    recording: Blob,
+  ): Promise<string> => {
+    const form = new FormData();
+    form.append('question_version_id', questionVersionId);
+    form.append('audio', recording, 'question.webm');
+    const response = await fetch(`/v1/practice/${sessionId}/listen`, {
+      method: 'POST',
+      body: form,
+    });
+    if (!response.ok) throw new Error(await readError(response));
+    return ((await response.json()) as { asked: string }).asked;
+  },
+
+  /**
+   * The same ask, watched and heard rather than waited for.
+   *
+   * The coach answers in two channels: `onSay` for a line spoken aloud, `onBoard` for a line
+   * written up. `onAudio` arrives later with the voice for a spoken line, by index, because
+   * speech takes longer to make than words do — the text is always there first, so a muted
+   * phone or a failed voice call is a quieter lesson rather than a missing one. `onReset`
+   * means what was stored differs from what was streamed, and the lesson should be rebuilt.
+   */
+  practiceAskStreaming: async (
+    sessionId: string,
+    questionVersionId: string,
+    asked: string,
+    stepIndex: number | null,
+    handlers: {
+      onSay: (index: number, text: string) => void;
+      onBoard: (after: number, text: string) => void;
+      /** A sketch to put on the board: SVG the server has already reduced to safe shapes. */
+      onDraw: (after: number, svg: string) => void;
+      onVoice: (index: number, url: string | null) => void;
+      onReset: () => void;
+    },
+  ): Promise<TutorReply> => {
+    const response = await fetch(`/v1/practice/${sessionId}/ask/stream`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        question_version_id: questionVersionId,
+        asked,
+        step_index: stepIndex,
+      }),
+    });
+    if (!response.ok || !response.body) {
+      throw new Error(await readError(response));
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffered = '';
+    let settled: TutorReply | null = null;
+
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffered += decoder.decode(value, { stream: true });
+
+      // Frames are separated by a blank line; anything after the last one is a partial
+      // frame and stays in the buffer until the rest of it arrives.
+      const frames = buffered.split('\n\n');
+      buffered = frames.pop() ?? '';
+      for (const frame of frames) {
+        const rows = frame.split('\n');
+        const name = rows.find((row) => row.startsWith('event: '))?.slice(7);
+        const data = rows.find((row) => row.startsWith('data: '))?.slice(6);
+        if (!name || !data) continue;
+        const payload = JSON.parse(data) as {
+          index?: number;
+          after?: number;
+          text?: string;
+          url?: string | null;
+          source?: string;
+          asks_left?: number;
+        };
+        if (name === 'say' && payload.text !== undefined && payload.index !== undefined) {
+          handlers.onSay(payload.index, payload.text);
+        }
+        if (name === 'board' && payload.text !== undefined) {
+          handlers.onBoard(payload.after ?? -1, payload.text);
+        }
+        if (name === 'draw' && payload.text !== undefined) {
+          handlers.onDraw(payload.after ?? -1, payload.text);
+        }
+        // `url` is null when this line has no voice — said explicitly, so the board does
+        // not sit waiting on audio that is never coming.
+        if (name === 'voice' && payload.index !== undefined) {
+          handlers.onVoice(payload.index, payload.url ?? null);
+        }
+        if (name === 'reset') handlers.onReset();
+        if (name === 'done') {
+          settled = {
+            reply: '',
+            spoken: '',
+            board: [],
+            source: (payload.source ?? 'fallback') as TutorReply['source'],
+            asks_left: payload.asks_left ?? 0,
+          };
+        }
+      }
+    }
+
+    if (settled === null) throw new Error('the coach stopped writing before it finished');
+    return settled;
+  },
 };

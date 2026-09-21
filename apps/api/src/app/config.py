@@ -33,6 +33,22 @@ class Settings(BaseSettings):
     ai_runtime_model: str = "gpt-4o"
     ai_batch_model: str = "gpt-4o"
     ai_daily_calls_per_student: int = Field(default=20, ge=0)
+    #: Send the reviewed diagram with the question. A coach that cannot see the figure is
+    #: guessing at any step that points into it. Costs more per turn than the text does, so
+    #: it is a switch a deployment can throw.
+    ai_send_figures: bool = True
+    #: Speak the coach's explanation aloud. The board is the summary; the voice is the lesson,
+    #: so this is not a decoration — with it off, most of the teaching is simply not delivered.
+    ai_speak: bool = True
+    ai_speech_model: str = "gpt-4o-mini-tts"
+    #: A warm, unhurried voice. Auditioned against the alternatives on a real explanation.
+    ai_speech_voice: str = "alloy"
+    #: Let the student ask by speaking instead of typing. On: the consent position for
+    #: recording a minor is certified, so this is now an ordinary feature rather than a
+    #: blocked one. The audio is still transcribed and dropped inside the request — only the
+    #: words are kept, in `tutor_turns`, exactly as a typed question would be.
+    ai_listen: bool = True
+    ai_transcription_model: str = "gpt-4o-transcribe"
 
     @field_validator("database_schema")
     @classmethod
