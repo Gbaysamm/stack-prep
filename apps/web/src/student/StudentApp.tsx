@@ -117,11 +117,31 @@ export function StudentApp() {
     api.catalogue().then(setCatalogue).catch((issue: Error) => setError(issue.message));
   }, []);
 
+  const forget = useCallback(() => {
+    localStorage.removeItem(IDENTITY_KEY);
+    localStorage.removeItem(PLACE_KEY);
+    setIdentity(null);
+    setPlace({});
+    setStep('welcome');
+  }, []);
+
   useEffect(() => {
     if (!identity) return;
-    api.goals(identity.studentId).then(setGoals).catch(() => setGoals([]));
-    api.sittings(identity.studentId).then(setSittings).catch(() => setSittings([]));
-  }, [identity, step]);
+    // A stored identity can outlive the student row it names. Keeping it then produces
+    // "unknown student" on every screen that asks, with nothing the student can do about
+    // it but clear site data by hand — so drop it and start them over instead.
+    const forgetIfStale = (issue: Error) => {
+      if (issue.message.toLowerCase().includes('unknown student')) forget();
+    };
+    api.goals(identity.studentId).then(setGoals).catch((issue: Error) => {
+      setGoals([]);
+      forgetIfStale(issue);
+    });
+    api.sittings(identity.studentId).then(setSittings).catch((issue: Error) => {
+      setSittings([]);
+      forgetIfStale(issue);
+    });
+  }, [identity, step, forget]);
 
   const examination = catalogue.find((e) => e.examination_id === place.examinationId);
   const subject = examination?.subjects.find((s) => s.subject_id === place.subjectId);
@@ -154,13 +174,7 @@ export function StudentApp() {
             remember({ examinationId: id, subjectId: undefined, sessionId: undefined });
             setStep('subject');
           }}
-          onSignOut={() => {
-            localStorage.removeItem(IDENTITY_KEY);
-            localStorage.removeItem(PLACE_KEY);
-            setIdentity(null);
-            setPlace({});
-            setStep('welcome');
-          }}
+          onSignOut={forget}
         />
       </Shell>
     );
