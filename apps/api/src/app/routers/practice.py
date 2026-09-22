@@ -1281,6 +1281,9 @@ async def ask_streaming(
                 for frame in dispatch(settled.text):
                     yield frame
 
+        # Both branches above settle on a reply; the one inside the else narrows only
+        # within it, so say it again where the value is actually used.
+        assert settled is not None
         await _record_turn(conn, session_id, session["student_id"], question, settled)
         yield _event("done", {"source": settled.source, "asks_left": asks_left})
 

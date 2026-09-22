@@ -1027,10 +1027,14 @@ async def write_on_the_board(
     finish_reason = None
 
     try:
-        stream = await client.chat.completions.create(
+        # The SDK's overloads do not admit this combination: _messages() builds plain
+        # dicts rather than the typed message unions, and with stream_options present
+        # no overload matches at all, so the error lands on the call and not the
+        # argument.
+        stream = await client.chat.completions.create(  # type: ignore[call-overload]
             model=settings.ai_runtime_model,
             max_completion_tokens=REPLY_MAX_TOKENS,
-            messages=_messages(lesson, asked),  # type: ignore[arg-type]
+            messages=_messages(lesson, asked),
             stream=True,
             # Usage does not come with a stream unless it is asked for, and without it the
             # turn would be stored with no idea what it cost.

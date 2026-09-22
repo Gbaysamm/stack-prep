@@ -52,6 +52,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from math import exp
 
 #: No amount of study takes a subtopic to certainty, and a plan that assumes it does will
 #: always over-promise. Exam-day mastery of 0.9 is already an excellent student.
@@ -134,7 +135,7 @@ def learning_rate(mastery: float) -> float:
     groundwork; near the ceiling it buys little because there is little left.
     """
     distance = (mastery - PEAK_AT) / SPREAD
-    return PEAK_RATE * 2.718281828459045 ** (-0.5 * distance * distance)
+    return PEAK_RATE * exp(-0.5 * distance * distance)
 
 
 def session_gain(mastery: float) -> float:

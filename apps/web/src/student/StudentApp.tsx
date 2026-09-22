@@ -270,13 +270,25 @@ export function StudentApp() {
     );
   }
 
-  // Any state the steps above do not cover means the remembered place no longer matches the
-  // catalogue — a subject withdrawn, say. Start from the top rather than showing a blank.
+  // Any state the steps above do not cover — a subject withdrawn, a session that no longer
+  // resolves, a half-finished sitting. Start from the top rather than showing a blank.
+  //
+  // Clearing the remembered place is the whole point: changing the step alone leaves the
+  // state that caused this in storage, so the next render reads it straight back and lands
+  // here again, with no way out but clearing site data by hand.
   return (
     <Shell kicker="Score Pilot" title="Let's start again">
       <div className="sp-card">
-        <p className="sp-small">That subject is no longer available.</p>
-        <button className="sp-btn primary" onClick={() => setStep('exam')} type="button">
+        <p className="sp-small">We could not pick up where you left off.</p>
+        <button
+          className="sp-btn primary"
+          onClick={() => {
+            setPlace({});
+            writePlace({});
+            setStep('exam');
+          }}
+          type="button"
+        >
           Choose again
         </button>
       </div>
