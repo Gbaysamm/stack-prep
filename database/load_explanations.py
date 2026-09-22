@@ -34,7 +34,7 @@ ROOT = Path(__file__).resolve().parent.parent
 async def run(folder: Path, dsn: str | None, apply: bool) -> int:
     written: dict[str, dict[str, object]] = {}
     for path in sorted(folder.glob("*.yaml")):
-        document = yaml.safe_load(path.read_text())
+        document = yaml.safe_load(path.read_text(encoding="utf-8"))
         for key, entry in (document.get("explanations") or {}).items():
             written[str(key)] = entry
 

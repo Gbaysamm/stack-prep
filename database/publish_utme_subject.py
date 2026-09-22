@@ -52,7 +52,7 @@ def implied_items(seed: Path) -> set[str]:
     that judgement per item — it is what the extraction notes argue for — so it is read from
     there rather than restated here, where the two could drift apart.
     """
-    document = yaml.safe_load(seed.read_text())
+    document = yaml.safe_load(seed.read_text(encoding="utf-8"))
     return {
         item["code"]
         for item in document["curriculum_items"]

@@ -40,7 +40,7 @@ def keys_in(path: Path) -> list[str]:
     the comments above each section are part of what a reviewer reads. A load-and-dump would
     lose them.
     """
-    return re.findall(r"^  ([0-9a-f]{8}):\s*$", path.read_text(), re.M)
+    return re.findall(r"^  ([0-9a-f]{8}):\s*$", path.read_text(encoding="utf-8"), re.M)
 
 
 async def run(folder: Path, dsn: str | None, apply: bool) -> int:
@@ -59,7 +59,7 @@ async def run(folder: Path, dsn: str | None, apply: bool) -> int:
         corrections = folder / "key_corrections.json"
         wanted = {key for path in files for key in keys_in(path)}
         if corrections.exists():
-            wanted |= set(json.loads(corrections.read_text()))
+            wanted |= set(json.loads(corrections.read_text(encoding="utf-8")))
 
         rows = await conn.fetch(
             """
@@ -76,7 +76,7 @@ async def run(folder: Path, dsn: str | None, apply: bool) -> int:
 
         changed = clashed = 0
         for path in files:
-            text = path.read_text()
+            text = path.read_text(encoding="utf-8")
             present = set(keys_in(path))
             for was, is_now in moved.items():
                 if was not in present:
@@ -90,13 +90,16 @@ async def run(folder: Path, dsn: str | None, apply: bool) -> int:
                 present.add(is_now)
                 changed += 1
             if apply:
-                path.write_text(text)
+                path.write_text(text, encoding="utf-8")
 
         if corrections.exists():
-            recorded = json.loads(corrections.read_text())
+            recorded = json.loads(corrections.read_text(encoding="utf-8"))
             renamed = {moved.get(key, key): value for key, value in recorded.items()}
             if apply:
-                corrections.write_text(json.dumps(dict(sorted(renamed.items())), indent=2) + "\n")
+                corrections.write_text(
+                    json.dumps(dict(sorted(renamed.items())), indent=2) + "\n",
+                    encoding="utf-8",
+                )
 
         print(f"{changed} explanation(s) re-pointed, {clashed} left for a person to settle.")
         if not apply:

@@ -62,7 +62,7 @@ def settle(steps: list[str], old: str, new: str) -> list[str]:
 
 
 async def run(corrections: Path, reviewer_id: str, dsn: str | None, apply: bool) -> int:
-    wanted: dict[str, str] = json.loads(corrections.read_text())
+    wanted: dict[str, str] = json.loads(corrections.read_text(encoding="utf-8"))
     conn = await asyncpg.connect(
         dsn=dsn,
         # TCP, not the Unix socket under ROOT: ROOT is this working copy, so from a git

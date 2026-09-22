@@ -59,7 +59,7 @@ def discover(directory: Path | None = None) -> list[Migration]:
         # database with no tables in it.
         raise RuntimeError(f"no migrations directory at {directory}; set MIGRATIONS_DIR")
     return [
-        Migration(version=path.stem, path=path, sql=path.read_text())
+        Migration(version=path.stem, path=path, sql=path.read_text(encoding="utf-8"))
         for path in sorted(directory.glob("*.sql"))
     ]
 

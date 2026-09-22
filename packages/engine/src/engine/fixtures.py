@@ -213,7 +213,7 @@ def main(argv: list[str]) -> int:
         return 2
     destination = Path(argv[1])
     destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(json.dumps(build(), indent=2, sort_keys=False) + "\n")
+    destination.write_text(json.dumps(build(), indent=2, sort_keys=False) + "\n", encoding="utf-8")
     print(f"Wrote {destination} ({len(build()['cases'])} cases)")
     return 0
 

@@ -107,7 +107,7 @@ def load_levels(path: Path | None) -> dict[int, dict[str, Any]]:
     """Read proposed difficulty levels, keyed by question number."""
     if path is None:
         return {}
-    doc = yaml.safe_load(path.read_text())
+    doc = yaml.safe_load(path.read_text(encoding="utf-8"))
     if doc.get("format_version") != FORMAT_VERSION:
         fail(f"unsupported levels format_version: {doc.get('format_version')!r}")
     levels: dict[int, dict[str, Any]] = {}
@@ -313,7 +313,7 @@ async def apply_keys(conn: asyncpg.Connection, subject: asyncpg.Record, path: Pa
     Answers land as `model_proposed`, which is what they are, and the working is stored as
     the question's first solution step. Only drafts are touched.
     """
-    doc = yaml.safe_load(path.read_text())
+    doc = yaml.safe_load(path.read_text(encoding="utf-8"))
     if doc.get("format_version") != FORMAT_VERSION:
         fail(f"unsupported keys format_version: {doc.get('format_version')!r}")
     year = doc.get("exam_year")
@@ -378,7 +378,7 @@ async def load(args: argparse.Namespace) -> int:
     if not pdf_path.is_file():
         fail(f"PDF not found: {pdf_path}")
 
-    doc = yaml.safe_load(transcription_path.read_text())
+    doc = yaml.safe_load(transcription_path.read_text(encoding="utf-8"))
     if doc.get("format_version") != FORMAT_VERSION:
         fail(f"unsupported transcription format_version: {doc.get('format_version')!r}")
 

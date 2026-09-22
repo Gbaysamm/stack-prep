@@ -47,7 +47,7 @@ def levels(folder: Path) -> dict[tuple[int, str], dict]:
     """
     found = {}
     for path in sorted(folder.glob("levels_*.yaml")):
-        document = yaml.safe_load(path.read_text())
+        document = yaml.safe_load(path.read_text(encoding="utf-8"))
         year = int(document["paper"]["exam_year"])
         for entry in document["levels"]:
             found[(year, str(entry["number"]))] = entry
@@ -57,7 +57,7 @@ def levels(folder: Path) -> dict[tuple[int, str], dict]:
 def transcribed(folder: Path) -> dict[tuple[int, str], dict]:
     found = {}
     for path in sorted(folder.glob("transcription_*.yaml")):
-        document = yaml.safe_load(path.read_text())
+        document = yaml.safe_load(path.read_text(encoding="utf-8"))
         year = int(document["source"]["exam_year"])
         for question in document["questions"]:
             found[(year, str(question["number"]))] = question

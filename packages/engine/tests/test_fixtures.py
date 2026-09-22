@@ -34,7 +34,7 @@ def test_checked_in_vectors_match_the_current_engine() -> None:
     if not VECTORS.exists():
         pytest.skip("vectors.json not generated yet — run `make fixtures`")
 
-    stored = json.loads(VECTORS.read_text())
+    stored = json.loads(VECTORS.read_text(encoding="utf-8"))
     # Compare through JSON so tuples and lists are not treated as different.
     current = json.loads(json.dumps(build()))
 
