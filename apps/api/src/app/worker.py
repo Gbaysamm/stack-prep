@@ -27,6 +27,10 @@ class WorkerSettings:
     functions: ClassVar[list[Callable[..., Any]]] = [ping]
     cron_jobs: ClassVar[list[Any]] = []
 
-    @staticmethod
-    def redis_settings() -> RedisSettings:
-        return RedisSettings.from_dsn(get_settings().redis_url)
+    #: arq reads this as a value, not as something to call: it passes whatever is
+    #: here straight to ``create_pool``, which then asks it for ``.host``. Declaring
+    #: it a ``@staticmethod`` type-checks perfectly and fails only when a worker
+    #: actually starts, with "'staticmethod' object has no attribute 'host'" -- so
+    #: it survived every check we have and surfaced on the first real deployment.
+    #: Evaluated at import, which is safe because ``redis_url`` carries a default.
+    redis_settings: ClassVar[RedisSettings] = RedisSettings.from_dsn(get_settings().redis_url)
