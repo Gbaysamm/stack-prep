@@ -75,6 +75,13 @@ echo "==> Restarting the web client"
 # server inherits server.proxy, so /health and /v1 still reach the API.
 pkill -f "vite preview" 2>/dev/null || true
 pkill -f "vite --host 127.0.0.1 --port $WEB_PORT" 2>/dev/null || true
+# Wait for the port, not for the process. --strictPort means preview refuses to
+# start if the old server still holds 5173, and a dying process can go on
+# answering for a second or two after the signal.
+for _ in $(seq 1 15); do
+  ss -ltn "sport = :$WEB_PORT" 2>/dev/null | grep -q ":$WEB_PORT" || break
+  sleep 1
+done
 cd "$APP/apps/web"
 API_PROXY="http://127.0.0.1:$API_PORT" setsid nohup nice -n 19 \
   npx vite preview --host 127.0.0.1 --port "$WEB_PORT" --strictPort \
@@ -96,7 +103,10 @@ done
 
 echo "==> Waiting for the web client"
 for attempt in $(seq 1 20); do
-  if curl -fsS --max-time 5 -o /dev/null "http://127.0.0.1:$WEB_PORT/"; then
+  # Checks for the built bundle, not merely for a reply. "Something answered on
+  # 5173" was satisfied once by the previous server on its way out, which turned
+  # a failed deploy green; only `preview` serves /assets/.
+  if curl -fsS --max-time 5 "http://127.0.0.1:$WEB_PORT/" | grep -q "/assets/"; then
     echo "    serving after ${attempt} attempt(s)"
     break
   fi
