@@ -23,6 +23,18 @@ ROOT=/opt/score-pilot
 APP="$ROOT/app"
 export IMAGE=score-pilot-api:local
 
+# Node is installed through nvm, which is set up by an interactive shell profile
+# and is therefore absent when CI runs a command over SSH -- `npm: command not
+# found`, after a login shell has shown it working perfectly. Add nvm's bin
+# directory straight to PATH rather than sourcing nvm.sh, which trips over `set -u`.
+# Newest version wins, so a node upgrade on the box does not need a change here.
+NODE_BIN=$(ls -d "$HOME"/.nvm/versions/node/*/bin 2>/dev/null | sort -V | tail -1)
+[ -n "$NODE_BIN" ] && export PATH="$NODE_BIN:$PATH"
+if ! command -v npm > /dev/null; then
+  echo "npm is not on PATH. Looked in $HOME/.nvm/versions/node/*/bin." >&2
+  exit 1
+fi
+
 cd "$APP"
 
 echo "==> Checking out $SHA"
