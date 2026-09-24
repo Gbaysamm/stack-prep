@@ -31,7 +31,11 @@ compose up -d postgres redis
 
 echo "==> Applying migrations"
 # --no-deps: postgres is already up and healthy; this must not restart it.
-compose run --rm --no-deps api python -m app.cli migrate
+# -T and </dev/null both matter: this script is piped into `bash -s` over SSH, so
+# the script itself is stdin. `docker compose run` without -T takes stdin over and
+# swallows the remaining lines, after which bash reaches EOF and exits 0 -- a deploy
+# that silently does a third of its work and reports success.
+compose run --rm --no-deps -T api python -m app.cli migrate < /dev/null
 
 echo "==> Starting API and worker"
 compose up -d

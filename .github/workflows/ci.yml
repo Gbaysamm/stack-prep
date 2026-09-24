@@ -218,10 +218,20 @@ jobs:
         run: |
           ssh target "SHA='$SHA' BRANCH='$BRANCH' bash -euo pipefail -s" < deploy/stackjunior/release.sh
 
-      - name: Say what is deployed
-        if: always()
+      - name: Confirm the release actually finished
+        # Not decoration. A release script piped over SSH can be cut short -- a
+        # command that reads stdin swallows the rest of it -- and bash then exits 0,
+        # so the job goes green having done part of the work. The script writes this
+        # file last, so the commit being present is the only proof it reached the end.
+        env:
+          SHA: ${{ github.sha }}
         run: |
-          ssh target "cat ~/score-pilot/.deployed 2>/dev/null || echo 'nothing recorded'"
+          recorded=$(ssh target "head -1 ~/score-pilot/.deployed 2>/dev/null || true")
+          echo "recorded: ${recorded:-<nothing>}"
+          if [ "$recorded" != "$SHA" ]; then
+            echo "::error::The release did not run to completion. Expected $SHA."
+            exit 1
+          fi
 
   deploy-binaax:
     name: Deploy · integration to the Binaax review instance
@@ -268,7 +278,17 @@ jobs:
         run: |
           ssh binaax "SHA='$SHA' BRANCH='$BRANCH' bash -euo pipefail -s" < deploy/binaax/release.sh
 
-      - name: Say what is deployed
-        if: always()
+      - name: Confirm the release actually finished
+        # See the note on the same step in the Stack Junior job. This one caught it
+        # for real: the first run of this job reported success having stopped after
+        # migrations, because `docker compose run` without -T ate the rest of the
+        # piped script.
+        env:
+          SHA: ${{ github.sha }}
         run: |
-          ssh binaax "cat /opt/score-pilot/.deployed 2>/dev/null || echo 'nothing recorded'"
+          recorded=$(ssh binaax "head -1 /opt/score-pilot/.deployed 2>/dev/null || true")
+          echo "recorded: ${recorded:-<nothing>}"
+          if [ "$recorded" != "$SHA" ]; then
+            echo "::error::The release did not run to completion. Expected $SHA."
+            exit 1
+          fi
