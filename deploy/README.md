@@ -1,5 +1,11 @@
 # Deploying to the shared Hetzner box
 
+> **Not the live route.** The dev deployment now runs unprivileged on the Stack
+> Junior server — see [stackjunior/README.md](stackjunior/README.md) and
+> [ADR-0017](../docs/adr/0017-an-unprivileged-deployment-on-the-stack-junior-server.md).
+> This directory is kept because it is the right shape for a host where we have
+> root, and the box it targeted was abandoned rather than the approach being wrong.
+
 A push to `dev` that passes every check deploys itself. `main` is never deployed
 automatically. See [ADR-0016](../docs/adr/0016-hetzner-vps-for-the-dev-deployment.md)
 for why a VPS, and what it is not suitable for.
