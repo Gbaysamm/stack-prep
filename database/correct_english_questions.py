@@ -53,7 +53,7 @@ def transcribed(folder: Path) -> dict[tuple[int, str], dict[str, str]]:
     """Every question the re-parse produced, keyed by year and number."""
     found: dict[tuple[int, str], dict[str, str]] = {}
     for path in sorted(folder.glob("transcription_*.yaml")):
-        document = yaml.safe_load(path.read_text())
+        document = yaml.safe_load(path.read_text(encoding="utf-8"))
         year = int(document["source"]["exam_year"])
         for question in document["questions"]:
             found[(year, str(question["number"]))] = question

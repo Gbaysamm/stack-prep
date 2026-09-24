@@ -58,7 +58,7 @@ def rewrite(block: str, steps: list[str]) -> str:
 
 
 async def run(folder: Path, dsn: str | None, apply: bool) -> int:
-    corrections = json.loads((folder / "key_corrections.json").read_text())
+    corrections = json.loads((folder / "key_corrections.json").read_text(encoding="utf-8"))
     conn = await asyncpg.connect(
         dsn=dsn,
         # TCP, not the Unix socket under ROOT: ROOT is this working copy, so from a git
@@ -86,7 +86,7 @@ async def run(folder: Path, dsn: str | None, apply: bool) -> int:
 
         settled = missing = unchanged = 0
         for path in sorted(folder.glob("*.yaml")):
-            text = path.read_text()
+            text = path.read_text(encoding="utf-8")
             for key, now in corrections.items():
                 span = entry_span(text, key)
                 if span is None:
@@ -105,7 +105,7 @@ async def run(folder: Path, dsn: str | None, apply: bool) -> int:
                 text = text[:span[0]] + after + text[span[1]:]
                 settled += 1
             if apply:
-                path.write_text(text)
+                path.write_text(text, encoding="utf-8")
 
         print(f"{len(corrections)} corrected keys; {settled} explanation(s) rewritten to say so.")
         if unchanged:

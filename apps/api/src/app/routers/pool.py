@@ -30,7 +30,7 @@ How the choice is made:
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -131,7 +131,7 @@ async def _current_version(conn: AsyncConnection, subject_id: UUID) -> UUID:
 
 async def _topic_weights(
     conn: AsyncConnection, subject_id: UUID
-) -> tuple[list[dict[str, object]], str]:
+) -> tuple[list[dict[str, Any]], str]:
     """Every topic in the syllabus, with its exam share when one has been approved.
 
     Unlike the check-up's own helper this keeps topics that have no questions yet: a topic
@@ -161,7 +161,7 @@ async def _topic_weights(
     return rows, source
 
 
-def _wanted_per_topic(rows: list[dict[str, object]], size: int, weighted: bool) -> dict[str, int]:
+def _wanted_per_topic(rows: list[dict[str, Any]], size: int, weighted: bool) -> dict[str, int]:
     """How many questions each topic should contribute, by the engine's own blueprint."""
     weights = [
         TopicWeight(
@@ -177,7 +177,7 @@ def _wanted_per_topic(rows: list[dict[str, object]], size: int, weighted: bool) 
     return counts
 
 
-async def _candidates(conn: AsyncConnection, subject_id: UUID) -> list[dict[str, object]]:
+async def _candidates(conn: AsyncConnection, subject_id: UUID) -> list[dict[str, Any]]:
     """Questions that could be reserved, best first within each topic and level.
 
     Only drafts are offered. Moving an approved question between pools would change what
@@ -218,19 +218,19 @@ async def _candidates(conn: AsyncConnection, subject_id: UUID) -> list[dict[str,
 
 
 def _choose(
-    candidates: list[dict[str, object]], wanted: dict[str, int]
-) -> dict[str, list[dict[str, object]]]:
+    candidates: list[dict[str, Any]], wanted: dict[str, int]
+) -> dict[str, list[dict[str, Any]]]:
     """Fill each topic's quota, taking one level at a time so the ladder has range."""
-    by_topic_level: dict[str, dict[int, list[dict[str, object]]]] = {}
+    by_topic_level: dict[str, dict[int, list[dict[str, Any]]]] = {}
     for row in candidates:
         topic = str(row["topic_id"])
         level = int(row["level"])
         by_topic_level.setdefault(topic, {}).setdefault(level, []).append(row)
 
-    chosen: dict[str, list[dict[str, object]]] = {}
+    chosen: dict[str, list[dict[str, Any]]] = {}
     for topic, quota in wanted.items():
         levels = by_topic_level.get(topic, {})
-        picked: list[dict[str, object]] = []
+        picked: list[dict[str, Any]] = []
         # Round-robin across levels, starting from the middle and working outwards, so a
         # small reservation still spans easy to hard rather than clustering on whatever the
         # bank happens to hold most of.

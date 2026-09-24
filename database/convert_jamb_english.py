@@ -924,7 +924,8 @@ def main() -> int:
         )
         path = out / f"transcription_{year}.yaml"
         path.write_text(header + yaml.dump(
-            document, sort_keys=False, allow_unicode=True, width=100))
+            document, sort_keys=False, allow_unicode=True, width=100),
+                encoding="utf-8",)
         totals[year] = len(document["questions"])
         print(f"{year}: {len(document['questions']):3d} questions, "
               f"{len(rejections):2d} rejected, {len(document['passages'])} passages, "

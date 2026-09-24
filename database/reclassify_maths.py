@@ -379,7 +379,7 @@ def main() -> int:
     updates: dict[str, tuple[str, str]] = {}
 
     for path in sorted(folder.glob("transcription_*.yaml")):
-        document = yaml.safe_load(path.read_text())
+        document = yaml.safe_load(path.read_text(encoding="utf-8"))
         year = document["source"]["exam_year"]
         for question in document["questions"]:
             total += 1
@@ -397,10 +397,13 @@ def main() -> int:
         # applying. A dry run that rewrites the files it is previewing is not a dry run.
         if args.apply:
             header = "".join(
-                line + "\n" for line in path.read_text().splitlines() if line.startswith("#")
+                line + "\n"
+                for line in path.read_text(encoding="utf-8").splitlines()
+                if line.startswith("#")
             )
             path.write_text(
-                header + yaml.dump(document, sort_keys=False, allow_unicode=True, width=100)
+                header + yaml.dump(document, sort_keys=False, allow_unicode=True, width=100),
+                encoding="utf-8",
             )
 
     subtopics: Counter[str] = Counter()

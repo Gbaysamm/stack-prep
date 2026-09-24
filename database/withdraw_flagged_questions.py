@@ -70,7 +70,7 @@ def flagged(folder: Path) -> dict[str, str]:
     """Question versions whose own explanation says they cannot stand, and why."""
     found: dict[str, str] = {}
     for path in sorted(folder.glob("*.yaml")):
-        document = yaml.safe_load(path.read_text())
+        document = yaml.safe_load(path.read_text(encoding="utf-8"))
         for vid, entry in (document.get("explanations") or {}).items():
             text = " ".join(entry.get("steps") or [])
             if "flagged" not in text:

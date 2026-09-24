@@ -305,7 +305,7 @@ def main() -> int:
     total = 0
 
     for path in sorted(folder.glob("transcription_*.yaml")):
-        document = yaml.safe_load(path.read_text())
+        document = yaml.safe_load(path.read_text(encoding="utf-8"))
         year = int(document["source"]["exam_year"])
         if args.year and year not in args.year:
             continue
@@ -343,7 +343,8 @@ def main() -> int:
                 sort_keys=False,
                 allow_unicode=True,
                 width=100,
-            )
+            ),
+            encoding="utf-8",
         )
         print(f"{year}: {len(entries)} levels -> {out.name}")
 

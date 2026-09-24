@@ -16,7 +16,10 @@ name: CI / CD
 
 on:
   push:
-    branches: [main, dev]
+    # integration is where the work happens, so it is where the checks belong. Without
+    # it a fortnight of commits goes unchecked and every problem surfaces at once on
+    # the merge into main, which is how nine type errors arrived in a single run.
+    branches: [main, integration, dev]
   pull_request:
   workflow_dispatch:
 
@@ -159,6 +162,11 @@ jobs:
   deploy:
     name: Deploy · dev to Hetzner
     # Only once every check above is green, and only from dev.
+    #
+    # NOTE: no `dev` branch exists in this repository, so this job always skips. It was
+    # written when `dev` was the convention and the branching changed underneath it.
+    # Either create the branch or point this at whichever one should deploy — but not at
+    # `integration` by default, which would publish work in progress to a live box.
     needs: [python, javascript, schema, image]
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest

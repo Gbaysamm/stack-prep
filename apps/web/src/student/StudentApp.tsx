@@ -117,11 +117,31 @@ export function StudentApp() {
     api.catalogue().then(setCatalogue).catch((issue: Error) => setError(issue.message));
   }, []);
 
+  const forget = useCallback(() => {
+    localStorage.removeItem(IDENTITY_KEY);
+    localStorage.removeItem(PLACE_KEY);
+    setIdentity(null);
+    setPlace({});
+    setStep('welcome');
+  }, []);
+
   useEffect(() => {
     if (!identity) return;
-    api.goals(identity.studentId).then(setGoals).catch(() => setGoals([]));
-    api.sittings(identity.studentId).then(setSittings).catch(() => setSittings([]));
-  }, [identity, step]);
+    // A stored identity can outlive the student row it names. Keeping it then produces
+    // "unknown student" on every screen that asks, with nothing the student can do about
+    // it but clear site data by hand — so drop it and start them over instead.
+    const forgetIfStale = (issue: Error) => {
+      if (issue.message.toLowerCase().includes('unknown student')) forget();
+    };
+    api.goals(identity.studentId).then(setGoals).catch((issue: Error) => {
+      setGoals([]);
+      forgetIfStale(issue);
+    });
+    api.sittings(identity.studentId).then(setSittings).catch((issue: Error) => {
+      setSittings([]);
+      forgetIfStale(issue);
+    });
+  }, [identity, step, forget]);
 
   const examination = catalogue.find((e) => e.examination_id === place.examinationId);
   const subject = examination?.subjects.find((s) => s.subject_id === place.subjectId);
@@ -154,13 +174,7 @@ export function StudentApp() {
             remember({ examinationId: id, subjectId: undefined, sessionId: undefined });
             setStep('subject');
           }}
-          onSignOut={() => {
-            localStorage.removeItem(IDENTITY_KEY);
-            localStorage.removeItem(PLACE_KEY);
-            setIdentity(null);
-            setPlace({});
-            setStep('welcome');
-          }}
+          onSignOut={forget}
         />
       </Shell>
     );
@@ -270,13 +284,25 @@ export function StudentApp() {
     );
   }
 
-  // Any state the steps above do not cover means the remembered place no longer matches the
-  // catalogue — a subject withdrawn, say. Start from the top rather than showing a blank.
+  // Any state the steps above do not cover — a subject withdrawn, a session that no longer
+  // resolves, a half-finished sitting. Start from the top rather than showing a blank.
+  //
+  // Clearing the remembered place is the whole point: changing the step alone leaves the
+  // state that caused this in storage, so the next render reads it straight back and lands
+  // here again, with no way out but clearing site data by hand.
   return (
     <Shell kicker="Score Pilot" title="Let's start again">
       <div className="sp-card">
-        <p className="sp-small">That subject is no longer available.</p>
-        <button className="sp-btn primary" onClick={() => setStep('exam')} type="button">
+        <p className="sp-small">We could not pick up where you left off.</p>
+        <button
+          className="sp-btn primary"
+          onClick={() => {
+            setPlace({});
+            writePlace({});
+            setStep('exam');
+          }}
+          type="button"
+        >
           Choose again
         </button>
       </div>
