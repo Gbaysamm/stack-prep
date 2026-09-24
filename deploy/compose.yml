@@ -58,7 +58,12 @@ services:
     restart: unless-stopped
     env_file: .env.local
     environment:
-      APP_ENV: staging
+      # Overridable from .env.local. There is no login yet (ADR-0013 is still
+      # Proposed), so the only way to create a student is /v1/dev/students, which
+      # refuses to answer unless this is local or ci. A demo instance therefore has
+      # to be `local` or its student journey does not work at all. Safe only because
+      # Caddy puts basic auth in front; never set this on anything public.
+      APP_ENV: ${APP_ENV:-staging}
       DATABASE_URL: postgresql+asyncpg://scorepilot:${POSTGRES_PASSWORD}@postgres:5432/scorepilot
       DATABASE_SCHEMA: stackprep
       REDIS_URL: redis://redis:6379/0
@@ -88,7 +93,8 @@ services:
       disable: true
     env_file: .env.local
     environment:
-      APP_ENV: staging
+      # See the api service above for why this is overridable.
+      APP_ENV: ${APP_ENV:-staging}
       DATABASE_URL: postgresql+asyncpg://scorepilot:${POSTGRES_PASSWORD}@postgres:5432/scorepilot
       DATABASE_SCHEMA: stackprep
       REDIS_URL: redis://redis:6379/0
