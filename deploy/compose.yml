@@ -80,6 +80,12 @@ services:
     image: ${IMAGE:?IMAGE is not set — the deploy workflow passes the tag to publish}
     restart: unless-stopped
     command: ['arq', 'app.worker.WorkerSettings']
+    # The image's healthcheck asks the API for /health, and a worker serves no
+    # HTTP, so it inherits a check it can never pass and reports unhealthy while
+    # working perfectly. That is worse than none: it teaches whoever reads
+    # `docker ps` that the column is noise.
+    healthcheck:
+      disable: true
     env_file: .env.local
     environment:
       APP_ENV: staging
