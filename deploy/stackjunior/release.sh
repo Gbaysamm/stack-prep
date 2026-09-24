@@ -61,8 +61,12 @@ echo "==> Restarting the API"
 # the pid that gets recorded is the wrapper, not the process holding the port.
 # pkill run unprivileged only ever reaches this account's own processes.
 pkill -f "uvicorn app.main:app --host 127.0.0.1 --port $API_PORT" 2>/dev/null || true
-for _ in $(seq 1 15); do
+for attempt in $(seq 1 15); do
   ss -ltn "sport = :$API_PORT" 2>/dev/null | grep -q ":$API_PORT" || break
+  if [ "$attempt" = 15 ]; then
+    echo "Port $API_PORT is still held after 15s; refusing to start a second API." >&2
+    exit 1
+  fi
   sleep 1
 done
 setsid nohup nice -n 19 uv run --frozen uvicorn app.main:app \
@@ -78,8 +82,15 @@ pkill -f "vite --host 127.0.0.1 --port $WEB_PORT" 2>/dev/null || true
 # Wait for the port, not for the process. --strictPort means preview refuses to
 # start if the old server still holds 5173, and a dying process can go on
 # answering for a second or two after the signal.
-for _ in $(seq 1 15); do
+for attempt in $(seq 1 15); do
   ss -ltn "sport = :$WEB_PORT" 2>/dev/null | grep -q ":$WEB_PORT" || break
+  if [ "$attempt" = 15 ]; then
+    # Failing here matters more than it looks. The old server also serves
+    # /assets/, so if it will not die the health check below would pass against
+    # it and call a deploy that changed nothing a success.
+    echo "Port $WEB_PORT is still held after 15s; the old server will not stop." >&2
+    exit 1
+  fi
   sleep 1
 done
 cd "$APP/apps/web"
