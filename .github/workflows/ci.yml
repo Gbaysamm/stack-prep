@@ -4,10 +4,12 @@
 # needs no local cluster. Keep the two in step: if a check only exists here, it
 # will not be run before a push.
 #
-# A push to `integration` that passes every check deploys to the unprivileged
-# instance on the Stack Junior server (ADR-0017). `main` is never deployed
-# automatically, because a production deploy needs a rollback story this has not
-# got yet.
+# A push to `integration` that passes every check deploys to both instances: the
+# unprivileged one on the Stack Junior server (ADR-0017), reachable only through an
+# SSH tunnel, and the review instance at stackprep.binaax.app (ADR-0018), which is
+# what anyone outside the team is shown. They deploy independently, so one box being
+# unreachable does not hold the other back. `main` is never deployed automatically,
+# because a production deploy needs a rollback story this has not got yet.
 #
 # ADR-0012 lists the gates this should enforce. Present: ruff, mypy, pytest,
 # Vitest, parity vectors, the TypeScript check and a migration run against an
@@ -220,3 +222,53 @@ jobs:
         if: always()
         run: |
           ssh target "cat ~/score-pilot/.deployed 2>/dev/null || echo 'nothing recorded'"
+
+  deploy-binaax:
+    name: Deploy · integration to the Binaax review instance
+    # The instance people are actually shown: https://stackprep.binaax.app, behind
+    # basic auth. It deploys from the same commit and on the same trigger as the
+    # Stack Junior one, and runs independently — one box being unreachable must not
+    # stop the other from getting the change.
+    needs: [python, javascript, schema, image]
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/integration')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    concurrency:
+      group: deploy-binaax
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authorise SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.BINAAX_SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.BINAAX_SSH_HOST }}
+          SSH_USER: ${{ secrets.BINAAX_SSH_USER }}
+        run: |
+          install -m 700 -d ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_binaax
+          chmod 600 ~/.ssh/id_binaax
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          {
+            echo "Host binaax"
+            echo "  HostName $SSH_HOST"
+            echo "  User $SSH_USER"
+            echo "  IdentityFile ~/.ssh/id_binaax"
+            echo "  IdentitiesOnly yes"
+            echo "  StrictHostKeyChecking yes"
+          } >> ~/.ssh/config
+
+      - name: Release
+        env:
+          SHA: ${{ github.sha }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          ssh binaax "SHA='$SHA' BRANCH='$BRANCH' bash -euo pipefail -s" < deploy/binaax/release.sh
+
+      - name: Say what is deployed
+        if: always()
+        run: |
+          ssh binaax "cat /opt/score-pilot/.deployed 2>/dev/null || echo 'nothing recorded'"

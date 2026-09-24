@@ -25,5 +25,6 @@ new ADR that supersedes it and update the old file's status line.
 | [0015](0015-waec-wassce-replaces-neco.md) | WAEC WASSCE replaces NECO as the POC exam | Accepted |
 | [0016](0016-hetzner-vps-for-the-dev-deployment.md) | A shared Hetzner VPS for the dev deployment | Superseded in practice by 0017 |
 | [0017](0017-an-unprivileged-deployment-on-the-stack-junior-server.md) | An unprivileged deployment on the Stack Junior server | Accepted |
+| [0018](0018-a-review-instance-on-the-binaax-box.md) | A review instance on the Binaax box | Accepted |
 
 Statuses: Proposed · Accepted · Superseded by ADR-XXXX · Rejected.
