@@ -2,9 +2,10 @@
 #
 # Keyed on question number; see explanations_2003.yaml for why, and for how these are written.
 #
-# 44 of the 50 are answered; six are pending. Two need a chart read off the page (a bar chart
-# and a histogram), two need a geometry figure, one has an option set that disagrees with the
-# arithmetic in every row, and one has a stem missing the term the answer depends on.
+# 46 of the 50 are answered. The four pending ones all genuinely need a picture: a
+# linear-programming graph, a geometry figure, a bar chart and a histogram. Nothing is pending
+# merely because its printing is damaged -- a broken stem or a wrong option set is repaired and
+# answered, because the mathematics is recoverable even when the typesetting is not.
 #
 # Checked against keys_2001.yaml, which covers 33. They agree everywhere except Q8, where the
 # key's own working produces a factorisation none of the printed options carries.
@@ -114,6 +115,20 @@ explanations:
       leaves stray y terms; no printed option is the correct factorisation. C now carries
       (2x - 3y + 5)(2x + 3y + 5). Verify against the paper.
     hint: "Three of the terms form a perfect square. Group them, and what is left is a difference of two squares."
+
+  9:
+    answer: A
+    steps:
+      - "Two graphs intersect where they have the same $y$ for the same $x$, so set the two expressions equal to each other."
+      - "That gives $px^{2} + q = 2x^{2} - 1$, and this must hold at the point where they meet."
+      - "We are told they meet at $x = 2$, so substitute that value into both sides."
+      - "Left side: $p(2)^{2} + q = 4p + q$."
+      - "Right side: $2(2)^{2} - 1 = 8 - 1 = 7$."
+      - "So $4p + q = 7$."
+      - "The question asks for $p$ in terms of $q$, so make $p$ the subject: subtract $q$ from both sides to get $4p = 7 - q$."
+      - "Divide by 4: $p = \\dfrac{7 - q}{4}$."
+      - "Note that only the $x$ value is needed — the $y$ value at the intersection is never required, because setting the two expressions equal has already used it."
+    hint: "At an intersection the two expressions for $y$ are equal. Set them equal, put $x = 2$ in, and rearrange for $p$."
 
   10:
     answer: D
@@ -226,6 +241,18 @@ explanations:
       - "Adding: $1 + 2 - 5 = -2$."
       - "Two minus signs meet on the middle term — the $-1$ from the matrix and the $-$ from the expansion pattern — and they make a plus. Missing that gives $1 - 2 - 5 = -6$, which is not offered, so an answer off the list is a signal to re-check that sign."
     hint: "Expand along the top row. The middle term has a minus from the pattern and a minus from the entry itself."
+
+  20:
+    answer: D
+    steps:
+      - "Multiplying a matrix by a number is the simplest matrix operation there is: every single entry is multiplied by that number, and the shape does not change."
+      - "So $-2P$ is found by multiplying each of the nine entries of $P$ by $-2$, one at a time."
+      - "First row of $P$ is $3$, $-3$, $4$. Multiplying each by $-2$ gives $-6$, $+6$, $-8$ — note the middle entry becomes positive, because a negative times a negative is positive."
+      - "Second row is $5$, $0$, $6$, which becomes $-10$, $0$, $-12$. Zero times anything stays zero."
+      - "Third row is $1$, $2$, $1$, which becomes $-2$, $-4$, $-2$."
+      - "Assembling: $-2P = \\begin{pmatrix} -6 & 6 & -8 \\\\ -10 & 0 & -12 \\\\ -2 & -4 & -2 \\end{pmatrix}$."
+      - "A quick check: every entry of $P$ was multiplied by a negative number, so every non-zero entry must change sign. Any candidate answer keeping a positive entry where $P$ had a positive one — or keeping $5$ and $6$ unchanged, as some of the printed options do — can be ruled out without any arithmetic at all."
+    hint: "Multiply every entry by $-2$, including the zero. Watch the entry that is already negative — two negatives make a positive."
 
   21:
     answer: C
