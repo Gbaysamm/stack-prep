@@ -95,7 +95,7 @@ h1{margin:0 0 4px;font-size:19px}.sub{color:#666;font-size:14px}
 .num{font-weight:700}
 .tag{font-size:11px;padding:2px 8px;border-radius:99px;background:#e2e2e8}
 .tag.fig{background:#dbeafe;color:#1e3a8a}.tag.sus{background:#fde3c8;color:#7c2d12}
-.tag.fix{background:#ede9fe;color:#5b21b6}
+.tag.fix{background:#ede9fe;color:#5b21b6}.tag.pend{background:#fee2e2;color:#991b1b}
 .fix{margin-top:10px;padding:8px 10px;background:#f5f3ff;border-left:3px solid #8b5cf6;
   font-size:13px;color:#4c1d95}
 .cols{display:grid;grid-template-columns:1fr 1fr}
@@ -135,6 +135,7 @@ def build(transcription: Path, out_dir: Path, before: dict[str, str], label: str
             "figure": bool(q.get("needs_figure")),
             "uncertain": q.get("uncertain") or "",
             "corrected": q.get("corrected") or "",
+            "pending": bool(q.get("pending")),
             "answer": (worked.get(q["number"]) or {}).get("answer") or "",
             "steps": (worked.get(q["number"]) or {}).get("steps") or [],
             "hint": (worked.get(q["number"]) or {}).get("hint") or "",
@@ -149,6 +150,7 @@ def build(transcription: Path, out_dir: Path, before: dict[str, str], label: str
         tags = '<span class="tag fig">needs the diagram</span>' if q["figure"] else ""
         tags += '<span class="tag sus">ambiguous in print</span>' if q["uncertain"] else ""
         tags += '<span class="tag fix">option repaired</span>' if q["corrected"] else ""
+        tags += '<span class="tag pend">pending an answer</span>' if q["pending"] else ""
         options = "".join(
             f'<li class="right"><span class="k">{key}.</span> {value}'
             f'<span class="ok">correct</span></li>'
@@ -200,7 +202,7 @@ def build(transcription: Path, out_dir: Path, before: dict[str, str], label: str
         "</div></header>\n"
         f'<div class="wrap">{"".join(cards)}</div>\n</body></html>'
     )
-    target = out_dir / "index.html"
+    target = out_dir / f"{label.split()[-1]}.html"
     target.write_text(page, encoding="utf-8")
     return target
 
@@ -238,6 +240,17 @@ def main() -> int:
     target = build(transcription, folder / "preview", before,
                    f"{args.exam.upper()} {args.subject.title()} {args.year}",
                    folder / f"explanations_{args.year}.yaml")
+    index = folder / "preview" / "index.html"
+    years = sorted(p.stem for p in (folder / "preview").glob("[0-9][0-9][0-9][0-9].html"))
+    links = "".join(f'<li><a href="./{y}.html">{y}</a></li>' for y in years)
+    index.write_text(
+        '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+        f"<title>{args.subject.title()} transcriptions</title>"
+        "<style>body{font:16px/1.6 system-ui,sans-serif;margin:40px;max-width:640px}"
+        "li{padding:4px 0}</style></head><body>"
+        f"<h1>{args.exam.upper()} {args.subject.title()}</h1>"
+        f"<p>Years transcribed so far:</p><ul>{links}</ul></body></html>",
+        encoding="utf-8")
     print(f"Open {target}")
     return 0
 
