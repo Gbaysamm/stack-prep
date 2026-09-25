@@ -58,6 +58,10 @@ INK_THRESHOLD = 160       # 0 is black, 255 white
 #: comes from the question, not from an assumption about the year.
 OPTION_KEYS = ("A", "B", "C", "D", "E")
 MINIMUM_OPTIONS = 4
+#: A glyph shorter than this fraction of the body text is a script, not a line of its own.
+SCRIPT_HEIGHT_RATIO = 0.82
+#: How far, in body heights, a band of scripts may sit from the line it belongs to.
+SCRIPT_REACH = 1.6
 
 YEAR_RE = re.compile(r"Mathematics\s+((?:19|20)\d\d)")
 QUESTION_RE = re.compile(r"^(\d{1,3})\s*[.)]\s*(.*)$")
@@ -490,6 +494,136 @@ def describe(figure: Figure) -> str:
     return "Diagram from the paper, with no text labels. Not yet checked by a person."
 
 
+def merge_scripts(rows: list[list[Word]]) -> list[list[Word]]:
+    """Put superscripts and subscripts back on the line they belong to.
+
+    `group_rows` clusters by vertical centre, which is right for ordinary text and wrong for
+    mathematics: a numerator sits above the line and a denominator below it, so "2¹/₃" is
+    split into three rows. The main row keeps "2 1 /", and the denominators drift to the end
+    of the question as a row of their own — which is how
+
+        Simplify 1 - (2¹/₃ x 1¹/₄) + ³/₅
+
+    arrived as "Simplify 1 - (21/ x 11/ ) + 3/ 3 4 5", with "3 4 5" stranded at the end. Base
+    subscripts do the same: "213₄ x 23₄" became "213 x 23 4 4".
+
+    A row whose glyphs are markedly smaller than the body text is not a line, it is a band of
+    scripts belonging to the nearest real line. Each of its words is folded back in at its own
+    x position and marked `^{...}` or `_{...}` by which side of that line it sits on; sorting
+    by x then restores reading order. `to_latex` turns the marks into mathematics.
+
+    A raised lone o/O/0 after a number was never a letter: the compilation prints degrees as a
+    raised circle and the text layer flattens it to zero, turning 60° into 600.
+    """
+    if not rows:
+        return rows
+    heights = sorted(w.height for row in rows for w in row if w.height > 0)
+    if not heights:
+        return rows
+    body_height = heights[len(heights) // 2]
+    if body_height <= 0:
+        return rows
+
+    def median_height(row: list[Word]) -> float:
+        values = sorted(w.height for w in row if w.height > 0)
+        return values[len(values) // 2] if values else 0.0
+
+    def centre(row: list[Word]) -> float:
+        return sum((w.y0 + w.y1) / 2 for w in row) / len(row)
+
+    body: list[list[Word]] = []
+    scripts: list[list[Word]] = []
+    for row in rows:
+        (scripts if median_height(row) < body_height * SCRIPT_HEIGHT_RATIO else body).append(row)
+    if not body:
+        return rows
+
+    orphans: list[list[Word]] = []
+    for band in scripts:
+        band_centre = centre(band)
+        host = min(body, key=lambda r: abs(centre(r) - band_centre))
+        # Further than a line and a half away it is small print, not a script: a footnote or
+        # a figure label that happens to be set small. Left where it is rather than guessed at.
+        if abs(centre(host) - band_centre) > body_height * SCRIPT_REACH:
+            orphans.append(band)
+            continue
+        raised = band_centre < centre(host)
+        for word in band:
+            if raised and re.fullmatch(r"[oO0]", word.text):
+                marked = "°"
+            else:
+                marked = f"{'^' if raised else '_'}{{{word.text}}}"
+            host.append(Word(word.x0, word.y0, word.x1, word.y1, marked))
+
+    merged = body + orphans
+    merged.sort(key=centre)
+    out: list[list[Word]] = []
+    for row in merged:
+        out.append(mark_inline_scripts(sorted(row, key=lambda w: w.x0), body_height))
+    return out
+
+
+def mark_inline_scripts(row: list[Word], body_height: float) -> list[Word]:
+    """Mark the scripts that never left their line.
+
+    A numerator sits only a little above the baseline, so it often clusters into the row it
+    belongs to rather than forming a band of its own -- which is why merging bands alone
+    recovered the denominators of 2¹/₃ and not its numerator, leaving "21/_{3}". Here the
+    comparison is against this line's own baseline rather than against whatever word happened
+    to be extracted previously, which is what the earlier attempt got wrong: in reading order
+    the word before a superscript can be in the other column entirely.
+    """
+    if not row or body_height <= 0:
+        return row
+    full = [w for w in row if w.height >= body_height * SCRIPT_HEIGHT_RATIO]
+    if not full:
+        return row
+    baselines = sorted(w.y1 for w in full)
+    baseline = baselines[len(baselines) // 2]
+    out: list[Word] = []
+    for word in row:
+        if word.text.startswith(("^{", "_{")) or word.text == "°":
+            out.append(word)
+            continue
+        raised = (word.height < body_height * SCRIPT_HEIGHT_RATIO
+                  and word.y1 < baseline - body_height * 0.18)
+        if raised and re.fullmatch(r"[oO0]", word.text):
+            out.append(Word(word.x0, word.y0, word.x1, word.y1, "°"))
+        elif raised and re.fullmatch(r"\d+|[a-zA-Z]", word.text):
+            out.append(Word(word.x0, word.y0, word.x1, word.y1, f"^{{{word.text}}}"))
+        else:
+            out.append(word)
+    return out
+
+
+def to_latex(text: str) -> str:
+    r"""Turn the reconstructed marks into mathematics a renderer can set.
+
+    Deliberately conservative. Only what the geometry established is wrapped -- the atom, not
+    the sentence around it -- because deciding where an expression begins and ends is a
+    judgement, and a wrong guess silently rewrites an examiner's question. So
+
+        Simplify 1 - (2¹/₃ x 1¹/₄) + ³/₅
+
+    becomes "Simplify 1 - ($2\\frac{1}{3}$ x $1\\frac{1}{4}$) + $\\frac{3}{5}$":
+    every fraction is set and the prose between them is left alone. Tidying that into a single
+    expression is a person's decision. This script's job is to stop losing information, not to
+    start inventing it.
+    """
+    # A mixed number first, or its integer part is left stranded beside its own fraction.
+    text = re.sub(r"(?<!\w)(\d+)\s*\^\{(\d+)\}\s*/\s*_\{(\d+)\}",
+                  r"$\1\\frac{\2}{\3}$", text)
+    text = re.sub(r"\^\{(\d+)\}\s*/\s*_\{(\d+)\}",
+                  r"$\\frac{\1}{\2}$", text)
+    # Whatever is left is an exponent or a base subscript. It belongs to the whole
+    # token before it: 213 base four is 213_4, not 21 followed by 3_4.
+    text = re.sub(r"(\d+|[A-Za-z])\^\{([^{}]+)\}", r"$\1^{\2}$", text)
+    text = re.sub(r"(\d+|[A-Za-z])_\{([^{}]+)\}", r"$\1_{\2}$", text)
+    # Atoms that ended up adjacent read as one expression, not two.
+    text = re.sub(r"\$\s*\$", " ", text)
+    return text
+
+
 def assemble_row(row: list[Word]) -> str:
     """Join one line's words, putting back the spacing the PDF threw away.
 
@@ -619,7 +753,7 @@ def parse_year(pdf: Path, year: int, begin: tuple[int, float], finish: tuple[int
                             and box[1] - 10 < word.y0 and word.y1 < box[3] + 10
                             for box in label_boxes)
             ]
-            for row in group_rows(keep):
+            for row in merge_scripts(group_rows(keep)):
                 text = assemble_row(row)
                 if text and not FOOTER_RE.search(text):
                     lines.append(Line(page, min(w.y0 for w in row), max(w.y1 for w in row),
@@ -701,8 +835,11 @@ def parse_year(pdf: Path, year: int, begin: tuple[int, float], finish: tuple[int
         questions.append({
             "number": number,
             "page": segment[0].page,
-            "stem": stem,
-            "options": {key: options[key] for key in present},
+            # Converted here rather than in assemble_row: the question and option
+            # regexes run against the raw line, and a dollar delimiter in the middle
+            # of them would change what counts as an option.
+            "stem": to_latex(stem),
+            "options": {key: to_latex(options[key]) for key in present},
             # No answer: this compilation prints no key. See the module docstring.
             "proposed_skill": skill,
             "skill_reason": reason,
