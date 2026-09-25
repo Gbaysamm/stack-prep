@@ -4,10 +4,15 @@
 # written. In short: state the rule before using it, do the arithmetic in full, and finish by
 # naming the wrong answer the paper is fishing for.
 #
-# 41 of the 50 are answered. Nine are pending: seven need a figure that has not been attached
-# (a Venn diagram, a shaded graph, two circle diagrams, a triangle, a pie chart and a
-# cumulative frequency curve), one has no equation in its stem at all, and one is printed with
-# a table belonging to a different question. Those carry their stem and options but no answer.
+# 48 of the 50 are answered. Seven that were once pending turned out to be answerable: their
+# values were on the page, in a picture rather than in the text, and reading the figures at
+# 400dpi recovered them. Four now carry an SVG drawn from those values, so a student sees a
+# clean chart rather than a cropped scan.
+#
+# Two remain pending, and neither is a drawing problem. Q6's stem contains no equation at all,
+# so there is nothing to solve. Q49 is printed with a table headed "No. of days" and "No. of
+# students" whose frequencies cannot sum to the 100 rolls its stem claims -- that table belongs
+# to 2002 Q24, where it is coherent, so what was meant to sit here is simply missing.
 #
 # Answers are checked against keys_2004.yaml, which covers 30 of them. They agree everywhere
 # except Q47, where the key ignores the constraint the question turns on; that disagreement is
@@ -105,6 +110,19 @@ explanations:
       - "Option D is $\\tfrac{8}{3}$ — what you get by taking a square root somewhere instead of a cube root. The 3 on the right-hand side is what makes it a cube."
     hint: "Use the power law to bring the coefficients inside, then the subtraction law to make one logarithm. Then read it back as a power."
 
+  9:
+    answer: A
+    steps:
+      - "With three overlapping circles there are seven separate regions, so the way to read a shaded one is to ask, for each circle in turn, whether the shading is inside it or outside it."
+      - "The shaded patch lies inside $Q$ — it sits within the right-hand circle's boundary."
+      - "It also lies inside $R$, the lower circle."
+      - "But it lies outside $P$: the left-hand circle's edge cuts across and the shading stops there, staying on the far side."
+      - "So a point in the shaded region is in $Q$ *and* in $R$ *and* not in $P$."
+      - "'In $Q$ and in $R$' is $Q \\cap R$, and 'not in $P$' is $P^{c}$, so together the region is $P^{c} \\cap (Q \\cap R)$."
+      - "Option D is $P^{c} \\cap (Q \\cup R)$, which would shade everything in either $Q$ or $R$ outside $P$ — a far larger region including the parts of $Q$ and $R$ that do not overlap each other."
+      - "And option C uses $\\cup$ at the front, which would include the whole of $P^{c}$ — every point outside $P$, even those in no circle at all."
+    hint: "Ask three separate questions about the shaded patch: is it inside $P$? inside $Q$? inside $R$? Then write those three answers as one expression."
+
   10:
     answer: C
     steps:
@@ -183,6 +201,20 @@ explanations:
       - "Then $L = 4 \\times 81 = 324$ cm."
       - "Option C is 144 cm, which is $64 \\times \\tfrac{9}{4}$ — the answer you get by scaling the length in proportion to $T$ rather than to $T^{2}$. Doubling the period makes a pendulum four times as long, not twice."
     hint: "Write $L = kT^{2}$, find $k$ from the pendulum you are given, then substitute $T = 9$. Do not forget to square."
+
+  16:
+    answer: A
+    steps:
+      - "The boundary is a straight line, and the graph gives two points on it: $(0, 6)$ on the $y$-axis and $(2, 0)$ on the $x$-axis."
+      - "Find its gradient: $m = \\dfrac{0 - 6}{2 - 0} = \\dfrac{-6}{2} = -3$."
+      - "With a $y$-intercept of 6, the line is $y = -3x + 6$."
+      - "Rearranging so it matches the shape of the options: $y + 3x = 6$."
+      - "Now decide which side of the line is shaded, and the safest way is to test a point. The origin is the easiest one to use."
+      - "At the origin, $y + 3x = 0 + 0 = 0$, which is less than 6."
+      - "The origin lies inside the shaded band on the graph, so the shaded side is the one where $y + 3x$ is less than 6."
+      - "So the region is $\\{(x, y) : y + 3x < 6\\}$."
+      - "Options C and D use $y - 3x$, which describes a line of gradient $+3$ — sloping the other way entirely. Reading the gradient's sign off the picture rules out half the options before any testing."
+    hint: "Find the equation of the line from its two intercepts, then substitute the origin to see which side of it is shaded."
 
   17:
     answer: C
@@ -292,6 +324,34 @@ explanations:
       - "Option B, 42 cm, is the perimeter of the hexagon itself ($6 \\times 7$). The question asks for the circumference of the circle, which is slightly larger — as it must be, since the circle bulges outside the hexagon."
     hint: "Count the vertices to see which polygon it is. For a regular hexagon in a circle, the side and the radius are equal."
 
+  26:
+    answer: A
+    steps:
+      - "Two lines run out from $Q$ and cut the circle, so this is the external-angle case: the angle at $Q$ is half the *difference* of the two arcs its lines cut off."
+      - "First use the $20^{\\circ}$ at $P$. That is an angle at the circumference, standing on the near arc between the two secants, so that arc is twice it: $2 \\times 20 = 40^{\\circ}$."
+      - "Now the angle at $Q$ is half the difference between the far arc $PS$ and that near arc."
+      - "So $35 = \\tfrac{1}{2}(\\text{arc } PS - 40)$."
+      - "Multiplying by 2: $70 = \\text{arc } PS - 40$, so arc $PS = 110^{\\circ}$."
+      - "The angle at the centre standing on an arc equals the arc, so $\\angle POS = 110^{\\circ}$."
+      - "Triangle $POS$ has two sides that are radii, $OP$ and $OS$, so it is isosceles and its base angles are equal."
+      - "Those two angles share what is left of $180^{\\circ}$: $\\angle PSO = \\dfrac{180 - 110}{2} = 35^{\\circ}$."
+      - "It is a coincidence that the answer matches the $35^{\\circ}$ at $Q$ — the two angles are unrelated, and the working is what establishes it."
+    hint: "Turn the $20^{\\circ}$ into an arc, use the external angle at $Q$ to get arc $PS$, then remember triangle $POS$ has two radii for sides."
+
+  27:
+    answer: D
+    steps:
+      - "The arrows on the figure carry the information: a single arrow on $PQ$ and on $UR$ means those two are parallel, and matching double and triple arrows mark the other parallel pairs."
+      - "$PQTU$ is named a parallelogram, so its opposite sides are equal: $UT = PQ = 4$ cm."
+      - "Its area is base times perpendicular height, so $4h = 32$ and the height is $h = 8$ cm. That height is the distance between the two parallel lines, so it is the same for the trapezium."
+      - "Now the trapezium's longer side. $U$, $T$, $S$ and $R$ lie in order along the bottom, so $UR = UT + TS + SR$."
+      - "$UT = 4$ and $TS = 6$ are known. For $SR$: the arrows show $PS$ parallel to $QR$, and $PQ$ is parallel to $SR$, so $PQSR$ is a parallelogram too — giving $SR = PQ = 4$ cm."
+      - "So $UR = 4 + 6 + 4 = 14$ cm."
+      - "The area of a trapezium is $\\tfrac{1}{2}(a + b)h$ with the two parallel sides: $\\tfrac{1}{2}(4 + 14) \\times 8$."
+      - "That is $\\tfrac{1}{2} \\times 18 \\times 8 = 72\\ \\text{cm}^{2}$."
+      - "Option B is $48\\ \\text{cm}^{2}$, which is what you get by taking $UR$ as $UT + TS = 10$ and forgetting the piece beyond $S$. Reading the order of the four points along the base is what prevents that."
+    hint: "Use the parallelogram's area to find the height, then build $UR$ from all three pieces along the bottom before using the trapezium formula."
+
   28:
     answer: B
     steps:
@@ -350,6 +410,19 @@ explanations:
       - "So the midpoint is $(1, 1)$."
       - "Option B is $(4, 4)$ — what you get by subtracting the coordinates instead of adding them, which is the distance calculation starting up by habit rather than the midpoint one."
     hint: "Add the two $x$ values and halve, then add the two $y$ values and halve. Add — do not subtract."
+
+  33:
+    answer: C
+    steps:
+      - "The triangle gives two angles and the side between one of them and the unknown, so the sine rule is the tool: $\\dfrac{a}{\\sin A} = \\dfrac{b}{\\sin B}$, where each side pairs with the angle opposite it."
+      - "Match them up carefully. The side of 15 cm is opposite the $60^{\\circ}$ angle, and the side $x$ is opposite the $45^{\\circ}$ angle."
+      - "So $\\dfrac{x}{\\sin 45^{\\circ}} = \\dfrac{15}{\\sin 60^{\\circ}}$."
+      - "Therefore $x = \\dfrac{15\\sin 45^{\\circ}}{\\sin 60^{\\circ}}$."
+      - "Substitute the exact values: $\\sin 45^{\\circ} = \\dfrac{\\sqrt{2}}{2}$ and $\\sin 60^{\\circ} = \\dfrac{\\sqrt{3}}{2}$."
+      - "The halves cancel, leaving $x = \\dfrac{15\\sqrt{2}}{\\sqrt{3}}$."
+      - "Rationalise by multiplying top and bottom by $\\sqrt{3}$: $x = \\dfrac{15\\sqrt{6}}{3} = 5\\sqrt{6}$."
+      - "Pairing each side with the wrong angle is the usual error here, and it would give $15\\sqrt{6}/2$ — not offered. Checking that the larger side faces the larger angle is a quick way to be sure the pairing is right: $60^{\\circ}$ is bigger than $45^{\\circ}$, and 15 is bigger than $5\\sqrt{6} \\approx 12.2$ ✓."
+    hint: "Use the sine rule, pairing each side with the angle opposite it — not the angle next to it."
 
   34:
     answer: C
@@ -429,6 +502,19 @@ explanations:
       - "Option B is $\\tfrac{2}{3}$ and option D is $-6\\tfrac{2}{3}$ — the first from forgetting the upper value, the second from subtracting the wrong way round. Subtracting a negative adds."
     hint: "Integrate, then work out the value at each limit and subtract the lower from the upper. Watch the sign of the lower one."
 
+  40:
+    answer: D
+    steps:
+      - "A pie chart divides $360^{\\circ}$ in proportion to the quantities, so first make sure every sector's angle is known."
+      - "Three are marked: Others $60^{\\circ}$, Millet $150^{\\circ}$, and Maize carries a right-angle symbol, so it is $90^{\\circ}$."
+      - "Beans is whatever is left: $360 - 60 - 150 - 90 = 60^{\\circ}$."
+      - "Now use the quantity you are given. Millet's $150^{\\circ}$ represents 3000 tonnes."
+      - "So one degree represents $\\dfrac{3000}{150} = 20$ tonnes."
+      - "Beans occupies $60^{\\circ}$, so it is $60 \\times 20 = 1200$ tonnes."
+      - "Equivalently, beans' sector is $\\tfrac{60}{150} = \\tfrac{2}{5}$ of millet's, and $\\tfrac{2}{5}$ of 3000 is 1200 — a useful check."
+      - "Option A is 9000 tonnes, which comes from scaling the wrong way round, treating the smaller sector as the larger. A sector less than half the size of millet's cannot represent three times as much."
+    hint: "Find the missing sector angle first — the right-angle mark gives you one of them. Then work out what one degree is worth."
+
   41:
     answer: C
     steps:
@@ -439,6 +525,19 @@ explanations:
       - "All three statements are true, so the answer is I, II and III."
       - "A bar chart, by contrast, has gaps between its bars because its categories are separate rather than continuous. Statement III is the one that tells the two apart, and any option leaving it out is describing a bar chart."
     hint: "Check each statement separately. In particular, ask what makes a histogram different from a bar chart."
+
+  42:
+    answer: B
+    steps:
+      - "On a cumulative frequency curve, the height at any mark tells you how many students scored *up to* that mark, so start by reading the total."
+      - "The curve levels off at 25, so there are 25 students in all."
+      - "The question asks about more than 20 marks, so first find how many scored 20 or fewer — that is the height of the curve at 20."
+      - "20 sits between the plotted points at 19 and 24, where the curve reads 17 and 22."
+      - "Reading across at 20, the curve is at about 18. (Interpolating: one fifth of the way from 19 to 24 adds about one fifth of the rise from 17 to 22, which is 1.)"
+      - "So 18 students scored 20 or fewer, and the rest scored more: $25 - 18 = 7$ students."
+      - "As a percentage: $\\dfrac{7}{25} \\times 100 = 28\\%$."
+      - "Option A is 68%, close to the proportion scoring *below* 20 — which is what you get by reading the curve's value and using it directly instead of subtracting from the total. A cumulative curve always counts upwards, so 'more than' always means taking the reading away from the total."
+    hint: "Read the total where the curve flattens, then read the curve at 20. The question asks for what is left above that, not the reading itself."
 
   43:
     answer: B

@@ -110,7 +110,32 @@ questions:
       B: $P \cap Q$
       C: $P^{c} \cup (Q \cap R)$
       D: $P^{c} \cap (Q \cup R)$
-    pending: true
+    needs_figure: true
+    figure_svg: |
+      <svg viewBox="0 0 300 230" width="300" height="230" role="img"
+           aria-label="Three overlapping circles P, Q and R; the region inside both Q and R but outside P is shaded">
+        <defs>
+          <clipPath id="v9q"><circle cx="190" cy="90" r="70"/></clipPath>
+          <clipPath id="v9r"><circle cx="150" cy="150" r="70"/></clipPath>
+          <mask id="v9notp">
+            <rect x="0" y="0" width="300" height="230" fill="#fff"/>
+            <circle cx="110" cy="90" r="70" fill="#000"/>
+          </mask>
+        </defs>
+        <g clip-path="url(#v9q)" mask="url(#v9notp)">
+          <circle cx="150" cy="150" r="70" fill="#6d5ae0" fill-opacity="0.55"/>
+        </g>
+        <g fill="none" stroke="#1a1a1f" stroke-width="1.6">
+          <circle cx="110" cy="90" r="70"/>
+          <circle cx="190" cy="90" r="70"/>
+          <circle cx="150" cy="150" r="70"/>
+        </g>
+        <g font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#1a1a1f">
+          <text x="58" y="34" text-anchor="middle">P</text>
+          <text x="244" y="34" text-anchor="middle">Q</text>
+          <text x="150" y="226" text-anchor="middle">R</text>
+        </g>
+      </svg>
 
   - number: 10
     stem: >-
@@ -180,7 +205,29 @@ questions:
       B: '$\{(x, y) : y + 3x < -6\}$'
       C: '$\{(x, y) : y - 3x < 6\}$'
       D: '$\{(x, y) : y - 3x < -6\}$'
-    pending: true
+    needs_figure: true
+    figure_svg: |
+      <svg viewBox="0 0 320 250" width="320" height="250" role="img"
+           aria-label="The line through (0,6) and (2,0); the half-plane containing the origin is shaded">
+        <defs><clipPath id="g16"><rect x="30" y="26" width="260" height="200"/></clipPath></defs>
+        <g clip-path="url(#g16)">
+          <path d="M93.3 26 L226.7 226 L30 226 L30 26 Z" fill="#6d5ae0" fill-opacity="0.22"/>
+          <path d="M93.3 26 L226.7 226" stroke="#3f2fa8" stroke-width="2" fill="none"/>
+        </g>
+        <g stroke="#1a1a1f" stroke-width="1.6" fill="none">
+          <path d="M34 156 H292"/><path d="M100 30 V222"/>
+        </g>
+        <g fill="#1a1a1f">
+          <circle cx="100" cy="36" r="3.4"/><circle cx="180" cy="156" r="3.4"/>
+        </g>
+        <g font-family="system-ui, sans-serif" font-size="12" fill="#1a1a1f">
+          <text x="108" y="34">(0, 6)</text>
+          <text x="56" y="172">(0, 0)</text>
+          <text x="186" y="172">(2, 0)</text>
+          <text x="296" y="152" font-style="italic">x</text>
+          <text x="106" y="40" fill="#555" font-size="11">y</text>
+        </g>
+      </svg>
 
   - number: 17
     stem: What are the integral values of $x$ which satisfy the inequality $-1 < 3 - 2x \le 5$?
@@ -277,7 +324,7 @@ questions:
       B: $40^{\circ}$
       C: $45^{\circ}$
       D: $55^{\circ}$
-    pending: true
+    needs_figure: true
 
   - number: 27
     stem: >-
@@ -288,7 +335,7 @@ questions:
       B: $48\ \text{cm}^{2}$
       C: $60\ \text{cm}^{2}$
       D: $72\ \text{cm}^{2}$
-    pending: true
+    needs_figure: true
 
   - number: 28
     stem: >-
@@ -347,7 +394,7 @@ questions:
       B: $15\sqrt{6}$
       C: $5\sqrt{6}$
       D: $3\sqrt{6}$
-    pending: true
+    needs_figure: true
 
   - number: 34
     stem: >-
@@ -411,7 +458,27 @@ questions:
       B: 6000 tonnes
       C: 1500 tonnes
       D: 1200 tonnes
-    pending: true
+    needs_figure: true
+    figure_svg: |
+      <svg viewBox="0 0 300 250" width="300" height="250" role="img"
+           aria-label="Pie chart: Others 60 degrees, Maize 90 degrees, Millet 150 degrees, Beans 60 degrees">
+        <g transform="translate(150,120)">
+          <path d="M0 0 L0 -100 A100 100 0 0 1 86.6 -50 Z" fill="#c7bff5"/>
+          <path d="M0 0 L86.6 -50 A100 100 0 0 1 86.6 50 Z" fill="#9f92ee"/>
+          <path d="M0 0 L86.6 50 A100 100 0 0 1 -100 0 Z" fill="#6d5ae0"/>
+          <path d="M0 0 L-100 0 A100 100 0 0 1 0 -100 Z" fill="#e3dffa"/>
+          <g fill="none" stroke="#fff" stroke-width="2">
+            <path d="M0 0 L0 -100 M0 0 L86.6 -50 M0 0 L86.6 50 M0 0 L-100 0"/>
+          </g>
+          <circle cx="0" cy="0" r="100" fill="none" stroke="#1a1a1f" stroke-width="1.6"/>
+          <g font-family="system-ui, sans-serif" font-size="12" fill="#1a1a1f" text-anchor="middle">
+            <text x="34" y="-58">Others</text><text x="34" y="-44" font-weight="700">60°</text>
+            <text x="62" y="4">Maize</text><text x="62" y="18" font-weight="700">90°</text>
+            <text x="-8" y="58">Millet</text><text x="-8" y="72" font-weight="700">150°</text>
+            <text x="-52" y="-42">Beans</text><text x="-52" y="-28" font-weight="700">60°</text>
+          </g>
+        </g>
+      </svg>
 
   - number: 41
     stem: >-
@@ -433,7 +500,37 @@ questions:
       B: 28%
       C: 17%
       D: 8%
-    pending: true
+    needs_figure: true
+    figure_svg: |
+      <svg viewBox="0 0 400 250" width="400" height="250" role="img"
+           aria-label="Cumulative frequency curve: class mark 9 gives 3, 14 gives 9, 19 gives 17, 24 gives 22, 29 gives 24.5, 34 gives 25">
+        <g stroke="#e4e4ea" stroke-width="1">
+          <path d="M56 30 H364 M56 62 H364 M56 94 H364 M56 126 H364 M56 158 H364 M56 190 H364"/>
+          <path d="M96 30 V190 M140 30 V190 M184 30 V190 M228 30 V190 M272 30 V190 M316 30 V190"/>
+        </g>
+        <g fill="none" stroke="#1a1a1f" stroke-width="1.6"><path d="M56 22 V190 H372"/></g>
+        <path d="M96 171 L140 133 L184 82 L228 50 L272 34 L316 30"
+              fill="none" stroke="#6d5ae0" stroke-width="2.4" stroke-linejoin="round"/>
+        <g fill="#3f2fa8">
+          <circle cx="96" cy="171" r="4"/><circle cx="140" cy="133" r="4"/>
+          <circle cx="184" cy="82" r="4"/><circle cx="228" cy="50" r="4"/>
+          <circle cx="272" cy="34" r="4"/><circle cx="316" cy="30" r="4"/>
+        </g>
+        <g stroke="#b91c1c" stroke-width="1.4" stroke-dasharray="4 3" fill="none">
+          <path d="M194 190 V76 H56"/>
+        </g>
+        <g font-family="system-ui, sans-serif" font-size="11" fill="#555" text-anchor="end">
+          <text x="48" y="194">0</text><text x="48" y="162">5</text><text x="48" y="130">10</text>
+          <text x="48" y="98">15</text><text x="48" y="66">20</text><text x="48" y="34">25</text>
+        </g>
+        <g font-family="system-ui, sans-serif" font-size="11" fill="#1a1a1f" text-anchor="middle">
+          <text x="96" y="206">9</text><text x="140" y="206">14</text><text x="184" y="206">19</text>
+          <text x="228" y="206">24</text><text x="272" y="206">29</text><text x="316" y="206">34</text>
+          <text x="206" y="228" font-weight="600" fill="#555">Class mark</text>
+        </g>
+        <text x="0" y="0" font-family="system-ui, sans-serif" font-size="11" font-weight="600"
+              fill="#555" text-anchor="middle" transform="translate(16,106) rotate(-90)">Cumulative frequency</text>
+      </svg>
 
   - number: 43
     stem: >-
