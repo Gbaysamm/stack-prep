@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   api,
+  type PaperYear,
   type Progress,
   type QueueItem,
   type QueueState,
@@ -37,6 +38,7 @@ export function ReviewPage() {
   const [reviewerId, setReviewerId] = useState<string>('');
   const [queueState, setQueueState] = useState<QueueState>('needs_review');
   const [examYear, setExamYear] = useState<number | null>(null);
+  const [years, setYears] = useState<PaperYear[]>([]);
   const [items, setItems] = useState<QueueItem[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [detail, setDetail] = useState<QuestionDetail | null>(null);
@@ -53,6 +55,8 @@ export function ReviewPage() {
       const known = saved && list.some((r) => r.id === saved) ? saved : list[0]?.id;
       if (known) setReviewerId(known);
     }, reportError);
+    // Read from the bank rather than listed here, so a newly loaded paper shows up.
+    api.years().then(setYears, reportError);
   }, []);
 
   const loadQueue = useCallback(async () => {
@@ -201,8 +205,11 @@ export function ReviewPage() {
             onChange={(event) => setExamYear(event.target.value ? Number(event.target.value) : null)}
           >
             <option value="">All years</option>
-            <option value="2011">2011</option>
-            <option value="2013">2013</option>
+            {years.map((year) => (
+              <option key={year.exam_year} value={year.exam_year}>
+                {year.exam_year} ({year.questions})
+              </option>
+            ))}
           </select>
         </label>
         <span className="review-count">{summary}</span>

@@ -106,6 +106,11 @@ class Progress(BaseModel):
     flagged: int
 
 
+class PaperYear(BaseModel):
+    exam_year: int
+    questions: int
+
+
 class Skill(BaseModel):
     id: UUID
     code: str
@@ -249,6 +254,19 @@ async def queue(
         **({"exam_year": exam_year} if exam_year is not None else {}),
     )
     return [QueueItem(**row) for row in rows]
+
+
+@router.get("/years", response_model=list[PaperYear], summary="The paper years in the bank")
+async def years(conn: Annotated[AsyncConnection, Depends(connection)]) -> list[PaperYear]:
+    """Read from the bank, so a newly loaded paper appears in the filter without a release."""
+    rows = await fetch_all(
+        conn,
+        """
+        SELECT exam_year, count(*) AS questions FROM question_readiness
+        WHERE exam_year IS NOT NULL GROUP BY exam_year ORDER BY exam_year
+        """,
+    )
+    return [PaperYear(**row) for row in rows]
 
 
 @router.get("/progress", response_model=Progress, summary="How much of the bank is decided")

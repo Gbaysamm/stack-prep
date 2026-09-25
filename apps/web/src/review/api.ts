@@ -84,6 +84,11 @@ export interface Skill {
   topic: string | null;
 }
 
+export interface PaperYear {
+  exam_year: number;
+  questions: number;
+}
+
 export type QueueState =
   | 'needs_review'
   | 'needs_answer'
@@ -115,6 +120,8 @@ export const api = {
     if (examYear !== null) params.set('exam_year', String(examYear));
     return request<QueueItem[]>(`/queue?${params.toString()}`);
   },
+
+  years: () => request<PaperYear[]>('/years'),
 
   progress: (examYear: number | null) =>
     request<Progress>(`/progress${examYear !== null ? `?exam_year=${examYear}` : ''}`),
