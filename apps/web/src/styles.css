@@ -479,10 +479,18 @@ button.primary {
 /* Question and answer text set in KaTeX's own text face, so the words around the mathematics
    read as one piece with it rather than a sans-serif sentence with typeset formulas dropped
    in. KaTeX's stylesheet already loads this font for the maths, so it costs no extra fetch. */
-.sp-textbook {
+/* Named with the page's own containers as well as alone, because the student theme styles its
+   headings as `.sp h2` — a heading and a class together outrank a class by itself, and the
+   question heading kept the display face until this said so. */
+.sp-textbook,
+.sp .sp-textbook,
+.sp h1.sp-textbook,
+.sp h2.sp-textbook,
+.sp h3.sp-textbook {
   font-family: KaTeX_Main, 'Latin Modern Roman', 'Computer Modern', 'Times New Roman', serif;
   font-weight: 400;
   letter-spacing: 0;
+  line-height: 1.4;
 }
 /* KaTeX enlarges its maths by a fifth to sit beside ordinary fonts. Beside its own face that
    makes the formula visibly bigger than the words, so it is brought back into line. */

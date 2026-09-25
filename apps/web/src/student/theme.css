@@ -814,13 +814,15 @@
 
 /* Mathematics in the coach's reply. KaTeX brings its own type; these rules only settle how
    it sits in a line of prose and stop a long expression widening the card. */
+/* Inline maths flows with the sentence and breaks after + and = like the words around it.
+   Scrolling is kept for a displayed formula, which is one unbreakable line: on an inline one
+   it stopped the line breaking, and a long expression ran off the edge of the card. */
 .sp-maths {
-  overflow-x: auto;
-  overflow-y: hidden;
   max-width: 100%;
-  vertical-align: middle;
 }
 .sp-maths.block {
+  overflow-x: auto;
+  overflow-y: hidden;
   display: block;
   margin: 0.55em 0;
   text-align: center;
