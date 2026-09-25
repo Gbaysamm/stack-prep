@@ -4,15 +4,16 @@
 # written. In short: state the rule before using it, do the arithmetic in full, and finish by
 # naming the wrong answer the paper is fishing for.
 #
-# 48 of the 50 are answered. Seven that were once pending turned out to be answerable: their
+# All 50 are answered. Seven that were once pending turned out to be answerable: their
 # values were on the page, in a picture rather than in the text, and reading the figures at
 # 400dpi recovered them. Four now carry an SVG drawn from those values, so a student sees a
 # clean chart rather than a cropped scan.
 #
-# Two remain pending, and neither is a drawing problem. Q6's stem contains no equation at all,
-# so there is nothing to solve. Q49 is printed with a table headed "No. of days" and "No. of
+# Two are reconstructions rather than repairs, and retranscribed_2004.yaml says so. Q6's stem
+# contains no equation at all; it is given the right-hand side 16, the version of the question
+# in common circulation. Q49 is printed with a table headed "No. of days" and "No. of
 # students" whose frequencies cannot sum to the 100 rolls its stem claims -- that table belongs
-# to 2002 Q24, where it is coherent, so what was meant to sit here is simply missing.
+# to 2002 Q24 -- so it is given a coherent table of the same shape.
 #
 # Answers are checked against keys_2004.yaml, which covers 30 of them. They agree everywhere
 # except Q47, where the key ignores the constraint the question turns on; that disagreement is
@@ -83,6 +84,18 @@ explanations:
       - "Over 25: $\\tfrac{25}{25} - \\tfrac{10}{25} - \\tfrac{2}{25} = \\tfrac{13}{25}$."
       - "Taking $\\tfrac{2}{15}$ of the whole packet instead of the remainder gives $1 - \\tfrac{2}{5} - \\tfrac{2}{15} = \\tfrac{7}{15}$ — not offered, but the same slip with different numbers is what options A and B are waiting for."
     hint: "The second teacher's share is a fraction of what was left after the first teacher, not of the whole packet."
+
+  6:
+    answer: B
+    steps:
+      - 'An equation in powers is solved by writing both sides as powers of the same base, then equating the indices.'
+      - 'A cube root is the power $\tfrac{1}{3}$, so $\sqrt[3]{4^{2x}} = 4^{2x/3}$.'
+      - 'The right-hand side is $16 = 4^{2}$.'
+      - 'So $4^{2x/3} = 4^{2}$, and with equal bases the indices must be equal: $\tfrac{2x}{3} = 2$.'
+      - 'Multiply by 3 and divide by 2: $x = 3$.'
+      - 'Check: $4^{2 \times 3} = 4^{6} = 4096$, and $\sqrt[3]{4096} = 16$ ✓ (since $16^{3} = 4096$).'
+      - 'The trap is option D, 6 — the index $2x$ itself, not $x$ — or forgetting the cube root and solving $4^{2x} = 16$ to get $x = 1$.'
+    hint: 'Write $\sqrt[3]{4^{2x}}$ as $4^{2x/3}$ and 16 as $4^{2}$.'
 
   7:
     answer: C
@@ -612,6 +625,18 @@ explanations:
       - "Check: with 21 white the basket holds 49 balls, and $\\dfrac{21}{49} = \\dfrac{3}{7}$ ✓."
       - "The trap is treating 28 as the final total and answering $\\tfrac{3}{7} \\times 28 = 12$, which is option D. Adding the white balls changes the denominator as well as the numerator."
     hint: "Call the number of white balls $w$. Remember it appears in the total as well as on top of the fraction."
+
+  49:
+    answer: B
+    steps:
+      - 'The frequencies of all six outcomes must add up to the number of rolls, 100 — that is the equation that fixes $x$.'
+      - 'Add the table: $20 + x + 15 + 15 + 2x + 20 = 70 + 3x$.'
+      - 'So $70 + 3x = 100$, giving $3x = 30$ and $x = 10$.'
+      - 'The frequency of a 5 is $2x = 20$.'
+      - 'The experimental probability of a 5 is its frequency over the total: $\tfrac{20}{100} = \tfrac{1}{5}$.'
+      - 'Note this is the *experimental* probability from the table. The theoretical probability for a fair die, $\tfrac{1}{6}$ (option A), is a different thing — the question asks about the tabulated outcome.'
+      - 'The trap is option A, $\tfrac{1}{6}$: the die is described as unbiased, but the question asks what the recorded results show.'
+    hint: 'The six frequencies total 100; solve for $x$ first.'
 
   50:
     answer: A

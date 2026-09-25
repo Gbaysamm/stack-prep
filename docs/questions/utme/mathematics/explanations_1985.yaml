@@ -1,0 +1,582 @@
+# UTME 1985 Mathematics — worked explanations, written against the paper.
+#
+# Keyed on question number; see explanations_2003.yaml for why, and for how these are written.
+# This is a five-option paper (A-E).
+#
+# All 50 are answered, and all 31 the key covers agree with it. Q15, Q45 and Q50 rest on
+# rebuilt stems, which their notes in retranscribed_1985.yaml say plainly.
+format_version: 1
+exam_year: 1985
+subject: MATH
+
+explanations:
+  1:
+    answer: A
+    steps:
+      - 'Numbers written in different forms can only be compared once they are in the same form, so turn both fractions into decimals.'
+      - '$\tfrac{6}{7} = 0.8571\ldots$ (divide 6 by 7).'
+      - '$\tfrac{13}{15} = 0.8666\ldots$ (divide 13 by 15).'
+      - 'The third number is already a decimal: $0.865$.'
+      - 'Line them up to three or four decimal places: $0.8571$, $0.8650$, $0.8667$. In ascending order (smallest first): $\tfrac{6}{7} < 0.865 < \tfrac{13}{15}$.'
+      - 'Notice how close $0.865$ and $\tfrac{13}{15}$ are — they differ only in the fourth decimal place, so rounding too early would hide the difference.'
+      - 'The trap is option E, which puts $0.865$ first because it "looks smaller" with fewer digits. The number of digits says nothing about size; only the place values do.'
+    hint: 'Convert $\tfrac{6}{7}$ and $\tfrac{13}{15}$ to decimals to four places.'
+
+  2:
+    answer: E
+    steps:
+      - 'With simple interest, the amount is the principal plus the interest, and the interest is a fixed percentage each year.'
+      - 'Over 4 years at 8% a year the interest is $4 \times 8\% = 32\%$ of the principal.'
+      - 'So the amount is $100\% + 32\% = 132\%$ of the principal: $1.32P = 330$.'
+      - 'Therefore $P = \dfrac{330}{1.32} = 250$, so ₦250.00 was invested.'
+      - 'Check: 8% of ₦250 is ₦20 a year, so 4 years give ₦80, and $250 + 80 = 330$ ✓.'
+      - 'The trap is taking 32% off the final ₦330 ($330 - 105.60 = 224.40$, not offered) or subtracting only one year''s interest. The percentage is of the unknown principal, not of the amount.'
+    hint: 'The amount is 1.32 times the principal.'
+
+  3:
+    answer: B
+    steps:
+      - 'The easiest route is to convert everything to base ten, solve, then convert the answer back to base 2.'
+      - '$11_{2} = 2 + 1 = 3$; $1000_{2} = 8$; $101_{2} = 4 + 1 = 5$.'
+      - 'The equation becomes $\dfrac{3}{x} = \dfrac{8}{x + 5}$.'
+      - 'Cross-multiply: $3(x + 5) = 8x$, so $3x + 15 = 8x$ and $5x = 15$, giving $x = 3$.'
+      - 'In base 2, $3 = 2 + 1 = 11_{2}$.'
+      - 'Check: $\tfrac{3}{3} = 1$ and $\tfrac{8}{3 + 5} = 1$ ✓.'
+      - 'The trap is option A, $101$ — the $5$ from the equation, not the solution. The answer must be written back in base 2.'
+    hint: 'In base ten the equation is $\tfrac{3}{x} = \tfrac{8}{x + 5}$.'
+
+  4:
+    answer: A
+    steps:
+      - 'A double inequality is solved by doing the same operation to all three parts at once.'
+      - 'Add 6 throughout: $-2 + 6 \le 2x \le 4 + 6$, that is $4 \le 2x \le 10$.'
+      - 'Divide throughout by 2 (positive, so the signs stay the same): $2 \le x \le 5$.'
+      - 'The integers in that range are 2, 3, 4 and 5 — both ends included, because the inequality includes equality.'
+      - 'Check the ends: $x = 2$ gives $2(2) - 6 = -2$ ✓ and $x = 5$ gives $4$ ✓.'
+      - 'The trap is option B, 2, 3, 4, which drops the upper end — or, with strict inequalities, dropping both ends. Whether an end point counts depends entirely on $\le$ versus $<$.'
+    hint: 'Add 6, then divide by 2: $2 \le x \le 5$.'
+
+  5:
+    answer: A
+    steps:
+      - 'Rounding should be done once, at the end, so first add everything exactly as decimals.'
+      - '$\tfrac{1}{100} = 0.01$, $\tfrac{3}{1000} = 0.003$ and $\tfrac{27}{10000} = 0.0027$.'
+      - 'Line up the decimal points and add: $100.0000 + 0.0100 + 0.0030 + 0.0027 = 100.0157$.'
+      - 'To two decimal places, look at the third decimal digit. It is 5, and the rule is that 5 or more rounds the previous digit up.'
+      - 'So $100.0157 \to 100.02$.'
+      - 'The trap is option D, 100.01, which either chops off the digits instead of rounding or rounds each small fraction to 0.00 before adding — losing the 0.0057 that tips the total up.'
+    hint: 'Add to 100.0157, then round.'
+
+  6:
+    answer: C
+    steps:
+      - 'A continued fraction is simplified from the bottom up: work out the deepest fraction first and climb.'
+      - 'Deepest: $4 + \tfrac{1}{5} = \tfrac{21}{5}$, so $\dfrac{1}{4 + \frac{1}{5}} = \dfrac{5}{21}$.'
+      - 'Next: $2 - \tfrac{5}{21} = \tfrac{42 - 5}{21} = \tfrac{37}{21}$, and its reciprocal is $\tfrac{21}{37}$.'
+      - 'Next: $2 + \tfrac{21}{37} = \tfrac{74 + 21}{37} = \tfrac{95}{37}$, and its reciprocal is $\tfrac{37}{95}$.'
+      - 'Finally: $\tfrac{1}{2} + \tfrac{37}{95} = \tfrac{95}{190} + \tfrac{74}{190} = \tfrac{169}{190}$.'
+      - 'A sense check: $\tfrac{37}{95} \approx 0.39$, so the total is about $0.89$, and $\tfrac{169}{190} \approx 0.889$ ✓.'
+      - 'The trap is working from the top down, adding $\tfrac{1}{2} + 1$ first. In a continued fraction every "1 over" applies to everything below it, so the bottom must be finished first.'
+    hint: 'Start with $4 + \tfrac{1}{5}$ and work upwards, taking reciprocals.'
+
+  7:
+    answer: B
+    steps:
+      - 'A ratio $6 : 4 : 5$ means the numbers are $6k$, $4k$ and $5k$ for some $k$. Any expression where the $k$s cancel can be evaluated with $k = 1$.'
+      - 'Take $p = 6$, $q = 4$, $r = 5$.'
+      - 'Numerator: $3p - q = 18 - 4 = 14$.'
+      - 'Denominator: $4q + r = 16 + 5 = 21$.'
+      - 'So the value is $\tfrac{14}{21} = \tfrac{2}{3}$.'
+      - 'With $k$ kept in: $\tfrac{18k - 4k}{16k + 5k} = \tfrac{14k}{21k}$, and the $k$ cancels — which is why the ratio alone is enough.'
+      - 'The trap is option A, $\tfrac{3}{2}$, the fraction upside down.'
+    hint: 'Put $p = 6$, $q = 4$, $r = 5$.'
+
+  8:
+    answer: E
+    steps:
+      - 'Each logarithm asks one question: what power of the base gives the number? Answer each in turn.'
+      - '$\log_{2}4$: $2^{2} = 4$, so it is 2.'
+      - '$\log_{4}2$: 2 is the square root of 4, and a square root is the power $\tfrac{1}{2}$, so $4^{1/2} = 2$ and the log is $\tfrac{1}{2}$.'
+      - '$\log_{25}5$: in the same way $25^{1/2} = 5$, so it is $\tfrac{1}{2}$.'
+      - 'So the expression is $2 + \tfrac{1}{2} - \tfrac{1}{2} = 2$.'
+      - 'A pattern worth knowing: $\log_{a}b = \dfrac{1}{\log_{b}a}$. So $\log_{4}2 = \dfrac{1}{\log_{2}4} = \dfrac{1}{2}$ ✓.'
+      - 'The trap is reading $\log_{4}2$ as 2 because "2 squared is 4" — that answers $\log_{2}4$, the question the other way round.'
+    hint: '$\log_{2}4 = 2$, and the other two are each $\tfrac{1}{2}$.'
+
+  9:
+    answer: A
+    steps:
+      - 'Let John start with $x$ naira and translate each sentence into algebra.'
+      - 'He gives away $\tfrac{x}{3}$, so he keeps $\tfrac{2x}{3}$.'
+      - 'Janet now has $105 + \tfrac{x}{3}$.'
+      - 'John''s money is one quarter of Janet''s: $\tfrac{2x}{3} = \tfrac{1}{4}\left(105 + \tfrac{x}{3}\right)$.'
+      - 'Multiply by 12: $8x = 3(105) + x$, so $7x = 315$ and $x = 45$.'
+      - 'Check: John gives ₦15 and keeps ₦30; Janet has ₦120, and $30 = \tfrac{1}{4} \times 120$ ✓.'
+      - 'The trap is forgetting that Janet''s total grows when John gives her money: comparing $\tfrac{2x}{3}$ with a quarter of 105 alone gives about ₦39, not offered.'
+    hint: 'John keeps $\tfrac{2x}{3}$; Janet has $105 + \tfrac{x}{3}$.'
+
+  10:
+    answer: B
+    steps:
+      - 'A logarithm is an index. The statement $\log_{9}x = 1.5$ means "9 raised to the power 1.5 gives $x$": $x = 9^{1.5}$.'
+      - 'Write the decimal index as a fraction: $1.5 = \tfrac{3}{2}$.'
+      - 'A fractional index $\tfrac{m}{n}$ means: take the $n$th root, then raise to the power $m$. So $9^{3/2} = \left(\sqrt{9}\right)^{3}$.'
+      - '$\sqrt{9} = 3$, and $3^{3} = 27$. So $x = 27$.'
+      - 'Check: $9^{1.5} = 9 \times 9^{0.5} = 9 \times 3 = 27$ ✓.'
+      - 'The trap is treating the logarithm as a multiplication: $9 \times 1.5 = 13.5$ is not offered, but the same slip with other numbers is behind options like 24.5. A logarithm always converts to a power.'
+    hint: '$x = 9^{3/2} = (\sqrt{9})^{3}$.'
+
+  11:
+    answer: A
+    steps:
+      - 'To make $h$ the subject, clear the fraction, then collect every term containing $h$ on one side.'
+      - 'Multiply both sides by $1 - dh$: $a(1 - dh) = b(1 - ch)$.'
+      - 'Expand: $a - adh = b - bch$.'
+      - 'Move the $h$ terms to one side and the rest to the other: $a - b = adh - bch$.'
+      - 'Factor out $h$: $a - b = h(ad - bc)$.'
+      - 'Divide: $h = \dfrac{a - b}{ad - bc}$.'
+      - 'The trap is option E, $\tfrac{b - a}{ad - bc}$, from moving the terms across with the signs slipped. A check with numbers settles it: $b = 1$, $c = 0$, $d = 1$, $h = \tfrac{1}{2}$ gives $a = 2$, and $\tfrac{2 - 1}{2 - 0} = \tfrac{1}{2}$ ✓.'
+    hint: 'Cross-multiply, then factor out $h$.'
+
+  12:
+    answer: C
+    steps:
+      - 'Write the statement as an equation: $22.5\%$ of one naira equals $17.1\%$ of one M.'
+      - 'So $0.225\,\text{N} = 0.171\,\text{M}$.'
+      - 'To express 1 M in naira, divide both sides by 0.171: $1\text{M} = \dfrac{0.225}{0.171}\,\text{N}$.'
+      - 'Simplify $\tfrac{225}{171}$: both divide by 9, giving $\tfrac{25}{19} = 1\tfrac{6}{19}$.'
+      - 'The options use 57ths: $\tfrac{6}{19} = \tfrac{18}{57}$, so $1\text{M} = ₦1\tfrac{18}{57}$.'
+      - 'Sense check: a smaller percentage of M matches a larger percentage of the naira, so M is worth more than the naira — the rate should be a little above 1 ✓.'
+      - 'The trap is option A, $\tfrac{15}{57}$ — close to the fraction the wrong way up. Always divide so that the currency being converted sits alone on one side.'
+    hint: '$0.225\,\text{N} = 0.171\,\text{M}$.'
+
+  13:
+    answer: A
+    steps:
+      - 'A quadratic has equal roots exactly when its discriminant $b^{2} - 4ac$ is zero.'
+      - 'Here $a = 1$, $b = -(p - 2)$ and $c = 2p + 1$.'
+      - 'Set $(p - 2)^{2} - 4(2p + 1) = 0$.'
+      - 'Expand: $p^{2} - 4p + 4 - 8p - 4 = p^{2} - 12p = 0$.'
+      - 'Factorise: $p(p - 12) = 0$, so $p = 0$ or $p = 12$.'
+      - 'Check $p = 12$: $x^{2} - 10x + 25 = (x - 5)^{2}$ ✓; $p = 0$: $x^{2} + 2x + 1 = (x + 1)^{2}$ ✓.'
+      - 'The trap is dropping the root $p = 0$ by dividing by $p$. Always factorise instead of dividing by an unknown.'
+    hint: 'Set the discriminant to zero.'
+
+  14:
+    answer: A
+    steps:
+      - 'The series for $e^{x}$ holds for any value put in place of $x$, and $\dfrac{1}{e^{x/2}} = e^{-x/2}$. So replace every $x$ in the series by $-\tfrac{x}{2}$.'
+      - 'First term: 1.'
+      - 'Second: $-\dfrac{x}{2}$.'
+      - 'Third: $\dfrac{(-x/2)^{2}}{1 \cdot 2} = \dfrac{x^{2}}{4 \times 2} = \dfrac{x^{2}}{1 \cdot 2^{3}}$ — positive, because the square removes the minus.'
+      - 'Fourth: $\dfrac{(-x/2)^{3}}{1 \cdot 2 \cdot 3} = -\dfrac{x^{3}}{8 \times 6} = -\dfrac{x^{3}}{2^{4} \cdot 3}$ — negative, because a cube keeps the minus.'
+      - 'So $e^{-x/2} = 1 - \dfrac{x}{2} + \dfrac{x^{2}}{1 \cdot 2^{3}} - \dfrac{x^{3}}{2^{4} \cdot 3} + \cdots$, with signs that alternate.'
+      - 'The trap is option E, which has all plus signs — that is $e^{+x/2}$, the value before taking the reciprocal. Option D gets the signs right but forgets to square and cube the $\tfrac{1}{2}$ properly.'
+    hint: 'Substitute $-\tfrac{x}{2}$ for $x$ in the series.'
+
+  15:
+    answer: D
+    steps:
+      - 'Take out the common factor 4 from top and bottom of the fraction first: $\dfrac{4(\sqrt{3} + \sqrt{2})}{4(\sqrt{3} - \sqrt{2})} = \dfrac{\sqrt{3} + \sqrt{2}}{\sqrt{3} - \sqrt{2}}$.'
+      - 'The expression is then $\dfrac{\sqrt{3} + \sqrt{2}}{\sqrt{3} - \sqrt{2}} \times (\sqrt{3} - \sqrt{2})$.'
+      - 'The factor $(\sqrt{3} - \sqrt{2})$ multiplies the denominator away completely.'
+      - 'What is left is $\sqrt{3} + \sqrt{2}$.'
+      - 'Numerical check: the fraction is $\tfrac{3.146}{0.318} \approx 9.90$, times $0.318$ gives $3.146$, and $\sqrt{3} + \sqrt{2} \approx 3.146$ ✓.'
+      - 'The trap is rationalising first — multiplying top and bottom by the conjugate — which works but takes far longer. Look for a factor that simply cancels before expanding anything.'
+    hint: 'The last factor cancels the denominator.'
+
+  16:
+    answer: D
+    steps:
+      - '"Partly constant and partly inversely proportional" means the cost per head has the form $C = a + \dfrac{b}{n}$, where $n$ is the number of people.'
+      - 'For 100 people: $30 = a + \dfrac{b}{100}$. For 40 people: $60 = a + \dfrac{b}{40}$.'
+      - 'Subtract the first from the second: $30 = \dfrac{b}{40} - \dfrac{b}{100} = b \cdot \dfrac{5 - 2}{200} = \dfrac{3b}{200}$, so $b = 2000$.'
+      - 'Then $a = 30 - \dfrac{2000}{100} = 10$.'
+      - 'For 50 people: $C = 10 + \dfrac{2000}{50} = 10 + 40 = 50$k.'
+      - 'Sense check: 50 people is between 40 and 100, so the cost per head should lie between 30k and 60k ✓.'
+      - 'The trap is treating the cost as purely inverse — $60 \times \tfrac{40}{50} = 48$k, not offered — and forgetting the constant part that does not shrink with more people.'
+    hint: 'Write $C = a + \tfrac{b}{n}$ and use the two facts to find $a$ and $b$.'
+
+  17:
+    answer: A
+    steps:
+      - 'The expression is a difference of two squares: $9 = 3^{2}$, so $9 - (x^{2} - 3x - 1)^{2} = (3 - B)(3 + B)$ with $B = x^{2} - 3x - 1$.'
+      - 'First bracket: $3 - (x^{2} - 3x - 1) = -x^{2} + 3x + 4 = -(x^{2} - 3x - 4) = -(x - 4)(x + 1)$.'
+      - 'Second bracket: $3 + x^{2} - 3x - 1 = x^{2} - 3x + 2 = (x - 1)(x - 2)$.'
+      - 'Together: $-(x - 4)(x + 1)(x - 1)(x - 2)$.'
+      - 'Check with $x = 0$: the original is $9 - 1 = 8$, and $-(-4)(1)(-1)(-2) = 8$ ✓.'
+      - 'The trap is losing the leading minus sign, which comes from $-x^{2}$ in the first bracket. Option D has no minus and the wrong factors; option E is the factorisation of $(x^{2} - 1)(x^{2} - 4)$.'
+    hint: 'Use $3^{2} - B^{2} = (3 - B)(3 + B)$.'
+
+  18:
+    answer: C
+    steps:
+      - '$3^{2y} = (3^{y})^{2}$, so the equation is a quadratic in $3^{y}$.'
+      - 'Let $u = 3^{y}$: $u^{2} - 6u - 27 = 0$.'
+      - 'Factorise: $(u - 9)(u + 3) = 0$, so $u = 9$ or $u = -3$.'
+      - 'A power of 3 is always positive, so $3^{y} = -3$ is impossible and is rejected.'
+      - '$3^{y} = 9 = 3^{2}$ gives $y = 2$.'
+      - 'Check: $81 - 6(9) = 27$ ✓.'
+      - 'The trap is option B or D, which come from treating $u = -3$ as allowed. Discarding impossible values of the substitution is part of the method.'
+    hint: 'Let $u = 3^{y}$; reject the negative root.'
+
+  19:
+    answer: A
+    steps:
+      - 'Four terms: group them into pairs that share a factor.'
+      - 'Pair the $b$ terms and the $y$ terms: $(abx^{2} - 4bx) + (8y - 2axy)$.'
+      - 'First pair: $bx(ax - 4)$. Second pair: $-2y(ax - 4)$ — taking out $-2y$ makes the bracket match.'
+      - 'Common bracket: $(ax - 4)(bx - 2y)$.'
+      - 'Check by expanding: $abx^{2} - 2axy - 4bx + 8y$ ✓.'
+      - 'The trap is option E, $(bx - 4)(ax - 2y)$, which swaps the letters inside the brackets; expanded it gives $abx^{2} - 2bxy - 4ax + 8y$, a different expression.'
+    hint: 'Group as $bx(ax - 4) - 2y(ax - 4)$.'
+
+  20:
+    answer: E
+    steps:
+      - 'At an intersection the two $y$-values are equal: $x^{3} + x = x^{2} + 1$.'
+      - 'Factor each side: $x(x^{2} + 1) = x^{2} + 1$.'
+      - 'Bring to one side: $(x^{2} + 1)(x - 1) = 0$.'
+      - 'The factor $x^{2} + 1$ is never zero for real $x$ (it is at least 1), so the only real solution is $x = 1$.'
+      - 'Check: both curves give $y = 2$ at $x = 1$ ✓.'
+      - 'The trap is dividing both sides by $x^{2} + 1$ without noticing it is safe only because it is never zero — or trying $x = -1$, where the curves give $-2$ and $2$.'
+    hint: 'Factor $x(x^{2} + 1) = x^{2} + 1$.'
+
+  21:
+    answer: D
+    steps:
+      - 'A quadratic $ax^{2} + bx + c$ is a perfect square when it has a single repeated root, which happens exactly when the discriminant $b^{2} - 4ac$ is zero.'
+      - 'Here $a = 3$, $b = -7$ and $c = R$.'
+      - 'Set $b^{2} - 4ac = 0$: $(-7)^{2} - 4(3)(R) = 49 - 12R = 0$.'
+      - 'So $R = \tfrac{49}{12}$.'
+      - 'Check by completing the square: $3x^{2} - 7x + \tfrac{49}{12} = 3\left(x^{2} - \tfrac{7}{3}x + \tfrac{49}{36}\right) = 3\left(x - \tfrac{7}{6}\right)^{2}$ ✓.'
+      - 'The trap is option E, $\tfrac{49}{36}$ — the familiar rule "(half the coefficient of $x$) squared" applied without first taking out the leading 3. That rule only works when the $x^{2}$ coefficient is 1.'
+    hint: 'Set $49 - 12R = 0$.'
+
+  22:
+    answer: B
+    steps:
+      - 'Clear the fractions by multiplying every term by the common denominator $3(2r - 1)(r + 2)$.'
+      - '$6(r + 2) - 5(2r - 1)(r + 2) = 3(2r - 1)$.'
+      - 'Expand: $6r + 12 - 5(2r^{2} + 3r - 2) = 6r - 3$, that is $6r + 12 - 10r^{2} - 15r + 10 = 6r - 3$.'
+      - 'Collect: $-10r^{2} - 15r + 25 = 0$, or dividing by $-5$, $2r^{2} + 3r - 5 = 0$.'
+      - 'Factorise: $(2r + 5)(r - 1) = 0$, so $r = 1$ or $r = -\tfrac{5}{2}$.'
+      - 'Check $r = 1$: $2 - \tfrac{5}{3} = \tfrac{1}{3}$ and $\tfrac{1}{3}$ ✓.'
+      - 'The trap is option A, $(-1, \tfrac{5}{2})$ — both roots with their signs reversed, from factorising as $(2r - 5)(r + 1)$.'
+    hint: 'Clear fractions to reach $2r^{2} + 3r - 5 = 0$.'
+
+  23:
+    answer: A
+    steps:
+      - 'Make $y$ the subject of the linear equation and substitute it into the quadratic one.'
+      - 'From $2x + y = 4$: $y = 4 - 2x$.'
+      - 'Substitute: $x^{2} + x(4 - 2x) = -12$, so $-x^{2} + 4x + 12 = 0$, or $x^{2} - 4x - 12 = 0$.'
+      - 'Factorise: $(x - 6)(x + 2) = 0$, so $x = 6$ or $x = -2$.'
+      - 'Then $y = 4 - 12 = -8$ or $y = 4 + 4 = 8$: the pairs are $(6, -8)$ and $(-2, 8)$.'
+      - 'Check $(6, -8)$: $36 - 48 = -12$ ✓.'
+      - 'The trap is option D, which lists the same numbers in the wrong positions — each pair must be $(x, y)$ in that order.'
+    hint: 'Substitute $y = 4 - 2x$.'
+
+  24:
+    answer: A
+    steps:
+      - 'A chain $A = B = 5$ contains two equations: $2x - 3y + 10 = 5$ and $10x - 6y = 5$.'
+      - 'The first simplifies to $2x - 3y = -5$.'
+      - 'Double it: $4x - 6y = -10$. Subtract from the second: $6x = 15$, so $x = \tfrac{5}{2} = 2\tfrac{1}{2}$.'
+      - 'Then $3y = 2x + 5 = 10$, so $y = \tfrac{10}{3} = 3\tfrac{1}{3}$.'
+      - 'Check in the second: $25 - 20 = 5$ ✓.'
+      - 'The trap is option E, which keeps the right $x$ but a wrong $y$ — usually from dropping the $+10$ when simplifying the first equation.'
+    hint: 'Split the chain into two equations.'
+
+  25:
+    answer: D
+    steps:
+      - 'The rule is given for $f(x - 2)$, not for $f(x)$. So to find $f$ at a particular input, choose the $x$ that makes $x - 2$ equal to that input.'
+      - 'We want $f(1)$, so set $x - 2 = 1$, giving $x = 3$.'
+      - 'Substitute $x = 3$ into the right-hand side: $4(3)^{2} + 3 + 7 = 36 + 3 + 7 = 46$.'
+      - 'So $f(1) = 46$.'
+      - 'Another route: write $t = x - 2$, so $x = t + 2$ and $f(t) = 4(t + 2)^{2} + (t + 2) + 7 = 4t^{2} + 17t + 25$. Then $f(1) = 4 + 17 + 25 = 46$ ✓.'
+      - 'The trap is option A, 12, from putting $x = 1$ straight into the right-hand side — that actually computes $f(-1)$.'
+    hint: 'Choose $x$ so that $x - 2 = 1$.'
+
+  26:
+    answer: E
+    steps:
+      - 'When all three sides of a triangle are known, the cosine rule gives any angle. For the angle at $Y$: $\cos Y = \dfrac{XY^{2} + YZ^{2} - XZ^{2}}{2 \cdot XY \cdot YZ}$.'
+      - 'The two sides meeting at $Y$ are $XY = 13$ and $YZ = 9$; the side opposite $Y$ is $XZ = 11$ — that is the one subtracted.'
+      - 'Squares: $13^{2} = 169$, $9^{2} = 81$, $11^{2} = 121$.'
+      - 'Numerator: $169 + 81 - 121 = 129$. Denominator: $2 \times 13 \times 9 = 234$.'
+      - 'So $\cos\theta = \tfrac{129}{234} = \tfrac{43}{78}$, dividing both by 3.'
+      - 'Sense check: a cosine must lie between $-1$ and 1, and $\tfrac{43}{78} \approx 0.55$ gives an angle of about $57^{\circ}$ — reasonable ✓.'
+      - 'The trap is option B, $\tfrac{43}{39}$, which forgets the 2 in the denominator; it is greater than 1, which no cosine can be.'
+    hint: 'Cosine rule, subtracting the square of the side opposite $Y$.'
+
+  27:
+    answer: A
+    steps:
+      - 'First check which rule the table actually follows, using the values given.'
+      - 'For $y = x^{3} - x + 3$: $x = 2$ gives $8 - 2 + 3 = 9$ ✓ and $x = 3$ gives $27 - 3 + 3 = 27$ ✓; $x = -1, 0, 1$ all give 3 ✓.'
+      - 'So the missing value is at $x = -2$: $(-2)^{3} - (-2) + 3 = -8 + 2 + 3 = -3$.'
+      - 'Watch the signs: $(-2)^{3}$ is $-8$, and subtracting $-2$ adds 2.'
+      - 'The trap is using the printed label $x^{2} - x + 3$, which gives 9 at $x = -2$ — but that rule does not fit the other entries in the table (at $x = 3$ it gives 9, not 27).'
+    hint: 'The table follows $y = x^{3} - x + 3$.'
+
+  28:
+    answer: B
+    steps:
+      - 'The mean is total goals divided by number of matches; the mode is the most frequent number of goals.'
+      - 'Total goals $= 0(3) + 1(5) + 2(7) + 3(4) + 4(1) + 5(0) = 0 + 5 + 14 + 12 + 4 + 0 = 35$.'
+      - 'Number of matches $= 3 + 5 + 7 + 4 + 1 + 0 = 20$ ✓.'
+      - 'Mean $= \tfrac{35}{20} = 1.75$.'
+      - 'The largest frequency is 7, for 2 goals, so the mode is 2.'
+      - 'The pair (mean, mode) is $(1.75, 2)$.'
+      - 'The trap is option A, $(1.75, 5)$ — taking the mode as the largest *number of goals* instead of the most frequent one.'
+    hint: 'Mean $= \tfrac{35}{20}$; mode is the value with frequency 7.'
+
+  29:
+    answer: A
+    steps:
+      - 'A right-angled isosceles triangle has its two shorter sides (the legs) equal, and the right angle between them. Call each leg $a$.'
+      - 'Pythagoras relates the legs to the hypotenuse: $a^{2} + a^{2} = 2^{2}$.'
+      - 'So $2a^{2} = 4$, giving $a^{2} = 2$ and $a = \sqrt{2}$.'
+      - 'This is the general fact that in a $45^{\circ}$-$45^{\circ}$-$90^{\circ}$ triangle the hypotenuse is $\sqrt{2}$ times each leg: $\sqrt{2} \times \sqrt{2} = 2$ ✓.'
+      - 'Sense check: each leg must be shorter than the hypotenuse, and $\sqrt{2} \approx 1.41 < 2$ ✓.'
+      - 'The trap is option C, $2\sqrt{2}$ — multiplying the hypotenuse by $\sqrt{2}$ instead of dividing, which would make the legs longer than the hypotenuse.'
+    hint: '$a^{2} + a^{2} = 4$.'
+
+  30:
+    answer: E
+    steps:
+      - 'Two coins can land in four equally likely ways: HH, HT, TH, TT. The two middle ones are different outcomes — first coin head, second tail, or the other way round.'
+      - '"At least one head" means one head or two heads: HH, HT and TH.'
+      - 'That is 3 of the 4 outcomes, so the probability is $\tfrac{3}{4}$.'
+      - 'A faster route uses the complement. The only outcome without a head is TT, with probability $\tfrac{1}{2} \times \tfrac{1}{2} = \tfrac{1}{4}$.'
+      - 'So $P(\text{at least one head}) = 1 - \tfrac{1}{4} = \tfrac{3}{4}$ ✓.'
+      - '"At least one" questions are almost always easiest by the complement, since "none" is a single case.'
+      - 'The trap is option B, $\tfrac{1}{2}$, which lists only three outcomes (two heads, one head, no head) as if they were equally likely. "One head" can happen in two ways, so it is twice as likely as the others.'
+    hint: 'Only TT has no head.'
+
+  31:
+    answer: E
+    steps:
+      - 'Similar solids have every length scaled by the same factor. Volume involves three lengths multiplied together, so volumes scale by the *cube* of the length factor.'
+      - 'The lengths are in the ratio $2 : 3$, so the volumes are in the ratio $2^{3} : 3^{3} = 8 : 27$.'
+      - 'The larger block is $351\ \text{cm}^{3}$, which corresponds to the 27 parts. One part is $351 \div 27 = 13$.'
+      - 'The smaller block is 8 parts: $8 \times 13 = 104\ \text{cm}^{3}$.'
+      - 'Check: $104 : 351 = 8 : 27$, since both divide by 13 ✓.'
+      - 'The trap is option A, 234, which uses the length ratio directly ($351 \times \tfrac{2}{3}$). Option B, 526.5, scales the wrong way — the other block is the *smaller* one.'
+    hint: 'Volume ratio is $2^{3} : 3^{3}$.'
+
+  32:
+    answer: B
+    steps:
+      - 'The bearing of the hunter from the bird is the reverse of the bird from the hunter: the line is the same, but it is travelled the other way.'
+      - 'N72°E means: face north, turn 72° towards east.'
+      - 'Reversing the direction swaps north for south and east for west, keeping the angle.'
+      - 'So the back bearing is S72°W.'
+      - 'In three-figure bearings: $072^{\circ} + 180^{\circ} = 252^{\circ}$, which is $72^{\circ}$ west of south ✓.'
+      - 'The trap is option A, S18°W, which swaps in the complementary angle $90 - 72$. A reversal keeps the angle; only the directions flip.'
+    hint: 'Flip N↔S and E↔W, keep 72°.'
+
+  33:
+    answer: B
+    steps:
+      - 'The altitude $XK$ splits the triangle into two right-angled triangles; use Pythagoras to find the missing piece of the base.'
+      - 'In triangle $XKZ$: $KZ^{2} = XZ^{2} - XK^{2} = 625 - 225 = 400$, so $KZ = 20$.'
+      - 'The whole base is $YZ = YK + KZ = 8 + 20 = 28$ cm.'
+      - 'Area $= \tfrac{1}{2} \times \text{base} \times \text{height} = \tfrac{1}{2} \times 28 \times 15 = 210\ \text{cm}^{2}$.'
+      - 'The trap is option A, 180, which uses $YK$ alone or forgets part of the base; and option E, 390, forgets the half.'
+    hint: 'Find $KZ$ by Pythagoras (20), then use base 28 and height 15.'
+
+  34:
+    answer: A
+    steps:
+      - 'Secant is the reciprocal of cosine, $\sec\theta = \dfrac{1}{\cos\theta}$, so start from the exact value of $\cos 30^{\circ}$.'
+      - 'From the 30-60-90 triangle (half an equilateral triangle of side 2: sides 1, $\sqrt{3}$, 2), $\cos 30^{\circ} = \dfrac{\sqrt{3}}{2}$.'
+      - 'So $\sec 30^{\circ} = \dfrac{2}{\sqrt{3}}$, and squaring, $\sec^{2}30^{\circ} = \dfrac{4}{3}$.'
+      - 'Then $1 + \sec^{2}30^{\circ} = 1 + \dfrac{4}{3} = \dfrac{3}{3} + \dfrac{4}{3} = \dfrac{7}{3}$.'
+      - 'As a mixed number, $\tfrac{7}{3} = 2\tfrac{1}{3}$.'
+      - 'A check through an identity: $\sec^{2}\theta = 1 + \tan^{2}\theta$, and $\tan 30^{\circ} = \tfrac{1}{\sqrt{3}}$, so $\sec^{2}30^{\circ} = 1 + \tfrac{1}{3} = \tfrac{4}{3}$ ✓.'
+      - 'The trap is option C, $1\tfrac{1}{3}$, which is $\sec^{2}30^{\circ}$ on its own — the extra 1 in the question is easily lost because $1 + \tan^{2}$ and $\sec^{2}$ look so alike.'
+    hint: '$\sec^{2}30^{\circ} = \tfrac{4}{3}$; now add 1.'
+
+  35:
+    answer: B
+    steps:
+      - 'For an "either … or …" probability, count the numbers satisfying at least one of the two conditions, taking care not to count any number twice.'
+      - 'The integers from 1 to 10 are equally likely: 10 outcomes.'
+      - 'The primes among them are 2, 3, 5 and 7 (1 is not prime).'
+      - 'The multiples of 3 are 3, 6 and 9.'
+      - 'Merging the two lists, with 3 counted once: 2, 3, 5, 6, 7, 9 — six numbers.'
+      - 'So the probability is $\tfrac{6}{10} = \tfrac{3}{5}$.'
+      - 'The same by the addition rule: $P(\text{prime}) + P(\text{mult. of 3}) - P(\text{both}) = \tfrac{4}{10} + \tfrac{3}{10} - \tfrac{1}{10} = \tfrac{6}{10}$ ✓.'
+      - 'The trap is option A, $\tfrac{7}{10}$, which adds $4 + 3$ and counts 3 twice.'
+    hint: 'List the primes and the multiples of 3, and count 3 only once.'
+
+  36:
+    answer: B
+    steps:
+      - 'Join the centre of the circle to each of the six vertices. Because the hexagon is regular, this cuts it into six identical triangles meeting at the centre.'
+      - 'Each triangle has an angle of $360^{\circ} \div 6 = 60^{\circ}$ at the centre, and two sides equal to the radius, 8 cm.'
+      - 'A triangle with two equal sides and a $60^{\circ}$ angle between them is equilateral, so every side is 8 cm.'
+      - 'The area of an equilateral triangle of side $s$ is $\tfrac{\sqrt{3}}{4}s^{2}$, which comes from $\tfrac{1}{2} \times s \times s \times \sin 60^{\circ}$.'
+      - 'With $s = 8$: $\tfrac{\sqrt{3}}{4} \times 64 = 16\sqrt{3}\ \text{cm}^{2}$ for each triangle.'
+      - 'Six triangles make $6 \times 16\sqrt{3} = 96\sqrt{3}\ \text{cm}^{2}$, about $166\ \text{cm}^{2}$.'
+      - 'A sense check: the hexagon must be smaller than the circle, whose area is $64\pi \approx 201\ \text{cm}^{2}$ ✓.'
+      - 'The trap is option A, $16\sqrt{3}$ — one of the six triangles only.'
+    hint: 'Six equilateral triangles of side 8 cm.'
+
+  37:
+    answer: A
+    steps:
+      - 'In the cyclic quadrilateral $MNQP$, opposite angles add to $180^{\circ}$.'
+      - '$\angle MNQ = 86^{\circ}$, so the opposite angle $\angle MPQ = 94^{\circ}$.'
+      - '$\angle NQP = 122^{\circ}$, so the opposite angle $\angle NMP = 58^{\circ}$.'
+      - 'At $X$: triangle $MXP$ has angles $58^{\circ}$ at $M$ and $94^{\circ}$ at $P$, so $x = 180 - 58 - 94 = 28^{\circ}$.'
+      - 'At $Y$: triangle $MNY$ has angles $58^{\circ}$ at $M$ and $86^{\circ}$ at $N$, so $y = 180 - 58 - 86 = 36^{\circ}$.'
+      - 'So $(x, y) = (28^{\circ}, 36^{\circ})$.'
+      - 'The trap is option B, the same two angles in the wrong order. Check which triangle meets at $X$ (the lines $MN$ and $PQ$) and which at $Y$ ($NQ$ and $MP$).'
+    hint: 'Opposite angles give $94^{\circ}$ at $P$ and $58^{\circ}$ at $M$.'
+
+  38:
+    answer: A
+    steps:
+      - 'First identify the angle. $\cos\theta = \tfrac{\sqrt{3}}{2}$ with $\theta$ acute means $\theta = 30^{\circ}$.'
+      - 'Next the numerator. Complementary angles swap tangent and cotangent: $\cot(90^{\circ} - \theta) = \tan\theta$.'
+      - 'So $\cot(90^{\circ} - 30^{\circ}) = \cot 60^{\circ} = \tan 30^{\circ} = \dfrac{1}{\sqrt{3}}$.'
+      - 'The denominator: $\sin 30^{\circ} = \tfrac{1}{2}$, so $\sin^{2}30^{\circ} = \tfrac{1}{4}$.'
+      - 'Divide: $\dfrac{1/\sqrt{3}}{1/4} = \dfrac{4}{\sqrt{3}}$.'
+      - 'Rationalise by multiplying top and bottom by $\sqrt{3}$: $\dfrac{4\sqrt{3}}{3}$.'
+      - 'The trap is option B, $4\sqrt{3}$, which uses $\tan 60^{\circ} = \sqrt{3}$ in the numerator instead of $\cot 60^{\circ}$. Reading $\cot(90 - \theta)$ correctly as $\tan\theta$ avoids it.'
+    hint: '$\theta = 30^{\circ}$, and $\cot 60^{\circ} = \tan 30^{\circ}$.'
+
+  39:
+    answer: C
+    steps:
+      - 'Mass is proportional to volume for the same metal, and a sphere''s volume is proportional to $r^{3}$ — the $\tfrac{4}{3}\pi$ cancels in every comparison.'
+      - 'The solid sphere has "volume units" $4^{3} = 64$, and mass 64 kg — so each unit is 1 kg.'
+      - 'The shell is the outer sphere minus the hollow: $3^{3} - 2^{3} = 27 - 8 = 19$ units.'
+      - 'So its mass is 19 kg.'
+      - 'The trap is option A, 5 kg, from subtracting the radii before cubing ($3 - 2$ and similar slips), or option D, 25 kg, from $27 - 2$. Cube each radius first, then subtract.'
+    hint: 'Compare $3^{3} - 2^{3}$ with $4^{3}$.'
+
+  40:
+    answer: D
+    steps:
+      - 'Three circle facts combine here: opposite angles of a cyclic quadrilateral, the angle in a semicircle, and the angle sum of a triangle.'
+      - 'The points $P$, $S$, $R$ and $Q$ all lie on the circle, so $PSRQ$ is a cyclic quadrilateral. Its opposite angles add to $180^{\circ}$.'
+      - 'The angle at $S$ is $\angle PSR = 145^{\circ}$, so the angle at $Q$, $\angle PQR$, is $180^{\circ} - 145^{\circ} = 35^{\circ}$.'
+      - '$PQ$ is a diameter, so the angle it subtends at $R$ on the circle is a right angle: $\angle PRQ = 90^{\circ}$.'
+      - 'Triangle $PQR$ now has angles $35^{\circ}$ at $Q$ and $90^{\circ}$ at $R$, so $x = \angle QPR = 180^{\circ} - 125^{\circ} = 55^{\circ}$.'
+      - 'The trap is option B, $35^{\circ}$ — the angle at $Q$, found on the way, rather than the angle at $P$ that the question marks.'
+    hint: 'Opposite angles give $35^{\circ}$ at $Q$; the angle in a semicircle gives $90^{\circ}$ at $R$.'
+
+  41:
+    answer: E
+    steps:
+      - '$H$ and $N$ are opposite corners of the cube, so $HN$ is a space diagonal. Reach it with two applications of Pythagoras.'
+      - 'First, the diagonal $HJ$ across the bottom face: $\sqrt{a^{2} + a^{2}} = a\sqrt{2}$.'
+      - '$N$ is directly above $J$, a height $a$ away, and $HJ$ is horizontal — so triangle $HJN$ is right-angled at $J$.'
+      - '$HN = \sqrt{(a\sqrt{2})^{2} + a^{2}} = \sqrt{2a^{2} + a^{2}} = a\sqrt{3}$.'
+      - 'The trap is option D, $a\sqrt{2}$ — the face diagonal, stopping one step short of the diagonal through the cube.'
+    hint: 'Face diagonal $a\sqrt{2}$, then up by $a$.'
+
+  42:
+    answer: B
+    steps:
+      - 'The area of a trapezium is $\tfrac{1}{2}(\text{sum of parallel sides}) \times \text{height}$, which gives the height.'
+      - '$14 = \tfrac{1}{2}(4 + 3)h$, so $\tfrac{7}{2}h = 14$ and $h = 4$ cm.'
+      - 'Triangle $SQR$ has base $SR = 3$ and its third vertex $Q$ on the other parallel side, so its height is the same 4 cm.'
+      - 'Area $= \tfrac{1}{2} \times 3 \times 4 = 6\ \text{cm}^{2}$.'
+      - 'Check: the other triangle, $PQS$, has base 4 and height 4, area 8; and $6 + 8 = 14$ ✓.'
+      - 'The trap is option A, 7.0 — half the trapezium, as though the diagonal cut it into equal parts. It cuts it in the ratio of the parallel sides, $3 : 4$.'
+    hint: 'Height from the trapezium area is 4 cm.'
+
+  43:
+    answer: E
+    steps:
+      - 'Two facts are needed: the angle in a semicircle, and the alternate segment theorem.'
+      - '$SR$ is a diameter, so $\angle SQR = 90^{\circ}$.'
+      - 'The angle between the tangent $QP$ and the chord $QR$ equals the angle in the alternate segment: $\angle PQR = \angle QSR$, so $\angle QSR = \phi$.'
+      - 'Now triangle $SQP$: its angles are $\phi$ at $S$, $\theta$ at $P$, and $90^{\circ} + \phi$ at $Q$ (the right angle plus the tangent–chord angle).'
+      - 'They add to $180^{\circ}$: $\phi + \theta + 90^{\circ} + \phi = 180^{\circ}$, so $\theta + 2\phi = 90^{\circ}$.'
+      - 'Check with numbers: $\theta = 30^{\circ}$ gives $\phi = 30^{\circ}$, and the triangle''s angles $30 + 30 + 120 = 180$ ✓.'
+      - 'The trap is option B, $\phi = 90^{\circ} - 2\theta$, which is the same relation with $\theta$ and $\phi$ swapped.'
+    hint: 'In triangle $SQP$ the angle at $Q$ is $90^{\circ} + \phi$.'
+
+  44:
+    answer: A
+    steps:
+      - 'Without replacement, the second draw depends on the first, so multiply the conditional probabilities.'
+      - 'First red: 6 red out of 10 balls, $\tfrac{6}{10}$.'
+      - 'Second red, given the first was red: 5 red out of the 9 left, $\tfrac{5}{9}$.'
+      - 'Both red: $\tfrac{6}{10} \times \tfrac{5}{9} = \tfrac{30}{90} = \tfrac{1}{3}$.'
+      - 'Check with combinations: $\dfrac{^{6}C_{2}}{^{10}C_{2}} = \dfrac{15}{45} = \dfrac{1}{3}$ ✓.'
+      - 'The trap is option E, $\tfrac{3}{5}$ — the chance of just one red ball — or $\tfrac{6}{10} \times \tfrac{6}{10} = \tfrac{9}{25}$, which treats the draws as if the first ball were put back.'
+    hint: '$\tfrac{6}{10} \times \tfrac{5}{9}$.'
+
+  45:
+    answer: A
+    steps:
+      - 'When discs are cut in straight rows and columns, each disc needs a square of cardboard whose side equals its diameter. So count how many diameters fit along each edge and multiply.'
+      - 'The diameter is $2\sqrt{2}$ cm.'
+      - 'Along the length: $\dfrac{2^{18}\sqrt{2}}{2\sqrt{2}}$. The $\sqrt{2}$ cancels and $\tfrac{2^{18}}{2} = 2^{17}$, so $2^{17}$ discs fit in a row.'
+      - 'Across the width: $\dfrac{4\sqrt{2}}{2\sqrt{2}} = 2$, so there are 2 rows.'
+      - 'Total: $2^{17} \times 2 = 2^{18}$ discs.'
+      - 'The options write this as $4^{9}$, since $4^{9} = (2^{2})^{9} = 2^{18}$ ✓.'
+      - 'The trap is option B, $2^{19}$, which divides the length by $\sqrt{2}$ alone and forgets the factor 2 in the diameter.'
+    hint: '$2^{17}$ discs along, 2 rows across.'
+
+  46:
+    answer: E
+    steps:
+      - 'Two places on the same parallel are joined by an arc of that parallel, whose radius is $R\cos(\text{latitude})$.'
+      - 'The longitudes 147°E and 153°W are on opposite sides of Greenwich; going the short way round across the 180° meridian, the difference is $360 - (147 + 153) = 60^{\circ}$.'
+      - 'The circumference of the parallel is $2\pi R\cos 60^{\circ} = 4 \times 10^{4} \times \tfrac{1}{2} = 2 \times 10^{4}$ km.'
+      - 'The arc is $\tfrac{60}{360} = \tfrac{1}{6}$ of it: $\tfrac{20000}{6} \approx 3{,}333$ km.'
+      - 'The trap is adding the longitudes, $147 + 153 = 300^{\circ}$, which measures the long way round — option B. The two points are only $60^{\circ}$ apart across the 180° meridian.'
+    hint: 'The longitude difference is $60^{\circ}$ the short way; the parallel has radius $R\cos 60^{\circ}$.'
+
+  47:
+    answer: C
+    steps:
+      - 'A segment is a sector with the triangle cut out.'
+      - 'Sector: $\tfrac{120}{360} \times \pi \times 3^{2} = \tfrac{1}{3} \times 9\pi = 3\pi$.'
+      - 'Triangle: two sides of 3 with $120^{\circ}$ between them, area $\tfrac{1}{2} \times 3 \times 3 \times \sin 120^{\circ} = \tfrac{9}{2} \times \tfrac{\sqrt{3}}{2} = \tfrac{9\sqrt{3}}{4}$.'
+      - 'Segment $= 3\pi - \tfrac{9\sqrt{3}}{4} = 3\left(\pi - \tfrac{3\sqrt{3}}{4}\right)$.'
+      - 'Numerically about $9.42 - 3.90 = 5.53$ — much less than the sector, as it should be.'
+      - 'The trap is option A, $3\pi$ — the sector with the triangle still in it. Option E adds the triangle instead of subtracting it.'
+    hint: 'Sector $3\pi$ minus triangle $\tfrac{9\sqrt{3}}{4}$.'
+
+  48:
+    answer: E
+    steps:
+      - 'A pie chart shares the full $360^{\circ}$ among the groups in proportion to their sizes, so a group''s angle is its fraction of the whole, times $360^{\circ}$.'
+      - 'The A-grade students are 18 out of 120, which simplifies to $\tfrac{18}{120} = \tfrac{3}{20}$.'
+      - 'So $Z = \tfrac{3}{20} \times 360 = 3 \times 18 = 54$.'
+      - 'A quicker way: 120 students share $360^{\circ}$, so each student is worth $3^{\circ}$, and $18 \times 3 = 54$ ✓.'
+      - 'Sense check: 18 is a little under a sixth of 120, and a sixth of $360^{\circ}$ is $60^{\circ}$, so an answer a little under 60 is right ✓.'
+      - 'The trap is option A, 15 — that is the *percentage* of the class ($\tfrac{18}{120} = 15\%$), not the angle. Percentages share out 100; a pie chart shares out 360.'
+    hint: 'Each student is worth $360 \div 120 = 3^{\circ}$.'
+
+  49:
+    answer: E
+    steps:
+      - 'The shape is an arrowhead: three outer angles (20°, 80°, 40°) and a notch. The angle $x$ is the angle at the notch, measured on the outside of the shape.'
+      - 'A useful fact: the angle at the notch, on the outside, equals the sum of the other three angles.'
+      - 'To see why, the four interior angles of any quadrilateral add to $360^{\circ}$, so the reflex interior angle at the notch is $360 - 20 - 80 - 40 = 220^{\circ}$.'
+      - 'The angle $x$ on the other side of the notch is $360 - 220 = 140^{\circ}$.'
+      - 'And indeed $20 + 80 + 40 = 140$ ✓.'
+      - 'The trap is option A, $100^{\circ}$, from $180 - 80$, or treating the shape as a triangle. The notch makes it a quadrilateral.'
+    hint: 'The notch angle equals $20 + 80 + 40$.'
+
+  50:
+    answer: E
+    steps:
+      - 'Factorise the numerator by treating it as a quadratic in $x^{2}$.'
+      - 'Let $u = x^{2}$: $u^{2} - 5u + 4 = (u - 1)(u - 4)$.'
+      - 'So $x^{4} - 5x^{2} + 4 = (x^{2} - 1)(x^{2} - 4)$.'
+      - 'Divide by $x^{2} - 1$: the factor cancels, leaving $x^{2} - 4$.'
+      - 'Check with $x = 3$: $\tfrac{81 - 45 + 4}{8} = \tfrac{40}{8} = 5$, and $9 - 4 = 5$ ✓.'
+      - 'The trap is option A, $x^{2} - 1$ — the factor that cancels, rather than the one left behind.'
+    hint: 'The numerator is $(x^{2} - 1)(x^{2} - 4)$.'

@@ -1,0 +1,688 @@
+# UTME 1997 Mathematics — worked explanations, written against the paper.
+#
+# Keyed on question number; see explanations_2003.yaml for why, and for how these are written.
+#
+# All 50 are answered, and all 31 the key covers agree with it. Where a question rests on a
+# repaired stem or option, retranscribed_1997.yaml says exactly what was changed.
+format_version: 1
+exam_year: 1997
+subject: MATH
+
+explanations:
+  1:
+    answer: D
+    steps:
+      - "A numeral in base 4 has place values that are powers of 4, so write out what each digit is worth before solving for $P$."
+      - "Reading $1P03$ from the right, the columns are worth $1$, $4$, $16$ and $64$."
+      - "So $(1P03)_{4} = (1 \\times 64) + (P \\times 16) + (0 \\times 4) + (3 \\times 1)$."
+      - "That is $64 + 16P + 3 = 67 + 16P$."
+      - "Setting it equal to 115: $67 + 16P = 115$."
+      - "So $16P = 48$, giving $P = 3$."
+      - "Check $P$ is a legal base-4 digit — digits must be 0 to 3, and 3 just qualifies ✓. And check the whole numeral: $(1303)_{4} = 64 + 48 + 0 + 3 = 115$ ✓."
+      - "The zero in the third column contributes nothing, but it still holds a place. Dropping it would shift every other digit and change the answer entirely."
+    hint: "Write out the four place values 64, 16, 4 and 1, build an equation in $P$, and check your $P$ is a valid base-4 digit."
+
+  2:
+    answer: B
+    steps:
+      - "Squaring two four-figure decimals by hand is slow and error-prone, so look for structure first — and a difference of two squares is exactly that."
+      - "The identity is $a^{2} - b^{2} = (a + b)(a - b)$."
+      - "Here $a = 64.764$ and $b = 35.236$."
+      - "The sum is $64.764 + 35.236 = 100$ exactly — the decimals were chosen to make this happen, which is the signal the identity was intended."
+      - "The difference is $64.764 - 35.236 = 29.528$."
+      - "So the expression is $100 \\times 29.528 = 2952.8$."
+      - "Now round to 3 significant figures. The first three significant digits are 2, 9 and 5, and the next digit is 2, which is below 5, so the 5 stays."
+      - "That gives 2950."
+      - "Option A is 2960, from rounding 2952.8 up. Rounding is decided by the digit immediately after the ones you keep, and here that digit is 2."
+    hint: "Use $a^2 - b^2 = (a+b)(a-b)$ — the two numbers add to exactly 100 — then round the product to 3 s.f."
+
+  3:
+    answer: C
+    steps:
+      - "Cubing small decimals directly invites lost zeros, so write each in standard form first and cube that."
+      - "$0.006 = 6 \\times 10^{-3}$, so $(0.006)^{3} = 6^{3} \\times 10^{-9} = 216 \\times 10^{-9}$."
+      - "$0.004 = 4 \\times 10^{-3}$, so $(0.004)^{3} = 4^{3} \\times 10^{-9} = 64 \\times 10^{-9}$."
+      - "Both now carry the same power of ten, so they can be added directly: $216 + 64 = 280$."
+      - "So the total is $280 \\times 10^{-9}$."
+      - "That is not yet standard form, which needs exactly one non-zero digit before the point."
+      - "Moving the point two places left multiplies the power of ten by $10^{2}$: $280 \\times 10^{-9} = 2.8 \\times 10^{-7}$."
+      - "Option A is $2.8 \\times 10^{-9}$, which keeps the original power of ten and forgets that shifting 280 to 2.8 must be paid for. Every place the decimal point moves left raises the index by one."
+    hint: "Cube each number in standard form, add them while the powers of ten match, then fix the answer into standard form."
+
+  4:
+    answer: C
+    steps:
+      - "You are given the logarithms of 2 and 3, so express 13.5 using only 2s and 3s."
+      - "$13.5 = \\dfrac{27}{2}$, and $27 = 3^{3}$, so $13.5 = \\dfrac{3^{3}}{2}$."
+      - "Now apply the log laws. A quotient becomes a subtraction and a power becomes a multiplier."
+      - "$\\log_{a}13.5 = \\log_{a}3^{3} - \\log_{a}2 = 3\\log_{a}3 - \\log_{a}2$."
+      - "Substituting the given values: $3(1.097) - 0.693$."
+      - "$3 \\times 1.097 = 3.291$."
+      - "Then $3.291 - 0.693 = 2.598$."
+      - "Option D is 2.790, which is $3.291 - 0.501$ or some other mis-subtraction; option A, 1.404, is $2.097 - 0.693$, from using $\\log 3$ once instead of three times. Writing $13.5$ as $3^{3} \\div 2$ is the step that decides both."
+    hint: "Write 13.5 as $\\tfrac{3^3}{2}$, then split it into $3\\log_a 3 - \\log_a 2$."
+
+  5:
+    answer: B
+    steps:
+      - "Bring the coefficient inside the logarithm first, so the two terms can be combined into one."
+      - "The power law says $2\\log_{2}6 = \\log_{2}6^{2} = \\log_{2}36$."
+      - "So the expression is $\\log_{2}96 - \\log_{2}36$."
+      - "A difference of logarithms with the same base is the logarithm of a quotient: $\\log_{2}\\dfrac{96}{36}$."
+      - "Simplify the fraction: both divide by 12, giving $\\dfrac{8}{3}$."
+      - "So the expression is $\\log_{2}\\dfrac{8}{3}$, which splits again as $\\log_{2}8 - \\log_{2}3$."
+      - "And $\\log_{2}8 = 3$, since $2^{3} = 8$."
+      - "So the answer is $3 - \\log_{2}3$."
+      - "Option A is $2 - \\log_{2}3$, which comes from taking $\\log_{2}4$ instead of $\\log_{2}8$ — that is, simplifying $\\tfrac{96}{36}$ carelessly to $\\tfrac{4}{3}$ rather than $\\tfrac{8}{3}$."
+    hint: "Turn $2\\log_2 6$ into $\\log_2 36$, subtract to get $\\log_2 \\tfrac{8}{3}$, then split off $\\log_2 8 = 3$."
+
+  6:
+    answer: D
+    steps:
+      - "Every number here is a power of 2, so rewrite both sides with 2 as the only base and then compare indices."
+      - "On the left, $8 = 2^{3}$, so $8^{x/2} = \\left(2^{3}\\right)^{x/2} = 2^{3x/2}$ — raising a power to a power multiplies the indices."
+      - "On the right, $2^{3/8}$ is already in base 2."
+      - "And $4 = 2^{2}$, so $4^{3/4} = \\left(2^{2}\\right)^{3/4} = 2^{3/2}$."
+      - "Multiplying powers of the same base adds the indices: $2^{3/8} \\times 2^{3/2} = 2^{3/8 + 3/2}$."
+      - "Over a denominator of 8: $\\dfrac{3}{8} + \\dfrac{12}{8} = \\dfrac{15}{8}$."
+      - "So $2^{3x/2} = 2^{15/8}$, and since the bases match, the indices must be equal: $\\dfrac{3x}{2} = \\dfrac{15}{8}$."
+      - "Multiplying both sides by $\\dfrac{2}{3}$: $x = \\dfrac{15}{8} \\times \\dfrac{2}{3} = \\dfrac{30}{24} = \\dfrac{5}{4}$."
+      - "The two rules do different jobs and mixing them up is the trap: a power *of* a power multiplies indices, while a product of powers adds them. Both appear here, one on each side."
+    hint: "Write 8 and 4 as powers of 2, then equate the indices — multiplying for a power of a power, adding for a product."
+
+  7:
+    answer: A
+    steps:
+      - "A surd in the denominator is cleared by multiplying top and bottom by the conjugate — the same expression with its middle sign reversed."
+      - "The denominator is $3\\sqrt{5} - 2\\sqrt{3}$, so the conjugate is $3\\sqrt{5} + 2\\sqrt{3}$."
+      - "The new denominator is a difference of two squares: $(3\\sqrt{5})^{2} - (2\\sqrt{3})^{2} = 9 \\times 5 - 4 \\times 3 = 45 - 12 = 33$."
+      - "Now the numerator: $(2\\sqrt{3} + 3\\sqrt{5})(3\\sqrt{5} + 2\\sqrt{3})$."
+      - "Expanding term by term: $2\\sqrt{3} \\times 3\\sqrt{5} = 6\\sqrt{15}$; $2\\sqrt{3} \\times 2\\sqrt{3} = 4 \\times 3 = 12$; $3\\sqrt{5} \\times 3\\sqrt{5} = 9 \\times 5 = 45$; $3\\sqrt{5} \\times 2\\sqrt{3} = 6\\sqrt{15}$."
+      - "Collecting: $12 + 45 + 12\\sqrt{15} = 57 + 12\\sqrt{15}$."
+      - "So the expression is $\\dfrac{57 + 12\\sqrt{15}}{33}$, and every term divides by 3."
+      - "That gives $\\dfrac{19 + 4\\sqrt{15}}{11}$."
+      - "Option B has the same numerator over 19 — the denominator left as $45 - 26$ or similar. Squaring $3\\sqrt{5}$ as $3 \\times 5$ rather than $9 \\times 5$ is the usual cause; the coefficient gets squared too."
+    hint: "Multiply top and bottom by $3\\sqrt{5} + 2\\sqrt{3}$, square the coefficients as well as the surds, then divide through by 3."
+
+  8:
+    answer: B
+    steps:
+      - "Simple interest is earned on the original sum only, at the same amount every year, so the formula is $I = \\dfrac{PRT}{100}$."
+      - "First find the interest itself. The money grew from ₦1,000 to ₦1,240."
+      - "So the interest over the whole period is $1240 - 1000 = ₦240$."
+      - "Now substitute into the formula with $P = 1000$ and $T = 3$: $240 = \\dfrac{1000 \\times R \\times 3}{100}$."
+      - "The right side simplifies: $\\dfrac{3000R}{100} = 30R$."
+      - "So $30R = 240$, giving $R = 8$."
+      - "The rate is therefore 8% per annum."
+      - "A quick check: 8% of ₦1,000 is ₦80 a year, and three years give $3 \\times 80 = ₦240$ ✓. The ₦1,240 is the *final amount*, not the interest — using it directly in the formula is the mistake the question invites."
+    hint: "Subtract to get the interest of ₦240 first, then use $I = \\tfrac{PRT}{100}$ with $P = 1000$ and $T = 3$."
+
+  9:
+    answer: C
+    steps:
+      - "Work from the inside out: the bracket $Y \\cup Z$ first, then intersect the result with $X$."
+      - "A union collects everything in either set: $Y = \\{P, N, O, U, R\\}$ and $Z = \\{L, O, U, D\\}$."
+      - "Together they give $\\{P, N, O, U, R, L, D\\}$ — the O and U appear in both but are listed once."
+      - "Now intersect with $X = \\{S, P, E, N, D\\}$, keeping only what appears in both."
+      - "Going through $X$ one letter at a time: S is not in the union; P is ✓; E is not; N is ✓; D is ✓."
+      - "So $X \\cap (Y \\cup Z) = \\{P, N, D\\}$."
+      - "There is a shortcut worth knowing for questions like this. An intersection with $X$ can never contain anything outside $X$, so the answer must be a subset of $\\{S, P, E, N, D\\}$."
+      - "Checking the options against that alone: A contains O, U and R; B contains R; D contains U. None of those letters is in $X$, so all three are impossible before any working is done."
+      - "That leaves only $\\{P, N, D\\}$. Ruling out options by what they *cannot* contain is often faster than computing the answer outright."
+    hint: "Do the union first, then intersect. Or note that the answer must be a subset of $X$ — that alone eliminates three options."
+
+  10:
+    answer: B
+    steps:
+      - "Two overlapping groups inside a fixed total: find how many are in at least one group, then subtract from the total."
+      - "The addition rule avoids double-counting: $n(H \\cup I) = n(H) + n(I) - n(H \\cap I)$."
+      - "The 9 who speak both have been counted once in the 80 and once in the 20, so they must be taken off once."
+      - "Substituting: $n(H \\cup I) = 80 + 20 - 9 = 91$."
+      - "So 91 students speak at least one of the two languages."
+      - "Everyone else speaks neither, and there are 100 students altogether."
+      - "So the answer is $100 - 91 = 9$."
+      - "That it matches the 9 who speak both is a coincidence of the numbers, not a rule. Option A, 0, is what you get by adding 80 and 20 to make 100 and concluding everyone is covered — the overlap is exactly what makes that wrong."
+    hint: "Add the two groups, subtract the overlap once, then take the result away from 100."
+
+  11:
+    answer: A
+    steps:
+      - "'Divisible by $x + 1$' means $x + 1$ is a factor, so dividing leaves no remainder."
+      - "The factor theorem turns that into a substitution: if $(x - a)$ is a factor of $f(x)$, then $f(a) = 0$."
+      - "Here the factor is $x + 1$, which is $x - (-1)$, so the value to substitute is $x = -1$ — not $+1$."
+      - "Compute $f(-1) = (-1)^{3} + 2(-1)^{2} + q(-1) - 6$."
+      - "Term by term: $(-1)^{3} = -1$; $2(-1)^{2} = 2(1) = 2$; $q(-1) = -q$; and the constant is $-6$."
+      - "So $f(-1) = -1 + 2 - q - 6 = -5 - q$."
+      - "Setting this to zero: $-5 - q = 0$, so $q = -5$."
+      - "Check: $f(x) = x^{3} + 2x^{2} - 5x - 6$, and $f(-1) = -1 + 2 + 5 - 6 = 0$ ✓."
+      - "The odd and even powers behave differently under the minus: $(-1)^{2}$ is positive while $(-1)^{3}$ is negative. Getting one of those signs wrong gives $q = 5$, which is option D."
+    hint: "Substitute $x = -1$ (the value making $x+1$ zero) and set the result to zero, watching the signs on the odd and even powers."
+
+  12:
+    answer: B
+    steps:
+      - "The unknowns sit in denominators, which looks awkward — but notice that $\\dfrac{3}{y}$ appears in both equations with opposite signs."
+      - "That means adding the two equations will eliminate it without any substitution."
+      - "Adding: $\\left(\\dfrac{2}{x} + \\dfrac{4}{x}\\right) + \\left(-\\dfrac{3}{y} + \\dfrac{3}{y}\\right) = 2 + 10$."
+      - "The $y$ terms cancel and the $x$ terms combine: $\\dfrac{6}{x} = 12$."
+      - "So $6 = 12x$, giving $x = \\dfrac{1}{2}$."
+      - "Substitute back into the first equation: $\\dfrac{2}{1/2} - \\dfrac{3}{y} = 2$, and $\\dfrac{2}{1/2} = 4$."
+      - "So $4 - \\dfrac{3}{y} = 2$, giving $\\dfrac{3}{y} = 2$ and $y = \\dfrac{3}{2}$."
+      - "Check in the second equation: $\\dfrac{4}{1/2} + \\dfrac{3}{3/2} = 8 + 2 = 10$ ✓."
+      - "Treating $\\dfrac{1}{x}$ and $\\dfrac{1}{y}$ as the unknowns — rather than $x$ and $y$ — is what makes this an ordinary pair of simultaneous equations. The last step, inverting back, is easy to forget: $\\dfrac{1}{x} = 2$ means $x = \\tfrac{1}{2}$, not 2."
+    hint: "Add the equations to cancel the $y$ terms, and remember the result gives $\\tfrac{1}{x}$ — invert it at the end."
+
+  13:
+    answer: A
+    steps:
+      - "The coefficient of $x^{2}$ is positive, so the parabola opens upwards and does have a minimum."
+      - "That minimum sits at the turning point, $x = -\\dfrac{b}{2a}$, with $a = 1$ and $b = -3$."
+      - "So $x = -\\dfrac{-3}{2(1)} = \\dfrac{3}{2}$."
+      - "Substitute that back to get the value: $\\left(\\dfrac{3}{2}\\right)^{2} - 3\\left(\\dfrac{3}{2}\\right) + 2$."
+      - "Term by term: $\\dfrac{9}{4} - \\dfrac{9}{2} + 2$."
+      - "Over a denominator of 4: $\\dfrac{9}{4} - \\dfrac{18}{4} + \\dfrac{8}{4} = \\dfrac{9 - 18 + 8}{4} = -\\dfrac{1}{4}$."
+      - "Completing the square gives the same result and shows why: $x^{2} - 3x + 2 = \\left(x - \\tfrac{3}{2}\\right)^{2} - \\tfrac{1}{4}$, and a square is never negative, so the smallest the whole thing can be is $-\\tfrac{1}{4}$."
+      - "Option C is $+\\tfrac{1}{4}$. The minimum here lies *below* the axis — the curve $x^{2} - 3x + 2$ factorises as $(x-1)(x-2)$ and so dips between its roots — and a positive answer contradicts that."
+    hint: "Find the turning point at $x = \\tfrac{3}{2}$ and substitute back, or complete the square — the minimum is negative."
+
+  14:
+    answer: B
+    steps:
+      - "$f$ is buried under a square root inside a compound fraction, so unwrap it one layer at a time."
+      - "First square both sides to remove the root: $t^{2} = \\dfrac{v}{\\dfrac{1}{f} + \\dfrac{1}{g}}$."
+      - "Now the bracket is a denominator, so multiply both sides by it: $t^{2}\\left(\\dfrac{1}{f} + \\dfrac{1}{g}\\right) = v$."
+      - "Divide by $t^{2}$: $\\dfrac{1}{f} + \\dfrac{1}{g} = \\dfrac{v}{t^{2}}$."
+      - "Isolate the term with $f$: $\\dfrac{1}{f} = \\dfrac{v}{t^{2}} - \\dfrac{1}{g}$."
+      - "Combine the right side over the common denominator $gt^{2}$: $\\dfrac{vg - t^{2}}{gt^{2}}$."
+      - "Finally take the reciprocal of both sides, since $f$ is currently upside down: $f = \\dfrac{gt^{2}}{gv - t^{2}}$."
+      - "Option A is that fraction the other way up — the answer for $\\dfrac{1}{f}$, not for $f$. The last inversion is a separate step and the commonest place to stop early."
+    hint: "Square, clear the denominator, isolate $\\tfrac{1}{f}$, combine the right side into one fraction, then flip it."
+
+  15:
+    answer: D
+    steps:
+      - "A perfect square in two letters has the form $(2x - ky)^{2}$, since the first term $4x^{2}$ is the square of $2x$."
+      - "Expanding that pattern: $(2x - ky)^{2} = 4x^{2} - 4kxy + k^{2}y^{2}$."
+      - "Compare the middle terms with the expression given. It has $-18xy$, so $-4k = -18$."
+      - "That gives $k = \\dfrac{18}{4} = \\dfrac{9}{2}$."
+      - "The constant term must then be $k^{2}y^{2} = \\left(\\dfrac{9}{2}\\right)^{2}y^{2} = \\dfrac{81y^{2}}{4}$."
+      - "So $g = \\dfrac{81y^{2}}{4}$."
+      - "Check: $\\left(2x - \\tfrac{9}{2}y\\right)^{2} = 4x^{2} - 18xy + \\tfrac{81}{4}y^{2}$ ✓."
+      - "There is a general shortcut: for $ax^{2} + bx + c$ to be a perfect square the discriminant $b^{2} - 4ac$ must be zero, so $324y^{2} = 16g$ and $g = \\tfrac{81y^{2}}{4}$ — the same answer with no expanding."
+      - "Option C is $81y^{2}$, from halving the middle coefficient to 9 and squaring, forgetting that the $4x^{2}$ makes the first term $2x$ rather than $x$."
+    hint: "Match against $(2x - ky)^2$: the middle term gives $k = \\tfrac{9}{2}$, and $g$ is $k^2y^2$."
+
+  16:
+    answer: A
+    steps:
+      - "In a partial-fraction identity the two sides are equal for every value of the variable, so a well-chosen substitution isolates one constant at a time."
+      - "Start by clearing the denominators. Multiplying $\\dfrac{5 + 2r}{(r+1)(r-2)} = \\dfrac{K}{r-2} + \\dfrac{L}{r+1}$ by $(r+1)(r-2)$ gives"
+      - "$5 + 2r = K(r + 1) + L(r - 2)$."
+      - "To find $K$, choose the value that makes the $L$ bracket vanish: $r - 2 = 0$, so $r = 2$."
+      - "Substituting: the left side is $5 + 2(2) = 9$."
+      - "The right side is $K(2 + 1) + L(0) = 3K$."
+      - "So $3K = 9$, giving $K = 3$."
+      - "Only $K$ was asked for, so $L$ need never be found — though for completeness, putting $r = -1$ gives $3 = -3L$ and $L = -1$."
+      - "Notice which bracket pairs with which constant: $K$ sits over $(r - 2)$, so it survives when $r = 2$. Substituting $r = -1$ instead would give $L$, and mixing the two up is the one real risk here."
+    hint: "Clear the denominators, then substitute $r = 2$ — the value that kills the other term — to get $K$ in one step."
+
+  17:
+    answer: C
+    steps:
+      - "There is an unknown in the denominator, so the sign of that denominator decides whether the inequality flips when you multiply through."
+      - "The question settles it for us: it states $g(x) > 0$, so $6x + 7$ is positive and multiplying by it leaves the inequality direction unchanged."
+      - "Multiplying $\\dfrac{2x + 4}{6x + 7} < 1$ by $(6x + 7)$ gives $2x + 4 < 6x + 7$."
+      - "Collect the $x$ terms on one side: $4 - 7 < 6x - 2x$."
+      - "That is $-3 < 4x$."
+      - "Dividing by 4 — a positive number, so again no flip: $-\\dfrac{3}{4} < x$."
+      - "Written the usual way round, $x > -\\dfrac{3}{4}$."
+      - "Option A has the inequality reversed, which is what you get by multiplying through as if $6x + 7$ were negative. The sentence '$g(x) > 0$' is not decoration — it is the permission to multiply without flipping, and it is the whole reason it appears in the stem."
+    hint: "Because $g(x) > 0$ you may multiply through without reversing the inequality. Then collect the $x$ terms."
+
+  18:
+    answer: A
+    steps:
+      - "Bring everything to one side so the quadratic can be factorised: $12x^{2} < x + 1$ becomes $12x^{2} - x - 1 < 0$."
+      - "To factorise, look for two numbers multiplying to $12 \\times (-1) = -12$ and adding to $-1$: those are $-4$ and $3$."
+      - "Split the middle term and group: $12x^{2} - 4x + 3x - 1 = 4x(3x - 1) + 1(3x - 1)$."
+      - "Both parts share $(3x - 1)$, so the factorisation is $(4x + 1)(3x - 1) < 0$."
+      - "The roots are where each bracket is zero: $x = -\\dfrac{1}{4}$ and $x = \\dfrac{1}{3}$."
+      - "A product of two numbers is negative exactly when they have opposite signs, which happens *between* the roots."
+      - "So the solution is $-\\dfrac{1}{4} < x < \\dfrac{1}{3}$."
+      - "Test a point inside to be sure: at $x = 0$ the original reads $0 < 1$ ✓. And outside, at $x = 1$: $12 < 2$ is false ✓."
+      - "Option C has the two roots swapped round, giving $-\\tfrac{1}{3} < x < \\tfrac{1}{4}$ — the right numbers attached to the wrong brackets. Reading each root off its own bracket avoids it."
+    hint: "Rearrange to $12x^2 - x - 1 < 0$ and factorise. A negative product means the answer lies between the roots."
+
+  19:
+    answer: D
+    steps:
+      - "The sum of the first $n$ terms includes the $n$th term, and the sum of the first $n - 1$ terms includes everything *before* it."
+      - "So subtracting one from the other leaves the $n$th term alone: $U_{n} = S_{n} - S_{n-1}$."
+      - "Here $S_{n} = n^{2} - 1$, so $S_{n-1} = (n-1)^{2} - 1$."
+      - "Expanding: $(n-1)^{2} - 1 = n^{2} - 2n + 1 - 1 = n^{2} - 2n$."
+      - "Now subtract: $U_{n} = (n^{2} - 1) - (n^{2} - 2n)$."
+      - "The $n^{2}$ terms cancel: $U_{n} = -1 + 2n = 2n - 1$."
+      - "Check with a small case. $S_{2} = 3$ and $S_{1} = 0$, so the 2nd term is 3; and $2(2) - 1 = 3$ ✓."
+      - "The brackets around $S_{n-1}$ matter: the minus sign applies to both its terms, and dropping it on the $-2n$ would give $2n + 1$ instead, which is option C."
+    hint: "The $n$th term is $S_n - S_{n-1}$. Expand $(n-1)^2$ carefully and subtract the whole expression, brackets included."
+
+  20:
+    answer: A
+    steps:
+      - "The formula gives any term directly, so substitute $n = 1$, $2$ and $3$ in turn rather than hunting for a pattern."
+      - "For $n = 1$: the term is $3^{1-1} = 3^{0} = 1$. Any non-zero number to the power zero is 1."
+      - "For $n = 2$: $3^{1-2} = 3^{-1} = \\dfrac{1}{3}$. A negative index means the reciprocal."
+      - "For $n = 3$: $3^{1-3} = 3^{-2} = \\dfrac{1}{3^{2}} = \\dfrac{1}{9}$."
+      - "So the first three terms are $1$, $\\dfrac{1}{3}$ and $\\dfrac{1}{9}$ — a geometric sequence with ratio $\\tfrac{1}{3}$, as the form of the $n$th term suggests."
+      - "Now add them over a common denominator of 9: $\\dfrac{9}{9} + \\dfrac{3}{9} + \\dfrac{1}{9}$."
+      - "That gives $\\dfrac{13}{9}$."
+      - "Option D is $\\tfrac{1}{9}$ — the third term alone rather than the sum. Option B is 1, the first term. Both are values that appear in the working, which is why it is worth writing the addition down rather than reading off the last thing computed."
+    hint: "Substitute $n = 1, 2, 3$ to get $1$, $\\tfrac13$ and $\\tfrac19$ — noting $3^0 = 1$ — then add over a denominator of 9."
+
+  21:
+    answer: C
+    steps:
+      - "Two different operations are defined, and the brackets say which to do first — so start inside."
+      - "The inner operation is $4 * 5$, which uses the rule $m * n = mn - n - 1$ with $m = 4$ and $n = 5$."
+      - "Substituting: $4 * 5 = (4)(5) - 5 - 1 = 20 - 5 - 1 = 14$."
+      - "Now the outer operation is $3 \\oplus 14$, which uses the *other* rule, $m \\oplus n = mn + n - 2$."
+      - "Here $m = 3$ and $n = 14$: $3 \\oplus 14 = (3)(14) + 14 - 2$."
+      - "That is $42 + 14 - 2$."
+      - "Which comes to $54$."
+      - "Using the same rule twice is the obvious danger, since the two definitions look alike — one subtracts $n$ and the other adds it. Keeping track of which symbol is which is most of the work; the arithmetic is straightforward once they are kept apart."
+    hint: "Work the bracket first with the star rule, then feed the result into the circled-plus rule — they are different definitions."
+
+  22:
+    answer: D
+    steps:
+      - "Apply the definition twice, substituting the given second value each time, and keep the order straight: $x$ before the star, $y$ after."
+      - "First, $x * 2$. With $y = 2$: $x + 2 - 2x$."
+      - "Collecting the $x$ terms: $2 - x$."
+      - "Next, $x * 3$. With $y = 3$: $x + 3 - 3x$."
+      - "Collecting: $3 - 2x$."
+      - "The question says these add to 68: $(2 - x) + (3 - 2x) = 68$."
+      - "Simplify the left: $5 - 3x = 68$."
+      - "So $-3x = 63$, giving $x = -21$."
+      - "Check: $(-21) * 2 = -21 + 2 + 42 = 23$ and $(-21) * 3 = -21 + 3 + 63 = 45$; and $23 + 45 = 68$ ✓."
+      - "A negative answer is worth expecting here. The two expressions both have negative $x$ coefficients, so reaching a total as large as 68 requires $x$ to be well below zero — a sanity check that rules out options A and B at a glance."
+    hint: "Substitute $y = 2$ and then $y = 3$ into the rule, add the two expressions, and expect a negative answer."
+
+  23:
+    answer: C
+    steps:
+      - "A matrix equation like this is just a pair of simultaneous equations written compactly — multiply out to see them."
+      - "The first row of the matrix times the column gives $2x - 3y$, and that equals the first entry on the right, $-1$."
+      - "The second row gives $-x + 4y$, equal to $8$."
+      - "So the system is $2x - 3y = -1$ and $-x + 4y = 8$."
+      - "The second equation has a single $x$, so rearrange it: $x = 4y - 8$."
+      - "Substitute into the first: $2(4y - 8) - 3y = -1$, that is $8y - 16 - 3y = -1$."
+      - "Collecting: $5y = 15$, so $y = 3$."
+      - "Then $x = 4(3) - 8 = 4$."
+      - "The question asks for $x + y$, not for either separately: $4 + 3 = 7$."
+      - "Check both equations: $2(4) - 3(3) = 8 - 9 = -1$ ✓ and $-4 + 12 = 8$ ✓. Options A and B are 3 and 4 — the individual values, offered for anyone who solves correctly and then answers the wrong question."
+    hint: "Multiply out into two simultaneous equations, solve them, then add $x$ and $y$ — that sum is what is asked for."
+
+  24:
+    answer: C
+    steps:
+      - "Expand the three-by-three determinant along the first row, using the alternating signs $+, -, +$."
+      - "The first row is $(x, 1, 0)$, and the final zero kills one term straight away."
+      - "The first minor, deleting row 1 and column 1, is $\\begin{vmatrix} x & 1 \\\\ 1 & x \\end{vmatrix} = x^{2} - 1$."
+      - "The second minor, deleting row 1 and column 2, is $\\begin{vmatrix} 1 & 1 \\\\ 0 & x \\end{vmatrix} = x - 0 = x$."
+      - "So the determinant is $x(x^{2} - 1) - 1(x) + 0 = x^{3} - x - x = x^{3} - 2x$."
+      - "Setting it to zero: $x^{3} - 2x = 0$, so $x(x^{2} - 2) = 0$."
+      - "The roots are $x = 0$ and $x^{2} = 2$, that is $x = \\pm\\sqrt{2}$."
+      - "The question asks for the non-zero positive value, which rules out both $0$ and $-\\sqrt{2}$, leaving $x = \\sqrt{2}$."
+      - "Factorising rather than dividing through by $x$ is what keeps all three roots in view. Dividing by $x$ would silently discard the root $x = 0$ — harmless here, since the question excludes it, but a habit worth not forming."
+      - "Option A is 2, the value of $x^{2}$ rather than of $x$. The square root is the last step."
+    hint: "Expand along the first row to get $x^3 - 2x$, factorise as $x(x^2-2)$, and pick the positive non-zero root."
+
+  25:
+    answer: A
+    steps:
+      - "The base of the triangle is a chord of the circle, and it subtends one angle at the apex and another at the centre — the two are linked."
+      - "First find the apex angle. The base angles are $58^{\\circ}$ each, and a triangle's angles total $180^{\\circ}$."
+      - "So the apex angle is $180 - 58 - 58 = 64^{\\circ}$."
+      - "That apex lies on the circle, so $64^{\\circ}$ is the angle the base subtends at the *circumference*."
+      - "The angle at the centre is twice the angle at the circumference when both stand on the same arc."
+      - "So the base subtends $2 \\times 64 = 128^{\\circ}$ at the centre."
+      - "Check it is possible: $128^{\\circ}$ is less than $360^{\\circ}$, and the other two chords must then account for $360 - 128 = 232^{\\circ}$, split evenly as $116^{\\circ}$ each by symmetry — consistent with base angles of $58^{\\circ}$, since $116 \\div 2 = 58$ ✓."
+      - "Option C is $64^{\\circ}$, the apex angle itself — correct as far as the triangle goes, but it is the angle at the circumference, and the question asks for the one at the centre. The doubling is the last step."
+    hint: "Find the apex angle from the triangle's angle sum, then double it — that apex angle is the one at the circumference."
+
+  26:
+    answer: B
+    steps:
+      - "Three facts are in play: a pair of parallel lines, the angle sum of a triangle, and an isosceles triangle. Take them in turn."
+      - "$FK \\parallel GR$ and $FR$ cuts across both, so $\\angle RFK$ and $\\angle FRG$ are alternate angles and are equal."
+      - "Therefore $\\angle FRG = 34^{\\circ}$."
+      - "Now the large triangle $FGR$ has angles $47^{\\circ}$ at $G$ and $34^{\\circ}$ at $R$."
+      - "So $\\angle GFR = 180 - 47 - 34 = 99^{\\circ}$."
+      - "Next the isosceles triangle. $FH = GH$, so the angles opposite those equal sides are equal: $\\angle GFH = \\angle FGH = 47^{\\circ}$."
+      - "The angle $\\angle GFR$ splits into two parts at $F$: $\\angle GFH$ and $\\angle HFR$."
+      - "So $x = \\angle HFR = \\angle GFR - \\angle GFH = 99 - 47 = 52^{\\circ}$."
+      - "Notice which sides are equal: $FH = GH$ makes the angles at $F$ and $G$ equal, not the angles at $F$ and $H$. In an isosceles triangle the equal angles face the equal sides, and reading that the wrong way round here would give $\\angle FHG = 47^{\\circ}$ and a different answer."
+    hint: "Alternate angles give the angle at $R$; the triangle's angle sum gives the whole angle at $F$; then subtract the isosceles part."
+
+  27:
+    answer: B
+    steps:
+      - "A tangent meets each radius at a right angle, so drawing the two radii to the points of contact creates the right angles this calculation needs."
+      - "For a direct common tangent, both radii point the same way, so the figure encloses a right-angled trapezium: the tangent, the two radii, and the line $XY$."
+      - "Sliding the shorter radius along until it lines up with the longer one leaves a right-angled triangle whose hypotenuse is $XY$."
+      - "That triangle's legs are the tangent length, 25 cm, and the *difference* of the radii, $3 - 2 = 1$ cm."
+      - "By Pythagoras: $XY^{2} = 25^{2} + 1^{2}$."
+      - "That is $625 + 1 = 626$."
+      - "So $XY^{2} = 626\\ \\text{cm}^{2}$, and $XY$ itself is $\\sqrt{626} \\approx 25.02$ cm — barely longer than the tangent, which makes sense when the radii differ by only 1 cm."
+      - "The difference of the radii is what matters for a *direct* tangent. For a transverse one — crossing between the circles — it would be the sum, giving $625 + 25 = 650$. Which kind of tangent the figure shows decides between the two, and that is the single thing to read off the diagram."
+    hint: "Draw both radii to the contact points. For a direct tangent the right-angled triangle has legs 25 and $3 - 2$; use Pythagoras."
+
+  28:
+    answer: A
+    steps:
+      - "An arc is a fraction of the full circumference, and that fraction is the angle over $360^{\\circ}$."
+      - "The diameter is 42 cm, so the radius is 21 cm — the formula needs the radius, not the diameter."
+      - "The full circumference is $2\\pi r = 2 \\times \\dfrac{22}{7} \\times 21$."
+      - "The 7 divides into 21 three times: $2 \\times 22 \\times 3 = 132$ cm."
+      - "The minor arc's share is $\\dfrac{60}{360} = \\dfrac{1}{6}$ of that."
+      - "So the arc length is $\\dfrac{1}{6} \\times 132 = 22$ cm."
+      - "A sanity check: the arc is a sixth of the way round, so it should be well under the 42 cm diameter — and 22 cm is."
+      - "Option B is 44 cm, which comes from using 42 as the radius rather than the diameter, doubling the answer. Halving the diameter first is the habit that prevents it."
+    hint: "Halve the diameter to get $r = 21$, find the full circumference with $\\pi = \\tfrac{22}{7}$, then take $\\tfrac{60}{360}$ of it."
+
+  29:
+    answer: A
+    steps:
+      - "A sector is a fraction of the whole circle's area, and the fraction is the angle over $360^{\\circ}$."
+      - "The full area is $\\pi r^{2} = \\dfrac{22}{7} \\times 6^{2} = \\dfrac{22}{7} \\times 36$."
+      - "The sector's share is $\\dfrac{70}{360}$, which simplifies: both divide by 10 to give $\\dfrac{7}{36}$."
+      - "So the area is $\\dfrac{7}{36} \\times \\dfrac{22}{7} \\times 36$."
+      - "The 7 in the numerator cancels the 7 in the denominator, and the 36s cancel too."
+      - "That leaves just 22."
+      - "So the sector's area is $22\\ \\text{cm}^{2}$."
+      - "The cancellation is not luck — the numbers were chosen so that $\\tfrac{70}{360}$ reduces to $\\tfrac{7}{36}$ and meets a $\\tfrac{22}{7}$ and a 36. Simplifying the fraction before multiplying turns this into mental arithmetic; multiplying first gives $\\tfrac{5544}{252}$ and far more chance of slipping."
+    hint: "Take $\\tfrac{70}{360}$ of $\\pi r^2$, simplifying the fraction to $\\tfrac{7}{36}$ first so everything cancels."
+
+  30:
+    answer: D
+    steps:
+      - "A prism has the same cross-section all along its length, so the volume is the area of that cross-section times the length."
+      - "The cross-section here is the shaded end face — a trapezium, not a rectangle or a triangle."
+      - "Its two parallel sides are the 8 cm along the top and the 10 cm along the bottom, and the 5 cm side is perpendicular to both, so that is the distance between them."
+      - "The area of a trapezium is $\\dfrac{1}{2}(a + b)h$ with $a$ and $b$ the parallel sides."
+      - "So the area is $\\dfrac{1}{2}(8 + 10)(5) = \\dfrac{1}{2}(18)(5) = 45\\ \\text{cm}^{2}$."
+      - "The 11 cm is the length of the prism — the direction the cross-section is dragged through."
+      - "So the volume is $45 \\times 11 = 495\\ \\text{cm}^{3}$."
+      - "Option A is $990\\ \\text{cm}^{3}$, exactly double, which comes from using $(8 + 10) \\times 5$ and forgetting the half in the trapezium formula. Option C, $550$, is $10 \\times 5 \\times 11$ — treating the end as a rectangle and ignoring the slope."
+    hint: "The end face is a trapezium with parallel sides 8 and 10 and height 5. Find its area, then multiply by the 11 cm length."
+
+  31:
+    answer: B
+    steps:
+      - "When a sector is rolled into a cone, the sector's arc becomes the circle around the base — nothing is stretched or lost."
+      - "So the key equation is: arc length of the sector = circumference of the cone's base."
+      - "The sector has angle $45^{\\circ}$ cut from a circle of radius $r$, so its arc is $\\dfrac{45}{360}$ of that circle's circumference."
+      - "$\\dfrac{45}{360} = \\dfrac{1}{8}$, so the arc length is $\\dfrac{1}{8} \\times 2\\pi r = \\dfrac{\\pi r}{4}$."
+      - "Now let the cone's base radius be $R$. Its circumference is $2\\pi R$."
+      - "Setting them equal: $2\\pi R = \\dfrac{\\pi r}{4}$."
+      - "The $\\pi$ cancels from both sides, leaving $2R = \\dfrac{r}{4}$."
+      - "So $R = \\dfrac{r}{8}$ cm."
+      - "The two radii play completely different roles: $r$ is the sector's radius, which becomes the cone's *slant height*, while $R$ is the base radius. Option D, $\\tfrac{r}{2}$, comes from equating the radii directly instead of the arc to the circumference."
+    hint: "The sector's arc becomes the base circle. Set $\\tfrac{1}{8}(2\\pi r)$ equal to $2\\pi R$ and solve for $R$."
+
+  32:
+    answer: D
+    steps:
+      - "A point equidistant from two others lies on the perpendicular bisector of the segment joining them — that is what 'equidistant' buys us here."
+      - "So $P$ sits on the line through the midpoint of $LM$, at right angles to it."
+      - "Call that midpoint $N$. Since $LM = 16$ cm and $N$ is the midpoint, $LN = 8$ cm."
+      - "Now triangle $LNP$ has a right angle at $N$, because the bisector is perpendicular to $LM$."
+      - "Its hypotenuse is $LP = 10$ cm, given, and one leg is $LN = 8$ cm."
+      - "The distance of $P$ from $LM$ is the remaining leg, $PN$ — distance from a line always means the perpendicular distance."
+      - "By Pythagoras: $PN^{2} = 10^{2} - 8^{2} = 100 - 64 = 36$."
+      - "So $PN = 6$ cm."
+      - "This is the 6-8-10 triangle, a scaled 3-4-5. Option C is 8 cm, which is $LN$ — the distance along $LM$ rather than away from it, and the two are perpendicular, so they are not interchangeable."
+    hint: "$P$ is on the perpendicular bisector, so drop to the midpoint: a right triangle with hypotenuse 10 and one leg 8."
+
+  33:
+    answer: C
+    steps:
+      - "The angle a line makes with the positive horizontal axis gives its gradient directly: $m = \\tan\\theta$."
+      - "Here $\\theta = 135^{\\circ}$, so $m = \\tan 135^{\\circ}$."
+      - "$135^{\\circ}$ lies in the second quadrant, where tangent is negative, and it is $45^{\\circ}$ past the vertical from $90^{\\circ}$... more simply, $\\tan 135^{\\circ} = -\\tan 45^{\\circ} = -1$."
+      - "So the line has gradient $-1$ and slopes downwards, which an angle greater than $90^{\\circ}$ always means."
+      - "Now use the point-gradient form $y - y_{1} = m(x - x_{1})$ with the point $(2, 3)$."
+      - "$y - 3 = -1(x - 2) = -x + 2$."
+      - "Rearranging: $y = -x + 5$, that is $x + y = 5$."
+      - "Check the point lies on it: $2 + 3 = 5$ ✓."
+      - "Options A and D use $x - y$, which describes a line of gradient $+1$ — sloping upwards. An angle of $135^{\\circ}$ rules those out before any substitution, since the gradient's sign is fixed by the quadrant alone."
+    hint: "Gradient is $\\tan 135^\\circ = -1$, so the line slopes down. Use the point $(2,3)$ in $y - y_1 = m(x - x_1)$."
+
+  34:
+    answer: D
+    steps:
+      - "The 'point common to the lines' is where they cross, so solve the two equations together first."
+      - "The equations are $2x - y = 4$ and $x + y = 2$, and the $y$ terms have opposite signs — so adding eliminates $y$."
+      - "Adding: $(2x + x) + (-y + y) = 4 + 2$, giving $3x = 6$ and $x = 2$."
+      - "Substitute into the second: $2 + y = 2$, so $y = 0$."
+      - "The common point is therefore $(2, 0)$."
+      - "Now find the distance from $Q(4, 3)$ to $(2, 0)$ using $\\sqrt{(x_{2}-x_{1})^{2} + (y_{2}-y_{1})^{2}}$."
+      - "The differences are $4 - 2 = 2$ and $3 - 0 = 3$."
+      - "So the distance is $\\sqrt{2^{2} + 3^{2}} = \\sqrt{4 + 9} = \\sqrt{13}$."
+      - "Option C is $\\sqrt{26}$, which is $\\sqrt{2(13)}$ — what you get from a sign slip that makes the differences 1 and 5, or from using the wrong intersection point. Checking $(2,0)$ satisfies *both* original equations, as it does, rules that out."
+    hint: "Add the two equations to find where the lines meet, then apply the distance formula from $Q(4,3)$ to that point."
+
+  35:
+    answer: B
+    steps:
+      - "Sketch the right-angled triangle: the building is vertical, the ground is horizontal, and the instrument is at the far end of the ground."
+      - "The angle of elevation, $30^{\\circ}$, sits at the instrument, between the ground and the line of sight to the top."
+      - "Relative to that angle, the building's 40 m is the *opposite* side and the ground distance is the *adjacent* side."
+      - "Opposite over adjacent is tangent, so $\\tan 30^{\\circ} = \\dfrac{40}{d}$."
+      - "Rearranging for the distance: $d = \\dfrac{40}{\\tan 30^{\\circ}}$."
+      - "Now $\\tan 30^{\\circ} = \\dfrac{1}{\\sqrt{3}}$, so dividing by it is multiplying by $\\sqrt{3}$."
+      - "Therefore $d = 40\\sqrt{3}$ m, which is about 69 m."
+      - "A shallow angle of elevation means the observer is far away, so the distance should exceed the 40 m height — and $40\\sqrt{3} \\approx 69$ m does. Option C, $\\dfrac{40}{\\sqrt{3}} \\approx 23$ m, would put the instrument closer than the building is tall, which a $30^{\\circ}$ elevation rules out at a glance."
+    hint: "Tangent relates the 40 m opposite to the unknown adjacent. Dividing by $\\tan 30^\\circ$ multiplies by $\\sqrt{3}$ — the answer exceeds 40 m."
+
+  36:
+    answer: B
+    steps:
+      - "Two sides and the angle *between* them are given, with the third side wanted — that is the cosine rule's case."
+      - "The rule is $b^{2} = a^{2} + c^{2} - 2ac\\cos B$, where $B$ is the angle between the two known sides."
+      - "Here the $60^{\\circ}$ is at $Y$, between $XY = 3$ and $YZ = 4$, and $XZ$ is opposite it."
+      - "So $XZ^{2} = 3^{2} + 4^{2} - 2(3)(4)\\cos 60^{\\circ}$."
+      - "The first part is $9 + 16 = 25$, and $2(3)(4) = 24$."
+      - "Since $\\cos 60^{\\circ} = \\dfrac{1}{2}$, the last term is $24 \\times \\dfrac{1}{2} = 12$."
+      - "So $XZ^{2} = 25 - 12 = 13$, giving $XZ = \\sqrt{13}$ cm."
+      - "Note what the $60^{\\circ}$ does: had the angle been $90^{\\circ}$, Pythagoras would give $\\sqrt{25} = 5$. An acute angle pulls the opposite side *shorter* than that, and $\\sqrt{13} \\approx 3.6$ duly is. Forgetting the $\\cos$ term altogether gives exactly that 5, which is not offered — a useful warning."
+    hint: "Cosine rule with the $60^\\circ$ between the two given sides. Since $\\cos 60^\\circ = \\tfrac12$, the subtracted term is 12."
+
+  37:
+    answer: D
+    steps:
+      - "The $150^{\\circ}$ is outside the triangle, so convert it into an angle inside before using any rule."
+      - "$X$, $Z$ and $E$ lie on a straight line, so $\\angle XZY$ and $\\angle YZE$ are angles on a straight line and add to $180^{\\circ}$."
+      - "Therefore $\\angle XZY = 180 - 150 = 30^{\\circ}$."
+      - "Now the triangle has one known angle and two known sides — but the sides are not both next to that angle, so the sine rule applies."
+      - "The sine rule pairs each side with the angle *opposite* it: $\\dfrac{XZ}{\\sin\\angle XYZ} = \\dfrac{XY}{\\sin\\angle XZY}$."
+      - "Match them carefully: $XZ = 2$ is opposite the angle at $Y$, and $XY = 5$ is opposite the angle at $Z$."
+      - "So $\\dfrac{2}{\\sin\\theta} = \\dfrac{5}{\\sin 30^{\\circ}} = \\dfrac{5}{0.5} = 10$."
+      - "Therefore $\\sin\\theta = \\dfrac{2}{10} = \\dfrac{1}{5}$."
+      - "Pairing each side with the angle *next* to it rather than opposite it is the standard error, and here it would give $\\sin\\theta = \\tfrac{5}{4}$ — greater than 1, which is impossible for a sine, and so an immediate signal the pairing was wrong."
+    hint: "Angles on a straight line turn the $150^\\circ$ into $30^\\circ$ inside the triangle. Then use the sine rule, pairing each side with the angle opposite."
+
+  38:
+    answer: C
+    steps:
+      - "A quotient can be differentiated with the quotient rule, but here the denominator is a single term, so dividing through first is far quicker."
+      - "Split the fraction term by term over $3x^{2}$: $\\dfrac{6x^{3}}{3x^{2}} - \\dfrac{5x^{2}}{3x^{2}} + \\dfrac{1}{3x^{2}}$."
+      - "The first is $2x$; the second is $\\dfrac{5}{3}$, a constant; the third is $\\dfrac{1}{3}x^{-2}$."
+      - "So the expression is $2x - \\dfrac{5}{3} + \\dfrac{1}{3}x^{-2}$."
+      - "Now differentiate each piece. $2x$ gives 2."
+      - "The constant $-\\dfrac{5}{3}$ differentiates to 0 — constants vanish."
+      - "For $\\dfrac{1}{3}x^{-2}$: bring the index down and reduce it by one, giving $\\dfrac{1}{3} \\times (-2)x^{-3} = -\\dfrac{2}{3}x^{-3}$."
+      - "So the derivative is $2 - \\dfrac{2}{3x^{3}}$."
+      - "The sign on the last term is where this turns: a negative index brought down stays negative, so the term subtracts. Option A has it adding, which is the same working with that one sign missed."
+    hint: "Divide each term by $3x^2$ first, then differentiate — the negative index brings down a negative, so the last term subtracts."
+
+  39:
+    answer: D
+    steps:
+      - "This is a function inside a function, so the chain rule applies: differentiate the outside, keep the inside unchanged, then multiply by the derivative of the inside."
+      - "The outside function is cosine, and the derivative of $\\cos u$ is $-\\sin u$ — note the minus sign, which is part of the rule."
+      - "So the first factor is $-\\sin(3x^{2} - 2x)$, with the bracket copied across unchanged."
+      - "Now the inside: $u = 3x^{2} - 2x$, so $\\dfrac{du}{dx} = 6x - 2$."
+      - "Multiplying the two: $-\\sin(3x^{2} - 2x) \\times (6x - 2)$."
+      - "Written tidily, that is $-(6x - 2)\\sin(3x^{2} - 2x)$."
+      - "Two things must survive intact: the minus from differentiating cosine, and the bracket inside the sine, which never changes."
+      - "Option A, $-\\sin(6x - 2)$, differentiates the inside and then puts it *inside* the sine — but the chain rule multiplies by it, it does not substitute it. Option C has the right shape but drops the minus, and option B drops the $(6x-2)$ factor entirely."
+    hint: "Chain rule: $-\\sin(\\text{the same bracket})$, multiplied by the bracket's derivative $6x - 2$. Keep the minus."
+
+  40:
+    answer: C
+    steps:
+      - "The gradient is the derivative, so rewrite both terms as powers of $x$ before differentiating — roots and reciprocals are both indices in disguise."
+      - "$2\\sqrt{x} = 2x^{1/2}$ and $\\dfrac{1}{x} = x^{-1}$, so $y = 2x^{1/2} - x^{-1}$."
+      - "Differentiate the first term: bring $\\tfrac{1}{2}$ down and reduce the index by one, giving $2 \\times \\tfrac{1}{2}x^{-1/2} = x^{-1/2}$."
+      - "Differentiate the second: $-x^{-1}$ gives $-(-1)x^{-2} = +x^{-2}$. The two minus signs make a plus."
+      - "So $\\dfrac{dy}{dx} = x^{-1/2} + x^{-2}$, which can be written $\\dfrac{1}{\\sqrt{x}} + \\dfrac{1}{x^{2}}$."
+      - "Now substitute $x = 1$. Both $\\sqrt{1}$ and $1^{2}$ are 1."
+      - "So the gradient is $1 + 1 = 2$."
+      - "The sign flip on the second term is the trap: differentiating $-\\dfrac{1}{x}$ gives $+\\dfrac{1}{x^{2}}$, not $-\\dfrac{1}{x^{2}}$. Getting that wrong gives $1 - 1 = 0$, which is option A."
+    hint: "Write both terms as indices, differentiate, and watch that $-x^{-1}$ differentiates to $+x^{-2}$. Then put $x = 1$."
+
+  41:
+    answer: B
+    steps:
+      - "Integrate the two terms separately — integration splits across a sum."
+      - "The first term is $\\dfrac{1}{x}$, which is $x^{-1}$. The usual power rule fails here, because raising the index by one would give $x^{0}$ and a division by zero."
+      - "This one case has its own result: $\\displaystyle\\int \\dfrac{1}{x}\\,dx = \\ln x$."
+      - "The second term is $\\cos x$, and integration reverses differentiation — since $\\sin x$ differentiates to $\\cos x$, the integral of $\\cos x$ is $\\sin x$."
+      - "Putting them together: $\\ln x + \\sin x$."
+      - "An indefinite integral always needs the arbitrary constant, since any constant differentiates to zero."
+      - "So the answer is $\\ln x + \\sin x + k$."
+      - "Options A and D give $-\\dfrac{1}{x^{2}}$ for the first term, which is what you get by *differentiating* $\\dfrac{1}{x}$ rather than integrating it. The logarithm is the whole point of the $\\dfrac{1}{x}$ term, and it is the one function the power rule cannot handle."
+    hint: "$\\tfrac{1}{x}$ integrates to $\\ln x$ — the one case the power rule misses — and $\\cos x$ to $\\sin x$. Add the constant."
+
+  42:
+    answer: D
+    steps:
+      - "Expand the integrand first so it can be integrated term by term: $y = x(x^{4} + x^{2} + 1) = x^{5} + x^{3} + x$."
+      - "Before integrating, look at the limits: they are $-1$ and $1$, symmetric about zero. That is worth noticing."
+      - "Every power here is odd, so $y$ is an odd function: replacing $x$ by $-x$ gives $-x^{5} - x^{3} - x$, which is exactly $-y$."
+      - "An odd function is anti-symmetric about the origin, so whatever area it encloses on the right of the axis it encloses equally below on the left, and the two cancel."
+      - "Therefore the integral over any interval symmetric about zero is exactly zero."
+      - "Confirming by direct integration: the antiderivative is $\\dfrac{x^{6}}{6} + \\dfrac{x^{4}}{4} + \\dfrac{x^{2}}{2}$, and every power in it is *even*."
+      - "So substituting $x = 1$ and $x = -1$ gives the same value, $\\dfrac{1}{6} + \\dfrac{1}{4} + \\dfrac{1}{2} = \\dfrac{11}{12}$, in both cases."
+      - "Subtracting: $\\dfrac{11}{12} - \\dfrac{11}{12} = 0$."
+      - "Option A is $\\tfrac{11}{12}$ — the value at the upper limit, with the subtraction of the lower limit forgotten. Spotting the odd function first makes the whole calculation unnecessary."
+    hint: "Expand to $x^5 + x^3 + x$ — all odd powers — and note the limits are symmetric. An odd function integrates to zero over such an interval."
+
+  43:
+    answer: A
+    steps:
+      - "A pie chart shares $360^{\\circ}$ in proportion to the amounts, so the first job is to find the angle of the sector that is not labelled."
+      - "Four sectors are marked: Housing $69^{\\circ}$, Transport $60^{\\circ}$, Meal $61^{\\circ}$ and Others $50^{\\circ}$."
+      - "Adding them: $69 + 60 = 129$; $+61 = 190$; $+50 = 240^{\\circ}$."
+      - "The whole circle is $360^{\\circ}$, so Basic accounts for $360 - 240 = 120^{\\circ}$."
+      - "Now convert that angle into money. The full $360^{\\circ}$ stands for the monthly income of ₦6,000."
+      - "So Basic's share is $\\dfrac{120}{360} \\times 6000$."
+      - "$\\dfrac{120}{360} = \\dfrac{1}{3}$, and a third of 6,000 is ₦2,000."
+      - "Note that Basic is the largest single sector at $120^{\\circ}$ — a third of the whole chart — even though it carries no label. Finding the unmarked sector by subtraction is the step the question is built on; the four printed angles are there to be added, not read individually."
+    hint: "Add the four marked angles, subtract from $360^\\circ$ to get Basic's $120^\\circ$, then take that fraction of ₦6,000."
+
+  44:
+    answer: D
+    steps:
+      - "In a histogram the height of each bar is the frequency for that class, so the total is simply the sum of the heights."
+      - "Read each bar against the vertical scale, which is marked in twos."
+      - "The class from 0 to 50 has height 3."
+      - "The class from 50 to 100 has height 5."
+      - "The class from 100 to 150 is the tallest, at 8."
+      - "The class from 150 to 200 has height 1."
+      - "And the class from 200 to 250 has height 2."
+      - "Adding: $3 + 5 = 8$; $+8 = 16$; $+1 = 17$; $+2 = 19$."
+      - "So the school presented 19 candidates."
+      - "Every bar counts, including the short ones on the right — the class with a single candidate is easy to overlook against the tall bar beside it, and dropping it gives 18, which is offered as option C."
+    hint: "Read the height of every bar, including the short ones on the right, and add them all."
+
+  45:
+    answer: B
+    steps:
+      - "The median is the middle value once everything is placed in order, so first find how many students there are."
+      - "Add the frequencies: $3 + 5 + 1 + 1 + 2 + 3$."
+      - "Running along: $3 + 5 = 8$; $+1 = 9$; $+1 = 10$; $+2 = 12$; $+3 = 15$."
+      - "With 15 students — an odd number — there is a single middle value, at position $\\dfrac{15 + 1}{2} = 8$."
+      - "Now build cumulative totals until position 8 is reached. The ages are already in order along the table."
+      - "Up to age 20: 3 students, covering positions 1 to 3."
+      - "Up to age 25: $3 + 5 = 8$ students, covering positions 4 to 8."
+      - "Position 8 therefore falls in the age-25 group, so the median age is 25."
+      - "The ages themselves, 20 to 45, are not what gets averaged — taking the middle *age* would give something near 32.5. The median depends on where the students are, and most of them are at the low end."
+    hint: "Total the frequencies to get 15, so the median is the 8th value. Run cumulative totals across the ages until you reach it."
+
+  46:
+    answer: C
+    steps:
+      - "The mode is the value that occurs most often, so count how many times each score appears."
+      - "The scores are 15, 16, 17, 13, 16, 8, 5, 16, 19, 17."
+      - "Going through them: 15 appears once; 13 once; 8 once; 5 once; 19 once."
+      - "17 appears twice — at the third position and the last."
+      - "16 appears three times — at the second, fifth and eighth positions."
+      - "Three is more than any other count, so the mode is 16."
+      - "Note that the mode is a value *from the data*, not a position or a count — the answer is 16, the score itself, not 3, the number of times it occurred."
+      - "It is also worth separating the mode from the other averages: the mean here is 14.2 and the median 16, and only the mode is found purely by counting repeats."
+    hint: "Count how many times each score appears. The mode is the score itself, not how often it occurs."
+
+  47:
+    answer: C
+    steps:
+      - "Standard deviation measures spread about the mean, so find the mean first — and here it falls out immediately."
+      - "The data run from $-5$ to $5$, symmetric about zero, so the positives and negatives cancel and the mean is 0."
+      - "That simplifies everything: each deviation from the mean is just the value itself."
+      - "Now square each value. The squares are $25, 16, 9, 4, 1, 0, 1, 4, 9, 16, 25$."
+      - "Because of the symmetry, the non-zero squares come in matching pairs: $2(1 + 4 + 9 + 16 + 25)$."
+      - "The bracket is $1 + 4 = 5$; $+9 = 14$; $+16 = 30$; $+25 = 55$. So the total is $2 \\times 55 = 110$."
+      - "There are 11 values, so the variance is $\\dfrac{110}{11} = 10$."
+      - "The standard deviation is the square root of that: $\\sqrt{10}$."
+      - "Option A is 2 and option B is 3, both plausible-looking whole numbers, but $\\sqrt{10} \\approx 3.16$ lies between them. And the count is 11, not 10 — there are eleven integers from $-5$ to $5$ inclusive, and using 10 would give $\\sqrt{11}$, which is option D."
+    hint: "The mean is 0 by symmetry, so square the values directly. There are 11 numbers, not 10 — count the zero."
+
+  48:
+    answer: A
+    steps:
+      - "Two separate quantities are wanted, so work each out before combining."
+      - "The range is the largest value minus the smallest. Scanning 4, 9, 6, 3, 2, 8, 10, 5, 6, 7: the largest is 10 and the smallest is 2."
+      - "So the range is $10 - 2 = 8$."
+      - "Now the variance. It is the mean of the squared deviations, and the question supplies $\\sum d^{2} = 60$, which is exactly that total — so the hard part is done."
+      - "There are 10 numbers, so the variance is $\\dfrac{\\sum d^{2}}{n} = \\dfrac{60}{10} = 6$."
+      - "The question asks for the difference between the range and the variance."
+      - "That is $8 - 6 = 2$."
+      - "The 60 is the *sum* of the squared deviations, not the variance itself — using it directly would give a difference of $8 - 60 = -52$, which is not offered. Dividing by $n$ is what turns a total into an average, and it is the step the notation $\\sum d^{2}$ is signalling."
+    hint: "Range is $10 - 2$. The variance is $\\tfrac{\\sum d^2}{n} = \\tfrac{60}{10}$ — divide the given total by 10. Then subtract."
+
+  49:
+    answer: A
+    steps:
+      - "Count the whole sample space first, then the outcomes that count as successes."
+      - "The basket holds $6 + 11 + 13$ fruits altogether."
+      - "That is $6 + 11 = 17$, and $17 + 13 = 30$ fruits."
+      - "A success is picking either a grape or a banana. No fruit is both, so these cases cannot overlap and their counts simply add."
+      - "The favourable outcomes number $6 + 11 = 17$."
+      - "So the probability is $\\dfrac{17}{30}$."
+      - "This fraction will not simplify — 17 is prime and does not divide 30 — so it is already in lowest terms."
+      - "Equivalently, the complement works too: the only other outcome is an orange, with probability $\\dfrac{13}{30}$, and $1 - \\dfrac{13}{30} = \\dfrac{17}{30}$ ✓. Option B, $\\dfrac{11}{30}$, is the bananas alone, with the grapes forgotten."
+    hint: "Add all three kinds for the total of 30, then add grapes and bananas for the favourable count."
+
+  50:
+    answer: C
+    steps:
+      - "Count the possible outcomes first, and take care with 'both numbers inclusive' — it means 10 and 20 are themselves in the range."
+      - "The numbers are $10, 11, 12, \\ldots, 20$."
+      - "Counting them: $20 - 10 + 1 = 11$ numbers. The $+1$ is what includes both endpoints."
+      - "Now count the even ones: 10, 12, 14, 16, 18, 20."
+      - "That is 6 numbers."
+      - "So the probability is $\\dfrac{6}{11}$."
+      - "The evens outnumber the odds here — six against five — because the range starts and ends on an even number, which is why the answer is a little over a half rather than exactly a half."
+      - "Option B is $\\tfrac{1}{2}$, the instinctive answer, and option A is $\\tfrac{5}{11}$, the probability of an *odd* number. Counting the eleven values explicitly, rather than assuming evens and odds must balance, is what separates the three."
+    hint: "'Inclusive' makes it 11 numbers, not 10. List the evens — there are six, so the answer is just over a half."

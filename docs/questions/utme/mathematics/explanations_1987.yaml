@@ -1,0 +1,581 @@
+# UTME 1987 Mathematics — worked explanations, written against the paper.
+#
+# Keyed on question number; see explanations_2003.yaml for why, and for how these are written.
+#
+# All 50 are answered. Of the 29 the key covers, 28 agree; Q20 differs, and
+# retranscribed_1987.yaml sets out why. Q11 and Q12 rest on rebuilt stems, which their notes
+# say plainly.
+format_version: 1
+exam_year: 1987
+subject: MATH
+
+explanations:
+  1:
+    answer: B
+    steps:
+      - 'Changing between two bases that are not ten is done in two stages: first into base ten, then out of it into the new base.'
+      - 'In base 5 the place values, from the right, are 1, 5 and 25. So $241_{5} = 2 \times 25 + 4 \times 5 + 1 \times 1 = 50 + 20 + 1 = 71$.'
+      - 'Now write 71 in base 8 by dividing repeatedly by 8 and keeping the remainders.'
+      - '$71 \div 8 = 8$ remainder 7; $8 \div 8 = 1$ remainder 0; $1 \div 8 = 0$ remainder 1.'
+      - 'Reading the remainders from the last one upwards gives $107_{8}$.'
+      - 'Check: $107_{8} = 1 \times 64 + 0 \times 8 + 7 = 71$ ✓.'
+      - 'The trap is option A, $71_{8}$ — the base-ten value 71 with a subscript 8 stuck on. The digits must be recalculated, not relabelled; $71_{8}$ is really $57$.'
+    hint: 'Convert $241_{5}$ to base ten (71) first, then divide by 8.'
+
+  2:
+    answer: B
+    steps:
+      - 'A rod that can be cut exactly into 40 cm strips has a length that is a multiple of 40; the same rod cut into 48 cm strips must be a multiple of 48. The least such length is the lowest common multiple.'
+      - 'Factorise: $40 = 2^{3} \times 5$ and $48 = 2^{4} \times 3$.'
+      - 'The LCM takes each prime to its highest power: $2^{4} \times 3 \times 5 = 16 \times 15 = 240$.'
+      - 'Check: $240 \div 40 = 6$ strips and $240 \div 48 = 5$ strips, both exact ✓.'
+      - 'Option A, 120, fails: $120 \div 48 = 2.5$, not a whole number of strips.'
+      - 'The trap is options C and D, which are common multiples (480 is) but not the *least* one. Or reaching for the H.C.F., 8, which answers a different question — the longest strip that fits both.'
+    hint: 'Find the L.C.M. of 40 and 48.'
+
+  3:
+    answer: D
+    steps:
+      - 'The area is in square yards but the length is in metres, so both must be put into the same unit before dividing.'
+      - 'Convert the length to yards: 1 m is 1.1 yd, so 50 m is $50 \times 1.1 = 55$ yd.'
+      - 'Width in yards $= \dfrac{\text{area}}{\text{length}} = \dfrac{1815}{55} = 33$ yd.'
+      - 'The answer is wanted in metres, so convert back: $33 \div 1.1 = 30$ m.'
+      - 'Check: $50 \text{ m} \times 30 \text{ m} = 1500\ \text{m}^{2}$, and one square metre is $1.1^{2} = 1.21$ square yards, so $1500 \times 1.21 = 1815$ ✓.'
+      - 'The trap is option C, 33 — the width in yards, correct as a number but in the wrong unit. The question asks for metres.'
+    hint: 'Change 50 m to yards, divide, then change the answer back to metres.'
+
+  4:
+    answer: C
+    steps:
+      - 'The instruction is to round every number *first*, then calculate — so round each to two significant figures before doing any arithmetic.'
+      - '$0.02174$ to 2 s.f.: the first significant figures are 2 and 1, and the next digit is 7, so it rounds up to $0.022$.'
+      - '$1.2047$ to 2 s.f. is $1.2$, since the next digit, 0, does not round up.'
+      - '$0.023789$ to 2 s.f.: the figures are 2 and 3, the next is 7, so it becomes $0.024$.'
+      - 'Now evaluate: $\dfrac{0.022 \times 1.2}{0.024} = \dfrac{0.0264}{0.024} = 1.1$.'
+      - 'For comparison, the unrounded value is about $1.10$ too — rounding first changes little here.'
+      - 'The trap is rounding $0.02174$ down to $0.021$, which gives $\tfrac{0.0252}{0.024} = 1.05$. Rounding looks at the digit *after* the last one kept, and 7 rounds up.'
+    hint: 'Round each number to 2 s.f. first: 0.022, 1.2 and 0.024.'
+
+  5:
+    answer: B
+    steps:
+      - 'Average speed is always total distance divided by total time — never the average of the two speeds, because the slower leg takes longer.'
+      - 'Let the distance $PQ$ be $d$ km. The whole journey is $2d$ km.'
+      - 'The time out is $\dfrac{d}{90}$ hours and the time back is $\dfrac{d}{45} = \dfrac{2d}{90}$ hours.'
+      - 'Total time $= \dfrac{d}{90} + \dfrac{2d}{90} = \dfrac{3d}{90} = \dfrac{d}{30}$ hours.'
+      - 'Average speed $= \dfrac{2d}{d/30} = 2 \times 30 = 60$ km/h.'
+      - 'Check with a real distance, say 90 km: 1 hour out, 2 hours back, 180 km in 3 hours = 60 km/h ✓.'
+      - 'The trap is option C, 67.5 km/h — the simple average $\tfrac{90 + 45}{2}$. The train spends twice as long at the slow speed, which drags the average down.'
+    hint: 'Pick a convenient distance and divide total distance by total time.'
+
+  6:
+    answer: D
+    steps:
+      - 'Percentage changes to length and width multiply together to give the change in area, so work with the scale factors.'
+      - 'Let the square have side $s$, so its area is $s^{2}$.'
+      - 'The length becomes $1.2s$ (a 20% increase) and the width $0.8s$ (a 20% decrease).'
+      - 'The rectangle''s area is $1.2s \times 0.8s = 0.96s^{2}$.'
+      - 'So the ratio of rectangle to square is $0.96 : 1 = 96 : 100 = 24 : 25$.'
+      - 'The trap is assuming the changes cancel — a 20% rise and a 20% fall do not return you to the start, because the fall is taken from a bigger number. The area drops by 4%. Option B, 25 : 24, is the ratio upside down.'
+    hint: 'Multiply the scale factors 1.2 and 0.8.'
+
+  7:
+    answer: A
+    steps:
+      - 'Profit is what is left after the money invested is recovered, so find it first.'
+      - 'Profit $= ₦15{,}000 - ₦5{,}000 = ₦10{,}000$.'
+      - 'The ratio $2 : 3$ has $2 + 3 = 5$ parts, so each part is $10{,}000 \div 5 = ₦2{,}000$.'
+      - 'The shares are $2 \times 2000 = ₦4{,}000$ and $3 \times 2000 = ₦6{,}000$.'
+      - 'The difference is $6000 - 4000 = ₦2{,}000$ — exactly one part, since the ratio terms differ by 1.'
+      - 'The trap is sharing the whole ₦15,000 instead of the profit: the parts would be ₦3,000 and the difference ₦3,000, not offered. Options B and C are the two shares themselves.'
+    hint: 'Profit is ₦10,000; the shares differ by one of the five parts.'
+
+  8:
+    answer: A
+    steps:
+      - 'An average multiplied by the number of weeks gives the total, so work with totals.'
+      - 'A year has 52 weeks, and $20 + 24 + 8 = 52$ ✓. The whole-year total is $52 \times ₦30 = ₦1{,}560$.'
+      - 'The first 20 weeks earn $20 \times 20 = ₦400$.'
+      - 'The next 24 weeks earn $24 \times 36 = ₦864$.'
+      - 'So the remaining 8 weeks must earn $1560 - 400 - 864 = ₦296$.'
+      - 'The average for those weeks is $296 \div 8 = ₦37$.'
+      - 'The trap is option C, ₦30 — assuming the remaining weeks simply match the yearly average. The early weeks were paid below ₦30, so the late ones must be above it to compensate.'
+    hint: 'Year total $52 \times 30$; subtract the first two periods and divide by 8.'
+
+  9:
+    answer: B
+    steps:
+      - 'With simple interest, the amount is the principal plus the interest: $A = P + \dfrac{PRT}{100} = P\left(1 + \dfrac{RT}{100}\right)$.'
+      - 'Here $R = 4$ and $T = 3$, so $\dfrac{RT}{100} = 0.12$ and $A = 1.12P$.'
+      - 'The amount is ₦7,000, so $1.12P = 7000$ and $P = \dfrac{7000}{1.12} = ₦6{,}250$.'
+      - 'Check: interest is $6250 \times 0.04 \times 3 = ₦750$, and $6250 + 750 = 7000$ ✓.'
+      - 'The trap is option C, ₦6,160 — taking 12% *of the ₦7,000* off it ($7000 - 840$). The interest is 12% of the unknown principal, not of the final amount.'
+    hint: 'The amount is 1.12 times the principal.'
+
+  10:
+    answer: C
+    steps:
+      - 'Percentage profit or loss is always measured against the cost price, so find the cost first.'
+      - 'Selling at ₦1.35 gives an 8% profit, so ₦1.35 is 108% of the cost: $1.08C = 1.35$.'
+      - 'So $C = \dfrac{1.35}{1.08} = ₦1.25$.'
+      - 'Selling for ₦1.10 is below cost, a loss of $1.25 - 1.10 = ₦0.15$.'
+      - 'As a percentage of the cost: $\dfrac{0.15}{1.25} \times 100 = 12\%$ loss.'
+      - 'The trap is measuring the loss against ₦1.35 or ₦1.10 instead of the cost, which gives about 11% or 14%. Profit and loss percentages are always based on cost price.'
+    hint: 'Cost $= 1.35 \div 1.08$; then compare ₦1.10 with it.'
+
+  11:
+    answer: B
+    steps:
+      - 'Work problems are solved by measuring the job in a common unit — here, the work one boy does in an hour (a "boy-hour").'
+      - 'Boys work at a quarter of a girl''s rate, so one girl does the work of 4 boys.'
+      - 'Four boys and eight girls are therefore worth $4 + 8 \times 4 = 36$ boys.'
+      - 'They take 5 hours, so the field needs $36 \times 5 = 180$ boy-hours of work.'
+      - 'To finish in 3 hours with boys alone: $\dfrac{180}{3} = 60$ boys.'
+      - 'A sense check: fewer hours need more workers, and boys are slow workers, so a large number is expected ✓.'
+      - 'The trap is option A, 180 — the total boy-hours, not yet divided by the 3 hours available.'
+    hint: 'Convert everyone to boys (a girl = 4 boys), find the boy-hours, divide by 3.'
+
+  12:
+    answer: A
+    steps:
+      - 'Fractional indices have two parts: the denominator is a root and the numerator is a power. It is easiest to take the root first.'
+      - '$125^{4/3}$: the cube root of 125 is 5, and $5^{4} = 625$.'
+      - '$16^{3/4}$: the fourth root of 16 is 2, and $2^{3} = 8$.'
+      - 'So the expression is $\dfrac{625}{8}$.'
+      - 'Taking the root first keeps the numbers small: $125^{4}$ is over 244 million, whose cube root would be hard to find by hand.'
+      - 'The trap is option B, $\tfrac{8}{625}$, the fraction upside down, and option D, 8, which is only the denominator.'
+    hint: 'Cube root of 125, then fourth power; fourth root of 16, then cube.'
+
+  13:
+    answer: B
+    steps:
+      - 'First find the value both ways, then subtract, then write the difference in standard form.'
+      - '$\tfrac{35}{6} = 5.8333\ldots$, with the 3 recurring.'
+      - 'To 3 significant figures: 5, 8, 3 — the next digit is 3, so it stays $5.83$.'
+      - 'To 3 decimal places: $5.833$.'
+      - 'The error is $5.833 - 5.83 = 0.003$.'
+      - 'Standard form writes a number as $A \times 10^{n}$ with $1 \le A < 10$: $0.003 = 3.0 \times 10^{-3}$.'
+      - 'The trap is option A, 0.003 — the right number, but not in standard form, which is what the question asks for. Option D, $0.3 \times 10^{-3}$, is only $0.0003$, and its front number is below 1 anyway.'
+    hint: '$5.833 - 5.83$, then write it as $A \times 10^{n}$.'
+
+  14:
+    answer: A
+    steps:
+      - 'Simplify the top and bottom separately using the laws of logarithms.'
+      - 'Numerator: $\log_{2}6 - \log_{2}3 = \log_{2}\tfrac{6}{3} = \log_{2}2 = 1$.'
+      - 'Denominator: $\log_{2}8 = 3$, since $2^{3} = 8$.'
+      - '$\log_{2}\tfrac{1}{2} = -1$, since $2^{-1} = \tfrac{1}{2}$, so $2\log_{2}\tfrac{1}{2} = -2$.'
+      - 'The denominator is $3 - (-2) = 5$.'
+      - 'So the expression is $\dfrac{1}{5}$.'
+      - 'The trap is option C, $-\tfrac{1}{2}$ or similar, from treating $\log_{2}\tfrac{1}{2}$ as positive — the denominator would then be $3 - 2 = 1$, giving 1. The log of a number below 1 is negative.'
+    hint: 'Numerator is $\log_{2}2 = 1$; $\log_{2}\tfrac{1}{2} = -1$.'
+
+  15:
+    answer: D
+    steps:
+      - 'Multiply the whole numbers together and the surds together, then simplify.'
+      - 'Numerator: $2 \times 3 = 6$ and $\sqrt{14} \times \sqrt{21} = \sqrt{294}$. Since $294 = 49 \times 6$, $\sqrt{294} = 7\sqrt{6}$. So the numerator is $42\sqrt{6}$.'
+      - 'Denominator: $7 \times 2 = 14$ and $\sqrt{24} \times \sqrt{98} = \sqrt{2352}$. Since $2352 = 784 \times 3$ and $784 = 28^{2}$, $\sqrt{2352} = 28\sqrt{3}$. So the denominator is $392\sqrt{3}$.'
+      - 'The fraction is $\dfrac{42\sqrt{6}}{392\sqrt{3}}$. Now $\tfrac{\sqrt{6}}{\sqrt{3}} = \sqrt{2}$ and $\tfrac{42}{392} = \tfrac{3}{28}$.'
+      - 'So the result is $\dfrac{3\sqrt{2}}{28}$.'
+      - 'Numerical check: the original is $\tfrac{6 \times 17.15}{14 \times 48.50} \approx 0.1515$, and $\tfrac{3 \times 1.414}{28} \approx 0.1515$ ✓.'
+      - 'The trap is option C, $\tfrac{3\sqrt{14}}{28}$ — getting the number right but not simplifying the surds against each other.'
+    hint: 'Break each surd into a perfect square times a small number.'
+
+  16:
+    answer: D
+    steps:
+      - 'Substitute the known values first, then solve for $n$.'
+      - 'With $r = \sqrt{\tfrac{1}{3}}$, $r^{2} = \tfrac{1}{3}$, so $1 - r^{2} = \tfrac{2}{3}$.'
+      - 'The formula becomes $1 = \dfrac{2}{3} \times \dfrac{2/3}{n^{2}} = \dfrac{4/9}{n^{2}}$.'
+      - 'So $n^{2} = \tfrac{4}{9}$.'
+      - 'Taking the positive square root: $n = \tfrac{2}{3}$.'
+      - 'Check: $\tfrac{2}{3} \times \tfrac{2/3}{4/9} = \tfrac{2}{3} \times \tfrac{3}{2} = 1$ ✓.'
+      - 'The trap is option A, $\tfrac{3}{2}$ — the reciprocal, from solving $n^{2} = \tfrac{9}{4}$ by mixing up which side $n^{2}$ is on.'
+    hint: '$1 - r^{2} = \tfrac{2}{3}$, so $n^{2} = \tfrac{4}{9}$.'
+
+  17:
+    answer: A
+    steps:
+      - 'Work out $a$ and $b$ first, being careful with the negative value of $v$.'
+      - '$a = u^{2} - 3v^{2} = 1 - 3(1) = -2$, since $(-1)^{2} = 1$.'
+      - '$b = 2uv + v^{2} = 2(1)(-1) + 1 = -1$.'
+      - 'First bracket: $2a - b = -4 - (-1) = -3$.'
+      - 'Second bracket: $a - b^{2} = -2 - 1 = -3$, since $(-1)^{2} = 1$.'
+      - 'Product: $(-3)(-3) = 9$.'
+      - 'The trap is squaring $v = -1$ as $-1$. Every even power of a negative number is positive; that slip changes both $a$ and $b$.'
+    hint: '$a = -2$ and $b = -1$; then $(2a - b)(a - b^{2}) = (-3)(-3)$.'
+
+  18:
+    answer: D
+    steps:
+      - 'In $Q = 15 + 0.5n$, the 15 is a fixed cost and $0.5n$ grows with the number of people.'
+      - 'Each extra person adds $0.5$ to $Q$ — that is the coefficient of $n$.'
+      - 'So one more person costs ₦0.50 extra.'
+      - 'In kobo (100 kobo to the naira): $0.50 \times 100 = 50$ kobo.'
+      - 'Check: $Q(11) - Q(10) = 20.5 - 20 = 0.5$ ✓.'
+      - 'The trap is including the fixed ₦15, or confusing naira and kobo — 150k and 200k both come from adding the constant in some way. The extra cost only involves the part that changes.'
+    hint: 'The extra cost per person is the coefficient of $n$.'
+
+  19:
+    answer: B
+    steps:
+      - 'Write each variation as an equation with a constant, then substitute to remove $V$.'
+      - '$P$ varies inversely as $V$: $P = \dfrac{k}{V}$.'
+      - '$V$ varies directly as $R^{2}$: $V = cR^{2}$.'
+      - 'Substituting: $P = \dfrac{k}{cR^{2}} = \dfrac{K}{R^{2}}$, with the constants combined into $K$.'
+      - 'Use $R = 7$, $P = 2$: $2 = \dfrac{K}{49}$, so $K = 98$.'
+      - 'The relationship is $P = \dfrac{98}{R^{2}}$, that is $PR^{2} = 98$.'
+      - 'The trap is option A, $P = 98R^{2}$ — a direct variation, when the chain "inversely, then directly" makes $P$ inversely related to $R^{2}$.'
+    hint: 'Combine $P = \tfrac{k}{V}$ and $V = cR^{2}$ into $P = \tfrac{K}{R^{2}}$.'
+
+  20:
+    answer: C
+    steps:
+      - 'To make $y$ the subject, isolate the term containing $y$, then undo each operation on it in reverse order.'
+      - 'Subtract $x^{2}$: $Z - x^{2} = \dfrac{1}{y^{3}}$.'
+      - 'Take reciprocals of both sides: $y^{3} = \dfrac{1}{Z - x^{2}}$.'
+      - 'Take the cube root: $y = \dfrac{1}{(Z - x^{2})^{1/3}}$.'
+      - 'Check with $x = 1$, $Z = 9$: then $\tfrac{1}{y^{3}} = 8$, so $y = \tfrac{1}{2}$; and $\tfrac{1}{8^{1/3}} = \tfrac{1}{2}$ ✓.'
+      - 'The trap is option D, which takes the cube root of $Z$ and of $x^{2}$ separately. Roots do not split over subtraction: $\sqrt[3]{9 - 1} = 2$, but $\sqrt[3]{9} - \sqrt[3]{1} \approx 1.08$.'
+    hint: 'Subtract $x^{2}$, flip both sides, then take the cube root of the whole bracket.'
+
+  21:
+    answer: C
+    steps:
+      - 'A quadratic $ax^{2} + bx + c$ is a perfect square exactly when it has one repeated root, that is when its discriminant $b^{2} - 4ac$ is zero.'
+      - 'Here $a = 1$, $b = 2(m + 1)$ and $c = m + 3$.'
+      - 'Set $b^{2} - 4ac = 0$: $4(m + 1)^{2} - 4(m + 3) = 0$.'
+      - 'Divide by 4 and expand: $m^{2} + 2m + 1 - m - 3 = 0$, so $m^{2} + m - 2 = 0$.'
+      - 'Factorise: $(m + 2)(m - 1) = 0$, so $m = 1$ or $m = -2$.'
+      - 'Check $m = 1$: the function is $x^{2} + 4x + 4 = (x + 2)^{2}$ ✓. And $m = -2$: $x^{2} - 2x + 1 = (x - 1)^{2}$ ✓.'
+      - 'The trap is option B, $-1, 2$ — the right numbers with both signs reversed, from solving $(m + 2)(m - 1) = 0$ carelessly.'
+    hint: 'Set the discriminant $b^{2} - 4ac$ to zero.'
+
+  22:
+    answer: A
+    steps:
+      - 'The powers of 6 become a quadratic once $6^{2x + 1}$ is rewritten: $6^{2x + 1} = 6 \times 6^{2x} = 6(6^{x})^{2}$.'
+      - 'Let $u = 6^{x}$. The expression becomes $6u^{2} - 7u - 5$.'
+      - 'Factorise: two numbers multiplying to $6 \times (-5) = -30$ and adding to $-7$ are $-10$ and $3$.'
+      - 'Split the middle: $6u^{2} - 10u + 3u - 5 = 2u(3u - 5) + 1(3u - 5) = (3u - 5)(2u + 1)$.'
+      - 'Replace $u$ by $6^{x}$: $\{3(6^{x}) - 5\}\{2(6^{x}) + 1\}$.'
+      - 'Check by expanding: $(3u - 5)(2u + 1) = 6u^{2} + 3u - 10u - 5 = 6u^{2} - 7u - 5$ ✓.'
+      - 'The trap is option B, with $-1$ in the second bracket, which expands to $-13u + 5$. Only one arrangement of the signs reproduces both $-7u$ and $-5$.'
+    hint: 'Write $6^{2x + 1} = 6(6^{x})^{2}$ and let $u = 6^{x}$.'
+
+  23:
+    answer: C
+    steps:
+      - 'With one linear and one quadratic equation, make a letter the subject of the linear one and substitute into the quadratic.'
+      - 'From $x + y = 5$: $x = 5 - y$.'
+      - 'Substitute: $(5 - y)^{2} - 2y^{2} = 1$, so $25 - 10y + y^{2} - 2y^{2} = 1$.'
+      - 'Simplify: $-y^{2} - 10y + 24 = 0$, or $y^{2} + 10y - 24 = 0$.'
+      - 'Factorise: $(y + 12)(y - 2) = 0$, so $y = -12$ or $y = 2$.'
+      - 'Check $y = 2$: $x = 3$, and $9 - 8 = 1$ ✓. Check $y = -12$: $x = 17$, and $289 - 288 = 1$ ✓.'
+      - 'The trap is option A, $12, -2$ — both signs reversed, from the factorisation $(y - 12)(y + 2)$, which gives $y^{2} - 10y - 24$.'
+    hint: 'Substitute $x = 5 - y$ to get $y^{2} + 10y - 24 = 0$.'
+
+  24:
+    answer: A
+    steps:
+      - 'The rule links the number of sides to the number of diagonals: a figure with $n$ diagonals has $(n - 2)^{2}$ sides.'
+      - 'A 25-sided figure therefore satisfies $(n - 2)^{2} = 25$.'
+      - 'Take the square root: $n - 2 = 5$ (the negative root would give a negative $n$).'
+      - 'So $n = 7$.'
+      - 'Check: $(7 - 2)^{2} = 25$ ✓.'
+      - 'The trap is working backwards the wrong way — taking $n = 25$ and computing $(25 - 2)^{2}$. The 25 is the number of *sides*, which is the output of the rule, not its input.'
+    hint: 'Solve $(n - 2)^{2} = 25$.'
+
+  25:
+    answer: A
+    steps:
+      - 'A function "vanishes" where its value is zero, which on a graph is where the curve meets the horizontal axis.'
+      - 'The curve crosses the $x$-axis at three points: $x = -1$, $x = 0$ and $x = 1$.'
+      - 'So the function vanishes at $-1$, $0$ and $1$.'
+      - 'This fits a cubic: a cubic can have at most three real roots, and here all three are visible — the function could be $f(x) = kx(x - 1)(x + 1)$.'
+      - 'Options B and D describe *intervals*, where the function is negative or positive, not the individual points where it is zero.'
+      - 'The trap is option B, $-1 < x < 1$ — the stretch between the outer roots, which contains the root at 0 but also every point where the curve is above or below the axis.'
+    hint: '"Vanishes" means $f(x) = 0$: read where the curve crosses the $x$-axis.'
+
+  26:
+    answer: B
+    steps:
+      - 'Solve a linear inequality like an equation, but reverse the sign whenever you multiply or divide by a negative number.'
+      - 'Expand the bracket: $x - 1 > 4x + 8$.'
+      - 'Collect the $x$ terms on one side: $x - 4x > 8 + 1$, so $-3x > 9$.'
+      - 'Divide by $-3$ and reverse the sign: $x < -3$.'
+      - 'Check with $x = -4$: $-5 > 4(-2) = -8$ ✓. And $x = 0$ fails: $-1 > 8$ is false ✓.'
+      - 'The trap is option A, $x > -3$ — dividing by $-3$ without reversing the inequality.'
+    hint: 'You reach $-3x > 9$; dividing by $-3$ flips the sign.'
+
+  27:
+    answer: C
+    steps:
+      - 'Factorise the top and the bottom completely, then cancel common factors.'
+      - 'The numerator is a difference of two squares: $x^{2} - y^{2} = (x - y)(x + y)$.'
+      - 'The denominator: $2x^{2} + xy - y^{2}$. Look for $(2x + ?)(x + ?)$ — it is $(2x - y)(x + y)$, since that expands to $2x^{2} + 2xy - xy - y^{2}$ ✓.'
+      - 'Cancel the common factor $(x + y)$: $\dfrac{x - y}{2x - y}$.'
+      - 'Check with $x = 2$, $y = 1$: the original is $\tfrac{3}{8 + 2 - 1} = \tfrac{3}{9} = \tfrac{1}{3}$, and $\tfrac{1}{3}$ ✓.'
+      - 'The trap is option D, $\tfrac{x - y}{2x + y}$, from factorising the denominator as $(2x + y)(x - y)$, which expands to $2x^{2} - xy - y^{2}$ — the wrong middle sign.'
+    hint: 'Denominator is $(2x - y)(x + y)$.'
+
+  28:
+    answer: D
+    steps:
+      - 'A quadratic with a positive $x^{2}$ term has a lowest point, and completing the square shows where it is and how low it goes.'
+      - '$x^{2} - 6x + 8 = (x - 3)^{2} - 9 + 8 = (x - 3)^{2} - 1$.'
+      - 'A square is never negative, so $(x - 3)^{2} \ge 0$, and the smallest value of $y$ is when it is zero.'
+      - 'So the minimum value is $-1$, reached at $x = 3$.'
+      - 'By calculus: $\tfrac{dy}{dx} = 2x - 6 = 0$ at $x = 3$, and $y = 9 - 18 + 8 = -1$ ✓.'
+      - 'The trap is option B, 3 — the value of $x$ where the minimum happens, not the minimum value of $y$.'
+    hint: 'Complete the square: $(x - 3)^{2} - 1$.'
+
+  29:
+    answer: D
+    steps:
+      - 'The terms increase by 2 each time, so this is an arithmetic progression with $a = -10$ and $d = 2$.'
+      - 'The sum formula is $S_{n} = \dfrac{n}{2}[2a + (n - 1)d]$.'
+      - 'With $n = 21$: $2a + 20d = -20 + 40 = 20$.'
+      - '$S_{21} = \dfrac{21}{2} \times 20 = 210$.'
+      - 'A check: the 21st term is $-10 + 20 \times 2 = 30$, and $\tfrac{21}{2}(-10 + 30) = 210$ ✓.'
+      - 'The early negative terms cancel part of the later positive ones: $-10$ to $10$ sums to zero, leaving $12 + 14 + \cdots + 30 = 210$.'
+      - 'The trap is option C, 200 — using $nd$ instead of $(n - 1)d$, or counting 20 terms instead of 21.'
+    hint: 'AP with $a = -10$, $d = 2$, $n = 21$.'
+
+  30:
+    answer: B
+    steps:
+      - 'Each term is double the one before, so this is a geometric progression with $a = 4$ and $r = 2$.'
+      - 'The $n$th term is $ar^{n - 1}$, so the 11th term is $4 \times 2^{10}$.'
+      - 'Write 4 as a power of 2: $4 = 2^{2}$.'
+      - 'Then $2^{2} \times 2^{10} = 2^{12}$, adding the indices.'
+      - 'Check the pattern: the terms are $2^{2}, 2^{3}, 2^{4}, \ldots$, so the $n$th term is $2^{n + 1}$, and the 11th is $2^{12}$ ✓.'
+      - 'The trap is option D, $2^{10}$ — the factor $r^{n - 1}$ alone, with the first term 4 forgotten. Option A, $2^{13}$, uses $r^{n}$ instead of $r^{n - 1}$.'
+    hint: '11th term $= 4 \times 2^{10}$, and $4 = 2^{2}$.'
+
+  31:
+    answer: A
+    steps:
+      - 'A tangent meets the radius drawn to its point of contact at a right angle, so $\angle OPT = 90^{\circ}$.'
+      - 'In triangle $OPT$, the angles add to $180^{\circ}$: $\angle POT = 180^{\circ} - 90^{\circ} - 30^{\circ} = 60^{\circ}$.'
+      - 'Since $R$ lies on $OT$, $\angle POR$ is this same $60^{\circ}$ — an angle at the centre standing on the arc $PR$.'
+      - 'The angle $x = \angle PQR$ is at the circumference, standing on the same arc $PR$.'
+      - 'The angle at the centre is twice the angle at the circumference, so $x = \tfrac{1}{2} \times 60^{\circ} = 30^{\circ}$.'
+      - 'A cross-check: triangle $OQR$ is isosceles ($OQ = OR$), and its exterior angle at $O$ is $\angle POR = 60^{\circ}$, so each base angle is $30^{\circ}$ ✓.'
+      - 'The trap is stopping at the angle at the centre, $60^{\circ}$, and forgetting to halve it — or, noticing that no option says $60^{\circ}$, guessing $45^{\circ}$. The angle at the circumference is always half the angle at the centre on the same arc.'
+    hint: 'Find $\angle POT$ from the right angle at $P$, then halve it.'
+
+  32:
+    answer: B
+    steps:
+      - 'Because $QR \parallel TS$, triangles $PQR$ and $PTS$ are similar — same angles, one an enlargement of the other.'
+      - 'Their sides are in the ratio $QR : TS = 2 : 3$.'
+      - 'Areas of similar figures are in the ratio of the *squares* of their sides: $2^{2} : 3^{2} = 4 : 9$.'
+      - 'So if triangle $PQR$ has 4 units of area, the whole triangle $PTS$ has 9.'
+      - 'The trapezium $QRST$ is the whole triangle minus the small one: $9 - 4 = 5$ units.'
+      - 'So the ratio of triangle $PQR$ to trapezium $QRST$ is $4 : 5$.'
+      - 'The trap is option A, $4 : 9$ — the small triangle compared with the *whole* triangle, not with the trapezium. Option D, $2 : 3$, forgets to square the ratio at all.'
+    hint: 'Square the side ratio to get 4 : 9, then subtract to get the trapezium.'
+
+  33:
+    answer: D
+    steps:
+      - 'The interior angles of a polygon with $n$ sides add to $(n - 2) \times 180^{\circ}$.'
+      - 'A nonagon has 9 sides, so its angles total $7 \times 180^{\circ} = 1260^{\circ}$.'
+      - 'Six angles together make $1110^{\circ}$, so the other three make $1260 - 1110 = 150^{\circ}$.'
+      - 'Those three are equal, so each is $150 \div 3 = 50^{\circ}$.'
+      - 'The trap is option B, $150^{\circ}$ — the total of the three equal angles, not the size of one of them.'
+      - 'Using $1440^{\circ}$ (the sum for a decagon) or $360^{\circ}$ (the exterior sum) would give 110° or a negative number instead.'
+    hint: 'Nonagon angles total $1260^{\circ}$.'
+
+  34:
+    answer: B
+    steps:
+      - 'When the altitude is drawn from the right angle to the hypotenuse, it creates two smaller triangles similar to the whole — and that gives neat relations between the lengths.'
+      - 'The altitude satisfies $YT^{2} = XT \times TZ = 9 \times 16 = 144$, so $YT = 12$ cm.'
+      - 'In the right-angled triangle $YTZ$: $YZ^{2} = YT^{2} + TZ^{2} = 144 + 256 = 400$.'
+      - 'So $YZ = 20$ cm.'
+      - 'A second route: $YZ^{2} = TZ \times XZ = 16 \times 25 = 400$ — the leg squared equals its projection times the hypotenuse ✓.'
+      - 'The trap is option A, 25 cm — that is the hypotenuse $XZ$, not the side $YZ$.'
+    hint: 'The altitude gives $YT^{2} = 9 \times 16$; then use Pythagoras in triangle $YTZ$.'
+
+  35:
+    answer: D
+    steps:
+      - 'Angles in the same segment of a circle are equal: two angles standing on the same chord, on the same side of it, are equal.'
+      - '$\angle PRQ$ stands on chord $PQ$. So does $\angle PNQ$ — and because chords $QR$ and $NP$ cross, $R$ and $N$ lie on the same arc, on the same side of $PQ$. So $\angle PRQ = \angle PNQ$.'
+      - 'Find $\angle PNQ$ from triangle $PNQ$. At $Q$, the chord $QR$ lies between $QN$ and $QP$, so $\angle NQP = \angle RQN + \angle RQP = 49^{\circ} + 37^{\circ} = 86^{\circ}$.'
+      - 'At $P$, $\angle QPN = 35^{\circ}$.'
+      - 'So $\angle PNQ = 180^{\circ} - 86^{\circ} - 35^{\circ} = 59^{\circ}$.'
+      - 'Therefore $\angle PRQ = 59^{\circ}$.'
+      - 'The trap is picking one of the given angles — options A, B and C are exactly the three numbers in the question. None of them stands on the chord $PQ$.'
+    hint: '$\angle PRQ = \angle PNQ$; find it from triangle $PNQ$.'
+
+  36:
+    answer: C
+    steps:
+      - 'Co-interior angles — the two interior angles on the same side of a transversal crossing parallel lines — add up to $180^{\circ}$.'
+      - 'The angle at the upper line is split into two halves $y$, so it is $2y$; the angle at the lower line is $2z$.'
+      - 'These are co-interior, so $2y + 2z = 180^{\circ}$, which gives $y + z = 90^{\circ}$.'
+      - 'The two bisectors and the transversal form a triangle whose angles are $y$, $z$ and $x$.'
+      - 'So $x = 180^{\circ} - (y + z) = 180^{\circ} - 90^{\circ} = 90^{\circ}$.'
+      - 'This is a general fact: the bisectors of co-interior angles always meet at right angles, however steep the transversal is.'
+      - 'The trap is trying to find $y$ and $z$ separately — there is not enough information, and there does not need to be. Only their sum matters.'
+    hint: 'Co-interior angles give $2y + 2z = 180^{\circ}$.'
+
+  37:
+    answer: D
+    steps:
+      - 'The shaded region is the big rectangle with a smaller rectangle removed, so its area is the difference of the two.'
+      - 'The big rectangle is $2h$ wide and $3h$ tall: area $6h^{2}$.'
+      - 'The removed rectangle loses 2 cm from each side of the width and 2 cm from the top: it is $(2h - 4)$ wide and $(3h - 2)$ tall.'
+      - 'Its area is $(2h - 4)(3h - 2) = 6h^{2} - 4h - 12h + 8 = 6h^{2} - 16h + 8$.'
+      - 'Shaded area $= 6h^{2} - (6h^{2} - 16h + 8) = 16h - 8$.'
+      - 'Set it to 72: $16h - 8 = 72$, so $16h = 80$ and $h = 5$ cm.'
+      - 'Check: the frame is 10 cm by 15 cm with a 6 cm by 13 cm hole; $150 - 78 = 72$ ✓. The trap is taking 2 cm off the height at both top and bottom — the bottom is open.'
+    hint: 'Shaded area $= 6h^{2} - (2h - 4)(3h - 2)$.'
+
+  38:
+    answer: A
+    steps:
+      - '$210^{\circ}$ lies in the third quadrant, $30^{\circ}$ past $180^{\circ}$. Its reference angle is $30^{\circ}$.'
+      - 'The size of each ratio comes from $30^{\circ}$: $\sin 30^{\circ} = \tfrac{1}{2}$, $\cos 30^{\circ} = \tfrac{\sqrt{3}}{2}$, $\tan 30^{\circ} = \tfrac{1}{\sqrt{3}} = \tfrac{\sqrt{3}}{3}$.'
+      - 'The sign comes from the quadrant. In the third quadrant both $x$ and $y$ are negative, so sine and cosine are negative and tangent (their ratio) is positive.'
+      - 'So $\sin 210^{\circ} = -\tfrac{1}{2}$, $\cos 210^{\circ} = -\tfrac{\sqrt{3}}{2}$ and $\tan 210^{\circ} = \tfrac{\sqrt{3}}{3}$.'
+      - 'The memory aid "All Students Take Coffee" gives the positive ratios in quadrants 1 to 4: in the third it is Tangent only.'
+      - 'The trap is option B, which has all three positive — the values for $30^{\circ}$, with the quadrant signs forgotten.'
+    hint: 'Reference angle $30^{\circ}$; in the third quadrant only tangent is positive.'
+
+  39:
+    answer: B
+    steps:
+      - 'Draw the right-angled triangle that the tangent describes: opposite side $m^{2} - n^{2}$ and adjacent side $2mn$.'
+      - 'The hypotenuse is $\sqrt{(m^{2} - n^{2})^{2} + (2mn)^{2}}$.'
+      - 'Expand: $m^{4} - 2m^{2}n^{2} + n^{4} + 4m^{2}n^{2} = m^{4} + 2m^{2}n^{2} + n^{4} = (m^{2} + n^{2})^{2}$.'
+      - 'So the hypotenuse is $m^{2} + n^{2}$.'
+      - '$\sec\theta = \dfrac{1}{\cos\theta} = \dfrac{\text{hypotenuse}}{\text{adjacent}} = \dfrac{m^{2} + n^{2}}{2mn}$.'
+      - 'Check with $m = 2$, $n = 1$: $\tan\theta = \tfrac{3}{4}$, the 3-4-5 triangle, so $\sec\theta = \tfrac{5}{4}$; and $\tfrac{4 + 1}{4} = \tfrac{5}{4}$ ✓.'
+      - 'The trap is option A, hypotenuse over *opposite* — that is $\operatorname{cosec}\theta$.'
+    hint: 'The hypotenuse works out to $m^{2} + n^{2}$; secant is hypotenuse over adjacent.'
+
+  40:
+    answer: C
+    steps:
+      - 'Both angles look up to the same top of the pole, so both right-angled triangles share the height $h$. Let $d$ be the distance from $Y$ (the nearer point, with the steeper angle) to the foot of the pole.'
+      - 'From $Y$: $\tan 60^{\circ} = \dfrac{h}{d}$, so $h = d\sqrt{3}$.'
+      - 'From $X$, 8 m farther away: $\tan 30^{\circ} = \dfrac{h}{d + 8}$, so $h = \dfrac{d + 8}{\sqrt{3}}$.'
+      - 'Equate: $d\sqrt{3} = \dfrac{d + 8}{\sqrt{3}}$, so $3d = d + 8$ and $d = 4$ m.'
+      - 'Then $h = 4\sqrt{3}$ m, about 6.9 m.'
+      - 'A neat fact confirms it: with angles $30^{\circ}$ and $60^{\circ}$ the triangle $XY$-top is isosceles, so the line of sight from $Y$ is 8 m long, and $h = 8\sin 60^{\circ} = 4\sqrt{3}$ ✓.'
+      - 'The trap is option D, $8\sqrt{3}$ — using the 8 m as the distance from $Y$ to the pole rather than between the two observers.'
+    hint: '$h = d\sqrt{3}$ and $h = \tfrac{d + 8}{\sqrt{3}}$.'
+
+  41:
+    answer: A
+    steps:
+      - 'The diagonal of the room runs from a bottom corner to the opposite top corner. Its angle with the floor is measured against the floor diagonal directly beneath it.'
+      - 'Floor diagonal: $\sqrt{12^{2} + 9^{2}} = \sqrt{144 + 81} = \sqrt{225} = 15$ m.'
+      - 'Room diagonal: the floor diagonal and the 8 m height form a right angle, so the room diagonal is $\sqrt{15^{2} + 8^{2}} = \sqrt{289} = 17$ m.'
+      - 'The cosine of the angle is adjacent over hypotenuse: $\dfrac{15}{17}$.'
+      - 'The trap is option B, $\tfrac{8}{17}$ — that is the *sine* of the angle, using the height instead of the floor diagonal.'
+    hint: 'Floor diagonal 15, room diagonal 17.'
+
+  42:
+    answer: B
+    steps:
+      - 'A circle of latitude is a horizontal circle round the earth, smaller than the equator, and its radius depends on how far north or south it lies.'
+      - 'At latitude $\theta$, the radius $r$ of the circle is the horizontal distance from the earth''s axis to the surface. In the right-angled triangle formed with the earth''s radius $R$, the angle at the centre is $\theta$, and $r$ is adjacent to it: $r = R\cos\theta$.'
+      - 'The circumference is $2\pi r = 2\pi R\cos\theta$.'
+      - 'Check the extremes: at the equator ($\theta = 0$) it is $2\pi R$, the full circumference ✓; at a pole ($\theta = 90^{\circ}$) it is 0 ✓.'
+      - 'The trap is option D, with $\sin\theta$, which would make the equator have zero length. Option A is the radius of the circle, not its circumference.'
+    hint: 'The radius of the latitude circle is $R\cos\theta$.'
+
+  43:
+    answer: C
+    steps:
+      - 'The height drops from the vertex to the centre of the square base. The slant edge, the height and half the base diagonal form a right-angled triangle.'
+      - 'The diagonal of a square of side 8 is $8\sqrt{2}$, so half of it is $4\sqrt{2}$ cm.'
+      - 'By Pythagoras: $h^{2} = (4\sqrt{3})^{2} - (4\sqrt{2})^{2} = 48 - 32 = 16$.'
+      - 'So $h = 4$ cm.'
+      - 'The trap is using half the *side* (4) instead of half the diagonal: $\sqrt{48 - 16} = \sqrt{32} \approx 5.7$, which is not offered. The edge runs to a corner, and the corner is half a diagonal from the centre.'
+    hint: 'Half-diagonal $4\sqrt{2}$; then $h^{2} = 48 - 32$.'
+
+  44:
+    answer: B
+    steps:
+      - 'Read the construction from its starting point. It begins at $P$, a point off the line, and draws an arc that cuts the line at $Q$ and $R$.'
+      - 'That makes $PQ = PR$ — $P$ is equidistant from $Q$ and $R$.'
+      - 'Next, equal arcs are drawn from $Q$ and $R$ to meet at $X$ on the other side, so $XQ = XR$ too.'
+      - 'Both $P$ and $X$ are equidistant from $Q$ and $R$, so the line $PX$ is the perpendicular bisector of $QR$ — and it passes through $P$.'
+      - 'So the figure constructs the perpendicular from the given point $P$ to the given line.'
+      - 'The trap is option A. The line $PX$ does bisect $QR$ perpendicularly, but $Q$ and $R$ were made by the construction; the given objects were the point $P$ and the line, and the purpose was the perpendicular from $P$.'
+    hint: 'The construction starts from a point off the line.'
+
+  45:
+    answer: A
+    steps:
+      - 'The perpendicular from the centre of a circle to a chord bisects the chord, which links the chord''s midpoint to the centre.'
+      - 'A chord of length 6 has half-length 3. The radius to its end is 5.'
+      - 'So the distance from the centre to the midpoint is $\sqrt{5^{2} - 3^{2}} = \sqrt{16} = 4$ cm.'
+      - 'Every chord of length 6 has its midpoint exactly 4 cm from $O$, and every point 4 cm from $O$ is the midpoint of such a chord.'
+      - 'So the locus is a circle of radius 4 cm with centre $O$.'
+      - 'The trap is option D, a circle of radius 6 — taking the chord length as the distance. Midpoints of equal chords are always closer to the centre than the radius.'
+    hint: 'Half-chord 3, radius 5: the midpoint is 4 cm from $O$.'
+
+  46:
+    answer: C
+    steps:
+      - 'A day has 24 hours, shown as a full circle of $360^{\circ}$, so each hour is worth $360 \div 24 = 15^{\circ}$.'
+      - 'Daylight runs from 5.30 a.m. to 7.00 p.m. — from 5.30 to 12.00 is 6½ hours, and from 12.00 to 7.00 is 7 hours, so 13½ hours in all.'
+      - 'Darkness is the rest: $24 - 13\tfrac{1}{2} = 10\tfrac{1}{2}$ hours.'
+      - 'Daylight angle: $13.5 \times 15 = 202.5^{\circ} = 202^{\circ}30''$.'
+      - 'Darkness angle: $10.5 \times 15 = 157.5^{\circ} = 157^{\circ}30''$.'
+      - 'Check: $202^{\circ}30'' + 157^{\circ}30'' = 360^{\circ}$ ✓. (Half a degree is 30 minutes.)'
+      - 'The trap is option A, $187^{\circ}30''$ and $172^{\circ}30''$, from counting 12½ hours of daylight — miscounting the hours between 5.30 a.m. and 7 p.m.'
+    hint: '13½ hours of daylight at $15^{\circ}$ per hour.'
+
+  47:
+    answer: C
+    steps:
+      - 'The total number of goals is the sum of each goal count times the number of teams that scored it: $\sum fx$.'
+      - '$0 \times 4 = 0$, $1 \times 3 = 3$, $2 \times 15 = 30$, $3 \times 16 = 48$.'
+      - '$4 \times 1 = 4$, $5 \times 0 = 0$, $6 \times 1 = 6$.'
+      - 'Adding: $0 + 3 + 30 + 48 + 4 + 0 + 6 = 91$.'
+      - 'A check on the table: the frequencies total $4 + 3 + 15 + 16 + 1 + 0 + 1 = 40$ teams ✓.'
+      - 'The trap is option B, 40 — the number of *teams*, found by adding the frequencies, not the number of goals. Option A, 21, adds the goal values 0 to 6.'
+    hint: 'Multiply each number of goals by its frequency, then add.'
+
+  48:
+    answer: D
+    steps:
+      - 'Find the mean and the median separately, then add.'
+      - 'Mean: $3 + 2 + 8 + 5 + 7 + 12 + 9 + 14 = 60$, and $60 \div 8 = 7.5$, so $P = 7.5$.'
+      - 'Median: put the eight marks in order — 2, 3, 5, 7, 8, 9, 12, 14.'
+      - 'With an even number of values, the median is the average of the middle two, the 4th and 5th: $\tfrac{7 + 8}{2} = 7.5$, so $Q = 7.5$.'
+      - '$P + Q = 7.5 + 7.5 = 15$.'
+      - 'The trap is taking the median from the unsorted list — the 4th and 5th numbers as printed are 5 and 7, giving 6 and $P + Q = 13.5$. The data must be ordered first.'
+    hint: 'Sort the marks before finding the middle two.'
+
+  49:
+    answer: B
+    steps:
+      - '$CF(6)$ is a cumulative frequency: the number of students who scored 6 *or less*.'
+      - 'Add the frequencies for scores 1 to 6: $3 + 6 + 10 + 8 + 6 + 5$.'
+      - 'Step by step: $3 + 6 = 9$; $+ 10 = 19$; $+ 8 = 27$; $+ 6 = 33$; $+ 5 = 38$.'
+      - 'So $CF(6) = 38$.'
+      - 'A check from the other end: 56 students in all, minus those scoring 7, 8 or 9 ($2 + 4 + 12 = 18$), is $56 - 18 = 38$ ✓.'
+      - 'The trap is option C, 33 — that is $CF(5)$, stopping one score short. "Less than or equal to" includes the students who scored exactly 6. Option D, 5, is just those students.'
+    hint: 'Add the frequencies for scores 1 to 6.'
+
+  50:
+    answer: A
+    steps:
+      - 'A parallelogram is a quadrilateral with both pairs of opposite sides parallel. Test each shape against that definition.'
+      - 'A square: both pairs of opposite sides parallel — yes.'
+      - 'A rectangle: yes. A rhombus: yes.'
+      - 'A kite: its sides are equal in adjacent pairs, but opposite sides are not parallel — no.'
+      - 'A trapezium: only one pair of parallel sides — no.'
+      - 'So 3 of the 5 shapes are parallelograms, and the probability is $\tfrac{3}{5}$.'
+      - 'The trap is option D, $\tfrac{1}{5}$ — counting only a shape *named* parallelogram. Squares, rectangles and rhombuses are all special kinds of parallelogram.'
+    hint: 'Squares, rectangles and rhombuses are all parallelograms.'
