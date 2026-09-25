@@ -32,7 +32,7 @@ import type { CSSProperties } from 'react';
 
 import type { TutorReply } from './api.js';
 import { Coach } from './Coach.js';
-import { Maths } from './Maths.js';
+import { Maths } from '../Maths.js';
 import './theme.css';
 
 const STEP_MS = 5200;

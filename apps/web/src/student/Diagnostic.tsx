@@ -14,6 +14,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, type CheckupState } from './api.js';
 import './theme.css';
 
+import { Maths } from '../Maths.js';
+
 const KEYS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 export function Diagnostic({
@@ -146,17 +148,21 @@ export function Diagnostic({
         {question.passage_body ? (
           <div className="sp-passage">
             {question.passage_title ? <b>{question.passage_title}</b> : null}
-            <div>{question.passage_body}</div>
+            <div>
+              <Maths text={question.passage_body} />
+            </div>
           </div>
         ) : null}
 
         <div className="sp-card">
           {question.instructions ? (
             <p className="sp-tiny sp-muted" style={{ margin: '0 0 8px' }}>
-              {question.instructions}
+              <Maths text={question.instructions} />
             </p>
           ) : null}
-          <h2 style={{ fontSize: 20, margin: '4px 0 16px' }}>{question.stem}</h2>
+          <h2 style={{ fontSize: 20, margin: '4px 0 16px' }}>
+            <Maths text={question.stem} />
+          </h2>
           {question.options.map((option) => (
             <button
               key={option.option_key}
@@ -168,7 +174,9 @@ export function Diagnostic({
               }}
             >
               <span className="letter">{option.option_key}</span>
-              <span className="body">{option.body}</span>
+              <span className="body">
+                <Maths text={option.body} />
+              </span>
             </button>
           ))}
         </div>

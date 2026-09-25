@@ -18,6 +18,9 @@ import {
   type Skill,
 } from './api.js';
 
+import { Maths } from '../Maths.js';
+
+
 const QUEUES: { value: QueueState; label: string }[] = [
   { value: 'needs_review', label: 'Needs review' },
   { value: 'needs_answer', label: 'Answer unchecked' },
@@ -224,7 +227,9 @@ export function ReviewPage() {
                 <span className="q-id">
                   {item.exam_year} · Q{item.question_number}
                 </span>
-                <span className="q-stem">{item.stem}</span>
+                <span className="q-stem">
+                  <Maths text={item.stem} />
+                </span>
                 <span className="q-flags">
                   <Flag on={item.answer_checked} label="answer" />
                   <Flag on={item.level_checked} label="level" />
@@ -309,12 +314,20 @@ function QuestionPanel({ detail, skills, reviewerId, busy, onAct, onTyping }: Pa
       {detail.passage_body && (
         <details className="passage">
           <summary>{detail.passage_title ?? 'Passage'}</summary>
-          <p>{detail.passage_body}</p>
+          <p>
+            <Maths text={detail.passage_body} />
+          </p>
         </details>
       )}
 
-      {detail.instructions && <p className="instruction">{detail.instructions}</p>}
-      <p className="stem">{detail.stem}</p>
+      {detail.instructions && (
+        <p className="instruction">
+          <Maths text={detail.instructions} />
+        </p>
+      )}
+      <p className="stem">
+        <Maths text={detail.stem} />
+      </p>
 
       <ol className="options">
         {detail.options.map((option) => (
@@ -326,7 +339,9 @@ function QuestionPanel({ detail, skills, reviewerId, busy, onAct, onTyping }: Pa
               onClick={() => onAct(() => api.setAnswer(detail.question_id, reviewerId, option.option_key))}
             >
               <span className="key">{option.option_key}</span>
-              <span>{option.body}</span>
+              <span>
+                <Maths text={option.body} />
+              </span>
             </button>
           </li>
         ))}

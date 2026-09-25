@@ -17,6 +17,8 @@ import { api, type PracticeState } from './api.js';
 import { Board } from './Board.js';
 import './theme.css';
 
+import { Maths } from '../Maths.js';
+
 type Confidence = 'sure' | 'unsure' | 'guessed';
 
 const CONFIDENCE: { value: Confidence; label: string }[] = [
@@ -225,17 +227,21 @@ export function Practice({
       {question.passage_body ? (
         <div className="sp-passage">
           {question.passage_title ? <b>{question.passage_title}</b> : null}
-          <div>{question.passage_body}</div>
+          <div>
+            <Maths text={question.passage_body} />
+          </div>
         </div>
       ) : null}
 
       <div className="sp-card">
         {question.instructions ? (
           <p className="sp-tiny sp-muted" style={{ margin: '0 0 8px' }}>
-            {question.instructions}
+            <Maths text={question.instructions} />
           </p>
         ) : null}
-        <h2 style={{ fontSize: 20, margin: '4px 0 16px' }}>{question.stem}</h2>
+        <h2 style={{ fontSize: 20, margin: '4px 0 16px' }}>
+          <Maths text={question.stem} />
+        </h2>
         {question.options.map((option) => (
           <button
             key={option.option_key}
@@ -245,7 +251,9 @@ export function Practice({
             disabled={asking || busy}
           >
             <span className="letter">{option.option_key}</span>
-            <span className="body">{option.body}</span>
+            <span className="body">
+              <Maths text={option.body} />
+            </span>
           </button>
         ))}
       </div>

@@ -23,6 +23,8 @@ import {
   type SandboxSubject,
 } from './api.js';
 
+import { Maths } from '../Maths.js';
+
 type Phase = 'choosing' | 'asking' | 'finished' | 'failed';
 
 export function CheckupPage() {
@@ -204,12 +206,18 @@ export function CheckupPage() {
       {question.passage_body && (
         <section className="passage">
           {question.passage_title && <h2>{question.passage_title}</h2>}
-          <p>{question.passage_body}</p>
+          <p><Maths text={question.passage_body} /></p>
         </section>
       )}
-      {question.instructions && <p className="instructions">{question.instructions}</p>}
+      {question.instructions && (
+        <p className="instructions">
+          <Maths text={question.instructions} />
+        </p>
+      )}
 
-      <h1 className="stem">{question.stem}</h1>
+      <h1 className="stem">
+        <Maths text={question.stem} />
+      </h1>
 
       <ul className="options">
         {question.options.map((option) => (
@@ -221,7 +229,9 @@ export function CheckupPage() {
               onClick={() => choose(option.option_key)}
             >
               <span className="option-key">{option.option_key}</span>
-              <span>{option.body}</span>
+              <span>
+                <Maths text={option.body} />
+              </span>
             </button>
           </li>
         ))}
