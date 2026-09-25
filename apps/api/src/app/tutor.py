@@ -114,6 +114,7 @@ def _completion_options(settings: Settings) -> dict[str, object]:
         "reasoning_effort": effort,
     }
 
+
 #: The service target is a useful response or a clear fallback within 15 seconds, so a call
 #: the student is waiting on is given less than that, and the fallback is given room to be
 #: written and stored. This is the ceiling for anything that arrives all at once: the
