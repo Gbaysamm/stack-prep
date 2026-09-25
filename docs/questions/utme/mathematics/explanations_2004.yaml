@@ -18,6 +18,7 @@
 # Answers are checked against keys_2004.yaml, which covers 30 of them. They agree everywhere
 # except Q47, where the key ignores the constraint the question turns on; that disagreement is
 # argued in the explanation rather than hidden.
+# Polished for a spoken lesson: each explanation opens, moves step by step, and closes.
 format_version: 1
 exam_year: 2004
 subject: MATH
@@ -26,626 +27,676 @@ explanations:
   1:
     answer: C
     steps:
-      - "This is ordinary column subtraction, but in base five — so a borrow is worth 5, not 10. Work right to left."
-      - "Units column: $3 - 4$ cannot be done, so borrow from the column to the left. In base five the borrow adds 5, making it $3 + 5 = 8$, and $8 - 4 = 4$. That matches the 4 printed in the answer, so the borrow is right."
-      - "Fives column: the 4 there was reduced to 3 by that borrow. Now $3 - x$ must end in 4, which is impossible without another borrow, so borrow again: $3 + 5 = 8$, and $8 - x = 4$ gives $x = 4$."
-      - "Twenty-fives column: the 2 was reduced to 1 by the last borrow. $1 - 3$ needs a borrow too: $1 + 5 = 6$, and $6 - 3 = 3$, which matches the 3 printed."
-      - "Hundred-and-twenty-fives column: the 4 was reduced to 3. $3 - 1 = 2$, so $y = 2$."
-      - "The question asks for $x$ and $y$ respectively, so the answer is $4, 2$."
-      - "Check the whole thing in base ten: $4243_5 = 573$ and $1344_5 = 224$, and $573 - 224 = 349 = 2344_5$ ✓. Treating a borrow as worth 10 instead of 5 is the one mistake that matters here."
-    hint: "Subtract column by column from the right, but remember a borrow in base five is worth 5, not 10."
+      - 'This is subtraction you already know, just in base five. The only new thing is what a borrow is worth, so let''s go column by column.'
+      - 'Work right to left.'
+      - 'Units column: $3 - 4$ cannot be done, so borrow from the column to the left. In base five the borrow adds 5, making it $3 + 5 = 8$, and $8 - 4 = 4$. That matches the 4 printed in the answer, so the borrow is right.'
+      - 'Next, the fives column: the 4 there was reduced to 3 by that borrow. Now $3 - x$ must end in 4, which is impossible without another borrow, so borrow again: $3 + 5 = 8$, and $8 - x = 4$ gives $x = 4$.'
+      - 'Twenty-fives column: the 2 was reduced to 1 by the last borrow. $1 - 3$ needs a borrow too: $1 + 5 = 6$, and $6 - 3 = 3$, which matches the 3 printed.'
+      - 'Last, the hundred-and-twenty-fives column: the 4 was reduced to 3. $3 - 1 = 2$, so $y = 2$.'
+      - 'The question asks for $x$ and $y$ respectively, so the answer is $4, 2$.'
+      - 'Let''s check the whole thing in base ten: $4243_5 = 573$ and $1344_5 = 224$, and $573 - 224 = 349 = 2344_5$ ✓. Treating a borrow as worth 10 instead of 5 is the one mistake that matters here — remember, a borrow is worth the base.'
+    hint: 'Subtract column by column from the right, but remember a borrow in base five is worth 5, not 10.'
 
   2:
     answer: C
     steps:
-      - "The three numerals are in different bases, so convert everything to base ten before doing any arithmetic."
-      - "$451_6 = (4 \\times 36) + (5 \\times 6) + 1 = 144 + 30 + 1 = 175$."
-      - "$305_6 = (3 \\times 36) + (0 \\times 6) + 5 = 108 + 0 + 5 = 113$."
-      - "The equation says $175 - p = 113$, so $p = 175 - 113 = 62$ in base ten."
-      - "But the options are in base seven, so convert 62 across. The place values are 1, 7 and 49."
-      - "$62 \\div 49 = 1$ remainder 13; $13 \\div 7 = 1$ remainder 6. So the digits are 1, 1, 6."
-      - "Therefore $p = 116_7$."
-      - "Notice the subscripts differ across the question — two sixes and a seven. Subtracting the digits directly, without converting, is what the question is testing you will not do."
-    hint: "Convert both base-six numbers into base ten, subtract there, then convert the result into base seven."
+      - 'Three numbers, two different bases. The safe road is through base ten, so let''s take it.'
+      - 'The three numerals are in different bases, so convert everything to base ten before doing any arithmetic.'
+      - 'First, $451_6 = (4 \times 36) + (5 \times 6) + 1 = 144 + 30 + 1 = 175$.'
+      - 'Next, $305_6 = (3 \times 36) + (0 \times 6) + 5 = 108 + 0 + 5 = 113$.'
+      - 'The equation says $175 - p = 113$, so $p = 175 - 113 = 62$ in base ten.'
+      - 'But the options are in base seven, so convert 62 across. The place values are 1, 7 and 49.'
+      - '$62 \div 49 = 1$ remainder 13; $13 \div 7 = 1$ remainder 6. So the digits are 1, 1, 6.'
+      - 'Therefore $p = 116_7$.'
+      - 'Notice the subscripts differ across the question — two sixes and a seven. Subtracting the digits directly, without converting, is the slip this question is testing you won''t make. Base ten in the middle keeps you safe.'
+    hint: 'Convert both base-six numbers into base ten, subtract there, then convert the result into base seven.'
 
   3:
     answer: D
     steps:
-      - "A compound fraction like this is really one division: work out the top, work out the bottom, then divide."
-      - "Top, first part: $\\tfrac{1}{10} \\times \\tfrac{2}{3} = \\tfrac{2}{30} = \\tfrac{1}{15}$."
-      - "Top, adding: $\\tfrac{1}{15} + \\tfrac{1}{4}$. Over 60 that is $\\tfrac{4}{60} + \\tfrac{15}{60} = \\tfrac{19}{60}$."
-      - "Bottom, first part: $\\tfrac{1}{2} \\div \\tfrac{3}{5}$ means $\\tfrac{1}{2} \\times \\tfrac{5}{3} = \\tfrac{5}{6}$."
-      - "Bottom, subtracting: $\\tfrac{5}{6} - \\tfrac{1}{4}$. Over 12 that is $\\tfrac{10}{12} - \\tfrac{3}{12} = \\tfrac{7}{12}$."
-      - "Now divide top by bottom: $\\tfrac{19}{60} \\div \\tfrac{7}{12} = \\tfrac{19}{60} \\times \\tfrac{12}{7}$."
-      - "The 12 cancels into the 60 five times, leaving $\\tfrac{19}{5 \\times 7} = \\tfrac{19}{35}$."
-      - "Options A and B are the bottom and the top on their own — both are there for anyone who works out one half of the fraction and stops."
-    hint: "Simplify the numerator to a single fraction and the denominator to a single fraction. Then divide one by the other."
+      - 'Don''t worry about the fraction stacked on a fraction. We''ll tidy the top, tidy the bottom, and then it''s one division.'
+      - 'A compound fraction like this is really one division: work out the top, work out the bottom, then divide.'
+      - 'Start with the top, first part: $\tfrac{1}{10} \times \tfrac{2}{3} = \tfrac{2}{30} = \tfrac{1}{15}$.'
+      - 'Then add: $\tfrac{1}{15} + \tfrac{1}{4}$. Over 60 that is $\tfrac{4}{60} + \tfrac{15}{60} = \tfrac{19}{60}$.'
+      - 'Now the bottom, first part: $\tfrac{1}{2} \div \tfrac{3}{5}$ means $\tfrac{1}{2} \times \tfrac{5}{3} = \tfrac{5}{6}$.'
+      - 'Then subtract: $\tfrac{5}{6} - \tfrac{1}{4}$. Over 12 that is $\tfrac{10}{12} - \tfrac{3}{12} = \tfrac{7}{12}$.'
+      - 'Now divide top by bottom: $\tfrac{19}{60} \div \tfrac{7}{12} = \tfrac{19}{60} \times \tfrac{12}{7}$.'
+      - 'The 12 cancels into the 60 five times, leaving $\tfrac{19}{5 \times 7} = \tfrac{19}{35}$.'
+      - 'Options A and B are the bottom and the top on their own — both are there for anyone who works out one half of the fraction and stops. Finish both halves, then divide.'
+    hint: 'Simplify the numerator to a single fraction and the denominator to a single fraction. Then divide one by the other.'
 
   4:
     answer: A
     steps:
-      - "A ratio compares two quantities, so find both before writing anything down."
-      - "The number sowed is given directly: 5000 grains."
-      - "The number harvested is not given directly — it must be worked out. There are 5000 cobs, and each carries 500 grains."
-      - "So the harvest is $5000 \\times 500 = 2{,}500{,}000$ grains."
-      - "The ratio sowed to harvested is $5000 : 2{,}500{,}000$."
-      - "Divide both sides by 5000: $1 : 500$."
-      - "The trap is comparing 5000 grains with 5000 cobs and answering $1:1$, or stopping at the 500 grains per cob without multiplying. A cob is not a grain, and the question asks about grains at both ends."
-    hint: "Work out how many grains were harvested altogether first — that is cobs multiplied by grains per cob — then compare with the 5000 sowed."
+      - 'A ratio needs two numbers, and here one of them is hiding. Let''s find it first.'
+      - 'A ratio compares two quantities, so find both before writing anything down.'
+      - 'The number sowed is given directly: 5000 grains.'
+      - 'The number harvested is not given directly — it must be worked out. There are 5000 cobs, and each carries 500 grains.'
+      - 'So the harvest is $5000 \times 500 = 2{,}500{,}000$ grains.'
+      - 'Now the ratio sowed to harvested is $5000 : 2{,}500{,}000$.'
+      - 'Divide both sides by 5000: $1 : 500$.'
+      - 'The trap is comparing 5000 grains with 5000 cobs and answering $1:1$, or stopping at the 500 grains per cob without multiplying. A cob is not a grain, and the question asks about grains at both ends. Same units on both sides, always.'
+    hint: 'Work out how many grains were harvested altogether first — that''s cobs multiplied by grains per cob — then compare with the 5000 sowed.'
 
   5:
     answer: C
     steps:
-      - "Read the second sentence carefully: the second teacher gets a fraction *of the remainder*, not of the whole packet. That is the whole question."
-      - "The first teacher takes $\\tfrac{2}{5}$, so the remainder after him is $1 - \\tfrac{2}{5} = \\tfrac{3}{5}$."
-      - "The second teacher takes $\\tfrac{2}{15}$ of that remainder: $\\tfrac{2}{15} \\times \\tfrac{3}{5} = \\tfrac{6}{75}$."
-      - "Simplify by dividing top and bottom by 3: $\\tfrac{2}{25}$."
-      - "The third teacher gets whatever is left of the whole packet: $1 - \\tfrac{2}{5} - \\tfrac{2}{25}$."
-      - "Over 25: $\\tfrac{25}{25} - \\tfrac{10}{25} - \\tfrac{2}{25} = \\tfrac{13}{25}$."
-      - "Taking $\\tfrac{2}{15}$ of the whole packet instead of the remainder gives $1 - \\tfrac{2}{5} - \\tfrac{2}{15} = \\tfrac{7}{15}$ — not offered, but the same slip with different numbers is what options A and B are waiting for."
-    hint: "The second teacher's share is a fraction of what was left after the first teacher, not of the whole packet."
+      - 'A lot of students slip on this one, and it''s usually over three small words: ''of the remainder''. Let''s go slowly.'
+      - 'the second teacher gets a fraction *of the remainder*, not of the whole packet. That is the whole question.'
+      - 'The first teacher takes $\tfrac{2}{5}$, so the remainder after him is $1 - \tfrac{2}{5} = \tfrac{3}{5}$.'
+      - 'Now the second teacher takes $\tfrac{2}{15}$ of that remainder: $\tfrac{2}{15} \times \tfrac{3}{5} = \tfrac{6}{75}$.'
+      - 'Simplify by dividing top and bottom by 3: $\tfrac{2}{25}$.'
+      - 'The third teacher gets whatever is left of the whole packet: $1 - \tfrac{2}{5} - \tfrac{2}{25}$.'
+      - 'Over 25: $\tfrac{25}{25} - \tfrac{10}{25} - \tfrac{2}{25} = \tfrac{13}{25}$.'
+      - 'Taking $\tfrac{2}{15}$ of the whole packet instead of the remainder gives $1 - \tfrac{2}{5} - \tfrac{2}{15} = \tfrac{7}{15}$ — not offered, but the same slip with different numbers is what options A and B are waiting for. Always ask: a fraction of what?'
+    hint: 'The second teacher''s share is a fraction of what was left after the first teacher, not of the whole packet.'
 
   6:
     answer: B
     steps:
-      - 'An equation in powers is solved by writing both sides as powers of the same base, then equating the indices.'
+      - 'Equations with powers get much easier once both sides share a base. Here that base is 4.'
+      - 'The method: an equation in powers is solved by writing both sides as powers of the same base, then equating the indices.'
       - 'A cube root is the power $\tfrac{1}{3}$, so $\sqrt[3]{4^{2x}} = 4^{2x/3}$.'
       - 'The right-hand side is $16 = 4^{2}$.'
       - 'So $4^{2x/3} = 4^{2}$, and with equal bases the indices must be equal: $\tfrac{2x}{3} = 2$.'
       - 'Multiply by 3 and divide by 2: $x = 3$.'
-      - 'Check: $4^{2 \times 3} = 4^{6} = 4096$, and $\sqrt[3]{4096} = 16$ ✓ (since $16^{3} = 4096$).'
-      - 'The trap is option D, 6 — the index $2x$ itself, not $x$ — or forgetting the cube root and solving $4^{2x} = 16$ to get $x = 1$.'
-    hint: 'Write $\sqrt[3]{4^{2x}}$ as $4^{2x/3}$ and 16 as $4^{2}$.'
+      - 'Let''s check: $4^{2 \times 3} = 4^{6} = 4096$, and $\sqrt[3]{4096} = 16$ ✓ (since $16^{3} = 4096$).'
+      - 'The trap is option D, 6 — the index $2x$ itself, not $x$ — or forgetting the cube root and solving $4^{2x} = 16$ to get $x = 1$. Same base, then compare indices, and you''re there.'
+    hint: 'Try writing $\sqrt[3]{4^{2x}}$ as $4^{2x/3}$ and 16 as $4^{2}$.'
 
   7:
     answer: C
     steps:
-      - "A surd in the denominator has to be cleared, and the tool for that is the conjugate: multiply top and bottom by the denominator with its middle sign reversed."
-      - "The denominator is $\\sqrt{3} + 2$, so its conjugate is $2 - \\sqrt{3}$."
-      - "Multiplying top and bottom by the same thing does not change the value, so $\\dfrac{1}{\\sqrt{3}+2} \\times \\dfrac{2 - \\sqrt{3}}{2 - \\sqrt{3}}$."
-      - "The new denominator is $(2 + \\sqrt{3})(2 - \\sqrt{3})$, a difference of two squares: $2^{2} - (\\sqrt{3})^{2} = 4 - 3 = 1$."
-      - "That is why the conjugate works — the surd squares away and leaves a whole number."
-      - "So the expression is $\\dfrac{2 - \\sqrt{3}}{1} = 2 - \\sqrt{3}$."
-      - "In the form $a + b\\sqrt{3}$ that is $a = 2$ and $b = -1$."
-      - "Option D, $2 + \\sqrt{3}$, is the conjugate itself — right shape, wrong sign, and exactly what you get by multiplying by $\\sqrt{3} + 2$ instead of its conjugate."
-    hint: "Multiply top and bottom by the conjugate of the denominator, and use the difference of two squares to clear the surd."
+      - 'When there''s a surd in the denominator, there''s one reliable tool to clear it. Let''s use it.'
+      - 'That tool is the conjugate: multiply top and bottom by the denominator with its middle sign reversed.'
+      - 'The denominator is $\sqrt{3} + 2$, so its conjugate is $2 - \sqrt{3}$.'
+      - 'Multiplying top and bottom by the same thing does not change the value, so $\dfrac{1}{\sqrt{3}+2} \times \dfrac{2 - \sqrt{3}}{2 - \sqrt{3}}$.'
+      - 'The new denominator is $(2 + \sqrt{3})(2 - \sqrt{3})$, a difference of two squares: $2^{2} - (\sqrt{3})^{2} = 4 - 3 = 1$.'
+      - 'That is why the conjugate works — the surd squares away and leaves a whole number.'
+      - 'So the expression is $\dfrac{2 - \sqrt{3}}{1} = 2 - \sqrt{3}$.'
+      - 'In the form $a + b\sqrt{3}$ that is $a = 2$ and $b = -1$.'
+      - 'Option D, $2 + \sqrt{3}$, is the conjugate itself — right shape, wrong sign, and exactly what you get by multiplying by $\sqrt{3} + 2$ instead of its conjugate. Flip the middle sign, and the surd disappears.'
+    hint: 'Multiply top and bottom by the conjugate of the denominator, and use the difference of two squares to clear the surd.'
 
   8:
     answer: C
     steps:
-      - "Collect the left-hand side into a single logarithm using the power and subtraction laws."
-      - "The power law moves a coefficient into an index: $6\\log_x 2 = \\log_x 2^{6} = \\log_x 64$, and $3\\log_x 3 = \\log_x 3^{3} = \\log_x 27$."
-      - "The subtraction law turns a difference of logs into a quotient: $\\log_x 64 - \\log_x 27 = \\log_x \\dfrac{64}{27}$."
-      - "So the equation is $\\log_x \\dfrac{64}{27} = 3$."
-      - "A logarithm equation is read back as a power: $\\log_x A = 3$ means $x^{3} = A$."
-      - "So $x^{3} = \\dfrac{64}{27}$."
-      - "Take the cube root of top and bottom separately: $\\sqrt[3]{64} = 4$ and $\\sqrt[3]{27} = 3$, so $x = \\dfrac{4}{3}$."
-      - "Option D is $\\tfrac{8}{3}$ — what you get by taking a square root somewhere instead of a cube root. The 3 on the right-hand side is what makes it a cube."
-    hint: "Use the power law to bring the coefficients inside, then the subtraction law to make one logarithm. Then read it back as a power."
+      - 'Two logarithms on one side can become one with the right laws. Let''s combine them, then read it as a power.'
+      - 'The plan: collect the left-hand side into a single logarithm using the power and subtraction laws.'
+      - 'First, the power law moves a coefficient into an index: $6\log_x 2 = \log_x 2^{6} = \log_x 64$, and $3\log_x 3 = \log_x 3^{3} = \log_x 27$.'
+      - 'Next, the subtraction law turns a difference of logs into a quotient: $\log_x 64 - \log_x 27 = \log_x \dfrac{64}{27}$.'
+      - 'So the equation is $\log_x \dfrac{64}{27} = 3$.'
+      - 'Now, a logarithm equation is read back as a power: $\log_x A = 3$ means $x^{3} = A$.'
+      - 'So $x^{3} = \dfrac{64}{27}$.'
+      - 'Take the cube root of top and bottom separately: $\sqrt[3]{64} = 4$ and $\sqrt[3]{27} = 3$, so $x = \dfrac{4}{3}$.'
+      - 'Option D is $\tfrac{8}{3}$ — what you get by taking a square root somewhere instead of a cube root. The 3 on the right-hand side is what makes it a cube. Combine the logs, then read it back as a power.'
+    hint: 'Use the power law to bring the coefficients inside, then the subtraction law to make one logarithm. Then read it back as a power.'
 
   9:
     answer: A
     steps:
-      - "With three overlapping circles there are seven separate regions, so the way to read a shaded one is to ask, for each circle in turn, whether the shading is inside it or outside it."
-      - "The shaded patch lies inside $Q$ — it sits within the right-hand circle's boundary."
-      - "It also lies inside $R$, the lower circle."
-      - "But it lies outside $P$: the left-hand circle's edge cuts across and the shading stops there, staying on the far side."
-      - "So a point in the shaded region is in $Q$ *and* in $R$ *and* not in $P$."
-      - "'In $Q$ and in $R$' is $Q \\cap R$, and 'not in $P$' is $P^{c}$, so together the region is $P^{c} \\cap (Q \\cap R)$."
-      - "Option D is $P^{c} \\cap (Q \\cup R)$, which would shade everything in either $Q$ or $R$ outside $P$ — a far larger region including the parts of $Q$ and $R$ that do not overlap each other."
-      - "And option C uses $\\cup$ at the front, which would include the whole of $P^{c}$ — every point outside $P$, even those in no circle at all."
-    hint: "Ask three separate questions about the shaded patch: is it inside $P$? inside $Q$? inside $R$? Then write those three answers as one expression."
+      - 'Three overlapping circles can look confusing, but we''ll just ask three yes-or-no questions about the shaded patch.'
+      - 'With three overlapping circles there are seven separate regions, so the way to read a shaded one is to ask, for each circle in turn, whether the shading is inside it or outside it.'
+      - 'First, $Q$: the shaded patch lies inside it — it sits within the right-hand circle''s boundary.'
+      - 'Next, $R$: it also lies inside the lower circle.'
+      - 'But it lies outside $P$: the left-hand circle''s edge cuts across and the shading stops there, staying on the far side.'
+      - 'So a point in the shaded region is in $Q$ *and* in $R$ *and* not in $P$.'
+      - 'Now write it in symbols. ''In $Q$ and in $R$'' is $Q \cap R$, and ''not in $P$'' is $P^{c}$, so together the region is $P^{c} \cap (Q \cap R)$.'
+      - 'Option D is $P^{c} \cap (Q \cup R)$, which would shade everything in either $Q$ or $R$ outside $P$ — a far larger region including the parts of $Q$ and $R$ that do not overlap each other.'
+      - 'And option C uses $\cup$ at the front, which would include the whole of $P^{c}$ — every point outside $P$, even those in no circle at all. Three questions, one answer each — that''s all these need.'
+    hint: 'Ask three separate questions about the shaded patch: is it inside $P$? inside $Q$? inside $R$? Then write those three answers as one expression.'
 
   10:
     answer: C
     steps:
-      - "Give the unknown a name. Let $b$ be the number offering both subjects — everything else in the question is described in terms of that."
-      - "The number offering Physics is three times that: $P = 3b$."
-      - "The number offering Chemistry is twice the Physics figure: $C = 2 \\times 3b = 6b$."
-      - "Every student offers at least one subject, so nobody is outside the two sets and the union is the whole class of 40."
-      - "The addition rule gives $P + C - b = 40$, since those offering both have been counted in each of $P$ and $C$."
-      - "Substituting: $3b + 6b - b = 8b = 40$, so $b = 5$."
-      - "Physics altogether is $3b = 15$, but the question asks for Physics *only* — those who do not also take Chemistry."
-      - "So subtract the overlap: $15 - 5 = 10$."
-      - "Option B is 15, the full Physics figure. The word 'only' is the entire difference between the two."
-    hint: "Call the number taking both subjects $b$ and write everything else in terms of it. At the end, remember 'only' means the overlap has to come out."
+      - 'Everything in this question is described in terms of one unknown group. Let''s name it and build from there.'
+      - 'Let $b$ be the number offering both subjects — everything else in the question is described in terms of that.'
+      - 'The number offering Physics is three times that: $P = 3b$.'
+      - 'The number offering Chemistry is twice the Physics figure: $C = 2 \times 3b = 6b$.'
+      - 'Every student offers at least one subject, so nobody is outside the two sets and the union is the whole class of 40.'
+      - 'Now the addition rule gives $P + C - b = 40$, since those offering both have been counted in each of $P$ and $C$.'
+      - 'Substituting: $3b + 6b - b = 8b = 40$, so $b = 5$.'
+      - 'Physics altogether is $3b = 15$, but the question asks for Physics *only* — those who do not also take Chemistry.'
+      - 'So subtract the overlap: $15 - 5 = 10$.'
+      - 'Option B is 15, the full Physics figure. The word ''only'' is the entire difference between the two. Watch for it every time.'
+    hint: 'Call the number taking both subjects $b$ and write everything else in terms of it. At the end, remember ''only'' means the overlap has to come out.'
 
   11:
     answer: C
     steps:
-      - "A curve crosses the $x$-axis where $y = 0$, so this is really asking you to solve $x^{3} + 2x^{2} - 5x - 6 = 0$."
-      - "For a cubic, find one root by trial using factors of the constant term 6: the candidates are $\\pm 1, \\pm 2, \\pm 3, \\pm 6$."
-      - "Try $x = 2$: $8 + 8 - 10 - 6 = 0$. So $x = 2$ is a root and $(x - 2)$ is a factor."
-      - "Divide to get the quadratic factor: $x^{3} + 2x^{2} - 5x - 6 = (x - 2)(x^{2} + 4x + 3)$."
-      - "Factorise the quadratic: $x^{2} + 4x + 3 = (x + 1)(x + 3)$."
-      - "So the roots are $x = 2$, $x = -1$ and $x = -3$."
-      - "Check one of them: at $x = -3$, $-27 + 18 + 15 - 6 = 0$ ✓."
-      - "Every option here is the same three numbers with signs shuffled, so the sign of each root is the whole question — a factor $(x + 1)$ gives the root $-1$, not $+1$."
-    hint: "Set $y = 0$ and find one root by trying factors of 6. Then divide out and factorise what is left."
+      - 'Crossing the $x$-axis means solving a cubic. We''ll find one root by trying, and the rest will follow.'
+      - 'A curve crosses the $x$-axis where $y = 0$, so this is really asking you to solve $x^{3} + 2x^{2} - 5x - 6 = 0$.'
+      - 'For a cubic, find one root by trial using factors of the constant term 6: the candidates are $\pm 1, \pm 2, \pm 3, \pm 6$.'
+      - 'Try $x = 2$: $8 + 8 - 10 - 6 = 0$. So $x = 2$ is a root and $(x - 2)$ is a factor.'
+      - 'Now divide to get the quadratic factor: $x^{3} + 2x^{2} - 5x - 6 = (x - 2)(x^{2} + 4x + 3)$.'
+      - 'Factorise the quadratic: $x^{2} + 4x + 3 = (x + 1)(x + 3)$.'
+      - 'So the roots are $x = 2$, $x = -1$ and $x = -3$.'
+      - 'Let''s check one of them: at $x = -3$, $-27 + 18 + 15 - 6 = 0$ ✓.'
+      - 'Every option here is the same three numbers with signs shuffled, so the sign of each root is the whole question — a factor $(x + 1)$ gives the root $-1$, not $+1$. Flip the sign from the bracket and you''ll be right.'
+    hint: 'Set $y = 0$ and find one root by trying factors of 6. Then divide out and factorise what is left.'
 
   12:
     answer: B
     steps:
-      - "The remainder theorem says that dividing $f(x)$ by $(x - a)$ leaves the remainder $f(a)$ — no long division needed."
-      - "Here the divisor is $x + 3$, which is $x - (-3)$, so $a = -3$."
-      - "So the remainder is $f(-3)$, where $f(x) = 3x^{3} + 5x^{2} - 11x + 4$."
-      - "Work out each term. $3(-3)^{3} = 3 \\times -27 = -81$."
-      - "$5(-3)^{2} = 5 \\times 9 = 45$. Note the square makes this positive."
-      - "$-11(-3) = +33$, since a negative times a negative is positive."
-      - "Adding all four terms: $-81 + 45 + 33 + 4 = 1$."
-      - "So the remainder is 1."
-      - "Using $a = +3$ instead of $-3$ is the standard slip: $x + 3$ is zero at $x = -3$, and it is that zero the theorem needs."
-    hint: "Use the remainder theorem: the remainder is $f(a)$ where $a$ makes the divisor zero. For $x + 3$, that is $x = -3$, not $+3$."
+      - 'There''s no need for long division here. One theorem gives the remainder straight away.'
+      - 'The remainder theorem says that dividing $f(x)$ by $(x - a)$ leaves the remainder $f(a)$ — no long division needed.'
+      - 'Here the divisor is $x + 3$, which is $x - (-3)$, so $a = -3$.'
+      - 'So the remainder is $f(-3)$, where $f(x) = 3x^{3} + 5x^{2} - 11x + 4$.'
+      - 'Now work out each term. $3(-3)^{3} = 3 \times -27 = -81$.'
+      - 'Next, $5(-3)^{2} = 5 \times 9 = 45$. Note the square makes this positive.'
+      - 'And $-11(-3) = +33$, since a negative times a negative is positive.'
+      - 'Adding all four terms: $-81 + 45 + 33 + 4 = 1$.'
+      - 'So the remainder is 1.'
+      - 'Using $a = +3$ instead of $-3$ is the standard slip: $x + 3$ is zero at $x = -3$, and it is that zero the theorem needs. Find what makes the divisor zero, and substitute that.'
+    hint: 'Use the remainder theorem: the remainder is $f(a)$ where $a$ makes the divisor zero. For $x + 3$, that is $x = -3$, not $+3$.'
 
   13:
     answer: B
     steps:
-      - "Four terms with no factor common to all of them means grouping — and the pairing has to be chosen so that both pairs leave the same bracket."
-      - "Look at the last two terms: $-a^{2} + 4b^{2}$ is a difference of two squares in disguise, since $-(a^{2} - 4b^{2}) = -(a - 2b)(a + 2b)$."
-      - "Now the first two: $ac - 2bc$ has $c$ in common, giving $c(a - 2b)$."
-      - "So the expression is $c(a - 2b) - (a - 2b)(a + 2b)$."
-      - "Both parts now contain $(a - 2b)$, so take it out as a common factor."
-      - "That leaves $(a - 2b)\\left[c - (a + 2b)\\right]$."
-      - "Expand the inner bracket carefully — the minus applies to both terms: $c - a - 2b$."
-      - "So the factorisation is $(a - 2b)(c - a - 2b)$."
-      - "Options A and D differ only in the signs inside the second bracket, which is exactly what dropping that minus across $(a + 2b)$ would give you."
-    hint: "Spot that $-a^{2} + 4b^{2}$ is a difference of two squares. Factorise it, and see what bracket it shares with the first two terms."
+      - 'This factorisation has a difference of two squares hiding in it. Once we spot it, the rest falls into place.'
+      - 'Four terms with no factor common to all of them means grouping — and the pairing has to be chosen so that both pairs leave the same bracket.'
+      - 'Look at the last two terms: $-a^{2} + 4b^{2}$ is a difference of two squares in disguise, since $-(a^{2} - 4b^{2}) = -(a - 2b)(a + 2b)$.'
+      - 'Now the first two: $ac - 2bc$ has $c$ in common, giving $c(a - 2b)$.'
+      - 'So the expression is $c(a - 2b) - (a - 2b)(a + 2b)$.'
+      - 'Both parts now contain $(a - 2b)$, so take it out as a common factor.'
+      - 'That leaves $(a - 2b)\left[c - (a + 2b)\right]$.'
+      - 'Watch this part: expand the inner bracket carefully — the minus applies to both terms: $c - a - 2b$.'
+      - 'So the factorisation is $(a - 2b)(c - a - 2b)$.'
+      - 'Options A and D differ only in the signs inside the second bracket, which is exactly what dropping that minus across $(a + 2b)$ would give you. Carry the minus through the whole bracket.'
+    hint: 'Spot that $-a^{2} + 4b^{2}$ is a difference of two squares. Factorise it, and see what bracket it shares with the first two terms.'
 
   14:
     answer: B
     steps:
-      - "Inversely proportional means $y = \\dfrac{k}{x}$, so the product $xy$ is the same in every case."
-      - "Find $k$ from the pair you are given: $k = xy = \\tfrac{1}{2} \\times 4 = 2$."
-      - "So the relationship is $y = \\dfrac{2}{x}$, or equivalently $xy = 2$ always."
-      - "Now use $y = 10$: $10x = 2$."
-      - "Dividing: $x = \\dfrac{2}{10} = \\dfrac{1}{5}$."
-      - "It is worth checking the direction makes sense: $y$ went up from 4 to 10, so $x$ should go down — and $\\tfrac{1}{2}$ down to $\\tfrac{1}{5}$ does."
-      - "Option D is 10, which is what you get by treating the relationship as direct. In direct proportion $x$ would rise with $y$; here it must fall."
-    hint: "Inverse proportion means $xy$ stays constant. Find that constant from the first pair, then use it with $y = 10$."
+      - 'Inverse proportion means one thing stays fixed: the product. Let''s find it and use it.'
+      - 'Inversely proportional means $y = \dfrac{k}{x}$, so the product $xy$ is the same in every case.'
+      - 'Find $k$ from the pair you are given: $k = xy = \tfrac{1}{2} \times 4 = 2$.'
+      - 'So the relationship is $y = \dfrac{2}{x}$, or equivalently $xy = 2$ always.'
+      - 'Now use $y = 10$: $10x = 2$.'
+      - 'Dividing: $x = \dfrac{2}{10} = \dfrac{1}{5}$.'
+      - 'Let''s check the direction makes sense: $y$ went up from 4 to 10, so $x$ should go down — and $\tfrac{1}{2}$ down to $\tfrac{1}{5}$ does.'
+      - 'Option D is 10, which is what you get by treating the relationship as direct. In direct proportion $x$ would rise with $y$; here it must fall. Inverse means the product stays fixed.'
+    hint: 'Inverse proportion means $xy$ stays constant. Find that constant from the first pair, then use it with $y = 10$.'
 
   15:
     answer: D
     steps:
-      - "'Varies directly as the square of $T$' means $L = kT^{2}$ — the square is part of the relationship, not an afterthought."
-      - "Find $k$ from the pendulum you are told about: $64 = k \\times 4^{2} = 16k$."
-      - "So $k = \\dfrac{64}{16} = 4$."
-      - "Now apply $L = 4T^{2}$ with $T = 9$."
-      - "First the square: $9^{2} = 81$."
-      - "Then $L = 4 \\times 81 = 324$ cm."
-      - "Option C is 144 cm, which is $64 \\times \\tfrac{9}{4}$ — the answer you get by scaling the length in proportion to $T$ rather than to $T^{2}$. Doubling the period makes a pendulum four times as long, not twice."
-    hint: "Write $L = kT^{2}$, find $k$ from the pendulum you are given, then substitute $T = 9$. Do not forget to square."
+      - 'The word ''square'' in this question is doing real work. Let''s build it into the formula from the start.'
+      - '''Varies directly as the square of $T$'' means $L = kT^{2}$ — the square is part of the relationship, not an afterthought.'
+      - 'Find $k$ from the pendulum you are told about: $64 = k \times 4^{2} = 16k$.'
+      - 'So $k = \dfrac{64}{16} = 4$.'
+      - 'Now apply $L = 4T^{2}$ with $T = 9$.'
+      - 'First the square: $9^{2} = 81$.'
+      - 'Then $L = 4 \times 81 = 324$ cm.'
+      - 'Option C is 144 cm, which is $64 \times \tfrac{9}{4}$ — the answer you get by scaling the length in proportion to $T$ rather than to $T^{2}$. Doubling the period makes a pendulum four times as long, not twice. Keep the square in, all the way through.'
+    hint: 'Write $L = kT^{2}$, find $k$ from the pendulum you are given, then substitute $T = 9$. Don''t forget to square.'
 
   16:
     answer: A
     steps:
-      - "The boundary is a straight line, and the graph gives two points on it: $(0, 6)$ on the $y$-axis and $(2, 0)$ on the $x$-axis."
-      - "Find its gradient: $m = \\dfrac{0 - 6}{2 - 0} = \\dfrac{-6}{2} = -3$."
-      - "With a $y$-intercept of 6, the line is $y = -3x + 6$."
-      - "Rearranging so it matches the shape of the options: $y + 3x = 6$."
-      - "Now decide which side of the line is shaded, and the safest way is to test a point. The origin is the easiest one to use."
-      - "At the origin, $y + 3x = 0 + 0 = 0$, which is less than 6."
-      - "The origin lies inside the shaded band on the graph, so the shaded side is the one where $y + 3x$ is less than 6."
-      - "So the region is $\\{(x, y) : y + 3x < 6\\}$."
-      - "Options C and D use $y - 3x$, which describes a line of gradient $+3$ — sloping the other way entirely. Reading the gradient's sign off the picture rules out half the options before any testing."
-    hint: "Find the equation of the line from its two intercepts, then substitute the origin to see which side of it is shaded."
+      - 'We need the boundary line and the side that''s shaded. Let''s find the line first, then test a point.'
+      - 'The boundary is a straight line, and the graph gives two points on it: $(0, 6)$ on the $y$-axis and $(2, 0)$ on the $x$-axis.'
+      - 'Find its gradient: $m = \dfrac{0 - 6}{2 - 0} = \dfrac{-6}{2} = -3$.'
+      - 'With a $y$-intercept of 6, the line is $y = -3x + 6$.'
+      - 'Rearranging so it matches the shape of the options: $y + 3x = 6$.'
+      - 'Now decide which side of the line is shaded, and the safest way is to test a point. The origin is the easiest one to use.'
+      - 'At the origin, $y + 3x = 0 + 0 = 0$, which is less than 6.'
+      - 'The origin lies inside the shaded band on the graph, so the shaded side is the one where $y + 3x$ is less than 6.'
+      - 'So the region is $\{(x, y) : y + 3x < 6\}$.'
+      - 'Options C and D use $y - 3x$, which describes a line of gradient $+3$ — sloping the other way entirely. Reading the gradient''s sign off the picture rules out half the options before any testing.'
+    hint: 'Find the equation of the line from its two intercepts, then substitute the origin to see which side of it is shaded.'
 
   17:
     answer: C
     steps:
-      - "A double inequality is handled by doing the same thing to all three parts at once."
-      - "Start with $-1 < 3 - 2x \\le 5$ and subtract 3 throughout: $-4 < -2x \\le 2$."
-      - "Now divide throughout by $-2$. Dividing by a negative reverses both inequality signs — this is the step the question is built around."
-      - "That gives $2 > x \\ge -1$, which reads more naturally as $-1 \\le x < 2$."
-      - "Note which end is inclusive: $x$ can equal $-1$, but it cannot equal 2."
-      - "The integers in that range are $-1$, 0 and 1."
-      - "Option B includes 2, which fails because the original inequality is strict at that end. Forgetting to flip the signs when dividing by $-2$ produces exactly that wrong set."
-    hint: "Subtract 3 from all three parts, then divide by $-2$ — and remember what dividing by a negative does to the inequality signs."
+      - 'This double inequality has one moment that needs real care: dividing by a negative. Let''s go slowly.'
+      - 'A double inequality is handled by doing the same thing to all three parts at once.'
+      - 'Start with $-1 < 3 - 2x \le 5$ and subtract 3 throughout: $-4 < -2x \le 2$.'
+      - 'Now divide throughout by $-2$. Dividing by a negative reverses both inequality signs — this is the step the question is built around.'
+      - 'That gives $2 > x \ge -1$, which reads more naturally as $-1 \le x < 2$.'
+      - 'Note which end is inclusive: $x$ can equal $-1$, but it cannot equal 2.'
+      - 'So the integers in that range are $-1$, 0 and 1.'
+      - 'Option B includes 2, which fails because the original inequality is strict at that end. Forgetting to flip the signs when dividing by $-2$ produces exactly that wrong set. Divide by a negative, flip the signs — every time.'
+    hint: 'Subtract 3 from all three parts, then divide by $-2$ — and remember what dividing by a negative does to the inequality signs.'
 
   18:
     answer: D
     steps:
-      - "Both formulas give the $n$th term, so substitute $n = 2$ into each one separately."
-      - "For $Q_n = 3 \\cdot 2^{n-2}$ with $n = 2$: the index is $2 - 2 = 0$."
-      - "Anything to the power zero is 1, so $Q_2 = 3 \\times 1 = 3$."
-      - "For $U_n = 3 \\cdot 2^{2n-3}$ with $n = 2$: the index is $(2 \\times 2) - 3 = 1$."
-      - "So $U_2 = 3 \\times 2^{1} = 6$."
-      - "The question asks for the product: $3 \\times 6 = 18$."
-      - "Option B is 6 and option A is 3 — the two terms on their own. And $2^{0} = 1$, not 0, which is the arithmetic slip that turns $Q_2$ into nothing."
-    hint: "Put $n = 2$ into each formula separately, working out the index first. Then multiply the two results."
+      - 'Two formulas, one value of $n$. We''ll work each term out separately, then multiply.'
+      - 'Both formulas give the $n$th term, so substitute $n = 2$ into each one separately.'
+      - 'For $Q_n = 3 \cdot 2^{n-2}$ with $n = 2$: the index is $2 - 2 = 0$.'
+      - 'Anything to the power zero is 1, so $Q_2 = 3 \times 1 = 3$.'
+      - 'Now for $U_n = 3 \cdot 2^{2n-3}$ with $n = 2$: the index is $(2 \times 2) - 3 = 1$.'
+      - 'So $U_2 = 3 \times 2^{1} = 6$.'
+      - 'The question asks for the product: $3 \times 6 = 18$.'
+      - 'Option B is 6 and option A is 3 — the two terms on their own. And $2^{0} = 1$, not 0, which is the arithmetic slip that turns $Q_2$ into nothing. Work the index out first, and the rest is easy.'
+    hint: 'Put $n = 2$ into each formula separately, working out the index first. Then multiply the two results.'
 
   19:
     answer: D
     steps:
-      - "In a geometric progression the $n$th term is $ar^{n-1}$, so the fourth term is $ar^{3}$."
-      - "The first term is given: $a = 6$. The fourth term gives $6r^{3} = 162$."
-      - "Divide both sides by 6: $r^{3} = 27$."
-      - "Take the cube root: $r = 3$."
-      - "Now write out the first three terms: $6$, $6 \\times 3 = 18$, and $18 \\times 3 = 54$."
-      - "Their sum is $6 + 18 + 54 = 78$."
-      - "Option C is 48, the sum you get with $r = 2$ — which comes from misreading $r^{3} = 27$ as $r = 27/3$. The cube root is the step that matters."
-    hint: "Use the fourth term to find $r$ — remember it is $ar^{3}$, not $ar^{4}$ — then write out the first three terms and add them."
+      - 'We know the first and fourth terms of a geometric progression, and that''s enough to find the ratio. Let''s start there.'
+      - 'In a geometric progression the $n$th term is $ar^{n-1}$, so the fourth term is $ar^{3}$.'
+      - 'The first term is given: $a = 6$. The fourth term gives $6r^{3} = 162$.'
+      - 'Divide both sides by 6: $r^{3} = 27$.'
+      - 'Take the cube root: $r = 3$.'
+      - 'Now write out the first three terms: $6$, $6 \times 3 = 18$, and $18 \times 3 = 54$.'
+      - 'Their sum is $6 + 18 + 54 = 78$.'
+      - 'Option C is 48, the sum you get with $r = 2$ — which comes from misreading $r^{3} = 27$ as $r = 27/3$. The cube root is the step that matters. You''ve got it now.'
+    hint: 'Use the fourth term to find $r$ — remember it is $ar^{3}$, not $ar^{4}$ — then write out the first three terms and add them.'
 
   20:
     answer: B
     steps:
-      - "A sum to infinity only exists for a geometric series whose ratio is between $-1$ and 1, so first check what the ratio is."
-      - "Divide any term by the one before it: $\\tfrac{1}{6} \\div \\tfrac{1}{2} = \\tfrac{1}{6} \\times \\tfrac{2}{1} = \\tfrac{1}{3}$."
-      - "Check it holds for the next pair too: $\\tfrac{1}{18} \\div \\tfrac{1}{6} = \\tfrac{1}{3}$ ✓. So $r = \\tfrac{1}{3}$, which is safely between $-1$ and 1."
-      - "The formula is $S_\\infty = \\dfrac{a}{1 - r}$, with $a = \\tfrac{1}{2}$."
-      - "The denominator first: $1 - \\tfrac{1}{3} = \\tfrac{2}{3}$."
-      - "So $S_\\infty = \\dfrac{1/2}{2/3} = \\dfrac{1}{2} \\times \\dfrac{3}{2} = \\dfrac{3}{4}$."
-      - "Dividing by $\\tfrac{2}{3}$ means multiplying by $\\tfrac{3}{2}$ — turning that upside down instead gives $\\tfrac{1}{3}$, which is offered as option D."
-    hint: "Find the common ratio first, then use $S_\\infty = \\dfrac{a}{1-r}$. Take care when dividing by the fraction at the end."
+      - 'An infinite sum can still have a finite answer, as long as the ratio behaves. Let''s check it and use the formula.'
+      - 'A sum to infinity only exists for a geometric series whose ratio is between $-1$ and 1, so first check what the ratio is.'
+      - 'Divide any term by the one before it: $\tfrac{1}{6} \div \tfrac{1}{2} = \tfrac{1}{6} \times \tfrac{2}{1} = \tfrac{1}{3}$.'
+      - 'Check it holds for the next pair too: $\tfrac{1}{18} \div \tfrac{1}{6} = \tfrac{1}{3}$ ✓. So $r = \tfrac{1}{3}$, which is safely between $-1$ and 1.'
+      - 'The formula is $S_\infty = \dfrac{a}{1 - r}$, with $a = \tfrac{1}{2}$.'
+      - 'The denominator first: $1 - \tfrac{1}{3} = \tfrac{2}{3}$.'
+      - 'So $S_\infty = \dfrac{1/2}{2/3} = \dfrac{1}{2} \times \dfrac{3}{2} = \dfrac{3}{4}$.'
+      - 'Dividing by $\tfrac{2}{3}$ means multiplying by $\tfrac{3}{2}$ — turning that upside down instead gives $\tfrac{1}{3}$, which is offered as option D. Take care with that last division and you''re there.'
+    hint: 'Find the common ratio first, then use $S_\infty = \dfrac{a}{1-r}$. Take care when dividing by the fraction at the end.'
 
   21:
     answer: B
     steps:
-      - "A defined operation is just a rule to follow. Here $p * q$ means multiply the two numbers and take the square root."
-      - "Brackets first, as always: work out $8 * 32$ before touching the 4."
-      - "$8 * 32 = \\sqrt{8 \\times 32} = \\sqrt{256}$."
-      - "$\\sqrt{256} = 16$, so the expression becomes $4 * 16$."
-      - "Apply the rule again: $4 * 16 = \\sqrt{4 \\times 16} = \\sqrt{64}$."
-      - "$\\sqrt{64} = 8$."
-      - "Option A is 16 — the value of the inner bracket, which is easy to hand in as the final answer once you have done the harder half of the work."
-    hint: "Work out the bracket first using the rule, then apply the same rule again to the result."
+      - 'A made-up operation is just a rule to follow carefully. Let''s apply it twice, inside first.'
+      - 'A defined operation is just a rule to follow. Here $p * q$ means multiply the two numbers and take the square root.'
+      - 'Brackets first, as always: work out $8 * 32$ before touching the 4.'
+      - '$8 * 32 = \sqrt{8 \times 32} = \sqrt{256}$.'
+      - 'And $\sqrt{256} = 16$, so the expression becomes $4 * 16$.'
+      - 'Now apply the rule again: $4 * 16 = \sqrt{4 \times 16} = \sqrt{64}$.'
+      - 'That gives $\sqrt{64} = 8$.'
+      - 'Option A is 16 — the value of the inner bracket, which is easy to hand in as the final answer once you have done the harder half of the work. Finish the outer step too.'
+    hint: 'Work out the bracket first using the rule, then apply the same rule again to the result.'
 
   22:
     answer: B
     steps:
-      - "For a $2 \\times 2$ matrix $\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}$, the inverse is $\\dfrac{1}{ad - bc}\\begin{pmatrix} d & -b \\\\ -c & a \\end{pmatrix}$ — swap the leading diagonal, negate the other one, and divide by the determinant."
-      - "First the determinant: $ad - bc = (2)(1) - (1)(1) = 2 - 1 = 1$."
-      - "A determinant of 1 is convenient: dividing by it changes nothing, so the inverse is just the rearranged matrix."
-      - "Swap $a$ and $d$: the 2 and the 1 on the leading diagonal exchange places, giving 1 in the top left and 2 in the bottom right."
-      - "Negate the other diagonal: both off-diagonal entries are 1, so each becomes $-1$."
-      - "So the inverse is $\\begin{pmatrix} 1 & -1 \\\\ -1 & 2 \\end{pmatrix}$."
-      - "Check by multiplying: $\\begin{pmatrix} 2 & 1 \\\\ 1 & 1 \\end{pmatrix}\\begin{pmatrix} 1 & -1 \\\\ -1 & 2 \\end{pmatrix} = \\begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\end{pmatrix}$ ✓."
-      - "Option A has the same four numbers with the minus in the wrong place. Only the off-diagonal entries are negated, and the diagonal ones are swapped rather than changed in sign."
-    hint: "Swap the two entries on the leading diagonal, put a minus on the other two, and divide by the determinant."
+      - 'The inverse of a two-by-two matrix follows a neat recipe. Let''s go through it step by step.'
+      - 'For a $2 \times 2$ matrix $\begin{pmatrix} a & b \\ c & d \end{pmatrix}$, the inverse is $\dfrac{1}{ad - bc}\begin{pmatrix} d & -b \\ -c & a \end{pmatrix}$ — swap the leading diagonal, negate the other one, and divide by the determinant.'
+      - 'First the determinant: $ad - bc = (2)(1) - (1)(1) = 2 - 1 = 1$.'
+      - 'A determinant of 1 is convenient: dividing by it changes nothing, so the inverse is just the rearranged matrix.'
+      - 'Next, swap $a$ and $d$: the 2 and the 1 on the leading diagonal exchange places, giving 1 in the top left and 2 in the bottom right.'
+      - 'Then negate the other diagonal: both off-diagonal entries are 1, so each becomes $-1$.'
+      - 'So the inverse is $\begin{pmatrix} 1 & -1 \\ -1 & 2 \end{pmatrix}$.'
+      - 'Let''s check by multiplying: $\begin{pmatrix} 2 & 1 \\ 1 & 1 \end{pmatrix}\begin{pmatrix} 1 & -1 \\ -1 & 2 \end{pmatrix} = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$ ✓.'
+      - 'Option A has the same four numbers with the minus in the wrong place. Only the off-diagonal entries are negated, and the diagonal ones are swapped rather than changed in sign. Swap, negate, divide — that''s the recipe.'
+    hint: 'Swap the two entries on the leading diagonal, put a minus on the other two, and divide by the determinant.'
 
   23:
     answer: B
     steps:
-      - "Expanding a $3 \\times 3$ determinant is quickest along whichever row or column has the most zeros, because each zero kills a whole term."
-      - "The middle column here is $0$, $4$, $0$ — two zeros, so expand along it."
-      - "Only the middle entry survives, and its sign in the checkerboard pattern is positive, so the determinant is $4$ times its minor."
-      - "The minor is what is left after deleting the row and column through that 4: $\\begin{vmatrix} 1 & -1 \\\\ -1 & 1 \\end{vmatrix}$."
-      - "That minor is $(1)(1) - (-1)(-1) = 1 - 1 = 0$."
-      - "So the determinant is $4 \\times 0 = 0$."
-      - "There is a quicker way to see it: the first and third rows are $(1, 0, -1)$ and $(-1, 0, 1)$, which are exact negatives of each other. Any matrix with one row a multiple of another has determinant zero."
-    hint: "Expand along the column with two zeros in it. Or look at the first and third rows and ask how they are related."
+      - 'A three-by-three determinant can be long, but zeros make it short. Let''s look for them first.'
+      - 'Expanding a $3 \times 3$ determinant is quickest along whichever row or column has the most zeros, because each zero kills a whole term.'
+      - 'The middle column here is $0$, $4$, $0$ — two zeros, so expand along it.'
+      - 'Only the middle entry survives, and its sign in the checkerboard pattern is positive, so the determinant is $4$ times its minor.'
+      - 'The minor is what is left after deleting the row and column through that 4: $\begin{vmatrix} 1 & -1 \\ -1 & 1 \end{vmatrix}$.'
+      - 'That minor is $(1)(1) - (-1)(-1) = 1 - 1 = 0$.'
+      - 'So the determinant is $4 \times 0 = 0$.'
+      - 'A common slip is reading $(-1)(-1)$ as $-1$ and getting 8. There''s a quicker way to see it: the first and third rows, $(1, 0, -1)$ and $(-1, 0, 1)$, are exact negatives, and any matrix with one row a multiple of another has determinant zero.'
+    hint: 'Expand along the column with two zeros in it. Or look at the first and third rows and ask how they are related.'
 
   24:
     answer: B
     steps:
-      - "The interior angles of any polygon add to $(n - 2) \\times 180^{\\circ}$, where $n$ is the number of sides."
-      - "A pentagon has 5 sides, so the sum is $(5 - 2) \\times 180 = 3 \\times 180 = 540^{\\circ}$."
-      - "The question says that same sum is $6x + 6y$, so $6x + 6y = 540$."
-      - "Both terms on the left share a factor of 6, so divide the whole equation by 6: $x + y = 90$."
-      - "The question asks for $y$ in terms of $x$, so make $y$ the subject: $y = 90 - x$."
-      - "Option D, $y = 150 - x$, comes from dividing $900$ by 6 — that is, from using the exterior-angle sum or from taking the polygon to have six sides. Counting the sides of a pentagon correctly is half this question."
-    hint: "Work out the interior angle sum of a pentagon first, set it equal to $6x + 6y$, then divide through by 6."
+      - 'This is an angle-sum question, and it starts with counting the sides of a pentagon correctly.'
+      - 'The interior angles of any polygon add to $(n - 2) \times 180^{\circ}$, where $n$ is the number of sides.'
+      - 'A pentagon has 5 sides, so the sum is $(5 - 2) \times 180 = 3 \times 180 = 540^{\circ}$.'
+      - 'The question says that same sum is $6x + 6y$, so $6x + 6y = 540$.'
+      - 'Both terms on the left share a factor of 6, so divide the whole equation by 6: $x + y = 90$.'
+      - 'Finally, the question asks for $y$ in terms of $x$, so make $y$ the subject: $y = 90 - x$.'
+      - 'Option D, $y = 150 - x$, comes from dividing $900$ by 6 — that is, from using the exterior-angle sum or from taking the polygon to have six sides. Counting the sides of a pentagon correctly is half this question.'
+    hint: 'Work out the interior angle sum of a pentagon first, set it equal to $6x + 6y$, then divide through by 6.'
 
   25:
     answer: C
     steps:
-      - "Count the letters in $PQRSTV$: six of them, so this is a regular hexagon."
-      - "A regular hexagon inscribed in a circle has a special property worth knowing: each side equals the radius."
-      - "The reason is that joining the centre to two adjacent vertices gives a triangle with a central angle of $\\tfrac{360}{6} = 60^{\\circ}$ and two equal radii — so all three angles are $60^{\\circ}$ and the triangle is equilateral."
-      - "Therefore the radius equals the side: $r = 7$ cm."
-      - "Circumference is $2\\pi r = 2 \\times \\dfrac{22}{7} \\times 7$."
-      - "The 7s cancel, leaving $2 \\times 22 = 44$ cm."
-      - "Option B, 42 cm, is the perimeter of the hexagon itself ($6 \\times 7$). The question asks for the circumference of the circle, which is slightly larger — as it must be, since the circle bulges outside the hexagon."
-    hint: "Count the vertices to see which polygon it is. For a regular hexagon in a circle, the side and the radius are equal."
+      - 'Here the whole question turns on one lovely fact about hexagons in circles. Let''s start there.'
+      - 'Count the letters in $PQRSTV$: six of them, so this is a regular hexagon.'
+      - 'A regular hexagon inscribed in a circle has a special property worth knowing: each side equals the radius.'
+      - 'Here''s why: joining the centre to two adjacent vertices gives a triangle with a central angle of $\tfrac{360}{6} = 60^{\circ}$ and two equal radii — so all three angles are $60^{\circ}$ and the triangle is equilateral.'
+      - 'Therefore the radius equals the side: $r = 7$ cm.'
+      - 'Now the circumference is $2\pi r = 2 \times \dfrac{22}{7} \times 7$.'
+      - 'The 7s cancel, leaving $2 \times 22 = 44$ cm.'
+      - 'Option B, 42 cm, is the perimeter of the hexagon itself ($6 \times 7$). The question asks for the circumference of the circle, which is slightly larger — as it must be, since the circle bulges outside the hexagon.'
+    hint: 'Count the vertices to see which polygon it is. For a regular hexagon in a circle, the side and the radius are equal.'
 
   26:
     answer: A
     steps:
-      - "Two lines run out from $Q$ and cut the circle, so this is the external-angle case: the angle at $Q$ is half the *difference* of the two arcs its lines cut off."
-      - "First use the $20^{\\circ}$ at $P$. That is an angle at the circumference, standing on the near arc between the two secants, so that arc is twice it: $2 \\times 20 = 40^{\\circ}$."
-      - "Now the angle at $Q$ is half the difference between the far arc $PS$ and that near arc."
-      - "So $35 = \\tfrac{1}{2}(\\text{arc } PS - 40)$."
-      - "Multiplying by 2: $70 = \\text{arc } PS - 40$, so arc $PS = 110^{\\circ}$."
-      - "The angle at the centre standing on an arc equals the arc, so $\\angle POS = 110^{\\circ}$."
-      - "Triangle $POS$ has two sides that are radii, $OP$ and $OS$, so it is isosceles and its base angles are equal."
-      - "Those two angles share what is left of $180^{\\circ}$: $\\angle PSO = \\dfrac{180 - 110}{2} = 35^{\\circ}$."
-      - "It is a coincidence that the answer matches the $35^{\\circ}$ at $Q$ — the two angles are unrelated, and the working is what establishes it."
-    hint: "Turn the $20^{\\circ}$ into an arc, use the external angle at $Q$ to get arc $PS$, then remember triangle $POS$ has two radii for sides."
+      - 'This circle question chains a few theorems together. We''ll go one link at a time.'
+      - 'Two lines run out from $Q$ and cut the circle, so this is the external-angle case: the angle at $Q$ is half the *difference* of the two arcs its lines cut off.'
+      - 'First use the $20^{\circ}$ at $P$. That is an angle at the circumference, standing on the near arc between the two secants, so that arc is twice it: $2 \times 20 = 40^{\circ}$.'
+      - 'Now the angle at $Q$ is half the difference between the far arc $PS$ and that near arc.'
+      - 'So $35 = \tfrac{1}{2}(\text{arc } PS - 40)$.'
+      - 'Multiplying by 2: $70 = \text{arc } PS - 40$, so arc $PS = 110^{\circ}$.'
+      - 'The angle at the centre standing on an arc equals the arc, so $\angle POS = 110^{\circ}$.'
+      - 'Next, triangle $POS$ has two sides that are radii, $OP$ and $OS$, so it is isosceles and its base angles are equal.'
+      - 'Those two angles share what is left of $180^{\circ}$: $\angle PSO = \dfrac{180 - 110}{2} = 35^{\circ}$.'
+      - 'It is a coincidence that the answer matches the $35^{\circ}$ at $Q$ — the two angles are unrelated, so copying the $35^{\circ}$ across is not a method. The working is what establishes it, and you''ve now seen each link.'
+    hint: 'Turn the $20^{\circ}$ into an arc, use the external angle at $Q$ to get arc $PS$, then remember triangle $POS$ has two radii for sides.'
 
   27:
     answer: D
     steps:
-      - "The arrows on the figure carry the information: a single arrow on $PQ$ and on $UR$ means those two are parallel, and matching double and triple arrows mark the other parallel pairs."
-      - "$PQTU$ is named a parallelogram, so its opposite sides are equal: $UT = PQ = 4$ cm."
-      - "Its area is base times perpendicular height, so $4h = 32$ and the height is $h = 8$ cm. That height is the distance between the two parallel lines, so it is the same for the trapezium."
-      - "Now the trapezium's longer side. $U$, $T$, $S$ and $R$ lie in order along the bottom, so $UR = UT + TS + SR$."
-      - "$UT = 4$ and $TS = 6$ are known. For $SR$: the arrows show $PS$ parallel to $QR$, and $PQ$ is parallel to $SR$, so $PQSR$ is a parallelogram too — giving $SR = PQ = 4$ cm."
-      - "So $UR = 4 + 6 + 4 = 14$ cm."
-      - "The area of a trapezium is $\\tfrac{1}{2}(a + b)h$ with the two parallel sides: $\\tfrac{1}{2}(4 + 14) \\times 8$."
-      - "That is $\\tfrac{1}{2} \\times 18 \\times 8 = 72\\ \\text{cm}^{2}$."
-      - "Option B is $48\\ \\text{cm}^{2}$, which is what you get by taking $UR$ as $UT + TS = 10$ and forgetting the piece beyond $S$. Reading the order of the four points along the base is what prevents that."
-    hint: "Use the parallelogram's area to find the height, then build $UR$ from all three pieces along the bottom before using the trapezium formula."
+      - 'This figure carries its information in the arrows. Let''s read them carefully and build the lengths we need.'
+      - 'a single arrow on $PQ$ and on $UR$ means those two are parallel, and matching double and triple arrows mark the other parallel pairs.'
+      - '$PQTU$ is named a parallelogram, so its opposite sides are equal: $UT = PQ = 4$ cm.'
+      - 'Its area is base times perpendicular height, so $4h = 32$ and the height is $h = 8$ cm. That height is the distance between the two parallel lines, so it is the same for the trapezium.'
+      - 'Now the trapezium''s longer side. $U$, $T$, $S$ and $R$ lie in order along the bottom, so $UR = UT + TS + SR$.'
+      - '$UT = 4$ and $TS = 6$ are known. For $SR$: the arrows show $PS$ parallel to $QR$, and $PQ$ is parallel to $SR$, so $PQSR$ is a parallelogram too — giving $SR = PQ = 4$ cm.'
+      - 'So $UR = 4 + 6 + 4 = 14$ cm.'
+      - 'The area of a trapezium is $\tfrac{1}{2}(a + b)h$ with the two parallel sides: $\tfrac{1}{2}(4 + 14) \times 8$.'
+      - 'That is $\tfrac{1}{2} \times 18 \times 8 = 72\ \text{cm}^{2}$.'
+      - 'Option B is $48\ \text{cm}^{2}$, which is what you get by taking $UR$ as $UT + TS = 10$ and forgetting the piece beyond $S$. Reading the order of the four points along the base is what prevents that.'
+    hint: 'Use the parallelogram''s area to find the height, then build $UR$ from all three pieces along the bottom before using the trapezium formula.'
 
   28:
     answer: B
     steps:
-      - "Arc length is the fraction of the circumference matching the angle at the centre: $\\text{arc} = \\dfrac{\\theta}{360} \\times 2\\pi r$."
-      - "The diameter is 14 cm, so the radius is 7 cm."
-      - "The full circumference is $2 \\times \\dfrac{22}{7} \\times 7 = 44$ cm."
-      - "The arc is 22 cm, which is exactly half of 44."
-      - "So the angle must be half of $360^{\\circ}$, which is $180^{\\circ}$."
-      - "The question calls that angle $3x^{\\circ}$, so $3x = 180$."
-      - "Dividing: $x = 60$."
-      - "Option D is $180^{\\circ}$ — the angle itself rather than $x$. The last line of the question asks for $x$, and the angle is three times it."
-    hint: "Find the full circumference, see what fraction of it the arc is, and get the angle. Then remember the angle is $3x$, not $x$."
+      - 'Arc length is just a fraction of the circumference. Let''s find that fraction, then remember what the question calls the angle.'
+      - 'Arc length is the fraction of the circumference matching the angle at the centre: $\text{arc} = \dfrac{\theta}{360} \times 2\pi r$.'
+      - 'The diameter is 14 cm, so the radius is 7 cm.'
+      - 'The full circumference is $2 \times \dfrac{22}{7} \times 7 = 44$ cm.'
+      - 'Now notice: the arc is 22 cm, which is exactly half of 44.'
+      - 'So the angle must be half of $360^{\circ}$, which is $180^{\circ}$.'
+      - 'The question calls that angle $3x^{\circ}$, so $3x = 180$.'
+      - 'Dividing: $x = 60$.'
+      - 'Option D is $180^{\circ}$ — the angle itself rather than $x$. The last line of the question asks for $x$, and the angle is three times it. Always finish with what was asked.'
+    hint: 'Find the full circumference, see what fraction of it the arc is, and get the angle. Then remember the angle is $3x$, not $x$.'
 
   29:
     answer: B
     steps:
-      - "Equidistant from two lines means the same perpendicular distance from each, and the locus of such points is the bisector of the angle between them."
-      - "$PQ$ and $QR$ are two sides of the square, and they meet at the corner $Q$."
-      - "So the locus is the line that bisects the angle at $Q$."
-      - "In a square each corner is $90^{\\circ}$, and the diagonal from that corner cuts it into two $45^{\\circ}$ halves."
-      - "The diagonal from $Q$ runs to the opposite corner $S$, so the locus is the diagonal $QS$."
-      - "Option A is the other diagonal, $PR$. That one bisects the angles at $P$ and $R$, not at $Q$ — and the question names $PQ$ and $QR$, which is what fixes $Q$ as the relevant corner."
-    hint: "The two sides named meet at one particular corner. What line through that corner is the same distance from both of them?"
+      - 'Points equally far from two lines sit on the angle bisector. Let''s find which angle, and which line that is.'
+      - 'Equidistant from two lines means the same perpendicular distance from each, and the locus of such points is the bisector of the angle between them.'
+      - '$PQ$ and $QR$ are two sides of the square, and they meet at the corner $Q$.'
+      - 'So the locus is the line that bisects the angle at $Q$.'
+      - 'In a square each corner is $90^{\circ}$, and the diagonal from that corner cuts it into two $45^{\circ}$ halves.'
+      - 'The diagonal from $Q$ runs to the opposite corner $S$, so the locus is the diagonal $QS$.'
+      - 'Option A is the other diagonal, $PR$. That one bisects the angles at $P$ and $R$, not at $Q$ — and the question names $PQ$ and $QR$, which is what fixes $Q$ as the relevant corner. Find the corner, and the diagonal follows.'
+    hint: 'The two sides named meet at one particular corner. What line through that corner is the same distance from both of them?'
 
   30:
     answer: A
     steps:
-      - "A locus is the set of every point satisfying a condition, so ask where *all* the points 5 cm from the line $LM$ are."
-      - "Picture standing on the line and stepping 5 cm away at right angles. You could step to one side — or to the other."
-      - "Stepping 5 cm to one side, all along the line, traces a line parallel to $LM$ at a distance of 5 cm."
-      - "Stepping 5 cm to the other side traces a second such line, on the opposite side."
-      - "Both sets of points satisfy the condition, so the locus is both lines together: a pair of lines, one on each side of $LM$, each parallel to it and 5 cm away."
-      - "Option B describes only one of the two. Missing half of a locus is the commonest error in these questions — the condition says 'distance 5 cm', and it never said which side."
-    hint: "Ask whether points on both sides of the line satisfy the condition, not just one side."
+      - 'Locus questions reward picturing every possible point. Let''s imagine stepping away from the line.'
+      - 'A locus is the set of every point satisfying a condition, so ask where *all* the points 5 cm from the line $LM$ are.'
+      - 'Picture standing on the line and stepping 5 cm away at right angles. You could step to one side — or to the other.'
+      - 'Stepping 5 cm to one side, all along the line, traces a line parallel to $LM$ at a distance of 5 cm.'
+      - 'Stepping 5 cm to the other side traces a second such line, on the opposite side.'
+      - 'Both sets of points satisfy the condition, so the locus is both lines together: a pair of lines, one on each side of $LM$, each parallel to it and 5 cm away.'
+      - 'Option B describes only one of the two. Missing half of a locus is the commonest error in these questions — the condition says ''distance 5 cm'', and it never said which side. Always check both sides.'
+    hint: 'Ask whether points on both sides of the line satisfy the condition, not just one side.'
 
   31:
     answer: C
     steps:
-      - "The distance between two points is $\\sqrt{(x_2 - x_1)^{2} + (y_2 - y_1)^{2}}$, and squaring both sides is easier than carrying the root."
-      - "With $(1, \\alpha)$ and $(\\beta, 1)$, the distance squared is $(\\beta - 1)^{2} + (1 - \\alpha)^{2}$, and it equals $3^{2} = 9$."
-      - "Expand both brackets: $(\\beta - 1)^{2} = \\beta^{2} - 2\\beta + 1$ and $(1 - \\alpha)^{2} = 1 - 2\\alpha + \\alpha^{2}$."
-      - "Adding them: $\\alpha^{2} + \\beta^{2} - 2\\alpha - 2\\beta + 2 = 9$."
-      - "Group the two middle terms: $\\alpha^{2} + \\beta^{2} - 2(\\alpha + \\beta) + 2 = 9$."
-      - "This is the useful move — the expression now contains $\\alpha + \\beta$, which the question tells us is 2."
-      - "Substituting: $\\alpha^{2} + \\beta^{2} - 4 + 2 = 9$, so $\\alpha^{2} + \\beta^{2} = 11$."
-      - "Trying to find $\\alpha$ and $\\beta$ individually is the long way round and is not possible from one equation. Grouping so that the given sum appears is what makes it solvable."
-    hint: "Square the distance formula and expand. Then group the linear terms so that $\\alpha + \\beta$ appears, and substitute what you are told."
+      - 'We can''t find $\alpha$ and $\beta$ separately here, and we don''t need to. Let''s arrange things so their sum appears.'
+      - 'The distance between two points is $\sqrt{(x_2 - x_1)^{2} + (y_2 - y_1)^{2}}$, and squaring both sides is easier than carrying the root.'
+      - 'With $(1, \alpha)$ and $(\beta, 1)$, the distance squared is $(\beta - 1)^{2} + (1 - \alpha)^{2}$, and it equals $3^{2} = 9$.'
+      - 'Expand both brackets: $(\beta - 1)^{2} = \beta^{2} - 2\beta + 1$ and $(1 - \alpha)^{2} = 1 - 2\alpha + \alpha^{2}$.'
+      - 'Adding them: $\alpha^{2} + \beta^{2} - 2\alpha - 2\beta + 2 = 9$.'
+      - 'Now group the two middle terms: $\alpha^{2} + \beta^{2} - 2(\alpha + \beta) + 2 = 9$.'
+      - 'Here''s the useful move — the expression now contains $\alpha + \beta$, which the question tells us is 2.'
+      - 'Substituting: $\alpha^{2} + \beta^{2} - 4 + 2 = 9$, so $\alpha^{2} + \beta^{2} = 11$.'
+      - 'Trying to find $\alpha$ and $\beta$ individually is the long way round and is not possible from one equation. A common slip is forgetting to square the 3. Grouping so that the given sum appears is what makes it solvable.'
+    hint: 'Square the distance formula and expand. Then group the linear terms so that $\alpha + \beta$ appears, and substitute what you are told.'
 
   32:
     answer: D
     steps:
-      - "The midpoint is the average of the endpoints, taken separately for $x$ and for $y$."
-      - "The formula is $\\left(\\dfrac{x_1 + x_2}{2}, \\dfrac{y_1 + y_2}{2}\\right)$."
-      - "For the $x$ coordinate: $\\dfrac{-3 + 5}{2} = \\dfrac{2}{2} = 1$."
-      - "For the $y$ coordinate: $\\dfrac{5 + (-3)}{2} = \\dfrac{2}{2} = 1$."
-      - "So the midpoint is $(1, 1)$."
-      - "Option B is $(4, 4)$ — what you get by subtracting the coordinates instead of adding them, which is the distance calculation starting up by habit rather than the midpoint one."
-    hint: "Add the two $x$ values and halve, then add the two $y$ values and halve. Add — do not subtract."
+      - 'A midpoint is just an average, done once for $x$ and once for $y$. Let''s do both.'
+      - 'The midpoint is the average of the endpoints, taken separately for $x$ and for $y$.'
+      - 'The formula is $\left(\dfrac{x_1 + x_2}{2}, \dfrac{y_1 + y_2}{2}\right)$.'
+      - 'For the $x$ coordinate: $\dfrac{-3 + 5}{2} = \dfrac{2}{2} = 1$.'
+      - 'For the $y$ coordinate: $\dfrac{5 + (-3)}{2} = \dfrac{2}{2} = 1$.'
+      - 'So the midpoint is $(1, 1)$.'
+      - 'Option B is $(4, 4)$ — what you get by subtracting the coordinates instead of adding them, which is the distance calculation starting up by habit rather than the midpoint one. For a midpoint, add and halve.'
+    hint: 'Add the two $x$ values and halve, then add the two $y$ values and halve. Add — don''t subtract.'
 
   33:
     answer: C
     steps:
-      - "The triangle gives two angles and the side between one of them and the unknown, so the sine rule is the tool: $\\dfrac{a}{\\sin A} = \\dfrac{b}{\\sin B}$, where each side pairs with the angle opposite it."
-      - "Match them up carefully. The side of 15 cm is opposite the $60^{\\circ}$ angle, and the side $x$ is opposite the $45^{\\circ}$ angle."
-      - "So $\\dfrac{x}{\\sin 45^{\\circ}} = \\dfrac{15}{\\sin 60^{\\circ}}$."
-      - "Therefore $x = \\dfrac{15\\sin 45^{\\circ}}{\\sin 60^{\\circ}}$."
-      - "Substitute the exact values: $\\sin 45^{\\circ} = \\dfrac{\\sqrt{2}}{2}$ and $\\sin 60^{\\circ} = \\dfrac{\\sqrt{3}}{2}$."
-      - "The halves cancel, leaving $x = \\dfrac{15\\sqrt{2}}{\\sqrt{3}}$."
-      - "Rationalise by multiplying top and bottom by $\\sqrt{3}$: $x = \\dfrac{15\\sqrt{6}}{3} = 5\\sqrt{6}$."
-      - "Pairing each side with the wrong angle is the usual error here, and it would give $15\\sqrt{6}/2$ — not offered. Checking that the larger side faces the larger angle is a quick way to be sure the pairing is right: $60^{\\circ}$ is bigger than $45^{\\circ}$, and 15 is bigger than $5\\sqrt{6} \\approx 12.2$ ✓."
-    hint: "Use the sine rule, pairing each side with the angle opposite it — not the angle next to it."
+      - 'Two angles and a side — that''s a job for the sine rule. The care is all in pairing each side with the right angle.'
+      - 'The triangle gives two angles and the side between one of them and the unknown, so the sine rule is the tool: $\dfrac{a}{\sin A} = \dfrac{b}{\sin B}$, where each side pairs with the angle opposite it.'
+      - 'Match them up carefully. The side of 15 cm is opposite the $60^{\circ}$ angle, and the side $x$ is opposite the $45^{\circ}$ angle.'
+      - 'So $\dfrac{x}{\sin 45^{\circ}} = \dfrac{15}{\sin 60^{\circ}}$.'
+      - 'Therefore $x = \dfrac{15\sin 45^{\circ}}{\sin 60^{\circ}}$.'
+      - 'Now substitute the exact values: $\sin 45^{\circ} = \dfrac{\sqrt{2}}{2}$ and $\sin 60^{\circ} = \dfrac{\sqrt{3}}{2}$.'
+      - 'The halves cancel, leaving $x = \dfrac{15\sqrt{2}}{\sqrt{3}}$.'
+      - 'Rationalise by multiplying top and bottom by $\sqrt{3}$: $x = \dfrac{15\sqrt{6}}{3} = 5\sqrt{6}$.'
+      - 'Pairing each side with the wrong angle is the usual error here, and it would give $15\sqrt{6}/2$ — not offered. A quick check: the larger side faces the larger angle, and $60^{\circ}$ is bigger than $45^{\circ}$ while 15 is bigger than $5\sqrt{6} \approx 12.2$ ✓.'
+    hint: 'Use the sine rule, pairing each side with the angle opposite it — not the angle next to it.'
 
   34:
     answer: C
     steps:
-      - "Draw the picture: the pole is vertical, its shadow lies flat on the ground, and the sun's rays run from the top of the pole to the tip of the shadow. That makes a right-angled triangle."
-      - "The angle of elevation is the angle at the tip of the shadow, between the ground and the ray."
-      - "From that angle, the pole is the opposite side and the shadow is the adjacent side — so the ratio to use is tangent."
-      - "$\\tan\\theta = \\dfrac{\\text{opposite}}{\\text{adjacent}} = \\dfrac{5\\sqrt{3}}{5}$."
-      - "The 5s cancel, leaving $\\tan\\theta = \\sqrt{3}$."
-      - "$\\sqrt{3}$ is the tangent of $60^{\\circ}$ — one of the standard values worth knowing, alongside $\\tan 30^{\\circ} = \\tfrac{1}{\\sqrt{3}}$ and $\\tan 45^{\\circ} = 1$."
-      - "So the angle of elevation is $60^{\\circ}$."
-      - "Option A is $30^{\\circ}$, which is what you get from $\\tfrac{5}{5\\sqrt{3}}$ — the ratio taken upside down. Which side is opposite depends on which angle you are measuring, and here it is the one at the ground."
-    hint: "Sketch the right-angled triangle. The pole is opposite the angle and the shadow is adjacent, so use tangent."
+      - 'A quick sketch turns this into a right-angled triangle. Let''s draw it and pick the right ratio.'
+      - 'Draw the picture: the pole is vertical, its shadow lies flat on the ground, and the sun''s rays run from the top of the pole to the tip of the shadow. That makes a right-angled triangle.'
+      - 'The angle of elevation is the angle at the tip of the shadow, between the ground and the ray.'
+      - 'From that angle, the pole is the opposite side and the shadow is the adjacent side — so the ratio to use is tangent.'
+      - 'So $\tan\theta = \dfrac{\text{opposite}}{\text{adjacent}} = \dfrac{5\sqrt{3}}{5}$.'
+      - 'The 5s cancel, leaving $\tan\theta = \sqrt{3}$.'
+      - 'Now, $\sqrt{3}$ is the tangent of $60^{\circ}$ — one of the standard values worth knowing, alongside $\tan 30^{\circ} = \tfrac{1}{\sqrt{3}}$ and $\tan 45^{\circ} = 1$.'
+      - 'So the angle of elevation is $60^{\circ}$.'
+      - 'Option A is $30^{\circ}$, which is what you get from $\tfrac{5}{5\sqrt{3}}$ — the ratio taken upside down. Which side is opposite depends on which angle you are measuring, and here it is the one at the ground. Sketch it, and it''s clear.'
+    hint: 'Sketch the right-angled triangle. The pole is opposite the angle and the shadow is adjacent, so use tangent.'
 
   35:
     answer: B
     steps:
-      - "You could use the product rule, but expanding first is quicker and less error-prone for a product of two simple brackets."
-      - "Expand $(2 + 3x)(1 - x)$ term by term: $2 \\times 1 = 2$; $2 \\times (-x) = -2x$; $3x \\times 1 = 3x$; $3x \\times (-x) = -3x^{2}$."
-      - "Collecting: $2 - 2x + 3x - 3x^{2} = 2 + x - 3x^{2}$."
-      - "Now differentiate term by term. The constant 2 gives 0."
-      - "The term $x$ differentiates to 1."
-      - "The term $-3x^{2}$ differentiates to $-6x$, by multiplying by the index and reducing it by one."
-      - "So $\\dfrac{dy}{dx} = 1 - 6x$."
-      - "Option A is $6x - 1$, the same expression with every sign reversed — what you get by expanding $(2 + 3x)(x - 1)$ instead, with the bracket the wrong way round."
-    hint: "Expand the brackets into a simple quadratic first, then differentiate term by term."
+      - 'We could use the product rule, but there''s a calmer route: expand first, then differentiate.'
+      - 'You could use the product rule, but expanding first is quicker and less error-prone for a product of two simple brackets.'
+      - 'Expand $(2 + 3x)(1 - x)$ term by term: $2 \times 1 = 2$; $2 \times (-x) = -2x$; $3x \times 1 = 3x$; $3x \times (-x) = -3x^{2}$.'
+      - 'Collecting: $2 - 2x + 3x - 3x^{2} = 2 + x - 3x^{2}$.'
+      - 'Now differentiate term by term. The constant 2 gives 0.'
+      - 'The term $x$ differentiates to 1.'
+      - 'The term $-3x^{2}$ differentiates to $-6x$, by multiplying by the index and reducing it by one.'
+      - 'So $\dfrac{dy}{dx} = 1 - 6x$.'
+      - 'Option A is $6x - 1$, the same expression with every sign reversed — what you get by expanding $(2 + 3x)(x - 1)$ instead, with the bracket the wrong way round. Copy the brackets exactly and the signs look after themselves.'
+    hint: 'Expand the brackets into a simple quadratic first, then differentiate term by term.'
 
   36:
     answer: C
     steps:
-      - "Expand before differentiating — it avoids the product rule entirely."
-      - "$y = 2x^{2}(2x - 1) = 2x^{2} \\times 2x - 2x^{2} \\times 1 = 4x^{3} - 2x^{2}$."
-      - "Differentiate term by term. For $4x^{3}$: multiply by the index and drop it by one, giving $12x^{2}$."
-      - "For $-2x^{2}$: the same rule gives $-4x$."
-      - "So $\\dfrac{dy}{dx} = 12x^{2} - 4x$."
-      - "Now substitute $x = -1$. The square first: $(-1)^{2} = 1$, so the first term is $12 \\times 1 = 12$."
-      - "The second term is $-4 \\times (-1) = +4$, because a negative times a negative is positive."
-      - "Adding: $12 + 4 = 16$."
-      - "Option A is $-6$ and option B is $-4$ — both come from letting a minus sign survive where the squaring or the double negative should have removed it."
-    hint: "Multiply out the brackets first, then differentiate. Take care with the signs when you substitute $x = -1$."
+      - 'Here too, expanding first saves effort. Then the care goes into substituting a negative number.'
+      - 'Expand before differentiating — it avoids the product rule entirely.'
+      - 'So $y = 2x^{2}(2x - 1) = 2x^{2} \times 2x - 2x^{2} \times 1 = 4x^{3} - 2x^{2}$.'
+      - 'Now differentiate term by term. For $4x^{3}$: multiply by the index and drop it by one, giving $12x^{2}$.'
+      - 'For $-2x^{2}$: the same rule gives $-4x$.'
+      - 'So $\dfrac{dy}{dx} = 12x^{2} - 4x$.'
+      - 'Now substitute $x = -1$. The square first: $(-1)^{2} = 1$, so the first term is $12 \times 1 = 12$.'
+      - 'The second term is $-4 \times (-1) = +4$, because a negative times a negative is positive.'
+      - 'Adding: $12 + 4 = 16$.'
+      - 'Option A is $-6$ and option B is $-4$ — both come from letting a minus sign survive where the squaring or the double negative should have removed it. Put negatives in brackets when you substitute.'
+    hint: 'Multiply out the brackets first, then differentiate. Take care with the signs when you substitute $x = -1$.'
 
   37:
     answer: C
     steps:
-      - "The angle inside the cosine is $\\tfrac{x}{3}$, not $x$, so the chain rule applies: differentiate the outside, then multiply by the derivative of the inside."
-      - "The derivative of $\\cos u$ is $-\\sin u$, so the outer part gives $-3\\sin\\left(\\tfrac{x}{3}\\right)$."
-      - "The inside is $\\tfrac{x}{3}$, whose derivative is $\\tfrac{1}{3}$."
-      - "Multiplying: $\\dfrac{dy}{dx} = -3\\sin\\left(\\tfrac{x}{3}\\right) \\times \\dfrac{1}{3} = -\\sin\\left(\\tfrac{x}{3}\\right)$."
-      - "Now substitute $x = \\tfrac{3\\pi}{2}$. The angle inside becomes $\\dfrac{3\\pi/2}{3} = \\dfrac{\\pi}{2}$."
-      - "So the derivative is $-\\sin\\left(\\tfrac{\\pi}{2}\\right)$."
-      - "$\\sin\\tfrac{\\pi}{2} = 1$, so the answer is $-1$."
-      - "Two signs have to survive here: the minus from differentiating cosine, and the fact that $\\sin\\tfrac{\\pi}{2}$ is positive. Losing the first gives $+1$, which is option B."
-    hint: "Differentiate the cosine into a negative sine, then multiply by the derivative of $\\tfrac{x}{3}$. Simplify the angle before substituting."
+      - 'This is a chain-rule question with two signs to keep track of. Let''s go slowly.'
+      - 'The angle inside the cosine is $\tfrac{x}{3}$, not $x$, so the chain rule applies: differentiate the outside, then multiply by the derivative of the inside.'
+      - 'The derivative of $\cos u$ is $-\sin u$, so the outer part gives $-3\sin\left(\tfrac{x}{3}\right)$.'
+      - 'The inside is $\tfrac{x}{3}$, whose derivative is $\tfrac{1}{3}$.'
+      - 'Multiplying: $\dfrac{dy}{dx} = -3\sin\left(\tfrac{x}{3}\right) \times \dfrac{1}{3} = -\sin\left(\tfrac{x}{3}\right)$.'
+      - 'Now substitute $x = \tfrac{3\pi}{2}$. The angle inside becomes $\dfrac{3\pi/2}{3} = \dfrac{\pi}{2}$.'
+      - 'So the derivative is $-\sin\left(\tfrac{\pi}{2}\right)$.'
+      - 'And $\sin\tfrac{\pi}{2} = 1$, so the answer is $-1$.'
+      - 'Two signs have to survive here: the minus from differentiating cosine, and the fact that $\sin\tfrac{\pi}{2}$ is positive. Losing the first gives $+1$, which is option B. Cosine differentiates to minus sine — keep that minus.'
+    hint: 'Differentiate the cosine into a negative sine, then multiply by the derivative of $\tfrac{x}{3}$. Simplify the angle before substituting.'
 
   38:
     answer: C
     steps:
-      - "'Rate of change of $V$ with respect to $r$' is exactly $\\dfrac{dV}{dr}$ — so the question is asking you to differentiate the volume formula."
-      - "A sphere has volume $\\tfrac{4}{3}\\pi r^{3}$, so a hemisphere is half of that: $V = \\tfrac{2}{3}\\pi r^{3}$."
-      - "Differentiate with respect to $r$, treating $\\tfrac{2}{3}\\pi$ as a constant multiplier."
-      - "The rule gives $\\dfrac{dV}{dr} = \\tfrac{2}{3}\\pi \\times 3r^{2}$."
-      - "The 3s cancel, leaving $\\dfrac{dV}{dr} = 2\\pi r^{2}$."
-      - "Now substitute $r = 2$: $2\\pi \\times 2^{2} = 2\\pi \\times 4 = 8\\pi$."
-      - "Using the full sphere formula instead of halving it gives $4\\pi r^{2} = 16\\pi$, which is offered as option D. The word 'hemisphere' is doing real work in this question."
-    hint: "Halve the sphere's volume formula first, then differentiate it with respect to $r$ and substitute $r = 2$."
+      - '''Rate of change'' is a signal to differentiate. But first, let''s get the right volume formula for a hemisphere.'
+      - '''Rate of change of $V$ with respect to $r$'' is exactly $\dfrac{dV}{dr}$ — so the question is asking you to differentiate the volume formula.'
+      - 'A sphere has volume $\tfrac{4}{3}\pi r^{3}$, so a hemisphere is half of that: $V = \tfrac{2}{3}\pi r^{3}$.'
+      - 'Now differentiate with respect to $r$, treating $\tfrac{2}{3}\pi$ as a constant multiplier.'
+      - 'The rule gives $\dfrac{dV}{dr} = \tfrac{2}{3}\pi \times 3r^{2}$.'
+      - 'The 3s cancel, leaving $\dfrac{dV}{dr} = 2\pi r^{2}$.'
+      - 'Now substitute $r = 2$: $2\pi \times 2^{2} = 2\pi \times 4 = 8\pi$.'
+      - 'Using the full sphere formula instead of halving it gives $4\pi r^{2} = 16\pi$, which is offered as option D. The word ''hemisphere'' is doing real work in this question. Halve first, then differentiate.'
+    hint: 'Halve the sphere''s volume formula first, then differentiate it with respect to $r$ and substitute $r = 2$.'
 
   39:
     answer: A
     steps:
-      - "Integrate term by term, adding one to each index and dividing by the new index."
-      - "For $x^{2}$: the index becomes 3, giving $\\dfrac{x^{3}}{3}$."
-      - "For $-1$: treat it as $-x^{0}$, so the index becomes 1 and it integrates to $-x$."
-      - "So the antiderivative is $\\dfrac{x^{3}}{3} - x$. No constant is needed, since the limits will cancel it."
-      - "Substitute the upper limit $x = 3$: $\\dfrac{27}{3} - 3 = 9 - 3 = 6$."
-      - "Substitute the lower limit $x = 1$: $\\dfrac{1}{3} - 1$. Writing 1 as $\\dfrac{3}{3}$, this is $\\dfrac{1}{3} - \\dfrac{3}{3} = -\\dfrac{2}{3}$."
-      - "Subtract the lower from the upper: $6 - \\left(-\\dfrac{2}{3}\\right) = 6 + \\dfrac{2}{3} = 6\\dfrac{2}{3}$."
-      - "Option B is $\\tfrac{2}{3}$ and option D is $-6\\tfrac{2}{3}$ — the first from forgetting the upper value, the second from subtracting the wrong way round. Subtracting a negative adds."
-    hint: "Integrate, then work out the value at each limit and subtract the lower from the upper. Watch the sign of the lower one."
+      - 'A definite integral: integrate, then subtract the two limits. The lower limit gives a negative, so we''ll take care there.'
+      - 'Integrate term by term, adding one to each index and dividing by the new index.'
+      - 'For $x^{2}$: the index becomes 3, giving $\dfrac{x^{3}}{3}$.'
+      - 'For $-1$: treat it as $-x^{0}$, so the index becomes 1 and it integrates to $-x$.'
+      - 'So the antiderivative is $\dfrac{x^{3}}{3} - x$. No constant is needed, since the limits will cancel it.'
+      - 'Now substitute the upper limit $x = 3$: $\dfrac{27}{3} - 3 = 9 - 3 = 6$.'
+      - 'Then the lower limit $x = 1$: $\dfrac{1}{3} - 1$. Writing 1 as $\dfrac{3}{3}$, this is $\dfrac{1}{3} - \dfrac{3}{3} = -\dfrac{2}{3}$.'
+      - 'Subtract the lower from the upper: $6 - \left(-\dfrac{2}{3}\right) = 6 + \dfrac{2}{3} = 6\dfrac{2}{3}$.'
+      - 'Option B is $\tfrac{2}{3}$ and option D is $-6\tfrac{2}{3}$ — the first from forgetting the upper value, the second from subtracting the wrong way round. Subtracting a negative adds, and that''s the step to hold on to.'
+    hint: 'Integrate, then work out the value at each limit and subtract the lower from the upper. Watch the sign of the lower one.'
 
   40:
     answer: D
     steps:
-      - "A pie chart divides $360^{\\circ}$ in proportion to the quantities, so first make sure every sector's angle is known."
-      - "Three are marked: Others $60^{\\circ}$, Millet $150^{\\circ}$, and Maize carries a right-angle symbol, so it is $90^{\\circ}$."
-      - "Beans is whatever is left: $360 - 60 - 150 - 90 = 60^{\\circ}$."
-      - "Now use the quantity you are given. Millet's $150^{\\circ}$ represents 3000 tonnes."
-      - "So one degree represents $\\dfrac{3000}{150} = 20$ tonnes."
-      - "Beans occupies $60^{\\circ}$, so it is $60 \\times 20 = 1200$ tonnes."
-      - "Equivalently, beans' sector is $\\tfrac{60}{150} = \\tfrac{2}{5}$ of millet's, and $\\tfrac{2}{5}$ of 3000 is 1200 — a useful check."
-      - "Option A is 9000 tonnes, which comes from scaling the wrong way round, treating the smaller sector as the larger. A sector less than half the size of millet's cannot represent three times as much."
-    hint: "Find the missing sector angle first — the right-angle mark gives you one of them. Then work out what one degree is worth."
+      - 'In pie charts, angles stand for amounts. Let''s find the missing angle and then what one degree is worth.'
+      - 'A pie chart divides $360^{\circ}$ in proportion to the quantities, so first make sure every sector''s angle is known.'
+      - 'Three are marked: Others $60^{\circ}$, Millet $150^{\circ}$, and Maize carries a right-angle symbol, so it is $90^{\circ}$.'
+      - 'Beans is whatever is left: $360 - 60 - 150 - 90 = 60^{\circ}$.'
+      - 'Now use the quantity you are given. Millet''s $150^{\circ}$ represents 3000 tonnes.'
+      - 'So one degree represents $\dfrac{3000}{150} = 20$ tonnes.'
+      - 'Beans occupies $60^{\circ}$, so it is $60 \times 20 = 1200$ tonnes.'
+      - 'Equivalently, beans'' sector is $\tfrac{60}{150} = \tfrac{2}{5}$ of millet''s, and $\tfrac{2}{5}$ of 3000 is 1200 — a useful check.'
+      - 'Option A is 9000 tonnes, which comes from scaling the wrong way round, treating the smaller sector as the larger. A sector less than half the size of millet''s cannot represent three times as much. A quick sense-check catches it.'
+    hint: 'Find the missing sector angle first — the right-angle mark gives you one of them. Then work out what one degree is worth.'
 
   41:
     answer: C
     steps:
-      - "Take each statement in turn and ask whether it is true of every histogram."
-      - "Statement I says the bars have equal width. In a standard histogram the class intervals are equal, so the bars are too — true."
-      - "Statement II says each bar's height is proportional to the frequency of its class. That is what makes a histogram readable at a glance — true."
-      - "Statement III says the bars touch, with no gaps. This is the feature that distinguishes a histogram from a bar chart: histogram data is continuous, so the intervals run into one another — true."
-      - "All three statements are true, so the answer is I, II and III."
-      - "A bar chart, by contrast, has gaps between its bars because its categories are separate rather than continuous. Statement III is the one that tells the two apart, and any option leaving it out is describing a bar chart."
-    hint: "Check each statement separately. In particular, ask what makes a histogram different from a bar chart."
+      - 'This is a question about what a histogram really is. Let''s test each statement in turn.'
+      - 'Take each statement and ask whether it is true of every histogram.'
+      - 'Statement I says the bars have equal width. In a standard histogram the class intervals are equal, so the bars are too — true.'
+      - 'Statement II says each bar''s height is proportional to the frequency of its class. That is what makes a histogram readable at a glance — true.'
+      - 'Statement III says the bars touch, with no gaps. This is the feature that distinguishes a histogram from a bar chart: histogram data is continuous, so the intervals run into one another — true.'
+      - 'So all three statements are true, and the answer is I, II and III.'
+      - 'A bar chart, by contrast, has gaps between its bars because its categories are separate rather than continuous. Statement III is the one that tells the two apart, and any option leaving it out is describing a bar chart. Touching bars mean a histogram.'
+    hint: 'Check each statement separately. In particular, ask what makes a histogram different from a bar chart.'
 
   42:
     answer: B
     steps:
-      - "On a cumulative frequency curve, the height at any mark tells you how many students scored *up to* that mark, so start by reading the total."
-      - "The curve levels off at 25, so there are 25 students in all."
-      - "The question asks about more than 20 marks, so first find how many scored 20 or fewer — that is the height of the curve at 20."
-      - "20 sits between the plotted points at 19 and 24, where the curve reads 17 and 22."
-      - "Reading across at 20, the curve is at about 18. (Interpolating: one fifth of the way from 19 to 24 adds about one fifth of the rise from 17 to 22, which is 1.)"
-      - "So 18 students scored 20 or fewer, and the rest scored more: $25 - 18 = 7$ students."
-      - "As a percentage: $\\dfrac{7}{25} \\times 100 = 28\\%$."
-      - "Option A is 68%, close to the proportion scoring *below* 20 — which is what you get by reading the curve's value and using it directly instead of subtracting from the total. A cumulative curve always counts upwards, so 'more than' always means taking the reading away from the total."
-    hint: "Read the total where the curve flattens, then read the curve at 20. The question asks for what is left above that, not the reading itself."
+      - 'A cumulative frequency curve counts upwards, so ''more than'' needs a subtraction. Let''s read the curve carefully.'
+      - 'On a cumulative frequency curve, the height at any mark tells you how many students scored *up to* that mark, so start by reading the total.'
+      - 'The curve levels off at 25, so there are 25 students in all.'
+      - 'The question asks about more than 20 marks, so first find how many scored 20 or fewer — that is the height of the curve at 20.'
+      - '20 sits between the plotted points at 19 and 24, where the curve reads 17 and 22.'
+      - 'Reading across at 20, the curve is at about 18. (Interpolating: one fifth of the way from 19 to 24 adds about one fifth of the rise from 17 to 22, which is 1.)'
+      - 'So 18 students scored 20 or fewer, and the rest scored more: $25 - 18 = 7$ students.'
+      - 'As a percentage: $\dfrac{7}{25} \times 100 = 28\%$.'
+      - 'Option A is 68%, close to the proportion scoring *below* 20 — what you get by using the curve''s reading directly instead of subtracting from the total. A cumulative curve always counts upwards, so ''more than'' always means taking the reading away from the total.'
+    hint: 'Read the total where the curve flattens, then read the curve at 20. The question asks for what is left above that, not the reading itself.'
 
   43:
     answer: B
     steps:
-      - "Let $n$ be the number of students. Their mean age is 15, so their ages total $15n$."
-      - "When the teacher joins, one more person is in the group, so the count becomes $n + 1$."
-      - "The total age becomes $15n + 45$, adding the teacher's 45 years."
-      - "The new mean is 18, so $\\dfrac{15n + 45}{n + 1} = 18$."
-      - "Multiply both sides by $(n + 1)$ to clear the fraction: $15n + 45 = 18(n + 1) = 18n + 18$."
-      - "Gather the $n$ terms on one side: $45 - 18 = 18n - 15n$, which is $27 = 3n$."
-      - "So $n = 9$."
-      - "Check it: 9 students total 135 years; adding 45 gives 180 over 10 people, which is a mean of 18 ✓."
-      - "The commonest error is forgetting the denominator changes. The teacher adds to the total *and* to the head count, and missing the second gives $n = 10$."
-    hint: "Write the total age as $15n$, then add the teacher to both the total and the number of people before setting the new mean to 18."
+      - 'When someone joins a group, both the total and the count change. Let''s write both down.'
+      - 'Let $n$ be the number of students. Their mean age is 15, so their ages total $15n$.'
+      - 'When the teacher joins, one more person is in the group, so the count becomes $n + 1$.'
+      - 'The total age becomes $15n + 45$, adding the teacher''s 45 years.'
+      - 'The new mean is 18, so $\dfrac{15n + 45}{n + 1} = 18$.'
+      - 'Multiply both sides by $(n + 1)$ to clear the fraction: $15n + 45 = 18(n + 1) = 18n + 18$.'
+      - 'Gather the $n$ terms on one side: $45 - 18 = 18n - 15n$, which is $27 = 3n$.'
+      - 'So $n = 9$.'
+      - 'Let''s check it: 9 students total 135 years; adding 45 gives 180 over 10 people, which is a mean of 18 ✓.'
+      - 'The commonest error is forgetting the denominator changes. The teacher adds to the total *and* to the head count, and missing the second gives $n = 10$. Change both, and it works out.'
+    hint: 'Write the total age as $15n$, then add the teacher to both the total and the number of people before setting the new mean to 18.'
 
   44:
     answer: C
     steps:
-      - "The range is the largest value minus the smallest, and nothing in between affects it."
-      - "The weights are 15, 16, 17, 18, 16, 17, 17, 17, 18 and 16."
-      - "Scanning for the largest: 18 kg."
-      - "Scanning for the smallest: 15 kg."
-      - "So the range is $18 - 15 = 3$ kg."
-      - "There are ten readings but only four different values, and the repetition is irrelevant to the range — 17 appears four times and changes nothing. Repetition matters for the mean and the mode, not for the range."
-    hint: "Find the heaviest and the lightest weight and subtract. How often each weight appears makes no difference."
+      - 'The range only needs the two extremes. Let''s find them.'
+      - 'The range is the largest value minus the smallest, and nothing in between affects it.'
+      - 'The weights are 15, 16, 17, 18, 16, 17, 17, 17, 18 and 16.'
+      - 'Scanning for the largest: 18 kg.'
+      - 'Scanning for the smallest: 15 kg.'
+      - 'So the range is $18 - 15 = 3$ kg.'
+      - 'There are ten readings but only four different values, and the repetition is irrelevant to the range — 17 appears four times and changes nothing. Repetition matters for the mean and the mode, not for the range. Biggest minus smallest, and you''re done.'
+    hint: 'Find the heaviest and the lightest weight and subtract. How often each weight appears makes no difference.'
 
   45:
     answer: A
     steps:
-      - "Mean deviation measures the average distance of the values from their mean, so the mean has to come first."
-      - "The mean of 1, 2, 3 and 4 is $\\dfrac{1 + 2 + 3 + 4}{4} = \\dfrac{10}{4} = 2.5$."
-      - "Now find how far each value is from 2.5, taking every distance as positive — that is what 'deviation' means here."
-      - "$|1 - 2.5| = 1.5$; $|2 - 2.5| = 0.5$; $|3 - 2.5| = 0.5$; $|4 - 2.5| = 1.5$."
-      - "Add them: $1.5 + 0.5 + 0.5 + 1.5 = 4$."
-      - "Divide by how many values there are: $\\dfrac{4}{4} = 1.0$."
-      - "Keeping the signs would give $-1.5 - 0.5 + 0.5 + 1.5 = 0$, which is why the absolute values are essential. Deviations from the mean always cancel to zero if you let them."
-    hint: "Find the mean first, then the distance of each value from it — ignoring signs — and average those distances."
+      - 'Mean deviation is an average of distances. Let''s find the mean, then the distances, then average them.'
+      - 'Mean deviation measures the average distance of the values from their mean, so the mean has to come first.'
+      - 'The mean of 1, 2, 3 and 4 is $\dfrac{1 + 2 + 3 + 4}{4} = \dfrac{10}{4} = 2.5$.'
+      - 'Now find how far each value is from 2.5, taking every distance as positive — that is what ''deviation'' means here.'
+      - '$|1 - 2.5| = 1.5$; $|2 - 2.5| = 0.5$; $|3 - 2.5| = 0.5$; $|4 - 2.5| = 1.5$.'
+      - 'Add them: $1.5 + 0.5 + 0.5 + 1.5 = 4$.'
+      - 'Divide by how many values there are: $\dfrac{4}{4} = 1.0$.'
+      - 'Keeping the signs would give $-1.5 - 0.5 + 0.5 + 1.5 = 0$, which is why the absolute values are essential. Deviations from the mean always cancel to zero if you let them — so treat every distance as positive.'
+    hint: 'Find the mean first, then the distance of each value from it — ignoring signs — and average those distances.'
 
   46:
     answer: A
     steps:
-      - "Selecting students for a team is a choice, not an arrangement: picking Ada and Bola is the same selection as picking Bola and Ada. So this is combinations."
-      - "The formula is $^{n}C_{r} = \\dfrac{n!}{r!(n-r)!}$, here with $n = 5$ and $r = 2$."
-      - "Rather than expanding all the factorials, cancel: $^{5}C_{2} = \\dfrac{5 \\times 4}{2 \\times 1}$."
-      - "That is $\\dfrac{20}{2} = 10$."
-      - "So there are 10 ways."
-      - "Option C is 20 — the permutation $^{5}P_{2}$, which counts each pair twice because it treats the two orders as different. Dividing by 2 is what turns the arrangement count into a selection count."
-    hint: "Order does not matter when selecting a pair, so use combinations rather than permutations."
+      - 'Choosing a team is about who, not what order. Let''s count the selections.'
+      - 'Selecting students for a team is a choice, not an arrangement: picking Ada and Bola is the same selection as picking Bola and Ada. So this is combinations.'
+      - 'The formula is $^{n}C_{r} = \dfrac{n!}{r!(n-r)!}$, here with $n = 5$ and $r = 2$.'
+      - 'Rather than expanding all the factorials, cancel: $^{5}C_{2} = \dfrac{5 \times 4}{2 \times 1}$.'
+      - 'That is $\dfrac{20}{2} = 10$.'
+      - 'So there are 10 ways.'
+      - 'Option C is 20 — the permutation $^{5}P_{2}$, which counts each pair twice because it treats the two orders as different. Dividing by 2 is what turns the arrangement count into a selection count. Order doesn''t matter, so combinations it is.'
+    hint: 'Order doesn''t matter when selecting a pair, so use combinations rather than permutations.'
 
   47:
     answer: B
     steps:
-      - "There are 12 people altogether — 9 commissioners and 3 members of the house of assembly — and 6 are to be chosen."
-      - "Without any condition, the number of committees would be $^{12}C_{6} = 924$. That is option A, and it is the answer to a question that has not been asked."
-      - "The condition is that the committee must include a member of the house of assembly. The cleanest way to count that is indirectly: take all the committees and remove the ones that break the rule."
-      - "Committees with no assembly member are chosen entirely from the 9 commissioners: $^{9}C_{6} = \\dfrac{9 \\times 8 \\times 7}{3 \\times 2 \\times 1} = 84$."
-      - "So the committees that do include at least one assembly member number $924 - 84 = 840$."
-      - "Counting directly would be much longer: one assembly member gives $^{3}C_{1} \\times {}^{9}C_{5} = 3 \\times 126 = 378$, two gives $^{3}C_{2} \\times {}^{9}C_{4} = 3 \\times 126 = 378$, three gives $^{3}C_{3} \\times {}^{9}C_{3} = 1 \\times 84 = 84$ — and $378 + 378 + 84 = 840$, the same answer."
-      - "Note that 378 is itself an option. It is the count for *exactly* one assembly member, which is what you get by reading 'include one member' as a precise number rather than a minimum."
-    hint: "Count all possible committees, then subtract the ones containing no member of the house of assembly. That is far shorter than counting the valid ones directly."
+      - 'This one has a condition that changes everything. The neatest way through is to count what we don''t want and take it away.'
+      - 'There are 12 people altogether — 9 commissioners and 3 members of the house of assembly — and 6 are to be chosen.'
+      - 'Without any condition, the number of committees would be $^{12}C_{6} = 924$. That is option A, and it is the answer to a question that has not been asked.'
+      - 'The condition is that the committee must include a member of the house of assembly. The cleanest way to count that is indirectly: take all the committees and remove the ones that break the rule.'
+      - 'Committees with no assembly member are chosen entirely from the 9 commissioners: $^{9}C_{6} = \dfrac{9 \times 8 \times 7}{3 \times 2 \times 1} = 84$.'
+      - 'So the committees that do include at least one assembly member number $924 - 84 = 840$.'
+      - 'Counting directly takes longer: one member gives $^{3}C_{1} \times {}^{9}C_{5} = 3 \times 126 = 378$, two gives $^{3}C_{2} \times {}^{9}C_{4} = 3 \times 126 = 378$, three gives $^{3}C_{3} \times {}^{9}C_{3} = 1 \times 84 = 84$ — and $378 + 378 + 84 = 840$, the same answer.'
+      - 'Note that 378 is itself an option. It is the count for *exactly* one assembly member, which is what you get by reading ''include one member'' as a precise number rather than a minimum. All minus the ones you don''t want — that''s the shortcut.'
+    hint: 'Count all possible committees, then subtract the ones containing no member of the house of assembly. That''s far shorter than counting the valid ones directly.'
 
   48:
     answer: C
     steps:
-      - "Let $w$ be the number of white balls added. Everything else follows from writing the probability in terms of $w$."
-      - "The basket already holds 12 red and 16 black, which is 28 balls."
-      - "After adding the white ones there are $28 + w$ balls altogether, of which $w$ are white."
-      - "So the probability of drawing white is $\\dfrac{w}{28 + w}$, and the question says this equals $\\dfrac{3}{7}$."
-      - "Cross-multiply: $7w = 3(28 + w) = 84 + 3w$."
-      - "Gather the $w$ terms: $7w - 3w = 84$, so $4w = 84$."
-      - "Therefore $w = 21$."
-      - "Check: with 21 white the basket holds 49 balls, and $\\dfrac{21}{49} = \\dfrac{3}{7}$ ✓."
-      - "The trap is treating 28 as the final total and answering $\\tfrac{3}{7} \\times 28 = 12$, which is option D. Adding the white balls changes the denominator as well as the numerator."
-    hint: "Call the number of white balls $w$. Remember it appears in the total as well as on top of the fraction."
+      - 'Adding balls changes the total as well as the count of white ones. Let''s build the probability with that in mind.'
+      - 'Let $w$ be the number of white balls added. Everything else follows from writing the probability in terms of $w$.'
+      - 'The basket already holds 12 red and 16 black, which is 28 balls.'
+      - 'After adding the white ones there are $28 + w$ balls altogether, of which $w$ are white.'
+      - 'So the probability of drawing white is $\dfrac{w}{28 + w}$, and the question says this equals $\dfrac{3}{7}$.'
+      - 'Cross-multiply: $7w = 3(28 + w) = 84 + 3w$.'
+      - 'Gather the $w$ terms: $7w - 3w = 84$, so $4w = 84$.'
+      - 'Therefore $w = 21$.'
+      - 'Let''s check: with 21 white the basket holds 49 balls, and $\dfrac{21}{49} = \dfrac{3}{7}$ ✓.'
+      - 'The trap is treating 28 as the final total and answering $\tfrac{3}{7} \times 28 = 12$, which is option D. Adding the white balls changes the denominator as well as the numerator. Keep both in view and you''ll get it.'
+    hint: 'Call the number of white balls $w$. Remember it appears in the total as well as on top of the fraction.'
 
   49:
     answer: B
     steps:
+      - 'This is about what the recorded results show, not what a fair die should do. Let''s find $x$ from the total first.'
       - 'The frequencies of all six outcomes must add up to the number of rolls, 100 — that is the equation that fixes $x$.'
       - 'Add the table: $20 + x + 15 + 15 + 2x + 20 = 70 + 3x$.'
       - 'So $70 + 3x = 100$, giving $3x = 30$ and $x = 10$.'
-      - 'The frequency of a 5 is $2x = 20$.'
+      - 'Now, the frequency of a 5 is $2x = 20$.'
       - 'The experimental probability of a 5 is its frequency over the total: $\tfrac{20}{100} = \tfrac{1}{5}$.'
       - 'Note this is the *experimental* probability from the table. The theoretical probability for a fair die, $\tfrac{1}{6}$ (option A), is a different thing — the question asks about the tabulated outcome.'
-      - 'The trap is option A, $\tfrac{1}{6}$: the die is described as unbiased, but the question asks what the recorded results show.'
-    hint: 'The six frequencies total 100; solve for $x$ first.'
+      - 'The trap is option A, $\tfrac{1}{6}$: the die is described as unbiased, but the question asks what the recorded results show. When there''s a table, use the table.'
+    hint: 'The six frequencies total 100, so solve for $x$ first.'
 
   50:
     answer: A
     steps:
-      - "Start with the total number of medals: $30 + 22 + 18 = 70$."
-      - "The question asks for 'not gold', which can be counted two ways — count the others, or subtract the gold from 1."
-      - "Counting the others: silver and bronze together are $22 + 18 = 40$."
-      - "So the probability is $\\dfrac{40}{70}$."
-      - "Simplify by dividing top and bottom by 10: $\\dfrac{4}{7}$."
-      - "The other route confirms it: the probability of gold is $\\dfrac{30}{70} = \\dfrac{3}{7}$, and $1 - \\dfrac{3}{7} = \\dfrac{4}{7}$ ✓."
-      - "Option B is $\\dfrac{3}{7}$, the probability that it *is* gold. When a question says 'not', the complement is the whole question — and checking that your two routes agree is the quickest way to be sure you have answered the right one."
-    hint: "Either add the silver and bronze, or work out the probability of gold and subtract from 1. Both should give the same answer."
+      - 'The word ''not'' is the key here, and there are two ways to handle it. Let''s use both and check they agree.'
+      - 'Start with the total number of medals: $30 + 22 + 18 = 70$.'
+      - 'The question asks for ''not gold'', which can be counted two ways — count the others, or subtract the gold from 1.'
+      - 'Counting the others: silver and bronze together are $22 + 18 = 40$.'
+      - 'So the probability is $\dfrac{40}{70}$.'
+      - 'Simplify by dividing top and bottom by 10: $\dfrac{4}{7}$.'
+      - 'The other route confirms it: the probability of gold is $\dfrac{30}{70} = \dfrac{3}{7}$, and $1 - \dfrac{3}{7} = \dfrac{4}{7}$ ✓.'
+      - 'Option B is $\dfrac{3}{7}$, the probability that it *is* gold. When a question says ''not'', the complement is the whole question — and checking that your two routes agree is the quickest way to be sure you have answered the right one.'
+    hint: 'Either add the silver and bronze, or work out the probability of gold and subtract from 1. Both should give the same answer.'
