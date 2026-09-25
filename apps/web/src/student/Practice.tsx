@@ -82,6 +82,17 @@ export function Practice({
     };
   }, [sessionId]);
 
+  // On the first wrong answer, start making the lesson. Writing a teacher's narration and its
+  // voice takes longer than a student should wait at the board, and the second try is time
+  // they are spending anyway — so the board opens on a lesson already made.
+  const warmed = useRef<string | null>(null);
+  const hintedVersion = state?.stage === 'hint' ? state.question?.question_version_id : undefined;
+  useEffect(() => {
+    if (!canHear || !hintedVersion || warmed.current === hintedVersion) return;
+    warmed.current = hintedVersion;
+    api.practiceWarm(sessionId, hintedVersion).catch(() => undefined);
+  }, [canHear, hintedVersion, sessionId]);
+
   const send = useCallback(
     async (confidence: Confidence | null) => {
       const question = state?.question;
@@ -177,9 +188,9 @@ export function Practice({
         question={question.stem}
         figures={question.figures}
         steps={state.solution_steps ?? []}
-        stepVoice={
+        loadLesson={
           canHear
-            ? (index) => api.stepVoiceUrl(sessionId, question.question_version_id, index)
+            ? () => api.practiceLesson(sessionId, question.question_version_id)
             : undefined
         }
         answerLine={`The answer is ${state.correct_option_key}.`}
@@ -226,11 +237,11 @@ export function Practice({
 
       {state.stage === 'hint' && state.hint ? (
         <div className="sp-notice warn" style={{ marginBottom: 14 }}>
-          <b>Not that one.</b> {state.hint}
+          <b>Not that one.</b> <Maths text={state.hint} />
           {state.misconception ? (
             <div className="sp-tiny" style={{ marginTop: 6 }}>
               That option is the {state.misconception.name.toLowerCase()} mistake —{' '}
-              {state.misconception.description}
+              <Maths text={state.misconception.description} />
             </div>
           ) : null}
           <div className="sp-tiny sp-muted" style={{ marginTop: 6 }}>

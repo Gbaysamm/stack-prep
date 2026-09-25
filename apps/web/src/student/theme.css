@@ -642,6 +642,15 @@
 .sp-hl.sp-written {
   animation: sp-write 0.5s ease both;
 }
+/* One piece of a step's working, written up while the teacher talks: each on its own line,
+   fading in as the hand reaches it. */
+.sp-hl .sp-item {
+  display: block;
+  animation: sp-write 0.45s ease both;
+}
+.sp-hl .sp-item + .sp-item {
+  margin-top: 4px;
+}
 @keyframes sp-write {
   from {
     opacity: 0;

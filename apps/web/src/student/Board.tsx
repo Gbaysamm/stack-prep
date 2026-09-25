@@ -24,21 +24,61 @@
  * Everything is typeset: the reviewed steps are written in LaTeX now, and so is the coach's
  * reply, and `Maths` renders both, because a student reading about $3x$ should see $3x$.
  *
- * The steps are read aloud as well as written, where the deployment has a voice: each step's
- * audio is made once on the server from its words, and the board moves on when a step has
- * been said. Without a voice, or when a browser will not play one, it keeps the reading clock.
+ * Where the deployment has a voice, the working is TAUGHT rather than read out: the board
+ * writes the reviewed step's own mathematics a piece at a time, and the teacher talks the
+ * reasoning over it — each piece going up as the words it belongs to begin, the way a good
+ * whiteboard teacher keeps hand and voice together. The words are shown under the board as
+ * they are said. The lesson is made on the server when the student first gets the question
+ * wrong, so the board opens on it ready. Without a voice, or when a browser will not play
+ * one, the board writes the full reviewed steps on a reading clock, as it always did.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 
-import type { TutorReply } from './api.js';
+import type { NarratedLesson, TutorReply } from './api.js';
 import { Coach } from './Coach.js';
 import { Figures, type QuestionFigure } from '../Figures.js';
 import { Maths } from '../Maths.js';
 import './theme.css';
 
 const STEP_MS = 5200;
+
+/**
+ * One piece of the lesson as the board plays it: what goes up, and what is said meanwhile.
+ *
+ * With a teacher's narration, `items` is the working the teacher writes — mostly its
+ * mathematics — and `say` is the explanation spoken over it, shown under the board as it is
+ * heard. Without one, `items` is the whole reviewed step and `say` is the same words.
+ */
+interface Entry {
+  /** "step 3", "answer", or null for the opening, which is not a step. */
+  label: string | null;
+  items: string[];
+  /** When each item goes up, as a fraction of the way through the voice. */
+  at: number[];
+  say: string;
+  voice: string | null;
+  /** Which reviewed step this is, for asking about it; null for the opening and the answer. */
+  step: number | null;
+  answer: boolean;
+}
+
+/** Resolve once a clip can start without stalling, or after `limitMs` whatever happens. */
+function whenReady(clip: HTMLAudioElement | null, limitMs: number): Promise<void> {
+  if (!clip || clip.readyState >= 3) return Promise.resolve();
+  return new Promise((resolve) => {
+    const done = () => {
+      clip.removeEventListener('canplay', done);
+      clip.removeEventListener('error', done);
+      window.clearTimeout(timer);
+      resolve();
+    };
+    const timer = window.setTimeout(done, limitMs);
+    clip.addEventListener('canplay', done);
+    clip.addEventListener('error', done);
+  });
+}
 
 /**
  * One beat of the lesson: a sentence the coach says, and what it writes while saying it.
@@ -107,18 +147,17 @@ export function Board({
   figures,
   steps,
   answerLine,
-  stepVoice,
+  loadLesson,
   onDone,
   onAsk,
   onListen,
 }: {
   /**
-   * Where to fetch each worked step read aloud, when this deployment has a voice. The board
-   * then moves on when a step has been said rather than on a clock, so the reading and the
-   * writing stay together. Undefined, or a step whose audio will not play, falls back to the
-   * clock — the lesson is never held up waiting for a sound.
+   * Fetch the lesson: the reviewed working as a teacher teaches it, with what to write and
+   * what to say for each step. Undefined where the deployment has no voice, and the board
+   * then writes the reviewed steps out on a reading clock, as it always did.
    */
-  stepVoice?: (index: number) => string;
+  loadLesson?: () => Promise<NarratedLesson>;
   title: string;
   subtitle: string;
   /**
@@ -194,7 +233,64 @@ export function Board({
   //: quieter one, and the first thing they will do is ask it again.
   const [voiceBlocked, setVoiceBlocked] = useState(false);
   const [askIssue, setAskIssue] = useState<string | null>(null);
-  const lines = [...steps, answerLine];
+  // The lesson, fetched once when the board opens. Usually already made: it was started when
+  // the student first got the question wrong.
+  const [lesson, setLesson] = useState<NarratedLesson | null>(null);
+  const [preparing, setPreparing] = useState(Boolean(loadLesson));
+  const loadOnce = useRef(loadLesson);
+  useEffect(() => {
+    const load = loadOnce.current;
+    if (!load) return;
+    let cancelled = false;
+    load()
+      .then((ready) => {
+        if (!cancelled) setLesson(ready);
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        if (!cancelled) setPreparing(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const lines: Entry[] = useMemo(() => {
+    if (lesson && lesson.beats.length > 0) {
+      return lesson.beats.map((beat) => {
+        const answer = beat.board_index === steps.length;
+        return {
+          label: beat.board_index === null ? null : answer ? 'answer' : `step ${beat.board_index + 1}`,
+          items: answer ? [answerLine] : beat.write,
+          at: answer ? [0] : beat.write_at,
+          say: beat.say,
+          voice: beat.voice_url,
+          step: beat.board_index !== null && !answer ? beat.board_index : null,
+          answer,
+        };
+      });
+    }
+    return [
+      ...steps.map((text, index) => ({
+        label: `step ${index + 1}`,
+        items: [text],
+        at: [0],
+        say: text,
+        voice: null,
+        step: index,
+        answer: false,
+      })),
+      {
+        label: 'answer',
+        items: [answerLine],
+        at: [0],
+        say: answerLine,
+        voice: null,
+        step: null,
+        answer: true,
+      },
+    ];
+  }, [answerLine, lesson, steps]);
   const inkRef = useRef<HTMLDivElement>(null);
 
   // The lesson is played rather than displayed. `script` is what has arrived, `cursor` is
@@ -492,78 +588,121 @@ export function Board({
     setShown((current) => Math.min(current + 1, lines.length));
   }, [lines.length]);
 
-  // The working's own voice: one clip per step, fetched a couple ahead so the next is ready
-  // when this one ends. Kept apart from the coach's reply player, which answers questions.
-  const narration = useRef(new Map<number, HTMLAudioElement>());
+  // The lesson's voice: one clip per beat, all fetched as soon as the lesson arrives. They were
+  // made on the server while the student was on their second try, so this is reading, not
+  // waiting. Kept apart from the coach's reply player, which answers questions.
+  const [itemsShown, setItemsShown] = useState(0);
+  const [replayed, setReplayed] = useState(0);
+  const clips = useRef(new Map<number, HTMLAudioElement>());
   const narrating = useRef<number | null>(null);
-  const narratorFor = useCallback(
+  const clipFor = useCallback(
     (index: number): HTMLAudioElement | null => {
-      if (!stepVoice || index < 0 || index >= lines.length) return null;
-      let clip = narration.current.get(index);
+      const url = lines[index]?.voice;
+      if (!url) return null;
+      let clip = clips.current.get(index);
       if (!clip) {
-        clip = new Audio(stepVoice(index));
+        clip = new Audio(url);
         clip.preload = 'auto';
-        narration.current.set(index, clip);
+        clips.current.set(index, clip);
       }
       return clip;
     },
-    [lines.length, stepVoice],
+    [lines],
   );
+  useEffect(() => {
+    lines.forEach((_, index) => clipFor(index));
+  }, [clipFor, lines]);
 
   useEffect(() => {
-    if (paused) return;
-    if (shown === 0) {
-      const timer = setTimeout(advance, 500);
-      return () => clearTimeout(timer);
-    }
-    const index = shown - 1;
-    const more = shown < lines.length;
-    let timer: number | null = null;
-    // Onward after a step: a short breath after its voice, or the reading clock without one.
-    const onward = (delay: number) => {
-      if (more) timer = window.setTimeout(advance, delay);
+    if (paused || preparing) return;
+    let cancelled = false;
+    const timers: number[] = [];
+    const later = (run: () => void, ms: number) => timers.push(window.setTimeout(run, ms));
+    // The next line goes up only when its voice can start, so the writing and the talking
+    // begin together rather than the text sitting there waiting to be read out.
+    const onward = (delay: number) =>
+      later(() => {
+        if (shown >= lines.length) return;
+        void whenReady(clipFor(shown), 8000).then(() => {
+          if (!cancelled) advance();
+        });
+      }, delay);
+    const stop = () => {
+      cancelled = true;
+      timers.forEach((timer) => window.clearTimeout(timer));
     };
 
-    const clip = narratorFor(index);
-    narratorFor(index + 1);
-    narratorFor(index + 2);
-    if (clip === null) {
-      onward(STEP_MS);
-      return () => {
-        if (timer !== null) clearTimeout(timer);
-      };
+    if (shown === 0) {
+      onward(300);
+      return stop;
     }
-    // A new step starts from its beginning; the same step after a pause carries on.
-    if (narrating.current !== index) clip.currentTime = 0;
+    const index = shown - 1;
+    const entry = lines[index];
+    const clip = clipFor(index);
+    if (!entry || clip === null) {
+      setItemsShown(entry?.items.length ?? 0);
+      onward(STEP_MS);
+      return stop;
+    }
+
+    // A new beat starts from its beginning; after a pause it carries on where it was.
+    if (narrating.current !== index) {
+      clip.currentTime = 0;
+      setItemsShown(0);
+    }
     narrating.current = index;
+    const writeAll = () => setItemsShown(entry.items.length);
+    // Each item goes up as the words it belongs to begin, the way a hand keeps pace with a
+    // voice: the server says where in the talk each one starts.
+    const pace = () => {
+      const seconds = Number.isFinite(clip.duration) && clip.duration > 0 ? clip.duration : null;
+      entry.items.forEach((_, item) => {
+        const fraction = entry.at[item] ?? item / Math.max(1, entry.items.length);
+        const due = seconds === null ? item * 1800 : (fraction * seconds - clip.currentTime) * 1000;
+        const show = () => setItemsShown((current) => Math.max(current, item + 1));
+        if (due <= 0) show();
+        else later(show, due);
+      });
+    };
     clip.onended = () => {
       unfollow();
-      onward(700);
+      writeAll();
+      // A breath, not a pause: the next beat's voice is already here.
+      onward(250);
     };
-    clip.onerror = () => onward(STEP_MS);
+    clip.onerror = () => {
+      writeAll();
+      onward(STEP_MS);
+    };
     clip
       .play()
       .then(() => {
+        if (cancelled) return;
+        setVoiceBlocked(false);
+        pace();
         const analyser = listen(clip);
         if (analyser) follow(analyser);
       })
       .catch(() => {
-        // Autoplay refused, or no audio to be had. The step is read instead of heard.
+        // Autoplay refused, or no audio to be had. The words are under the board to read.
+        if (cancelled) return;
+        setVoiceBlocked(true);
+        writeAll();
         onward(STEP_MS);
       });
     return () => {
+      stop();
       clip.onended = null;
       clip.onerror = null;
       clip.pause();
       unfollow();
-      if (timer !== null) clearTimeout(timer);
     };
-  }, [advance, follow, lines.length, listen, narratorFor, paused, shown, unfollow]);
+  }, [advance, clipFor, follow, lines, listen, paused, preparing, replayed, shown, unfollow]);
 
   // Nothing left playing once the board is closed.
   useEffect(
     () => () => {
-      for (const clip of narration.current.values()) clip.pause();
+      for (const clip of clips.current.values()) clip.pause();
     },
     [],
   );
@@ -580,7 +719,7 @@ export function Board({
 
   // Which line of the working the question is about. Null once the board has moved past the
   // steps onto the answer line, or before it has written anything.
-  const stepIndex = shown > 0 && shown - 1 < steps.length ? shown - 1 : null;
+  const stepIndex = shown > 0 ? (lines[shown - 1]?.step ?? null) : null;
 
   const send = useCallback(
     async (event: { preventDefault: () => void }) => {
@@ -680,7 +819,9 @@ export function Board({
   const finished = shown >= lines.length;
   const caption = finished
     ? 'That is the whole working. This one goes back in the pile — you will meet the same ground again, with a different question.'
-    : (lines[Math.max(0, shown - 1)] ?? '');
+    : preparing
+      ? 'Getting the lesson ready…'
+      : (lines[Math.max(0, shown - 1)]?.say ?? '');
 
   // A student has to be able to tell being answered from being handed the same step again,
   // so the card says which of the two just happened rather than sounding the same either way.
@@ -714,7 +855,7 @@ export function Board({
         </div>
         <div className="sp-steps-mini">
           {lines.map((line, index) => (
-            <i key={line + String(index)} className={index < shown ? 'on' : ''} />
+            <i key={line.say + String(index)} className={index < shown ? 'on' : ''} />
           ))}
         </div>
       </div>
@@ -726,17 +867,23 @@ export function Board({
             <Maths text={question} />
           </span>
           <Figures figures={figures} compact />
-          {lines.slice(0, shown).map((line, index) => (
-            <span
-              key={line + String(index)}
-              className={`sp-hl show sp-written ${index === lines.length - 1 ? 'answer' : ''}`}
-            >
-              <span className="n">
-                {index === lines.length - 1 ? 'answer' : `step ${index + 1}`}
+          {lines.slice(0, shown).map((line, index) => {
+            const items = index === shown - 1 ? line.items.slice(0, itemsShown) : line.items;
+            if (items.length === 0 && line.label === null) return null;
+            return (
+              <span
+                key={line.say + String(index)}
+                className={`sp-hl show sp-written ${line.answer ? 'answer' : ''}`}
+              >
+                {line.label ? <span className="n">{line.label}</span> : null}
+                {items.map((item, piece) => (
+                  <span key={item + String(piece)} className="sp-item">
+                    <Maths text={item} />
+                  </span>
+                ))}
               </span>
-              <Maths text={line} />
-            </span>
-          ))}
+            );
+          })}
 
           {/*
             Earlier questions and what was written under them. Kept, because a board is not
@@ -911,7 +1058,8 @@ export function Board({
             title="Replay this step"
             onClick={() => {
               resume();
-              setShown((current) => Math.max(0, current - 1));
+              narrating.current = null;
+              setReplayed((count) => count + 1);
             }}
             disabled={shown === 0}
           >

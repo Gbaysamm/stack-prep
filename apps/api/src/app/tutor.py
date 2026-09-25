@@ -70,6 +70,7 @@ model does not see it.
 
 from __future__ import annotations
 
+import json
 import re
 import time
 from collections.abc import AsyncIterator
@@ -1110,6 +1111,268 @@ async def write_on_the_board(
             latency_ms=latency_ms,
         ),
     )
+
+
+@dataclass(frozen=True)
+class Taught:
+    """One stretch of a lesson: what is said, and what is written as each part is said.
+
+    `said` is spoken as one clip. `board[i]` goes up at `at[i]`, the fraction of the way
+    through that clip where the words it belongs to begin — so a formula appears as the
+    teacher starts saying it, the way a hand keeps pace with a voice.
+    """
+
+    said: str
+    board: list[str]
+    at: list[float]
+
+
+@dataclass(frozen=True)
+class Narration:
+    """A worked solution taught the way a good whiteboard teacher teaches it.
+
+    WHY NOT READ THE STEPS OUT. A voice reading the board word for word gives the student
+    nothing they could not read themselves, and the same words arriving by ear and by eye at
+    once compete for attention rather than helping (Mayer's redundancy principle). A teacher
+    writes the working a piece at a time and TALKS the reasoning while writing it — why this
+    step, what the idea means, what to notice — so the student learns by matching what they
+    hear to what goes up.
+
+    WHAT MAY GO ON THE BOARD. Only what the reviewed step already says: its own mathematics,
+    copied exactly, or a label of a few words carrying no number the step does not. Anything
+    else the model proposes is dropped (see `_board_items`), so nothing unchecked is ever
+    written up. The talk is generated; the board is the reviewed working.
+    """
+
+    #: Before the first step: what the question gives, what it wants, what they chose.
+    opening: Taught
+    #: One per reviewed step, in order.
+    steps: list[Taught]
+    #: Said with the answer line: the answer, the trap their choice fell into, a word to go on.
+    closing: str
+
+
+#: Bumped whenever the instructions below change, so a cached narration written to the old
+#: ones is not replayed as though it followed the new.
+NARRATION_VERSION = "3"
+
+NARRATION_SYSTEM = """\
+You are a warm, clear secondary school mathematics teacher in Nigeria, teaching one student \
+at a whiteboard in the style of the best YouTube maths teachers, such as The Organic \
+Chemistry Tutor. The student has just got this question wrong twice. You talk continuously \
+and naturally while you write the working up a piece at a time. There is no dead air, and \
+the student never waits for you to read something already written.
+
+You are given the reviewed worked solution as numbered steps. Teach each step as a short \
+run of SEGMENTS. A segment is one or two short spoken sentences, plus what you write on the \
+board while saying them (or nothing).
+
+How you talk, exactly as that style does:
+- Name the goal and the plan: "In order to find P, we first need an equation linking it \
+to V."
+- Explain the idea, not just the numbers. You may explain standard definitions and facts \
+("inverse variation means that as one goes up, the other comes down"), because that is \
+what makes a student understand.
+- Say the working aloud as you write it, with the arithmetic spelled out: "R squared is 7 \
+times 7, which is 49. So 2 is equal to K over 49."
+- Ask the question a student would ask, then answer it: "So how do we get K by itself? We \
+multiply both sides by 49."
+- Transition smoothly: "So now that we have K, we can write the relationship."
+- Short sentences. Plain spoken English for a 16-year-old. Say mathematics in words ("x \
+squared", "k over V", "a half"): no LaTeX, no dollar signs, no symbols such as = or ^ in \
+what you SAY.
+
+What you write:
+- Each "write" is either a piece of that step's mathematics copied EXACTLY as it appears in \
+the step, dollar signs included (for example "$P = \\dfrac{k}{V}$"), optionally after a \
+label of at most four words ("So $K = 98$"); or a label of at most five words with no \
+numbers ("Remove the middle letter"); or null for nothing. Never write sentences.
+
+Rules:
+- Never introduce a number, a result or a step of working for THIS problem that is not in \
+the steps, and never contradict them. General definitions and ideas are fine.
+- About 30 to 90 spoken words per step, in two to five segments.
+- "opening": segments that say what the question gives and what it wants; if the student \
+chose a wrong option, name it kindly. Do not reveal the answer. Its writes, if any, copy \
+the question's own mathematics exactly.
+- "closing": what you say with the answer: the correct option letter, the trap their choice \
+fell into if the steps show it, and a word of encouragement. One or two sentences.
+
+Reply with JSON only, in exactly this shape:
+{"opening": [{"say": "...", "write": "..." or null}],
+ "steps": [[{"say": "...", "write": "..." or null}, ...], ...],
+ "closing": "..."}
+The "steps" list must have exactly one entry, a list of segments, per numbered step, in order."""
+
+#: Room for a long solution's narration and a reasoning model's thinking before it.
+NARRATION_MAX_TOKENS = 6000
+
+#: One stretch of talk; past this the model has lost the brief.
+MAX_NARRATED_CHARS = 1200
+MAX_SEGMENTS = 8
+
+#: A board item is a formula or a label; past this it has become a sentence.
+MAX_BOARD_ITEM_CHARS = 160
+
+_MATHS_SEGMENT = re.compile(r"\$[^$]+\$")
+
+
+def _squash(text: str) -> str:
+    return re.sub(r"\s+", "", text)
+
+
+def _board_item(item: object, source: str) -> str | None:
+    """The item, if it may go on the board for a step whose reviewed text is `source`.
+
+    It passes if every formula in it appears in the step exactly (spacing aside) and the words
+    around it are a short label; or if it is a short label alone, with no number the step
+    does not contain. Anything else is refused.
+    """
+    if not isinstance(item, str) or not item.strip() or len(item) > MAX_BOARD_ITEM_CHARS:
+        return None
+    source_maths = {_squash(segment) for segment in _MATHS_SEGMENT.findall(source)}
+    formulas = _MATHS_SEGMENT.findall(item)
+    words = _MATHS_SEGMENT.sub(" ", item)
+    if formulas:
+        if not all(_squash(formula) in source_maths for formula in formulas):
+            return None
+        if len(words.split()) > 4 or re.search(r"\d", words):
+            return None
+        return item.strip()
+    if len(item.split()) > 5 or "$" in item:
+        return None
+    if not set(re.findall(r"\d+", item)) <= set(re.findall(r"\d+", source)):
+        return None
+    return item.strip()
+
+
+def _taught(segments: object, source: str) -> Taught | None:
+    """A run of segments, checked, joined into one spoken stretch with timed board items.
+
+    A malformed segment list is refused. A board item that strays from the reviewed working
+    is dropped and the words around it kept. If nothing the model wrote survives and the step
+    has mathematics of its own, that mathematics goes up instead, spread across the talk —
+    so a step is never taught over an empty board.
+    """
+    if not isinstance(segments, list) or not 0 < len(segments) <= MAX_SEGMENTS:
+        return None
+    spoken: list[str] = []
+    wanted: list[tuple[int, str]] = []
+    for segment in segments:
+        if not isinstance(segment, dict):
+            return None
+        say = segment.get("say")
+        if not isinstance(say, str) or not say.strip():
+            return None
+        item = _board_item(segment.get("write"), source) if segment.get("write") else None
+        if item is not None:
+            wanted.append((len(spoken), item))
+        spoken.append(say.strip())
+    said = " ".join(spoken)
+    if len(said) > MAX_NARRATED_CHARS:
+        return None
+
+    # Where each segment starts, as a fraction of the whole, measured on the words as they
+    # will actually be spoken — mathematics said in words is longer than it is written.
+    lengths = [len(for_the_voice(line)) + 1 for line in spoken]
+    total = sum(lengths) or 1
+    starts, running = [], 0
+    for length in lengths:
+        starts.append(running / total)
+        running += length
+
+    if wanted:
+        return Taught(
+            said=said,
+            board=[item for _, item in wanted],
+            at=[round(starts[index], 3) for index, _ in wanted],
+        )
+    own = _MATHS_SEGMENT.findall(source)[: len(spoken)] if source else []
+    return Taught(
+        said=said,
+        board=own,
+        at=[round(starts[min(index, len(starts) - 1)], 3) for index in range(len(own))],
+    )
+
+
+def _narration_prompt(lesson: Lesson) -> str:
+    lines = [
+        f"TOPIC: {lesson.topic_name} / {lesson.subtopic_name}",
+        f"QUESTION: {lesson.stem}",
+        "OPTIONS:",
+        *(f"  {key}. {body}" for key, body in lesson.options),
+        f"CORRECT OPTION: {lesson.correct_option_key}",
+    ]
+    if lesson.chose:
+        chosen = dict(lesson.options).get(lesson.chose, "")
+        lines.append(f"THE STUDENT CHOSE: {lesson.chose}. {chosen}")
+        if lesson.misconception:
+            lines.append(f"WHY STUDENTS PICK THAT OPTION: {lesson.misconception}")
+    lines.append(f"WORKED SOLUTION ({len(lesson.steps)} steps):")
+    lines += [f"  {index}. {step}" for index, step in enumerate(lesson.steps, 1)]
+    return "\n".join(lines)
+
+
+def _narration_from(raw: str, lesson: Lesson) -> Narration | None:
+    """The model's JSON, checked. A malformed reply is refused rather than half-used."""
+    try:
+        data = json.loads(raw)
+    except ValueError:
+        return None
+    if not isinstance(data, dict):
+        return None
+    steps = data.get("steps")
+    if not isinstance(steps, list) or len(steps) != len(lesson.steps):
+        return None
+    opening = _taught(data.get("opening"), lesson.stem)
+    taught = [
+        _taught(segments, source) for segments, source in zip(steps, lesson.steps, strict=True)
+    ]
+    closing = data.get("closing")
+    if opening is None or any(step is None for step in taught):
+        return None
+    if not isinstance(closing, str) or not closing.strip() or len(closing) > MAX_NARRATED_CHARS:
+        return None
+    return Narration(
+        opening=opening,
+        steps=[step for step in taught if step is not None],
+        closing=closing.strip(),
+    )
+
+
+async def narrate(lesson: Lesson, settings: Settings) -> Narration | None:
+    """A teacher's lesson on the reviewed working, or None when there is none to be had.
+
+    Never raises. No key, no SDK, an outage, or a reply that does not fit the shape asked for:
+    the board falls back to writing the reviewed steps themselves, as it did before.
+    """
+    if not settings.openai_api_key or not lesson.steps:
+        return None
+    try:
+        from openai import AsyncOpenAI
+    except ImportError:
+        return None
+
+    client = AsyncOpenAI(api_key=settings.openai_api_key, timeout=LESSON_TIMEOUT_SECONDS)
+    options = _completion_options(settings)
+    options["max_completion_tokens"] = NARRATION_MAX_TOKENS
+    try:
+        reply = await client.chat.completions.create(  # type: ignore[call-overload]
+            model=settings.ai_runtime_model,
+            messages=[
+                {"role": "system", "content": NARRATION_SYSTEM},
+                {"role": "user", "content": _narration_prompt(lesson)},
+            ],
+            response_format={"type": "json_object"},
+            **options,
+        )
+    except Exception:
+        return None
+    choices = getattr(reply, "choices", None) or []
+    if not choices:
+        return None
+    content = getattr(getattr(choices[0], "message", None), "content", "") or ""
+    return _narration_from(content, lesson)
 
 
 #: How the voice is asked to read. The model takes a plain instruction, and this one is aimed

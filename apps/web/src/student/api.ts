@@ -180,6 +180,23 @@ export interface PracticeState {
   closing_note: string | null;
 }
 
+/** One beat of a taught lesson: what goes up on the board, and what is said meanwhile. */
+export interface LessonBeat {
+  /** The reviewed step this teaches; one past the last for the answer; null for the opening. */
+  board_index: number | null;
+  write: string[];
+  /** When each written item goes up, as a fraction of the way through `say`. */
+  write_at: number[];
+  say: string;
+  voice_url: string;
+}
+
+export interface NarratedLesson {
+  /** "model": a teacher's narration. "steps": none could be made; the steps are read. */
+  source: 'model' | 'steps';
+  beats: LessonBeat[];
+}
+
 export interface TutorReply {
   reply: string;
   spoken: string;
@@ -249,9 +266,14 @@ export const api = {
   /** What this deployment has switched on. Asked rather than assumed, so a client never
    *  draws a microphone the server would refuse. */
   features: () => call<Features>('/features'),
-  /** Where the board fetches one worked step read aloud. A URL, so <audio> can stream it. */
-  stepVoiceUrl: (sessionId: string, questionVersionId: string, index: number) =>
-    `/v1/practice/${sessionId}/steps/${questionVersionId}/${index}/voice`,
+  /** The worked solution as a lesson, for the board. */
+  practiceLesson: (sessionId: string, questionVersionId: string) =>
+    call<NarratedLesson>(`/practice/${sessionId}/lesson/${questionVersionId}`),
+  /** Start making the lesson on the first wrong answer, so the board opens on it ready. */
+  practiceWarm: (sessionId: string, questionVersionId: string) =>
+    call<{ beats: number }>(`/practice/${sessionId}/lesson/${questionVersionId}/warm`, {
+      method: 'POST',
+    }),
   sittings: (studentId: string) => call<Sitting[]>(`/student/${studentId}/sittings`),
   start: (studentId: string, subjectId: string) =>
     call<CheckupState>('/checkup/start', {

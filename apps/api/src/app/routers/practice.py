@@ -40,7 +40,9 @@ exists so that the day the pad lands, the attempts already recorded have the sha
 
 from __future__ import annotations
 
+import asyncio
 import base64
+import dataclasses
 import hashlib
 import json
 import secrets
@@ -51,7 +53,15 @@ from pathlib import Path
 from typing import Annotated, Any, Literal
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    UploadFile,
+)
 from fastapi.responses import FileResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import text
@@ -1351,9 +1361,17 @@ async def listen(
     return Heard(asked=heard)
 
 
-#: A worked step is written to be read aloud and may run to a short paragraph; this is past
-#: the longest in the bank once its mathematics is said in words.
+#: A narrated beat is a few spoken sentences; this is well past the longest the brief allows,
+#: once its mathematics is said in words.
 STEP_SPOKEN_CHARS = 2000
+
+#: One lock per thing being made, so a warm-up and a board asking at the same moment make it
+#: once between them rather than paying for it twice.
+_MAKING: dict[str, asyncio.Lock] = {}
+
+
+def _making(key: str) -> asyncio.Lock:
+    return _MAKING.setdefault(key, asyncio.Lock())
 
 
 def _speech_cache() -> Path:
@@ -1363,74 +1381,269 @@ def _speech_cache() -> Path:
     return folder
 
 
-@router.get(
-    "/{session_id}/steps/{question_version_id}/{index}/voice",
-    summary="Hear one step of the worked solution",
-)
-async def step_voice(
-    conn: Annotated[AsyncConnection, Depends(connection)],
-    settings: Annotated[Settings, Depends(get_settings)],
-    session_id: UUID,
-    question_version_id: UUID,
-    index: int,
-) -> Response:
-    """The board reading its own working aloud, one step at a time.
+def _write_atomically(path: Path, data: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    partial = path.with_suffix(f".{secrets.token_hex(4)}.part")
+    partial.write_bytes(data)
+    partial.replace(path)
 
-    Only for a question answered in this sitting, which is the only way a student reaches its
-    board — so this cannot be used to make the voice read anything else. The index one past
-    the last step is the answer line.
 
-    MADE ONCE. A reviewed step's words do not change, so its audio is kept, named for the
-    exact words, voice and model; the thousandth student to hear a step costs nothing, and a
-    corrected step is simply a new file.
+class LessonBeat(BaseModel):
+    #: Which reviewed step this beat teaches: a step's index, one past the last step for the
+    #: answer, or None for the opening. Asking at the board names the step by this.
+    board_index: int | None
+    #: What is written up, a piece at a time, while `say` is spoken. Only the reviewed
+    #: working's own mathematics or a short label: see tutor.Narration.
+    write: list[str]
+    #: When each item goes up, as a fraction of the way through `say`: the moment the words
+    #: it belongs to begin.
+    write_at: list[float]
+    say: str
+    voice_url: str
+
+
+class NarratedLesson(BaseModel):
+    #: "model" when a teacher's narration was written; "steps" when it could not be and the
+    #: board reads its own reviewed steps instead.
+    source: Literal["model", "steps"]
+    beats: list[LessonBeat]
+
+
+async def _must_have_missed(conn: AsyncConnection, session_id: UUID, version_id: UUID) -> None:
+    """Refuse unless this sitting has a wrong answer to this question.
+
+    The lesson is made ahead of time, from the first wrong answer, so it is ready by the time
+    the board opens. That is as early as it may start: a question nobody has missed has no
+    lesson to prepare, and the voice cannot be used to read anything else.
+    """
+    missed = (
+        await conn.execute(
+            text(
+                """
+                SELECT 1 FROM attempts
+                WHERE session_id = :session AND question_version_id = :version
+                  AND coalesce(is_correct, false) IS FALSE
+                LIMIT 1
+                """
+            ),
+            {"session": session_id, "version": version_id},
+        )
+    ).scalar()
+    if missed is None:
+        raise HTTPException(status_code=409, detail="there is no lesson for this question yet")
+
+
+async def _first_mistake(
+    conn: AsyncConnection, session_id: UUID, version_id: UUID
+) -> tuple[str | None, str | None]:
+    """The first wrong option chosen, and why it tempts.
+
+    The first rather than the latest, so the narration made while the student is still trying
+    again is the one the board plays: it opens on the mistake they started with.
     """
     row = (
         (
             await conn.execute(
                 text(
                     """
-                    SELECT v.solution_steps,
-                           (SELECT option_key FROM question_options o
-                             WHERE o.question_version_id = v.id AND o.is_correct) AS key
-                    FROM question_versions v
-                    WHERE v.id = :version AND EXISTS (
-                      SELECT 1 FROM attempts a
-                      WHERE a.session_id = :session AND a.question_version_id = v.id)
+                    SELECT a.selected_option_key, m.description
+                    FROM attempts a
+                    LEFT JOIN question_options o
+                      ON o.question_version_id = a.question_version_id
+                     AND o.option_key = a.selected_option_key
+                    LEFT JOIN misconceptions m ON m.id = o.misconception_id
+                    WHERE a.session_id = :session AND a.question_version_id = :version
+                      AND coalesce(a.is_correct, false) IS FALSE
+                    ORDER BY a.answered_at_client
+                    LIMIT 1
                     """
                 ),
-                {"version": question_version_id, "session": session_id},
+                {"session": session_id, "version": version_id},
             )
         )
         .mappings()
         .first()
     )
     if row is None:
-        raise HTTPException(status_code=404, detail="no such step")
-    steps = row["solution_steps"]
-    steps = json.loads(steps) if isinstance(steps, str) else list(steps or [])
-    if 0 <= index < len(steps):
-        line = str(steps[index])
-    elif index == len(steps) and row["key"]:
-        line = f"The answer is {row['key']}."
-    else:
-        raise HTTPException(status_code=404, detail="no such step")
+        return None, None
+    return row["selected_option_key"], row["description"]
 
+
+async def _narration(
+    conn: AsyncConnection, session_id: UUID, version_id: UUID, settings: Settings
+) -> tuple[tutor.Narration, Literal["model", "steps"]]:
+    """The teacher's narration of this question's working, made once and then kept.
+
+    Kept on disk under a name drawn from everything it depends on — the working, the key, the
+    wrong option it opens on, the model and the instructions — so every student who makes the
+    same mistake hears the same lesson without it being written again.
+    """
+    session = await _session(conn, session_id)
+    lesson = await _lesson_on_the_board(
+        conn, session_id, session["student_id"], version_id, None, settings
+    )
+    chose, misconception = await _first_mistake(conn, session_id, version_id)
+    lesson = dataclasses.replace(lesson, chose=chose, misconception=misconception)
+    key = hashlib.sha256(
+        json.dumps(
+            [
+                tutor.NARRATION_VERSION,
+                settings.ai_runtime_model,
+                str(version_id),
+                chose,
+                lesson.steps,
+                lesson.correct_option_key,
+            ]
+        ).encode()
+    ).hexdigest()
+    kept = _speech_cache() / "lessons" / f"{key}.json"
+    async with _making(key):
+        if kept.is_file():
+            data = json.loads(kept.read_text(encoding="utf-8"))
+            return (
+                tutor.Narration(
+                    opening=tutor.Taught(**data["opening"]),
+                    steps=[tutor.Taught(**step) for step in data["steps"]],
+                    closing=data["closing"],
+                ),
+                "model",
+            )
+        narration = await tutor.narrate(lesson, settings)
+        if narration is not None:
+            _write_atomically(kept, json.dumps(dataclasses.asdict(narration)).encode())
+            return narration, "model"
+    # No narration to be had: the board reads its own reviewed steps, as it did before. Not
+    # kept, so the next student gets another try at the real thing.
+    return (
+        tutor.Narration(
+            opening=tutor.Taught(said="", board=[], at=[]),
+            # Without a teacher's talk, the board carries the whole reviewed step as before.
+            steps=[tutor.Taught(said=step, board=[step], at=[0.0]) for step in lesson.steps],
+            closing=f"The answer is {lesson.correct_option_key}.",
+        ),
+        "steps",
+    )
+
+
+def _beats(narration: tutor.Narration) -> list[tuple[int | None, tutor.Taught]]:
+    """The lesson in the order it is said: which step each stretch teaches, and the stretch."""
+    beats: list[tuple[int | None, tutor.Taught]] = []
+    if narration.opening.said:
+        beats.append((None, narration.opening))
+    beats += list(enumerate(narration.steps))
+    beats.append((len(narration.steps), tutor.Taught(said=narration.closing, board=[], at=[])))
+    return beats
+
+
+async def _voice_file(line: str, settings: Settings) -> Path | None:
+    """One line's audio, made once and kept under a name drawn from its words and voice."""
     said = tutor.for_the_voice(line)
     name = hashlib.sha256(
         f"{settings.ai_speech_model}|{settings.ai_speech_voice}|{tutor.SPEECH_STYLE}|{said}".encode()
     ).hexdigest()
     cached = _speech_cache() / f"{name}.mp3"
-    if not cached.is_file():
+    async with _making(name):
+        if cached.is_file():
+            return cached
         audio = await tutor.speak(line, settings, max_chars=STEP_SPOKEN_CHARS)
         if audio is None:
-            # No voice to be had. The board reads this as silence and holds the step instead.
-            raise HTTPException(status_code=404, detail="no voice for this step")
-        partial = cached.with_suffix(f".{secrets.token_hex(4)}.part")
-        partial.write_bytes(audio)
-        partial.replace(cached)
-    return FileResponse(
-        cached, media_type="audio/mpeg", headers={"Cache-Control": "private, max-age=86400"}
+            return None
+        _write_atomically(cached, audio)
+        return cached
+
+
+async def _voice_all(lines: list[str], settings: Settings) -> None:
+    """Make every line's audio, a few at a time, so the board finds them ready."""
+    gate = asyncio.Semaphore(3)
+
+    async def one(line: str) -> None:
+        async with gate:
+            await _voice_file(line, settings)
+
+    await asyncio.gather(*(one(line) for line in lines), return_exceptions=True)
+
+
+@router.get(
+    "/{session_id}/lesson/{question_version_id}",
+    response_model=NarratedLesson,
+    summary="The worked solution as a lesson: what goes on the board, and what is said",
+)
+async def lesson(
+    conn: Annotated[AsyncConnection, Depends(connection)],
+    settings: Annotated[Settings, Depends(get_settings)],
+    session_id: UUID,
+    question_version_id: UUID,
+) -> NarratedLesson:
+    """The board writes the reviewed steps; the teacher talks each one through.
+
+    What is written is the checked working, word for word. What is said is the narration,
+    which explains why each step is taken rather than reading it out — a student can read the
+    board for themselves, and a voice that only reads it teaches them nothing more.
+    """
+    await _must_be_at_the_board(conn, session_id, question_version_id)
+    narration, source = await _narration(conn, session_id, question_version_id, settings)
+    return NarratedLesson(
+        source=source,
+        beats=[
+            LessonBeat(
+                board_index=board_index,
+                write=taught.board,
+                write_at=taught.at,
+                say=taught.said,
+                voice_url=f"/v1/practice/{session_id}/lesson/{question_version_id}/voice/{index}",
+            )
+            for index, (board_index, taught) in enumerate(_beats(narration))
+        ],
     )
+
+
+@router.get(
+    "/{session_id}/lesson/{question_version_id}/voice/{beat}",
+    summary="Hear one beat of the lesson",
+)
+async def lesson_voice(
+    conn: Annotated[AsyncConnection, Depends(connection)],
+    settings: Annotated[Settings, Depends(get_settings)],
+    session_id: UUID,
+    question_version_id: UUID,
+    beat: int,
+) -> Response:
+    await _must_have_missed(conn, session_id, question_version_id)
+    narration, _ = await _narration(conn, session_id, question_version_id, settings)
+    beats = _beats(narration)
+    if not 0 <= beat < len(beats):
+        raise HTTPException(status_code=404, detail="no such beat")
+    path = await _voice_file(beats[beat][1].said, settings)
+    if path is None:
+        # No voice to be had. The board reads this as silence and holds the beat instead.
+        raise HTTPException(status_code=404, detail="no voice for this beat")
+    return FileResponse(
+        path, media_type="audio/mpeg", headers={"Cache-Control": "private, max-age=86400"}
+    )
+
+
+@router.post(
+    "/{session_id}/lesson/{question_version_id}/warm",
+    status_code=202,
+    summary="Start preparing the lesson, so the board finds it ready",
+)
+async def warm_lesson(
+    conn: Annotated[AsyncConnection, Depends(connection)],
+    settings: Annotated[Settings, Depends(get_settings)],
+    session_id: UUID,
+    question_version_id: UUID,
+    background: BackgroundTasks,
+) -> dict[str, int]:
+    """Called on the first wrong answer. Writing the narration and making its voice take
+    longer than a student waits comfortably, and the second try is time they are spending
+    anyway — so the lesson is made then, and the board opens on it already prepared.
+    """
+    await _must_have_missed(conn, session_id, question_version_id)
+    narration, _ = await _narration(conn, session_id, question_version_id, settings)
+    lines = [taught.said for _, taught in _beats(narration)]
+    if settings.ai_speak:
+        background.add_task(_voice_all, lines, settings)
+    return {"beats": len(lines)}
 
 
 @router.get(
