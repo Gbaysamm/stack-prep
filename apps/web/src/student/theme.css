@@ -637,6 +637,17 @@
   opacity: 1;
   transform: none;
 }
+/* A step is put on the board as it is reached, so it fades in as it arrives rather than
+   by switching a class on something that was already there. */
+.sp-hl.sp-written {
+  animation: sp-write 0.5s ease both;
+}
+@keyframes sp-write {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
 .sp-hl .n {
   font-family: var(--mono);
   font-size: 0.6em;

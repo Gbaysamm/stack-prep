@@ -390,6 +390,18 @@ async def _pick_question(
               WHERE h.student_id = :student AND h.question_id = dq.question_id
           )
         ORDER BY (dq.usage_pool = 'diagnostic') DESC,
+                 -- A subtopic this sitting has not asked about yet comes first. A topic gets
+                 -- two or three questions, and three from one subtopic would leave the rest
+                 -- of the topic unmeasured while looking as though it had been.
+                 EXISTS (
+                   SELECT 1 FROM question_versions asked
+                   JOIN question_classifications ac
+                     ON ac.question_id = asked.question_id
+                    AND ac.classification_role = 'primary'
+                   JOIN curriculum_items askill ON askill.id = ac.curriculum_item_id
+                   WHERE asked.id = ANY (CAST(:seen AS uuid[]))
+                     AND askill.parent_id = sub.id
+                 ),
                  abs(coalesce(dq.mastery_level_number, 3) - :level),
                  md5(:session || dq.question_version_id::text)
         LIMIT 1

@@ -66,6 +66,9 @@ class Settings(BaseSettings):
     #: words are kept, in `tutor_turns`, exactly as a typed question would be.
     ai_listen: bool = True
     ai_transcription_model: str = "gpt-transcribe"
+    #: Where the spoken worked steps are kept once made. A step's words do not change, so its
+    #: audio is made once and replayed free; empty means a folder in the system temp dir.
+    speech_cache_dir: str = ""
 
     @field_validator("database_schema")
     @classmethod

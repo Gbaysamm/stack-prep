@@ -45,14 +45,22 @@ export function Practice({
   // Whether this deployment lets a student speak their question. Asked once, and assumed
   // false until the server says otherwise, so a refused microphone is never drawn.
   const [canSpeak, setCanSpeak] = useState(false);
+  // Whether the coach has a voice here, which is what reads the board's working aloud.
+  const [canHear, setCanHear] = useState(false);
   const askedAt = useRef<number>(Date.now());
   const finishRef = useRef(onFinished);
 
   useEffect(() => {
     api
       .features()
-      .then((features) => setCanSpeak(features.student_voice))
-      .catch(() => setCanSpeak(false));
+      .then((features) => {
+        setCanSpeak(features.student_voice);
+        setCanHear(features.coach_voice);
+      })
+      .catch(() => {
+        setCanSpeak(false);
+        setCanHear(false);
+      });
   }, []);
 
   useEffect(() => {
@@ -169,6 +177,11 @@ export function Practice({
         question={question.stem}
         figures={question.figures}
         steps={state.solution_steps ?? []}
+        stepVoice={
+          canHear
+            ? (index) => api.stepVoiceUrl(sessionId, question.question_version_id, index)
+            : undefined
+        }
         answerLine={`The answer is ${state.correct_option_key}.`}
         onListen={
           canSpeak

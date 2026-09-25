@@ -249,6 +249,9 @@ export const api = {
   /** What this deployment has switched on. Asked rather than assumed, so a client never
    *  draws a microphone the server would refuse. */
   features: () => call<Features>('/features'),
+  /** Where the board fetches one worked step read aloud. A URL, so <audio> can stream it. */
+  stepVoiceUrl: (sessionId: string, questionVersionId: string, index: number) =>
+    `/v1/practice/${sessionId}/steps/${questionVersionId}/${index}/voice`,
   sittings: (studentId: string) => call<Sitting[]>(`/student/${studentId}/sittings`),
   start: (studentId: string, subjectId: string) =>
     call<CheckupState>('/checkup/start', {

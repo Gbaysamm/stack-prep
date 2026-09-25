@@ -21,10 +21,12 @@
  * comes back may be the tutor or may be the reviewed step again — the card says which, rather
  * than letting a student believe they were answered when they were not.
  *
- * The reply is the one thing here that is typeset rather than written out: the coach sets
- * mathematics in LaTeX and `Maths` renders it, because a student reading about $3x$ should
- * see $3x$. The steps above it are still plain reviewed text, and stay that way until the
- * people writing them start writing mathematics.
+ * Everything is typeset: the reviewed steps are written in LaTeX now, and so is the coach's
+ * reply, and `Maths` renders both, because a student reading about $3x$ should see $3x$.
+ *
+ * The steps are read aloud as well as written, where the deployment has a voice: each step's
+ * audio is made once on the server from its words, and the board moves on when a step has
+ * been said. Without a voice, or when a browser will not play one, it keeps the reading clock.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -105,10 +107,18 @@ export function Board({
   figures,
   steps,
   answerLine,
+  stepVoice,
   onDone,
   onAsk,
   onListen,
 }: {
+  /**
+   * Where to fetch each worked step read aloud, when this deployment has a voice. The board
+   * then moves on when a step has been said rather than on a clock, so the reading and the
+   * writing stay together. Undefined, or a step whose audio will not play, falls back to the
+   * clock — the lesson is never held up waiting for a sound.
+   */
+  stepVoice?: (index: number) => string;
   title: string;
   subtitle: string;
   /**
@@ -482,16 +492,88 @@ export function Board({
     setShown((current) => Math.min(current + 1, lines.length));
   }, [lines.length]);
 
+  // The working's own voice: one clip per step, fetched a couple ahead so the next is ready
+  // when this one ends. Kept apart from the coach's reply player, which answers questions.
+  const narration = useRef(new Map<number, HTMLAudioElement>());
+  const narrating = useRef<number | null>(null);
+  const narratorFor = useCallback(
+    (index: number): HTMLAudioElement | null => {
+      if (!stepVoice || index < 0 || index >= lines.length) return null;
+      let clip = narration.current.get(index);
+      if (!clip) {
+        clip = new Audio(stepVoice(index));
+        clip.preload = 'auto';
+        narration.current.set(index, clip);
+      }
+      return clip;
+    },
+    [lines.length, stepVoice],
+  );
+
   useEffect(() => {
-    if (paused || shown >= lines.length) return;
-    const timer = setTimeout(advance, shown === 0 ? 500 : STEP_MS);
-    return () => clearTimeout(timer);
-  }, [advance, lines.length, paused, shown]);
+    if (paused) return;
+    if (shown === 0) {
+      const timer = setTimeout(advance, 500);
+      return () => clearTimeout(timer);
+    }
+    const index = shown - 1;
+    const more = shown < lines.length;
+    let timer: number | null = null;
+    // Onward after a step: a short breath after its voice, or the reading clock without one.
+    const onward = (delay: number) => {
+      if (more) timer = window.setTimeout(advance, delay);
+    };
+
+    const clip = narratorFor(index);
+    narratorFor(index + 1);
+    narratorFor(index + 2);
+    if (clip === null) {
+      onward(STEP_MS);
+      return () => {
+        if (timer !== null) clearTimeout(timer);
+      };
+    }
+    // A new step starts from its beginning; the same step after a pause carries on.
+    if (narrating.current !== index) clip.currentTime = 0;
+    narrating.current = index;
+    clip.onended = () => {
+      unfollow();
+      onward(700);
+    };
+    clip.onerror = () => onward(STEP_MS);
+    clip
+      .play()
+      .then(() => {
+        const analyser = listen(clip);
+        if (analyser) follow(analyser);
+      })
+      .catch(() => {
+        // Autoplay refused, or no audio to be had. The step is read instead of heard.
+        onward(STEP_MS);
+      });
+    return () => {
+      clip.onended = null;
+      clip.onerror = null;
+      clip.pause();
+      unfollow();
+      if (timer !== null) clearTimeout(timer);
+    };
+  }, [advance, follow, lines.length, listen, narratorFor, paused, shown, unfollow]);
+
+  // Nothing left playing once the board is closed.
+  useEffect(
+    () => () => {
+      for (const clip of narration.current.values()) clip.pause();
+    },
+    [],
+  );
 
   // Keep the newest line in view: a long solution should scroll itself rather than write
   // below the fold and wait to be found. `played` is here as well as `shown`, because the
   // board fills from two directions — the reviewed steps and the coach's own hand — and a
   // line written below the fold looks to a student exactly like a line that was rubbed out.
+  // Only lines already reached are on the board at all, so the bottom is the newest line and
+  // not the empty room the unwritten steps used to hold, which scrolled the question away.
   useEffect(() => {
     inkRef.current?.scrollTo({ top: inkRef.current.scrollHeight, behavior: 'smooth' });
   }, [shown, played, asked]);
@@ -644,17 +726,15 @@ export function Board({
             <Maths text={question} />
           </span>
           <Figures figures={figures} compact />
-          {lines.map((line, index) => (
+          {lines.slice(0, shown).map((line, index) => (
             <span
               key={line + String(index)}
-              className={`sp-hl ${index < shown ? 'show' : ''} ${
-                index === lines.length - 1 ? 'answer' : ''
-              }`}
+              className={`sp-hl show sp-written ${index === lines.length - 1 ? 'answer' : ''}`}
             >
               <span className="n">
                 {index === lines.length - 1 ? 'answer' : `step ${index + 1}`}
               </span>
-              {line}
+              <Maths text={line} />
             </span>
           ))}
 
@@ -759,7 +839,7 @@ export function Board({
                 )}
               </div>
             ) : played === 0 ? (
-              <p>{waiting ? 'Let me look at that with you…' : caption}</p>
+              <p>{waiting ? 'Let me look at that with you…' : <Maths text={caption} />}</p>
             ) : null}
           </div>
         </div>

@@ -41,8 +41,10 @@ exists so that the day the pad lands, the attempts already recorded have the sha
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 import secrets
+import tempfile
 import time
 from collections.abc import AsyncIterator
 from pathlib import Path
@@ -50,7 +52,7 @@ from typing import Annotated, Any, Literal
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
@@ -1347,6 +1349,88 @@ async def listen(
             status_code=422, detail="I could not make that out. Try again, or type it."
         )
     return Heard(asked=heard)
+
+
+#: A worked step is written to be read aloud and may run to a short paragraph; this is past
+#: the longest in the bank once its mathematics is said in words.
+STEP_SPOKEN_CHARS = 2000
+
+
+def _speech_cache() -> Path:
+    configured = get_settings().speech_cache_dir.strip()
+    folder = Path(configured) if configured else Path(tempfile.gettempdir()) / "score-pilot-speech"
+    folder.mkdir(parents=True, exist_ok=True)
+    return folder
+
+
+@router.get(
+    "/{session_id}/steps/{question_version_id}/{index}/voice",
+    summary="Hear one step of the worked solution",
+)
+async def step_voice(
+    conn: Annotated[AsyncConnection, Depends(connection)],
+    settings: Annotated[Settings, Depends(get_settings)],
+    session_id: UUID,
+    question_version_id: UUID,
+    index: int,
+) -> Response:
+    """The board reading its own working aloud, one step at a time.
+
+    Only for a question answered in this sitting, which is the only way a student reaches its
+    board — so this cannot be used to make the voice read anything else. The index one past
+    the last step is the answer line.
+
+    MADE ONCE. A reviewed step's words do not change, so its audio is kept, named for the
+    exact words, voice and model; the thousandth student to hear a step costs nothing, and a
+    corrected step is simply a new file.
+    """
+    row = (
+        (
+            await conn.execute(
+                text(
+                    """
+                    SELECT v.solution_steps,
+                           (SELECT option_key FROM question_options o
+                             WHERE o.question_version_id = v.id AND o.is_correct) AS key
+                    FROM question_versions v
+                    WHERE v.id = :version AND EXISTS (
+                      SELECT 1 FROM attempts a
+                      WHERE a.session_id = :session AND a.question_version_id = v.id)
+                    """
+                ),
+                {"version": question_version_id, "session": session_id},
+            )
+        )
+        .mappings()
+        .first()
+    )
+    if row is None:
+        raise HTTPException(status_code=404, detail="no such step")
+    steps = row["solution_steps"]
+    steps = json.loads(steps) if isinstance(steps, str) else list(steps or [])
+    if 0 <= index < len(steps):
+        line = str(steps[index])
+    elif index == len(steps) and row["key"]:
+        line = f"The answer is {row['key']}."
+    else:
+        raise HTTPException(status_code=404, detail="no such step")
+
+    said = tutor.for_the_voice(line)
+    name = hashlib.sha256(
+        f"{settings.ai_speech_model}|{settings.ai_speech_voice}|{tutor.SPEECH_STYLE}|{said}".encode()
+    ).hexdigest()
+    cached = _speech_cache() / f"{name}.mp3"
+    if not cached.is_file():
+        audio = await tutor.speak(line, settings, max_chars=STEP_SPOKEN_CHARS)
+        if audio is None:
+            # No voice to be had. The board reads this as silence and holds the step instead.
+            raise HTTPException(status_code=404, detail="no voice for this step")
+        partial = cached.with_suffix(f".{secrets.token_hex(4)}.part")
+        partial.write_bytes(audio)
+        partial.replace(cached)
+    return FileResponse(
+        cached, media_type="audio/mpeg", headers={"Cache-Control": "private, max-age=86400"}
+    )
 
 
 @router.get(

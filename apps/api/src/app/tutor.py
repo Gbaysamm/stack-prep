@@ -1192,17 +1192,20 @@ async def speak_streaming(line: str, settings: Settings) -> AsyncIterator[bytes]
         return
 
 
-async def speak(line: str, settings: Settings) -> bytes | None:
+async def speak(line: str, settings: Settings, max_chars: int = MAX_SPOKEN_CHARS) -> bytes | None:
     """The audio for one spoken line, or None when there is none to be had.
 
     Never raises, for the same reason `answer` does not: the voice is the better lesson and
     the caption underneath it is the acceptable one. No key, no SDK, an outage, a line too
     long to be a line — the student reads instead of listening, and nothing on screen breaks.
+
+    `max_chars` is raised for a reviewed worked step, which is written to be read aloud and
+    can run longer than one sentence of the coach's.
     """
     line = for_the_voice(line)
     if not line or not settings.ai_speak or not settings.openai_api_key:
         return None
-    if len(line) > MAX_SPOKEN_CHARS:
+    if len(line) > max_chars:
         return None
 
     try:
