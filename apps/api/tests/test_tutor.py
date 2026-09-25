@@ -15,6 +15,8 @@ from app.config import Settings
 from app.tutor import (
     MAX_SPOKEN_CHARS,
     MEMORY_DEPTH,
+    REASONING_HEADROOM_TOKENS,
+    REPLY_MAX_TOKENS,
     SPOKEN_QUESTION_TYPES,
     Attempted,
     Figure,
@@ -23,6 +25,7 @@ from app.tutor import (
     Said,
     Turn,
     _briefing,
+    _completion_options,
     _messages,
     _packet,
     _whole_sentences,
@@ -319,6 +322,25 @@ def test_the_tags_are_read_whatever_their_case() -> None:
     reply = Reply(text="say: spoken\nboard: $x$", source="model")
     assert reply.spoken == "spoken"
     assert reply.board == ["$x$"]
+
+
+# --- what the model is asked for --------------------------------------------------------
+
+
+def test_a_reasoning_model_gets_room_to_think_as_well_as_to_answer() -> None:
+    """Thinking counts against the ceiling, so without headroom answers are cut short."""
+    options = _completion_options(Settings(ai_reasoning_effort="low"))
+    assert options == {
+        "max_completion_tokens": REPLY_MAX_TOKENS + REASONING_HEADROOM_TOKENS,
+        "reasoning_effort": "low",
+    }
+
+
+def test_a_model_that_does_not_reason_is_not_sent_the_setting() -> None:
+    """gpt-4o rejects reasoning_effort outright, so an empty setting leaves it out."""
+    assert _completion_options(Settings(ai_reasoning_effort="")) == {
+        "max_completion_tokens": REPLY_MAX_TOKENS
+    }
 
 
 # --- what the voice is given ------------------------------------------------------------

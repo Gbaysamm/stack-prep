@@ -92,6 +92,28 @@ MAX_QUESTION_CHARS = 400
 #: board line with the explanation of it never spoken.
 REPLY_MAX_TOKENS = 520
 
+#: A reasoning model's thinking is counted against the same ceiling as its reply, so without
+#: room for it the ceiling above would cut answers short again — the failure it was raised to
+#: stop. At low effort a board question takes a few hundred tokens of thought; this is added
+#: only when a reasoning effort is configured.
+REASONING_HEADROOM_TOKENS = 1500
+
+
+def _completion_options(settings: Settings) -> dict[str, object]:
+    """The ceiling, and the reasoning effort when there is one.
+
+    max_completion_tokens rather than max_tokens: the older parameter is refused by the
+    reasoning models outright, and this one is accepted by every chat model. reasoning_effort
+    is sent only when configured, because a non-reasoning model rejects it.
+    """
+    effort = settings.ai_reasoning_effort
+    if not effort:
+        return {"max_completion_tokens": REPLY_MAX_TOKENS}
+    return {
+        "max_completion_tokens": REPLY_MAX_TOKENS + REASONING_HEADROOM_TOKENS,
+        "reasoning_effort": effort,
+    }
+
 #: The service target is a useful response or a clear fallback within 15 seconds, so a call
 #: the student is waiting on is given less than that, and the fallback is given room to be
 #: written and stored. This is the ceiling for anything that arrives all at once: the
@@ -946,13 +968,10 @@ async def answer(lesson: Lesson, asked: str, settings: Settings) -> Reply:
     client = AsyncOpenAI(api_key=settings.openai_api_key, timeout=CALL_TIMEOUT_SECONDS)
     started = time.monotonic()
     try:
-        # max_completion_tokens rather than max_tokens: the older parameter is refused by the
-        # reasoning models outright, and this one is accepted by every chat model, so the
-        # ceiling holds whichever model the deployment is configured with.
-        message = await client.chat.completions.create(
+        message = await client.chat.completions.create(  # type: ignore[call-overload]
             model=settings.ai_runtime_model,
-            max_completion_tokens=REPLY_MAX_TOKENS,
-            messages=_messages(lesson, asked),  # type: ignore[arg-type]
+            messages=_messages(lesson, asked),
+            **_completion_options(settings),
         )
     except Exception:
         # Timeout, rate limit, bad key, outage. The student is mid-lesson and waiting; what
@@ -1034,9 +1053,9 @@ async def write_on_the_board(
         # argument.
         stream = await client.chat.completions.create(  # type: ignore[call-overload]
             model=settings.ai_runtime_model,
-            max_completion_tokens=REPLY_MAX_TOKENS,
             messages=_messages(lesson, asked),
             stream=True,
+            **_completion_options(settings),
             # Usage does not come with a stream unless it is asked for, and without it the
             # turn would be stored with no idea what it cost.
             stream_options={"include_usage": True},
