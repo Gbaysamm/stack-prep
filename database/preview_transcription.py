@@ -103,6 +103,9 @@ h1{margin:0 0 4px;font-size:19px}.sub{color:#666;font-size:14px}
 .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:6px}
 .before{color:#7c2d12;font-family:ui-monospace,monospace;font-size:13px;white-space:pre-wrap}
 .stem{font-size:16px}
+.fig{margin:12px 0;padding:10px;background:#fff;border:1px solid #e4e4ea;border-radius:8px;
+  overflow-x:auto}
+.fig svg{max-width:100%;height:auto;display:block;margin:0 auto}
 .opts{margin:10px 0 0;padding:0;list-style:none;font-size:15px}
 .opts li{padding:4px 0}.k{display:inline-block;width:22px;color:#888}
 .bad{background:#fee;color:#b91c1c;padding:0 3px;border-radius:3px}
@@ -136,6 +139,9 @@ def build(transcription: Path, out_dir: Path, before: dict[str, str], label: str
             "uncertain": q.get("uncertain") or "",
             "corrected": q.get("corrected") or "",
             "pending": bool(q.get("pending")),
+            # Authored by hand from the printed figure, never model output, so it is safe
+            # to place in the page as markup rather than escaping it.
+            "figure_svg": q.get("figure_svg") or "",
             "answer": (worked.get(q["number"]) or {}).get("answer") or "",
             "steps": (worked.get(q["number"]) or {}).get("steps") or [],
             "hint": (worked.get(q["number"]) or {}).get("hint") or "",
@@ -170,13 +176,14 @@ def build(transcription: Path, out_dir: Path, before: dict[str, str], label: str
         if q["corrected"]:
             note += f'<div class="fix">Option set repaired: {escape(q["corrected"])}</div>'
         was = escape(before.get(str(q["n"]), "(not in the database)"))
+        figure = f'<div class="fig">{q["figure_svg"]}</div>' if q["figure_svg"] else ""
         cards.append(
             f'<div class="q"><div class="hd"><span class="num">Q{q["n"]}</span>{tags}</div>'
             f'<div class="cols">'
             f'<div class="cell"><div class="lbl">in the database now</div>'
             f'<div class="before">{was}</div></div>'
             f'<div class="cell"><div class="lbl">re-transcribed</div>'
-            f'<div class="stem">{q["stem_html"]}</div>'
+            f'<div class="stem">{q["stem_html"]}</div>{figure}'
             f'<ul class="opts">{options}</ul>{note}{working}</div>'
             f"</div></div>"
         )
