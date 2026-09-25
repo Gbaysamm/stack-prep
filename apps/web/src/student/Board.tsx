@@ -720,7 +720,7 @@ export function Board({
       </div>
 
       <div className={`sp-board ${paused ? 'dim' : ''}`}>
-        <div className="sp-ink" ref={inkRef}>
+        <div className="sp-ink sp-textbook" ref={inkRef}>
           <span className="sp-hl show sp-question">
             <span className="n">question</span>
             <Maths text={question} />

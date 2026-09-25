@@ -216,7 +216,7 @@ export function CheckupPage() {
         </p>
       )}
 
-      <h1 className="stem">
+      <h1 className="stem sp-textbook">
         <Maths text={question.stem} />
       </h1>
       <Figures figures={question.figures} />
@@ -231,7 +231,7 @@ export function CheckupPage() {
               onClick={() => choose(option.option_key)}
             >
               <span className="option-key">{option.option_key}</span>
-              <span>
+              <span className="sp-textbook">
                 <Maths text={option.body} />
               </span>
             </button>

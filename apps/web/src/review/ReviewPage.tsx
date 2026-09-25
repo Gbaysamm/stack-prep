@@ -234,7 +234,7 @@ export function ReviewPage() {
                 <span className="q-id">
                   {item.exam_year} · Q{item.question_number}
                 </span>
-                <span className="q-stem">
+                <span className="q-stem sp-textbook">
                   <Maths text={item.stem} />
                 </span>
                 <span className="q-flags">
@@ -332,7 +332,7 @@ function QuestionPanel({ detail, skills, reviewerId, busy, onAct, onTyping }: Pa
           <Maths text={detail.instructions} />
         </p>
       )}
-      <p className="stem">
+      <p className="stem sp-textbook">
         <Maths text={detail.stem} />
       </p>
 
@@ -346,7 +346,7 @@ function QuestionPanel({ detail, skills, reviewerId, busy, onAct, onTyping }: Pa
               onClick={() => onAct(() => api.setAnswer(detail.question_id, reviewerId, option.option_key))}
             >
               <span className="key">{option.option_key}</span>
-              <span>
+              <span className="sp-textbook">
                 <Maths text={option.body} />
               </span>
             </button>

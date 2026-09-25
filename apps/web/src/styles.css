@@ -475,3 +475,17 @@ button.primary {
   height: auto;
   display: block;
 }
+
+/* Question and answer text set in KaTeX's own text face, so the words around the mathematics
+   read as one piece with it rather than a sans-serif sentence with typeset formulas dropped
+   in. KaTeX's stylesheet already loads this font for the maths, so it costs no extra fetch. */
+.sp-textbook {
+  font-family: KaTeX_Main, 'Latin Modern Roman', 'Computer Modern', 'Times New Roman', serif;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+/* KaTeX enlarges its maths by a fifth to sit beside ordinary fonts. Beside its own face that
+   makes the formula visibly bigger than the words, so it is brought back into line. */
+.sp-textbook .katex {
+  font-size: 1.04em;
+}

@@ -254,7 +254,7 @@ export function Practice({
             <Maths text={question.instructions} />
           </p>
         ) : null}
-        <h2 style={{ fontSize: 20, margin: '4px 0 16px' }}>
+        <h2 className="sp-textbook" style={{ fontSize: 21, margin: '4px 0 16px' }}>
           <Maths text={question.stem} />
         </h2>
         <Figures figures={question.figures} />
@@ -267,7 +267,7 @@ export function Practice({
             disabled={asking || busy}
           >
             <span className="letter">{option.option_key}</span>
-            <span className="body">
+            <span className="body sp-textbook">
               <Maths text={option.body} />
             </span>
           </button>
