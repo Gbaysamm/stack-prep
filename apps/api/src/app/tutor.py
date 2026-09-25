@@ -78,6 +78,7 @@ from typing import Literal
 from xml.etree import ElementTree
 
 from app.config import Settings
+from app.spoken_maths import speak_text
 
 #: Long enough for a real question, short enough that the box cannot be used as a channel for
 #: pasting something else into the prompt.
@@ -1105,27 +1106,12 @@ SPEECH_STYLE = (
 MAX_SPOKEN_CHARS = 600
 
 
-#: LaTeX the coach was told not to put in a spoken line, and how to say it instead. The
-#: instruction is in the prompt, but a voice reading "dollar one is less than dollar" to a
-#: student is too bad a failure to leave resting on the model remembering a rule.
-_SPOKEN_MATHS = [
-    (re.compile(r"\\frac\{([^{}]+)\}\{([^{}]+)\}"), r"\1 over \2"),
-    (re.compile(r"\\sqrt\{([^{}]+)\}"), r"the square root of \1"),
-    (re.compile(r"\\times"), " times "),
-    (re.compile(r"\\div"), " divided by "),
-    (re.compile(r"\\leq"), " is less than or equal to "),
-    (re.compile(r"\\geq"), " is greater than or equal to "),
-    (re.compile(r"\\neq"), " is not equal to "),
-    (re.compile(r"\\pi\b"), " pi "),
-    (re.compile(r"\\theta\b"), " theta "),
-    (re.compile(r"\^\{?2\}?"), " squared"),
-    (re.compile(r"\^\{?3\}?"), " cubed"),
-    (re.compile(r"\^\{?([^{}\s]+)\}?"), r" to the power \1"),
-    (re.compile(r"[<]"), " is less than "),
-    (re.compile(r"[>]"), " is greater than "),
-    (re.compile(r"\\[a-zA-Z]+"), " "),
-    (re.compile(r"[${}\\]"), " "),
-]
+#: LaTeX the coach wrote with no dollar signs round it: a command with its arguments, or a
+#: power. Each run is wrapped in $...$ so it goes through the same reader as the rest.
+_BARE_MATHS = re.compile(
+    r"[\w.]*\\[a-zA-Z]+(?:\[[^\]]*\])?(?:\{(?:[^{}]|\{[^{}]*\})*\})*"
+    r"|\w+\^(?:\{[^{}]*\}|\w)"
+)
 
 
 def for_the_voice(line: str) -> str:
@@ -1134,11 +1120,14 @@ def for_the_voice(line: str) -> str:
     The prompt tells the coach not to write LaTeX in a SAY line, and mostly it does not. This
     is what happens when it does, because the cost of being wrong is a student listening to
     "dollar backslash frac" — and unlike a wrong word on the board, there is nothing on
-    screen to correct it against.
+    screen to correct it against. The words themselves come from `spoken_maths`, which the
+    stored worked steps go through too, so the coach and a replayed lesson sound the same.
     """
-    spoken = line
-    for pattern, replacement in _SPOKEN_MATHS:
-        spoken = pattern.sub(replacement, spoken)
+    if "$" not in line:
+        line = _BARE_MATHS.sub(lambda m: f"${m.group(0)}$", line)
+    spoken = speak_text(line)
+    spoken = spoken.replace("<", " is less than ").replace(">", " is greater than ")
+    spoken = re.sub(r"[${}\\^]", " ", spoken)
     return re.sub(r"\s{2,}", " ", spoken).strip()
 
 

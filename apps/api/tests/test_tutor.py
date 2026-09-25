@@ -331,14 +331,21 @@ def test_latex_in_a_spoken_line_is_turned_into_words() -> None:
     "dollar backslash frac" has nothing, so this cannot rest on the model remembering a rule.
     """
     assert for_the_voice(r"The inequality $1 < 5 - 2x$ holds.") == (
-        "The inequality 1 is less than 5 - 2x holds."
+        "The inequality 1 is less than 5 minus 2 x holds."
     )
-    assert for_the_voice(r"This gives $x^2 = 12x$.") == "This gives x squared = 12x ."
+    assert for_the_voice(r"This gives $x^2 = 12x$.") == "This gives x squared equals 12 x."
     assert for_the_voice(r"Take $\frac{a}{b}$ and $\sqrt{2}$.") == (
-        "Take a over b and the square root of 2 ."
+        "Take a over b and the square root of 2."
     )
     assert for_the_voice(r"Note $x \leq 5$ and $3 \times 4$.") == (
-        "Note x is less than or equal to 5 and 3 times 4 ."
+        "Note x is less than or equal to 5 and 3 times 4."
+    )
+
+
+def test_latex_without_dollar_signs_is_still_said_in_words() -> None:
+    assert for_the_voice(r"So the angle is 60^{\circ}.") == "So the angle is 60 degrees."
+    assert for_the_voice(r"That is \frac{3}{4} of the tank.") == (
+        "That is three quarters of the tank."
     )
 
 
