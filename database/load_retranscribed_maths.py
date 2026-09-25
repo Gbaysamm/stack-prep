@@ -117,17 +117,42 @@ def read_papers() -> list[dict]:
 
 
 def export_figures(questions: list[dict]) -> int:
-    """Write each figure to its own file. Returns how many changed."""
+    """Write each figure to its own file, with a PNG copy beside it. Returns how many changed.
+
+    The SVG is what a student is shown. Inline in a page it needs no namespace, but as a file
+    loaded through <img> a browser refuses it without one, so the namespace is added here.
+
+    The PNG is for the coach: the model is sent the figure as a picture and does not take SVG.
+    Rendering needs resvg, which the app itself never does, so this step alone asks for it:
+
+        uv run --with resvg-py python database/load_retranscribed_maths.py --export-figures
+    """
+    import resvg_py  # type: ignore[import-not-found]
+
     SVG_DIR.mkdir(parents=True, exist_ok=True)
     changed = 0
     for q in questions:
         if not q["svg"]:
             continue
         path = svg_path(q["year"], q["number"])
-        text = q["svg"].strip() + "\n"
+        text = q["svg"].strip()
+        if "xmlns=" not in text.split(">", 1)[0]:
+            text = text.replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" ', 1)
+        text += "\n"
         if not path.exists() or path.read_text(encoding="utf-8") != text:
             path.write_text(text, encoding="utf-8", newline="\n")
             changed += 1
+        png = path.with_suffix(".png")
+        if not png.exists() or png.stat().st_mtime < path.stat().st_mtime:
+            # Twice the drawn size, on white: the figures are dark ink on no background.
+            width, _ = svg_size(text)
+            png.write_bytes(
+                bytes(
+                    resvg_py.svg_to_bytes(
+                        svg_string=text, background="white", width=(width or 320) * 2
+                    )
+                )
+            )
     return changed
 
 

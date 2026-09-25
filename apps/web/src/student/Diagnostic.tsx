@@ -14,6 +14,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, type CheckupState } from './api.js';
 import './theme.css';
 
+import { Figures } from '../Figures.js';
 import { Maths } from '../Maths.js';
 
 const KEYS = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -163,6 +164,7 @@ export function Diagnostic({
           <h2 style={{ fontSize: 20, margin: '4px 0 16px' }}>
             <Maths text={question.stem} />
           </h2>
+          <Figures figures={question.figures} />
           {question.options.map((option) => (
             <button
               key={option.option_key}

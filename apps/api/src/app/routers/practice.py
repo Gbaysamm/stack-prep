@@ -58,14 +58,12 @@ from sqlalchemy.ext.asyncio import AsyncConnection
 from app import tutor
 from app.config import Settings, get_settings
 from app.db import connection, fetch_all
+from app.figures import QuestionFigure, figures_for, resolve
 from app.routers.checkup import UnitWeight, _subtopics
 from engine.projection import UnitStanding, project
 from engine.version import ENGINE_VERSION
 
 router = APIRouter(prefix="/v1/practice", tags=["practice"])
-
-#: Asset URIs are stored repo-relative, the way the importer wrote them.
-REPO_ROOT = Path(__file__).resolve().parents[5]
 
 #: What may be sent to the model as a picture. Anything else attached to a question is not
 #: an image we are willing to put in a packet.
@@ -188,6 +186,8 @@ class PracticeQuestion(BaseModel):
     options: list[Option]
     #: Hints already spent on this question, so a reload does not hand one back.
     hints_used: int
+    #: The diagrams printed with the question, shown above it and again on the board.
+    figures: list[QuestionFigure] = Field(default_factory=list)
 
 
 class PracticeState(BaseModel):
@@ -465,6 +465,7 @@ async def _state(
                 **dict(found),
                 options=await _options(conn, repeat_version_id),
                 hints_used=await _hints_used(conn, session["id"], repeat_version_id),
+                figures=await figures_for(conn, repeat_version_id),
             )
     elif stage == "asking" and seen < length:
         for subtopic_id in await _plan(conn, session["student_id"], session["subject_id"]):
@@ -477,6 +478,7 @@ async def _state(
                     **dict(picked),
                     options=await _options(conn, picked["question_version_id"]),
                     hints_used=0,
+                    figures=await figures_for(conn, picked["question_version_id"]),
                 )
                 break
 
@@ -869,12 +871,15 @@ async def _figures(conn: AsyncConnection, version_id: UUID) -> list[tutor.Figure
         if len(figures) == tutor.MAX_FIGURES:
             break
         mime_type = str(row["mime_type"] or "")
+        storage_uri = str(row["storage_uri"])
+        if mime_type == "image/svg+xml":
+            # The model does not take SVG. Each redrawn figure has a PNG rendering beside it,
+            # made when the figure was exported, and that is the picture the coach is sent.
+            storage_uri, mime_type = str(Path(storage_uri).with_suffix(".png")), "image/png"
         if mime_type not in FIGURE_MIME_TYPES:
             continue
-        # Resolved under the repo root and checked to still be under it, so a stored path
-        # cannot walk out of the asset tree and read something else off the box.
-        path = (REPO_ROOT / str(row["storage_uri"])).resolve()
-        if not path.is_relative_to(REPO_ROOT) or not path.is_file():
+        path = resolve(storage_uri)
+        if path is None:
             continue
         if path.stat().st_size > MAX_FIGURE_BYTES:
             continue

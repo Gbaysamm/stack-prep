@@ -32,6 +32,7 @@ import type { CSSProperties } from 'react';
 
 import type { TutorReply } from './api.js';
 import { Coach } from './Coach.js';
+import { Figures, type QuestionFigure } from '../Figures.js';
 import { Maths } from '../Maths.js';
 import './theme.css';
 
@@ -101,6 +102,7 @@ export function Board({
   title,
   subtitle,
   question,
+  figures,
   steps,
   answerLine,
   onDone,
@@ -109,6 +111,12 @@ export function Board({
 }: {
   title: string;
   subtitle: string;
+  /**
+   * The diagram printed with the question, kept on the board under it. Most geometry steps
+   * point into the figure — "the angle at P", "the chord QR" — and a student cannot follow
+   * them with the picture left behind on the question screen.
+   */
+  figures?: QuestionFigure[];
   /**
    * The question itself, written at the top of the board.
    *
@@ -635,6 +643,7 @@ export function Board({
             <span className="n">question</span>
             <Maths text={question} />
           </span>
+          <Figures figures={figures} compact />
           {lines.map((line, index) => (
             <span
               key={line + String(index)}

@@ -26,6 +26,11 @@ class Settings(BaseSettings):
 
     cors_origins: str = "http://127.0.0.1:5173,http://localhost:5173"
 
+    #: Where question_assets.storage_uri is resolved from. Empty means the repository root,
+    #: which is right wherever the API runs from a checkout; the Docker image copies the
+    #: figures in and sets this to its own root.
+    asset_root: str = ""
+
     openai_api_key: str = ""
     # Deliberately not the cheap model. What the coach is asked to do — explain the reviewed
     # working, invent nothing, reveal nothing early — is refusal behaviour, and refusal is

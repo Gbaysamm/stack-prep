@@ -6,6 +6,8 @@
  * the tab loses nothing and reopening it finds the sitting where it stopped.
  */
 
+import type { QuestionFigure } from '../Figures.js';
+
 export interface SubjectOffer {
   subject_id: string;
   code: string;
@@ -64,6 +66,7 @@ export interface CheckupQuestion {
   passage_title: string | null;
   passage_body: string | null;
   options: CheckupOption[];
+  figures?: QuestionFigure[];
 }
 
 export interface CheckupState {
@@ -152,6 +155,7 @@ export interface PracticeQuestion {
   passage_body: string | null;
   options: PracticeOption[];
   hints_used: number;
+  figures?: QuestionFigure[];
 }
 
 export interface Misconception {

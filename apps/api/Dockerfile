@@ -22,7 +22,11 @@ RUN useradd --create-home --uid 10001 app
 WORKDIR /srv
 COPY --from=builder --chown=app:app /srv/.venv /srv/.venv
 COPY --from=builder --chown=app:app /srv/database /srv/database
-ENV PATH="/srv/.venv/bin:$PATH" PYTHONUNBUFFERED=1 MIGRATIONS_DIR=/srv/database/migrations
+# The figures students are shown. Asset rows store repo-relative paths, so they keep the same
+# path under /srv, which ASSET_ROOT then names as the root.
+COPY --chown=app:app docs/questions/utme/mathematics/figures/svg /srv/docs/questions/utme/mathematics/figures/svg
+ENV PATH="/srv/.venv/bin:$PATH" PYTHONUNBUFFERED=1 MIGRATIONS_DIR=/srv/database/migrations \
+    ASSET_ROOT=/srv
 USER app
 EXPOSE 8000
 

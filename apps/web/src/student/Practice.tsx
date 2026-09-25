@@ -17,6 +17,7 @@ import { api, type PracticeState } from './api.js';
 import { Board } from './Board.js';
 import './theme.css';
 
+import { Figures } from '../Figures.js';
 import { Maths } from '../Maths.js';
 
 type Confidence = 'sure' | 'unsure' | 'guessed';
@@ -166,6 +167,7 @@ export function Practice({
         // The question, but never the passage: several paragraphs of comprehension text
         // would bury the working underneath it.
         question={question.stem}
+        figures={question.figures}
         steps={state.solution_steps ?? []}
         answerLine={`The answer is ${state.correct_option_key}.`}
         onListen={
@@ -242,6 +244,7 @@ export function Practice({
         <h2 style={{ fontSize: 20, margin: '4px 0 16px' }}>
           <Maths text={question.stem} />
         </h2>
+        <Figures figures={question.figures} />
         {question.options.map((option) => (
           <button
             key={option.option_key}

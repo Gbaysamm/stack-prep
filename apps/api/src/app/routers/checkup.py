@@ -24,6 +24,7 @@ from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from app.db import connection, fetch_all
+from app.figures import QuestionFigure, figures_for
 from app.routers.student import sessions_before
 from engine.checkup import (
     DEFAULT_LENGTH,
@@ -85,6 +86,7 @@ class QuestionOut(BaseModel):
     passage_title: str | None
     passage_body: str | None
     options: list[dict[str, str]]
+    figures: list[QuestionFigure] = Field(default_factory=list)
 
 
 class CheckupState(BaseModel):
@@ -467,6 +469,7 @@ async def _next_state(
             passage_title=question["passage_title"],
             passage_body=question["passage_body"],
             options=await _options(conn, question["question_version_id"]),
+            figures=await figures_for(conn, question["question_version_id"]),
         ),
     )
 

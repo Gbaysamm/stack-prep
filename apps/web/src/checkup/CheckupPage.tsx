@@ -23,6 +23,7 @@ import {
   type SandboxSubject,
 } from './api.js';
 
+import { Figures } from '../Figures.js';
 import { Maths } from '../Maths.js';
 
 type Phase = 'choosing' | 'asking' | 'finished' | 'failed';
@@ -218,6 +219,7 @@ export function CheckupPage() {
       <h1 className="stem">
         <Maths text={question.stem} />
       </h1>
+      <Figures figures={question.figures} />
 
       <ul className="options">
         {question.options.map((option) => (

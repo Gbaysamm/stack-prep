@@ -1,5 +1,7 @@
 /** Thin typed wrapper over the check-up endpoints, plus the developer student endpoints. */
 
+import type { QuestionFigure } from '../Figures.js';
+
 export interface CheckupOption {
   option_key: string;
   body: string;
@@ -15,6 +17,7 @@ export interface CheckupQuestion {
   passage_title: string | null;
   passage_body: string | null;
   options: CheckupOption[];
+  figures?: QuestionFigure[];
 }
 
 export interface CheckupState {
