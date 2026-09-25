@@ -258,11 +258,13 @@ export function Board({
   const lines: Entry[] = useMemo(() => {
     if (lesson && lesson.beats.length > 0) {
       return lesson.beats.map((beat) => {
-        const answer = beat.board_index === steps.length;
+        const answer = beat.answer || beat.board_index === steps.length;
+        // A written lesson writes its own answer line; a narration's closing borrows ours.
+        const bare = answer && beat.write.length === 0;
         return {
-          label: beat.board_index === null ? null : answer ? 'answer' : `step ${beat.board_index + 1}`,
-          items: answer ? [answerLine] : beat.write,
-          at: answer ? [0] : beat.write_at,
+          label: null,
+          items: bare ? [answerLine] : beat.write,
+          at: bare ? [0] : beat.write_at,
           say: beat.say,
           voice: beat.voice_url,
           step: beat.board_index !== null && !answer ? beat.board_index : null,
@@ -272,7 +274,7 @@ export function Board({
     }
     return [
       ...steps.map((text, index) => ({
-        label: `step ${index + 1}`,
+        label: null,
         items: [text],
         at: [0],
         say: text,
@@ -281,7 +283,7 @@ export function Board({
         answer: false,
       })),
       {
-        label: 'answer',
+        label: null,
         items: [answerLine],
         at: [0],
         say: answerLine,
@@ -592,6 +594,8 @@ export function Board({
   // made on the server while the student was on their second try, so this is reading, not
   // waiting. Kept apart from the coach's reply player, which answers questions.
   const [itemsShown, setItemsShown] = useState(0);
+  //: How long the line being written takes to write out. Set from its voice once it plays.
+  const [handMs, setHandMs] = useState(900);
   const [replayed, setReplayed] = useState(0);
   const clips = useRef(new Map<number, HTMLAudioElement>());
   const narrating = useRef<number | null>(null);
@@ -679,6 +683,10 @@ export function Board({
       .then(() => {
         if (cancelled) return;
         setVoiceBlocked(false);
+        // The writing takes most of the time its words take, split across its items, so the
+        // hand is never ahead of the voice and the line is finished as the sentence ends.
+        const seconds = Number.isFinite(clip.duration) && clip.duration > 0 ? clip.duration : 2;
+        setHandMs(Math.max(500, (seconds * 1000 * 0.85) / Math.max(1, entry.items.length)));
         pace();
         const analyser = listen(clip);
         if (analyser) follow(analyser);
@@ -863,21 +871,25 @@ export function Board({
       <div className={`sp-board ${paused ? 'dim' : ''}`}>
         <div className="sp-ink sp-textbook" ref={inkRef}>
           <span className="sp-hl show sp-question">
-            <span className="n">question</span>
             <Maths text={question} />
           </span>
           <Figures figures={figures} compact />
           {lines.slice(0, shown).map((line, index) => {
-            const items = index === shown - 1 ? line.items.slice(0, itemsShown) : line.items;
-            if (items.length === 0 && line.label === null) return null;
+            const current = index === shown - 1;
+            const items = current ? line.items.slice(0, itemsShown) : line.items;
+            if (items.length === 0) return null;
             return (
               <span
                 key={line.say + String(index)}
                 className={`sp-hl show sp-written ${line.answer ? 'answer' : ''}`}
               >
-                {line.label ? <span className="n">{line.label}</span> : null}
                 {items.map((item, piece) => (
-                  <span key={item + String(piece)} className="sp-item">
+                  <span
+                    key={item + String(piece)}
+                    className="sp-item sp-hand"
+                    // Written out over the time its words take, not flashed up whole.
+                    style={{ '--write-ms': `${current ? handMs : 0}ms` } as CSSProperties}
+                  >
                     <Maths text={item} />
                   </span>
                 ))}

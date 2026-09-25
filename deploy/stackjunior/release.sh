@@ -104,6 +104,13 @@ setsid nohup nice -n 19 uv run --frozen uvicorn app.main:app \
   --host 127.0.0.1 --port "$API_PORT" \
   > "$ROOT/logs/api.log" 2>&1 < /dev/null &
 
+echo "==> Voicing written lessons, in the background"
+# Detached: making a new year's audio takes minutes and the release does not wait for it. A
+# line already made is skipped, so after the first run this only voices what is new.
+pkill -f "app.cli voice-lessons" 2>/dev/null || true
+setsid nohup nice -n 19 uv run --frozen python -m app.cli voice-lessons \
+  > "$ROOT/logs/voice.log" 2>&1 < /dev/null &
+
 echo "==> Restarting the web client"
 # `preview` rather than `dev`: it serves the built assets and starts no file
 # watchers, which matters on a machine that is not ours alone. Vite's preview

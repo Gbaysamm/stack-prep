@@ -189,6 +189,8 @@ export interface LessonBeat {
   write_at: number[];
   say: string;
   voice_url: string;
+  /** The moment that gives the answer, which the board marks. */
+  answer: boolean;
 }
 
 export interface NarratedLesson {

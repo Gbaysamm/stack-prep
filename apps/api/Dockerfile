@@ -19,6 +19,9 @@ COPY database database
 
 FROM python:3.13-slim AS runtime
 RUN useradd --create-home --uid 10001 app
+# Where the lessons' audio is kept. Made here and owned by the app user, so the volume
+# mounted over it starts out writable by the process that fills it.
+RUN mkdir -p /srv/speech && chown app:app /srv/speech
 WORKDIR /srv
 COPY --from=builder --chown=app:app /srv/.venv /srv/.venv
 COPY --from=builder --chown=app:app /srv/database /srv/database
@@ -26,7 +29,7 @@ COPY --from=builder --chown=app:app /srv/database /srv/database
 # path under /srv, which ASSET_ROOT then names as the root.
 COPY --chown=app:app docs/questions/utme/mathematics/figures/svg /srv/docs/questions/utme/mathematics/figures/svg
 ENV PATH="/srv/.venv/bin:$PATH" PYTHONUNBUFFERED=1 MIGRATIONS_DIR=/srv/database/migrations \
-    ASSET_ROOT=/srv
+    ASSET_ROOT=/srv SPEECH_CACHE_DIR=/srv/speech
 USER app
 EXPOSE 8000
 

@@ -1,0 +1,54 @@
+# UTME 2002 Mathematics — lessons for the board.
+#
+# Each lesson is a run of MOMENTS, taught the way a good whiteboard teacher teaches: one or two
+# short things said, and at most one line written while they are said. The line starts being
+# written as its words start, so every line of working must be here — the board shows nothing
+# the lesson does not write, and a jump from "0 = 4x - 8" to "(2, 0)" reads as missing steps.
+#
+#   say:    what the teacher says. Plain spoken English; mathematics may be written in $...$
+#           and is said in words ("2y equals 4x minus 8"). One or two short sentences.
+#   write:  the one line written while it is said, in LaTeX, or left out for nothing.
+#   answer: true on the moment that gives the answer, which the board marks.
+#
+#   traps:  said at the end to a student who chose that wrong option: why it tempts, kindly.
+#
+# Keyed on question number, like explanations_2002.yaml. Answers match that file.
+format_version: 1
+exam_year: 2002
+lessons:
+  11:
+    moments:
+      - say: 'Let''s find the midpoint of the $x$ and $y$ intercepts of the line $2y = 4x - 8$.'
+        write: '$2y = 4x - 8$'
+      - say: 'First, what is an intercept? It''s where the line crosses an axis. On the $x$-axis, $y$ is zero, and on the $y$-axis, $x$ is zero.'
+      - say: 'So to find the $x$-intercept, let''s replace $y$ with zero.'
+        write: '$2(0) = 4x - 8$'
+      - say: 'Two times zero is zero, so we have zero equals $4x$ minus 8.'
+        write: '$0 = 4x - 8$'
+      - say: 'Now let''s add 8 to both sides. That gives us 8 equals $4x$.'
+        write: '$4x = 8$'
+      - say: 'To get $x$ by itself, divide both sides by 4. 8 divided by 4 is 2.'
+        write: '$x = 2$'
+      - say: 'So the line crosses the $x$-axis at the point 2, 0.'
+        write: '$x\text{-intercept: } (2,\ 0)$'
+      - say: 'Now the $y$-intercept. This time, we replace $x$ with zero.'
+        write: '$2y = 4(0) - 8$'
+      - say: '4 times zero is zero, so $2y$ equals negative 8.'
+        write: '$2y = -8$'
+      - say: 'Divide both sides by 2, and $y$ is negative 4.'
+        write: '$y = -4$'
+      - say: 'So the line crosses the $y$-axis at the point 0, negative 4.'
+        write: '$y\text{-intercept: } (0,\ -4)$'
+      - say: 'Now we have our two points. To find the midpoint, we average the $x$-values, and we average the $y$-values.'
+        write: '$\text{midpoint} = \left(\dfrac{x_1 + x_2}{2},\ \dfrac{y_1 + y_2}{2}\right)$'
+      - say: 'The $x$-values are 2 and 0. 2 plus 0 is 2, and 2 divided by 2 is 1.'
+        write: '$\dfrac{2 + 0}{2} = 1$'
+      - say: 'The $y$-values are 0 and negative 4. 0 plus negative 4 is negative 4, and negative 4 divided by 2 is negative 2.'
+        write: '$\dfrac{0 + (-4)}{2} = -2$'
+      - say: 'So the midpoint is 1, negative 2, which is answer choice D.'
+        write: '$(1,\ -2)$'
+        answer: true
+    traps:
+      A: 'You went for negative 1, negative 2. The $y$-value is right, but the $x$-value is 1, not negative 1: 2 plus 0 is positive 2, and half of that is positive 1.'
+      B: 'You went for 1, 2. The $x$-value is right, but the $y$-intercept is negative 4, so the average of the $y$-values is negative 2, not 2. Watch the sign.'
+      C: 'You went for 2, 0. That''s the $x$-intercept on its own. The question wants the point halfway between both intercepts.'

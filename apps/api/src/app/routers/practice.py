@@ -40,13 +40,11 @@ exists so that the day the pad lands, the attempts already recorded have the sha
 
 from __future__ import annotations
 
-import asyncio
 import base64
 import dataclasses
 import hashlib
 import json
 import secrets
-import tempfile
 import time
 from collections.abc import AsyncIterator
 from pathlib import Path
@@ -67,7 +65,7 @@ from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import tutor
+from app import tutor, voice_store
 from app.config import Settings, get_settings
 from app.db import connection, fetch_all
 from app.figures import QuestionFigure, figures_for, resolve
@@ -1361,60 +1359,45 @@ async def listen(
     return Heard(asked=heard)
 
 
-#: A narrated beat is a few spoken sentences; this is well past the longest the brief allows,
-#: once its mathematics is said in words.
-STEP_SPOKEN_CHARS = 2000
-
-#: One lock per thing being made, so a warm-up and a board asking at the same moment make it
-#: once between them rather than paying for it twice.
-_MAKING: dict[str, asyncio.Lock] = {}
-
-
-def _making(key: str) -> asyncio.Lock:
-    return _MAKING.setdefault(key, asyncio.Lock())
-
-
-def _speech_cache() -> Path:
-    configured = get_settings().speech_cache_dir.strip()
-    folder = Path(configured) if configured else Path(tempfile.gettempdir()) / "score-pilot-speech"
-    folder.mkdir(parents=True, exist_ok=True)
-    return folder
-
-
-def _write_atomically(path: Path, data: bytes) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    partial = path.with_suffix(f".{secrets.token_hex(4)}.part")
-    partial.write_bytes(data)
-    partial.replace(path)
-
-
 class LessonBeat(BaseModel):
-    #: Which reviewed step this beat teaches: a step's index, one past the last step for the
-    #: answer, or None for the opening. Asking at the board names the step by this.
+    #: Which reviewed step this beat teaches, for asking about it: a step's index, one past the
+    #: last for the answer, or None where the beat is not one step (an opening, or any moment
+    #: of a written lesson, which follows the working rather than the steps).
     board_index: int | None
-    #: What is written up, a piece at a time, while `say` is spoken. Only the reviewed
-    #: working's own mathematics or a short label: see tutor.Narration.
+    #: The line written while `say` is spoken, if any. It starts being written as the voice
+    #: starts, and is written out over the time the words take.
     write: list[str]
-    #: When each item goes up, as a fraction of the way through `say`: the moment the words
-    #: it belongs to begin.
+    #: When each written item starts, as a fraction of the way through `say`.
     write_at: list[float]
     say: str
     voice_url: str
+    #: The moment that gives the answer, which the board marks.
+    answer: bool = False
 
 
 class NarratedLesson(BaseModel):
-    #: "model" when a teacher's narration was written; "steps" when it could not be and the
-    #: board reads its own reviewed steps instead.
-    source: Literal["model", "steps"]
+    #: "script": the lesson written for this question. "model": a teacher's narration written
+    #: live over the reviewed steps, for a question with no lesson yet. "steps": neither could
+    #: be had, and the board reads the reviewed steps.
+    source: Literal["script", "model", "steps"]
     beats: list[LessonBeat]
+
+
+@dataclasses.dataclass(frozen=True)
+class _Beat:
+    board_index: int | None
+    write: list[str]
+    at: list[float]
+    say: str
+    answer: bool = False
 
 
 async def _must_have_missed(conn: AsyncConnection, session_id: UUID, version_id: UUID) -> None:
     """Refuse unless this sitting has a wrong answer to this question.
 
-    The lesson is made ahead of time, from the first wrong answer, so it is ready by the time
-    the board opens. That is as early as it may start: a question nobody has missed has no
-    lesson to prepare, and the voice cannot be used to read anything else.
+    The lesson is prepared from the first wrong answer, so it is ready by the time the board
+    opens. That is as early as it may start: a question nobody has missed has no lesson to
+    prepare, and the voice cannot be used to read anything else.
     """
     missed = (
         await conn.execute(
@@ -1433,19 +1416,20 @@ async def _must_have_missed(conn: AsyncConnection, session_id: UUID, version_id:
         raise HTTPException(status_code=409, detail="there is no lesson for this question yet")
 
 
-async def _first_mistake(
-    conn: AsyncConnection, session_id: UUID, version_id: UUID
+async def _mistake(
+    conn: AsyncConnection, session_id: UUID, version_id: UUID, *, first: bool
 ) -> tuple[str | None, str | None]:
-    """The first wrong option chosen, and why it tempts.
+    """A wrong option this sitting chose for the question, and why that option tempts.
 
-    The first rather than the latest, so the narration made while the student is still trying
-    again is the one the board plays: it opens on the mistake they started with.
+    `first` for the narration written while the student is still trying, so it opens on the
+    mistake they started with; otherwise the latest, which is the one a written lesson's trap
+    is said about at the end.
     """
     row = (
         (
             await conn.execute(
                 text(
-                    """
+                    f"""
                     SELECT a.selected_option_key, m.description
                     FROM attempts a
                     LEFT JOIN question_options o
@@ -1454,7 +1438,7 @@ async def _first_mistake(
                     LEFT JOIN misconceptions m ON m.id = o.misconception_id
                     WHERE a.session_id = :session AND a.question_version_id = :version
                       AND coalesce(a.is_correct, false) IS FALSE
-                    ORDER BY a.answered_at_client
+                    ORDER BY a.answered_at_client {"ASC" if first else "DESC"}
                     LIMIT 1
                     """
                 ),
@@ -1471,18 +1455,18 @@ async def _first_mistake(
 
 async def _narration(
     conn: AsyncConnection, session_id: UUID, version_id: UUID, settings: Settings
-) -> tuple[tutor.Narration, Literal["model", "steps"]]:
-    """The teacher's narration of this question's working, made once and then kept.
+) -> tuple[tutor.Narration, list[str], Literal["model", "steps"]]:
+    """A teacher's narration over the reviewed steps, for a question with no written lesson.
 
-    Kept on disk under a name drawn from everything it depends on — the working, the key, the
-    wrong option it opens on, the model and the instructions — so every student who makes the
-    same mistake hears the same lesson without it being written again.
+    Kept on disk under a name drawn from everything it depends on, so every student who makes
+    the same mistake hears the same lesson without it being written again. Returns the
+    narration, the reviewed steps it was written over, and where it came from.
     """
     session = await _session(conn, session_id)
     lesson = await _lesson_on_the_board(
         conn, session_id, session["student_id"], version_id, None, settings
     )
-    chose, misconception = await _first_mistake(conn, session_id, version_id)
+    chose, misconception = await _mistake(conn, session_id, version_id, first=True)
     lesson = dataclasses.replace(lesson, chose=chose, misconception=misconception)
     key = hashlib.sha256(
         json.dumps(
@@ -1496,71 +1480,87 @@ async def _narration(
             ]
         ).encode()
     ).hexdigest()
-    kept = _speech_cache() / "lessons" / f"{key}.json"
-    async with _making(key):
+    kept = voice_store.folder() / "lessons" / f"{key}.json"
+    async with voice_store.making(key):
         if kept.is_file():
             data = json.loads(kept.read_text(encoding="utf-8"))
-            return (
-                tutor.Narration(
-                    opening=tutor.Taught(**data["opening"]),
-                    steps=[tutor.Taught(**step) for step in data["steps"]],
-                    closing=data["closing"],
-                ),
-                "model",
+            narration = tutor.Narration(
+                opening=tutor.Taught(**data["opening"]),
+                steps=[tutor.Taught(**step) for step in data["steps"]],
+                closing=data["closing"],
             )
-        narration = await tutor.narrate(lesson, settings)
-        if narration is not None:
-            _write_atomically(kept, json.dumps(dataclasses.asdict(narration)).encode())
-            return narration, "model"
-    # No narration to be had: the board reads its own reviewed steps, as it did before. Not
-    # kept, so the next student gets another try at the real thing.
-    return (
-        tutor.Narration(
-            opening=tutor.Taught(said="", board=[], at=[]),
-            # Without a teacher's talk, the board carries the whole reviewed step as before.
-            steps=[tutor.Taught(said=step, board=[step], at=[0.0]) for step in lesson.steps],
-            closing=f"The answer is {lesson.correct_option_key}.",
-        ),
-        "steps",
+            return narration, lesson.steps, "model"
+        made = await tutor.narrate(lesson, settings)
+        if made is not None:
+            voice_store.write_atomically(kept, json.dumps(dataclasses.asdict(made)).encode())
+            return made, lesson.steps, "model"
+    # No narration to be had: the board reads its own reviewed steps. Not kept, so the next
+    # student gets another try at the real thing.
+    plain = tutor.Narration(
+        opening=tutor.Taught(said="", board=[], at=[]),
+        steps=[tutor.Taught(said=step, board=[], at=[]) for step in lesson.steps],
+        closing=f"The answer is {lesson.correct_option_key}.",
     )
+    return plain, lesson.steps, "steps"
 
 
-def _beats(narration: tutor.Narration) -> list[tuple[int | None, tutor.Taught]]:
-    """The lesson in the order it is said: which step each stretch teaches, and the stretch."""
-    beats: list[tuple[int | None, tutor.Taught]] = []
+async def _lesson_beats(
+    conn: AsyncConnection, session_id: UUID, version_id: UUID, settings: Settings
+) -> tuple[list[_Beat], Literal["script", "model", "steps"]]:
+    """The lesson in the order it happens.
+
+    A written lesson when the question has one: every line of working, each written as it is
+    said, and at the end the trap in the option this student last chose. Otherwise a narration
+    over the reviewed steps — and then the board writes each reviewed step whole, because a
+    step's working cut down to fragments reads as working with lines missing.
+    """
+    written = (
+        (
+            await conn.execute(
+                text("SELECT moments, traps FROM question_lessons WHERE question_version_id = :v"),
+                {"v": version_id},
+            )
+        )
+        .mappings()
+        .first()
+    )
+    if written is not None:
+        moments = written["moments"]
+        moments = json.loads(moments) if isinstance(moments, str) else moments
+        traps = written["traps"]
+        traps = json.loads(traps) if isinstance(traps, str) else (traps or {})
+        beats = [
+            _Beat(
+                board_index=None,
+                write=[str(moment["write"])] if moment.get("write") else [],
+                at=[0.0] if moment.get("write") else [],
+                say=str(moment["say"]),
+                answer=bool(moment.get("answer")),
+            )
+            for moment in moments
+        ]
+        chose, _ = await _mistake(conn, session_id, version_id, first=False)
+        if chose and traps.get(chose):
+            beats.append(_Beat(board_index=None, write=[], at=[], say=str(traps[chose])))
+        return beats, "script"
+
+    narration, steps, source = await _narration(conn, session_id, version_id, settings)
+    beats = []
     if narration.opening.said:
-        beats.append((None, narration.opening))
-    beats += list(enumerate(narration.steps))
-    beats.append((len(narration.steps), tutor.Taught(said=narration.closing, board=[], at=[])))
-    return beats
-
-
-async def _voice_file(line: str, settings: Settings) -> Path | None:
-    """One line's audio, made once and kept under a name drawn from its words and voice."""
-    said = tutor.for_the_voice(line)
-    name = hashlib.sha256(
-        f"{settings.ai_speech_model}|{settings.ai_speech_voice}|{tutor.SPEECH_STYLE}|{said}".encode()
-    ).hexdigest()
-    cached = _speech_cache() / f"{name}.mp3"
-    async with _making(name):
-        if cached.is_file():
-            return cached
-        audio = await tutor.speak(line, settings, max_chars=STEP_SPOKEN_CHARS)
-        if audio is None:
-            return None
-        _write_atomically(cached, audio)
-        return cached
-
-
-async def _voice_all(lines: list[str], settings: Settings) -> None:
-    """Make every line's audio, a few at a time, so the board finds them ready."""
-    gate = asyncio.Semaphore(3)
-
-    async def one(line: str) -> None:
-        async with gate:
-            await _voice_file(line, settings)
-
-    await asyncio.gather(*(one(line) for line in lines), return_exceptions=True)
+        beats.append(
+            _Beat(
+                None,
+                list(narration.opening.board),
+                list(narration.opening.at),
+                narration.opening.said,
+            )
+        )
+    beats += [
+        _Beat(index, [step], [0.0], taught.said)
+        for index, (taught, step) in enumerate(zip(narration.steps, steps, strict=True))
+    ]
+    beats.append(_Beat(len(steps), [], [], narration.closing, answer=True))
+    return beats, source
 
 
 @router.get(
@@ -1574,25 +1574,20 @@ async def lesson(
     session_id: UUID,
     question_version_id: UUID,
 ) -> NarratedLesson:
-    """The board writes the reviewed steps; the teacher talks each one through.
-
-    What is written is the checked working, word for word. What is said is the narration,
-    which explains why each step is taken rather than reading it out — a student can read the
-    board for themselves, and a voice that only reads it teaches them nothing more.
-    """
     await _must_be_at_the_board(conn, session_id, question_version_id)
-    narration, source = await _narration(conn, session_id, question_version_id, settings)
+    beats, source = await _lesson_beats(conn, session_id, question_version_id, settings)
     return NarratedLesson(
         source=source,
         beats=[
             LessonBeat(
-                board_index=board_index,
-                write=taught.board,
-                write_at=taught.at,
-                say=taught.said,
+                board_index=beat.board_index,
+                write=beat.write,
+                write_at=beat.at,
+                say=beat.say,
                 voice_url=f"/v1/practice/{session_id}/lesson/{question_version_id}/voice/{index}",
+                answer=beat.answer,
             )
-            for index, (board_index, taught) in enumerate(_beats(narration))
+            for index, beat in enumerate(beats)
         ],
     )
 
@@ -1609,11 +1604,10 @@ async def lesson_voice(
     beat: int,
 ) -> Response:
     await _must_have_missed(conn, session_id, question_version_id)
-    narration, _ = await _narration(conn, session_id, question_version_id, settings)
-    beats = _beats(narration)
+    beats, _ = await _lesson_beats(conn, session_id, question_version_id, settings)
     if not 0 <= beat < len(beats):
         raise HTTPException(status_code=404, detail="no such beat")
-    path = await _voice_file(beats[beat][1].said, settings)
+    path = await voice_store.voiced(beats[beat].say, settings)
     if path is None:
         # No voice to be had. The board reads this as silence and holds the beat instead.
         raise HTTPException(status_code=404, detail="no voice for this beat")
@@ -1634,15 +1628,16 @@ async def warm_lesson(
     question_version_id: UUID,
     background: BackgroundTasks,
 ) -> dict[str, int]:
-    """Called on the first wrong answer. Writing the narration and making its voice take
-    longer than a student waits comfortably, and the second try is time they are spending
-    anyway — so the lesson is made then, and the board opens on it already prepared.
+    """Called on the first wrong answer, so the board opens on a lesson already prepared.
+
+    A written lesson's audio is normally made in advance, after each release; this catches
+    any line that is not. A question without one has its narration written here too.
     """
     await _must_have_missed(conn, session_id, question_version_id)
-    narration, _ = await _narration(conn, session_id, question_version_id, settings)
-    lines = [taught.said for _, taught in _beats(narration)]
+    beats, _ = await _lesson_beats(conn, session_id, question_version_id, settings)
+    lines = [beat.say for beat in beats]
     if settings.ai_speak:
-        background.add_task(_voice_all, lines, settings)
+        background.add_task(voice_store.voice_all, lines, settings)
     return {"beats": len(lines)}
 
 

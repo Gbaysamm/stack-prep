@@ -101,6 +101,11 @@ fi
 echo "==> Starting API and worker"
 compose up -d
 
+echo "==> Voicing written lessons, in the background"
+# Detached: making a new year's audio takes minutes and the release does not wait for it. A
+# line already made is skipped, so after the first run this only voices what is new.
+compose run -d --rm --no-deps api python -m app.cli voice-lessons < /dev/null > /dev/null
+
 echo "==> Building the web client"
 npm ci --no-audit --no-fund > /dev/null
 npm run build --workspace @score-pilot/web > /dev/null

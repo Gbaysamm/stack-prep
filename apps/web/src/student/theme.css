@@ -606,12 +606,30 @@
 .sp-steps-mini i.on {
   background: var(--purple);
 }
+/* A clean whiteboard: nothing on it but the question and the working. */
 .sp-board {
   position: relative;
   overflow: hidden;
   background: #fff;
-  background-image: radial-gradient(#dcd4e8 1px, transparent 1.2px);
-  background-size: 22px 22px;
+}
+/* The question sits at the top, set apart by a rule rather than a label. */
+.sp-hl.sp-question {
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid #ece8f3;
+}
+/* A line being written: revealed from left to right over --write-ms, the way a hand moves
+   across a board while the teacher talks, rather than appearing whole. */
+.sp-hl .sp-item.sp-hand {
+  animation: sp-hand var(--write-ms, 900ms) linear both;
+}
+@keyframes sp-hand {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
 }
 .sp-ink {
   position: absolute;

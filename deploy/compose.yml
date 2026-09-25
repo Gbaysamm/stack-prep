@@ -71,6 +71,10 @@ services:
       # never ours to point anywhere — that zone is on a Cloudflare account we
       # have no access to. binaax.app has a wildcard that already resolves here.
       CORS_ORIGINS: https://stackprep.binaax.app
+    volumes:
+      # The lessons' audio, made once after each release and replayed from here. A volume,
+      # so a restart or a new image does not throw it away and pay for it again.
+      - speech-data:/srv/speech
     ports:
       # Host-local only. Caddy reaches this; the internet does not.
       - '127.0.0.1:8010:8000'
@@ -107,3 +111,4 @@ services:
 
 volumes:
   postgres-data:
+  speech-data:

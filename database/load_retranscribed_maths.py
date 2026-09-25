@@ -206,6 +206,80 @@ async def report_uncertain(conn: asyncpg.Connection, version_id: object, q: dict
     )
 
 
+OPTION_LETTERS = {"A", "B", "C", "D", "E"}
+
+
+def read_lessons() -> dict[tuple[int, int], dict]:
+    """Every written lesson (lessons_YYYY.yaml), checked, keyed by year and question number.
+
+    A malformed lesson stops the load with its address rather than being skipped: a lesson
+    is played to students exactly as written, so one that is wrong has to be fixed, not
+    quietly left out.
+    """
+    found: dict[tuple[int, int], dict] = {}
+    for path in sorted(MATHS.glob("lessons_*.yaml")):
+        doc = yaml.safe_load(path.read_text(encoding="utf-8"))
+        year = int(doc["exam_year"])
+        for number, lesson in (doc.get("lessons") or {}).items():
+            where = f"{path.name} Q{number}"
+            moments = lesson.get("moments")
+            if not isinstance(moments, list) or not moments:
+                raise SystemExit(f"{where}: a lesson needs moments")
+            clean = []
+            for moment in moments:
+                say = moment.get("say") if isinstance(moment, dict) else None
+                if not isinstance(say, str) or not say.strip():
+                    raise SystemExit(f"{where}: every moment needs something said")
+                write = moment.get("write")
+                if write is not None and (not isinstance(write, str) or not write.strip()):
+                    raise SystemExit(f"{where}: a moment's write is a line of working or nothing")
+                entry: dict[str, object] = {"say": say.strip()}
+                if write:
+                    entry["write"] = write.strip()
+                if moment.get("answer"):
+                    entry["answer"] = True
+                clean.append(entry)
+            traps = lesson.get("traps") or {}
+            if not isinstance(traps, dict) or not set(traps) <= OPTION_LETTERS:
+                raise SystemExit(f"{where}: traps are keyed by option letter")
+            found[(year, int(number))] = {
+                "moments": clean,
+                "traps": {str(key): str(value).strip() for key, value in traps.items()},
+                "file": path.relative_to(ROOT).as_posix(),
+            }
+    return found
+
+
+async def lessons_to_load(
+    conn: asyncpg.Connection, subject_id: object, lessons: dict[tuple[int, int], dict]
+) -> list[tuple[object, dict]]:
+    """The lessons whose question's current version does not already carry them as written."""
+    work: list[tuple[object, dict]] = []
+    for (year, number), lesson in lessons.items():
+        row = await conn.fetchrow(
+            """
+            SELECT q.current_version_id AS version_id, l.moments, l.traps
+            FROM questions q
+            LEFT JOIN question_lessons l ON l.question_version_id = q.current_version_id
+            WHERE q.subject_id = $1 AND q.exam_year = $2 AND q.question_number = $3
+              AND q.retired_at IS NULL
+            """,
+            subject_id,
+            year,
+            str(number),
+        )
+        if row is None:
+            continue
+        same = (
+            row["moments"] is not None
+            and json.loads(row["moments"]) == lesson["moments"]
+            and json.loads(row["traps"]) == lesson["traps"]
+        )
+        if not same:
+            work.append((row["version_id"], lesson))
+    return work
+
+
 async def run(args: argparse.Namespace) -> int:
     questions = read_papers()
     if args.export_figures:
@@ -377,7 +451,11 @@ async def run(args: argparse.Namespace) -> int:
         print(f"  {len(plan['complete'])} drafts already read correctly: completed, approved")
         print(f"  {len(plan['explain'])} unchanged but for the explanation: rewritten in place")
         print(f"  {len(plan['same'])} already exactly as written")
+        lessons = read_lessons()
+        lesson_work = await lessons_to_load(conn, subject_id, lessons)
+        print(f"  {len(lessons)} written lessons, {len(lesson_work)} to load or update")
         pending = sum(len(plan[k]) for k in ("revise", "create", "complete", "explain"))
+        pending += len(lesson_work)
         if args.pending:
             # For a deploy: exit 10 when there is work, so it knows to take a backup first.
             return 10 if pending else 0
@@ -601,6 +679,27 @@ async def run(args: argparse.Namespace) -> int:
                     reviewer_id,
                 )
                 await report_uncertain(conn, version_id, q)
+
+        # After the questions, because a lesson belongs to the version a question is ON, and
+        # the corrections above may just have moved it.
+        lesson_work = await lessons_to_load(conn, subject_id, lessons)
+        async with conn.transaction():
+            for version_id, lesson in lesson_work:
+                await conn.execute(
+                    """
+                    INSERT INTO question_lessons (question_version_id, moments, traps,
+                      source_file)
+                    VALUES ($1, $2::jsonb, $3::jsonb, $4)
+                    ON CONFLICT (question_version_id) DO UPDATE
+                      SET moments = EXCLUDED.moments, traps = EXCLUDED.traps,
+                          source_file = EXCLUDED.source_file, updated_at = now()
+                    """,
+                    version_id,
+                    json.dumps(lesson["moments"]),
+                    json.dumps(lesson["traps"]),
+                    lesson["file"],
+                )
+        print(f"{len(lesson_work)} written lessons loaded or updated.")
 
         deliverable = await conn.fetchval(
             "SELECT count(*) FROM deliverable_questions WHERE subject_id = $1", subject_id

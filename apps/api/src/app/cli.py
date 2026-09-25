@@ -1,8 +1,9 @@
 """Command line entry points.
 
-    uv run python -m app.cli migrate     apply pending SQL migrations
-    uv run python -m app.cli baseline    record existing migrations as applied
-    uv run python -m app.cli openapi     print the OpenAPI schema
+uv run python -m app.cli migrate     apply pending SQL migrations
+uv run python -m app.cli baseline    record existing migrations as applied
+uv run python -m app.cli openapi     print the OpenAPI schema
+uv run python -m app.cli voice-lessons  make the audio for written lessons not yet voiced
 """
 
 from __future__ import annotations
@@ -36,6 +37,56 @@ def _baseline() -> int:
     return 0
 
 
+def _voice_lessons() -> int:
+    """Make the audio for every written lesson that does not have it yet.
+
+    Run after each release, in the background. A lesson's lines are voiced ahead of time so the
+    board starts the moment it opens; a line already made is skipped, so after the first run
+    this only makes what is new or reworded.
+    """
+    from sqlalchemy import text
+
+    from app import voice_store
+    from app.config import get_settings
+    from app.db import get_engine
+
+    async def run() -> int:
+        settings = get_settings()
+        if not settings.ai_speak or not settings.openai_api_key:
+            print("No voice configured here; nothing made.")
+            return 0
+        async with get_engine().connect() as conn:
+            rows = (
+                (
+                    await conn.execute(
+                        text(
+                            """
+                            SELECT l.moments, l.traps FROM question_lessons l
+                            JOIN questions q ON q.current_version_id = l.question_version_id
+                            """
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        lines: list[str] = []
+        for row in rows:
+            moments, traps = row["moments"], row["traps"]
+            moments = moments if isinstance(moments, list) else json.loads(moments)
+            traps = traps if isinstance(traps, dict) else json.loads(traps)
+            lines += [str(moment["say"]) for moment in moments]
+            lines += [str(said) for said in traps.values()]
+        unique = list(dict.fromkeys(lines))
+        missing = [line for line in unique if not voice_store.path_for(line, settings).is_file()]
+        print(f"{len(unique)} lines across {len(rows)} lessons; {len(missing)} to make.")
+        made, failed = await voice_store.voice_all(missing, settings)
+        print(f"Made {made}; {failed} could not be voiced.")
+        return 0
+
+    return asyncio.run(run())
+
+
 def _openapi() -> int:
     from app.main import app
 
@@ -46,9 +97,15 @@ def _openapi() -> int:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="app.cli")
-    parser.add_argument("command", choices=["migrate", "baseline", "openapi"])
+    commands = {
+        "migrate": _migrate,
+        "baseline": _baseline,
+        "openapi": _openapi,
+        "voice-lessons": _voice_lessons,
+    }
+    parser.add_argument("command", choices=list(commands))
     args = parser.parse_args(argv)
-    return {"migrate": _migrate, "baseline": _baseline, "openapi": _openapi}[args.command]()
+    return commands[args.command]()
 
 
 if __name__ == "__main__":
