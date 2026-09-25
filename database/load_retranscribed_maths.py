@@ -3,6 +3,10 @@
 
     uv run python database/load_retranscribed_maths.py --reviewer <academic_reviewers.id>
     uv run python database/load_retranscribed_maths.py --reviewer <id> --apply
+    uv run python database/load_retranscribed_maths.py --reviewer-name Abdulmalik --apply
+
+Each deploy runs the last form (deploy/*/release.sh), after a backup, whenever --pending
+says there is anything left to load; once the bank matches, it is a no-op.
 
 WHY THIS EXISTS. The Mathematics bank was filled by convert_jamb_maths.py, which read the text
 layer of a PDF that mangles mathematics: degree signs as zeros, powers flattened, options cut
@@ -42,6 +46,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -214,7 +219,10 @@ async def run(args: argparse.Namespace) -> int:
             f"{len(missing_files)} figure files are missing; run with --export-figures first"
         )
 
-    dsn = (args.database_url or "").replace("+asyncpg", "", 1) or None
+    # Inside the API container the database address is already in the environment, so a
+    # deploy can run this without repeating the password on a command line.
+    url = args.database_url or os.environ.get("DATABASE_URL") or ""
+    dsn = url.replace("+asyncpg", "", 1) or None
     conn = await asyncpg.connect(
         dsn=dsn,
         host=None if dsn else "127.0.0.1",
@@ -223,12 +231,31 @@ async def run(args: argparse.Namespace) -> int:
     )
     try:
         await conn.execute("SET search_path = stackprep, public")
-        reviewer = await conn.fetchrow(
-            "SELECT id, display_name FROM academic_reviewers WHERE id = $1 AND active",
-            args.reviewer,
-        )
-        if reviewer is None:
-            raise SystemExit("no active reviewer with that id")
+        new_reviewer = False
+        if args.reviewer:
+            reviewer = await conn.fetchrow(
+                "SELECT id, display_name FROM academic_reviewers WHERE id = $1 AND active",
+                args.reviewer,
+            )
+            if reviewer is None:
+                raise SystemExit("no active reviewer with that id")
+            reviewer_id, reviewer_name = reviewer["id"], reviewer["display_name"]
+        elif args.reviewer_name:
+            # By name, so a deploy can say who approves without anyone looking up an id on
+            # each server. Two active reviewers with one name is ambiguous and refused.
+            found = await conn.fetch(
+                "SELECT id FROM academic_reviewers WHERE display_name = $1 AND active",
+                args.reviewer_name,
+            )
+            if len(found) > 1:
+                raise SystemExit(f"{len(found)} active reviewers are called {args.reviewer_name}")
+            reviewer_name = args.reviewer_name
+            if found:
+                reviewer_id = found[0]["id"]
+            else:
+                reviewer_id, new_reviewer = uuid_for(f"reviewer:{reviewer_name}"), True
+        else:
+            reviewer_id, reviewer_name = None, "nobody (checking only)"
         subject_id = await conn.fetchval(
             """
             SELECT s.id FROM subjects s JOIN examinations e ON e.id = s.examination_id
@@ -350,7 +377,11 @@ async def run(args: argparse.Namespace) -> int:
         print(f"  {len(plan['complete'])} drafts already read correctly: completed, approved")
         print(f"  {len(plan['explain'])} unchanged but for the explanation: rewritten in place")
         print(f"  {len(plan['same'])} already exactly as written")
-        print(f"Approving as {reviewer['display_name']}.")
+        pending = sum(len(plan[k]) for k in ("revise", "create", "complete", "explain"))
+        if args.pending:
+            # For a deploy: exit 10 when there is work, so it knows to take a backup first.
+            return 10 if pending else 0
+        print(f"Approving as {reviewer_name}" + (" (a new reviewer)." if new_reviewer else "."))
         if uncertain:
             print(
                 f"{len(uncertain)} carry a reading to verify against the paper; each gets an "
@@ -359,8 +390,12 @@ async def run(args: argparse.Namespace) -> int:
         if not args.apply:
             print("\nDry run; pass --apply to write it.")
             return 0
+        if not pending:
+            print("\nNothing to do.")
+            return 0
 
         author_id = uuid_for(f"reviewer:{AUTHOR}")
+        reviewer = {"display_name": reviewer_name}
         async with conn.transaction():
             await conn.execute(
                 "INSERT INTO academic_reviewers (id, display_name, active) VALUES ($1, $2, true) "
@@ -368,6 +403,13 @@ async def run(args: argparse.Namespace) -> int:
                 author_id,
                 AUTHOR,
             )
+            if new_reviewer:
+                await conn.execute(
+                    "INSERT INTO academic_reviewers (id, display_name, active) "
+                    "VALUES ($1, $2, true) ON CONFLICT (id) DO NOTHING",
+                    reviewer_id,
+                    reviewer_name,
+                )
             for q, row in plan["explain"]:
                 await conn.execute(
                     """
@@ -475,7 +517,7 @@ async def run(args: argparse.Namespace) -> int:
                         skills[code],
                         syllabus_version_id,
                         reason,
-                        args.reviewer,
+                        reviewer_id,
                     )
                 # Point the question at the new version BEFORE withdrawing the old one, so
                 # the question is never momentarily without a deliverable version.
@@ -492,7 +534,7 @@ async def run(args: argparse.Namespace) -> int:
                      WHERE id = $1
                     """,
                     version_id,
-                    args.reviewer,
+                    reviewer_id,
                 )
                 if row is not None:
                     await conn.execute(
@@ -507,7 +549,7 @@ async def run(args: argparse.Namespace) -> int:
                         """,
                         row["version_id"],
                         NOTE.format(year=q["year"]),
-                        args.reviewer,
+                        reviewer_id,
                         f"Superseded by version {version}.",
                     )
                 await report_uncertain(conn, version_id, q)
@@ -556,7 +598,7 @@ async def run(args: argparse.Namespace) -> int:
                      WHERE id = $1
                     """,
                     version_id,
-                    args.reviewer,
+                    reviewer_id,
                 )
                 await report_uncertain(conn, version_id, q)
 
@@ -572,16 +614,25 @@ async def run(args: argparse.Namespace) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--reviewer", help="academic_reviewers.id of the person approving")
-    parser.add_argument("--database-url", default=None)
+    parser.add_argument(
+        "--reviewer-name",
+        help="The approving reviewer's display name; created as a reviewer if not yet one",
+    )
+    parser.add_argument("--database-url", default=None, help="Defaults to $DATABASE_URL")
     parser.add_argument("--apply", action="store_true")
+    parser.add_argument(
+        "--pending",
+        action="store_true",
+        help="Write nothing; exit 10 if there is anything to load, 0 if not",
+    )
     parser.add_argument(
         "--export-figures",
         action="store_true",
         help="Write the SVG figure files from the transcriptions, then stop",
     )
     args = parser.parse_args()
-    if not args.export_figures and not args.reviewer:
-        parser.error("--reviewer is required")
+    if args.apply and not (args.reviewer or args.reviewer_name):
+        parser.error("--apply needs --reviewer or --reviewer-name: approval is a person's")
     return asyncio.run(run(args))
 
 

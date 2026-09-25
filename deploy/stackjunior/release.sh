@@ -52,6 +52,37 @@ echo "==> Applying migrations"
 # directory and .env lives at the top of the checkout.
 uv run --frozen python -m app.cli migrate
 
+echo "==> Loading re-transcribed content"
+# Approved in the name below, which is a person's decision recorded on every row it writes.
+# Only when there is something to load, and only after a backup: once the bank matches the
+# transcriptions this is one quick check. A failure here is reported, not fatal -- the load
+# is one transaction, so a failed one has changed nothing, and the release still goes out.
+CONTENT_REVIEWER="${CONTENT_REVIEWER:-Abdulmalik}"
+DB_URL=$(grep '^DATABASE_URL=' .env | cut -d= -f2- | sed 's/+asyncpg//')
+set +e
+DATABASE_URL="$DB_URL" uv run --frozen python database/load_retranscribed_maths.py --pending \
+  > /dev/null < /dev/null
+pending=$?
+set -e
+if [ "$pending" = 10 ]; then
+  mkdir -p "$ROOT/backups"
+  backup="$ROOT/backups/before-content-$(date +%F-%H%M%S).sql.gz"
+  if ! command -v pg_dump > /dev/null; then
+    echo "::warning::Content not loaded: no pg_dump on PATH to take a backup first."
+  elif ! pg_dump "$DB_URL" | gzip > "$backup"; then
+    echo "::warning::Content not loaded: the backup failed."
+  elif ! DATABASE_URL="$DB_URL" uv run --frozen python database/load_retranscribed_maths.py \
+         --reviewer-name "$CONTENT_REVIEWER" --apply < /dev/null; then
+    echo "::warning::Loading the re-transcribed content failed; nothing was changed."
+  else
+    echo "    loaded, approved by $CONTENT_REVIEWER; backup at $backup"
+  fi
+elif [ "$pending" = 0 ]; then
+  echo "    already up to date"
+else
+  echo "::warning::Could not check the re-transcribed content (exit $pending)."
+fi
+
 echo "==> Building the web client"
 npm ci --no-audit --no-fund
 npm run build --workspace @score-pilot/web

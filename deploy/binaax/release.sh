@@ -67,6 +67,37 @@ echo "==> Applying migrations"
 # that silently does a third of its work and reports success.
 compose run --rm --no-deps -T api python -m app.cli migrate < /dev/null
 
+echo "==> Loading re-transcribed content"
+# Run in the API image, which has the database address in its environment, with the
+# checkout mounted read-only for the transcriptions it reads. Approved in the name below --
+# a person's decision, recorded on every row -- only when there is something to load, and
+# only after a backup. A failure is reported, not fatal: the load is one transaction, so a
+# failed one has changed nothing, and the release still goes out.
+CONTENT_REVIEWER="${CONTENT_REVIEWER:-Abdulmalik}"
+load_content() {
+  compose run --rm --no-deps -T -v "$APP:/repo:ro" -w /repo -e PYTHONDONTWRITEBYTECODE=1 \
+    api python database/load_retranscribed_maths.py "$@" < /dev/null
+}
+set +e
+load_content --pending > /dev/null
+pending=$?
+set -e
+if [ "$pending" = 10 ]; then
+  mkdir -p "$ROOT/backups"
+  backup="$ROOT/backups/before-content-$(date +%F-%H%M%S).sql.gz"
+  if ! compose exec -T postgres pg_dump -U scorepilot scorepilot < /dev/null | gzip > "$backup"; then
+    echo "::warning::Content not loaded: the backup failed."
+  elif ! load_content --reviewer-name "$CONTENT_REVIEWER" --apply; then
+    echo "::warning::Loading the re-transcribed content failed; nothing was changed."
+  else
+    echo "    loaded, approved by $CONTENT_REVIEWER; backup at $backup"
+  fi
+elif [ "$pending" = 0 ]; then
+  echo "    already up to date"
+else
+  echo "::warning::Could not check the re-transcribed content (exit $pending)."
+fi
+
 echo "==> Starting API and worker"
 compose up -d
 
