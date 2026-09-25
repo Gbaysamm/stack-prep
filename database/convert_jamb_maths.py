@@ -197,8 +197,14 @@ def run(command: list[str]) -> bytes:
 
 
 def page_words(pdf: Path) -> list[list[Word]]:
+    # encoding= is not optional. pdftotext emits UTF-8; text=True alone decodes with the
+    # locale encoding, which on Windows is cp1252, so every en dash, radical, division sign
+    # and vulgar fraction is mangled at the moment it is read and then written back out as
+    # UTF-8 -- doubly encoded, and unrecoverable by the time anyone sees it. The repository
+    # fixed this for file reads and missed the subprocess.
     xml = subprocess.run(["pdftotext", "-bbox", str(pdf), "-"],
-                         check=True, capture_output=True, text=True, errors="replace").stdout
+                         check=True, capture_output=True, text=True,
+                         encoding="utf-8", errors="replace").stdout
     pages = re.findall(r'<page width="[\d.]+" height="[\d.]+">(.*?)</page>', xml, re.S)
     word_re = re.compile(
         r'<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)" yMax="([\d.]+)">(.*?)</word>',
@@ -559,7 +565,34 @@ def merge_scripts(rows: list[list[Word]]) -> list[list[Word]]:
     merged.sort(key=centre)
     out: list[list[Word]] = []
     for row in merged:
-        out.append(mark_inline_scripts(sorted(row, key=lambda w: w.x0), body_height))
+        marked = mark_inline_scripts(sorted(row, key=lambda w: w.x0), body_height)
+        out.append(fuse_scripts(marked, body_height))
+    return out
+
+
+def fuse_scripts(row: list[Word], body_height: float) -> list[Word]:
+    """One exponent, not three.
+
+    An exponent is set as several glyphs -- 9^(2x-1) arrives as "2x", "-" and "1", each
+    raised -- and marking them separately gives ^{2x}^{-}^{1}, which no reader and no
+    renderer makes sense of. Neighbouring marks of the same kind, set close enough to be one
+    run, are therefore fused into a single script.
+    """
+    if not row:
+        return row
+    out: list[Word] = []
+    for word in row:
+        kind = word.text[:2] if word.text[:2] in ("^{", "_{") else None
+        if out and kind and out[-1].text[:2] == kind and out[-1].text.endswith("}"):
+            gap = word.x0 - out[-1].x1
+            if gap < body_height * 0.6:
+                previous = out.pop()
+                inner = previous.text[2:-1] + word.text[2:-1]
+                out.append(Word(previous.x0, min(previous.y0, word.y0),
+                                word.x1, max(previous.y1, word.y1),
+                                f"{kind}{inner}}}"))
+                continue
+        out.append(word)
     return out
 
 
@@ -596,6 +629,19 @@ def mark_inline_scripts(row: list[Word], body_height: float) -> list[Word]:
     return out
 
 
+def needs_notation_review(stem: str, options: dict[str, str]) -> bool:
+    """True when conversion left something a person has to settle.
+
+    The catch-all in `to_latex` guarantees no raw brace reaches a student, but a
+    floating exponent is not the same as a correct one: an integral's limits, a Greek
+    letter or an exponent whose base did not separate all end up wrapped and wrong.
+    Those are flagged rather than trusted -- silently shipping a plausible-looking
+    formula is the one outcome worse than shipping an obviously broken one.
+    """
+    return any("$^{" in value or "$_{" in value
+               for value in [stem, *options.values()])
+
+
 def to_latex(text: str) -> str:
     r"""Turn the reconstructed marks into mathematics a renderer can set.
 
@@ -615,10 +661,25 @@ def to_latex(text: str) -> str:
                   r"$\1\\frac{\2}{\3}$", text)
     text = re.sub(r"\^\{(\d+)\}\s*/\s*_\{(\d+)\}",
                   r"$\\frac{\1}{\2}$", text)
-    # Whatever is left is an exponent or a base subscript. It belongs to the whole
-    # token before it: 213 base four is 213_4, not 21 followed by 3_4.
-    text = re.sub(r"(\d+|[A-Za-z])\^\{([^{}]+)\}", r"$\1^{\2}$", text)
-    text = re.sub(r"(\d+|[A-Za-z])_\{([^{}]+)\}", r"$\1_{\2}$", text)
+    # Whatever is left is an exponent or a base subscript, and it belongs to the whole
+    # token before it. Taking a single character bit into words: 121cm² came out as
+    # "121c$m^{2}$" and log₂4 as "lo$g_{2}$4".
+    text = re.sub(r"([A-Za-z]+|\d+)\^\{([^{}]+)\}", r"$\1^{\2}$", text)
+    text = re.sub(r"([A-Za-z]+|\d+)_\{([^{}]+)\}", r"$\1_{\2}$", text)
+
+    # Anything still marked had no token to attach to: an integral's limits, a Greek
+    # letter, an exponent whose base did not separate. Wrap it so no student ever sees a
+    # brace -- but only outside the mathematics already set, or the catch-all re-wraps
+    # what the rules above just produced. ("$log_{2}$" became "$log$_{2}$$", and the
+    # empty-pair collapse below then made that "$log$_{2} ".)
+    def catch_all(fragment: str) -> str:
+        fragment = re.sub(r"\^\{([^{}]+)\}", r"$^{\1}$", fragment)
+        return re.sub(r"_\{([^{}]+)\}", r"$_{\1}$", fragment)
+
+    pieces = re.split(r"(\$[^$]*\$)", text)
+    text = "".join(piece if piece.startswith("$") and piece.endswith("$") and len(piece) > 1
+                   else catch_all(piece)
+                   for piece in pieces)
     # Atoms that ended up adjacent read as one expression, not two.
     text = re.sub(r"\$\s*\$", " ", text)
     return text
@@ -821,6 +882,9 @@ def parse_year(pdf: Path, year: int, begin: tuple[int, float], finish: tuple[int
             for page, box in leftover_ink
         )
         suspect = suspect or looks_damaged(stem, options)
+        latex_stem = to_latex(stem)
+        latex_options = {key: to_latex(options[key]) for key in present}
+        unsettled = needs_notation_review(latex_stem, latex_options)
         printed_copy: list[Figure] = []
         if suspect:
             column_x = (30.0, gutter_of.get(segment[0].page, GUTTER_X) - 4) \
@@ -838,12 +902,12 @@ def parse_year(pdf: Path, year: int, begin: tuple[int, float], finish: tuple[int
             # Converted here rather than in assemble_row: the question and option
             # regexes run against the raw line, and a dollar delimiter in the middle
             # of them would change what counts as an option.
-            "stem": to_latex(stem),
-            "options": {key: to_latex(options[key]) for key in present},
+            "stem": latex_stem,
+            "options": latex_options,
             # No answer: this compilation prints no key. See the module docstring.
             "proposed_skill": skill,
             "skill_reason": reason,
-            "notation_suspect": bool(printed_copy),
+            "notation_suspect": bool(printed_copy) or unsettled,
             "figures": [
                 {
                     "file": repo_relative(f.path) if f.path else None,

@@ -1,0 +1,596 @@
+# UTME 2003 Mathematics — worked explanations, written against the paper.
+#
+# Keyed on question number, not on question_version_id. The English explanations are keyed on
+# the version they were written against, and every correction since has broken those keys —
+# which is why database/rekey_explanations.py exists. These are written before the questions
+# are loaded, so there is no version to key on yet; the loader resolves number to version.
+#
+# HOW THESE ARE WRITTEN. A student who got the question wrong does not need the answer, they
+# need to know where their reasoning left the road. So each step names the idea before it
+# uses it ("to integrate a power of x, add one to the index and divide by the new index"),
+# and then does the arithmetic in full rather than presenting the result. No step assumes the
+# reader could already have done it: if a fraction is simplified, the simplification is
+# shown; if a sign flips, the reason is given. The last step almost always names the wrong
+# answer the paper is fishing for and says why it is tempting, because a correct answer with
+# no account of the trap teaches nothing and the student meets the same trap next week.
+#
+# `hint` is shown after a first wrong attempt, before the answer. It points at the next move
+# without making it.
+#
+# Answers come from keys_2003.yaml. Four questions are absent from that key; all four are
+# answered here from the printed page, and three of them turn out to be faults in the paper
+# rather than in the reading. Those say so, and give the mathematically correct result.
+format_version: 1
+exam_year: 2003
+subject: MATH
+
+explanations:
+  1:
+    answer: C
+    steps:
+      - "Mixed numbers cannot be multiplied by multiplying the whole parts and the fraction parts separately, so the first move is to turn each one into a single improper fraction."
+      - "For $2\\tfrac{1}{3}$: the whole number 2 is $\\tfrac{6}{3}$, and adding the $\\tfrac{1}{3}$ gives $\\tfrac{7}{3}$. The same way, $1\\tfrac{1}{4}$ is $\\tfrac{4}{4} + \\tfrac{1}{4} = \\tfrac{5}{4}$."
+      - "Now multiply those: $\\tfrac{7}{3} \\times \\tfrac{5}{4}$ means multiplying the tops and multiplying the bottoms, giving $\\tfrac{35}{12}$."
+      - "The expression is now $1 - \\tfrac{35}{12} + \\tfrac{3}{5}$. To add and subtract these they need a common denominator. 12 and 5 share no factors, so the smallest one is $12 \\times 5 = 60$."
+      - "Rewrite each term over 60: the 1 becomes $\\tfrac{60}{60}$; $\\tfrac{35}{12}$ becomes $\\tfrac{175}{60}$ (multiply top and bottom by 5); $\\tfrac{3}{5}$ becomes $\\tfrac{36}{60}$ (multiply top and bottom by 12)."
+      - "Now only the numerators change: $60 - 175 + 36 = -79$. So the value is $-\\tfrac{79}{60}$."
+      - "The options are written as mixed numbers, so convert back. 60 goes into 79 once with 19 left over, so $\\tfrac{79}{60} = 1\\tfrac{19}{60}$, and the answer is $-1\\tfrac{19}{60}$."
+      - "Multiplying $2 \\times 1$ and $\\tfrac{1}{3} \\times \\tfrac{1}{4}$ separately would give $2\\tfrac{1}{12}$, and the whole calculation would be wrong from there. That shortcut works for adding mixed numbers, never for multiplying them."
+    hint: "Change both mixed numbers into improper fractions before you multiply. You cannot multiply the whole parts and the fraction parts separately."
+
+  2:
+    answer: A
+    steps:
+      - "Everyone in the hall is a child, a man or a woman, so those three percentages must account for the whole hall — 100%."
+      - "Two of the three are given, so the women's share is what is left: $100\\% - 22\\tfrac{1}{2}\\% - 47\\tfrac{1}{2}\\%$."
+      - "The two given percentages add to exactly $70\\%$ (the two halves make a whole), so the women are $30\\%$ of the hall."
+      - "We are told that group is 84 people. So $30\\%$ of the hall is 84, which means the whole hall is $84 \\div 0.30$."
+      - "$84 \\div 0.30 = 280$, so there are 280 people altogether. It is worth checking that this is sensible: $30\\%$ of 280 is indeed 84."
+      - "The question asks for the men, who are $47\\tfrac{1}{2}\\%$ of that total: $0.475 \\times 280 = 133$."
+      - "Option D is 84 — the number the question hands you. It is the count of women, not men, and it is there for anyone who stops reading once they find a number that appears in the question."
+    hint: "The three percentages must add up to 100. Find the women's percentage first, then use it together with the 84 to work out how big the whole hall is."
+
+  3:
+    answer: D
+    steps:
+      - "The small 4 written after each numeral means these are base-four numbers, so their digits do not mean what they would in ordinary base ten."
+      - "In base four the place values, reading right to left, are 1, 4, 16, 64 and so on — each one four times the last."
+      - "So $213_4 = (2 \\times 16) + (1 \\times 4) + (3 \\times 1) = 32 + 4 + 3 = 39$."
+      - "And $23_4 = (2 \\times 4) + (3 \\times 1) = 8 + 3 = 11$."
+      - "Multiplying is easiest in base ten: $39 \\times 11 = 429$."
+      - "Now convert 429 back to base four. The largest place value not exceeding it is 256, and $429 \\div 256 = 1$ remainder 173. Then $173 \\div 64 = 2$ remainder 45; $45 \\div 16 = 2$ remainder 13; $13 \\div 4 = 3$ remainder 1."
+      - "Reading those digits in order gives $12231_4$."
+      - "A quick sanity check rules out wrong options: a base-four numeral can only use the digits 0, 1, 2 and 3, so anything containing a 4 or higher could not be a base-four number at all."
+    hint: "Convert both numerals into base ten, do the multiplication there, then convert the product back into base four."
+
+  4:
+    answer: B
+    steps:
+      - "Profit is what is left after the cost is taken off the money received, so we need both figures before we can subtract."
+      - "She does not sell oranges one at a time — they go in groups of 5 — so first find how many groups 270 oranges make."
+      - "$270 \\div 5 = 54$, so she has 54 groups to sell."
+      - "Each group brings in ₦40.00, so the money received is $54 \\times ₦40.00 = ₦2160.00$."
+      - "She paid ₦1800.00 for the oranges, so the profit is $₦2160.00 - ₦1800.00 = ₦360.00$."
+      - "₦2160.00 appears as option D. That is the money she took in, not what she made — the cost still has to come off it. Reading the last line of the question carefully is what separates the two."
+    hint: "Work out how many groups of 5 there are in 270, then how much money those bring in. Only then take away what she paid."
+
+  5:
+    answer: A
+    steps:
+      - "Each of these surds can be simplified by finding a square number that divides into it, because $\\sqrt{ab} = \\sqrt{a} \\times \\sqrt{b}$."
+      - "$98 = 49 \\times 2$, and 49 is a perfect square, so $\\sqrt{98} = \\sqrt{49} \\times \\sqrt{2} = 7\\sqrt{2}$."
+      - "$50 = 25 \\times 2$, so $\\sqrt{50} = 5\\sqrt{2}$. And $32 = 16 \\times 2$, so $\\sqrt{32} = 4\\sqrt{2}$."
+      - "Rewriting the whole expression: $\\dfrac{7\\sqrt{2} - 5\\sqrt{2}}{4\\sqrt{2}}$."
+      - "The top is now a subtraction of like terms. Just as $7a - 5a = 2a$, here $7\\sqrt{2} - 5\\sqrt{2} = 2\\sqrt{2}$."
+      - "So the expression is $\\dfrac{2\\sqrt{2}}{4\\sqrt{2}}$. The $\\sqrt{2}$ appears in both top and bottom, so it cancels, leaving $\\dfrac{2}{4}$."
+      - "$\\dfrac{2}{4}$ simplifies to $\\dfrac{1}{2}$."
+      - "It is tempting to write $\\sqrt{98} - \\sqrt{50}$ as $\\sqrt{48}$, but square roots do not subtract like that. $\\sqrt{98} \\approx 9.9$ and $\\sqrt{50} \\approx 7.1$, and the difference is about 2.8 — which is $2\\sqrt{2}$, not $\\sqrt{48} \\approx 6.9$."
+    hint: "Write each surd in the form $k\\sqrt{2}$ first. Once all three look alike, the top becomes a simple subtraction and the $\\sqrt{2}$ cancels."
+
+  6:
+    answer: C
+    steps:
+      - "The small 5 marks this as a base-five number, so its digits carry place values 1, 5, 25 and 125 reading from the right."
+      - "So $1214_5 = (1 \\times 125) + (2 \\times 25) + (1 \\times 5) + (4 \\times 1) = 125 + 50 + 5 + 4 = 184$."
+      - "That 184 is the total of four numbers, so their mean is $184 \\div 4 = 46$."
+      - "The question asks for that average expressed in base five, so 46 has to be converted back."
+      - "The largest base-five place value not exceeding 46 is 25. $46 \\div 25 = 1$ remainder 21; then $21 \\div 5 = 4$ remainder 1; and 1 unit is left."
+      - "Reading those digits gives $141_5$."
+      - "Dividing the digits 1, 2, 1, 4 by four directly is the mistake. Place value means $1214_5$ is a single number, 184 — its digits are not four separate quantities to be averaged."
+    hint: "Convert the total into base ten first, divide by 4 there, then convert the answer back into base five."
+
+  7:
+    answer: A
+    steps:
+      - "A logarithm asks a single question: what power turns the base into the number? Take the three terms one at a time."
+      - "$\\log_{\\sqrt{2}} 4$ asks what power of $\\sqrt{2}$ gives 4. Since $(\\sqrt{2})^{2} = 2$ and $(\\sqrt{2})^{4} = 4$, the answer is 4."
+      - "$\\log_{1/2} 16$ asks what power of $\\tfrac{1}{2}$ gives 16. Positive powers of a half get smaller, so the power must be negative: $\\left(\\tfrac{1}{2}\\right)^{-4} = 2^{4} = 16$, so this term is $-4$."
+      - "$\\log_{4} 32$ is easiest with both numbers written in base two: $4 = 2^{2}$ and $32 = 2^{5}$. The question becomes what power of $2^{2}$ gives $2^{5}$, which is $\\tfrac{5}{2} = 2.5$."
+      - "Now put the three values into the expression exactly as it is written: $4 + (-4) - 2.5$."
+      - "The first two cancel, leaving $-2.5$."
+      - "The sign on the middle term is what this question is really testing. When the base is between 0 and 1, the logarithm of any number greater than 1 is negative — miss that and you get $4 + 4 - 2.5 = 5.5$, which is offered as option B."
+    hint: "Take each logarithm separately and ask 'what power?'. Look carefully at the middle one: its base is less than 1, which affects the sign."
+
+  8:
+    answer: C
+    steps:
+      - "Write the three sets out in full before doing anything else — this question is only hard if you try to reason about it abstractly."
+      - "$U$ is the even numbers strictly between 0 and 30: 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28."
+      - "$P$ is the multiples of 6 in that range: 6, 12, 18, 24. $Q$ is the multiples of 4: 4, 8, 12, 16, 20, 24, 28."
+      - "$P \\cup Q$ means everything that is in either set. Listing them once each: 4, 6, 8, 12, 16, 18, 20, 24, 28."
+      - "The superscript $c$ means the complement — everything not in that union. Crucially, the complement is taken inside $U$, not inside all numbers."
+      - "So go through $U$ and strike out anything in the union. What survives is 2, 10, 14, 22, 26."
+      - "The answer is $\\{2, 10, 14, 22, 26\\}$."
+      - "Options containing 0 or 30 can be ruled out immediately: the question says *between* 0 and 30, so neither is in $U$, and nothing outside $U$ can be in a complement taken within it."
+    hint: "Write out $U$, $P$ and $Q$ as full lists. Then remember that the complement means everything left in $U$ once $P \\cup Q$ is removed."
+
+  9:
+    answer: C
+    steps:
+      - "Start with the students who offer at least one of the two subjects. Of the 40, four offer neither, so $40 - 4 = 36$ offer Mathematics or Physics or both."
+      - "Now think about what happens if you simply add the two subject counts: $32 + 24 = 56$."
+      - "But there are only 36 students in that group, so 56 must be counting some of them twice — and the ones counted twice are exactly those taking both subjects."
+      - "This is the addition rule for sets: $n(M \\cup P) = n(M) + n(P) - n(M \\cap P)$."
+      - "Substituting what we know: $36 = 32 + 24 - n(M \\cap P)$."
+      - "So $n(M \\cap P) = 56 - 36 = 20$."
+      - "Twenty students offer both subjects."
+      - "Forgetting to remove the four who take neither gives $32 + 24 - 40 = 16$, which is offered as option A. The overlap must be measured against the 36 who actually take something, not against the whole class."
+    hint: "First work out how many students take at least one subject. Then ask why 32 + 24 comes to more than that number."
+
+  10:
+    answer: D
+    steps:
+      - "Work strictly from the inside out: simplify the bracket to a single number, and only then apply the power outside it."
+      - "Dividing by a fraction is the same as multiplying by its reciprocal. The reciprocal of $\\dfrac{1}{0.042}$ is $0.042$."
+      - "So the bracket becomes $\\dfrac{1}{0.06} \\times 0.042$, which is $\\dfrac{0.042}{0.06}$."
+      - "To divide those, multiply top and bottom by 1000 to clear the decimals: $\\dfrac{42}{60}$, which simplifies to $\\dfrac{7}{10} = 0.7$."
+      - "Now deal with the power $-1$ outside the bracket. A power of $-1$ means take the reciprocal, so the answer is $\\dfrac{1}{0.7}$."
+      - "$\\dfrac{1}{0.7} = \\dfrac{10}{7} = 1.4285\\ldots$"
+      - "To two decimal places that is $1.43$."
+      - "Option C is 1.53 and option B is 3.14, but the real trap is stopping at 0.7 — the answer looks finished before the $-1$ has been used, and the $-1$ is the whole second half of the question."
+    hint: "Simplify everything inside the bracket down to one number first. Then remember what a power of $-1$ does to that number."
+
+  11:
+    answer: C
+    steps:
+      - "The equation mixes powers of 9 and 27, which cannot be compared directly. But both are powers of 3, so rewriting everything in base 3 makes them comparable."
+      - "$9 = 3^{2}$, so $9^{2x-1} = (3^{2})^{2x-1}$. When a power is raised to a power the indices multiply, giving $3^{2(2x-1)} = 3^{4x-2}$."
+      - "$27 = 3^{3}$, so $27^{x+1} = (3^{3})^{x+1} = 3^{3(x+1)} = 3^{3x+3}$."
+      - "The equation is now $\\dfrac{3^{4x-2}}{3^{3x+3}} = 1$. Dividing powers of the same base subtracts the indices: $3^{(4x-2)-(3x+3)} = 1$."
+      - "The right-hand side also needs to be a power of 3. Anything raised to the power zero is 1, so $1 = 3^{0}$."
+      - "With the same base on both sides, the indices must be equal: $(4x - 2) - (3x + 3) = 0$."
+      - "Expand the brackets carefully — the minus sign applies to both terms: $4x - 2 - 3x - 3 = x - 5$."
+      - "So $x - 5 = 0$, giving $x = 5$. Checking: $9^{9}/27^{6} = 3^{18}/3^{18} = 1$, which confirms it."
+    hint: "Both 9 and 27 are powers of 3. Rewrite them that way, and remember that $1$ can be written as $3^{0}$ so both sides share a base."
+
+  12:
+    answer: D
+    steps:
+      - "Before grouping anything, look for a factor common to all four terms — taking it out first makes everything that follows simpler."
+      - "The terms are $4abx$, $-2axy$, $-12b^{2}x$ and $6bxy$. Every one contains an $x$, and every coefficient is even, so $2x$ divides all four."
+      - "Taking it out: $2x(2ab - ay - 6b^{2} + 3by)$."
+      - "Now factorise the bracket by grouping in pairs: $(2ab - ay)$ and $(-6b^{2} + 3by)$."
+      - "The first pair has $a$ in common: $a(2b - y)$."
+      - "The second pair has $-3b$ in common: $-3b(2b - y)$. Taking out the negative is what makes the second bracket match the first — with $+3b$ you would get $(-2b + y)$ instead."
+      - "Both pairs now contain $(2b - y)$, so it can be taken out: $(2b - y)(a - 3b)$."
+      - "Putting the $2x$ back: $2x(a - 3b)(2b - y)$."
+      - "If you skip the common factor and group straight away, the brackets come out mismatched and it looks as though the expression will not factorise at all."
+    hint: "Take out the common factor $2x$ first. Then group the four remaining terms in pairs, and watch the sign when you factor the second pair."
+
+  13:
+    answer: B
+    steps:
+      - "There are two formulas for the sum of an arithmetic progression. One needs the common difference, the other needs the last term — and here the last term is given, so use that one."
+      - "The formula is $S_n = \\dfrac{n}{2}(a + l)$, where $a$ is the first term and $l$ the last."
+      - "Substituting $S_n = 252$, $a = -16$ and $l = 72$: $252 = \\dfrac{n}{2}(-16 + 72)$."
+      - "Work out the bracket first: $-16 + 72 = 56$."
+      - "So $252 = \\dfrac{n}{2} \\times 56 = 28n$."
+      - "Therefore $n = \\dfrac{252}{28} = 9$."
+      - "There are 9 terms in the series."
+      - "The other formula, $S_n = \\tfrac{n}{2}[2a + (n-1)d]$, would also work, but you would first have to find $d$ — and that needs $n$, which is what you are trying to find. Choosing the formula that matches what you are given avoids a circle."
+    hint: "You have been given the first term and the last term, so choose the version of the sum formula that uses both of them."
+
+  14:
+    answer: A
+    steps:
+      - "This is a standard 'solve an equation from a drawn graph' question. The idea is that where two graphs cross, both equations are satisfied at once."
+      - "The curve is already drawn as $y = x^{2} + 4$. The line $PQ$ is drawn so that the crossing points solve $x^{2} - 3x + 2 = 0$."
+      - "So take the equation to be solved and rearrange it so one side looks like the curve's expression. From $x^{2} - 3x + 2 = 0$ we get $x^{2} = 3x - 2$."
+      - "Now substitute that into the curve. Wherever the curve is, $y = x^{2} + 4$, and at the crossing points $x^{2}$ can be replaced by $3x - 2$."
+      - "That gives $y = (3x - 2) + 4$."
+      - "Simplifying: $y = 3x + 2$."
+      - "So the line PQ has equation $y = 3x + 2$."
+      - "The method generalises: to solve any new quadratic using a curve already drawn, rearrange it so that the curve's expression appears on one side, and whatever is left is the line you must draw."
+    hint: "Make $x^{2}$ the subject of the equation you are asked to solve, then put that into $y = x^{2} + 4$ in place of $x^{2}$."
+
+  16:
+    answer: C
+    steps:
+      - "Write both equations with the constants on the right: $3x - 5y = -5$ and $4x - 7y = -8$."
+      - "To eliminate $x$, make its coefficients match. The lowest common multiple of 3 and 4 is 12."
+      - "Multiply the first equation by 4: $12x - 20y = -20$. Multiply the second by 3: $12x - 21y = -24$."
+      - "Now subtract the second from the first. The $x$ terms cancel, and $-20y - (-21y) = y$, while $-20 - (-24) = 4$."
+      - "So $y = 4$."
+      - "Substitute back into either original equation. Using the first: $3x - 5(4) = -5$, so $3x - 20 = -5$ and $3x = 15$."
+      - "Therefore $x = 5$."
+      - "Check both: $3(5) - 5(4) = -5$ ✓ and $4(5) - 7(4) = -8$ ✓."
+      - "The question asks for $x$ and $y$ *respectively*, so the answer must be written 5 then 4. Option D is 4, 5 — the same two numbers in the wrong order, which catches anyone who solved it correctly and then stopped reading."
+    hint: "Multiply each equation so that one unknown has the same coefficient in both, then subtract. At the end, check which value the question wants first."
+
+  17:
+    answer: A
+    steps:
+      - "A $2 \\times 2$ determinant $\\begin{vmatrix} a & b \\\\ c & d \\end{vmatrix}$ is worked out as $ad - bc$: multiply along the leading diagonal, then subtract the product of the other diagonal."
+      - "For the left-hand matrix the entries are $a = x$, $b = 2$, $c = 4x$ and $d = 1$."
+      - "So its determinant is $(x)(1) - (2)(4x) = x - 8x = -7x$."
+      - "For the right-hand matrix, $a = 3$, $b = 3x$, $c = 4$ and $d = -5$."
+      - "So its determinant is $(3)(-5) - (3x)(4) = -15 - 12x$. The first product is negative because $d$ itself is negative — dropping that minus is the commonest slip in the whole question."
+      - "The question says the two determinants are equal, so $-7x = -15 - 12x$."
+      - "Add $12x$ to both sides to gather the $x$ terms on the left: $-7x + 12x = -15$, which is $5x = -15$."
+      - "Divide both sides by 5: $x = -3$."
+      - "Check by substituting back. The left determinant becomes $-7(-3) = 21$, and the right becomes $-15 - 12(-3) = -15 + 36 = 21$. They agree, so $x = -3$ is right. Had you dropped the minus on the $-5$, the right-hand side would read $15 - 12x$ and you would get $x = 3$ instead."
+    hint: "Work out each determinant separately as $ad - bc$, then set them equal. Take care with the sign when you multiply by the $-5$."
+
+  18:
+    answer: A
+    steps:
+      - "Two inequalities joined by 'and' must both hold, so solve them separately and then find the values of $x$ that satisfy both."
+      - "The first is $5 + x \\le 8$. Subtracting 5 from both sides gives $x \\le 3$."
+      - "The second is $13 + x \\ge 7$. Subtracting 13 from both sides gives $x \\ge -6$."
+      - "Now combine them. $x$ must be no more than 3 and at the same time no less than $-6$."
+      - "Written as a single statement, that is $-6 \\le x \\le 3$."
+      - "It helps to picture a number line: one condition shades everything left of 3, the other everything right of $-6$, and the answer is the stretch where the two shadings overlap."
+      - "One warning worth carrying into every inequality question: multiplying or dividing both sides by a negative number reverses the sign. That does not happen here — both steps only subtract — but it is the most common way these go wrong."
+    hint: "Solve the two inequalities one at a time, then sketch both on a number line and look for the stretch where they overlap."
+
+  19:
+    answer: C
+    steps:
+      - "Turn the sentence into a formula one clause at a time. 'Varies directly as the product of $U$ and $V$' puts $UV$ on the top; 'inversely as their sum' puts $U + V$ on the bottom."
+      - "So $x = \\dfrac{kUV}{U + V}$, where $k$ is a constant that is the same in every case."
+      - "Use the case you are given to find $k$. When $x = 3$, $U = 3$ and $V = 1$: $3 = \\dfrac{k(3)(1)}{3 + 1} = \\dfrac{3k}{4}$."
+      - "Multiply both sides by 4: $12 = 3k$, so $k = 4$."
+      - "Now the relation is fully known: $x = \\dfrac{4UV}{U + V}$."
+      - "Apply it to the second case, $U = 3$ and $V = 3$: $x = \\dfrac{4(3)(3)}{3 + 3} = \\dfrac{36}{6}$."
+      - "So $x = 6$."
+      - "Every variation question follows this same three-part shape: write the relation with a constant, use the given case to pin the constant down, then apply the completed relation. Skipping the middle part is what makes these look unanswerable."
+    hint: "Write the relationship with a constant $k$ in it. Use the first set of values to find $k$, then use that same formula with the second set."
+
+  20:
+    answer: B
+    steps:
+      - "Each side of the shaded triangle lies along one of the drawn lines, and the region itself is on one particular side of each line. So the answer is three inequalities, one per line."
+      - "The three lines in the diagram are $x + 1 = 0$ (a vertical line through $x = -1$), $y + x = 0$ and $y - x = 0$ (the two diagonals through the origin)."
+      - "Rather than reasoning about which side is which, pick a point clearly inside the triangle and test it. That converts a geometry question into simple arithmetic."
+      - "Take a point inside the region, to the right of $x = -1$ and between the two diagonals in the lower-left part of the diagram."
+      - "For the vertical line, points inside have $x$ greater than $-1$, so $x + 1 \\ge 0$."
+      - "Testing the same point in $y + x$ gives a negative value, so $y + x \\le 0$; testing it in $y - x$ gives a positive value, so $y - x \\ge 0$."
+      - "The three conditions together are $x + 1 \\ge 0$, $y + x \\le 0$ and $y - x \\ge 0$."
+      - "Option A has $x - 1 \\le 0$, which is a different line entirely — it describes a boundary at $x = 1$, not at $x = -1$. Reading the line labels off the diagram carefully is half of this question."
+    hint: "Pick any point clearly inside the shaded triangle and substitute it into each option. Only one set of three inequalities will be true for that point."
+
+  21:
+    answer: B
+    steps:
+      - "In a geometric progression each term is the one before it multiplied by a fixed ratio $r$. So the ratio between successive pairs must be the same."
+      - "That means $\\dfrac{n}{n-2} = \\dfrac{n+3}{n}$, which rearranges to $n^{2} = (n-2)(n+3)$. This is the standard result that the middle term squared equals the product of its neighbours."
+      - "Expand the right-hand side: $(n-2)(n+3) = n^{2} + 3n - 2n - 6 = n^{2} + n - 6$."
+      - "So $n^{2} = n^{2} + n - 6$. The $n^{2}$ appears on both sides and cancels, which is what makes this solvable — it drops from a quadratic to a linear equation."
+      - "That leaves $0 = n - 6$, so $n = 6$."
+      - "Now write out the three terms: $n - 2 = 4$, $n = 6$ and $n + 3 = 9$."
+      - "The common ratio is any term divided by the one before it: $\\dfrac{6}{4} = \\dfrac{3}{2}$."
+      - "Check it against the second pair too: $\\dfrac{9}{6} = \\dfrac{3}{2}$ ✓. If the two ratios had disagreed, the value of $n$ would have been wrong."
+    hint: "In a geometric progression, the middle term squared equals the product of the terms on either side of it. Set that up and watch the $n^{2}$ cancel."
+
+  22:
+    answer: A
+    steps:
+      - "'Inversely proportional' means that as one quantity goes up the other goes down in the same proportion, which is written $L = \\dfrac{k}{W}$."
+      - "Here $L$ is the length jumped and $W$ the weight, and $k$ is the constant of proportionality the question asks for."
+      - "Rearranging that formula gives $k = L \\times W$ — so for an inverse relationship, the constant is the *product* of the two quantities."
+      - "Substitute the case given: the person weighs 20 kg and jumps 1.5 m, so $k = 1.5 \\times 20$."
+      - "Therefore $k = 30$."
+      - "It is worth seeing why multiplying is right. If the relationship were direct, $L = kW$, the constant would be $L \\div W = 0.075$. The word 'inversely' is doing real work in this question, and it changes which operation you reach for."
+    hint: "In inverse proportion the product of the two quantities stays constant. So multiply the two values you are given."
+
+  24:
+    answer: C
+    steps:
+      - "This question is the converse of a circle theorem you already know: the angle in a semicircle is a right angle."
+      - "Read that backwards. If the angle $\\angle XPY$ is $90^{\\circ}$, then $P$ must lie on a circle for which $XY$ is a diameter."
+      - "So every point that gives a right angle at $P$ lies somewhere on that particular circle — and taken together, those points form the whole circle."
+      - "But the question adds a restriction: $P$ moves on one side only of the line $XY$."
+      - "The line $XY$ is a diameter, so it cuts that circle exactly in half. Restricting $P$ to one side keeps only half of the circle."
+      - "Half a circle is a semicircle, so the locus is a semicircle."
+      - "Option B, 'a circle', is what you get by forgetting the restriction — and it would be the right answer if the phrase 'on one side only' were not there. That phrase is the entire question."
+    hint: "Recall that the angle in a semicircle is $90^{\\circ}$, and think about what that says about where $P$ must lie. Then read again what the question says about which side of $XY$ it stays on."
+
+  28:
+    answer: A
+    steps:
+      - "The expression $\\dfrac{4}{6 + 2\\cos\\theta}$ has a numerator that never changes. With a fixed top, the fraction is at its largest exactly when the bottom is at its smallest."
+      - "This is the step most often taken backwards: to maximise a fraction, you minimise its denominator."
+      - "The denominator is $6 + 2\\cos\\theta$, and the only part that varies is $\\cos\\theta$, so we need $\\cos\\theta$ as small as possible."
+      - "The cosine function never goes below $-1$. Within the given range $\\tfrac{\\pi}{2} \\le \\theta \\le 2\\pi$, it does reach $-1$, at $\\theta = \\pi$ — so that minimum really is available here."
+      - "Putting $\\cos\\theta = -1$ into the denominator: $6 + 2(-1) = 6 - 2 = 4$."
+      - "So the maximum value of the whole expression is $\\dfrac{4}{4} = 1$."
+      - "Chasing the largest value of $\\cos\\theta$ instead would give $6 + 2 = 8$ and a value of $\\tfrac{1}{2}$ — which is option B, and is in fact the *minimum* of this expression, not the maximum."
+    hint: "The top of the fraction is fixed. To make the whole fraction as large as possible, ask what makes the bottom as small as possible."
+
+  29:
+    answer: D
+    steps:
+      - "Bearings questions are almost always easier after a sketch, so draw the journey before calculating anything."
+      - "Put $P$ at the bottom. The plane flies due north to $Q$, so $Q$ is directly above $P$. It then flies due east to $R$, so $R$ is directly to the right of $Q$."
+      - "North and east are at right angles, so the triangle $PQR$ has a right angle at $Q$."
+      - "The question says $Q$ is equidistant from $P$ and $R$, which means the two legs $QP$ and $QR$ are equal in length."
+      - "A right-angled triangle with two equal legs is isosceles, and its other two angles are $45^{\\circ}$ each."
+      - "Now stand at $R$ and look towards $P$. Since $P$ is below and to the left of $R$, the direction is south-west — and the equal legs make it exactly south-west, at $45^{\\circ}$ into that quadrant."
+      - "Bearings are measured clockwise from north. North is $000^{\\circ}$, east $090^{\\circ}$, south $180^{\\circ}$, and south-west is a further $45^{\\circ}$ round: $180 + 45 = 225^{\\circ}$."
+      - "Option A, $270^{\\circ}$, is due west — which would be the answer if $P$ were level with $R$ rather than below it. The bearing is taken *from* $R$, and which end you stand at changes the answer by $180^{\\circ}$."
+    hint: "Draw the two legs of the journey. They are equal and at right angles, so the triangle is isosceles — then measure clockwise from north, standing at $R$."
+
+  30:
+    answer: B
+    steps:
+      - "Parallel lines have equal gradients, so the plan is to find the gradient of the given line and then force the line through the two points to match it."
+      - "Rearrange $2y + 8x - 17 = 0$ into the form $y = mx + c$, where $m$ is the gradient. Move the other terms to the right: $2y = -8x + 17$."
+      - "Now divide every term by 2: $y = -4x + 8.5$. So this line has gradient $-4$."
+      - "Next, the gradient through the two points, which is the change in $y$ divided by the change in $x$."
+      - "The change in $y$ is $2 - (-p)$, and subtracting a negative adds, so this is $2 + p$."
+      - "The change in $x$ is $-2 - (-1) = -2 + 1 = -1$."
+      - "So the gradient through the points is $\\dfrac{2 + p}{-1}$, which is $-(2 + p)$."
+      - "The lines are parallel, so set the two gradients equal: $-(2 + p) = -4$."
+      - "Multiply both sides by $-1$ to clear the minus signs: $2 + p = 4$, so $p = 2$."
+      - "That subtraction in the denominator is where this usually goes wrong. Taking the points in the other order gives $-1 - (-2) = +1$, which flips the sign of the whole gradient — and you must then flip the numerator too, or you end up solving $2 + p = -4$ and getting $p = -6$."
+    hint: "Put the given line into $y = mx + c$ form to read its gradient. Then write the gradient through the two points and set the two expressions equal."
+
+  31:
+    answer: C
+    steps:
+      - "'Equidistant from $Q$ and $R$' means the distance $PQ$ equals the distance $PR$. Writing that as an equation is the whole method."
+      - "The distance between two points is $\\sqrt{(x_2-x_1)^{2} + (y_2-y_1)^{2}}$, so $PQ = \\sqrt{x^{2} + y^{2}}$ and $PR = \\sqrt{(x-2)^{2} + (y-1)^{2}}$."
+      - "Square both sides straight away. Distances are never negative, so squaring loses nothing and removes the square roots: $x^{2} + y^{2} = (x - 2)^{2} + (y - 1)^{2}$."
+      - "Expand the right-hand side: $(x-2)^{2} = x^{2} - 4x + 4$ and $(y-1)^{2} = y^{2} - 2y + 1$."
+      - "So the equation is $x^{2} + y^{2} = x^{2} - 4x + 4 + y^{2} - 2y + 1$."
+      - "The $x^{2}$ and $y^{2}$ terms appear on both sides and cancel, leaving $0 = -4x - 2y + 5$."
+      - "Rearranging: $4x + 2y = 5$."
+      - "Those squared terms always cancel in this kind of question, which is why the locus turns out to be a straight line rather than a curve. Geometrically it is the perpendicular bisector of $QR$ — every point on it is the same distance from both ends."
+    hint: "Write 'distance to $Q$ = distance to $R$', square both sides before expanding, and watch the squared terms disappear."
+
+  32:
+    answer: C
+    steps:
+      - "The arc length formula needs the angle at the *centre* of the circle, but this question gives an angle at the circumference. That mismatch is the point of the question."
+      - "The angle at the centre is twice the angle at the circumference when both stand on the same arc. So the $30^{\\circ}$ given becomes $60^{\\circ}$ at the centre."
+      - "Arc length is the matching fraction of the whole circumference: $\\dfrac{\\theta}{360} \\times 2\\pi r$."
+      - "The fraction is $\\dfrac{60}{360} = \\dfrac{1}{6}$, so the arc is one sixth of the way round."
+      - "The full circumference is $2 \\times \\dfrac{22}{7} \\times 21$. Since 7 divides into 21 three times, this is $2 \\times 22 \\times 3 = 132$ cm."
+      - "So the arc length is $\\dfrac{1}{6} \\times 132 = 22$ cm."
+      - "Using the $30^{\\circ}$ directly would give $\\dfrac{30}{360} \\times 132 = 11$ cm — which is offered as option D. Exactly half the right answer, because the doubling was skipped."
+    hint: "The angle you are given is at the circumference, not the centre. Convert it first, then take that fraction of the full circumference."
+
+  33:
+    answer: B
+    steps:
+      - "The area of a trapezium is $\\dfrac{1}{2}(a + b)h$, where $a$ and $b$ are the two parallel sides and $h$ is the perpendicular distance between them — which is exactly what the question asks for."
+      - "Substituting the two parallel sides: $\\dfrac{1}{2}(5 + 9) = \\dfrac{1}{2}(14) = 7$."
+      - "So the area is $7h$."
+      - "Setting that equal to the given area: $7h = 21$."
+      - "Therefore $h = 3$ cm."
+      - "Note what $h$ means: the perpendicular distance between the parallel sides, not the length of one of the slanted sides. Those are different, and the slanted side is always the longer of the two."
+    hint: "Use area $= \\tfrac{1}{2}(a + b)h$. You know the area and both parallel sides, so the only thing left to find is $h$."
+
+  34:
+    answer: A
+    steps:
+      - "The shaded region is bounded by the straight chord $XY$ on one side and the arc $XY$ on the other. A region of that shape is called a segment."
+      - "The way to find a segment is always the same: work out the sector that contains it, then subtract the triangle that the chord cuts off."
+      - "The diagram marks the angle at $Z$, on the circumference, as $45^{\\circ}$. The angle at the centre standing on the same arc $XY$ is twice that, so $\\angle XOY = 90^{\\circ}$."
+      - "The sector $XOY$ is therefore a quarter of the circle: $\\dfrac{90}{360} \\times \\dfrac{22}{7} \\times 7^{2} = \\dfrac{1}{4} \\times 154 = 38.5\\ \\text{cm}^{2}$."
+      - "Now the triangle $XOY$. Two of its sides are radii of 7 cm with a $90^{\\circ}$ angle between them, so its area is $\\dfrac{1}{2} \\times 7 \\times 7 = 24.5\\ \\text{cm}^{2}$."
+      - "Subtract to leave the segment: $38.5 - 24.5 = 14\\ \\text{cm}^{2}$."
+      - "Option B is $38\\ \\text{cm}^{2}$ — the sector on its own, rounded. Anyone who finds the sector and stops has done most of the work and still gets it wrong, because the triangle is not part of the shaded region."
+    hint: "The shaded shape is a segment. Find the sector first, then subtract the triangle formed by the two radii and the chord."
+
+  35:
+    answer: B
+    steps:
+      - "The midpoint of a line segment is just the average of its two endpoints, taken separately in each direction: $\\left(\\dfrac{x_1 + x_2}{2}, \\dfrac{y_1 + y_2}{2}\\right)$."
+      - "Take $PQ$ first, with $P(-1, 6)$ and $Q(-3, -4)$."
+      - "The $x$ coordinate is $\\dfrac{-1 + (-3)}{2} = \\dfrac{-4}{2} = -2$, and the $y$ coordinate is $\\dfrac{6 + (-4)}{2} = \\dfrac{2}{2} = 1$. So the midpoint of $PQ$ is $(-2, 1)$."
+      - "Now $QR$, with $Q(-3, -4)$ and $R(1, -4)$."
+      - "The $x$ coordinate is $\\dfrac{-3 + 1}{2} = \\dfrac{-2}{2} = -1$, and the $y$ coordinate is $\\dfrac{-4 + (-4)}{2} = \\dfrac{-8}{2} = -4$. So the midpoint of $QR$ is $(-1, -4)$."
+      - "The answer is $(-2, 1)$ and $(-1, -4)$, in that order, because the question names $PQ$ before $QR$."
+      - "There is a useful check here: $Q$ and $R$ both have $y = -4$, so the segment $QR$ is horizontal and its midpoint must also have $y = -4$. If your arithmetic gave anything else, it is wrong."
+    hint: "Average the two $x$ values and the two $y$ values separately. Then check you have given the midpoints in the order the question asks for them."
+
+  36:
+    answer: A
+    steps:
+      - "To integrate a power of $x$, add one to the index and divide by the new index. Do it to each term in turn."
+      - "For $x^{2}$: the index 2 becomes 3, and dividing by 3 gives $\\dfrac{x^{3}}{3}$."
+      - "For $-2x$: the index is 1, so it becomes 2, giving $\\dfrac{-2x^{2}}{2}$, which simplifies to $-x^{2}$."
+      - "So the integral of $x^{2} - 2x$ is $\\dfrac{x^{3}}{3} - x^{2}$. No constant of integration is needed, because this is a definite integral and the constant would cancel when the two limits are subtracted."
+      - "Now substitute the upper limit, $x = 3$: $\\dfrac{3^{3}}{3} - 3^{2} = \\dfrac{27}{3} - 9 = 9 - 9 = 0$."
+      - "Then the lower limit, $x = 2$: $\\dfrac{2^{3}}{3} - 2^{2} = \\dfrac{8}{3} - 4$. To subtract these, write 4 as $\\dfrac{12}{3}$, giving $\\dfrac{8}{3} - \\dfrac{12}{3} = -\\dfrac{4}{3}$."
+      - "A definite integral is the upper value minus the lower value: $0 - \\left(-\\dfrac{4}{3}\\right)$."
+      - "Subtracting a negative is the same as adding, so the answer is $\\dfrac{4}{3}$."
+      - "That last sign is where this question is usually lost. Treating it as $0 - \\dfrac{4}{3}$ gives $-\\dfrac{4}{3}$, and reversing the limits gives the same wrong sign — the lower limit is always subtracted, brackets and all."
+    hint: "Integrate each term by adding one to the index and dividing by it. Then work out the value at each limit and subtract the lower from the upper — carefully, because the lower one is negative."
+
+  37:
+    answer: A
+    steps:
+      - "The angle inside the sine is $-4x$, not simply $x$, so this needs the chain rule: differentiate the outer function, then multiply by the derivative of the inner one."
+      - "Take the outer function first. The derivative of $\\sin u$ is $\\cos u$, so $3\\sin(-4x)$ differentiates to $3\\cos(-4x)$ — for now, leaving the inside untouched."
+      - "Now the inner function. The derivative of $-4x$ with respect to $x$ is $-4$."
+      - "The chain rule says to multiply those together: $\\dfrac{dy}{dx} = 3 \\times \\cos(-4x) \\times (-4)$."
+      - "Multiplying the numbers: $3 \\times (-4) = -12$."
+      - "So $\\dfrac{dy}{dx} = -12\\cos(-4x)$."
+      - "Two things go wrong here often. Forgetting the inner derivative leaves $3\\cos(-4x)$ — no option, but a common slip. And differentiating sine to sine rather than cosine gives option B, $12\\sin(-4x)$, which has both errors at once."
+    hint: "Use the chain rule: differentiate the sine into a cosine, then multiply by the derivative of the angle that is inside it."
+
+  38:
+    answer: A
+    steps:
+      - "For a quadratic $y = ax^{2} + bx + c$, the sign of $a$ decides which way the curve bends. Positive means it opens upward and has a lowest point; negative means it opens downward and has a highest point."
+      - "Here $a = 3$, which is positive, so this curve opens upward. It has a minimum and no maximum at all — $y$ grows without limit as $x$ moves away in either direction."
+      - "The turning point of a quadratic always sits at $x = -\\dfrac{b}{2a}$."
+      - "With $a = 3$ and $b = 5$: $x = -\\dfrac{5}{2 \\times 3} = -\\dfrac{5}{6}$."
+      - "Now substitute that back into the equation to find the value of $y$ there: $y = 3\\left(-\\dfrac{5}{6}\\right)^{2} + 5\\left(-\\dfrac{5}{6}\\right) - 3$."
+      - "Take the square first. $\\left(-\\dfrac{5}{6}\\right)^{2} = \\dfrac{25}{36}$, and multiplying by 3 gives $\\dfrac{75}{36}$, which simplifies to $\\dfrac{25}{12}$."
+      - "The middle term is $5 \\times -\\dfrac{5}{6} = -\\dfrac{25}{6}$. Over twelfths that is $-\\dfrac{50}{12}$, and the constant $-3$ is $-\\dfrac{36}{12}$."
+      - "Adding the three: $\\dfrac{25}{12} - \\dfrac{50}{12} - \\dfrac{36}{12} = -\\dfrac{61}{12}$, which is about $-5.08$."
+      - "Completing the square gives the same answer and shows why it is the smallest possible: $y = 3\\left(x + \\dfrac{5}{6}\\right)^{2} - \\dfrac{61}{12}$. A squared bracket can never be negative, so the least $y$ can ever be is $-\\dfrac{61}{12}$, reached exactly when the bracket is zero at $x = -\\dfrac{5}{6}$."
+    hint: "Check the sign of the $x^{2}$ coefficient to see which way the curve bends. The turning point is at $x = -\\dfrac{b}{2a}$ — find that, then substitute it back to get the value."
+
+  39:
+    answer: B
+    steps:
+      - "The slope of a curve is not a single number — it changes from point to point. The derivative $\\dfrac{dy}{dx}$ is the formula that gives the slope at any $x$."
+      - "So differentiate first. For $2x^{2}$, multiply by the index and reduce the index by one: $2 \\times 2x^{1} = 4x$."
+      - "For $5x$, the same rule gives $5$. And the constant $-3$ differentiates to 0, because a constant does not change and so contributes no slope."
+      - "So $\\dfrac{dy}{dx} = 4x + 5$."
+      - "Now substitute the $x$ value of the point. The point is $(1, 4)$, so $x = 1$."
+      - "$\\dfrac{dy}{dx} = 4(1) + 5 = 9$."
+      - "Only the $x$ coordinate is used. The $y$ coordinate is there to confirm the point actually lies on the curve — and it does, since $2(1)^{2} + 5(1) - 3 = 4$ — but it plays no part in finding the slope."
+    hint: "Differentiate to get a formula for the slope, then put in the $x$ value of the given point. The $y$ value is not needed."
+
+  40:
+    answer: D
+    steps:
+      - "In a histogram like this one, the height of each bar is the number of people in that age group, read off the vertical axis."
+      - "So the first job is simply to read the five bar heights: 3, 4, 5, 6 and 2."
+      - "The question asks how many people were involved altogether, which means every bar counts."
+      - "Add them: $3 + 4 = 7$, $7 + 5 = 12$, $12 + 6 = 18$, and $18 + 2 = 20$."
+      - "So 20 people were involved in the pollution."
+      - "The tallest bar is 6, and the widest age band might look most important, but neither is what was asked. The total is the sum of every bar, however tall."
+    hint: "Each bar's height is a count of people. Read all five heights off the axis and add them together."
+
+  41:
+    answer: B
+    steps:
+      - "This is a frequency table, so the values are not equally common — some occur many times. The mean must take that into account, which is why it is $\\dfrac{\\sum fx}{\\sum f}$."
+      - "That formula says: multiply each value by how often it occurs, add those products, then divide by the total number of readings."
+      - "Take the products one at a time: $0 \\times 1 = 0$; $1 \\times 2 = 2$; $2 \\times 2 = 4$; $3 \\times 1 = 3$; $4 \\times 9 = 36$."
+      - "Adding those: $0 + 2 + 4 + 3 + 36 = 45$. That 45 is the sum of all the readings."
+      - "Now the total number of readings is the sum of the frequencies: $1 + 2 + 2 + 1 + 9 = 15$."
+      - "So the mean is $\\dfrac{45}{15} = 3$."
+      - "Averaging the values 0, 1, 2, 3 and 4 on their own gives 2, which is offered as option D. That treats all five values as equally common — but 9 of the 15 readings are 4s, which pulls the true mean upward."
+    hint: "Multiply each value by its frequency and add those products. Then divide by the total frequency — not by how many different values there are."
+
+  42:
+    answer: D
+    steps:
+      - "The standard deviation cannot be found until every number is known, so start by using the mean to find $x$."
+      - "The mean of five numbers is 5, so the five must total $5 \\times 5 = 25$."
+      - "The known four add to $3 + 6 + 4 + 7 = 20$, so $x = 25 - 20 = 5$."
+      - "The five numbers are therefore 3, 6, 4, 5 and 7, with a mean of 5."
+      - "Now find how far each number is from the mean: $3 - 5 = -2$; $6 - 5 = 1$; $4 - 5 = -1$; $5 - 5 = 0$; $7 - 5 = 2$."
+      - "Square each of those, which removes the minus signs: 4, 1, 1, 0 and 4. They add to 10."
+      - "The variance is that total divided by how many numbers there are: $\\dfrac{10}{5} = 2$."
+      - "The standard deviation is the square root of the variance, so it is $\\sqrt{2}$."
+      - "Option A is 2 — the variance, not the standard deviation. Squaring the deviations was necessary to stop the positives and negatives cancelling, and the square root at the end undoes it so the answer is back in the original units."
+    hint: "Find $x$ from the mean first. Then square the deviations, average them to get the variance, and remember the final square root."
+
+  43:
+    answer: D
+    steps:
+      - "There are $5 + 3 = 8$ balls in the bag, and the balls are not replaced, so the second pick happens with only 7 balls left."
+      - "'A black and a red' does not say which comes first, so there are two different ways it can happen and both must be counted."
+      - "First way — black then red. The chance the first ball is black is $\\dfrac{5}{8}$. With that black ball gone, 7 balls remain of which 3 are red, so the chance the second is red is $\\dfrac{3}{7}$."
+      - "Multiply for the sequence: $\\dfrac{5}{8} \\times \\dfrac{3}{7} = \\dfrac{15}{56}$."
+      - "Second way — red then black. The chance the first is red is $\\dfrac{3}{8}$, and then 5 of the remaining 7 are black, so $\\dfrac{5}{7}$. That gives $\\dfrac{3}{8} \\times \\dfrac{5}{7} = \\dfrac{15}{56}$ as well."
+      - "The two ways are separate outcomes, so add them: $\\dfrac{15}{56} + \\dfrac{15}{56} = \\dfrac{30}{56}$."
+      - "Simplify by dividing top and bottom by 2: $\\dfrac{15}{28}$."
+      - "Counting only one order gives $\\dfrac{15}{56}$, which is not even offered — a useful signal that something has been missed. And the second denominator is 7, not 8, because the first ball was not put back."
+    hint: "The question does not say which colour comes first, so count both orders. And remember the second fraction has a denominator of 7."
+
+  44:
+    answer: D
+    steps:
+      - "The sectors of a pie chart together make a full turn, so all four angles add to $360^{\\circ}$."
+      - "Three are given, so find the fourth: $360 - 45 - 90 - 135 = 90^{\\circ}$."
+      - "Now the four angles are $45^{\\circ}$, $90^{\\circ}$, $90^{\\circ}$ and $135^{\\circ}$. The smallest is $45^{\\circ}$ and the largest is $135^{\\circ}$ — which is only clear once the missing one has been worked out."
+      - "In a pie chart the amount represented is proportional to the angle, so a sector three times the size represents three times the money."
+      - "The smallest sector, $45^{\\circ}$, represents ₦28.00. The largest, $135^{\\circ}$, is exactly three times that angle, since $135 = 3 \\times 45$."
+      - "So the largest sector represents $3 \\times ₦28.00 = ₦84.00$."
+      - "Skipping the missing angle is the trap: you might assume the $90^{\\circ}$ already listed is the largest, and answer $2 \\times ₦28.00 = ₦56.00$. Finding the fourth angle is what tells you $135^{\\circ}$ is the biggest."
+    hint: "Work out the fourth angle first, so you know for certain which sector is the largest. Then compare it with the $45^{\\circ}$ one."
+
+  45:
+    answer: B
+    steps:
+      - "The range of a set of numbers measures how spread out they are, and it is defined simply as the largest value minus the smallest."
+      - "Nothing between the two extremes matters, so there is no need to sort the whole list — just scan it twice."
+      - "Scanning for the largest: 4, 3, 11, 9, 6, 15, 19, 23, 27, 24, 21, 16 — the largest is 27."
+      - "Scanning for the smallest: the smallest is 3."
+      - "So the range is $27 - 3 = 24$."
+      - "Option A is 23 and option C is 21, both of which are numbers that appear in the list. The range is a measure of spread, not one of the values themselves — and it will usually not be in the list at all."
+    hint: "Find the biggest number in the list and the smallest, then subtract. Nothing in between affects the answer."
+
+  46:
+    answer: D
+    steps:
+      - "The die was tossed 120 times, and every toss produced exactly one of the six outcomes. So the six frequencies must add to 120 — that is the equation this question turns on."
+      - "Four of the frequencies are plain numbers: 12, 20, 21 and 28. Adding them: $12 + 20 = 32$, $32 + 21 = 53$, $53 + 28 = 81$."
+      - "The other two cells are $x$ and $x - 1$. Note they are *not* the same expression, which matters in a moment."
+      - "So the equation is $81 + x + (x - 1) = 120$."
+      - "Collecting terms on the left: $81 - 1 = 80$, and $x + x = 2x$, giving $80 + 2x = 120$."
+      - "Subtract 80 from both sides: $2x = 40$."
+      - "So $x = 20$."
+      - "Check it: the frequencies become 12, 20, 20, 21, 19, 28, and those add to 120 ✓. Treating both unknown cells as $x$ would give $81 + 2x = 120$ and $x = 19.5$ — impossible, since a frequency counts whole tosses."
+    hint: "All six frequencies must add up to 120. Look carefully at the two cells containing the unknown — they are not the same expression."
+
+  47:
+    answer: D
+    steps:
+      - "Write both expressions out in full so the common parts become visible."
+      - "A permutation of 3 from $n$ is $^{n}P_{3} = n(n-1)(n-2)$ — three descending factors."
+      - "A combination of 4 from $n$ is $^{n}C_{4} = \\dfrac{n(n-1)(n-2)(n-3)}{4!}$, and $4! = 24$."
+      - "So $6\\left(^{n}C_{4}\\right) = \\dfrac{6n(n-1)(n-2)(n-3)}{24} = \\dfrac{n(n-1)(n-2)(n-3)}{4}$."
+      - "The equation $^{n}P_{3} - 6\\left(^{n}C_{4}\\right) = 0$ therefore becomes $n(n-1)(n-2) = \\dfrac{n(n-1)(n-2)(n-3)}{4}$."
+      - "Both sides share the factor $n(n-1)(n-2)$. For any $n \\ge 3$ that factor is not zero, so it is safe to divide both sides by it."
+      - "That leaves $1 = \\dfrac{n-3}{4}$, so $n - 3 = 4$ and $n = 7$."
+      - "Check: $^{7}P_{3} = 7 \\times 6 \\times 5 = 210$, and $^{7}C_{4} = 35$, so $6 \\times 35 = 210$ ✓. Multiplying everything out into a quartic also works, but cancelling the shared factor first turns several lines of algebra into one."
+    hint: "Write the permutation and the combination out as products of descending factors. They share three of them — cancel before you solve."
+
+  48:
+    answer: B
+    steps:
+      - "With two dice there are $6 \\times 6 = 36$ possible outcomes, and each one is equally likely. This matters: the *sums* from 2 to 12 are not equally likely, but the 36 outcomes are, so all counting must be done in outcomes."
+      - "The sums divisible by 3 are 3, 6, 9 and 12. Count the outcomes giving each."
+      - "Sum 3: $(1,2)$ and $(2,1)$ — 2 ways."
+      - "Sum 6: $(1,5), (2,4), (3,3), (4,2), (5,1)$ — 5 ways."
+      - "Sum 9: $(3,6), (4,5), (5,4), (6,3)$ — 4 ways."
+      - "Sum 12: $(6,6)$ — 1 way."
+      - "Altogether $2 + 5 + 4 + 1 = 12$ favourable outcomes out of 36."
+      - "So the probability is $\\dfrac{12}{36} = \\dfrac{1}{3}$."
+      - "Counting sums instead of outcomes gives 4 out of 11, which is close to $\\tfrac{1}{3}$ and wrong for the right-looking reason — $(1,2)$ and $(2,1)$ really are two different outcomes."
+    hint: "There are 36 outcomes, not 11 sums. List which sums divide by 3, then count the ordered pairs giving each one."
+
+  49:
+    answer: B
+    steps:
+      - "A committee is a group, not an ordered line-up: choosing Ade then Bola gives the same committee as Bola then Ade. So this is combinations, not permutations."
+      - "The two choices are separate, so handle them separately. First the men: choose 2 from 4."
+      - "$^{4}C_{2} = \\dfrac{4 \\times 3}{2 \\times 1} = 6$. So there are 6 possible pairs of men."
+      - "Now the women: choose 1 from 3, which is simply $^{3}C_{1} = 3$."
+      - "Each of the 6 pairs of men can be joined by any one of the 3 women, and every such combination is a different committee."
+      - "That means multiplying, not adding: $6 \\times 3 = 18$."
+      - "There are 18 possible committees."
+      - "Adding gives 9, which is offered as option C. Adding would be right if you were choosing men *or* women; multiplying is right because you need men *and* women together."
+    hint: "Count the ways to choose the men and the ways to choose the women separately. Then ask whether each pair of men can go with each woman."
+
+  50:
+    answer: D
+    steps:
+      - "Two averages are needed here, and they are found in different ways, so work them out one at a time."
+      - "The mean is the total divided by how many numbers there are. Adding: $30 + 56 = 86$; $86 + 31 = 117$; $117 + 55 = 172$; $172 + 43 = 215$; $215 + 44 = 259$."
+      - "There are six numbers, so the mean is $\\dfrac{259}{6} = 43.1\\overline{6}$, which is about 43.17."
+      - "The median is the middle value — but only once the numbers are in order. Sorted, they are 30, 31, 43, 44, 55, 56."
+      - "With six numbers there is no single middle one, so the median is the average of the third and fourth: $\\dfrac{43 + 44}{2} = 43.5$."
+      - "The question asks by how much the mean is *less than* the median, so subtract in that order: $43.5 - 43.17 = 0.33$."
+      - "Sorting first is essential. Taking the numbers as listed would put 31 and 55 in the middle and give a median of 43 — close enough to look plausible, and wrong."
+    hint: "Find the mean by adding and dividing. For the median, sort the numbers first — and with six of them, average the middle two."
