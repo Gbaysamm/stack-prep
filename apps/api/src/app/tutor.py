@@ -1514,7 +1514,9 @@ async def speak(
     except APIStatusError as refused:
         code = getattr(refused, "code", None)
         _log.warning("speech refused: %s %s", refused.status_code, code or refused.message)
-        if refused.status_code in (401, 403) or code == "insufficient_quota":
+        kind = getattr(refused, "type", None)
+        out_of_credit = "insufficient_quota" in (code, kind) or code == "credit_balance_exhausted"
+        if refused.status_code in (401, 403) or out_of_credit:
             _speech_rests_until = time.monotonic() + SPEECH_REST_SECONDS
         return None
     except Exception as failed:
