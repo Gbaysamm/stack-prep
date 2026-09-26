@@ -33,20 +33,21 @@
  * one, the board writes the full reviewed steps on a reading clock, as it always did.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 
-import type { NarratedLesson, TutorReply } from './api.js';
-import { Coach } from './Coach.js';
-import { Figures, type QuestionFigure } from '../Figures.js';
-import { Maths } from '../Maths.js';
-import './theme.css';
+import type { NarratedLesson, TutorReply } from "./api.js";
+import { Coach } from "./Coach.js";
+import { Figures, type QuestionFigure } from "../Figures.js";
+import { Maths } from "../Maths.js";
+import "./theme.css";
 
 const STEP_MS = 5200;
 
-/** How long a line waits for its voice before the board writes it unheard. Long: a line
- *  written before its voice arrives is worse than a short wait the student is told about. */
-const VOICE_WAIT_MS = 30000;
+/** How long a line waits for its voice before the board writes it unheard. Long enough for a
+ *  line the server has to make on the spot (a few seconds); past that the voice has failed,
+ *  and the lesson is read along rather than waiting at every line. */
+const VOICE_WAIT_MS = 15000;
 
 /**
  * One piece of the lesson as the board plays it: what goes up, and what is said meanwhile.
@@ -68,20 +69,34 @@ interface Entry {
   answer: boolean;
 }
 
-/** Resolve once a clip can start without stalling, or after `limitMs` whatever happens. */
-function whenReady(clip: HTMLAudioElement | null, limitMs: number): Promise<void> {
-  if (!clip || clip.readyState >= 3) return Promise.resolve();
+/**
+ * Resolve once a clip can start without stalling: true when it can, false when it failed or
+ * `limitMs` ran out first.
+ */
+function whenReady(
+  clip: HTMLAudioElement | null,
+  limitMs: number,
+): Promise<boolean> {
+  if (!clip || clip.readyState >= 3) return Promise.resolve(true);
+  if (clip.error) return Promise.resolve(false);
   return new Promise((resolve) => {
-    const done = () => {
-      clip.removeEventListener('canplay', done);
-      clip.removeEventListener('error', done);
+    const done = (ready: boolean) => () => {
+      clip.removeEventListener("canplay", yes);
+      clip.removeEventListener("error", no);
       window.clearTimeout(timer);
-      resolve();
+      resolve(ready);
     };
-    const timer = window.setTimeout(done, limitMs);
-    clip.addEventListener('canplay', done);
-    clip.addEventListener('error', done);
+    const yes = done(true);
+    const no = done(false);
+    const timer = window.setTimeout(no, limitMs);
+    clip.addEventListener("canplay", yes);
+    clip.addEventListener("error", no);
   });
+}
+
+/** How long a line is left up to be read when there is no voice to hear it by. */
+function readingMs(said: string): number {
+  return Math.min(9000, Math.max(2500, said.length * 55));
 }
 
 /**
@@ -94,7 +109,7 @@ function whenReady(clip: HTMLAudioElement | null, limitMs: number): Promise<void
 interface Beat {
   said: string;
   /** Lines of working, and sketches, in the order the coach put them up. */
-  board: { kind: 'write' | 'draw'; text: string }[];
+  board: { kind: "write" | "draw"; text: string }[];
   /** Where this beat's voice can be heard, or null when it has none. */
   voiceUrl: string | null;
   /**
@@ -214,14 +229,16 @@ export function Board({
 }) {
   const [shown, setShown] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [draft, setDraft] = useState('');
-  const [turn, setTurn] = useState<(TutorReply & { asked: string }) | null>(null);
+  const [draft, setDraft] = useState("");
+  const [turn, setTurn] = useState<(TutorReply & { asked: string }) | null>(
+    null,
+  );
   const [waiting, setWaiting] = useState(false);
   //: Everything the board is already carrying: earlier questions and what was written under
   //: them. A teacher does not rub the board out between questions — they keep going down it,
   //: and a student looking back at what they asked ten minutes ago should still find it.
   const [written, setWritten] = useState<
-    { kind: 'asked' | 'answered' | 'coach' | 'drawn'; text: string }[]
+    { kind: "asked" | "answered" | "coach" | "drawn"; text: string }[]
   >([]);
   //: The question being answered right now, and the lesson as a run of beats under it.
   const [asked, setAsked] = useState<string | null>(null);
@@ -318,13 +335,16 @@ export function Board({
   // handful and a lesson makes a clip per sentence. `createMediaElementSource` may be called
   // once per element, so which elements have been wired is remembered — calling it twice
   // throws and would take the voice down with it.
-  const listener = useRef<{ context: AudioContext; analyser: AnalyserNode } | null>(null);
+  const listener = useRef<{
+    context: AudioContext;
+    analyser: AnalyserNode;
+  } | null>(null);
   const wired = useRef<WeakSet<HTMLAudioElement>>(new WeakSet());
   const faceRef = useRef<SVGSVGElement>(null);
   const watching = useRef<number | null>(null);
 
   const mouth = useCallback((openness: number) => {
-    faceRef.current?.style.setProperty('--mouth', openness.toFixed(3));
+    faceRef.current?.style.setProperty("--mouth", openness.toFixed(3));
   }, []);
 
   /** Route a clip through the analyser, so its loudness can be read while it plays. */
@@ -391,7 +411,7 @@ export function Board({
     if (!beat || beat.voiceUrl === null) return null;
     if (beat.voice === null) {
       const audio = new Audio(beat.voiceUrl);
-      audio.preload = 'auto';
+      audio.preload = "auto";
       beat.voice = audio;
     }
     return beat.voice;
@@ -423,7 +443,8 @@ export function Board({
     // takes to say — so the lesson stalled between every beat. Priming all of them instead
     // starved the one being waited on. Three is enough to stay ahead and few enough that
     // they are not fighting for the same connections.
-    for (let ahead = 1; ahead <= VOICES_AHEAD; ahead += 1) prime(cursor.current + ahead);
+    for (let ahead = 1; ahead <= VOICES_AHEAD; ahead += 1)
+      prime(cursor.current + ahead);
     if (audio === null) {
       holding.current = window.setTimeout(onward, silentBeatMs(beat.said));
       return;
@@ -469,9 +490,9 @@ export function Board({
   // Mirrors of the two pieces of state `keep` needs, so it can read what is on the board
   // without being rebuilt every time either of them changes.
   const askedRef = useRef<string | null>(null);
-  const askedKindRef = useRef<'asked' | 'answered'>('asked');
+  const askedKindRef = useRef<"asked" | "answered">("asked");
   const playedRef = useRef(0);
-  const [askedKind, setAskedKind] = useState<'asked' | 'answered'>('asked');
+  const [askedKind, setAskedKind] = useState<"asked" | "answered">("asked");
   useEffect(() => {
     askedRef.current = asked;
   }, [asked]);
@@ -489,20 +510,28 @@ export function Board({
    * is more often an answer than a question, and the board should not call it "asked".
    */
   const awaitingAnswer = useCallback(() => {
-    const spoken = script.current.slice(0, playedRef.current).filter((beat) => beat.said);
+    const spoken = script.current
+      .slice(0, playedRef.current)
+      .filter((beat) => beat.said);
     const last = spoken[spoken.length - 1];
-    return last !== undefined && last.said.trim().endsWith('?');
+    return last !== undefined && last.said.trim().endsWith("?");
   }, []);
 
   /** Move the exchange on the board into the part of it that stays. */
   const keep = useCallback(() => {
-    const lines: { kind: 'asked' | 'answered' | 'coach' | 'drawn'; text: string }[] = [];
+    const lines: {
+      kind: "asked" | "answered" | "coach" | "drawn";
+      text: string;
+    }[] = [];
     if (askedRef.current !== null) {
       lines.push({ kind: askedKindRef.current, text: askedRef.current });
     }
     for (const beat of script.current.slice(0, playedRef.current)) {
       for (const line of beat.board) {
-        lines.push({ kind: line.kind === 'draw' ? 'drawn' : 'coach', text: line.text });
+        lines.push({
+          kind: line.kind === "draw" ? "drawn" : "coach",
+          text: line.text,
+        });
       }
     }
     if (lines.length) setWritten((sofar) => [...sofar, ...lines]);
@@ -521,7 +550,7 @@ export function Board({
       if (beat.voice) {
         beat.voice.onended = null;
         beat.voice.onerror = null;
-        beat.voice.src = '';
+        beat.voice.src = "";
         beat.voice.load();
       }
     }
@@ -559,7 +588,7 @@ export function Board({
     try {
       stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch {
-      setAskIssue('I could not reach the microphone. You can type instead.');
+      setAskIssue("I could not reach the microphone. You can type instead.");
       return;
     }
 
@@ -570,7 +599,9 @@ export function Board({
     active.onstop = () => {
       for (const track of stream.getTracks()) track.stop();
       setRecording(false);
-      const recorded = new Blob(pieces, { type: active.mimeType || 'audio/webm' });
+      const recorded = new Blob(pieces, {
+        type: active.mimeType || "audio/webm",
+      });
       if (recorded.size === 0) return;
       setListening(true);
       onListen(recorded)
@@ -608,6 +639,9 @@ export function Board({
   const [gettingReady, setGettingReady] = useState(false);
   //: The browser will not play sound until the student taps. The lesson waits for the tap.
   const [needsTap, setNeedsTap] = useState(false);
+  //: The voice failed for this lesson. It is read along instead, at reading pace, rather than
+  //: every line waiting in turn for a voice that is not coming.
+  const [silent, setSilent] = useState(false);
   const [replayed, setReplayed] = useState(0);
   const clips = useRef(new Map<number, HTMLAudioElement>());
   const narrating = useRef<number | null>(null);
@@ -618,7 +652,7 @@ export function Board({
       let clip = clips.current.get(index);
       if (!clip) {
         clip = new Audio(url);
-        clip.preload = 'auto';
+        clip.preload = "auto";
         clips.current.set(index, clip);
       }
       return clip;
@@ -633,7 +667,8 @@ export function Board({
     if (paused || preparing || needsTap) return;
     let cancelled = false;
     const timers: number[] = [];
-    const later = (run: () => void, ms: number) => timers.push(window.setTimeout(run, ms));
+    const later = (run: () => void, ms: number) =>
+      timers.push(window.setTimeout(run, ms));
     // The next line goes up only when its voice can start. The wait is long on purpose: a
     // line's audio may still be being made, and a line written before its voice arrives is
     // the one thing the board must not do. A student waiting sees that the coach is getting
@@ -641,16 +676,33 @@ export function Board({
     const onward = (delay: number) =>
       later(() => {
         if (shown >= lines.length) return;
+        if (silent) {
+          advance();
+          return;
+        }
         const next = clipFor(shown);
-        const slow = window.setTimeout(() => !cancelled && setGettingReady(true), 1200);
+        const slow = window.setTimeout(
+          () => !cancelled && setGettingReady(true),
+          1200,
+        );
         timers.push(slow);
-        void whenReady(next, VOICE_WAIT_MS).then(() => {
+        void whenReady(next, VOICE_WAIT_MS).then((ready) => {
           window.clearTimeout(slow);
           if (cancelled) return;
           setGettingReady(false);
+          // One line's voice not coming means the rest are not either: the server makes
+          // them all the same way. Read along from here instead of waiting at every line.
+          if (!ready) setSilent(true);
           advance();
         });
       }, delay);
+    // The voice has failed: the line goes up and stays long enough to be read.
+    const readAlong = (entry: Entry | undefined) => {
+      setSilent(true);
+      setQuestionUp(true);
+      setItemsShown(entry?.items.length ?? 0);
+      onward(entry ? readingMs(entry.say) : STEP_MS);
+    };
     const stop = () => {
       cancelled = true;
       timers.forEach((timer) => window.clearTimeout(timer));
@@ -663,6 +715,10 @@ export function Board({
     const index = shown - 1;
     const entry = lines[index];
     const clip = clipFor(index);
+    if (entry && clip !== null && (silent || clip.error)) {
+      readAlong(entry);
+      return stop;
+    }
     if (!entry || clip === null) {
       // No voice at all here: the board is read, not heard, so it writes as before.
       setQuestionUp(true);
@@ -683,15 +739,20 @@ export function Board({
     // writing then takes the rest of the time its words take, so the hand follows the voice
     // and the line is finished as the sentence ends — never before the voice, never after.
     const pace = () => {
-      const seconds = Number.isFinite(clip.duration) && clip.duration > 0 ? clip.duration : 2.5;
+      const seconds =
+        Number.isFinite(clip.duration) && clip.duration > 0
+          ? clip.duration
+          : 2.5;
       const lead = Math.min(0.7, seconds * 0.15);
       const count = Math.max(1, entry.items.length);
       setHandMs(Math.max(450, ((seconds * 0.92 - lead) * 1000) / count));
       if (index === 0) later(() => setQuestionUp(true), 0);
       entry.items.forEach((_, item) => {
         const fraction = entry.at[item] ?? item / count;
-        const due = (Math.max(fraction * seconds, lead) - clip.currentTime) * 1000;
-        const show = () => setItemsShown((current) => Math.max(current, item + 1));
+        const due =
+          (Math.max(fraction * seconds, lead) - clip.currentTime) * 1000;
+        const show = () =>
+          setItemsShown((current) => Math.max(current, item + 1));
         if (due <= 0) show();
         else later(show, due);
       });
@@ -702,22 +763,9 @@ export function Board({
       // A breath, not a pause: the next beat's voice is already here.
       onward(250);
     };
-    let retried = false;
     clip.onerror = () => {
       if (cancelled) return;
-      // One more try before giving up on the voice: a line still being made on the server
-      // can fail once and succeed a moment later.
-      if (!retried) {
-        retried = true;
-        later(() => {
-          clip.load();
-          void clip.play().catch(() => undefined);
-        }, 1500);
-        return;
-      }
-      setQuestionUp(true);
-      writeAll();
-      onward(STEP_MS);
+      readAlong(entry);
     };
     clip
       .play()
@@ -729,17 +777,15 @@ export function Board({
         if (analyser) follow(analyser);
       })
       .catch((error: Error) => {
-        if (cancelled || error.name === 'AbortError') return;
-        if (error.name === 'NotAllowedError') {
+        if (cancelled || error.name === "AbortError") return;
+        if (error.name === "NotAllowedError") {
           // The browser wants a tap before it will play sound. The lesson waits for it,
           // rather than writing itself out in silence.
           setNeedsTap(true);
           return;
         }
         setVoiceBlocked(true);
-        setQuestionUp(true);
-        writeAll();
-        onward(STEP_MS);
+        readAlong(entry);
       });
     return () => {
       stop();
@@ -748,7 +794,20 @@ export function Board({
       clip.pause();
       unfollow();
     };
-  }, [advance, clipFor, follow, lines, listen, needsTap, paused, preparing, replayed, shown, unfollow]);
+  }, [
+    advance,
+    clipFor,
+    follow,
+    lines,
+    listen,
+    needsTap,
+    paused,
+    preparing,
+    replayed,
+    shown,
+    silent,
+    unfollow,
+  ]);
 
   // Nothing left playing once the board is closed.
   useEffect(
@@ -765,7 +824,10 @@ export function Board({
   // Only lines already reached are on the board at all, so the bottom is the newest line and
   // not the empty room the unwritten steps used to hold, which scrolled the question away.
   useEffect(() => {
-    inkRef.current?.scrollTo({ top: inkRef.current.scrollHeight, behavior: 'smooth' });
+    inkRef.current?.scrollTo({
+      top: inkRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }, [shown, played, asked]);
 
   // Which line of the working the question is about. Null once the board has moved past the
@@ -792,17 +854,17 @@ export function Board({
       const answering = awaitingAnswer();
       keep();
       rewind();
-      setAskedKind(answering ? 'answered' : 'asked');
+      setAskedKind(answering ? "answered" : "asked");
       setAsked(question);
       setTurn(null);
-      setDraft('');
+      setDraft("");
 
       // The script is held in a ref as well as in state: the player reads it from the ref so
       // it always sees the newest beat, and the state copy is only what React renders.
       const publish = () => setBeats([...script.current]);
       const beatAt = (index: number): Beat => {
         script.current[index] ??= {
-          said: '',
+          said: "",
           board: [],
           voiceUrl: null,
           voice: null,
@@ -823,13 +885,13 @@ export function Board({
             setWaiting(false);
             setWriting(true);
             // A board line written before anything was said belongs to a beat of its own.
-            beatAt(Math.max(0, after)).board.push({ kind: 'write', text });
+            beatAt(Math.max(0, after)).board.push({ kind: "write", text });
             publish();
           },
           onDraw: (after, svg) => {
             setWaiting(false);
             setWriting(true);
-            beatAt(Math.max(0, after)).board.push({ kind: 'draw', text: svg });
+            beatAt(Math.max(0, after)).board.push({ kind: "draw", text: svg });
             publish();
           },
           onVoice: (index, url) => {
@@ -853,7 +915,17 @@ export function Board({
         setWriting(false);
       }
     },
-    [awaitingAnswer, draft, hush, keep, onAsk, play, rewind, stepIndex, waiting],
+    [
+      awaitingAnswer,
+      draft,
+      hush,
+      keep,
+      onAsk,
+      play,
+      rewind,
+      stepIndex,
+      waiting,
+    ],
   );
 
   // Reading an answer and watching the next step appear are different things, so the reply
@@ -869,30 +941,32 @@ export function Board({
 
   const finished = shown >= lines.length;
   const caption = finished
-    ? 'That is the whole working. This one goes back in the pile — you will meet the same ground again, with a different question.'
+    ? "That is the whole working. This one goes back in the pile — you will meet the same ground again, with a different question."
     : needsTap
-      ? 'Tap the button on the board to hear the lesson.'
+      ? "Tap the button on the board to hear the lesson."
       : preparing || gettingReady || shown === 0
-        ? 'Getting the lesson ready…'
-        : (lines[shown - 1]?.say ?? '');
+        ? "Getting the lesson ready…"
+        : (lines[shown - 1]?.say ?? "");
 
   // A student has to be able to tell being answered from being handed the same step again,
   // so the card says which of the two just happened rather than sounding the same either way.
   const status = waiting
-    ? 'Coach · reading your question'
+    ? "Coach · reading your question"
     : speaking !== null
-      ? 'Coach · speaking'
+      ? "Coach · speaking"
       : writing || played > 0
-        ? 'Coach · explaining'
+        ? "Coach · explaining"
         : turn
-          ? turn.source === 'model'
-            ? 'Coach · said its piece'
-            : 'Coach · cannot talk this through — here is the reviewed step'
+          ? turn.source === "model"
+            ? "Coach · said its piece"
+            : "Coach · cannot talk this through — here is the reviewed step"
           : paused
-            ? 'Coach · paused — your place is kept'
+            ? "Coach · paused — your place is kept"
             : finished
-              ? 'Coach · finished'
-              : `Coach · step ${shown} of ${lines.length}`;
+              ? "Coach · finished"
+              : silent
+                ? `Coach · no voice right now, read along · step ${shown} of ${lines.length}`
+                : `Coach · step ${shown} of ${lines.length}`;
 
   return (
     <div className="sp sp-coach">
@@ -908,12 +982,15 @@ export function Board({
         </div>
         <div className="sp-steps-mini">
           {lines.map((line, index) => (
-            <i key={line.say + String(index)} className={index < shown ? 'on' : ''} />
+            <i
+              key={line.say + String(index)}
+              className={index < shown ? "on" : ""}
+            />
           ))}
         </div>
       </div>
 
-      <div className={`sp-board ${paused ? 'dim' : ''}`}>
+      <div className={`sp-board ${paused ? "dim" : ""}`}>
         {needsTap ? (
           <button
             type="button"
@@ -938,19 +1015,25 @@ export function Board({
           ) : null}
           {lines.slice(0, shown).map((line, index) => {
             const current = index === shown - 1;
-            const items = current ? line.items.slice(0, itemsShown) : line.items;
+            const items = current
+              ? line.items.slice(0, itemsShown)
+              : line.items;
             if (items.length === 0) return null;
             return (
               <span
                 key={line.say + String(index)}
-                className={`sp-hl show sp-written ${line.answer ? 'answer' : ''}`}
+                className={`sp-hl show sp-written ${line.answer ? "answer" : ""}`}
               >
                 {items.map((item, piece) => (
                   <span
                     key={item + String(piece)}
                     className="sp-item sp-hand"
                     // Written out over the time its words take, not flashed up whole.
-                    style={{ '--write-ms': `${current ? handMs : 0}ms` } as CSSProperties}
+                    style={
+                      {
+                        "--write-ms": `${current ? handMs : 0}ms`,
+                      } as CSSProperties
+                    }
                   >
                     <Maths text={item} />
                   </span>
@@ -965,12 +1048,15 @@ export function Board({
             still be able to look back and find it.
           */}
           {written.map((line, index) =>
-            line.kind === 'drawn' ? (
-              <span key={`kept-${index}`} className="sp-hl show coach kept sp-drawing">
+            line.kind === "drawn" ? (
+              <span
+                key={`kept-${index}`}
+                className="sp-hl show coach kept sp-drawing"
+              >
                 <span className="n">coach</span>
                 <span dangerouslySetInnerHTML={{ __html: line.text }} />
               </span>
-            ) : line.kind !== 'coach' ? (
+            ) : line.kind !== "coach" ? (
               <span key={`kept-${index}`} className="sp-hl show coach-asked">
                 <span className="n">{line.kind}</span>
                 {line.text}
@@ -1002,8 +1088,11 @@ export function Board({
           */}
           {beats.slice(0, played).flatMap((beat, index) =>
             beat.board.map((line, row) =>
-              line.kind === 'draw' ? (
-                <span key={`coach-${index}-${row}`} className="sp-hl show coach sp-drawing">
+              line.kind === "draw" ? (
+                <span
+                  key={`coach-${index}-${row}`}
+                  className="sp-hl show coach sp-drawing"
+                >
                   <span className="n">coach</span>
                   {/*
                     The server has already reduced this to a whitelist of shapes — no script,
@@ -1018,7 +1107,9 @@ export function Board({
                   key={`coach-${index}-${row}`}
                   className="sp-hl show coach"
                   // Long lines take longer to write, the way a hand does.
-                  style={{ '--write-ms': `${writeMs(line.text)}ms` } as CSSProperties}
+                  style={
+                    { "--write-ms": `${writeMs(line.text)}ms` } as CSSProperties
+                  }
                 >
                   <span className="n">coach</span>
                   <Maths text={line.text} />
@@ -1026,7 +1117,9 @@ export function Board({
               ),
             ),
           )}
-          {writing || speaking !== null ? <span className="sp-nib" aria-hidden="true" /> : null}
+          {writing || speaking !== null ? (
+            <span className="sp-nib" aria-hidden="true" />
+          ) : null}
         </div>
 
         {/*
@@ -1039,8 +1132,14 @@ export function Board({
           a lesson lost to a muted phone, a failed call or a student who cannot hear it, so
           where there is no audio the sentence is written out instead.
         */}
-        <div className={`sp-tutorcard ${paused ? 'paused' : ''} ${voiceBlocked ? '' : 'slim'}`}>
-          <Coach faceRef={faceRef} speaking={speaking !== null} listening={recording} />
+        <div
+          className={`sp-tutorcard ${paused ? "paused" : ""} ${voiceBlocked ? "" : "slim"}`}
+        >
+          <Coach
+            faceRef={faceRef}
+            speaking={speaking !== null}
+            listening={recording}
+          />
           <div>
             <div className="who">
               <span className="dot" />
@@ -1052,7 +1151,7 @@ export function Board({
                   beat.said ? (
                     <p
                       key={`said-${index}`}
-                      className={speaking === index ? 'saying now' : 'saying'}
+                      className={speaking === index ? "saying now" : "saying"}
                     >
                       <Maths text={beat.said} />
                     </p>
@@ -1060,7 +1159,13 @@ export function Board({
                 )}
               </div>
             ) : played === 0 ? (
-              <p>{waiting ? 'Let me look at that with you…' : <Maths text={caption} />}</p>
+              <p>
+                {waiting ? (
+                  "Let me look at that with you…"
+                ) : (
+                  <Maths text={caption} />
+                )}
+              </p>
             ) : null}
           </div>
         </div>
@@ -1075,17 +1180,17 @@ export function Board({
                 setDraft(event.target.value);
                 // A student typing a question is no longer reading the board, and a step that
                 // scrolls past mid-sentence is the step they were about to ask about.
-                if (event.target.value !== '') setPaused(true);
+                if (event.target.value !== "") setPaused(true);
               }}
               onKeyDown={(event) => {
                 // Submitted here rather than left to the form, because this box is mostly
                 // used on a phone, where sending is the keyboard's own Go key and not a tap
                 // on the button beside it.
-                if (event.key === 'Enter') void send(event);
+                if (event.key === "Enter") void send(event);
               }}
               placeholder={
                 stepIndex === null
-                  ? 'Ask the coach about the working…'
+                  ? "Ask the coach about the working…"
                   : `Ask about step ${stepIndex + 1}…`
               }
               aria-label="Ask the coach about this working"
@@ -1094,36 +1199,38 @@ export function Board({
             />
             {onListen ? (
               <button
-                className={`sp-btn sm light sp-mic ${recording ? 'on' : ''}`}
+                className={`sp-btn sm light sp-mic ${recording ? "on" : ""}`}
                 type="button"
-                onClick={() => void (recording ? stopRecording() : startRecording())}
+                onClick={() =>
+                  void (recording ? stopRecording() : startRecording())
+                }
                 disabled={waiting || listening}
-                aria-label={recording ? 'Stop recording' : 'Ask by speaking'}
-                title={recording ? 'Stop recording' : 'Ask by speaking'}
+                aria-label={recording ? "Stop recording" : "Ask by speaking"}
+                title={recording ? "Stop recording" : "Ask by speaking"}
               >
-                {listening ? '…' : recording ? '■' : '🎤'}
+                {listening ? "…" : recording ? "■" : "🎤"}
               </button>
             ) : null}
             <button
               className="sp-btn sm"
               type="submit"
-              disabled={waiting || draft.trim() === ''}
+              disabled={waiting || draft.trim() === ""}
             >
-              {waiting ? '…' : 'Ask'}
+              {waiting ? "…" : "Ask"}
             </button>
           </div>
           <span className="note">
             {askIssue
               ? askIssue
               : voiceBlocked
-                ? 'I cannot play the voice here, so the lesson is written out instead.'
+                ? "I cannot play the voice here, so the lesson is written out instead."
                 : recording
-                ? 'Listening… press stop when you have finished your question.'
-                : listening
-                  ? 'Writing down what you said…'
-                  : turn && turn.asks_left <= LOW_ON_ASKS
-                    ? `${turn.asks_left} more question${turn.asks_left === 1 ? '' : 's'} today.`
-                    : 'Lost a step? Ask about it — the coach answers from this working.'}
+                  ? "Listening… press stop when you have finished your question."
+                  : listening
+                    ? "Writing down what you said…"
+                    : turn && turn.asks_left <= LOW_ON_ASKS
+                      ? `${turn.asks_left} more question${turn.asks_left === 1 ? "" : "s"} today.`
+                      : "Lost a step? Ask about it — the coach answers from this working."}
           </span>
         </form>
         <div className="ctl">
@@ -1141,14 +1248,14 @@ export function Board({
           </button>
           <button
             type="button"
-            title={paused ? 'Resume' : 'Pause'}
+            title={paused ? "Resume" : "Pause"}
             onClick={() => {
               resume();
               setPaused((value) => !value);
             }}
             disabled={finished}
           >
-            {paused ? '▶' : '❚❚'}
+            {paused ? "▶" : "❚❚"}
           </button>
           <button
             type="button"
@@ -1159,7 +1266,7 @@ export function Board({
               else advance();
             }}
           >
-            {finished ? '✓' : '→'}
+            {finished ? "✓" : "→"}
           </button>
         </div>
       </div>

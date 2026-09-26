@@ -71,6 +71,7 @@ model does not see it.
 from __future__ import annotations
 
 import json
+import logging
 import re
 import time
 from collections.abc import AsyncIterator
@@ -80,6 +81,8 @@ from xml.etree import ElementTree
 
 from app.config import Settings
 from app.spoken_maths import speak_text
+
+_log = logging.getLogger(__name__)
 
 #: Long enough for a real question, short enough that the box cannot be used as a channel for
 #: pasting something else into the prompt.
@@ -1455,7 +1458,16 @@ async def speak_streaming(line: str, settings: Settings) -> AsyncIterator[bytes]
         return
 
 
-async def speak(line: str, settings: Settings, max_chars: int = MAX_SPOKEN_CHARS) -> bytes | None:
+#: After the speech service refuses the account itself (no quota, a bad key), a student's
+#: line is not sent to it again for this long. Each attempt would cost the student a wait
+#: for the same refusal.
+SPEECH_REST_SECONDS = 300.0
+_speech_rests_until = 0.0
+
+
+async def speak(
+    line: str, settings: Settings, max_chars: int = MAX_SPOKEN_CHARS, patient: bool = False
+) -> bytes | None:
     """The audio for one spoken line, or None when there is none to be had.
 
     Never raises, for the same reason `answer` does not: the voice is the better lesson and
@@ -1464,19 +1476,30 @@ async def speak(line: str, settings: Settings, max_chars: int = MAX_SPOKEN_CHARS
 
     `max_chars` is raised for a reviewed worked step, which is written to be read aloud and
     can run longer than one sentence of the coach's.
+
+    `patient` is for the background voicing of whole lessons: nobody is waiting, so a busy
+    service is waited out (the SDK backs off as the service asks). A student's line is tried
+    once, because every retry is dead air on the board.
     """
+    global _speech_rests_until
     line = for_the_voice(line)
     if not line or not settings.ai_speak or not settings.openai_api_key:
         return None
     if len(line) > max_chars:
         return None
+    if not patient and time.monotonic() < _speech_rests_until:
+        return None
 
     try:
-        from openai import AsyncOpenAI
+        from openai import APIStatusError, AsyncOpenAI
     except ImportError:
         return None
 
-    client = AsyncOpenAI(api_key=settings.openai_api_key, timeout=CALL_TIMEOUT_SECONDS)
+    client = AsyncOpenAI(
+        api_key=settings.openai_api_key,
+        timeout=CALL_TIMEOUT_SECONDS if not patient else 60.0,
+        max_retries=6 if patient else 0,
+    )
     try:
         spoken = await client.audio.speech.create(
             model=settings.ai_speech_model,
@@ -1488,7 +1511,14 @@ async def speak(line: str, settings: Settings, max_chars: int = MAX_SPOKEN_CHARS
             response_format="mp3",
         )
         return await spoken.aread()
-    except Exception:
+    except APIStatusError as refused:
+        code = getattr(refused, "code", None)
+        _log.warning("speech refused: %s %s", refused.status_code, code or refused.message)
+        if refused.status_code in (401, 403) or code == "insufficient_quota":
+            _speech_rests_until = time.monotonic() + SPEECH_REST_SECONDS
+        return None
+    except Exception as failed:
+        _log.warning("speech failed: %s", type(failed).__name__)
         return None
 
 

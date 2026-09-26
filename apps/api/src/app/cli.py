@@ -80,7 +80,7 @@ def _voice_lessons() -> int:
         unique = list(dict.fromkeys(lines))
         missing = [line for line in unique if not voice_store.path_for(line, settings).is_file()]
         print(f"{len(unique)} lines across {len(rows)} lessons; {len(missing)} to make.")
-        made, failed = await voice_store.voice_all(missing, settings)
+        made, failed = await voice_store.voice_all(missing, settings, patient=True)
         print(f"Made {made}; {failed} could not be voiced.")
         return 0
 

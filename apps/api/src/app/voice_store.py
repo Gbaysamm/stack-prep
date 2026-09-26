@@ -56,27 +56,32 @@ def path_for(line: str, settings: Settings) -> Path:
     return folder() / f"{name}.mp3"
 
 
-async def voiced(line: str, settings: Settings) -> Path | None:
-    """The line's audio file, made now if it has not been. None when there is no voice."""
+async def voiced(line: str, settings: Settings, patient: bool = False) -> Path | None:
+    """The line's audio file, made now if it has not been. None when there is no voice.
+
+    `patient` when nobody is waiting on it: see `tutor.speak`.
+    """
     cached = path_for(line, settings)
     async with making(cached.stem):
         if cached.is_file():
             return cached
-        audio = await tutor.speak(line, settings, max_chars=MAX_SPOKEN_CHARS)
+        audio = await tutor.speak(line, settings, max_chars=MAX_SPOKEN_CHARS, patient=patient)
         if audio is None:
             return None
         write_atomically(cached, audio)
         return cached
 
 
-async def voice_all(lines: list[str], settings: Settings, at_once: int = 3) -> tuple[int, int]:
+async def voice_all(
+    lines: list[str], settings: Settings, at_once: int = 2, patient: bool = False
+) -> tuple[int, int]:
     """Make every line's audio, a few at a time. Returns (made or already there, failed)."""
     gate = asyncio.Semaphore(at_once)
     outcome = {"ok": 0, "failed": 0}
 
     async def one(line: str) -> None:
         async with gate:
-            found = await voiced(line, settings)
+            found = await voiced(line, settings, patient=patient)
             outcome["ok" if found is not None else "failed"] += 1
 
     await asyncio.gather(*(one(line) for line in lines), return_exceptions=True)
