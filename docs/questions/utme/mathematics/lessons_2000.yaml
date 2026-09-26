@@ -1,0 +1,1232 @@
+# UTME 2000 Mathematics — lessons for the board.
+#
+# Each lesson is a run of moments: what the teacher says, and the one line written while it
+# is said. See lessons_2002.yaml for the full format notes. Answers match explanations_2000.yaml.
+format_version: 1
+exam_year: 2000
+lessons:
+  1:
+    moments:
+      - say: 'We have three sets, $P$, $Q$ and $R$, and we want $(P - Q) \cap R$.'
+        write: '$(P - Q) \cap R$'
+      - say: 'The brackets tell us the order. First we work out $P - Q$, and only then do we intersect with $R$.'
+      - say: 'What does $P - Q$ mean? It means everything that is in $P$ but not in $Q$.'
+        write: '$P = \{1, 2, u, v, w, x\}$'
+      - say: 'Let''s go through $P$ one element at a time. Is 1 in $Q$? No, so 1 stays.'
+      - say: '2 is in $Q$, so it goes. $u$, $v$ and $w$ are all in $Q$ as well, so they go too. And $x$ is not in $Q$, so $x$ stays.'
+      - say: 'So $P - Q$ is the set 1, $x$.'
+        write: '$P - Q = \{1, x\}$'
+      - say: 'Now we intersect with $R$. The intersection keeps only what appears in both sets.'
+        write: '$R = \{2, 3, 4, v, x, y\}$'
+      - say: 'Is 1 in $R$? No. Is $x$ in $R$? Yes it is.'
+        write: '$\{1, x\} \cap \{2, 3, 4, v, x, y\}$'
+      - say: 'So only $x$ survives, and $(P - Q) \cap R$ is the set containing $x$ alone, which is answer choice C.'
+        write: '$(P - Q) \cap R = \{x\}$'
+        answer: true
+    traps:
+      A: 'You went for the set 1, $x$. That''s $P - Q$ on its own. You still have to intersect with $R$, and 1 is not in $R$, so it drops out.'
+      B: 'You went for the set $x$, $y$. $y$ is in $R$, but it was never in $P$, so it cannot be in $P - Q$. Only elements of $P$ can survive the first step.'
+      D: 'You went for the empty set. But $x$ is in $P$, not in $Q$, and is in $R$, so one element does survive: $x$.'
+
+  2:
+    moments:
+      - say: 'A town had 240,000 people in January 1998, and the population grows by 2% each year. We want the population in January 2000.'
+        write: '$240{,}000 \text{ in 1998, growing } 2\% \text{ a year}$'
+      - say: 'First, how many years is that? From January 1998 to January 2000 is 2 years.'
+        write: '$n = 2$'
+      - say: 'Increasing by 2% means each year the population becomes 100% plus 2%, that is 102% of the year before. As a decimal, that is 1.02.'
+        write: '$100\% + 2\% = 102\% = 1.02$'
+      - say: 'Because it grows every year on the new total, we multiply by 1.02 once for each year. That is 240,000 times 1.02 squared.'
+        write: '$240{,}000 \times 1.02^{2}$'
+      - say: '1.02 times 1.02 is 1.0404.'
+        write: '$1.02^{2} = 1.0404$'
+      - say: 'So we need 240,000 times 1.0404.'
+        write: '$240{,}000 \times 1.0404$'
+      - say: '240,000 times 1 is 240,000, and 240,000 times 0.0404 is 9,696. Adding them gives 249,696.'
+        write: '$240{,}000 + 9{,}696 = 249{,}696$'
+      - say: 'So the population in January 2000 is 249,696, which is answer choice B.'
+        write: '$249{,}696$'
+        answer: true
+    traps:
+      A: 'You went for 480,000. That''s double the population, which would need a growth of 100%, not 2%. We multiply by 1.02 each year.'
+      C: 'You went for 249,600. That adds 2% of the original 240,000 twice, which is simple growth. The second year''s 2% is taken on the new, bigger population, so we multiply by 1.02 twice.'
+      D: 'You went for 244,800. That''s only one year of growth. From January 1998 to January 2000 is two years.'
+
+  3:
+    moments:
+      - say: 'We are told that $\dfrac{2\sqrt{3} - \sqrt{2}}{\sqrt{3} + 2\sqrt{2}}$ equals $m + n\sqrt{6}$, and we want $m$ and $n$.'
+        write: '$\dfrac{2\sqrt{3} - \sqrt{2}}{\sqrt{3} + 2\sqrt{2}} = m + n\sqrt{6}$'
+      - say: 'The first thing we need to do is clear the surd from the denominator. We multiply top and bottom by the conjugate, which is the denominator with its middle sign changed: $\sqrt{3} - 2\sqrt{2}$.'
+        write: '$\dfrac{2\sqrt{3} - \sqrt{2}}{\sqrt{3} + 2\sqrt{2}} \times \dfrac{\sqrt{3} - 2\sqrt{2}}{\sqrt{3} - 2\sqrt{2}}$'
+      - say: 'Start with the bottom. It is a difference of two squares: root 3 squared minus $2\sqrt{2}$ squared.'
+        write: '$(\sqrt{3})^{2} - (2\sqrt{2})^{2}$'
+      - say: 'Root 3 squared is 3. $2\sqrt{2}$ squared is 4 times 2, which is 8. 3 minus 8 is negative 5.'
+        write: '$3 - 8 = -5$'
+      - say: 'Now the top: $2\sqrt{3} - \sqrt{2}$ times $\sqrt{3} - 2\sqrt{2}$. Let''s expand term by term.'
+        write: '$(2\sqrt{3} - \sqrt{2})(\sqrt{3} - 2\sqrt{2})$'
+      - say: '$2\sqrt{3}$ times $\sqrt{3}$ is 2 times 3, which is 6. $2\sqrt{3}$ times negative $2\sqrt{2}$ is negative $4\sqrt{6}$.'
+        write: '$6 - 4\sqrt{6}$'
+      - say: 'Negative $\sqrt{2}$ times $\sqrt{3}$ is negative $\sqrt{6}$. And negative $\sqrt{2}$ times negative $2\sqrt{2}$ is positive 2 times 2, which is 4.'
+        write: '$6 - 4\sqrt{6} - \sqrt{6} + 4$'
+      - say: '6 plus 4 is 10, and negative 4 root 6 minus root 6 is negative 5 root 6.'
+        write: '$10 - 5\sqrt{6}$'
+      - say: 'So the whole expression is $10 - 5\sqrt{6}$ over negative 5.'
+        write: '$\dfrac{10 - 5\sqrt{6}}{-5}$'
+      - say: 'Divide each term by negative 5. 10 divided by negative 5 is negative 2. Negative 5 root 6 divided by negative 5 is positive root 6.'
+        write: '$-2 + \sqrt{6}$'
+      - say: 'Matching with $m + n\sqrt{6}$, $m$ is negative 2 and $n$ is 1. That''s answer choice B.'
+        write: '$m = -2,\ n = 1$'
+        answer: true
+    traps:
+      A: 'You went for 1, negative 2. The numbers are swapped and the signs are flipped. The denominator is negative 5, so 10 becomes negative 2 and negative 5 root 6 becomes positive root 6.'
+      C: 'You went for negative two-fifths, 1. The top simplifies to 10 minus 5 root 6, and 10 divided by negative 5 is negative 2, not negative two-fifths.'
+      D: 'You went for 2, three-fifths. Check the bottom: 3 minus 8 is negative 5, and dividing by a negative flips every sign on the top.'
+
+  4:
+    moments:
+      - say: 'A club has 94 members. 60 like modern music and 50 like traditional. The number who like both is three times the number who like neither. We want how many like only one type.'
+        write: '$n(M) = 60,\ n(T) = 50,\ \text{total} = 94$'
+      - say: 'The first thing we need to do is name the unknown. Let $n$ be the number who like neither. Then the number who like both is $3n$.'
+        write: '$\text{neither} = n,\ \text{both} = 3n$'
+      - say: 'The number who like at least one type is modern plus traditional, minus both, because the people in both were counted twice.'
+        write: '$n(M \cup T) = 60 + 50 - 3n$'
+      - say: '60 plus 50 is 110, so that is 110 minus $3n$.'
+        write: '$n(M \cup T) = 110 - 3n$'
+      - say: 'Everyone likes at least one type or likes neither. So those two groups add up to all 94 members.'
+        write: '$(110 - 3n) + n = 94$'
+      - say: 'Negative $3n$ plus $n$ is negative $2n$.'
+        write: '$110 - 2n = 94$'
+      - say: 'Subtract 94 from 110 and move the $2n$ across: 110 minus 94 is 16, so $2n$ is 16.'
+        write: '$2n = 16$'
+      - say: 'Divide both sides by 2, and $n$ is 8. So 8 like neither.'
+        write: '$n = 8$'
+      - say: 'Then the number who like both is 3 times 8, which is 24.'
+        write: '$\text{both} = 3 \times 8 = 24$'
+      - say: 'Those who like at least one type are 110 minus 24, which is 86.'
+        write: '$n(M \cup T) = 110 - 24 = 86$'
+      - say: 'But the question says only one type. So we take away the 24 who like both. 86 minus 24 is 62, which is answer choice C.'
+        write: '$\text{only one} = 86 - 24 = 62$'
+        answer: true
+    traps:
+      A: 'You went for 8. That''s the number who like neither type of music. We still need to use it to find those who like only one type.'
+      B: 'You went for 24. That''s the number who like both types. The question asks for those who like exactly one type.'
+      D: 'You went for 86. That''s everyone who likes at least one type, and it still includes the 24 who like both. Take them away to get 62.'
+
+  5:
+    moments:
+      - say: 'We have to evaluate this expression, rounding each number to two significant figures first, and giving the answer to two significant figures.'
+        write: '$\dfrac{(2.813 \times 10^{-3}) \times 1.063}{5.637 \times 10^{-2}}$'
+      - say: 'So let''s round first. 2.813 to two significant figures is 2.8. 1.063 is 1.1. And 5.637 is 5.6. The powers of ten stay as they are.'
+        write: '$2.813 \to 2.8,\quad 1.063 \to 1.1,\quad 5.637 \to 5.6$'
+      - say: 'Now the calculation becomes this.'
+        write: '$\dfrac{(2.8 \times 10^{-3}) \times 1.1}{5.6 \times 10^{-2}}$'
+      - say: 'Let''s handle the digits and the powers of ten separately. On top, 2.8 times 1.1 is 3.08.'
+        write: '$2.8 \times 1.1 = 3.08$'
+      - say: 'Now divide by 5.6. 3.08 divided by 5.6 is 0.55.'
+        write: '$\dfrac{3.08}{5.6} = 0.55$'
+      - say: 'Now the powers of ten. When we divide, we subtract the indices: negative 3 minus negative 2 is negative 1.'
+        write: '$\dfrac{10^{-3}}{10^{-2}} = 10^{-3 - (-2)} = 10^{-1}$'
+      - say: 'So we have 0.55 times 10 to the negative 1, which means 0.55 divided by 10.'
+        write: '$0.55 \times 10^{-1}$'
+      - say: 'That is 0.055, already two significant figures. That''s answer choice B.'
+        write: '$= 0.055$'
+        answer: true
+    traps:
+      A: 'You went for 0.056. Once the numbers are rounded, 2.8 times 1.1 is 3.08, and 3.08 divided by 5.6 is exactly 0.55, so the answer is 0.055.'
+      C: 'You went for 0.054. The question tells us to round each number first. With 2.8, 1.1 and 5.6, the answer comes out as exactly 0.055.'
+      D: 'You went for 0.54. The digits are close, but the power of ten is off. 10 to the negative 3 divided by 10 to the negative 2 is 10 to the negative 1, so 0.55 becomes 0.055.'
+
+  6:
+    moments:
+      - say: 'A man wants to have ₦150,000 after 3 years, at 25% compound interest. We want how much he must deposit now.'
+        write: 'Amount after 3 years: ₦150,000'
+      - say: 'Compound interest at 25% means each year the money is multiplied by 1.25. Over 3 years, it is multiplied by 1.25 cubed.'
+        write: '$P \times 1.25^{3} = 150{,}000$'
+      - say: 'Let''s work out 1.25 cubed. 1.25 squared is 1.5625.'
+        write: '$1.25^{2} = 1.5625$'
+      - say: 'Then 1.5625 times 1.25 is 1.953125.'
+        write: '$1.25^{3} = 1.953125$'
+      - say: 'So $P$ times 1.953125 equals 150,000.'
+        write: '$P \times 1.953125 = 150{,}000$'
+      - say: 'We know the end amount, not the start, so we divide. $P$ is 150,000 divided by 1.953125.'
+        write: '$P = \dfrac{150{,}000}{1.953125}$'
+      - say: 'That comes to 76,800.'
+        write: '$P = 76{,}800$'
+      - say: 'Let''s check by going forwards. 76,800 times 1.25 is 96,000. Times 1.25 again is 120,000. And times 1.25 once more is 150,000. It works.'
+        write: '$76{,}800 \to 96{,}000 \to 120{,}000 \to 150{,}000$'
+      - say: 'So he needs to deposit ₦76,800, which is answer choice D.'
+        write: '$P = ₦76{,}800$'
+        answer: true
+    traps:
+      A: 'You went for ₦112,000.50. Grow it forwards and you get far more than ₦150,000. Divide 150,000 by 1.25 cubed, which gives ₦76,800.'
+      B: 'You went for ₦96,000. That''s how much the deposit has grown to after one year. The question wants the amount at the very start.'
+      C: 'You went for ₦85,714.28. That''s 150,000 divided by 1.75, which treats the interest as simple, 25% three times. Compound interest multiplies by 1.25 each year.'
+
+  7:
+    moments:
+      - say: 'We are told that 314 in base ten, minus 256 in base seven, equals 340 in base $x$. We want $x$.'
+        write: '$314_{10} - 256_{7} = 340_{x}$'
+      - say: 'The first thing we need to do is put everything in base ten. $256_{7}$ has place values 49, 7 and 1.'
+        write: '$256_{7} = 2 \times 49 + 5 \times 7 + 6 \times 1$'
+      - say: '2 times 49 is 98. 5 times 7 is 35. And 6 times 1 is 6.'
+        write: '$= 98 + 35 + 6$'
+      - say: '98 plus 35 is 133, plus 6 is 139.'
+        write: '$= 139$'
+      - say: 'So the left-hand side is 314 minus 139, which is 175.'
+        write: '$314 - 139 = 175$'
+      - say: 'Now the right-hand side. In base $x$, the place values are $x$ squared, $x$ and 1. So $340_{x}$ is $3x^{2} + 4x + 0$.'
+        write: '$340_{x} = 3x^{2} + 4x$'
+      - say: 'Setting the two sides equal gives $3x^{2} + 4x = 175$.'
+        write: '$3x^{2} + 4x = 175$'
+      - say: 'Subtract 175 from both sides to get a quadratic equal to zero.'
+        write: '$3x^{2} + 4x - 175 = 0$'
+      - say: 'Let''s use the formula. The discriminant is $b^{2} - 4ac$: 16 minus 4 times 3 times negative 175, which is 16 plus 2100, so 2116.'
+        write: '$b^{2} - 4ac = 16 + 2100 = 2116$'
+      - say: 'The square root of 2116 is 46.'
+        write: '$\sqrt{2116} = 46$'
+      - say: 'So $x$ is negative 4 plus 46, over 6. We ignore the negative root, because a base cannot be negative.'
+        write: '$x = \dfrac{-4 + 46}{6} = \dfrac{42}{6}$'
+      - say: '42 divided by 6 is 7. Check: 3 times 49 is 147, plus 4 times 7 is 28, giving 175. So $x$ is 7, which is answer choice C.'
+        write: '$x = 7$'
+        answer: true
+    traps:
+      A: 'You went for 5. In base 5, 340 is 3 times 25 plus 4 times 5, which is 95, not 175. Solving $3x^{2} + 4x = 175$ gives $x = 7$.'
+      B: 'You went for 6. In base 6, 340 is 108 plus 24, which is 132, not 175. The base that gives 175 is 7.'
+      D: 'You went for 8. In base 8, 340 is 192 plus 32, which is 224, too big. Base 7 gives exactly 175.'
+
+  8:
+    moments:
+      - say: 'Audu bought an article for ₦50,000 and sold it to Femi at a loss of $x$ percent. Femi sold it to Oche at a 40% profit, and Femi''s profit was ₦10,000. We want $x$.'
+        write: 'Audu''s cost: ₦50,000'
+      - say: 'The key idea is that each percentage is measured against the cost of the person selling. So Femi''s 40% is 40% of what Femi paid.'
+        write: '$40\% \text{ of Femi''s cost} = 10{,}000$'
+      - say: '40% is 0.4, so 0.4 times Femi''s cost is 10,000.'
+        write: '$0.4 \times C = 10{,}000$'
+      - say: 'To find Femi''s cost, divide 10,000 by 0.4. That is 25,000.'
+        write: '$C = \dfrac{10{,}000}{0.4} = 25{,}000$'
+      - say: 'What Femi paid is what Audu sold it for. So Audu sold for ₦25,000 after paying ₦50,000.'
+        write: 'Audu''s selling price: ₦25,000'
+      - say: 'Audu''s loss is 50,000 minus 25,000, which is 25,000.'
+        write: '$\text{loss} = 50{,}000 - 25{,}000 = 25{,}000$'
+      - say: 'As a percentage of Audu''s own cost: 25,000 over 50,000, times 100.'
+        write: '$\dfrac{25{,}000}{50{,}000} \times 100$'
+      - say: '25,000 over 50,000 is one half, and a half of 100 is 50. So $x$ is 50, which is answer choice B.'
+        write: '$x = 50$'
+        answer: true
+    traps:
+      A: 'You went for 60. Audu sold for ₦25,000, which is half of his ₦50,000 cost, so the loss is 50%, not 60%.'
+      C: 'You went for 40. That''s Femi''s profit percentage, not Audu''s loss. Audu''s loss is measured against his own ₦50,000.'
+      D: 'You went for 20. That comes from taking Femi''s 40% of ₦50,000. But Femi''s 40% is measured against what Femi paid, which works out to ₦25,000.'
+
+  9:
+    moments:
+      - say: 'We want to simplify this fraction full of powers of 2.'
+        write: '$\dfrac{3(2^{n+1}) - 4(2^{n-1})}{2^{n+1} - 2^{n}}$'
+      - say: 'Every term is a power of 2 close to 2 to the $n$. So let''s call 2 to the $n$ by a single letter, $u$.'
+        write: '$u = 2^{n}$'
+      - say: '2 to the $n$ plus 1 is 2 to the $n$ times 2, so it is $2u$. And 2 to the $n$ minus 1 is 2 to the $n$ divided by 2, so it is $u$ over 2.'
+        write: '$2^{n+1} = 2u,\quad 2^{n-1} = \dfrac{u}{2}$'
+      - say: 'Now the top: 3 times $2u$, minus 4 times $u$ over 2.'
+        write: '$3(2u) - 4\left(\dfrac{u}{2}\right)$'
+      - say: '3 times $2u$ is $6u$. 4 times $u$ over 2 is $2u$. And $6u$ minus $2u$ is $4u$.'
+        write: '$6u - 2u = 4u$'
+      - say: 'Now the bottom: $2u$ minus $u$ is $u$.'
+        write: '$2u - u = u$'
+      - say: 'So the fraction is $4u$ over $u$.'
+        write: '$\dfrac{4u}{u}$'
+      - say: 'The $u$ cancels, leaving 4. That''s answer choice C.'
+        write: '$= 4$'
+        answer: true
+    traps:
+      A: 'You went for 2 to the $n$ plus 1. Every term on top and bottom is a multiple of 2 to the $n$, so the $n$ cancels completely and leaves a plain number, 4.'
+      B: 'You went for 2 to the $n$ minus 1. The powers of 2 cancel out: the top is $4u$ and the bottom is $u$, so the answer is just 4.'
+      D: 'You went for one quarter. That''s the fraction upside down. The top is $4u$ and the bottom is $u$, so it is 4, not a quarter.'
+
+  10:
+    moments:
+      - say: 'We have $P344_{6}$ minus $23P2_{6}$ equals $2PP2_{6}$, and we want the digit $P$.'
+        write: '$P344_{6} - 23P2_{6} = 2PP2_{6}$'
+      - say: 'Let''s convert each numeral to base ten, keeping $P$ as an unknown. In base six, the place values are 216, 36, 6 and 1.'
+        write: '$6^{3} = 216,\quad 6^{2} = 36,\quad 6^{1} = 6$'
+      - say: 'First numeral: $216P$, plus 3 times 36, which is 108, plus 4 times 6, which is 24, plus 4.'
+        write: '$P344_{6} = 216P + 108 + 24 + 4$'
+      - say: '108 plus 24 plus 4 is 136.'
+        write: '$= 216P + 136$'
+      - say: 'Second numeral: 2 times 216 is 432, 3 times 36 is 108, then $6P$, then 2.'
+        write: '$23P2_{6} = 432 + 108 + 6P + 2 = 542 + 6P$'
+      - say: 'Third numeral: 2 times 216 is 432, then $36P$, then $6P$, then 2. That''s 434 plus $42P$.'
+        write: '$2PP2_{6} = 432 + 36P + 6P + 2 = 434 + 42P$'
+      - say: 'Now the equation: the first minus the second equals the third.'
+        write: '$(216P + 136) - (542 + 6P) = 434 + 42P$'
+      - say: 'On the left, $216P$ minus $6P$ is $210P$, and 136 minus 542 is negative 406.'
+        write: '$210P - 406 = 434 + 42P$'
+      - say: 'Subtract $42P$ from both sides and add 406 to both sides. $210P$ minus $42P$ is $168P$, and 434 plus 406 is 840.'
+        write: '$168P = 840$'
+      - say: 'Divide both sides by 168. 840 divided by 168 is 5.'
+        write: '$P = \dfrac{840}{168} = 5$'
+      - say: 'In base six the digits run from 0 to 5, so 5 is allowed. $P$ is 5, which is answer choice D.'
+        write: '$P = 5$'
+        answer: true
+    traps:
+      A: 'You went for 2. Put $P = 2$ into $210P - 406 = 434 + 42P$ and the left is 14 while the right is 518. Solving gives $P = 5$.'
+      B: 'You went for 3. With $P = 3$ the left side is 224 but the right side is 560, so it doesn''t balance. The equation $168P = 840$ gives 5.'
+      C: 'You went for 4. With $P = 4$ the left side is 434 and the right side is 602. Only $P = 5$ balances, giving 644 on both sides.'
+
+  11:
+    moments:
+      - say: 'We want to evaluate 5 to the power negative 3 log base 5 of 2, times 2 to the power 2 log base 2 of 3.'
+        write: '$5^{-3\log_{5}2} \times 2^{2\log_{2}3}$'
+      - say: 'The key fact is that a base and its own logarithm undo each other: $a$ to the power log base $a$ of $k$ is just $k$.'
+        write: '$a^{\log_{a}k} = k$'
+      - say: 'Let''s take the first part. By the power law, the negative 3 in front can move inside the log as a power.'
+        write: '$-3\log_{5}2 = \log_{5}2^{-3}$'
+      - say: '2 to the negative 3 is 1 over 2 cubed, which is 1 over 8.'
+        write: '$2^{-3} = \dfrac{1}{8}$'
+      - say: 'So the first part is 5 to the power log base 5 of one-eighth, and the 5 and its log cancel. That leaves one-eighth.'
+        write: '$5^{\log_{5}\frac{1}{8}} = \dfrac{1}{8}$'
+      - say: 'Now the second part. The 2 in front moves inside the log: 2 log base 2 of 3 is log base 2 of 3 squared, which is log base 2 of 9.'
+        write: '$2\log_{2}3 = \log_{2}9$'
+      - say: 'So 2 to the power log base 2 of 9 is just 9.'
+        write: '$2^{\log_{2}9} = 9$'
+      - say: 'Now multiply the two parts: one-eighth times 9 is nine-eighths.'
+        write: '$\dfrac{1}{8} \times 9 = \dfrac{9}{8}$'
+      - say: '9 divided by 8 is 1 remainder 1, so nine-eighths is 1 and one-eighth. That''s answer choice B.'
+        write: '$\dfrac{9}{8} = 1\tfrac{1}{8}$'
+        answer: true
+    traps:
+      A: 'You went for 8. That''s 2 cubed, but the power is negative 3, so the first part is one-eighth. And don''t forget to multiply by the second part, 9.'
+      C: 'You went for two-fifths. The first part is one-eighth and the second is 9, so the product is nine-eighths, which is 1 and one-eighth.'
+      D: 'You went for one-eighth. That''s only the first part. We still have to multiply by the second part, which is 9.'
+
+  12:
+    moments:
+      - say: 'The operation star is defined by $a * b = a^{b}$. We are told $a * 2 = 2 - a$, and we want the possible values of $a$.'
+        write: '$a * b = a^{b}$'
+      - say: 'Using the rule with $b$ equal to 2, $a * 2$ is $a$ squared.'
+        write: '$a * 2 = a^{2}$'
+      - say: 'The question says this equals 2 minus $a$.'
+        write: '$a^{2} = 2 - a$'
+      - say: 'Let''s bring everything to one side. Add $a$ to both sides and subtract 2.'
+        write: '$a^{2} + a - 2 = 0$'
+      - say: 'To factorise, we need two numbers that multiply to negative 2 and add to 1. Those are 2 and negative 1.'
+        write: '$(a + 2)(a - 1) = 0$'
+      - say: 'So either $a + 2$ is zero, giving $a = -2$, or $a - 1$ is zero, giving $a = 1$.'
+        write: '$a = -2 \text{ or } a = 1$'
+      - say: 'Let''s check. 1 squared is 1, and 2 minus 1 is 1. Negative 2 squared is 4, and 2 minus negative 2 is 4. Both work.'
+        write: '$1^{2} = 2 - 1,\quad (-2)^{2} = 2 - (-2)$'
+      - say: 'So the possible values are 1 and negative 2, which is answer choice D.'
+        write: '$a = 1,\ -2$'
+        answer: true
+    traps:
+      A: 'You went for 1 and negative 1. 1 works, but try negative 1: negative 1 squared is 1, while 2 minus negative 1 is 3. The other root is negative 2.'
+      B: 'You went for 1 and 2. Try 2: 2 squared is 4, but 2 minus 2 is 0. The factors are $(a + 2)(a - 1)$, so the roots are 1 and negative 2.'
+      C: 'You went for 2 and negative 2. Negative 2 works, but 2 does not: 4 is not equal to 0. The other root is 1.'
+
+  13:
+    moments:
+      - say: 'The 3rd term of an A.P. is $4x - 2y$ and the 9th term is $10x - 8y$. We want the common difference.'
+        write: '$T_3 = 4x - 2y,\quad T_9 = 10x - 8y$'
+      - say: 'The $n$th term of an A.P. is $a$ plus $n$ minus 1 times $d$, where $a$ is the first term and $d$ is the common difference.'
+        write: '$T_n = a + (n - 1)d$'
+      - say: 'So the 3rd term is $a + 2d$.'
+        write: '$a + 2d = 4x - 2y$'
+      - say: 'And the 9th term is $a + 8d$.'
+        write: '$a + 8d = 10x - 8y$'
+      - say: 'If we subtract the first equation from the second, the $a$ disappears. $8d$ minus $2d$ is $6d$.'
+        write: '$(a + 8d) - (a + 2d) = 6d$'
+      - say: 'On the right: $10x$ minus $4x$ is $6x$, and negative $8y$ minus negative $2y$ is negative $6y$.'
+        write: '$(10x - 8y) - (4x - 2y) = 6x - 6y$'
+      - say: 'So $6d$ equals $6x - 6y$.'
+        write: '$6d = 6x - 6y$'
+      - say: 'Divide both sides by 6, and $d$ is $x - y$. That''s answer choice C.'
+        write: '$d = x - y$'
+        answer: true
+    traps:
+      A: 'You went for $19x - 17y$. Subtracting the two terms gives $6d = 6x - 6y$, so $d$ is just $x - y$.'
+      B: 'You went for $8x - 4y$. Take the 3rd term away from the 9th: that is $6x - 6y$, and it equals $6d$, not $d$. Divide by 6.'
+      D: 'You went for $2x$. Watch the $y$ terms: negative $8y$ minus negative $2y$ is negative $6y$, so the difference is $x - y$.'
+
+  14:
+    moments:
+      - say: 'The operation is $p * q = p + q - pq$, the identity is zero, and we want the inverse of $p$.'
+        write: '$p * q = p + q - pq,\quad e = 0$'
+      - say: 'What is an inverse? It is the element $q$ that combines with $p$ to give the identity. So we set $p * q$ equal to zero.'
+        write: '$p * q = 0$'
+      - say: 'Using the rule, that means $p + q - pq = 0$.'
+        write: '$p + q - pq = 0$'
+      - say: 'We want $q$ by itself, so keep the $q$ terms on the left and move $p$ to the right. Subtract $p$ from both sides.'
+        write: '$q - pq = -p$'
+      - say: 'Now factor $q$ out of the left side.'
+        write: '$q(1 - p) = -p$'
+      - say: 'Divide both sides by 1 minus $p$.'
+        write: '$q = \dfrac{-p}{1 - p}$'
+      - say: 'Let''s tidy the signs by multiplying top and bottom by negative 1. The top becomes $p$ and the bottom becomes $p - 1$.'
+        write: '$q = \dfrac{p}{p - 1}$'
+      - say: 'Quick check with $p = 2$: the inverse is 2 over 1, which is 2, and 2 star 2 is 2 plus 2 minus 4, which is zero. It works.'
+        write: '$2 * 2 = 2 + 2 - 4 = 0$'
+      - say: 'So the inverse of $p$ is $p$ over $p - 1$, which is answer choice C.'
+        write: '$p^{-1} = \dfrac{p}{p - 1}$'
+        answer: true
+    traps:
+      A: 'You went for $p$. Try $p = 2$: 2 star 2 is 0, so that works, but try $p = 3$: 3 plus 3 minus 9 is negative 3, not 0. The inverse is $p$ over $p - 1$.'
+      B: 'You went for $p - 1$. Setting $p + q - pq = 0$ and solving for $q$ gives $q(1 - p) = -p$, so $q$ is a fraction, $p$ over $p - 1$.'
+      D: 'You went for $p$ over $p + 1$. That''s the right shape with a sign slip. When you multiply top and bottom by negative 1, $1 - p$ becomes $p - 1$.'
+
+  15:
+    moments:
+      - say: 'We have a 2 by 2 matrix $P$ with $P$ transpose equal to $P$, and $b = 1$. We want to find which matrix $P$ is.'
+        write: '$P = \begin{pmatrix} a & b \\ c & d \end{pmatrix},\quad P^{T} = P$'
+      - say: 'What is the transpose? We swap rows and columns. So the entry in the top right swaps places with the one in the bottom left.'
+        write: '$P^{T} = \begin{pmatrix} a & c \\ b & d \end{pmatrix}$'
+      - say: 'Saying $P$ transpose equals $P$ means these two matrices match entry by entry.'
+        write: '$\begin{pmatrix} a & c \\ b & d \end{pmatrix} = \begin{pmatrix} a & b \\ c & d \end{pmatrix}$'
+      - say: 'The diagonal entries $a$ and $d$ match automatically. The only real condition is that $b$ equals $c$. A matrix like this is called symmetric.'
+        write: '$b = c$'
+      - say: 'We are told $b = 1$, so $c$ must be 1 as well.'
+        write: '$c = b = 1$'
+      - say: 'So we look for the option with 1 in the top right and 1 in the bottom left. Options B, C and D all have negative 1 in the bottom left.'
+      - say: 'Only option A has 1 in both places. So $P$ is 0, 1, 1, 0, which is answer choice A.'
+        write: '$P = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}$'
+        answer: true
+    traps:
+      B: 'You went for option B. Its bottom-left entry is negative 1, but it must equal the top-right entry, which is 1. Transposing would change it.'
+      C: 'You went for option C. The bottom-left entry is negative 1 while $b$ is 1. For $P^{T} = P$ those two entries must be equal.'
+      D: 'You went for option D. Its bottom-left is negative 1, not 1, so it isn''t symmetric. Only the off-diagonal pair has to match, and here it doesn''t.'
+
+  16:
+    moments:
+      - say: 'We want to evaluate a half minus a quarter plus an eighth minus a sixteenth, and so on, all raised to the power negative 1.'
+        write: '$\left(\tfrac{1}{2} - \tfrac{1}{4} + \tfrac{1}{8} - \tfrac{1}{16} + \ldots\right)^{-1}$'
+      - say: 'Let''s sum the bracket first. Each term is half the one before, with the sign flipped. That makes it a geometric progression.'
+      - say: 'The first term is one half. The common ratio is negative one half, because a quarter divided by a half, with the sign flipped, is negative a half.'
+        write: '$a = \tfrac{1}{2},\quad r = -\tfrac{1}{2}$'
+      - say: 'Since $r$ is between negative 1 and 1, the series has a sum to infinity: $a$ over 1 minus $r$.'
+        write: '$S_\infty = \dfrac{a}{1 - r}$'
+      - say: 'Substituting, we get one half over 1 minus negative one half.'
+        write: '$S_\infty = \dfrac{\tfrac{1}{2}}{1 - \left(-\tfrac{1}{2}\right)}$'
+      - say: 'Subtracting a negative means adding. 1 plus a half is three halves.'
+        write: '$S_\infty = \dfrac{\tfrac{1}{2}}{\tfrac{3}{2}}$'
+      - say: 'Dividing by three halves means multiplying by two thirds. One half times two thirds is one third.'
+        write: '$S_\infty = \dfrac{1}{2} \times \dfrac{2}{3} = \dfrac{1}{3}$'
+      - say: 'Now the power negative 1. A power of negative 1 means take the reciprocal, that is, flip the fraction.'
+        write: '$\left(\dfrac{1}{3}\right)^{-1}$'
+      - say: 'Flipping one third gives 3. So the answer is 3, which is answer choice B.'
+        write: '$= 3$'
+        answer: true
+    traps:
+      A: 'You went for two thirds. That''s the reciprocal of three halves, which is only the denominator $1 - r$. The sum is one third, and its reciprocal is 3.'
+      C: 'You went for negative two thirds. The sum is positive, one third, because its first term is positive and the terms get smaller. Its reciprocal is 3.'
+      D: 'You went for negative 1. The power negative 1 means take the reciprocal, not make it negative. The reciprocal of one third is 3.'
+
+  17:
+    moments:
+      - say: 'We have two inequalities, $2x - 2 \le y$ and $2y - 2 \le x$, and we want the graph that shows where both are true.'
+        write: '$2x - 2 \le y,\quad 2y - 2 \le x$'
+      - say: 'The first thing we need to do is write each one in the form $y$ equals $mx + c$, so we can see the boundary lines.'
+      - say: 'The first one is already nearly there: $y$ is greater than or equal to $2x - 2$. That''s a line of gradient 2 crossing the $y$-axis at negative 2, and we want the region above it.'
+        write: '$y \ge 2x - 2$'
+      - say: 'For the second, add 2 to both sides to get $2y \le x + 2$.'
+        write: '$2y \le x + 2$'
+      - say: 'Divide by 2: $y$ is less than or equal to a half $x$ plus 1. That''s a line of gradient one half crossing at 1, and we want the region below it.'
+        write: '$y \le \tfrac{1}{2}x + 1$'
+      - say: 'Both gradients are positive, so both lines slope upwards. That rules out graph B, where the lines slope down.'
+      - say: 'Where do the lines cross? Set $2x - 2$ equal to a half $x$ plus 1.'
+        write: '$2x - 2 = \tfrac{1}{2}x + 1$'
+      - say: 'Multiply both sides by 2 to get $4x - 4 = x + 2$. Then $3x = 6$, so $x = 2$, and $y$ is 2 times 2 minus 2, which is 2.'
+        write: '$4x - 4 = x + 2 \;\Rightarrow\; x = 2,\ y = 2$'
+      - say: 'Now test a point. Does the origin satisfy both? Zero is at least negative 2, yes. Zero is at most 1, yes. So the origin must be in the shaded region.'
+        write: '$0 \ge -2 \;\checkmark,\quad 0 \le 1 \;\checkmark$'
+      - say: 'So the region is the wedge between the two lines, with its point at 2, 2, opening to the left over the origin. That''s graph C, answer choice C.'
+        write: '$\text{Graph C}$'
+        answer: true
+    traps:
+      A: 'You went for graph A. It has the right lines, but it shades the wedge on the other side of the crossing point. The origin satisfies both inequalities, so it must be shaded, and in graph A it isn''t.'
+      B: 'You went for graph B. Its lines slope downwards, but both boundary lines, $y = 2x - 2$ and $y = \tfrac{1}{2}x + 1$, have positive gradients.'
+      D: 'You went for graph D. That shades below both lines. We need above the steep line and below the shallow one, and that region contains the origin.'
+
+  18:
+    moments:
+      - say: 'We want the values of $t$ that make the determinant of this 3 by 3 matrix zero.'
+        write: '$\begin{vmatrix} t - 4 & 0 & 0 \\ -1 & t + 1 & 1 \\ 3 & 4 & t - 2 \end{vmatrix} = 0$'
+      - say: 'Look at the first row: $t - 4$, then 0, then 0. Expanding along that row is quickest, because the zeros wipe out two of the three terms.'
+      - say: 'So the determinant is $t - 4$ times the 2 by 2 determinant left when we cross out its row and column.'
+        write: '$(t - 4)\begin{vmatrix} t + 1 & 1 \\ 4 & t - 2 \end{vmatrix}$'
+      - say: 'For a 2 by 2, we multiply down the leading diagonal and subtract the product of the other diagonal.'
+        write: '$(t + 1)(t - 2) - (1)(4)$'
+      - say: 'Expand: $t$ times $t$ is $t^{2}$, $t$ times negative 2 is negative $2t$, 1 times $t$ is $t$, and 1 times negative 2 is negative 2.'
+        write: '$t^{2} - 2t + t - 2 - 4$'
+      - say: 'Negative $2t$ plus $t$ is negative $t$, and negative 2 minus 4 is negative 6.'
+        write: '$t^{2} - t - 6$'
+      - say: 'To factorise, we need two numbers that multiply to negative 6 and add to negative 1. Those are negative 3 and 2.'
+        write: '$(t - 3)(t + 2)$'
+      - say: 'So the whole determinant is $(t - 4)(t - 3)(t + 2)$, and we set it equal to zero.'
+        write: '$(t - 4)(t - 3)(t + 2) = 0$'
+      - say: 'Each factor gives a value: $t = 4$, $t = 3$ or $t = -2$. That''s 4, negative 2, 3, which is answer choice D.'
+        write: '$t = 4,\ -2,\ 3$'
+        answer: true
+    traps:
+      A: 'You went for 0, 2, 3. The first row gives the factor $t - 4$, so $t = 4$ must be a root. And $t^{2} - t - 6$ factorises to $(t - 3)(t + 2)$, giving 3 and negative 2.'
+      B: 'You went for negative 4, 2, 3. The signs of two roots are flipped: $t - 4 = 0$ gives positive 4, and $t + 2 = 0$ gives negative 2.'
+      C: 'You went for negative 4, negative 2, negative 3. Setting $t - 4$ to zero gives positive 4, and $t - 3$ to zero gives positive 3.'
+
+  19:
+    moments:
+      - say: 'We know $x - 1$, $x + 1$ and $x - 2$ are all factors of $ax^{3} + bx^{2} + cx - 1$. We want $a$, $b$ and $c$.'
+        write: '$ax^{3} + bx^{2} + cx - 1$'
+      - say: 'A cubic has at most three linear factors. So the cubic must be $a$ times the product of these three.'
+        write: '$ax^{3} + bx^{2} + cx - 1 = a(x - 1)(x + 1)(x - 2)$'
+      - say: 'A quick way to find $a$ is to put $x = 0$ on both sides. That compares the constant terms.'
+        write: '$-1 = a(-1)(1)(-2)$'
+      - say: 'Negative 1 times 1 times negative 2 is positive 2, so the right side is $2a$.'
+        write: '$-1 = 2a$'
+      - say: 'Divide both sides by 2, and $a$ is negative one half.'
+        write: '$a = -\tfrac{1}{2}$'
+      - say: 'Now let''s expand the factors. $x - 1$ times $x + 1$ is a difference of two squares: $x^{2} - 1$.'
+        write: '$(x - 1)(x + 1) = x^{2} - 1$'
+      - say: 'Then $x^{2} - 1$ times $x - 2$: $x^{2}$ times $x$ is $x^{3}$, $x^{2}$ times negative 2 is negative $2x^{2}$, negative 1 times $x$ is negative $x$, and negative 1 times negative 2 is 2.'
+        write: '$(x^{2} - 1)(x - 2) = x^{3} - 2x^{2} - x + 2$'
+      - say: 'Multiply every term by negative one half.'
+        write: '$-\tfrac{1}{2}(x^{3} - 2x^{2} - x + 2) = -\tfrac{1}{2}x^{3} + x^{2} + \tfrac{1}{2}x - 1$'
+      - say: 'The constant is negative 1, which matches. Reading off, $a$ is negative one half, $b$ is 1, and $c$ is one half. That''s answer choice A.'
+        write: '$a = -\tfrac{1}{2},\ b = 1,\ c = \tfrac{1}{2}$'
+        answer: true
+    traps:
+      B: 'You went for one half, 1, one half. With $a$ positive one half, the constant term would be plus 1, but the polynomial ends in negative 1. Putting $x = 0$ gives $2a = -1$, so $a$ is negative one half.'
+      C: 'You went for one half, 1, negative one half. The sign of $a$ is off: $x = 0$ gives $-1 = 2a$, so $a = -\tfrac{1}{2}$, and then $c$ comes out as positive one half.'
+      D: 'You went for one half, negative 1, one half. With $a = \tfrac{1}{2}$ the constant term would be plus 1, not negative 1. The correct $a$ is negative one half, which makes $b$ positive 1.'
+
+  20:
+    moments:
+      - say: 'A trader makes $10x - x^{2}$ naira profit from selling $x$ bags of corn. We want the number of bags that gives the most profit.'
+        write: '$\text{Profit} = 10x - x^{2}$'
+      - say: 'Let''s write it in the usual order: negative $x^{2}$ plus $10x$. So $a$ is negative 1 and $b$ is 10.'
+        write: '$-x^{2} + 10x,\quad a = -1,\ b = 10$'
+      - say: 'Because $a$ is negative, the parabola opens downwards, so it has a highest point. That''s the maximum.'
+      - say: 'The turning point of a quadratic is at $x$ equals negative $b$ over $2a$.'
+        write: '$x = -\dfrac{b}{2a}$'
+      - say: 'Substitute: negative 10 over 2 times negative 1.'
+        write: '$x = -\dfrac{10}{2(-1)}$'
+      - say: '2 times negative 1 is negative 2, and negative 10 over negative 2 is positive 5.'
+        write: '$x = -\dfrac{10}{-2} = 5$'
+      - say: 'Let''s check around it. At 4 bags, profit is 40 minus 16, which is 24. At 5 bags, it is 50 minus 25, which is 25. At 6 bags, 60 minus 36 is 24.'
+        write: '$24,\quad 25,\quad 24$'
+      - say: 'So 5 bags give the maximum profit, which is answer choice B.'
+        write: '$x = 5 \text{ bags}$'
+        answer: true
+    traps:
+      A: 'You went for 4. At 4 bags the profit is 24 naira, but at 5 bags it is 25. The turning point is at negative $b$ over $2a$, which is 5.'
+      C: 'You went for 6. At 6 bags the profit is back down to 24 naira. The peak is at 5 bags.'
+      D: 'You went for 7. At 7 bags the profit is 70 minus 49, which is 21. The profit is highest at 5 bags.'
+
+  21:
+    moments:
+      - say: 'We want to solve the inequality 2 minus $x$ is greater than $x$ squared.'
+        write: '$2 - x > x^{2}$'
+      - say: 'The first thing we need to do is bring everything to one side. Subtract 2 and add $x$ to both sides.'
+        write: '$0 > x^{2} + x - 2$'
+      - say: 'Let''s write it the usual way round: $x^{2} + x - 2$ is less than zero.'
+        write: '$x^{2} + x - 2 < 0$'
+      - say: 'Now factorise. We need two numbers that multiply to negative 2 and add to 1. Those are 2 and negative 1.'
+        write: '$(x + 2)(x - 1) < 0$'
+      - say: 'The roots are where each bracket is zero: $x = -2$ and $x = 1$.'
+        write: '$x = -2,\quad x = 1$'
+      - say: 'When is a product of two brackets negative? When they have opposite signs. That happens between the roots.'
+      - say: 'So $x$ lies between negative 2 and 1.'
+        write: '$-2 < x < 1$'
+      - say: 'Let''s test $x = 0$, which is between them. 2 minus 0 is 2, and 0 squared is 0. Is 2 greater than 0? Yes.'
+        write: '$x = 0: \quad 2 > 0 \;\checkmark$'
+      - say: 'And a point outside, $x = 2$: 2 minus 2 is 0, and 2 squared is 4. 0 is not greater than 4, so outside fails.'
+        write: '$x = 2: \quad 0 > 4 \;\times$'
+      - say: 'So the solution is negative 2 less than $x$ less than 1, which is answer choice D.'
+        write: '$-2 < x < 1$'
+        answer: true
+    traps:
+      A: 'You went for $x < -2$ or $x > 1$. The roots are right, but that''s the outside region, where the product is positive. We need the product less than zero, which is between the roots.'
+      B: 'You went for $x > 2$ or $x < -1$. The factors are $(x + 2)(x - 1)$, so the roots are negative 2 and 1, not 2 and negative 1. And the answer lies between them.'
+      C: 'You went for negative 1 less than $x$ greater than 2. That isn''t a proper range, and the roots are negative 2 and 1. The solution is $-2 < x < 1$.'
+
+  22:
+    moments:
+      - say: 'Alpha and beta are the roots of $3x^{2} + 5x - 2 = 0$. We want 1 over alpha plus 1 over beta.'
+        write: '$3x^{2} + 5x - 2 = 0$'
+      - say: 'We don''t need the roots themselves. For $ax^{2} + bx + c = 0$, the sum of the roots is negative $b$ over $a$, and the product is $c$ over $a$.'
+        write: '$\alpha + \beta = -\dfrac{b}{a},\quad \alpha\beta = \dfrac{c}{a}$'
+      - say: 'Here $a$ is 3, $b$ is 5 and $c$ is negative 2.'
+        write: '$a = 3,\ b = 5,\ c = -2$'
+      - say: 'So the sum is negative five thirds.'
+        write: '$\alpha + \beta = -\dfrac{5}{3}$'
+      - say: 'And the product is negative two thirds.'
+        write: '$\alpha\beta = -\dfrac{2}{3}$'
+      - say: 'Now let''s combine 1 over alpha plus 1 over beta into a single fraction. The common denominator is alpha beta.'
+        write: '$\dfrac{1}{\alpha} + \dfrac{1}{\beta} = \dfrac{\beta + \alpha}{\alpha\beta}$'
+      - say: 'That''s the sum over the product. Substitute.'
+        write: '$\dfrac{-\tfrac{5}{3}}{-\tfrac{2}{3}}$'
+      - say: 'The thirds cancel, and a negative divided by a negative is positive. So we get five halves.'
+        write: '$= \dfrac{5}{2}$'
+      - say: 'So 1 over alpha plus 1 over beta is five halves, which is answer choice D.'
+        write: '$\dfrac{1}{\alpha} + \dfrac{1}{\beta} = \dfrac{5}{2}$'
+        answer: true
+    traps:
+      A: 'You went for negative five halves. The size is right, but both the sum and the product are negative, and a negative divided by a negative is positive.'
+      B: 'You went for negative two thirds. That''s the product of the roots on its own. We need the sum divided by the product.'
+      C: 'You went for one half. The roots are one third and negative 2, and 3 plus negative one half is five halves. Sum over product gives five halves.'
+
+  23:
+    moments:
+      - say: 'We want the minimum value of $f(\theta) = \dfrac{2}{3 - \cos\theta}$ for $\theta$ from 0 to $2\pi$.'
+        write: '$f(\theta) = \dfrac{2}{3 - \cos\theta}$'
+      - say: 'The top is fixed at 2. A fraction with a fixed top is smallest when its bottom is biggest.'
+      - say: 'The bottom is 3 minus cos theta. That is biggest when cos theta is as small as possible.'
+        write: '$3 - \cos\theta \text{ is largest when } \cos\theta \text{ is smallest}$'
+      - say: 'Cosine is never less than negative 1, and it does reach negative 1, when theta is $\pi$.'
+        write: '$-1 \le \cos\theta \le 1$'
+      - say: 'So the largest bottom is 3 minus negative 1, which is 4.'
+        write: '$3 - (-1) = 4$'
+      - say: 'Then the smallest value of the function is 2 over 4.'
+        write: '$f_{\min} = \dfrac{2}{4}$'
+      - say: '2 over 4 is one half. That''s answer choice A.'
+        write: '$f_{\min} = \dfrac{1}{2}$'
+        answer: true
+    traps:
+      B: 'You went for two thirds. That''s the value when cos theta is 0. We can make the bottom bigger by letting cos theta be negative 1, which gives one half.'
+      C: 'You went for 1. That comes from cos theta equal to 1, which makes the bottom smallest, so that''s the maximum. For the minimum we need the biggest bottom, 4.'
+      D: 'You went for 2. That''s just the top of the fraction. The bottom is at least 2, so the function can never be more than 1, and its minimum is one half.'
+
+  24:
+    moments:
+      - say: 'A frustum has a square top of side 2 metres and a square bottom of side 5 metres, and it is 6 metres deep. We want the height of the whole pyramid it came from.'
+        write: '$\text{top} = 2\text{ m},\quad \text{base} = 5\text{ m},\quad \text{depth} = 6\text{ m}$'
+      - say: 'A frustum is a pyramid with a smaller pyramid cut off the top. The small pyramid and the full pyramid are similar.'
+      - say: 'Let the full pyramid''s height be $h$. The small pyramid on top is 6 metres shorter, so its height is $h - 6$.'
+        write: '$\text{full} = h,\quad \text{small} = h - 6$'
+      - say: 'In similar shapes, the ratio of the base sides equals the ratio of the heights. The small base is 2, the full base is 5.'
+        write: '$\dfrac{2}{5} = \dfrac{h - 6}{h}$'
+      - say: 'Cross-multiply: 2 times $h$ equals 5 times $h - 6$.'
+        write: '$2h = 5(h - 6)$'
+      - say: 'Expand the bracket: 5 times $h$ is $5h$, and 5 times negative 6 is negative 30.'
+        write: '$2h = 5h - 30$'
+      - say: 'Subtract $2h$ from both sides and add 30 to both sides. That gives 30 equals $3h$.'
+        write: '$3h = 30$'
+      - say: 'Divide by 3, and $h$ is 10.'
+        write: '$h = 10$'
+      - say: 'Check: the small pyramid is 10 minus 6, which is 4 metres tall, and 4 over 10 is two fifths. It matches.'
+        write: '$\dfrac{4}{10} = \dfrac{2}{5} \;\checkmark$'
+      - say: 'So the pyramid is 10 metres high, which is answer choice D.'
+        write: '$h = 10.0\text{ m}$'
+        answer: true
+    traps:
+      A: 'You went for 8.0 metres. Then the small pyramid would be 2 metres tall, and 2 over 8 is a quarter, not two fifths. Solving $2h = 5(h - 6)$ gives 10.'
+      B: 'You went for 8.4 metres. The heights must be in the ratio 2 to 5, and $2h = 5(h - 6)$ gives $h = 10$ exactly.'
+      C: 'You went for 9.0 metres. The small pyramid would be 3 metres tall, and 3 over 9 is a third, not two fifths. The full height is 10 metres.'
+
+  25:
+    moments:
+      - say: '$P$ moves on one side of the line $UV$, in the same direction as $UV$. The line $ST$ is on the locus of $P$, and angle $VUS$ is 50 degrees. We want angle $UST$.'
+        write: '$\angle VUS = 50^{\circ}$'
+      - say: 'A point that keeps moving in the same direction as $UV$, staying on one side of it, traces a line parallel to $UV$. So $ST$ is parallel to $UV$.'
+        write: '$ST \parallel UV$'
+      - say: 'Now $US$ joins a point on one line to a point on the other. So $US$ is a transversal crossing the two parallel lines.'
+      - say: 'Angle $VUS$ is at $U$ and angle $UST$ is at $S$. They sit on the same side of the transversal, between the parallels. These are co-interior angles.'
+        write: '$\angle VUS \text{ and } \angle UST \text{ are co-interior}$'
+      - say: 'Co-interior angles between parallel lines add up to 180 degrees.'
+        write: '$\angle VUS + \angle UST = 180^{\circ}$'
+      - say: 'So 50 plus angle $UST$ is 180.'
+        write: '$50^{\circ} + \angle UST = 180^{\circ}$'
+      - say: '180 minus 50 is 130, so angle $UST$ is 130 degrees. That''s answer choice B.'
+        write: '$\angle UST = 130^{\circ}$'
+        answer: true
+    traps:
+      A: 'You went for 310 degrees. That''s 360 minus 50, the angle all the way round a point. Co-interior angles add to 180, so the answer is 130.'
+      C: 'You went for 80 degrees. There''s no step that gives 80 here. With parallel lines, co-interior angles add to 180, so 180 minus 50 is 130.'
+      D: 'You went for 50 degrees. That would be right for alternate angles, which sit on opposite sides of the transversal. These two are on the same side, so they add to 180.'
+
+  26:
+    moments:
+      - say: 'A ship sails 50 kilometres on $S50^{\circ}E$, then 50 kilometres on $N40^{\circ}E$. We want its bearing from where it started.'
+        write: '$50\text{ km on } S50^{\circ}E,\quad 50\text{ km on } N40^{\circ}E$'
+      - say: 'The plan is to split each leg into an east part and a north part, add them, then turn the total back into a bearing.'
+      - say: '$S50^{\circ}E$ means face south and turn 50 degrees towards east. So the east part is 50 sin 50 degrees, and the south part is 50 cos 50 degrees.'
+        write: '$E_1 = 50\sin 50^{\circ} \approx 38.3,\quad S_1 = 50\cos 50^{\circ} \approx 32.1$'
+      - say: 'Going south is going backwards on north, so this leg''s north part is negative 32.1.'
+        write: '$N_1 \approx -32.1$'
+      - say: 'Second leg, $N40^{\circ}E$: the east part is 50 sin 40 degrees, about 32.1, and the north part is 50 cos 40 degrees, about 38.3.'
+        write: '$E_2 = 50\sin 40^{\circ} \approx 32.1,\quad N_2 = 50\cos 40^{\circ} \approx 38.3$'
+      - say: 'Total east: 38.3 plus 32.1 is 70.4 kilometres.'
+        write: '$E = 38.3 + 32.1 = 70.4$'
+      - say: 'Total north: negative 32.1 plus 38.3 is 6.2 kilometres. So the ship ends up east and slightly north of its start.'
+        write: '$N = -32.1 + 38.3 = 6.2$'
+      - say: 'The angle north of east is the inverse tan of 6.2 over 70.4.'
+        write: '$\tan^{-1}\left(\dfrac{6.2}{70.4}\right)$'
+      - say: '6.2 over 70.4 is about 0.088, and the inverse tan of that is about 5 degrees.'
+        write: '$\tan^{-1}(0.088) \approx 5^{\circ}$'
+      - say: 'Measured from north, that is 90 minus 5, which is 85 degrees towards the east. So the bearing is $N85^{\circ}E$, which is answer choice D.'
+        write: '$90^{\circ} - 5^{\circ} = 85^{\circ} \;\Rightarrow\; N85^{\circ}E$'
+        answer: true
+    traps:
+      A: 'You went for $S90^{\circ}E$, which is due east. The ship does end up mostly east, but the north parts don''t cancel: negative 32.1 plus 38.3 leaves 6.2 north, so it''s 5 degrees north of east.'
+      B: 'You went for $N40^{\circ}E$. That''s the direction of the second leg only. The first leg pulled the ship a long way east and south, so the overall bearing is $N85^{\circ}E$.'
+      C: 'You went for $S95^{\circ}E$. A bearing measured from south or north never goes past 90 degrees. The ship ends up slightly north of east, so it''s $N85^{\circ}E$.'
+
+  27:
+    moments:
+      - say: 'An equilateral triangle with side root 3 centimetres sits inside a circle, with its corners on the circle. We want the radius.'
+        write: '$a = \sqrt{3}\text{ cm}$'
+      - say: 'Let''s join the centre to two corners of the triangle. That makes a triangle with two sides equal to the radius $R$.'
+      - say: 'The three corners share the full turn at the centre equally, so the angle between those two radii is 360 over 3, which is 120 degrees.'
+        write: '$\dfrac{360^{\circ}}{3} = 120^{\circ}$'
+      - say: 'Now use the cosine rule on that triangle. The side $a$ squared is $R$ squared plus $R$ squared minus $2R^{2}$ cos 120.'
+        write: '$a^{2} = R^{2} + R^{2} - 2R^{2}\cos 120^{\circ}$'
+      - say: 'Cos 120 degrees is negative one half, so minus $2R^{2}$ times negative a half is plus $R^{2}$.'
+        write: '$a^{2} = 2R^{2} + R^{2} = 3R^{2}$'
+      - say: 'Take square roots: $a$ is $R$ root 3. So $R$ is $a$ over root 3.'
+        write: '$R = \dfrac{a}{\sqrt{3}}$'
+      - say: 'Now substitute the side, root 3.'
+        write: '$R = \dfrac{\sqrt{3}}{\sqrt{3}}$'
+      - say: 'Root 3 over root 3 is 1. So the radius is 1 centimetre, which is answer choice C.'
+        write: '$R = 1\text{ cm}$'
+        answer: true
+    traps:
+      A: 'You went for two thirds of a centimetre. From the cosine rule, $a^{2} = 3R^{2}$, so $R$ is root 3 over root 3, which is 1.'
+      B: 'You went for 2 centimetres. The side of an equilateral triangle is longer than the radius, not shorter: $a = R\sqrt{3}$. So $R$ is 1.'
+      D: 'You went for 3 centimetres. That''s the side squared. We need $R = \dfrac{a}{\sqrt{3}}$, and root 3 over root 3 is 1.'
+
+  28:
+    moments:
+      - say: 'We have two lines, $3y = 4x - 1$ and $Ky = x + 3$, and they are perpendicular. We want $K$.'
+        write: '$3y = 4x - 1,\quad Ky = x + 3$'
+      - say: 'Perpendicular lines have gradients that multiply to negative 1. So we need both gradients, which means writing each line as $y = mx + c$.'
+        write: '$m_1 \times m_2 = -1$'
+      - say: 'First line: divide both sides by 3. $y$ equals four thirds $x$ minus one third, so the gradient is four thirds.'
+        write: '$y = \tfrac{4}{3}x - \tfrac{1}{3},\quad m_1 = \tfrac{4}{3}$'
+      - say: 'Second line: divide both sides by $K$. $y$ equals 1 over $K$ times $x$, plus 3 over $K$, so the gradient is 1 over $K$.'
+        write: '$y = \tfrac{1}{K}x + \tfrac{3}{K},\quad m_2 = \tfrac{1}{K}$'
+      - say: 'Now set the product to negative 1.'
+        write: '$\dfrac{4}{3} \times \dfrac{1}{K} = -1$'
+      - say: 'Four thirds times 1 over $K$ is 4 over $3K$.'
+        write: '$\dfrac{4}{3K} = -1$'
+      - say: 'Multiply both sides by $3K$: 4 equals negative $3K$.'
+        write: '$4 = -3K$'
+      - say: 'Divide both sides by negative 3, and $K$ is negative four thirds. That''s answer choice A.'
+        write: '$K = -\dfrac{4}{3}$'
+        answer: true
+    traps:
+      B: 'You went for negative three quarters. That makes the second gradient negative four thirds, and four thirds times negative four thirds isn''t negative 1. $4 = -3K$ gives $K = -\tfrac{4}{3}$.'
+      C: 'You went for three quarters. That makes the second gradient four thirds, the same as the first, so the lines would be parallel, not perpendicular.'
+      D: 'You went for four thirds. That''s the right size but the minus sign is lost. Perpendicular gradients multiply to negative 1, so $K$ is negative four thirds.'
+
+  29:
+    moments:
+      - say: 'In the diagram, angle $RPS$ is 50 degrees, angle $RPQ$ is 30 degrees, and $PQ = QR$. All four points lie on the circle. We want angle $PRS$.'
+        write: '$\angle RPS = 50^{\circ},\quad \angle RPQ = 30^{\circ},\quad PQ = QR$'
+      - say: 'Start with triangle $PQR$. $PQ$ equals $QR$, so it is isosceles, and the angles opposite the equal sides are equal.'
+        write: '$\angle QRP = \angle QPR = 30^{\circ}$'
+      - say: 'The angles in a triangle add up to 180, so angle $PQR$ is 180 minus 30 minus 30.'
+        write: '$\angle PQR = 180^{\circ} - 30^{\circ} - 30^{\circ}$'
+      - say: '180 minus 60 is 120.'
+        write: '$\angle PQR = 120^{\circ}$'
+      - say: 'Now, $PQRS$ is a cyclic quadrilateral, because all four corners are on the circle. Its opposite angles add up to 180 degrees.'
+        write: '$\angle PQR + \angle PSR = 180^{\circ}$'
+      - say: 'Angle $PSR$ is opposite angle $PQR$, so it is 180 minus 120, which is 60 degrees.'
+        write: '$\angle PSR = 180^{\circ} - 120^{\circ} = 60^{\circ}$'
+      - say: 'Now look at triangle $PSR$. Its angle at $P$ is 50 degrees, and its angle at $S$ is 60 degrees.'
+        write: '$\angle PRS = 180^{\circ} - 50^{\circ} - 60^{\circ}$'
+      - say: '50 plus 60 is 110, and 180 minus 110 is 70. So angle $PRS$ is 70 degrees, which is answer choice B.'
+        write: '$\angle PRS = 70^{\circ}$'
+        answer: true
+    traps:
+      A: 'You went for 80 degrees. That''s 50 plus 30, adding the two angles at $P$. They belong to different triangles. In triangle $PSR$, 180 minus 50 minus 60 is 70.'
+      C: 'You went for 60 degrees. That''s angle $PSR$, the angle at $S$. We still need the third angle of triangle $PSR$, at $R$.'
+      D: 'You went for 50 degrees. That''s angle $RPS$, which is given. The angle we want is at $R$: 180 minus 50 minus 60, which is 70.'
+
+  30:
+    moments:
+      - say: 'In the diagram, $FH$ is a diameter, and the chord $GE$ meets it at right angles at $N$. $NH$ is 8 centimetres and $GE$ is 24. We want $FH$.'
+        write: '$NH = 8\text{ cm},\quad GE = 24\text{ cm}$'
+      - say: 'A diameter that meets a chord at right angles cuts the chord exactly in half. So $N$ is the midpoint of $GE$.'
+      - say: 'Half of 24 is 12, so $GN$ and $NE$ are both 12.'
+        write: '$GN = NE = 12\text{ cm}$'
+      - say: 'When two chords cross inside a circle, the two pieces of one chord multiply to the same as the two pieces of the other.'
+        write: '$GN \times NE = FN \times NH$'
+      - say: 'Substitute: 12 times 12 equals $FN$ times 8.'
+        write: '$12 \times 12 = FN \times 8$'
+      - say: '12 times 12 is 144.'
+        write: '$144 = 8 \times FN$'
+      - say: 'Divide both sides by 8. 144 divided by 8 is 18.'
+        write: '$FN = 18\text{ cm}$'
+      - say: 'The diameter $FH$ is the two pieces either side of $N$ added together: 18 plus 8.'
+        write: '$FH = FN + NH = 18 + 8$'
+      - say: '18 plus 8 is 26. So $FH$ is 26 centimetres, which is answer choice C.'
+        write: '$FH = 26\text{ cm}$'
+        answer: true
+    traps:
+      A: 'You went for 16 centimetres. That''s just double $NH$. Use the crossing chords: 12 times 12 equals 8 times $FN$, so $FN$ is 18, and $FH$ is 18 plus 8.'
+      B: 'You went for 20 centimetres. First find $FN$ from 144 equals 8 times $FN$, which is 18. Then add $NH$: 18 plus 8 is 26.'
+      D: 'You went for 32 centimetres. Check the chord rule: 12 times 12 is 144, divided by 8 is 18. Add 8 to get 26.'
+
+  31:
+    moments:
+      - say: '$P$ and $Q$ are fixed points, and $X$ moves so that $XP$ always equals $XQ$. We want the locus of $X$, the path it traces.'
+        write: '$XP = XQ$'
+      - say: 'So $X$ is always the same distance from $P$ as from $Q$. Which points do that?'
+      - say: 'The midpoint of $PQ$ does. Let''s call it $M$. It is exactly halfway, so it is the same distance from both ends.'
+        write: '$MP = MQ$'
+      - say: 'But it is not the only one. Go straight up or down from $M$, at right angles to $PQ$. Any point there has two slanted distances to $P$ and $Q$ that are mirror images, so they are equal.'
+        write: '$X \text{ on the line through } M \perp PQ \;\Rightarrow\; XP = XQ$'
+      - say: 'Putting all those points together gives a straight line through the midpoint of $PQ$, at 90 degrees to $PQ$.'
+      - say: 'That line has a name. It bisects $PQ$, meaning it cuts it in half, and it is perpendicular to $PQ$. It is the perpendicular bisector of $PQ$.'
+        write: '$\text{locus} = \text{perpendicular bisector of } PQ$'
+      - say: 'So the locus of $X$ is the perpendicular bisector of $PQ$, which is answer choice D.'
+        write: '$\text{perpendicular bisector of } PQ$'
+        answer: true
+    traps:
+      A: 'You went for a straight line. That''s true, but it doesn''t say which line. The locus is one particular line: the perpendicular bisector of $PQ$.'
+      B: 'You went for a circle. A circle is the locus of points a fixed distance from one point. Being equally far from two points gives the perpendicular bisector of $PQ$.'
+      C: 'You went for the bisector of angle $PXQ$. That angle moves with $X$ itself, so it can''t describe a fixed path. Equal distances from $P$ and $Q$ give the perpendicular bisector of $PQ$.'
+
+  32:
+    moments:
+      - say: 'In a regular polygon, each interior angle is double its exterior angle. We want the number of sides.'
+        write: '$\text{interior} = 2 \times \text{exterior}$'
+      - say: 'At every corner, the interior and exterior angles sit on a straight line, so they add up to 180 degrees.'
+        write: '$\text{interior} + \text{exterior} = 180^{\circ}$'
+      - say: 'Let the exterior angle be $e$. Then the interior angle is $2e$.'
+        write: '$2e + e = 180^{\circ}$'
+      - say: '$2e$ plus $e$ is $3e$.'
+        write: '$3e = 180^{\circ}$'
+      - say: 'Divide by 3: 180 divided by 3 is 60. So each exterior angle is 60 degrees.'
+        write: '$e = 60^{\circ}$'
+      - say: 'The exterior angles of any polygon always add up to 360 degrees. So the number of sides is 360 divided by one exterior angle.'
+        write: '$n = \dfrac{360^{\circ}}{60^{\circ}}$'
+      - say: '360 divided by 60 is 6.'
+        write: '$n = 6$'
+      - say: 'Check: a regular hexagon has interior angles of 120 degrees, and 120 is twice 60. So the polygon has 6 sides, which is answer choice B.'
+        write: '$120^{\circ} = 2 \times 60^{\circ} \;\checkmark$'
+        answer: true
+    traps:
+      A: 'You went for 87. Each exterior angle is 60 degrees, and exterior angles add to 360, so there are 360 over 60, which is 6 sides.'
+      C: 'You went for 4. In a square, the interior and exterior angles are both 90 degrees, so the interior is equal to the exterior, not double. The answer is 6.'
+      D: 'You went for 3. In an equilateral triangle, the interior angle is 60 and the exterior is 120, so it''s the other way round. We need interior 120, exterior 60, giving 6 sides.'
+
+  33:
+    moments:
+      - say: 'A predator moves on a circle of radius root 2, centre the origin. A prey moves along $y = x$, with $x$ from 0 to 2. We want where they meet.'
+        write: '$\text{radius } \sqrt{2},\quad y = x,\quad 0 \le x \le 2$'
+      - say: 'They meet where the line crosses the circle. A circle centre the origin has equation $x^{2} + y^{2}$ equals radius squared.'
+        write: '$x^{2} + y^{2} = (\sqrt{2})^{2} = 2$'
+      - say: 'The prey is on $y = x$, so replace $y$ with $x$.'
+        write: '$x^{2} + x^{2} = 2$'
+      - say: '$x^{2}$ plus $x^{2}$ is $2x^{2}$.'
+        write: '$2x^{2} = 2$'
+      - say: 'Divide both sides by 2.'
+        write: '$x^{2} = 1$'
+      - say: 'Take square roots: $x$ is 1 or negative 1.'
+        write: '$x = 1 \text{ or } x = -1$'
+      - say: 'But the question says $x$ is between 0 and 2. Negative 1 is outside that range, so we throw it out.'
+        write: '$x = 1$'
+      - say: 'Since $y = x$, $y$ is also 1. So they meet only at the point 1, 1, which is answer choice A.'
+        write: '$(1,\ 1) \text{ only}$'
+        answer: true
+    traps:
+      B: 'You went for 1, 1 and 1, 2. The point 1, 2 is not on the line $y = x$, and it is not on the circle either, since 1 plus 4 is 5, not 2.'
+      C: 'You went for 1, 1 and negative 1, negative 1. Both are on the line and the circle, but the question says $x$ is between 0 and 2, so negative 1 is not allowed.'
+      D: 'You went for root 2, root 2. Check it in the circle: 2 plus 2 is 4, not 2. The meeting point is 1, 1.'
+
+  34:
+    moments:
+      - say: 'The diagram shows $y = x^{2}$ with the line $y = 16$ across it. We want the shaded area between the curve and the line.'
+        write: '$y = x^{2},\quad y = 16$'
+      - say: 'First, where do they meet? Set $x^{2}$ equal to 16.'
+        write: '$x^{2} = 16$'
+      - say: 'So $x$ is 4 or negative 4. The shaded region in the diagram runs from $x = 0$ to $x = 4$.'
+        write: '$x = 4$'
+      - say: 'Between those limits, the line is above the curve. The area between them is the integral of the top minus the bottom.'
+        write: '$\text{Area} = \displaystyle\int_{0}^{4}(16 - x^{2})\,dx$'
+      - say: 'Integrate term by term. 16 becomes $16x$. $x^{2}$ becomes $x^{3}$ over 3.'
+        write: '$\left[16x - \dfrac{x^{3}}{3}\right]_{0}^{4}$'
+      - say: 'Put in $x = 4$. 16 times 4 is 64. 4 cubed is 64, so the second part is 64 over 3.'
+        write: '$64 - \dfrac{64}{3}$'
+      - say: 'Write 64 as 192 over 3. Then 192 minus 64 is 128, so we have 128 over 3.'
+        write: '$\dfrac{192}{3} - \dfrac{64}{3} = \dfrac{128}{3}$'
+      - say: 'At $x = 0$ everything is zero. So the shaded area is 128 over 3 square units, which is answer choice B.'
+        write: '$\text{Area} = \dfrac{128}{3}$'
+        answer: true
+    traps:
+      A: 'You went for 64. That''s the whole rectangle, 4 wide and 16 tall. The part under the curve is not shaded, so we take away 64 over 3.'
+      C: 'You went for 64 over 3. That''s the area under the curve, the unshaded part. The shaded part is 64 minus that, which is 128 over 3.'
+      D: 'You went for 32. The integral of $16 - x^{2}$ from 0 to 4 is 64 minus 64 over 3, which is 128 over 3.'
+
+  35:
+    moments:
+      - say: 'We want the integral from 0 to $\pi$ of cos squared theta minus 1, over sin squared theta.'
+        write: '$\displaystyle\int_{0}^{\pi} \dfrac{\cos^{2}\theta - 1}{\sin^{2}\theta}\,d\theta$'
+      - say: 'Before integrating, let''s simplify the fraction. The key identity is sin squared plus cos squared equals 1.'
+        write: '$\sin^{2}\theta + \cos^{2}\theta = 1$'
+      - say: 'Subtract 1 and subtract sin squared from both sides: cos squared theta minus 1 equals negative sin squared theta.'
+        write: '$\cos^{2}\theta - 1 = -\sin^{2}\theta$'
+      - say: 'So the top of the fraction is negative sin squared theta.'
+        write: '$\dfrac{-\sin^{2}\theta}{\sin^{2}\theta}$'
+      - say: 'Sin squared cancels with sin squared, leaving negative 1.'
+        write: '$= -1$'
+      - say: 'So the integral is just the integral of negative 1 from 0 to $\pi$.'
+        write: '$\displaystyle\int_{0}^{\pi}(-1)\,d\theta$'
+      - say: 'Integrating a constant gives the constant times theta. So we get negative theta, from 0 to $\pi$.'
+        write: '$\left[-\theta\right]_{0}^{\pi}$'
+      - say: 'Top limit minus bottom limit: negative $\pi$ minus 0 is negative $\pi$. That''s answer choice D.'
+        write: '$-\pi - 0 = -\pi$'
+        answer: true
+    traps:
+      A: 'You went for $\pi$. The sign is lost. Cos squared minus 1 is negative sin squared, so the integrand is negative 1, and the answer is negative $\pi$.'
+      B: 'You went for $\pi$ over 2. The integrand simplifies to negative 1, and integrating negative 1 over a length of $\pi$ gives negative $\pi$.'
+      C: 'You went for negative $\pi$ over 2. The sign is right, but the fraction is exactly negative 1 all the way, so over 0 to $\pi$ the integral is negative $\pi$.'
+
+  36:
+    moments:
+      - say: 'We have $y = 2x\cos 2x - \sin 2x$, and we want $\dfrac{dy}{dx}$ when $x$ is $\pi$ over 4.'
+        write: '$y = 2x\cos 2x - \sin 2x$'
+      - say: 'The first term is a product, $2x$ times $\cos 2x$, so it needs the product rule: first times derivative of second, plus second times derivative of first.'
+        write: '$\dfrac{d}{dx}(uv) = u\dfrac{dv}{dx} + v\dfrac{du}{dx}$'
+      - say: 'The derivative of $2x$ is 2. The derivative of $\cos 2x$ is negative $2\sin 2x$: a minus from the cosine and a 2 from the chain rule.'
+        write: '$\dfrac{d}{dx}(2x) = 2,\quad \dfrac{d}{dx}(\cos 2x) = -2\sin 2x$'
+      - say: 'So the first term gives $2x$ times negative $2\sin 2x$, plus $\cos 2x$ times 2.'
+        write: '$-4x\sin 2x + 2\cos 2x$'
+      - say: 'The second term is negative $\sin 2x$. Its derivative is negative $2\cos 2x$, again with a 2 from the chain rule.'
+        write: '$\dfrac{d}{dx}(-\sin 2x) = -2\cos 2x$'
+      - say: 'Adding them up, the $2\cos 2x$ and the negative $2\cos 2x$ cancel out.'
+        write: '$\dfrac{dy}{dx} = -4x\sin 2x + 2\cos 2x - 2\cos 2x = -4x\sin 2x$'
+      - say: 'Now put $x = \dfrac{\pi}{4}$. Then $2x$ is $\pi$ over 2, and sin of $\pi$ over 2 is 1.'
+        write: '$\sin\dfrac{\pi}{2} = 1$'
+      - say: 'So we get negative 4 times $\pi$ over 4 times 1.'
+        write: '$\dfrac{dy}{dx} = -4 \times \dfrac{\pi}{4} \times 1$'
+      - say: 'The 4s cancel, leaving negative $\pi$. That''s answer choice B.'
+        write: '$= -\pi$'
+        answer: true
+    traps:
+      A: 'You went for $\pi$. The size is right, but the derivative of $\cos 2x$ is negative $2\sin 2x$, which makes the answer negative $\pi$.'
+      C: 'You went for $\pi$ over 2. The derivative of $\cos 2x$ carries a 2 from the chain rule and a minus sign, giving $-4x\sin 2x$. At $\pi$ over 4 that''s negative $\pi$.'
+      D: 'You went for negative $\pi$ over 2. You probably missed the 2 from the chain rule. The derivative is $-4x\sin 2x$, and at $\pi$ over 4 that''s negative $\pi$.'
+
+  37:
+    moments:
+      - say: 'A bowl is made by spinning the region bounded by $y = x^{2} - 1$, $y = 0$, $y = 3$ and $x \ge 0$ all the way round the $y$-axis. We want its volume.'
+        write: '$y = x^{2} - 1,\quad 0 \le y \le 3$'
+      - say: 'When we spin round the $y$-axis, we integrate with respect to $y$. The formula is $\pi$ times the integral of $x^{2}$, $dy$.'
+        write: '$V = \pi\displaystyle\int x^{2}\,dy$'
+      - say: 'So we need $x^{2}$ in terms of $y$. From $y = x^{2} - 1$, add 1 to both sides.'
+        write: '$x^{2} = y + 1$'
+      - say: 'The limits on $y$ are 0 and 3.'
+        write: '$V = \pi\displaystyle\int_{0}^{3}(y + 1)\,dy$'
+      - say: 'Integrate: $y$ becomes $y^{2}$ over 2, and 1 becomes $y$.'
+        write: '$V = \pi\left[\dfrac{y^{2}}{2} + y\right]_{0}^{3}$'
+      - say: 'At $y = 3$: 3 squared is 9, over 2 is nine halves, plus 3.'
+        write: '$\dfrac{9}{2} + 3$'
+      - say: '3 is six halves, and nine halves plus six halves is fifteen halves. At $y = 0$ everything is zero.'
+        write: '$\dfrac{9}{2} + \dfrac{6}{2} = \dfrac{15}{2}$'
+      - say: 'So the volume is $15\pi$ over 2 cubic units, which is answer choice B.'
+        write: '$V = \dfrac{15\pi}{2}$'
+        answer: true
+    traps:
+      A: 'You went for $7\pi$. Integrating $y + 1$ from 0 to 3 gives nine halves plus 3, which is fifteen halves, so the volume is $15\pi$ over 2.'
+      C: 'You went for $8\pi$. Check the integral: at $y = 3$ we get 9 over 2 plus 3, which is 7.5, not 8. So the volume is $15\pi$ over 2.'
+      D: 'You went for $17\pi$ over 2. The integral of $y + 1$ is $\tfrac{y^{2}}{2} + y$, and at 3 that''s 4.5 plus 3, which is 7.5, or fifteen halves.'
+
+  38:
+    moments:
+      - say: 'The volume of a hemisphere is growing at $8\pi$ cubic metres per second. We want how fast the radius is growing when it is 6 metres.'
+        write: '$\dfrac{dV}{dt} = 8\pi,\quad r = 6$'
+      - say: 'A hemisphere is half a sphere. A sphere''s volume is four thirds $\pi r^{3}$, so half of that is two thirds $\pi r^{3}$.'
+        write: '$V = \dfrac{1}{2} \times \dfrac{4}{3}\pi r^{3} = \dfrac{2}{3}\pi r^{3}$'
+      - say: 'Differentiate with respect to $r$: two thirds times 3 is 2, and $r^{3}$ becomes $r^{2}$.'
+        write: '$\dfrac{dV}{dr} = 2\pi r^{2}$'
+      - say: 'The chain rule links the rates: $dV$ by $dt$ equals $dV$ by $dr$ times $dr$ by $dt$.'
+        write: '$\dfrac{dV}{dt} = \dfrac{dV}{dr} \times \dfrac{dr}{dt}$'
+      - say: 'So $dr$ by $dt$ is $dV$ by $dt$ divided by $2\pi r^{2}$.'
+        write: '$\dfrac{dr}{dt} = \dfrac{8\pi}{2\pi r^{2}}$'
+      - say: 'When $r$ is 6, $r^{2}$ is 36, and $2\pi$ times 36 is $72\pi$.'
+        write: '$2\pi \times 36 = 72\pi$'
+      - say: 'So $dr$ by $dt$ is $8\pi$ over $72\pi$.'
+        write: '$\dfrac{dr}{dt} = \dfrac{8\pi}{72\pi}$'
+      - say: 'The $\pi$ cancels, and 8 over 72 is one ninth. So the radius grows at one ninth of a metre per second, which is answer choice D.'
+        write: '$\dfrac{dr}{dt} = \dfrac{1}{9}\ \text{ms}^{-1}$'
+        answer: true
+    traps:
+      A: 'You went for 2.50 metres per second. The rate is $8\pi$ divided by $2\pi r^{2}$, and with $r = 6$ that''s 8 over 72, which is one ninth.'
+      B: 'You went for 2.00 metres per second. Remember to square the radius: $2\pi$ times 36 is $72\pi$, so the answer is 8 over 72, one ninth.'
+      C: 'You went for 0.25 metres per second. That''s what a radius of 4 would give. With a radius of 6, $2\pi r^{2}$ is $72\pi$, so the rate is one ninth.'
+
+  39:
+    moments:
+      - say: 'A function passes through the origin, and its derivative is $3x + 2$. We want the function.'
+        write: '$\dfrac{dy}{dx} = 3x + 2$'
+      - say: 'To go from the derivative back to the function, we integrate. Then we use the origin to find the constant.'
+        write: '$y = \displaystyle\int (3x + 2)\,dx$'
+      - say: 'For $3x$: raise the power of $x$ from 1 to 2, then divide by the new power, 2. That gives three halves $x^{2}$.'
+        write: '$\displaystyle\int 3x\,dx = \dfrac{3x^{2}}{2}$'
+      - say: 'For 2: a constant integrates to itself times $x$, so we get $2x$.'
+        write: '$\displaystyle\int 2\,dx = 2x$'
+      - say: 'So $y$ is three halves $x^{2}$ plus $2x$ plus a constant $c$.'
+        write: '$y = \tfrac{3}{2}x^{2} + 2x + c$'
+      - say: 'It passes through the origin, so when $x$ is 0, $y$ is 0.'
+        write: '$0 = \tfrac{3}{2}(0)^{2} + 2(0) + c$'
+      - say: 'Everything else is zero, so $c$ is 0.'
+        write: '$c = 0$'
+      - say: 'So $y$ is three halves $x^{2}$ plus $2x$, which is answer choice A.'
+        write: '$y = \tfrac{3}{2}x^{2} + 2x$'
+        answer: true
+    traps:
+      B: 'You went for three halves $x^{2}$ plus $x$. The first term is right, but 2 integrates to $2x$, not $x$.'
+      C: 'You went for $3x^{2}$ plus $x$ over 2. The divisions are on the wrong terms. $3x$ integrates to $\tfrac{3}{2}x^{2}$, and 2 integrates to $2x$.'
+      D: 'You went for $3x^{2}$ plus $2x$. You forgot to divide by the new power. $3x$ integrates to $3x^{2}$ over 2. Differentiate $3x^{2}$ and you''d get $6x$, not $3x$.'
+
+  40:
+    moments:
+      - say: 'The expression $ax^{2} + bx + c$ equals 5 when $x$ is 1, and its derivative is $2x + 1$. We want $a$, $b$ and $c$.'
+        write: '$ax^{2} + bx + c$'
+      - say: 'Let''s start with the derivative. Differentiating gives $2ax + b$. The $c$ disappears.'
+        write: '$\dfrac{d}{dx}(ax^{2} + bx + c) = 2ax + b$'
+      - say: 'That must equal $2x + 1$.'
+        write: '$2ax + b = 2x + 1$'
+      - say: 'Match the $x$ terms: $2a$ equals 2, so $a$ is 1.'
+        write: '$2a = 2 \;\Rightarrow\; a = 1$'
+      - say: 'Match the constants: $b$ is 1.'
+        write: '$b = 1$'
+      - say: 'Now the second fact. When $x$ is 1, the expression is 5.'
+        write: '$a(1)^{2} + b(1) + c = 5$'
+      - say: 'That simplifies to $a + b + c = 5$. Put in $a = 1$ and $b = 1$.'
+        write: '$1 + 1 + c = 5$'
+      - say: '1 plus 1 is 2, and 5 minus 2 is 3. So $c$ is 3.'
+        write: '$c = 3$'
+      - say: 'So $a$, $b$, $c$ are 1, 1, 3, which is answer choice D.'
+        write: '$a = 1,\ b = 1,\ c = 3$'
+        answer: true
+    traps:
+      A: 'You went for 1, 3, 1. The derivative $2ax + b$ must equal $2x + 1$, so $b$ is 1, not 3. Then 1 plus 1 plus $c$ is 5, giving $c = 3$.'
+      B: 'You went for 1, 2, 1. The derivative gives $b = 1$, and 1, 2, 1 adds up to 4, not 5. The answer is 1, 1, 3.'
+      C: 'You went for 2, 1, 1. The derivative is $2ax + b$, so $2a = 2$, which makes $a$ equal to 1, not 2.'
+
+  41:
+    moments:
+      - say: '$X$ and $Y$ are independent events. The probability of $X$ or $Y$ is 0.7, and the probability of $X$ is 0.4. We want the probability of $Y$.'
+        write: '$P(X \cup Y) = 0.7,\quad P(X) = 0.4$'
+      - say: 'Independent means the probability of both is the product of the separate probabilities.'
+        write: '$P(X \cap Y) = P(X) \times P(Y)$'
+      - say: 'The addition rule says: $P$ of $X$ or $Y$ equals $P$ of $X$, plus $P$ of $Y$, minus $P$ of both.'
+        write: '$P(X \cup Y) = P(X) + P(Y) - P(X \cap Y)$'
+      - say: 'Let''s call $P$ of $Y$ just $p$. Then $P$ of both is 0.4 times $p$.'
+        write: '$0.7 = 0.4 + p - 0.4p$'
+      - say: '$p$ minus 0.4$p$ is 0.6$p$.'
+        write: '$0.7 = 0.4 + 0.6p$'
+      - say: 'Subtract 0.4 from both sides: 0.7 minus 0.4 is 0.3.'
+        write: '$0.6p = 0.3$'
+      - say: 'Divide by 0.6. 0.3 divided by 0.6 is a half, so $p$ is 0.5.'
+        write: '$p = \dfrac{0.3}{0.6} = 0.5$'
+      - say: 'Check: both is 0.4 times 0.5, which is 0.2, and 0.4 plus 0.5 minus 0.2 is 0.7. So $P$ of $Y$ is 0.50, which is answer choice B.'
+        write: '$P(Y) = 0.50$'
+        answer: true
+    traps:
+      A: 'You went for 0.30. That''s 0.7 minus 0.4, which forgets the overlap. The rule is $0.7 = 0.4 + p - 0.4p$, which gives $p = 0.5$.'
+      C: 'You went for 0.57. Collect the $p$ terms carefully: $p$ minus 0.4$p$ is 0.6$p$, and 0.3 divided by 0.6 is 0.5.'
+      D: 'You went for 1.80. A probability can never be more than 1, so this can be ruled out straight away. The answer is 0.5.'
+
+  42:
+    moments:
+      - say: 'The numbers 0, $x + 2$, $3x + 6$ and $4x + 8$ have a mean of 4. We want their mean deviation.'
+        write: '$0,\ x + 2,\ 3x + 6,\ 4x + 8$'
+      - say: 'The first thing we need to do is find $x$ using the mean. Let''s add the four numbers.'
+        write: '$0 + (x + 2) + (3x + 6) + (4x + 8) = 8x + 16$'
+      - say: 'A mean of 4 over four numbers means the total is 4 times 4, which is 16.'
+        write: '$8x + 16 = 16$'
+      - say: 'Subtract 16 from both sides: $8x$ is 0, so $x$ is 0.'
+        write: '$x = 0$'
+      - say: 'So the numbers are 0, 2, 6 and 8.'
+        write: '$0,\ 2,\ 6,\ 8$'
+      - say: 'Mean deviation is the average distance from the mean, with every distance taken as positive. The mean is 4.'
+        write: '$|0 - 4| = 4,\ |2 - 4| = 2,\ |6 - 4| = 2,\ |8 - 4| = 4$'
+      - say: 'Add the distances: 4 plus 2 plus 2 plus 4 is 12.'
+        write: '$4 + 2 + 2 + 4 = 12$'
+      - say: 'Divide by 4, the number of values. 12 divided by 4 is 3. So the mean deviation is 3, which is answer choice C.'
+        write: '$\text{M.D.} = \dfrac{12}{4} = 3$'
+        answer: true
+    traps:
+      A: 'You went for 0. That''s what you get if you keep the signs: deviations from the mean always add to zero. Mean deviation uses distances, which are all positive, giving 3.'
+      B: 'You went for 2. The distances are 4, 2, 2 and 4. Their total is 12, and 12 divided by 4 is 3.'
+      D: 'You went for 4. That''s the mean itself. The mean deviation is the average distance from it, which is 12 over 4, or 3.'
+
+  43:
+    moments:
+      - say: 'We want the number of ways to arrange the letters of the word MATHEMATICS.'
+        write: '$\text{MATHEMATICS}$'
+      - say: 'First count the letters: M, A, T, H, E, M, A, T, I, C, S. That''s 11 letters.'
+        write: '$11 \text{ letters}$'
+      - say: 'If all 11 were different, there would be 11 factorial arrangements.'
+        write: '$11!$'
+      - say: 'But some letters repeat. M appears twice, A appears twice, and T appears twice. The rest, H, E, I, C and S, appear once.'
+        write: '$M \times 2,\quad A \times 2,\quad T \times 2$'
+      - say: 'Swapping two identical letters gives the same word, so for each repeated letter we divide by 2 factorial.'
+      - say: 'There are three repeated letters, so we divide by 2 factorial three times.'
+        write: '$\dfrac{11!}{2!\,2!\,2!}$'
+      - say: 'So the number of arrangements is 11 factorial over 2 factorial, 2 factorial, 2 factorial, which is answer choice C.'
+        write: '$\dfrac{11!}{2!\,2!\,2!}$'
+        answer: true
+    traps:
+      A: 'You went for 11 factorial over 9 factorial times 2 factorial. That''s a choosing formula, not an arrangement of letters. We divide by 2 factorial for each of M, A and T.'
+      B: 'You went for 11 factorial over 9 factorial, 2 factorial, 2 factorial. There is no 9 factorial here. Only the repeated letters matter: M, A and T, each twice.'
+      D: 'You went for 11 factorial over 2 factorial, 2 factorial. That counts only two repeated letters. M, A and T all appear twice, so we need three 2 factorials.'
+
+  44:
+    moments:
+      - say: 'A dice was rolled 240 times. We want the pie chart angle for the number 4.'
+        write: '$\text{Frequency of } 4 = 40$'
+      - say: 'In a pie chart, the whole 360 degrees is shared out in proportion to the frequencies. Let''s first check the total.'
+        write: '$30 + 43 + 54 + 40 + 41 + 32$'
+      - say: '30 plus 43 is 73. Plus 54 is 127. Plus 40 is 167. Plus 41 is 208. Plus 32 is 240. That matches the 240 rolls.'
+        write: '$= 240$'
+      - say: 'The number 4 came up 40 times out of 240. So its share is 40 over 240.'
+        write: '$\dfrac{40}{240} = \dfrac{1}{6}$'
+      - say: 'Its angle is that share of 360 degrees: one sixth of 360.'
+        write: '$\dfrac{1}{6} \times 360^{\circ}$'
+      - say: '360 divided by 6 is 60. So the angle is 60 degrees, which is answer choice D.'
+        write: '$= 60^{\circ}$'
+        answer: true
+    traps:
+      A: 'You went for 10 degrees. The share for 4 is 40 out of 240, which is one sixth, and one sixth of 360 is 60 degrees.'
+      B: 'You went for 16 degrees. Multiply the share by 360: 40 over 240 times 360 is 60 degrees.'
+      C: 'You went for 40 degrees. That''s the frequency, not the angle. We convert it using the total: 40 over 240 of 360 degrees is 60.'
+
+  45:
+    moments:
+      - say: '$U$ is the whole numbers from 1 to 20. $E_2$ is the multiples of 4. We pick a number at random, and we want the probability that it is not in $E_2$.'
+        write: '$U = \{1, 2, \ldots, 20\}$'
+      - say: 'The question is only about $E_2$, so we can ignore $E_1$. There are 20 equally likely numbers.'
+        write: '$n(U) = 20$'
+      - say: 'The multiples of 4 up to 20 are 4, 8, 12, 16 and 20.'
+        write: '$E_2 = \{4, 8, 12, 16, 20\}$'
+      - say: 'That''s 5 numbers.'
+        write: '$n(E_2) = 5$'
+      - say: 'So the probability of being in $E_2$ is 5 over 20, which is one quarter.'
+        write: '$P(E_2) = \dfrac{5}{20} = \dfrac{1}{4}$'
+      - say: 'But we want not in $E_2$. That''s 1 minus the probability of being in it.'
+        write: '$P(\text{not } E_2) = 1 - \dfrac{1}{4}$'
+      - say: '1 minus a quarter is three quarters. That''s answer choice A.'
+        write: '$= \dfrac{3}{4}$'
+        answer: true
+    traps:
+      B: 'You went for three tenths. That''s the probability of picking a multiple of 3, which is $E_1$: 6 out of 20. The question is about $E_2$, the multiples of 4.'
+      C: 'You went for one quarter. That''s the probability that the number is in $E_2$. The question says not in $E_2$, so subtract from 1 to get three quarters.'
+      D: 'You went for one twentieth. That''s the chance of one particular number. There are 15 numbers not in $E_2$, so the probability is 15 over 20, which is three quarters.'
+
+  46:
+    moments:
+      - say: 'The cumulative frequency curve shows the ages of students. We want the age group that holds 70% of them.'
+      - say: 'A cumulative frequency curve gives running totals. Its height at an age tells us how many students are at or below that age.'
+      - say: 'The curve levels off at 100, so there are 100 students in all. 70% of 100 is 70.'
+        write: '$70\% \times 100 = 70$'
+      - say: 'To count the students in a group, we read the curve at both ends of the group and subtract. Let''s try 17.5 to 20.5.'
+      - say: 'At 17.5 the curve reads 30. At 20.5 it reads 100.'
+        write: '$\text{At } 17.5: 30,\quad \text{at } 20.5: 100$'
+      - say: 'So that group holds 100 minus 30, which is 70 students. That''s exactly 70%.'
+        write: '$100 - 30 = 70$'
+      - say: 'Let''s check the others. 15.5 to 18.5 holds 52 minus 10, which is 42.'
+        write: '$15.5\text{ to }18.5: 52 - 10 = 42$'
+      - say: '15.5 to 19.5 holds 78 minus 10, which is 68.'
+        write: '$15.5\text{ to }19.5: 78 - 10 = 68$'
+      - say: '16.5 to 19.5 holds 78 minus 20, which is 58.'
+        write: '$16.5\text{ to }19.5: 78 - 20 = 58$'
+      - say: 'Only 17.5 to 20.5 holds 70 students, so that''s the group. It''s answer choice D.'
+        write: '$17.5 - 20.5$'
+        answer: true
+    traps:
+      A: 'You went for 15.5 to 18.5. Read the curve at both ends: 52 minus 10 is 42, which is only 42% of the students.'
+      B: 'You went for 15.5 to 19.5. That holds 78 minus 10, which is 68 students. Close, but not 70. The group 17.5 to 20.5 holds exactly 70.'
+      C: 'You went for 16.5 to 19.5. That holds 78 minus 20, which is 58 students. We need 70, and 17.5 to 20.5 gives 100 minus 30, which is 70.'
+
+  47:
+    moments:
+      - say: 'We want the variance of $x$, $2x$, $3x$, $4x$ and $5x$.'
+        write: '$x,\ 2x,\ 3x,\ 4x,\ 5x$'
+      - say: 'First the mean. Add them up: $x$ plus $2x$ plus $3x$ plus $4x$ plus $5x$ is $15x$. Divide by 5.'
+        write: '$\bar{x} = \dfrac{15x}{5} = 3x$'
+      - say: 'Now the deviation of each value from the mean, $3x$: $x - 3x$ is negative $2x$, $2x - 3x$ is negative $x$, $3x - 3x$ is 0, $4x - 3x$ is $x$, and $5x - 3x$ is $2x$.'
+        write: '$-2x,\ -x,\ 0,\ x,\ 2x$'
+      - say: 'Square each one: negative $2x$ squared is $4x^{2}$, negative $x$ squared is $x^{2}$, then 0, $x^{2}$ and $4x^{2}$.'
+        write: '$4x^{2},\ x^{2},\ 0,\ x^{2},\ 4x^{2}$'
+      - say: 'Add them: 4 plus 1 plus 0 plus 1 plus 4 is 10, so the total is $10x^{2}$.'
+        write: '$4x^{2} + x^{2} + 0 + x^{2} + 4x^{2} = 10x^{2}$'
+      - say: 'The variance is that total divided by the number of values, 5.'
+        write: '$\text{Variance} = \dfrac{10x^{2}}{5}$'
+      - say: '10 divided by 5 is 2, so the variance is $2x^{2}$. That''s answer choice B.'
+        write: '$= 2x^{2}$'
+        answer: true
+    traps:
+      A: 'You went for $x\sqrt{2}$. That''s the standard deviation, the square root of the variance. The variance itself is $2x^{2}$.'
+      C: 'You went for $x^{2}$. The squared deviations add to $10x^{2}$, and dividing by 5 gives $2x^{2}$, not $x^{2}$.'
+      D: 'You went for $3x$. That''s the mean. The variance is the average squared deviation, which is $2x^{2}$.'
+
+  48:
+    moments:
+      - say: 'We want the sum of the range and the mode of this list of 22 numbers.'
+        write: '$\text{range} + \text{mode}$'
+      - say: 'The range is the largest value minus the smallest. Scanning the list, the largest is 10 and the smallest is 4.'
+        write: '$\text{largest} = 10,\quad \text{smallest} = 4$'
+      - say: '10 minus 4 is 6.'
+        write: '$\text{range} = 10 - 4 = 6$'
+      - say: 'The mode is the value that appears most often. Let''s count the 10s: they appear 7 times.'
+        write: '$10 \text{ appears } 7 \text{ times}$'
+      - say: '9 appears 4 times, and 8 and 7 appear 3 times each. Nothing else comes close to 7.'
+        write: '$9: 4,\quad 8: 3,\quad 7: 3$'
+      - say: 'So the mode is 10.'
+        write: '$\text{mode} = 10$'
+      - say: 'Now add them: 6 plus 10 is 16. That''s answer choice A.'
+        write: '$6 + 10 = 16$'
+        answer: true
+    traps:
+      B: 'You went for 14. That''s 10 plus 4, the mode plus the smallest value. The range is largest minus smallest, 10 minus 4, which is 6. So the sum is 16.'
+      C: 'You went for 12. The range is 6 and the mode is 10, since 10 appears 7 times. 6 plus 10 is 16.'
+      D: 'You went for 10. That''s the mode alone. We still need to add the range, 6, to get 16.'
+
+  49:
+    moments:
+      - say: 'We are choosing a delegation of 3 from 5 men and 3 women, with at least one man and at least one woman. We want the number of ways.'
+        write: '$5 \text{ men},\ 3 \text{ women},\ \text{choose } 3$'
+      - say: 'The easiest way is to count every delegation, then take away the ones that break the rule.'
+      - say: 'There are 8 people in all. Choosing 3 from 8 is 8 times 7 times 6, over 3 times 2 times 1.'
+        write: '$^{8}C_{3} = \dfrac{8 \times 7 \times 6}{3 \times 2 \times 1}$'
+      - say: '8 times 7 times 6 is 336, and 3 times 2 times 1 is 6. 336 divided by 6 is 56.'
+        write: '$^{8}C_{3} = \dfrac{336}{6} = 56$'
+      - say: 'Now the bad ones. All men means choosing 3 from the 5 men: 5 times 4 times 3 over 6, which is 10.'
+        write: '$^{5}C_{3} = \dfrac{5 \times 4 \times 3}{6} = 10$'
+      - say: 'All women means choosing 3 from the 3 women. There''s only 1 way.'
+        write: '$^{3}C_{3} = 1$'
+      - say: 'Take them away: 56 minus 10 minus 1 is 45.'
+        write: '$56 - 10 - 1 = 45$'
+      - say: 'Let''s check directly. 2 men and 1 woman: 10 times 3 is 30. 1 man and 2 women: 5 times 3 is 15. 30 plus 15 is 45.'
+        write: '$^{5}C_{2} \times {}^{3}C_{1} + {}^{5}C_{1} \times {}^{3}C_{2} = 30 + 15 = 45$'
+      - say: 'So there are 45 ways, which is answer choice D.'
+        write: '$45$'
+        answer: true
+    traps:
+      A: 'You went for 15. That''s only the delegations with 1 man and 2 women. We also need 2 men and 1 woman, which gives 30 more, so 45.'
+      B: 'You went for 28. Choosing 3 from all 8 people gives 56, and taking away the 10 all-men and 1 all-women delegations leaves 45.'
+      C: 'You went for 30. That''s only 2 men and 1 woman. At least one of each also allows 1 man and 2 women, which adds 15, so 45.'
+
+  50:
+    moments:
+      - say: 'The table shows the ages of pupils. We want the percentage who are over 15 years but less than 21 years.'
+        write: '$\text{over } 15 \text{ and under } 21$'
+      - say: 'First, the total number of pupils. 6 plus 14 is 20, plus 15 is 35, plus 10 is 45, plus 5 is 50.'
+        write: '$6 + 14 + 15 + 10 + 5 = 50$'
+      - say: 'Over 15 but less than 21 means ages 16 up to 20. Which groups is that?'
+        write: '$16 \le \text{age} \le 20$'
+      - say: 'The 16 to 18 group is inside, and so is 19 to 20.'
+        write: '$16\text{-}18: 15,\quad 19\text{-}20: 10$'
+      - say: 'The 13 to 15 group stops at 15, which is not over 15, so it''s out. And 21 to 23 starts at 21, which is not less than 21, so it''s out too.'
+      - say: 'So the number of pupils we want is 15 plus 10, which is 25.'
+        write: '$15 + 10 = 25$'
+      - say: 'As a percentage: 25 over 50, times 100.'
+        write: '$\dfrac{25}{50} \times 100$'
+      - say: '25 over 50 is a half, and a half of 100 is 50. So it''s 50%, which is answer choice C.'
+        write: '$= 50\%$'
+        answer: true
+    traps:
+      A: 'You went for 35%. Count the pupils aged 16 to 20: 15 plus 10 is 25. Out of 50 pupils, that''s a half, which is 50%.'
+      B: 'You went for 45%. Check the total first: it''s 50 pupils. Those over 15 and under 21 are 15 plus 10, which is 25, and 25 out of 50 is 50%.'
+      D: 'You went for 60%. That includes the 21 to 23 group, but 21 is not less than 21. Leave those 5 out: 25 out of 50 is 50%.'
