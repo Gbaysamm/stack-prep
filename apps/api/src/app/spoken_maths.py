@@ -21,21 +21,6 @@ from __future__ import annotations
 
 import re
 
-#: Fractions a teacher says as a word, keyed by denominator. Numerator 1 reads "a half",
-#: others read "three quarters", "two fifths".
-_DENOMINATOR_WORDS = {
-    2: ("half", "halves"),
-    3: ("third", "thirds"),
-    4: ("quarter", "quarters"),
-    5: ("fifth", "fifths"),
-    6: ("sixth", "sixths"),
-    7: ("seventh", "sevenths"),
-    8: ("eighth", "eighths"),
-    9: ("ninth", "ninths"),
-    10: ("tenth", "tenths"),
-    12: ("twelfth", "twelfths"),
-}
-
 #: Commands that are a single spoken word or phrase and take no argument.
 _WORDS = {
     "times": "times",
@@ -173,22 +158,6 @@ _UNITS = {
     "cl": "centilitres",
 }
 
-_SMALL = [
-    "zero",
-    "one",
-    "two",
-    "three",
-    "four",
-    "five",
-    "six",
-    "seven",
-    "eight",
-    "nine",
-    "ten",
-    "eleven",
-    "twelve",
-]
-
 
 class _Reader:
     """A cursor over a LaTeX string that hands out one token or one argument at a time."""
@@ -285,15 +254,24 @@ def _is_int(text: str) -> bool:
     return bool(re.fullmatch(r"-?\d+", text.strip()))
 
 
+#: The fractions a student hears as words and understands at once. Everything else is said
+#: "9 over 2": "nine halves" and "fifteen halves" are correct English that nobody in a
+#: Nigerian classroom says, and a student listening for the numbers loses them.
+_FRACTION_WORDS = {
+    (1, 2): "a half",
+    (1, 3): "a third",
+    (2, 3): "two thirds",
+    (1, 4): "a quarter",
+    (3, 4): "three quarters",
+}
+
+
 def _fraction(num: str, den: str) -> str:
-    """ "three quarters" for small whole numbers, "a over b" for everything else."""
+    """ "a half" and "three quarters" for the familiar few, "a over b" for everything else."""
     if _is_int(num) and _is_int(den):
-        n, d = int(num), int(den)
-        if d in _DENOMINATOR_WORDS and 0 < n < 13:
-            one, many = _DENOMINATOR_WORDS[d]
-            if n == 1:
-                return f"a {one}" if d != 2 else "a half"
-            return f"{_SMALL[n]} {many}"
+        words = _FRACTION_WORDS.get((int(num), int(den)))
+        if words:
+            return words
     top, bottom = speak(num), speak(den)
     # a long top or bottom gets a pause so "x plus 1 over x minus 1" is not heard as x + 1/x - 1
     if len(top.split()) > 1 or len(bottom.split()) > 1:

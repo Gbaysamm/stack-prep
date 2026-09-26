@@ -11,6 +11,10 @@ def test_small_fractions_are_words_and_others_read_over() -> None:
     assert speak(r"\dfrac{3}{4}") == "three quarters"
     assert speak(r"\tfrac{1}{2}") == "a half"
     assert speak(r"\dfrac{7}{36}") == "7 over 36"
+    # "nine halves" is correct English that no student listening for the numbers follows
+    assert speak(r"\dfrac{9}{2}") == "9 over 2"
+    assert speak(r"\tfrac{4}{3}") == "4 over 3"
+    assert speak(r"\dfrac{2}{3}") == "two thirds"
     assert speak(r"2\tfrac{1}{2}") == "2 and a half"
 
 

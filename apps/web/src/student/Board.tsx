@@ -44,6 +44,10 @@ import './theme.css';
 
 const STEP_MS = 5200;
 
+/** How long a line waits for its voice before the board writes it unheard. Long: a line
+ *  written before its voice arrives is worse than a short wait the student is told about. */
+const VOICE_WAIT_MS = 30000;
+
 /**
  * One piece of the lesson as the board plays it: what goes up, and what is said meanwhile.
  *
@@ -596,6 +600,14 @@ export function Board({
   const [itemsShown, setItemsShown] = useState(0);
   //: How long the line being written takes to write out. Set from its voice once it plays.
   const [handMs, setHandMs] = useState(900);
+  //: The question goes up as the teacher starts to read it, not before. Shown at once only
+  //: where there is no voice to wait for.
+  const [questionUp, setQuestionUp] = useState(!loadLesson);
+  //: Waiting on a line's voice for more than a moment: said, so the pause reads as the coach
+  //: getting ready rather than a board that has stalled.
+  const [gettingReady, setGettingReady] = useState(false);
+  //: The browser will not play sound until the student taps. The lesson waits for the tap.
+  const [needsTap, setNeedsTap] = useState(false);
   const [replayed, setReplayed] = useState(0);
   const clips = useRef(new Map<number, HTMLAudioElement>());
   const narrating = useRef<number | null>(null);
@@ -618,17 +630,25 @@ export function Board({
   }, [clipFor, lines]);
 
   useEffect(() => {
-    if (paused || preparing) return;
+    if (paused || preparing || needsTap) return;
     let cancelled = false;
     const timers: number[] = [];
     const later = (run: () => void, ms: number) => timers.push(window.setTimeout(run, ms));
-    // The next line goes up only when its voice can start, so the writing and the talking
-    // begin together rather than the text sitting there waiting to be read out.
+    // The next line goes up only when its voice can start. The wait is long on purpose: a
+    // line's audio may still be being made, and a line written before its voice arrives is
+    // the one thing the board must not do. A student waiting sees that the coach is getting
+    // ready rather than a silent board filling up.
     const onward = (delay: number) =>
       later(() => {
         if (shown >= lines.length) return;
-        void whenReady(clipFor(shown), 8000).then(() => {
-          if (!cancelled) advance();
+        const next = clipFor(shown);
+        const slow = window.setTimeout(() => !cancelled && setGettingReady(true), 1200);
+        timers.push(slow);
+        void whenReady(next, VOICE_WAIT_MS).then(() => {
+          window.clearTimeout(slow);
+          if (cancelled) return;
+          setGettingReady(false);
+          advance();
         });
       }, delay);
     const stop = () => {
@@ -637,13 +657,15 @@ export function Board({
     };
 
     if (shown === 0) {
-      onward(300);
+      onward(200);
       return stop;
     }
     const index = shown - 1;
     const entry = lines[index];
     const clip = clipFor(index);
     if (!entry || clip === null) {
+      // No voice at all here: the board is read, not heard, so it writes as before.
+      setQuestionUp(true);
       setItemsShown(entry?.items.length ?? 0);
       onward(STEP_MS);
       return stop;
@@ -656,13 +678,19 @@ export function Board({
     }
     narrating.current = index;
     const writeAll = () => setItemsShown(entry.items.length);
-    // Each item goes up as the words it belongs to begin, the way a hand keeps pace with a
-    // voice: the server says where in the talk each one starts.
+    // THE VOICE LEADS. Nothing is written until the teacher has started saying it: each item
+    // waits for its own words, and never less than a short lead after the voice begins. Its
+    // writing then takes the rest of the time its words take, so the hand follows the voice
+    // and the line is finished as the sentence ends — never before the voice, never after.
     const pace = () => {
-      const seconds = Number.isFinite(clip.duration) && clip.duration > 0 ? clip.duration : null;
+      const seconds = Number.isFinite(clip.duration) && clip.duration > 0 ? clip.duration : 2.5;
+      const lead = Math.min(0.7, seconds * 0.15);
+      const count = Math.max(1, entry.items.length);
+      setHandMs(Math.max(450, ((seconds * 0.92 - lead) * 1000) / count));
+      if (index === 0) later(() => setQuestionUp(true), 0);
       entry.items.forEach((_, item) => {
-        const fraction = entry.at[item] ?? item / Math.max(1, entry.items.length);
-        const due = seconds === null ? item * 1800 : (fraction * seconds - clip.currentTime) * 1000;
+        const fraction = entry.at[item] ?? item / count;
+        const due = (Math.max(fraction * seconds, lead) - clip.currentTime) * 1000;
         const show = () => setItemsShown((current) => Math.max(current, item + 1));
         if (due <= 0) show();
         else later(show, due);
@@ -674,7 +702,20 @@ export function Board({
       // A breath, not a pause: the next beat's voice is already here.
       onward(250);
     };
+    let retried = false;
     clip.onerror = () => {
+      if (cancelled) return;
+      // One more try before giving up on the voice: a line still being made on the server
+      // can fail once and succeed a moment later.
+      if (!retried) {
+        retried = true;
+        later(() => {
+          clip.load();
+          void clip.play().catch(() => undefined);
+        }, 1500);
+        return;
+      }
+      setQuestionUp(true);
       writeAll();
       onward(STEP_MS);
     };
@@ -683,18 +724,20 @@ export function Board({
       .then(() => {
         if (cancelled) return;
         setVoiceBlocked(false);
-        // The writing takes most of the time its words take, split across its items, so the
-        // hand is never ahead of the voice and the line is finished as the sentence ends.
-        const seconds = Number.isFinite(clip.duration) && clip.duration > 0 ? clip.duration : 2;
-        setHandMs(Math.max(500, (seconds * 1000 * 0.85) / Math.max(1, entry.items.length)));
         pace();
         const analyser = listen(clip);
         if (analyser) follow(analyser);
       })
-      .catch(() => {
-        // Autoplay refused, or no audio to be had. The words are under the board to read.
-        if (cancelled) return;
+      .catch((error: Error) => {
+        if (cancelled || error.name === 'AbortError') return;
+        if (error.name === 'NotAllowedError') {
+          // The browser wants a tap before it will play sound. The lesson waits for it,
+          // rather than writing itself out in silence.
+          setNeedsTap(true);
+          return;
+        }
         setVoiceBlocked(true);
+        setQuestionUp(true);
         writeAll();
         onward(STEP_MS);
       });
@@ -705,7 +748,7 @@ export function Board({
       clip.pause();
       unfollow();
     };
-  }, [advance, clipFor, follow, lines, listen, paused, preparing, replayed, shown, unfollow]);
+  }, [advance, clipFor, follow, lines, listen, needsTap, paused, preparing, replayed, shown, unfollow]);
 
   // Nothing left playing once the board is closed.
   useEffect(
@@ -827,9 +870,11 @@ export function Board({
   const finished = shown >= lines.length;
   const caption = finished
     ? 'That is the whole working. This one goes back in the pile — you will meet the same ground again, with a different question.'
-    : preparing
-      ? 'Getting the lesson ready…'
-      : (lines[Math.max(0, shown - 1)]?.say ?? '');
+    : needsTap
+      ? 'Tap the button on the board to hear the lesson.'
+      : preparing || gettingReady || shown === 0
+        ? 'Getting the lesson ready…'
+        : (lines[shown - 1]?.say ?? '');
 
   // A student has to be able to tell being answered from being handed the same step again,
   // so the card says which of the two just happened rather than sounding the same either way.
@@ -869,11 +914,28 @@ export function Board({
       </div>
 
       <div className={`sp-board ${paused ? 'dim' : ''}`}>
+        {needsTap ? (
+          <button
+            type="button"
+            className="sp-btn sp-tap"
+            onClick={() => {
+              // The tap is what the browser needs; the lesson then carries on from here.
+              setNeedsTap(false);
+              setReplayed((count) => count + 1);
+            }}
+          >
+            ▶ Tap to start the lesson
+          </button>
+        ) : null}
         <div className="sp-ink sp-textbook" ref={inkRef}>
-          <span className="sp-hl show sp-question">
-            <Maths text={question} />
-          </span>
-          <Figures figures={figures} compact />
+          {questionUp ? (
+            <>
+              <span className="sp-hl show sp-question sp-question-in">
+                <Maths text={question} />
+              </span>
+              <Figures figures={figures} compact />
+            </>
+          ) : null}
           {lines.slice(0, shown).map((line, index) => {
             const current = index === shown - 1;
             const items = current ? line.items.slice(0, itemsShown) : line.items;
