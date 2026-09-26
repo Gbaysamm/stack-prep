@@ -104,12 +104,11 @@ setsid nohup nice -n 19 uv run --frozen uvicorn app.main:app \
   --host 127.0.0.1 --port "$API_PORT" \
   > "$ROOT/logs/api.log" 2>&1 < /dev/null &
 
-echo "==> Voicing written lessons, in the background"
-# Detached: making a new year's audio takes minutes and the release does not wait for it. A
-# line already made is skipped, so after the first run this only voices what is new.
+# Lesson audio is not made here. It is made one question at a time, when a student gets that
+# question wrong, and kept. Voicing the whole bank at release sent thousands of lines to the
+# speech service at once, and the students' own lines were refused behind them. Stop any such
+# run an earlier release left going.
 pkill -f "app.cli voice-lessons" 2>/dev/null || true
-setsid nohup nice -n 19 uv run --frozen python -m app.cli voice-lessons \
-  > "$ROOT/logs/voice.log" 2>&1 < /dev/null &
 
 echo "==> Restarting the web client"
 # `preview` rather than `dev`: it serves the built assets and starts no file

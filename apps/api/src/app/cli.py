@@ -40,9 +40,9 @@ def _baseline() -> int:
 def _voice_lessons() -> int:
     """Make the audio for every written lesson that does not have it yet.
 
-    Run after each release, in the background. A lesson's lines are voiced ahead of time so the
-    board starts the moment it opens; a line already made is skipped, so after the first run
-    this only makes what is new or reworded.
+    Not run by a release: lesson audio is made one question at a time, when a student first
+    needs it (see `warm_lesson`). This is for voicing a chosen set by hand, knowing it sends
+    every missing line to the speech service. A line already made is skipped.
     """
     from sqlalchemy import text
 

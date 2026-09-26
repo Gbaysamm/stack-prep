@@ -1630,8 +1630,9 @@ async def warm_lesson(
 ) -> dict[str, int]:
     """Called on the first wrong answer, so the board opens on a lesson already prepared.
 
-    A written lesson's audio is normally made in advance, after each release; this catches
-    any line that is not. A question without one has its narration written here too.
+    This is where a written lesson's audio is made: one question at a time, the first time a
+    student needs it, and kept for everyone after. Nothing voices the whole bank in advance.
+    A question without a written lesson has its narration written here too.
     """
     await _must_have_missed(conn, session_id, question_version_id)
     beats, _ = await _lesson_beats(conn, session_id, question_version_id, settings)

@@ -101,10 +101,12 @@ fi
 echo "==> Starting API and worker"
 compose up -d
 
-echo "==> Voicing written lessons, in the background"
-# Detached: making a new year's audio takes minutes and the release does not wait for it. A
-# line already made is skipped, so after the first run this only voices what is new.
-compose run -d --rm --no-deps api python -m app.cli voice-lessons < /dev/null > /dev/null
+# Lesson audio is not made here. It is made one question at a time, when a student gets that
+# question wrong, and kept. Voicing the whole bank at release sent thousands of lines to the
+# speech service at once, and the students' own lines were refused behind them. Stop any such
+# run an earlier release left going.
+docker ps --no-trunc --format '{{.ID}} {{.Command}}' | grep 'app.cli voice-lessons' \
+  | cut -d' ' -f1 | xargs -r docker stop > /dev/null || true
 
 echo "==> Building the web client"
 npm ci --no-audit --no-fund > /dev/null
