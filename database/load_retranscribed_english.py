@@ -222,6 +222,9 @@ def read_papers(
             if number in seen:
                 raise SystemExit(f"{where} appears twice")
             seen.add(number)
+            if raw.get("retire"):
+                # Not a question at all: taken out of the bank by read_retirements below.
+                continue
             if raw.get("unrecoverable"):
                 unrecoverable.append(where)
                 continue
@@ -278,6 +281,25 @@ def read_papers(
                 }
             )
     return questions, passages, unrecoverable
+
+
+def read_retirements(years: list[int]) -> list[tuple[int, int, str]]:
+    """Items the files mark `retire`: printed on the paper, but not a question to ask anyone.
+
+    "Which question paper type of Use of English is given to you?" is an invigilator's
+    instruction from the paper-based exam. It has no answer to work out from anything a student
+    knows, so it teaches nothing and tells us nothing, and the only way to get it right is to
+    guess. The loader retires each one (its reason from the file), which takes it out of every
+    run and check-up while keeping the row for anyone who has already answered it.
+    """
+    found: list[tuple[int, int, str]] = []
+    for year in years:
+        paper = _load(ENGLISH / f"retranscribed_{year}.yaml")
+        for raw in paper["questions"]:
+            reason = raw.get("retire")
+            if reason:
+                found.append((year, int(raw["number"]), normalise(str(reason))))
+    return found
 
 
 def _clean_points(point: object, index: int, where: str) -> list[dict[str, object]]:
@@ -609,6 +631,7 @@ def _same_passage(row: asyncpg.Record, passage: dict[str, Any] | None) -> bool:
 async def run(args: argparse.Namespace) -> int:
     years, not_ready = years_ready()
     questions, _, unrecoverable = read_papers(years)
+    retirements = read_retirements(years)
     lessons = read_lessons(years, questions)
 
     conn = await connect(args)
@@ -730,6 +753,14 @@ async def run(args: argparse.Namespace) -> int:
             else:
                 plan["same"].append((q, row))
 
+        # Items the files say are not questions, still live in the bank: retired below.
+        to_retire = [
+            (year, number, reason, row)
+            for year, number, reason in retirements
+            if (row := everything.get((year, str(number)))) is not None
+            and row["retired_at"] is None
+        ]
+
         covered = {(q["year"], str(q["number"])) for q in questions}
         enc_versions: list[dict[str, Any]] = []
         enc_passages: list[asyncpg.Record] = []
@@ -759,6 +790,10 @@ async def run(args: argparse.Namespace) -> int:
             )
         if plan["create"]:
             print("    new: " + ", ".join(f"{q['year']} Q{q['number']}" for q, _ in plan["create"]))
+        print(
+            f"  {len(to_retire)} not questions at all (the paper-type instruction): retired"
+            + (" (" + ", ".join(f"{y} Q{n}" for y, n, _, _ in to_retire) + ")" if to_retire else "")
+        )
         lesson_work = await lessons_to_load(conn, subject_id, lessons)
         print(f"  {len(lessons)} written lessons, {len(lesson_work)} to load or update")
         if args.fix_encoding:
@@ -771,6 +806,7 @@ async def run(args: argparse.Namespace) -> int:
                 print(f"    {r['exam_year']} Q{r['question_number']} ({r['review_status']})")
         pending = sum(len(plan[k]) for k in ("revise", "create", "complete", "explain"))
         pending += len(reclassify) + len(lesson_work) + len(enc_versions) + len(enc_passages)
+        pending += len(to_retire)
         if args.pending:
             # For a deploy: exit 10 when there is work, so it knows to take a backup first.
             return 10 if pending else 0
@@ -796,6 +832,20 @@ async def run(args: argparse.Namespace) -> int:
                     "VALUES ($1, $2, true) ON CONFLICT (id) DO NOTHING",
                     reviewer_id,
                     reviewer_name,
+                )
+
+            for _, _, reason, row in to_retire:
+                await conn.execute(
+                    "UPDATE questions SET retired_at = now(), retired_reason = $2, "
+                    "updated_at = now() WHERE id = $1",
+                    row["question_id"],
+                    reason,
+                )
+                # A retired question's version must not read "approved".
+                await conn.execute(
+                    "UPDATE question_versions SET review_status = 'withdrawn' "
+                    "WHERE id = $1 AND review_status = 'approved'",
+                    row["version_id"],
                 )
 
             # Passages first: a version can only be approved on an approved passage.
