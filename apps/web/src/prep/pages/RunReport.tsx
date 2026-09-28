@@ -122,7 +122,7 @@ export function DeleteRunDialog({
       }
     >
       <p className="rr-dialog-text">
-        It disappears from your history. Your answers still count towards your predicted score.
+        It disappears from your history. Your answers still count towards your mastery of each topic.
       </p>
     </Dialog>
   );
@@ -192,7 +192,7 @@ export function RunReport() {
             <h2 className="sj-display sj-h3">It may have been deleted</h2>
           </div>
           <p className="sj-muted">
-            Deleted runs leave your history, but the answers in them still count towards your predicted score. The
+            Deleted runs leave your history, but the answers in them still count towards your mastery. The
             link may also be for someone else’s run.
           </p>
           <div className="rr-note-actions">

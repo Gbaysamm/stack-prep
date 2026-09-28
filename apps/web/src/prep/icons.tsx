@@ -189,3 +189,9 @@ export const IconVolume = make(
     <path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" />
   </>,
 );
+export const IconSearch = make(
+  <>
+    <circle cx="11" cy="11" r="6.5" />
+    <path d="m16 16 4.5 4.5" />
+  </>,
+);

@@ -143,7 +143,7 @@ export function Profile() {
     {
       label: 'Questions practised',
       value: answered,
-      line: `Across ${runs} finished ${runs === 1 ? 'run' : 'runs'}`,
+      line: runs === 0 ? 'No runs finished yet' : `Across ${runs} finished ${runs === 1 ? 'run' : 'runs'}`,
       tone: 'lime',
       tip: 'answered',
     },
@@ -256,7 +256,7 @@ export function Profile() {
                   </span>
                   <strong className="sj-display sj-h3">Add another subject</strong>
                 </span>
-                <span className="txt">Set a goal for each subject you sit, and each gets its own countdown and plan.</span>
+                <span className="txt">Set a target for each subject you sit, and each gets its own plan.</span>
               </Link>
             </li>
           </ul>
@@ -292,6 +292,17 @@ export function Profile() {
                 <button type="button" className="pro-copy" onClick={() => void copyId()}>
                   Copy
                 </button>
+              </dd>
+            </div>
+            <div>
+              <dt>
+                Help & guides
+                <small>How your numbers are worked out, and answers to common questions.</small>
+              </dt>
+              <dd>
+                <Button tone="ghost" size="sm" to="/help">
+                  Open help
+                </Button>
               </dd>
             </div>
             <div className="out">

@@ -1,5 +1,6 @@
 /**
- * /how-its-worked-out — every number the app shows a student, and exactly how it is worked out.
+ * Every number the app shows a student, and exactly how it is worked out: the words behind each
+ * ⓘ, and the data the /help/numbers page (HelpNumbers.tsx) is drawn from.
  *
  * The words here are written from the code, not from the spec, and must change when the code
  * does. Where each one comes from:
@@ -20,14 +21,10 @@
  * here for the rest.
  */
 
-import { useEffect, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
-import { IconArrowRight } from '../icons.js';
-import { usePageTitle } from '../store.js';
-import { Button, InfoTip, PageHero } from '../ui.js';
-import { Section } from './Home.js';
-import './HowItsWorkedOut.css';
+import { InfoTip } from '../ui.js';
 
 export type MetricId =
   | 'predicted'
@@ -51,6 +48,8 @@ export type MetricId =
 interface Metric {
   /** The name as the student sees it on the page. */
   title: string;
+  /** The answer in one plain sentence: the big line on /help/numbers. */
+  plain: string;
   /** One short paragraph: what the tip shows. */
   short: string;
   /** Anything more, for this page only. */
@@ -61,6 +60,7 @@ interface Metric {
 export const METRICS: Record<MetricId, Metric> = {
   predicted: {
     title: 'Predicted score',
+    plain: 'What you’d likely score out of 100 if you sat the exam today, worked out from your latest check-up.',
     short:
       'What you’d likely score if you sat the exam today, out of 100, from your latest check-up. We split the paper into its small parts and give each one the share of marks the real exam gives it. For each part we multiply that share by your mastery there, then add them all up. No curve, no bonus marks.',
     more: [
@@ -73,12 +73,14 @@ export const METRICS: Record<MetricId, Metric> = {
   },
   range: {
     title: 'Likely range',
+    plain: 'The band your predicted score most likely sits in. The more check-up answers behind it, the narrower it gets.',
     short:
       'Your predicted score comes from a handful of questions, so we show the band it most likely sits in. The band is your score plus or minus a set number of marks that depends on how many check-up answers stand behind it: 18 marks with fewer than 10 answers, 12 marks with 10 to 24, and 8 marks with 25 or more. It never goes below 0 or above 100.',
     example: 'Predicted 52 from a 15-question check-up: 52 minus 12 to 52 plus 12, so likely 40–64.',
   },
   projected: {
     title: 'By exam day',
+    plain: 'Where your score could be on exam day if you do every study session the plan counted.',
     short:
       'Where your score could be on exam day if you do every study session we counted and follow the plan. We spend your sessions one at a time on the part where one more session adds the most marks. A session moves you most when you’re around the middle (about 55%), less near the bottom or the top, and no part is taken past 90%.',
     more: [
@@ -90,36 +92,42 @@ export const METRICS: Record<MetricId, Metric> = {
   },
   target: {
     title: 'Your target',
+    plain: 'The score you said you’re aiming for. We never change it, but you can.',
     short:
       'The score you told us you’re aiming for when you set your goal. We never change it. The by-exam-day score is measured against it, and you can change it any time from your goal.',
     example: 'Aiming for 75 in UTME Mathematics? The target mark on the scale sits at 75.',
   },
   gap: {
     title: 'On track, or marks short',
+    plain: 'Your target minus your by-exam-day score. Reach your target or pass it and you’re on track.',
     short:
       'We compare your by-exam-day score with your target. If it reaches your target or passes it, you’re on track. If not, the gap is your target minus the by-exam-day score, rounded to a whole mark. The plan already puts every session where it earns most, so what closes a gap is more time: more study days, more minutes a day, or a later exam.',
     example: 'Target 75, by exam day 68: you’re 7 short.',
   },
   plan: {
     title: 'Your plan: sessions and marks added',
+    plain: 'Which parts of the syllabus your sessions go to, in order of the marks each is expected to add.',
     short:
       'Each line is one part of the syllabus the plan spends sessions on, ordered by the marks it’s expected to add, not just by how weak it is. “Now → after plan” is your mastery there today and after those sessions. The marks it adds are the part’s share of the paper times how much the sessions lift your mastery.',
     example: 'A part worth 8% of the paper going from 40% to 58% adds 0.08 × 18 = about 1.4 marks.',
   },
   days: {
     title: 'Days to exam',
+    plain: 'Calendar days from today to your exam, or to your next paper when papers are on different days.',
     short:
-      'Calendar days from today to the exam date on your goal. Today isn’t counted and exam day is, so the day before the exam shows 1. “Today” is worked out in your time zone (Lagos time unless you’ve changed it). Weekends and rest days count: it’s a countdown, not study time.',
+      'Calendar days from today to your exam date. Today isn’t counted and exam day is, so the day before the exam shows 1. For an exam sat on one day, like UTME, all your subjects share one date and one countdown. For an exam whose papers fall on different days, like WAEC, it counts to the nearest paper still to come and names it; once that day passes it moves to the next. With more than one exam, the nearest comes first. Weekends and rest days count: it’s a countdown, not study time.',
     example: 'Exam on Friday 13 November, and today is Monday 9 November: 4 days to exam.',
   },
   sessions: {
     title: 'Study sessions left',
+    plain: 'Weeks left × the days a week you study × the sessions you fit in a day.',
     short:
       'How many study sessions fit before your exam, from your goal. We take the weeks left, times the days a week you said you’d study, times the sessions you fit in a day (one for every 45 minutes of daily study, and at least one), then round down. This is the time the plan spends, and it assumes you study on every one of those days.',
     example: '46 days left is about 6.6 weeks. Studying 5 days a week for 60 minutes a day: 6.6 × 5 × 1 = 32 sessions.',
   },
   mastery: {
     title: 'Mastery',
+    plain: 'Your chance of getting a standard exam-level question on that part right.',
     short:
       'Your chance of getting a standard exam-level question on that part right, from your check-up answers. Everyone starts at 50%. A right answer lifts it and a wrong one lowers it, by more when the result is a surprise: a hard question right lifts it more than an easy one. Early answers move it most. A right answer given in under a quarter of the time the question should take moves it only half as much, because it may be a guess.',
     more: [
@@ -130,24 +138,28 @@ export const METRICS: Record<MetricId, Metric> = {
   },
   bands: {
     title: 'Strong, holding, shaky, needs teaching',
+    plain: 'Plain names for your mastery: Strong, Holding, Shaky or Needs teaching, or Not checked yet.',
     short:
       'Names for the mastery percentage: Strong is 75% and up, Holding is 50–74%, Shaky is 30–49%, and Needs teaching is under 30%. Not checked means the check-up asked nothing there, so we don’t know yet. It isn’t a low score. On the bars, the colour runs from pink (weak) to green (strong), and stripes mean not checked.',
     example: '62% on Indices is Holding. 28% on Logarithms is Needs teaching.',
   },
   weakest: {
     title: 'Your weakest spots',
+    plain: 'The parts your latest check-up reached where your mastery is lowest, lowest first.',
     short:
       'The parts of the syllabus with the lowest mastery, among the ones your latest check-up reached, lowest first. Home and your subject page show the three lowest. A part the check-up didn’t reach is never listed here, because no answers isn’t the same as weak.',
     example: 'If you’re at 22% on Surds, 35% on Logarithms and 48% on Sets, they’re listed in that order.',
   },
   checkup: {
     title: 'Check-up answers',
+    plain: 'Up to 15 questions across the paper. Each topic gets harder when you’re right and easier when you’re wrong.',
     short:
       'A check-up is up to 15 questions. They’re spread over the topics by how much of the paper each is worth, with at least one per topic while there’s room. Each topic starts at a middle question, then goes one step harder after a right answer and one step easier after a wrong one. There’s no pass mark and no time limit.',
     example: 'Right on your first Algebra question? Your next Algebra question is one level harder.',
   },
   answered: {
     title: 'Questions answered',
+    plain: 'Every different question you’ve met in practice, however many tries it took.',
     short:
       'Every different question you’ve met in practice, added up across all your runs. A question counts once in a run however many tries it took, and a question the coach taught you still counts. Check-up questions aren’t included.',
     example:
@@ -155,18 +167,21 @@ export const METRICS: Record<MetricId, Metric> = {
   },
   right: {
     title: 'Right first time',
+    plain: 'Practice questions you got right on the first try: no hint, no working shown, not a guess.',
     short:
       'Practice questions you got right on your first try, with no hint and without seeing the working. A right answer you told us was a guess doesn’t count here, because it doesn’t show you know it yet. A right answer on the second try, after the hint, doesn’t count either.',
     example: 'You picked the right option but tapped “I guessed”: it counts as answered, not as right first time.',
   },
   taught: {
     title: 'Taught',
+    plain: 'Questions you missed twice, so the coach worked them through with you on the board.',
     short:
       'Practice questions you missed twice, so the coach worked the solution through with you on the board, step by step. They’re counted as taught, not as known.',
     example: 'Wrong, then wrong again after the hint: the board opens and the question counts as taught.',
   },
   streak: {
     title: 'Day streak',
+    plain: 'Days in a row you’ve answered at least one question.',
     short:
       'How many days in a row you’ve answered at least one question in practice or a check-up. Days run midnight to midnight in your time zone (Lagos time unless you’ve changed it). If you haven’t answered anything yet today, your streak still counts up to yesterday, so it only resets after a whole day with no answers.',
     example:
@@ -174,13 +189,15 @@ export const METRICS: Record<MetricId, Metric> = {
   },
   checked: {
     title: 'Subjects checked',
+    plain: 'Subjects where you’ve finished at least one check-up.',
     short:
       'Subjects where you’ve finished at least one check-up. A check-up you’ve started but not finished doesn’t count until you finish it.',
     example: 'Finished a Mathematics check-up and half-way through English: 1 subject checked.',
   },
 };
 
-export const HOW_PATH = '/how-its-worked-out';
+/** Where the full explanations live. The old /how-its-worked-out address redirects here. */
+export const HOW_PATH = '/help/numbers';
 
 /** The ⓘ beside a number, with its explanation and a link to the full page. */
 export function MetricTip({ id, onDark, title }: { id: MetricId; onDark?: boolean; title?: string }) {
@@ -192,175 +209,32 @@ export function MetricTip({ id, onDark, title }: { id: MetricId; onDark?: boolea
   );
 }
 
-/* ================================================================== the page */
+/* ================================================================== groups */
 
-const GROUPS: { id: string; eyebrow: string; title: string; sub: string; metrics: MetricId[] }[] = [
+/** How the numbers are grouped on /help/numbers and on the help hub. `id` is the group's anchor. */
+export const METRIC_GROUPS: { id: 'score' | 'plan' | 'practice'; label: string; title: string; sub: string; metrics: MetricId[] }[] = [
   {
     id: 'score',
-    eyebrow: 'Your score',
-    title: 'Predicted score, range and target',
-    sub: 'The numbers on the 0–100 scale, on Home, your subject pages and your check-up report.',
-    metrics: ['predicted', 'range', 'projected', 'target', 'gap', 'plan'],
+    label: 'Your score',
+    title: 'Your score',
+    sub: 'The numbers on the 0–100 scale: on Home, your subject pages and your check-up report.',
+    metrics: ['predicted', 'range', 'projected', 'target', 'gap'],
   },
   {
-    id: 'time',
-    eyebrow: 'Your time',
-    title: 'Days and study sessions',
-    sub: 'How much time is left, and how much of it the plan can use.',
-    metrics: ['days', 'sessions'],
-  },
-  {
-    id: 'mastery-group',
-    eyebrow: 'What you know',
-    title: 'Mastery and the check-up',
-    sub: 'The percentages beside each topic and part, and the words we use for them.',
-    metrics: ['mastery', 'bands', 'weakest', 'checkup'],
+    id: 'plan',
+    label: 'Your plan',
+    title: 'Your plan',
+    sub: 'How much time is left, and where the plan spends it.',
+    metrics: ['days', 'sessions', 'plan'],
   },
   {
     id: 'practice',
-    eyebrow: 'What you’ve done',
-    title: 'Practice counts and your streak',
-    sub: 'The counts on Home, your subject pages and your profile.',
-    metrics: ['answered', 'right', 'taught', 'streak', 'checked'],
+    label: 'Your practice',
+    title: 'Your practice',
+    sub: 'What you’ve done, what you know, and the words we use for it.',
+    metrics: ['answered', 'right', 'taught', 'streak', 'mastery', 'bands', 'weakest', 'checkup', 'checked'],
   },
 ];
-
-/** The page's signature: the predicted-score sum, worked out on example numbers. */
-function WorkedSum() {
-  const rows = [
-    { part: 'Quadratic equations', share: 10, mastery: 60 },
-    { part: 'Indices', share: 6, mastery: 80 },
-    { part: 'Probability', share: 8, mastery: 35 },
-  ];
-  return (
-    <figure className="hw-sum sj-card sticker">
-      <figcaption>
-        <span className="sj-eyebrow">Worked example</span>
-        <span className="hw-sum-cap">Predicted score = add up (share of the paper × your mastery) for every part</span>
-      </figcaption>
-      <table>
-        <thead>
-          <tr>
-            <th scope="col">Part of the syllabus</th>
-            <th scope="col">Share</th>
-            <th scope="col">Mastery</th>
-            <th scope="col">Marks</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.part}>
-              <th scope="row">{row.part}</th>
-              <td className="sj-mono">{row.share}%</td>
-              <td className="sj-mono">× {row.mastery}%</td>
-              <td className="sj-mono">
-                <b>{((row.share * row.mastery) / 100).toFixed(1)}</b>
-              </td>
-            </tr>
-          ))}
-          <tr className="rest">
-            <th scope="row">…and every other part</th>
-            <td className="sj-mono">76%</td>
-            <td className="sj-mono">× your mastery</td>
-            <td className="sj-mono">…</td>
-          </tr>
-        </tbody>
-      </table>
-      <p className="hw-sum-foot">These three parts add 6.0 + 4.8 + 2.8 = 13.6 marks. The rest of the paper adds the rest.</p>
-    </figure>
-  );
-}
-
-function MetricCard({ id }: { id: MetricId }) {
-  const metric = METRICS[id];
-  return (
-    <article id={id} className="sj-card hw-metric" aria-labelledby={`${id}-title`}>
-      <h3 id={`${id}-title`} className="sj-display sj-h3">
-        {metric.title}
-      </h3>
-      <p>{metric.short}</p>
-      {metric.more?.map((line) => (
-        <p key={line}>{line}</p>
-      ))}
-      <div className="hw-example">
-        <span className="sj-mono">For example</span>
-        <p>{metric.example}</p>
-      </div>
-    </article>
-  );
-}
-
-export function HowItsWorkedOut() {
-  usePageTitle('How your numbers are worked out');
-
-  // Arriving from an ⓘ lands on that number's card.
-  useEffect(() => {
-    const hash = window.location.hash.slice(1);
-    if (!hash) return;
-    const id = window.setTimeout(() => {
-      const el = document.getElementById(hash);
-      if (!el) return;
-      el.scrollIntoView({ block: 'start' });
-      el.classList.add('hw-lit');
-      el.focus?.({ preventScroll: true });
-    }, 80);
-    return () => window.clearTimeout(id);
-  }, []);
-
-  return (
-    <div className="sj-page hw">
-      <PageHero
-        back={{ to: '/home', label: 'Home' }}
-        eyebrow="Plain answers"
-        title="How your numbers are worked out"
-        sub="Every score, count and label in Stack Prep, and exactly where it comes from, in plain words. Nothing is curved."
-        actions={
-          <nav className="hw-jump" aria-label="Jump to">
-            {GROUPS.map((group) => (
-              <a key={group.id} href={`#${group.id}`}>
-                {group.eyebrow}
-              </a>
-            ))}
-          </nav>
-        }
-      />
-
-      {GROUPS.map((group, index) => (
-        <Section
-          key={group.id}
-          id={`${group.id}-h`}
-          eyebrow={group.eyebrow}
-          title={group.title}
-          sub={group.sub}
-          className={`hw-group sj-rise d${Math.min(index + 1, 4)}`}
-        >
-          <span id={group.id} className="hw-anchor" aria-hidden="true" />
-          {group.id === 'score' ? <WorkedSum /> : null}
-          <div className="hw-grid">
-            {group.metrics.map((id) => (
-              <MetricCard key={id} id={id} />
-            ))}
-          </div>
-        </Section>
-      ))}
-
-      <section className="sj-card hw-end sj-rise d4" aria-labelledby="hw-end-title">
-        <h2 id="hw-end-title" className="sj-display sj-h3">
-          Want your own numbers to move?
-        </h2>
-        <p>Practice lifts what you know; a fresh check-up is what updates your predicted score.</p>
-        <div className="hw-end-actions">
-          <Button to="/practice" trailing={<IconArrowRight size={18} />}>
-            Practise now
-          </Button>
-          <Link className="sj-link" to="/checkup">
-            Take a check-up <IconArrowRight size={14} />
-          </Link>
-        </div>
-      </section>
-    </div>
-  );
-}
 
 /** A short line with a link to this page, for heroes and footers. */
 export function HowLink({ children = 'How your numbers are worked out' }: { children?: ReactNode }) {

@@ -17,7 +17,8 @@ import { Exams } from './pages/Exams.js';
 import { ExamSubjects } from './pages/ExamSubjects.js';
 import { Goal } from './pages/Goal.js';
 import { Home } from './pages/Home.js';
-import { HowItsWorkedOut } from './pages/HowItsWorkedOut.js';
+import { Help } from './pages/Help.js';
+import { HelpNumbers, HowItsWorkedOutRedirect } from './pages/HelpNumbers.js';
 import { NotFound } from './pages/NotFound.js';
 import { Onboarding } from './pages/Onboarding.js';
 import { PracticeHub } from './pages/PracticeHub.js';
@@ -67,7 +68,9 @@ export function PrepApp() {
                 <Route path="/progress" element={<Progress />} />
                 <Route path="/progress/check-ins" element={<CheckIns />} />
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/how-its-worked-out" element={<HowItsWorkedOut />} />
+                <Route path="/help" element={<Help />} />
+                <Route path="/help/numbers" element={<HelpNumbers />} />
+                <Route path="/how-its-worked-out" element={<HowItsWorkedOutRedirect />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
               <Route
