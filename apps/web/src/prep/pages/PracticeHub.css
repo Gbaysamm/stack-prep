@@ -849,3 +849,38 @@
     width: 48px;
   }
 }
+
+/* The build card's right side: four real counts in a 2×2 grid (one row of four on wide
+   screens), the same size however many topics the subject has. */
+.sj .ph-build-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  align-self: center;
+  min-width: 0;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--gray-200);
+  border: 1px solid var(--gray-200);
+}
+.sj .ph-build-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 18px;
+  background: #fff;
+}
+.sj .ph-build-stat b {
+  font-size: 30px;
+  color: var(--ink-900);
+}
+.sj .ph-build-stat span {
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--gray-600);
+}
+@media (max-width: 1100px) {
+  .sj .ph-build-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

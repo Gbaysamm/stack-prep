@@ -15,7 +15,6 @@ import {
   IconArrowRight,
   IconBolt,
   IconBulb,
-  IconCalendar,
   IconChevronRight,
   IconLayers,
   IconReplay,
@@ -709,13 +708,22 @@ function RunRow({
 /* ------------------------------------------------------------------ build your own */
 
 /**
- * The way into a run the student shapes: topics, years, length. Beside the words, a picture of
- * the three choices, drawn with chips like the builder's own.
+ * The way into a run the student shapes: topics, years, length. Beside the words, the real
+ * range they can choose from in their subject (counts, not a sample of names), so the card
+ * stays the same size whether a subject has five topics or fifty.
  */
 function BuildOwn({ subjectId }: { subjectId?: string }) {
-  const to = subjectId
-    ? `/practice/new?subject=${subjectId}`
-    : "/practice/new";
+  const student = useStudent();
+  const to = subjectId ? `/practice/new?subject=${subjectId}` : "/practice/new";
+  const options = useLoad(
+    () => (subjectId ? runsApi.options(student.studentId, subjectId) : Promise.resolve(null)),
+    [student.studentId, subjectId],
+  );
+  const o = options.data;
+  const subtopics = o ? o.topics.reduce((n, t) => n + t.subtopics.length, 0) : 0;
+  const questions = o ? o.topics.reduce((n, t) => n + t.questions, 0) : 0;
+  const years = o ? o.years.map((y) => y.exam_year) : [];
+  const span = years.length ? `${Math.min(...years)}–${Math.max(...years)}` : "";
   return (
     <Link to={to} className="ph-build sj-rise d3">
       <span className="ph-build-text">
@@ -723,13 +731,11 @@ function BuildOwn({ subjectId }: { subjectId?: string }) {
           <span className="ph-tile ink" aria-hidden="true">
             <IconLayers size={18} />
           </span>
-          <span className="sj-display sj-h3 ph-build-title">
-            Build your own run
-          </span>
+          <span className="sj-display sj-h3 ph-build-title">Build your own run</span>
         </span>
         <span className="ph-build-body">
-          Choose the topics and exam years you want, and how many questions.
-          Good for going over one topic, or a whole year’s paper.
+          Pick the topics and exam years you want, and how many questions. Good for going over
+          one topic, or sitting a whole year’s paper.
         </span>
         <span className="sj-btn ph-build-go">
           Build a run
@@ -738,36 +744,26 @@ function BuildOwn({ subjectId }: { subjectId?: string }) {
           </span>
         </span>
       </span>
-      <span className="ph-build-art" aria-hidden="true">
-        <span className="ph-build-line">
-          <span className="k">
-            <IconTarget size={14} />
-            Topics
+      {o ? (
+        <span className="ph-build-stats" aria-label={`Choose from ${o.topics.length} topics, ${subtopics} subtopics and ${years.length} exam years`}>
+          <span className="ph-build-stat">
+            <b className="sj-num">{o.topics.length}</b>
+            <span>topics</span>
           </span>
-          <i className="on">Algebra</i>
-          <i className="on">Indices</i>
-          <i>Statistics</i>
-        </span>
-        <span className="ph-build-line">
-          <span className="k">
-            <IconCalendar size={14} />
-            Years
+          <span className="ph-build-stat">
+            <b className="sj-num">{subtopics}</b>
+            <span>subtopics</span>
           </span>
-          <i>2016</i>
-          <i className="on">2017</i>
-          <i className="on">2018</i>
-        </span>
-        <span className="ph-build-line">
-          <span className="k">
-            <IconBolt size={14} />
-            Length
+          <span className="ph-build-stat">
+            <b className="sj-num">{years.length}</b>
+            <span>exam years{span ? ` · ${span}` : ""}</span>
           </span>
-          <i>5</i>
-          <i className="on">10</i>
-          <i>20</i>
-          <i>40</i>
+          <span className="ph-build-stat">
+            <b className="sj-num">{questions.toLocaleString()}</b>
+            <span>questions</span>
+          </span>
         </span>
-      </span>
+      ) : null}
     </Link>
   );
 }
