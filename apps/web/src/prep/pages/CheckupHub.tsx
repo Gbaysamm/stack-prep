@@ -13,7 +13,8 @@ import { api, type Goal } from '../../student/api.js';
 import { IconArrowRight, IconBook, IconClock, IconHelp, IconReplay, IconTarget } from '../icons.js';
 import { progressApi, type SubjectOverview } from '../progressApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
-import { Badge, Button, CountUp, PageHero, Skeleton, Steps, cx, daysUntil } from '../ui.js';
+import { Badge, Button, CountUp, PageHero, ShowMore, Skeleton, Steps, cx, daysUntil, useShowMore } from '../ui.js';
+import { MetricTip } from './HowItsWorkedOut.js';
 import './CheckupHub.css';
 
 interface SubjectRow {
@@ -36,6 +37,9 @@ function whenLabel(iso: string): string {
   if (diff < 7) return `${diff} days ago`;
   return `on ${then.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`;
 }
+
+/** Subject cards shown before "Show all". */
+const SUBJECTS_SHOWN = 4;
 
 const hasGoalOf = (row: SubjectRow) =>
   row.goal !== null && row.goal.target_score !== null && row.goal.exam_date !== null;
@@ -102,6 +106,8 @@ export function CheckupHub() {
     }
   }
 
+  const more = useShowMore(rows, SUBJECTS_SHOWN);
+
   const start = async (subjectId: string) => {
     if (starting) return;
     setStarting(subjectId);
@@ -156,7 +162,9 @@ export function CheckupHub() {
         aside={
           last && last.score_now !== null && scored ? (
             <div className="ch-stat">
-              <span className="ch-stat-label">Last predicted · {scored.name}</span>
+              <span className="ch-stat-label">
+                Last predicted · {scored.name} <MetricTip id="predicted" onDark />
+              </span>
               <span className="ch-stat-num">
                 <span className="sj-num">
                   <CountUp value={last.score_now} />
@@ -170,6 +178,7 @@ export function CheckupHub() {
                   </span>
                 ) : null}
                 <span>Checked {whenLabel(last.finished_at)}</span>
+                {last.score_low !== null && last.score_high !== null ? <MetricTip id="range" onDark /> : null}
               </span>
             </div>
           ) : (
@@ -235,8 +244,8 @@ export function CheckupHub() {
             check-up is one tap away.
           </NoteCard>
         ) : (
-          <div className="ch-list">
-            {rows.map((row, index) => (
+          <div className="ch-list" id="ch-subject-list">
+            {more.items.map((row, index) => (
               <SubjectCard
                 key={row.subjectId}
                 row={row}
@@ -247,6 +256,7 @@ export function CheckupHub() {
                 onStart={() => void start(row.subjectId)}
               />
             ))}
+            {more.hidden > 0 ? <ShowMore more={more} noun="subjects" controls="ch-subject-list" className="ch-more" /> : null}
             <div className="ch-add sj-rise d4">
               <span className="ch-ico" aria-hidden="true">
                 <IconBook size={18} />
@@ -330,6 +340,7 @@ function SubjectCard({
           <span>
             <IconTarget size={15} />
             {days === 0 ? 'Exam today' : `${days} ${days === 1 ? 'day' : 'days'} to your exam`}
+            <MetricTip id="days" />
           </span>
         ) : null}
       </p>
@@ -337,7 +348,9 @@ function SubjectCard({
       {latest && latest.score_now !== null ? (
         <div className="ch-panel">
           <div className="ch-panel-score">
-            <span className="ch-panel-label">Predicted score last time</span>
+            <span className="ch-panel-label">
+              Predicted score last time <MetricTip id="predicted" onDark />
+            </span>
             <span className="ch-panel-num">
               <span className="sj-num">
                 <CountUp value={latest.score_now} />
@@ -362,7 +375,10 @@ function SubjectCard({
 
       {weakest.length > 0 ? (
         <p className="ch-weak">
-          <span className="sj-eyebrow">Holding it down</span>
+          <span className="ch-weak-label">
+            <span className="sj-eyebrow">Holding it down</span>
+            <MetricTip id="weakest" />
+          </span>
           {weakest.map((w) => (
             <span key={w.subtopic_id} className="ch-weak-item">
               {w.name}

@@ -1,0 +1,358 @@
+/*
+ * Shared pieces added after prep.css was settled: the pager, the show-more toggle and the ⓘ
+ * info tip. Tokens only; the same breakpoints as prep.css (860 phone, 560 small phone).
+ */
+
+/* ---------------------------------------------------------------- pager */
+.sj .sj-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 18px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--gray-100);
+}
+.sj .sj-pager-count {
+  margin: 0;
+  font-size: 13px;
+  color: var(--gray-600);
+}
+.sj .sj-pager-count b {
+  color: var(--gray-900);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.sj .sj-pager-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sj .sj-pager-nums {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .sj-pager-nums .gap {
+  width: 22px;
+  text-align: center;
+  color: var(--gray-500);
+  font-family: var(--f-mono);
+  font-size: 13px;
+}
+.sj .sj-pager-step,
+.sj .sj-pager-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 36px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--gray-200);
+  background: #fff;
+  color: var(--gray-800);
+  font: 600 13px/1 var(--f-body);
+  cursor: pointer;
+  transition:
+    background var(--t-fast) var(--ease),
+    border-color var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease);
+}
+.sj .sj-pager-step {
+  padding: 0 12px;
+}
+.sj .sj-pager-num {
+  min-width: 36px;
+  padding: 0 8px;
+  font-family: var(--f-mono);
+  font-variant-numeric: tabular-nums;
+}
+.sj .sj-pager-step:hover:not(:disabled),
+.sj .sj-pager-num:hover:not(.on) {
+  border-color: var(--purple-300);
+  background: var(--purple-050);
+  color: var(--purple-700);
+}
+.sj .sj-pager-step:active:not(:disabled),
+.sj .sj-pager-num:active {
+  transform: translateY(1px);
+}
+.sj .sj-pager-step:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.sj .sj-pager-num.on {
+  background: var(--ink-900);
+  border-color: var(--ink-900);
+  color: #fff;
+  cursor: default;
+}
+.sj .sj-pager-of {
+  min-width: 96px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--gray-700);
+}
+@media (max-width: 560px) {
+  .sj .sj-pager {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .sj .sj-pager-controls {
+    justify-content: space-between;
+  }
+  .sj .sj-pager-step {
+    height: 44px;
+    padding: 0 14px;
+  }
+}
+
+/* ---------------------------------------------------------------- show more */
+.sj .sj-showmore {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  margin-top: 12px;
+  padding: 0 12px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--r-md);
+  background: #fff;
+  color: var(--purple-600);
+  font: 600 13px/1 var(--f-body);
+  cursor: pointer;
+  transition:
+    background var(--t-fast) var(--ease),
+    border-color var(--t-fast) var(--ease);
+}
+.sj .sj-showmore:hover {
+  border-color: var(--purple-300);
+  background: var(--purple-050);
+}
+.sj .sj-showmore svg {
+  transition: transform var(--t-med) var(--ease);
+}
+.sj .sj-showmore.open svg {
+  transform: rotate(180deg);
+}
+.sj .sj-showmore.on-dark {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.24);
+  color: #fff;
+}
+@media (max-width: 860px) {
+  .sj .sj-showmore {
+    min-height: 44px;
+  }
+}
+
+/* ---------------------------------------------------------------- info tip */
+.sj .sj-labelled {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.sj .sj-info {
+  position: relative;
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--gray-500);
+  cursor: pointer;
+  vertical-align: middle;
+  transition:
+    color var(--t-fast) var(--ease),
+    background var(--t-fast) var(--ease);
+}
+/* A 44px target around a 20px mark. */
+.sj .sj-info::after {
+  content: '';
+  position: absolute;
+  inset: -12px;
+}
+.sj .sj-info:hover,
+.sj .sj-info.open {
+  color: var(--purple-600);
+  background: var(--purple-050);
+}
+.sj .sj-info:focus-visible {
+  outline: 2px solid var(--purple-600);
+  outline-offset: 2px;
+}
+.sj .sj-info.on-dark {
+  color: rgba(255, 255, 255, 0.62);
+}
+.sj .sj-info.on-dark:hover,
+.sj .sj-info.on-dark.open {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+}
+.sj .sj-info.on-dark:focus-visible {
+  outline-color: var(--yellow-300);
+}
+
+.sj .sj-tip {
+  color: var(--gray-700);
+  font-family: var(--f-body);
+  text-align: left;
+  outline: none;
+}
+.sj .sj-tip.pop {
+  position: fixed;
+  z-index: 70;
+  width: min(360px, calc(100vw - 32px));
+  padding: 16px 18px 18px;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--gray-200);
+  background: #fff;
+  box-shadow:
+    0 2px 4px rgba(31, 0, 80, 0.06),
+    0 18px 44px rgba(31, 0, 80, 0.18);
+  animation: sj-tip-in 180ms var(--ease) both;
+}
+.sj .sj-tip.pop.above {
+  animation-name: sj-tip-in-up;
+}
+@keyframes sj-tip-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@keyframes sj-tip-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+.sj .sj-tip-scrim {
+  z-index: 70;
+}
+.sj .sj-tip.sheet {
+  position: relative;
+  width: 100%;
+  max-height: 86dvh;
+  overflow: auto;
+  padding: 12px 20px calc(22px + env(safe-area-inset-bottom));
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  background: #fff;
+  box-shadow: 0 -12px 40px rgba(31, 0, 80, 0.2);
+  animation: sj-sheet-in 320ms var(--ease) both;
+}
+.sj .sj-tip.sheet::before {
+  content: '';
+  display: block;
+  width: 44px;
+  height: 5px;
+  margin: 0 auto 14px;
+  border-radius: 3px;
+  background: var(--gray-200);
+}
+.sj .sj-tip-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.sj .sj-tip-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--purple-600);
+}
+.sj .sj-tip-close {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin: -6px -8px -6px 0;
+  border: 0;
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--gray-500);
+  cursor: pointer;
+}
+.sj .sj-tip-close:hover {
+  background: var(--gray-100);
+  color: var(--gray-900);
+}
+.sj .sj-tip.sheet .sj-tip-close {
+  width: 44px;
+  height: 44px;
+  margin: -10px -12px -10px 0;
+}
+.sj .sj-tip-title {
+  margin: 6px 0 0;
+  font-size: 20px;
+  line-height: 1.2;
+  font-weight: 600;
+  color: var(--gray-900);
+  text-wrap: balance;
+}
+.sj .sj-tip-body {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+.sj .sj-tip-body p {
+  margin: 0;
+}
+.sj .sj-tip-body p + p {
+  margin-top: 8px;
+}
+.sj .sj-tip-example {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--paper);
+  border-left: 3px solid var(--yellow-400);
+}
+.sj .sj-tip-example > span {
+  display: block;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray-600);
+}
+.sj .sj-tip-example p {
+  margin: 4px 0 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--gray-800);
+}
+.sj .sj-tip-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  min-height: 32px;
+  color: var(--purple-600);
+  font-weight: 600;
+  font-size: 13.5px;
+}
+.sj .sj-tip-more:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.sj .sj-tip.sheet .sj-tip-title {
+  font-size: 22px;
+}
+.sj .sj-tip.sheet .sj-tip-body {
+  font-size: 15px;
+}
+.sj .sj-tip.sheet .sj-tip-more {
+  min-height: 44px;
+}

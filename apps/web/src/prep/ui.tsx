@@ -10,6 +10,7 @@ import {
   useContext,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
   type ButtonHTMLAttributes,
@@ -19,7 +20,8 @@ import {
 import { createPortal } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { IconArrowLeft, IconCheck } from './icons.js';
+import { IconArrowLeft, IconArrowRight, IconCheck, IconChevronDown, IconChevronRight, IconClose } from './icons.js';
+import './ui-extras.css';
 
 const cx = (...names: (string | false | null | undefined)[]) => names.filter(Boolean).join(' ');
 
@@ -614,6 +616,390 @@ export function useNarrow(px = 860): boolean {
   }, [query]);
   return narrow;
 }
+
+/* ------------------------------------------------------------------ lists that grow */
+
+/**
+ * One page of a list that is already loaded. The page is kept in range when the list shrinks
+ * (a filter, a re-sort), and goes back to the first page when `resetKey` changes.
+ */
+export function usePaged<T>(items: readonly T[], pageSize: number, resetKey?: unknown) {
+  const [page, setPage] = useState(1);
+  const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
+  useEffect(() => setPage(1), [resetKey]);
+  const current = Math.min(page, pageCount);
+  const start = (current - 1) * pageSize;
+  return {
+    page: current,
+    pageCount,
+    pageSize,
+    total: items.length,
+    start,
+    end: Math.min(items.length, start + pageSize),
+    items: items.slice(start, start + pageSize),
+    setPage,
+  };
+}
+
+/** Page numbers with gaps: 1 … 4 5 6 … 12. Never more than seven slots. */
+function pageSlots(page: number, count: number): (number | 'gap')[] {
+  if (count <= 7) return Array.from({ length: count }, (_, i) => i + 1);
+  const near = [page - 1, page, page + 1].filter((n) => n > 1 && n < count);
+  if (page <= 3) near.push(2, 3, 4);
+  if (page >= count - 2) near.push(count - 3, count - 2, count - 1);
+  const middle = [...new Set(near)].filter((n) => n > 1 && n < count).sort((a, b) => a - b);
+  const slots: (number | 'gap')[] = [1];
+  if (middle[0]! > 2) slots.push('gap');
+  slots.push(...middle);
+  if (middle[middle.length - 1]! < count - 1) slots.push('gap');
+  slots.push(count);
+  return slots;
+}
+
+function ChevronLeft() {
+  return (
+    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="m15 6-6 6 6 6" />
+    </svg>
+  );
+}
+
+/**
+ * Prev / next through a long list. On a laptop: "Showing 11–20 of 34", then the page numbers
+ * with gaps; on a phone: Prev, "Page 2 of 4", Next. Renders nothing for a single page. After a
+ * page change the list's top is brought back into view if it has scrolled away (`anchorId`).
+ */
+export function Pager({
+  paged,
+  noun = 'items',
+  label,
+  anchorId,
+  className,
+}: {
+  paged: Pick<ReturnType<typeof usePaged>, 'page' | 'pageCount' | 'total' | 'start' | 'end' | 'setPage'>;
+  /** Plural noun for the count line: "Showing 1–10 of 34 runs". */
+  noun?: string;
+  /** What the pages are of, for screen readers: "Plan pages". */
+  label?: string;
+  anchorId?: string;
+  className?: string;
+}) {
+  const narrow = useNarrow(560);
+  if (paged.pageCount <= 1) return null;
+  const go = (n: number) => {
+    const next = Math.max(1, Math.min(paged.pageCount, n));
+    if (next === paged.page) return;
+    paged.setPage(next);
+    if (anchorId) {
+      requestAnimationFrame(() => {
+        const el = document.getElementById(anchorId);
+        if (el && el.getBoundingClientRect().top < 72) el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      });
+    }
+  };
+  return (
+    <nav className={cx('sj-pager', className)} aria-label={label ?? `Pages of ${noun}`}>
+      <p className="sj-pager-count" aria-live="polite">
+        Showing <b>{paged.start + 1}–{paged.end}</b> of <b>{paged.total}</b> {noun}
+      </p>
+      <div className="sj-pager-controls">
+        <button type="button" className="sj-pager-step" onClick={() => go(paged.page - 1)} disabled={paged.page <= 1} aria-label="Previous page">
+          <ChevronLeft />
+          <span>Prev</span>
+        </button>
+        {narrow ? (
+          <span className="sj-pager-of sj-mono">
+            Page {paged.page} of {paged.pageCount}
+          </span>
+        ) : (
+          <ol className="sj-pager-nums">
+            {pageSlots(paged.page, paged.pageCount).map((slot, index) =>
+              slot === 'gap' ? (
+                <li key={`gap-${index}`} className="gap" aria-hidden="true">
+                  …
+                </li>
+              ) : (
+                <li key={slot}>
+                  <button
+                    type="button"
+                    className={cx('sj-pager-num', slot === paged.page && 'on')}
+                    aria-current={slot === paged.page ? 'page' : undefined}
+                    aria-label={`Page ${slot}`}
+                    onClick={() => go(slot)}
+                  >
+                    {slot}
+                  </button>
+                </li>
+              ),
+            )}
+          </ol>
+        )}
+        <button
+          type="button"
+          className="sj-pager-step"
+          onClick={() => go(paged.page + 1)}
+          disabled={paged.page >= paged.pageCount}
+          aria-label="Next page"
+        >
+          <span>Next</span>
+          <IconChevronRight size={16} />
+        </button>
+      </div>
+    </nav>
+  );
+}
+
+/** The first `limit` of a short list, and whether the rest is showing. */
+export function useShowMore<T>(items: readonly T[], limit: number) {
+  const [open, setOpen] = useState(false);
+  return {
+    open,
+    toggle: () => setOpen((value) => !value),
+    items: items.slice(0, open ? items.length : limit),
+    hidden: Math.max(0, items.length - limit),
+    total: items.length,
+  };
+}
+
+/**
+ * The toggle under a capped list: "Show all 23" / "Show fewer". Renders nothing when nothing is
+ * hidden. `controls` is the id of the list it opens.
+ */
+export function ShowMore({
+  more,
+  noun,
+  controls,
+  className,
+  onDark,
+}: {
+  more: Pick<ReturnType<typeof useShowMore>, 'open' | 'toggle' | 'hidden' | 'total'>;
+  noun?: string;
+  controls?: string;
+  className?: string;
+  onDark?: boolean;
+}) {
+  if (more.hidden <= 0) return null;
+  return (
+    <button
+      type="button"
+      className={cx('sj-showmore', more.open && 'open', onDark && 'on-dark', className)}
+      aria-expanded={more.open}
+      aria-controls={controls}
+      onClick={more.toggle}
+    >
+      {more.open ? 'Show fewer' : `Show all ${more.total}${noun ? ` ${noun}` : ''}`}
+      <IconChevronDown size={16} />
+    </button>
+  );
+}
+
+/* ------------------------------------------------------------------ info tip */
+
+function InfoGlyph() {
+  return (
+    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9.2" />
+      <path d="M12 11v5.5" />
+      <circle cx="12" cy="7.6" r="1.1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+/**
+ * An ⓘ beside a number's label that says how the number is worked out. On a laptop it opens a
+ * small card under the button; on a phone, a bottom sheet that holds focus until it is closed.
+ * Escape, the close button or a tap outside closes it and puts focus back on the ⓘ.
+ */
+export function InfoTip({
+  title,
+  children,
+  example,
+  more,
+  label,
+  onDark,
+  className,
+}: {
+  /** The metric's name, as the card's heading. */
+  title: string;
+  children: ReactNode;
+  example?: ReactNode;
+  /** Where "More on how this works" goes. */
+  more?: string;
+  /** The button's accessible name; defaults to "How <title> is worked out". */
+  label?: string;
+  onDark?: boolean;
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const narrow = useNarrow(860);
+  const button = useRef<HTMLButtonElement>(null);
+  const card = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ top: number; left: number; above: boolean } | null>(null);
+  const id = useId();
+
+  const close = useCallback((refocus = true) => {
+    setOpen(false);
+    if (refocus) button.current?.focus();
+  }, []);
+
+  // Laptop: sit under the button, flip above when there is no room, never past the edges.
+  const place = useCallback(() => {
+    const b = button.current?.getBoundingClientRect();
+    if (!b) return;
+    const width = Math.min(360, window.innerWidth - 32);
+    const height = card.current?.offsetHeight ?? 260;
+    const left = Math.max(16, Math.min(b.left - 14, window.innerWidth - width - 16));
+    const below = b.bottom + 10;
+    const above = below + height > window.innerHeight - 12 && b.top - 10 - height > 12;
+    setPos({ top: above ? b.top - 10 - height : below, left, above });
+  }, []);
+
+  useLayoutEffectSafe(() => {
+    if (!open || narrow) return;
+    place();
+    const again = () => place();
+    window.addEventListener('resize', again);
+    window.addEventListener('scroll', again, true);
+    return () => {
+      window.removeEventListener('resize', again);
+      window.removeEventListener('scroll', again, true);
+    };
+  }, [open, narrow, place]);
+
+  useEffect(() => {
+    if (!open) return;
+    card.current?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.stopPropagation();
+        close();
+        return;
+      }
+      // The sheet holds focus; the laptop card lets Tab carry on through the page.
+      if (event.key === 'Tab' && narrow && card.current) {
+        const items = [...card.current.querySelectorAll<HTMLElement>(FOCUSABLE)];
+        if (items.length === 0) return;
+        const first = items[0]!;
+        const last = items[items.length - 1]!;
+        const active = document.activeElement;
+        if (event.shiftKey && (active === first || active === card.current)) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && active === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    const onDown = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (card.current?.contains(target) || button.current?.contains(target)) return;
+      close(false);
+    };
+    window.addEventListener('keydown', onKey, true);
+    if (!narrow) window.addEventListener('pointerdown', onDown);
+    return () => {
+      window.removeEventListener('keydown', onKey, true);
+      window.removeEventListener('pointerdown', onDown);
+    };
+  }, [open, narrow, close]);
+
+  const body = (
+    <>
+      <div className="sj-tip-head">
+        <span className="sj-tip-eyebrow sj-mono">How it’s worked out</span>
+        <button type="button" className="sj-tip-close" onClick={() => close()} aria-label="Close">
+          <IconClose size={16} />
+        </button>
+      </div>
+      <h2 id={`${id}-t`} className="sj-display sj-tip-title">
+        {title}
+      </h2>
+      <div className="sj-tip-body">{children}</div>
+      {example ? (
+        <div className="sj-tip-example">
+          <span className="sj-mono">For example</span>
+          <p>{example}</p>
+        </div>
+      ) : null}
+      {more ? (
+        <Link className="sj-tip-more" to={more} onClick={() => setOpen(false)}>
+          More on how this works <IconArrowRight size={14} />
+        </Link>
+      ) : null}
+    </>
+  );
+
+  return (
+    <>
+      <button
+        ref={button}
+        type="button"
+        className={cx('sj-info', onDark && 'on-dark', open && 'open', className)}
+        aria-label={label ?? `How ${title.toLowerCase()} is worked out`}
+        aria-expanded={open}
+        aria-controls={open ? id : undefined}
+        aria-haspopup="dialog"
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          if (open) close(false);
+          else setOpen(true);
+        }}
+      >
+        <InfoGlyph />
+      </button>
+      {open
+        ? createPortal(
+            <div className="sj">
+              {narrow ? (
+                <div className="sj-scrim sj-tip-scrim" onMouseDown={(event) => event.target === event.currentTarget && close()}>
+                  <div
+                    ref={card}
+                    id={id}
+                    className="sj-tip sheet"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby={`${id}-t`}
+                    tabIndex={-1}
+                  >
+                    {body}
+                  </div>
+                </div>
+              ) : (
+                <div
+                  ref={card}
+                  id={id}
+                  className={cx('sj-tip pop', pos?.above && 'above')}
+                  role="dialog"
+                  aria-labelledby={`${id}-t`}
+                  tabIndex={-1}
+                  style={{ top: pos?.top ?? -9999, left: pos?.left ?? -9999 }}
+                >
+                  {body}
+                </div>
+              )}
+            </div>,
+            document.body,
+          )
+        : null}
+    </>
+  );
+}
+
+/** A label with its ⓘ beside it, kept on one line with the last word. */
+export function Labelled({ children, tip, className }: { children: ReactNode; tip: ReactNode; className?: string }) {
+  return (
+    <span className={cx('sj-labelled', className)}>
+      {children}
+      {tip}
+    </span>
+  );
+}
+
+const useLayoutEffectSafe = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
 /* ------------------------------------------------------------------ little helpers */
 

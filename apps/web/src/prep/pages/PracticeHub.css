@@ -415,6 +415,9 @@
   box-shadow: inset 0 0 0 1px var(--gray-200);
 }
 .sj .ph-runs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -429,13 +432,11 @@
   font-weight: 600;
   font-size: 15px;
 }
+/* A run: the row is the way in; the bin at its end takes it out of the history. */
 .sj .ph-run {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: center;
-  gap: 22px;
-  min-height: 76px;
-  padding: 16px 20px;
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
   border-radius: var(--r-lg);
   background: #fff;
   border: 1px solid var(--gray-200);
@@ -449,8 +450,46 @@
   border-color: var(--purple-200);
   box-shadow: 0 10px 24px rgba(31, 0, 80, 0.08);
 }
-.sj .ph-run:active {
+.sj .ph-run:has(.ph-run-link:active) {
   transform: translateY(0);
+}
+.sj .ph-run-link {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 22px;
+  flex: 1;
+  min-width: 0;
+  min-height: 76px;
+  padding: 16px 12px 16px 20px;
+  border-radius: var(--r-lg) 0 0 var(--r-lg);
+}
+.sj .ph-run-del {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 56px;
+  margin: 12px 0;
+  border-left: 1px solid var(--gray-100);
+  color: var(--gray-500);
+  transition: color var(--t-fast) var(--ease);
+}
+.sj .ph-run-del svg {
+  padding: 8px;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-sm);
+  box-sizing: border-box;
+  transition: background var(--t-fast) var(--ease);
+}
+.sj .ph-run-del:hover {
+  color: #9c1d4c;
+}
+.sj .ph-run-del:hover svg {
+  background: var(--pink-100);
+}
+.sj .ph-run-del:focus-visible {
+  outline-offset: -3px;
 }
 .sj .ph-run-main {
   display: flex;
@@ -596,7 +635,7 @@
   .sj .ph-history {
     margin-top: 20px;
   }
-  .sj .ph-run {
+  .sj .ph-run-link {
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
       "main go"
@@ -631,4 +670,182 @@
 /* The stat panel is this hero's picture; the stacked-blocks art would show through behind it. */
 .sj .ph .sj-hero:has(.ph-stat) .sj-hero-art {
   display: none;
+}
+
+/* ---------------------------------------------------------------- more runs */
+.sj .ph-more {
+  display: flex;
+  padding-top: 14px;
+}
+.sj .ph-end {
+  padding-top: 14px;
+  font-size: 12px;
+  color: var(--gray-500);
+}
+.sj .ph-alert {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--pink-100);
+  color: #9c1d4c;
+  font-size: 13.5px;
+}
+
+/* ---------------------------------------------------------------- choose topics & years */
+.sj .ph-choose {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 8px;
+  min-height: 44px;
+  margin: -4px 0 -8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--purple-600);
+  border-radius: var(--r-sm);
+}
+.sj .ph-choose:hover {
+  color: var(--purple-700);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.sj .ph-choose-go {
+  transition: transform var(--t-med) var(--ease);
+}
+.sj .ph-choose:hover .ph-choose-go {
+  transform: translateX(3px);
+}
+.sj .ph-tile.ink {
+  background: var(--ink-900);
+  color: var(--green-400);
+}
+
+/* ---------------------------------------------------------------- build your own */
+.sj .ph-build {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 26px;
+  padding: 26px;
+  border-radius: var(--r-lg);
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  transition:
+    transform var(--t-med) var(--ease),
+    box-shadow var(--t-med) var(--ease),
+    border-color var(--t-med) var(--ease);
+}
+.sj .ph-build:hover {
+  transform: translateY(-2px);
+  border-color: var(--purple-200);
+  box-shadow: 0 12px 28px rgba(31, 0, 80, 0.08);
+}
+.sj .ph-build:hover .arrow {
+  transform: translateX(3px);
+}
+.sj .ph-build:active .ph-build-go {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 var(--ledge);
+}
+.sj .ph-build-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+.sj .ph-build-title {
+  font-size: clamp(20px, 1.9vw, 24px);
+  color: var(--gray-900);
+}
+.sj .ph-build-body {
+  max-width: 48ch;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--gray-600);
+  text-wrap: pretty;
+}
+.sj .ph-build-go {
+  margin-top: 6px;
+}
+/* The picture: three rows of choices, as the builder lays them out. */
+.sj .ph-build-art {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 18px;
+  border-radius: var(--r-md);
+  background: var(--ink-900);
+  background-image:
+    radial-gradient(80% 120% at 100% 0%, rgba(107, 11, 255, 0.5), transparent 65%);
+}
+.sj .ph-build-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+}
+.sj .ph-build-line .k {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  width: 78px;
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+.sj .ph-build-line i {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 10px;
+  border-radius: var(--r-sm);
+  font-style: normal;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  transition:
+    background var(--t-med) var(--ease),
+    color var(--t-med) var(--ease),
+    transform var(--t-med) var(--ease);
+}
+.sj .ph-build-line i.on {
+  background: var(--green-400);
+  color: var(--ink-900);
+  box-shadow: none;
+}
+.sj .ph-build:hover .ph-build-line i.on {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 1100px) {
+  .sj .ph-build {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+}
+@media (max-width: 860px) {
+  .sj .ph-build {
+    padding: 16px;
+  }
+  .sj .ph-build-go {
+    width: 100%;
+  }
+  .sj .ph-build-art {
+    padding: 14px;
+  }
+  .sj .ph-run-link {
+    padding: 16px 8px 16px 16px;
+  }
+  .sj .ph-run-del {
+    width: 48px;
+  }
 }

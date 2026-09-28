@@ -5,7 +5,7 @@
 /* ================================================================ page rhythm (shared) */
 /* One column. The hero, every section head and every card start on the same left edge, and the
    gap between blocks is always 28px (20px on a phone). */
-.sj :is(.home, .prog, .hub, .pro-page) > .sj-hero {
+.sj :is(.home, .prog, .hub, .pro-page, .hw) > .sj-hero {
   margin-bottom: 0;
 }
 .sj :is(.home, .prog, .hub, .pro-page) > * + * {
@@ -499,6 +499,25 @@
   margin-top: auto;
   font-size: 14px;
 }
+/* Under a capped run list: the toggle on the left, the way to every run on the right. */
+.sj .home-panel-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: auto;
+}
+.sj .home-panel-foot .sj-showmore {
+  margin-top: 0;
+}
+.sj .home-panel-foot .home-panel-link {
+  margin-top: 0;
+  min-height: 36px;
+}
+.sj .home-panel-foot:has(> .home-panel-link:only-child) {
+  justify-content: flex-start;
+}
 
 .sj .home-weak {
   display: flex;
@@ -991,4 +1010,66 @@
   .sj .home-chip.taught {
     display: none;
   }
+}
+
+/* ================================================================ info tips beside labels */
+.sj .home-sectitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.sj .home-sectitle .sj-info {
+  margin-top: 2px;
+}
+.sj .home-hstat dt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sj .home-hstat dt .sj-info {
+  margin: -4px 0;
+}
+.sj .home-fig .label .sj-info {
+  margin: -4px 0 -4px -2px;
+}
+.sj .home-gap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.sj .home-split-figs dt .sj-info {
+  margin: -3px 0 0 2px;
+}
+.sj .home-split-figs dt > span {
+  min-width: 0;
+}
+.sj .home-how-phone {
+  display: none;
+}
+@media (max-width: 860px) {
+  .sj .home-how-phone {
+    display: block;
+    margin-top: 8px;
+  }
+  .sj .home-how-phone a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 255, 255, 0.4);
+    text-underline-offset: 4px;
+  }
+}
+.sj .home-secsub .sj-info,
+.sj .home-stand-foot .sj-info {
+  margin: -3px 0 0;
+}
+.sj .home-hero-link.quiet a {
+  font-weight: 500;
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.78);
 }

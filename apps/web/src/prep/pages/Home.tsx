@@ -23,7 +23,8 @@ import {
 } from '../icons.js';
 import { progressApi, type Overview, type PracticeRun, type SubjectOverview, type WeakSubtopic } from '../progressApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
-import { Badge, Button, CountUp, PageHero, Steps, Skeleton, Track, cx, greeting, useToast } from '../ui.js';
+import { Badge, Button, CountUp, PageHero, ShowMore, Steps, Skeleton, Track, cx, greeting, useShowMore, useToast } from '../ui.js';
+import { HOW_PATH, MetricTip, type MetricId } from './HowItsWorkedOut.js';
 import './Home.css';
 
 /* ================================================================== shared helpers */
@@ -67,12 +68,12 @@ export function masteryWord(m: number | null): string {
   if (m >= 0.75) return 'Strong';
   if (m >= 0.5) return 'Holding';
   if (m >= 0.3) return 'Shaky';
-  return 'Weak';
+  return 'Needs teaching';
 }
 
 /** Where a run opens: an unfinished one back in the room, a finished one on its summary. */
 export const runHref = (run: Pick<PracticeRun, 'session_id' | 'finished'>) =>
-  run.finished ? `/practice/${run.session_id}/summary` : `/practice/${run.session_id}`;
+  run.finished ? `/practice/${run.session_id}/report` : `/practice/${run.session_id}`;
 
 /** Starts a practice run and takes the student into it. */
 export function useStartPractice() {
@@ -138,6 +139,7 @@ export function Section({
   id,
   className,
   children,
+  tip,
 }: {
   eyebrow: ReactNode;
   title: ReactNode;
@@ -146,15 +148,26 @@ export function Section({
   id: string;
   className?: string;
   children: ReactNode;
+  /** An ⓘ that sits after the heading. */
+  tip?: ReactNode;
 }) {
   return (
     <section className={cx('home-sec', className)} aria-labelledby={id}>
       <div className="home-sechead">
         <div className="text">
           <span className="sj-eyebrow">{eyebrow}</span>
-          <h2 id={id} className="sj-display sj-h2">
-            {title}
-          </h2>
+          {tip ? (
+            <div className="home-sectitle">
+              <h2 id={id} className="sj-display sj-h2">
+                {title}
+              </h2>
+              {tip}
+            </div>
+          ) : (
+            <h2 id={id} className="sj-display sj-h2">
+              {title}
+            </h2>
+          )}
         </div>
         {action ? <div className="action">{action}</div> : null}
       </div>
@@ -203,13 +216,16 @@ export function Note({
 export function HeroStats({
   stats,
 }: {
-  stats: { label: string; value: ReactNode; unit?: string; note?: ReactNode; tone?: 'lime' | 'yellow' | 'white' }[];
+  stats: { label: string; value: ReactNode; unit?: string; note?: ReactNode; tone?: 'lime' | 'yellow' | 'white'; tip?: MetricId }[];
 }) {
   return (
     <dl className="home-hstats">
       {stats.map((stat) => (
         <div key={stat.label} className={cx('home-hstat', stat.tone ?? 'white')}>
-          <dt>{stat.label}</dt>
+          <dt>
+            {stat.label}
+            {stat.tip ? <MetricTip id={stat.tip} onDark /> : null}
+          </dt>
           <dd>
             <span className="sj-num">{stat.value}</span>
             {stat.unit ? <span className="unit">{stat.unit}</span> : null}
@@ -259,23 +275,29 @@ export function Standing({ subject, className, sample }: { subject: SubjectOverv
   const gap = target !== null && projected !== null ? Math.round(target - projected) : null;
   const at = (v: number) => `${Math.max(0, Math.min(100, v))}%`;
 
-  const figures: { key: string; label: string; value: number | null; line: ReactNode; badge?: ReactNode }[] = [
-    { key: 'now', label: 'Predicted today', value: now, line: 'If you sat the exam today' },
-    { key: 'proj', label: 'By exam day', value: projected, line: 'If you keep to your plan' },
+  const figures: { key: string; label: string; value: number | null; line: ReactNode; badge?: ReactNode; tip: MetricId }[] = [
+    { key: 'now', label: 'Predicted today', value: now, line: 'If you sat the exam today', tip: 'predicted' },
+    { key: 'proj', label: 'By exam day', value: projected, line: 'If you keep to your plan', tip: 'projected' },
     {
       key: 'target',
+      tip: 'target',
       label: 'Your target',
       value: target,
       line: target === null ? 'Not set yet' : subject.goal?.exam_date ? `For ${shortDate(subject.goal.exam_date)}` : 'The score you want',
       badge:
-        gap === null ? null : gap <= 0 ? (
-          <Badge tone="green" dot>
-            On track
-          </Badge>
-        ) : (
-          <Badge tone="pink" dot>
-            {gap} short
-          </Badge>
+        gap === null ? null : (
+          <span className="home-gap">
+            {gap <= 0 ? (
+              <Badge tone="green" dot>
+                On track
+              </Badge>
+            ) : (
+              <Badge tone="pink" dot>
+                {gap} short
+              </Badge>
+            )}
+            {sample ? null : <MetricTip id="gap" />}
+          </span>
         ),
     },
   ];
@@ -290,7 +312,7 @@ export function Standing({ subject, className, sample }: { subject: SubjectOverv
           {low !== null && high !== null ? (
             <>
               Your score today is most likely between <b>{fmtScore(low)}</b> and <b>{fmtScore(high)}</b>, shaded on the
-              scale.{' '}
+              scale. <MetricTip id="range" />{' '}
             </>
           ) : null}
           From your {latest.answered}-question check-up on {shortDate(latest.finished_at)}.
@@ -355,6 +377,7 @@ export function Standing({ subject, className, sample }: { subject: SubjectOverv
             <span className="label">
               <i className={`k-${fig.key}`} aria-hidden="true" />
               {fig.label}
+              {sample ? null : <MetricTip id={fig.tip} title={fig.key === 'now' ? 'Predicted score' : undefined} />}
             </span>
             <span className="val">
               <span className="sj-num">{fig.value === null ? '—' : <CountUp value={Math.round(fig.value)} />}</span>
@@ -493,7 +516,11 @@ export function PracticeSplit({ subjects }: { subjects: SubjectOverview[] }) {
     <div className="home-split-wrap">
       <dl className="home-split-figs">
         <div>
-          <dt>Answered</dt>
+          <dt>
+            <span>
+              Answered <MetricTip id="answered" />
+            </span>
+          </dt>
           <dd className="sj-num">
             <CountUp value={total.answered} />
           </dd>
@@ -501,7 +528,9 @@ export function PracticeSplit({ subjects }: { subjects: SubjectOverview[] }) {
         <div className="right">
           <dt>
             <i aria-hidden="true" />
-            Right first time
+            <span>
+              Right first time <MetricTip id="right" />
+            </span>
           </dt>
           <dd className="sj-num">
             <CountUp value={total.right} />
@@ -510,7 +539,9 @@ export function PracticeSplit({ subjects }: { subjects: SubjectOverview[] }) {
         <div className="taught">
           <dt>
             <i aria-hidden="true" />
-            Taught on the board
+            <span>
+              Taught on the board <MetricTip id="taught" />
+            </span>
           </dt>
           <dd className="sj-num">
             <CountUp value={total.taught} />
@@ -685,6 +716,16 @@ function Hero({ overview, step, focus }: { overview: Overview; step: NextStep; f
       value: <CountUp value={days} />,
       tone: 'yellow',
       note: `${focus.examination_short_name} ${focus.subject_name}`,
+      tip: 'days',
+    });
+  }
+  if (overview.streak_days > 0) {
+    stats.push({
+      label: 'Day streak',
+      value: <CountUp value={overview.streak_days} />,
+      tone: 'lime',
+      note: overview.active_today ? 'Including today' : 'Answer one today to keep it',
+      tip: 'streak',
     });
   }
   if (stats.length === 0 && step.kind === 'resume-run' && step.run) {
@@ -709,12 +750,18 @@ function Hero({ overview, step, focus }: { overview: Overview; step: NextStep; f
             <b>{lead}</b>
           </span>{' '}
           {body}
+          <span className="home-how-phone">
+            <Link to={HOW_PATH}>How your numbers are worked out</Link>
+          </span>
         </>
       }
       actions={
         <>
           {action}
           {secondary ? <span className="home-hero-link">{secondary}</span> : null}
+          <span className="home-hero-link quiet">
+            <Link to={HOW_PATH}>How your numbers are worked out</Link>
+          </span>
         </>
       }
       aside={stats.length > 0 ? <HeroStats stats={stats} /> : undefined}
@@ -821,6 +868,7 @@ function HomeSkeleton() {
 }
 
 function SubjectCards({ subjects }: { subjects: SubjectOverview[] }) {
+  const more = useShowMore(subjects, 6);
   return (
     <Section
       eyebrow="All your subjects"
@@ -833,8 +881,8 @@ function SubjectCards({ subjects }: { subjects: SubjectOverview[] }) {
         </Link>
       }
     >
-      <div className="home-subjects">
-        {subjects.map((s) => {
+      <div className="home-subjects" id="home-subject-list">
+        {more.items.map((s) => {
           const latest = s.latest_checkup;
           const days = s.goal?.days_to_exam;
           return (
@@ -867,6 +915,7 @@ function SubjectCards({ subjects }: { subjects: SubjectOverview[] }) {
           );
         })}
       </div>
+      <ShowMore more={more} noun="subjects" controls="home-subject-list" />
     </Section>
   );
 }
@@ -920,6 +969,28 @@ export function Home() {
   const weak = focus?.latest_checkup?.weakest_subtopics ?? [];
 
   return (
+    <HomeBody data={data} focus={focus} many={many} step={step} weak={weak} starter={starter} />
+  );
+}
+
+function HomeBody({
+  data,
+  focus,
+  many,
+  step,
+  weak,
+  starter,
+}: {
+  data: Overview;
+  focus: SubjectOverview | undefined;
+  many: boolean;
+  step: NextStep;
+  weak: WeakSubtopic[];
+  starter: ReturnType<typeof useStartPractice>;
+}) {
+  const subjects = data.subjects;
+  const recent = useShowMore(data.recent_runs, 4);
+  return (
     <div className="sj-page home">
       <Hero overview={data} step={step} focus={focus} />
 
@@ -945,7 +1016,13 @@ export function Home() {
           title="Your weakest spots"
           id="home-weak"
           className="sj-rise d2"
-          sub="Mastery: how often we think you'd get a question on it right, from your answers so far."
+          tip={<MetricTip id="weakest" />}
+          sub={
+            <>
+              Mastery is how often we think you'd get a question on it right, from your check-up answers.{' '}
+              <MetricTip id="mastery" />
+            </>
+          }
         >
           <div className="sj-card home-panel">
             {weak.length > 0 && focus ? (
@@ -975,14 +1052,17 @@ export function Home() {
             <PracticeSplit subjects={subjects} />
             {data.recent_runs.length > 0 ? (
               <>
-                <ul className="home-runs">
-                  {data.recent_runs.slice(0, 4).map((run) => (
+                <ul className="home-runs" id="home-run-list">
+                  {recent.items.map((run) => (
                     <RunRow key={run.session_id} run={run} showSubject />
                   ))}
                 </ul>
-                <Link className="sj-link home-panel-link" to="/progress">
-                  See every run <IconArrowRight size={14} />
-                </Link>
+                <div className="home-panel-foot">
+                  <ShowMore more={recent} noun="recent runs" controls="home-run-list" />
+                  <Link className="sj-link home-panel-link" to="/progress">
+                    See every run <IconArrowRight size={14} />
+                  </Link>
+                </div>
               </>
             ) : (
               <Note icon={<IconBolt size={18} />} tone="lime" title="No runs yet">

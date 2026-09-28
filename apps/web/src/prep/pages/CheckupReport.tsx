@@ -31,7 +31,8 @@ import {
 } from '../icons.js';
 import { progressApi } from '../progressApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
-import { Button, Card, CountUp, Eyebrow, PageHero, Skeleton, cx } from '../ui.js';
+import { Button, Card, CountUp, Eyebrow, PageHero, Pager, ShowMore, Skeleton, cx, usePaged, useShowMore } from '../ui.js';
+import { HOW_PATH, MetricTip } from './HowItsWorkedOut.js';
 import './CheckupReport.css';
 
 /* ------------------------------------------------------------------ mastery bands */
@@ -204,7 +205,9 @@ export function CheckupReport() {
         aside={
           projection ? (
             <div className="cp-stat">
-              <span className="cp-stat-label">Predicted score today</span>
+              <span className="cp-stat-label">
+                Predicted score today <MetricTip id="predicted" onDark />
+              </span>
               <span className="cp-stat-num">
                 <span className="sj-num">
                   <CountUp value={projection.score_now} duration={1100} />
@@ -220,6 +223,7 @@ export function CheckupReport() {
                 <span>
                   Likely {fmt(projection.score_low)}–{fmt(projection.score_high)}
                 </span>
+                <MetricTip id="range" onDark />
               </span>
             </div>
           ) : (
@@ -264,11 +268,7 @@ export function CheckupReport() {
 
       <HowWorkedOut report={data} />
 
-      {data.unassessed_topics.length > 0 ? (
-        <Notice tone="warn" icon={<IconHelp size={18} />} title={`Not reached: ${data.unassessed_topics.join(', ')}`}>
-          No questions touched these, so nothing on this page is a judgement about them.
-        </Notice>
-      ) : null}
+      {data.unassessed_topics.length > 0 ? <NotReached topics={data.unassessed_topics} /> : null}
 
       <Topics report={data} />
 
@@ -384,6 +384,7 @@ function ScoreSection({
             <span className="cp-statcell-head">
               <span className="key projected" aria-hidden="true" />
               <span className="sj-eyebrow">After your plan</span>
+              <MetricTip id="projected" />
             </span>
             <span className="sj-num green">
               <CountUp value={p.score_projected} />
@@ -396,6 +397,7 @@ function ScoreSection({
             <span className="cp-statcell-head">
               <span className="key target" aria-hidden="true" />
               <span className="sj-eyebrow">Your target</span>
+              <MetricTip id="target" />
               <Link to={goalPath} className="cp-change">
                 Change
               </Link>
@@ -409,6 +411,7 @@ function ScoreSection({
             <span className="cp-statcell-head">
               <span className="key sessions" aria-hidden="true" />
               <span className="sj-eyebrow">Sessions left</span>
+              <MetricTip id="sessions" />
             </span>
             <span className="sj-num">
               <CountUp value={p.sessions_available} />
@@ -447,7 +450,10 @@ function NoGoal({ report, goalPath }: { report: Report; goalPath: string }) {
         </p>
         <div className="cp-stats three">
           <div className="cp-statcell">
-            <span className="sj-eyebrow">Answered</span>
+            <span className="cp-statcell-head">
+              <span className="sj-eyebrow">Answered</span>
+              <MetricTip id="checkup" />
+            </span>
             <span className="sj-num">{report.answered}</span>
             <span className="cp-statcell-foot">questions in this check-up</span>
           </div>
@@ -491,9 +497,14 @@ function Verdict({ report, goalPath }: { report: Report; goalPath: string }) {
           </>
         }
         action={
-          <Button size="sm" tone="ghost" to={goalPath}>
-            Adjust my goal
-          </Button>
+          <>
+            <Button size="sm" tone="ghost" to={goalPath}>
+              Adjust my goal
+            </Button>
+            <span className="cp-tipline">
+              How this is worked out <MetricTip id="gap" />
+            </span>
+          </>
         }
       >
         {p.shortfall_note ? wholeNumbers(p.shortfall_note) : undefined}
@@ -501,7 +512,17 @@ function Verdict({ report, goalPath }: { report: Report; goalPath: string }) {
     );
   }
   return (
-    <Notice tone="ok" className="sj-rise d2" icon={<IconCheck size={18} />} title="You’re on track">
+    <Notice
+      tone="ok"
+      className="sj-rise d2"
+      icon={<IconCheck size={18} />}
+      title="You’re on track"
+      action={
+        <span className="cp-tipline">
+          How this is worked out <MetricTip id="gap" />
+        </span>
+      }
+    >
       On the time you gave us, this plan reaches {fmt(p.score_projected)}, past your target of {fmt(p.target_score)}.
     </Notice>
   );
@@ -553,12 +574,41 @@ function HowWorkedOut({ report }: { report: Report }) {
           <p>{report.caveat}</p>
           {p ? <p>{p.caveat}</p> : null}
         </div>
+        <Link className="sj-link cp-how-more" to={HOW_PATH}>
+          Every number on this page, explained <IconArrowRight size={14} />
+        </Link>
       </div>
     </details>
   );
 }
 
 /* ------------------------------------------------------------------ topics */
+
+/** Topic cards a page, subtopics a card before "Show all", plan lines a page. */
+const TOPICS_PER_PAGE = 6;
+const SUBS_SHOWN = 5;
+const PLAN_PER_PAGE = 8;
+/** Names in the "not reached" note before the rest fold away. */
+const NOT_REACHED_SHOWN = 4;
+
+function NotReached({ topics }: { topics: string[] }) {
+  const more = useShowMore(topics, NOT_REACHED_SHOWN);
+  const count = `${topics.length} ${topics.length === 1 ? 'topic' : 'topics'}`;
+  return (
+    <Notice
+      tone="warn"
+      icon={<IconHelp size={18} />}
+      title={`Not reached: ${count}`}
+      action={more.hidden > 0 ? <ShowMore more={more} noun="topics" controls="cp-notreached" className="cp-inline-more" /> : undefined}
+    >
+      <span id="cp-notreached">
+        {more.items.join(', ')}
+        {more.open || more.hidden === 0 ? '' : ` and ${more.hidden} more`}.
+      </span>{' '}
+      No questions touched these, so nothing on this page is a judgement about them.
+    </Notice>
+  );
+}
 
 function Topics({ report }: { report: Report }) {
   const [weakestFirst, setWeakestFirst] = useState(false);
@@ -575,16 +625,23 @@ function Topics({ report }: { report: Report }) {
       .sort((a, b) => byWeakness(a.topic, b.topic))
       .map((g) => ({ ...g, subtopics: [...g.subtopics].sort(byWeakness) }));
   }, [report, weakestFirst]);
+  const paged = usePaged(groups, TOPICS_PER_PAGE, weakestFirst);
 
   return (
     <section className="cp-section" id="topics" aria-labelledby="cp-topics-title">
       <div className="cp-sechead">
         <div className="text">
           <Eyebrow>Topic by topic</Eyebrow>
-          <h2 id="cp-topics-title" className="sj-display sj-h2">
-            What you’ve got, and what’s shaky
-          </h2>
-          <p>How much of each part you have, from what you answered. Grey isn’t a low score — we just didn’t get there.</p>
+          <div className="cp-titlerow">
+            <h2 id="cp-topics-title" className="sj-display sj-h2">
+              What you’ve got, and what’s shaky
+            </h2>
+            <MetricTip id="bands" />
+          </div>
+          <p>
+            How much of each part you have, from what you answered. Grey isn’t a low score — we just didn’t get there.{' '}
+            <MetricTip id="mastery" />
+          </p>
         </div>
         <div className="cp-seg" role="group" aria-label="Order topics">
           <button type="button" aria-pressed={!weakestFirst} onClick={() => setWeakestFirst(false)}>
@@ -607,10 +664,11 @@ function Topics({ report }: { report: Report }) {
       </ul>
 
       <div className="cp-topics">
-        {groups.map(({ topic, subtopics, share }, index) => (
+        {paged.items.map(({ topic, subtopics, share }, index) => (
           <TopicCard key={topic.topic_id} topic={topic} subtopics={subtopics} share={share} index={index} />
         ))}
       </div>
+      <Pager paged={paged} noun="topics" label="Pages of topics" anchorId="topics" />
     </section>
   );
 }
@@ -627,6 +685,8 @@ function TopicCard({
   index: number;
 }) {
   const band = bandOf(topic.mastery);
+  const more = useShowMore(subtopics, SUBS_SHOWN);
+  const listId = `cp-subs-${topic.topic_id}`;
   return (
     <article className="sj-card cp-topic" style={{ animationDelay: `${index * 50}ms` } as CSSProperties}>
       <header className="cp-topic-head">
@@ -644,8 +704,8 @@ function TopicCard({
         <Bar value={topic.mastery} band={band} thick />
       </div>
       {subtopics.length > 0 ? (
-        <ul className="cp-subs">
-          {subtopics.map((s) => {
+        <ul className="cp-subs" id={listId}>
+          {more.items.map((s) => {
             const b = bandOf(s.mastery);
             return (
               <li key={s.subtopic_id} className={cx('cp-sub', b)}>
@@ -663,6 +723,7 @@ function TopicCard({
           })}
         </ul>
       ) : null}
+      <ShowMore more={more} noun="parts" controls={listId} className="cp-submore" />
     </article>
   );
 }
@@ -687,9 +748,8 @@ function Bar({ value, band, thick }: { value: number | null; band: Band; thick?:
 const TOPIC_SHADES = ['var(--purple-600)', 'var(--ink-900)', 'var(--purple-300)', 'var(--pink-500)', 'var(--green-400)', 'var(--yellow-400)', 'var(--purple-200)', 'var(--gray-500)'];
 
 function Plan({ lines, sessionsAvailable }: { lines: PlanLine[]; sessionsAvailable: number }) {
-  const worked = lines.filter((line) => line.sessions > 0);
-  const [showAll, setShowAll] = useState(false);
-  const shown = showAll ? worked : worked.slice(0, 6);
+  const worked = useMemo(() => lines.filter((line) => line.sessions > 0), [lines]);
+  const paged = usePaged(worked, PLAN_PER_PAGE);
   const planned = worked.reduce((sum, line) => sum + line.sessions, 0);
   const gained = worked.reduce((sum, line) => sum + line.marks_gained, 0);
 
@@ -707,9 +767,12 @@ function Plan({ lines, sessionsAvailable }: { lines: PlanLine[]; sessionsAvailab
       <div className="cp-sechead">
         <div className="text">
           <Eyebrow>Your plan</Eyebrow>
-          <h2 id="cp-plan-title" className="sj-display sj-h2">
-            Where your time goes
-          </h2>
+          <div className="cp-titlerow">
+            <h2 id="cp-plan-title" className="sj-display sj-h2">
+              Where your time goes
+            </h2>
+            <MetricTip id="plan" />
+          </div>
           <p>
             Ordered by the marks each part is likely to add — not just by how weak it is. An hour on a big part of
             the paper pays back more than an hour on a small one.
@@ -772,9 +835,9 @@ function Plan({ lines, sessionsAvailable }: { lines: PlanLine[]; sessionsAvailab
             <span>Adds</span>
           </div>
           <ol className="cp-lines">
-            {shown.map((line, index) => (
+            {paged.items.map((line, index) => (
               <li key={line.subtopic_id} className="cp-line">
-                <span className="rank sj-mono">{String(index + 1).padStart(2, '0')}</span>
+                <span className="rank sj-mono">{String(paged.start + index + 1).padStart(2, '0')}</span>
                 <div className="what">
                   <b>{line.name}</b>
                   <span className="topic">
@@ -803,13 +866,7 @@ function Plan({ lines, sessionsAvailable }: { lines: PlanLine[]; sessionsAvailab
               </li>
             ))}
           </ol>
-          {worked.length > 6 ? (
-            <div className="cp-more">
-              <Button tone="ghost" size="sm" onClick={() => setShowAll((v) => !v)} aria-expanded={showAll}>
-                {showAll ? 'Show the top 6' : `Show all ${worked.length}`}
-              </Button>
-            </div>
-          ) : null}
+          <Pager paged={paged} noun="parts" label="Pages of your plan" anchorId="plan" />
         </div>
       )}
     </section>

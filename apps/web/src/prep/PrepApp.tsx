@@ -16,12 +16,15 @@ import { Exams } from './pages/Exams.js';
 import { ExamSubjects } from './pages/ExamSubjects.js';
 import { Goal } from './pages/Goal.js';
 import { Home } from './pages/Home.js';
+import { HowItsWorkedOut } from './pages/HowItsWorkedOut.js';
 import { NotFound } from './pages/NotFound.js';
 import { Onboarding } from './pages/Onboarding.js';
 import { PracticeHub } from './pages/PracticeHub.js';
 import { PracticeRoom } from './pages/PracticeRoom.js';
 import { Profile } from './pages/Profile.js';
 import { Progress } from './pages/Progress.js';
+import { RunBuilder } from './pages/RunBuilder.js';
+import { RunReport } from './pages/RunReport.js';
 import { RunSummary } from './pages/RunSummary.js';
 import { SubjectHub } from './pages/SubjectHub.js';
 import { Welcome } from './pages/Welcome.js';
@@ -55,11 +58,14 @@ export function PrepApp() {
                 <Route path="/subjects/:subjectId" element={<SubjectHub />} />
                 <Route path="/subjects/:subjectId/goal" element={<Goal />} />
                 <Route path="/practice" element={<PracticeHub />} />
+                <Route path="/practice/new" element={<RunBuilder />} />
                 <Route path="/practice/:sessionId/summary" element={<RunSummary />} />
+                <Route path="/practice/:sessionId/report" element={<RunReport />} />
                 <Route path="/checkup" element={<CheckupHub />} />
                 <Route path="/checkup/:sessionId/report" element={<CheckupReport />} />
                 <Route path="/progress" element={<Progress />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/how-its-worked-out" element={<HowItsWorkedOut />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
               <Route

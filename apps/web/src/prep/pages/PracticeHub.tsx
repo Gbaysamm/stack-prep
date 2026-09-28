@@ -7,7 +7,7 @@
  * starts one expecting a test. Underneath, the runs so far, each a way back in.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { api } from "../../student/api.js";
@@ -15,7 +15,9 @@ import {
   IconArrowRight,
   IconBolt,
   IconBulb,
+  IconCalendar,
   IconChevronRight,
+  IconLayers,
   IconReplay,
   IconSpark,
   IconTarget,
@@ -23,8 +25,10 @@ import {
 import {
   progressApi,
   type PracticeRun,
+  type PracticeRunPage,
   type SubjectOverview,
 } from "../progressApi.js";
+import { runsApi } from "../runsApi.js";
 import { useLoad, usePageTitle, useStudent } from "../store.js";
 import {
   Badge,
@@ -37,7 +41,11 @@ import {
   cx,
   useToast,
 } from "../ui.js";
+import { DeleteRunDialog, IconTrash } from "./RunReport.js";
 import "./PracticeHub.css";
+
+/** Runs per page in the history, as on the progress page. */
+const PAGE = 12;
 
 const LENGTHS = [
   { value: 5, label: "Quick" },
@@ -74,12 +82,67 @@ export function PracticeHub() {
     [student.studentId],
   );
   const runs = useLoad(
-    () => progressApi.runs(student.studentId, 12),
+    () => progressApi.runs(student.studentId, PAGE),
     [student.studentId],
   );
+  const toast = useToast();
+  // Older pages, loaded on demand (the same pattern as the progress page).
+  const [extra, setExtra] = useState<PracticeRunPage["runs"]>([]);
+  const [next, setNext] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [moreError, setMoreError] = useState<string | null>(null);
+  // Deleted here: out of the list at once, back in if the server says no.
+  const [gone, setGone] = useState<Set<string>>(new Set());
+  const [asking, setAsking] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (runs.data) {
+      setExtra([]);
+      setNext(runs.data.next_before);
+    }
+  }, [runs.data]);
+
+  const loadMore = async () => {
+    if (!next) return;
+    setLoadingMore(true);
+    setMoreError(null);
+    try {
+      const page = await progressApi.runs(student.studentId, PAGE, next);
+      setExtra((current) => [...current, ...page.runs]);
+      setNext(page.next_before);
+    } catch (failure) {
+      setMoreError((failure as Error).message || "Something went wrong.");
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const remove = (sessionId: string) => {
+    setAsking(null);
+    setGone((current) => new Set(current).add(sessionId));
+    runsApi
+      .remove(sessionId)
+      .then(() => {
+        toast("Run deleted");
+        // A deleted open run is no longer there to resume.
+        overview.reload();
+      })
+      .catch((error: Error) => {
+        setGone((current) => {
+          const back = new Set(current);
+          back.delete(sessionId);
+          return back;
+        });
+        toast(`Couldn’t delete the run: ${error.message || "try again"}`);
+      });
+  };
 
   const subjects = overview.data?.subjects ?? [];
-  const history = runs.data?.runs ?? overview.data?.recent_runs ?? [];
+  const history = (
+    runs.data
+      ? [...runs.data.runs, ...extra]
+      : (overview.data?.recent_runs ?? [])
+  ).filter((run) => !gone.has(run.session_id));
   const anyOpen = subjects.some((subject) => subject.open_practice_session_id);
   const sub =
     "Short sets of questions aimed at your weak spots. Miss one and you get a hint; miss it again and the coach works it through with you.";
@@ -150,6 +213,11 @@ export function PracticeHub() {
               delay={index}
             />
           ))}
+          <BuildOwn
+            subjectId={
+              subjects.length === 1 ? subjects[0]?.subject_id : undefined
+            }
+          />
         </div>
       )}
 
@@ -201,12 +269,37 @@ export function PracticeHub() {
               </p>
             </div>
           ) : (
-            <div className="ph-runs">
-              {history.map((run) => (
-                <RunRow key={run.session_id} run={run} />
-              ))}
-            </div>
+            <>
+              <ul className="ph-runs">
+                {history.map((run) => (
+                  <RunRow
+                    key={run.session_id}
+                    run={run}
+                    onDelete={() => setAsking(run.session_id)}
+                  />
+                ))}
+              </ul>
+              {next ? (
+                <div className="ph-more">
+                  <Button tone="ghost" busy={loadingMore} onClick={loadMore}>
+                    Load more runs
+                  </Button>
+                </div>
+              ) : runs.data && history.length > PAGE ? (
+                <p className="ph-end sj-mono">That’s every run.</p>
+              ) : null}
+              {moreError ? (
+                <p className="ph-alert" role="alert">
+                  We couldn’t load more: {moreError}
+                </p>
+              ) : null}
+            </>
           )}
+          <DeleteRunDialog
+            open={asking !== null}
+            onClose={() => setAsking(null)}
+            onConfirm={() => asking && remove(asking)}
+          />
         </section>
       ) : null}
 
@@ -420,6 +513,14 @@ function SubjectCard({
                 ? "Picking questions…"
                 : `Start a ${length}-question run`}
             </Button>
+            <Link
+              to={`/practice/new?subject=${subject.subject_id}`}
+              className="ph-choose"
+            >
+              <IconLayers size={16} />
+              Or choose the topics and years yourself
+              <IconChevronRight size={16} className="ph-choose-go" />
+            </Link>
           </div>
 
           {checkup ? (
@@ -546,43 +647,126 @@ export function RunStrip({
   );
 }
 
-function RunRow({ run }: { run: PracticeRun & { topics?: string[] } }) {
+function RunRow({
+  run,
+  onDelete,
+}: {
+  run: PracticeRun & { topics?: string[] };
+  onDelete: () => void;
+}) {
   const to = run.finished
-    ? `/practice/${run.session_id}/summary`
+    ? `/practice/${run.session_id}/report`
     : `/practice/${run.session_id}`;
   return (
-    <Link to={to} className={cx("ph-run", !run.finished && "open")}>
-      <span className="ph-run-main">
-        <span className="ph-run-title">
-          <b>{run.subject_name}</b>
-          {run.finished ? (
-            <Badge tone="green" className="ph-run-badge">
-              Finished
-            </Badge>
-          ) : (
-            <Badge tone="yellow" className="ph-run-badge">
-              In progress
-            </Badge>
-          )}
+    <li className={cx("ph-run", !run.finished && "open")}>
+      <Link to={to} className="ph-run-link">
+        <span className="ph-run-main">
+          <span className="ph-run-title">
+            <b>{run.subject_name}</b>
+            {run.finished ? (
+              <Badge tone="green" className="ph-run-badge">
+                Finished
+              </Badge>
+            ) : (
+              <Badge tone="yellow" className="ph-run-badge">
+                In progress
+              </Badge>
+            )}
+          </span>
+          <span className="ph-run-sub sj-small">
+            {whenLabel(run.started_at)}
+            {run.topics && run.topics.length > 0
+              ? ` · ${run.topics.join(", ")}`
+              : ""}
+          </span>
         </span>
-        <span className="ph-run-sub sj-small">
-          {whenLabel(run.started_at)}
-          {run.topics && run.topics.length > 0
-            ? ` · ${run.topics.join(", ")}`
-            : ""}
+        <span className="ph-run-score">
+          <RunStrip run={run} />
+          <span className="ph-run-num sj-mono">
+            {run.correct_unaided}/{run.answered} right
+          </span>
+        </span>
+        <span className="ph-run-go">
+          <span className="ph-run-action">
+            {run.finished ? "Report" : "Resume"}
+          </span>
+          <IconChevronRight size={18} />
+        </span>
+      </Link>
+      <button
+        type="button"
+        className="ph-run-del"
+        onClick={onDelete}
+        aria-label={`Delete the ${run.subject_name} run from ${whenLabel(run.started_at)}`}
+        title="Delete this run"
+      >
+        <IconTrash size={18} />
+      </button>
+    </li>
+  );
+}
+
+/* ------------------------------------------------------------------ build your own */
+
+/**
+ * The way into a run the student shapes: topics, years, length. Beside the words, a picture of
+ * the three choices, drawn with chips like the builder's own.
+ */
+function BuildOwn({ subjectId }: { subjectId?: string }) {
+  const to = subjectId
+    ? `/practice/new?subject=${subjectId}`
+    : "/practice/new";
+  return (
+    <Link to={to} className="ph-build sj-rise d3">
+      <span className="ph-build-text">
+        <span className="ph-row">
+          <span className="ph-tile ink" aria-hidden="true">
+            <IconLayers size={18} />
+          </span>
+          <span className="sj-display sj-h3 ph-build-title">
+            Build your own run
+          </span>
+        </span>
+        <span className="ph-build-body">
+          Choose the topics and exam years you want, and how many questions.
+          Good for going over one topic, or a whole year’s paper.
+        </span>
+        <span className="sj-btn ph-build-go">
+          Build a run
+          <span className="arrow">
+            <IconArrowRight size={18} />
+          </span>
         </span>
       </span>
-      <span className="ph-run-score">
-        <RunStrip run={run} />
-        <span className="ph-run-num sj-mono">
-          {run.correct_unaided}/{run.answered} right
+      <span className="ph-build-art" aria-hidden="true">
+        <span className="ph-build-line">
+          <span className="k">
+            <IconTarget size={14} />
+            Topics
+          </span>
+          <i className="on">Algebra</i>
+          <i className="on">Indices</i>
+          <i>Statistics</i>
         </span>
-      </span>
-      <span className="ph-run-go">
-        <span className="ph-run-action">
-          {run.finished ? "Summary" : "Resume"}
+        <span className="ph-build-line">
+          <span className="k">
+            <IconCalendar size={14} />
+            Years
+          </span>
+          <i>2016</i>
+          <i className="on">2017</i>
+          <i className="on">2018</i>
         </span>
-        <IconChevronRight size={18} />
+        <span className="ph-build-line">
+          <span className="k">
+            <IconBolt size={14} />
+            Length
+          </span>
+          <i>5</i>
+          <i className="on">10</i>
+          <i>20</i>
+          <i>40</i>
+        </span>
       </span>
     </Link>
   );

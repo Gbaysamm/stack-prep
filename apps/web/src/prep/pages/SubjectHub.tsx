@@ -7,13 +7,15 @@
  * plan all need it.
  */
 
+import { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import { api, type CheckupReport } from '../../student/api.js';
 import { IconArrowRight, IconBolt, IconBook, IconCalendar, IconClock, IconTarget, IconTrophy } from '../icons.js';
 import { progressApi, type SubjectOverview } from '../progressApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
-import { Button, CountUp, PageHero, Skeleton, Track, cx } from '../ui.js';
+import { Button, CountUp, PageHero, Pager, ShowMore, Skeleton, Track, cx, usePaged, useShowMore } from '../ui.js';
+import { MetricTip } from './HowItsWorkedOut.js';
 import {
   Alert,
   HeroStats,
@@ -72,7 +74,9 @@ function PlanCard({ subject }: { subject: SubjectOverview }) {
     <div className="sj-card hub-plan">
       <dl className="hub-plan-figs">
         <div>
-          <dt>Target</dt>
+          <dt>
+            Target <MetricTip id="target" />
+          </dt>
           <dd>
             <span className="sj-num">{fmtScore(goal.target_score)}</span>
             <span className="of sj-mono">/100</span>
@@ -86,6 +90,7 @@ function PlanCard({ subject }: { subject: SubjectOverview }) {
           {days !== null ? (
             <span className={cx('hub-days', days < 0 && 'past')}>
               {days < 0 ? 'This date has passed' : days === 0 ? 'It is today' : `${plural(days, 'day')} to go`}
+              {days >= 0 ? <MetricTip id="days" /> : null}
             </span>
           ) : null}
         </div>
@@ -120,7 +125,10 @@ function PlanCard({ subject }: { subject: SubjectOverview }) {
           {goal.sessions_before_exam !== null ? (
             <li>
               <IconCalendar size={16} />
-              About {plural(goal.sessions_before_exam, 'study day')} left before the exam
+              <span>
+                About {plural(goal.sessions_before_exam, 'study session')} left before the exam{' '}
+                <MetricTip id="sessions" />
+              </span>
             </li>
           ) : null}
         </ul>
@@ -174,6 +182,10 @@ function ActionCards({ subject, openRun }: { subject: SubjectOverview; openRun?:
             </Button>
           )}
         </div>
+        <Link className="hub-choose" to={`/practice/new?subject=${subject.subject_id}`}>
+          Choose topics &amp; years
+          <IconArrowRight size={14} />
+        </Link>
         {practice.error ? <Alert>{practice.error}</Alert> : null}
       </article>
 
@@ -222,11 +234,24 @@ function ActionCards({ subject, openRun }: { subject: SubjectOverview; openRun?:
   );
 }
 
+/** How many topics show before "Show all". */
+const TOPICS_SHOWN = 6;
+
 function Topics({ subject }: { subject: SubjectOverview }) {
   const latest = subject.latest_checkup;
   const report = useLoad<CheckupReport | null>(
     () => (latest ? api.report(latest.session_id) : Promise.resolve(null)),
     [latest?.session_id],
+  );
+  // Weakest first, the order TopicStrengths shows them in, so the cap keeps the weakest.
+  const ordered = useMemo(
+    () => [...(report.data?.topics ?? [])].sort((a, b) => (a.mastery ?? 2) - (b.mastery ?? 2)),
+    [report.data],
+  );
+  const more = useShowMore(ordered, TOPICS_SHOWN);
+  const shownReport = useMemo(
+    () => (report.data ? { ...report.data, topics: more.items } : null),
+    [report.data, more.items],
   );
   if (!latest) return null;
   return (
@@ -235,6 +260,7 @@ function Topics({ subject }: { subject: SubjectOverview }) {
       title="How each topic stands"
       id="hub-topics"
       sub="From your last check-up, weakest first. Open a topic to see its parts. Striped means the check-up didn't reach it yet."
+      tip={<MetricTip id="bands" />}
       action={
         <Link className="sj-link" to={`/checkup/${latest.session_id}/report`}>
           Full report <IconArrowRight size={14} />
@@ -264,7 +290,10 @@ function Topics({ subject }: { subject: SubjectOverview }) {
         ) : (
           <>
             <MasteryLegend />
-            <TopicStrengths report={report.data} />
+            <div id="hub-topic-list">
+              <TopicStrengths report={shownReport ?? report.data} />
+            </div>
+            <ShowMore more={more} noun="topics" controls="hub-topic-list" className="hub-more" />
           </>
         )}
       </div>
@@ -341,7 +370,11 @@ function HubBody({ subject, exam, runs }: { subject: SubjectOverview; exam?: { s
   const starter = useStartPractice();
   const hasGoal = !!subject.goal && subject.goal.target_score !== null;
   const hero = useHeroActions(subject, hasGoal);
-  const subjectRuns = (runs.data?.runs ?? []).filter((r) => r.subject_id === subject.subject_id);
+  const subjectRuns = useMemo(
+    () => (runs.data?.runs ?? []).filter((r) => r.subject_id === subject.subject_id),
+    [runs.data, subject.subject_id],
+  );
+  const runPage = usePaged(subjectRuns, 5, subject.subject_id);
   const openRun = subjectRuns.find((r) => r.session_id === subject.open_practice_session_id);
   const weak = subject.latest_checkup?.weakest_subtopics ?? [];
   const goal = subject.goal;
@@ -350,10 +383,10 @@ function HubBody({ subject, exam, runs }: { subject: SubjectOverview; exam?: { s
 
   const stats: Parameters<typeof HeroStats>[0]['stats'] = [];
   if (days !== null && days >= 0) {
-    stats.push({ label: 'Days to exam', value: <CountUp value={days} />, tone: 'yellow', note: goal?.exam_date ? shortDate(goal.exam_date) : undefined });
+    stats.push({ label: 'Days to exam', value: <CountUp value={days} />, tone: 'yellow', note: goal?.exam_date ? shortDate(goal.exam_date) : undefined, tip: 'days' });
   }
   if (now !== null) {
-    stats.push({ label: 'Predicted', value: <CountUp value={Math.round(now)} />, unit: '/100', tone: 'lime', note: 'If you sat it today' });
+    stats.push({ label: 'Predicted', value: <CountUp value={Math.round(now)} />, unit: '/100', tone: 'lime', note: 'If you sat it today', tip: 'predicted' });
   }
 
   return (
@@ -398,7 +431,13 @@ function HubBody({ subject, exam, runs }: { subject: SubjectOverview; exam?: { s
           title="Your weakest spots"
           id="hub-weak"
           className="sj-rise d2"
-          sub="Mastery: how often we think you'd get a question on it right, from your answers so far."
+          tip={<MetricTip id="weakest" />}
+          sub={
+            <>
+              Mastery is how often we think you'd get a question on it right, from your check-up answers.{' '}
+              <MetricTip id="mastery" />
+            </>
+          }
         >
           <div className="sj-card hub-panel">
             {weak.length > 0 ? (
@@ -466,11 +505,14 @@ function HubBody({ subject, exam, runs }: { subject: SubjectOverview; exam?: { s
               ))}
             </div>
           ) : subjectRuns.length > 0 ? (
-            <ul className="home-runs">
-              {subjectRuns.slice(0, 5).map((run) => (
-                <RunRow key={run.session_id} run={run} showSubject={false} />
-              ))}
-            </ul>
+            <>
+              <ul className="home-runs" id="hub-run-list">
+                {runPage.items.map((run) => (
+                  <RunRow key={run.session_id} run={run} showSubject={false} />
+                ))}
+              </ul>
+              <Pager paged={runPage} noun="runs" label={`Pages of your ${subject.subject_name} runs`} anchorId="hub-runs" />
+            </>
           ) : (
             <Note icon={<IconBolt size={18} />} tone="lime" title={`No ${subject.subject_name} runs yet`}>
               Your first run shows up here the moment you start it, with how it went.

@@ -1,0 +1,223 @@
+/* How your numbers are worked out. One column; the worked sum is the page's one sticker. */
+
+.sj .hw > .sj-hero {
+  margin-bottom: 0;
+}
+.sj .hw > * + * {
+  margin-top: 28px;
+}
+
+/* Jump links in the hero. */
+.sj .hw-jump {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sj .hw-jump a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: var(--r-md);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  transition:
+    background var(--t-fast) var(--ease),
+    border-color var(--t-fast) var(--ease);
+}
+.sj .hw-jump a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--green-400);
+}
+
+/* A hash target that clears the top bar. */
+.sj .hw-anchor {
+  display: block;
+  height: 0;
+  scroll-margin-top: 96px;
+}
+.sj section.home-sec > .hw-anchor {
+  margin-top: 0;
+}
+.sj .hw-metric {
+  scroll-margin-top: 96px;
+}
+
+/* ---------------------------------------------------------------- worked sum */
+.sj .hw-sum {
+  margin: 0;
+  padding: 20px;
+}
+.sj .hw-sum figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sj .hw-sum-cap {
+  font-family: var(--f-display);
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--gray-900);
+  text-wrap: balance;
+}
+.sj .hw-sum table {
+  width: 100%;
+  margin-top: 14px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.sj .hw-sum th,
+.sj .hw-sum td {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--gray-100);
+  text-align: left;
+  font-weight: 400;
+}
+.sj .hw-sum thead th {
+  padding-top: 0;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+}
+.sj .hw-sum tbody th {
+  color: var(--gray-900);
+  font-weight: 500;
+  padding-right: 12px;
+}
+.sj .hw-sum td {
+  width: 18%;
+  color: var(--gray-700);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.sj .hw-sum td:last-child {
+  width: 12%;
+}
+.sj .hw-sum td b {
+  color: var(--green-600);
+  font-weight: 700;
+}
+.sj .hw-sum tr.rest th,
+.sj .hw-sum tr.rest td {
+  color: var(--gray-500);
+  border-bottom: 0;
+}
+.sj .hw-sum-foot {
+  margin: 12px 0 0;
+  padding-top: 12px;
+  border-top: 1.5px solid var(--gray-900);
+  font-size: 14px;
+  color: var(--gray-700);
+}
+
+/* ---------------------------------------------------------------- metric cards */
+.sj .hw-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: stretch;
+}
+.sj .hw-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  min-width: 0;
+  transition:
+    border-color var(--t-med) var(--ease),
+    box-shadow var(--t-med) var(--ease);
+}
+.sj .hw-metric h3 {
+  margin: 0;
+  text-wrap: balance;
+}
+.sj .hw-metric > p {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--gray-700);
+  text-wrap: pretty;
+}
+.sj .hw-example {
+  margin-top: auto;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--paper);
+  border-left: 3px solid var(--yellow-400);
+}
+.sj .hw-example > span {
+  display: block;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray-600);
+}
+.sj .hw-example p {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--gray-800);
+}
+.sj .hw-metric.hw-lit,
+.sj .hw-metric:target {
+  border-color: var(--purple-600);
+  box-shadow: 0 0 0 3px var(--purple-100);
+}
+.sj .hw-metric:focus {
+  outline: none;
+}
+
+/* ---------------------------------------------------------------- end card */
+.sj .hw-end {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+}
+.sj .hw-end h2 {
+  margin: 0;
+}
+.sj .hw-end p {
+  margin: 0;
+  color: var(--gray-600);
+  font-size: 14.5px;
+}
+.sj .hw-end-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 22px;
+  margin-top: 6px;
+}
+
+@media (max-width: 860px) {
+  .sj .hw > * + * {
+    margin-top: 20px;
+  }
+  .sj .hw-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .sj .hw-metric,
+  .sj .hw-sum,
+  .sj .hw-end {
+    padding: 16px;
+  }
+  .sj .hw-sum-cap {
+    font-size: 17px;
+  }
+  .sj .hw-sum table {
+    font-size: 13px;
+  }
+  .sj .hw-sum thead th:nth-child(1) {
+    width: 40%;
+  }
+  .sj .hw-jump a {
+    min-height: 44px;
+  }
+}

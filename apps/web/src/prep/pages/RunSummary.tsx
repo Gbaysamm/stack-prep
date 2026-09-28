@@ -224,6 +224,11 @@ export function RunSummary() {
         eyebrow={`Run complete${run ? ` · ${run.subject_name} · ${whenLabel(run.started_at)}` : ""}`}
         title={head.title}
         sub={head.line}
+        actions={
+          <Button to={`/practice/${sessionId}/report`} tone="lime" trailing={<IconArrowRight size={18} />}>
+            Question by question
+          </Button>
+        }
         aside={
           // The number that matters, big: right with no hint and no help.
           <div className="rs-aside">

@@ -6,11 +6,11 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
-import { api, type Goal, type SubjectOffer } from '../../student/api.js';
+import { api, type ExaminationOffer, type Goal, type SubjectOffer } from '../../student/api.js';
 import { progressApi, type Overview } from '../progressApi.js';
 import { IconArrowRight, IconBook, IconCheck, IconLayers, IconLock, IconReplay, IconTarget } from '../icons.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
-import { Badge, Button, PageHero, Skeleton, cx, daysUntil } from '../ui.js';
+import { Badge, Button, PageHero, Pager, Skeleton, cx, daysUntil, usePaged } from '../ui.js';
 import { ExNote, examTitle, isHiddenExam, isPracticeExam } from './Exams.js';
 import './ExamSubjects.css';
 
@@ -97,7 +97,23 @@ export function ExamSubjects() {
     );
   }
 
-  const [, goals, overview] = load.data;
+  return <ExamBody exam={exam} goals={load.data[1]} overview={load.data[2]} back={back} />;
+}
+
+/** Subject cards a page: three rows of three on a laptop. */
+const SUBJECTS_PER_PAGE = 9;
+
+function ExamBody({
+  exam,
+  goals,
+  overview,
+  back,
+}: {
+  exam: ExaminationOffer;
+  goals: Goal[];
+  overview: Overview | null;
+  back: { to: string; label: string };
+}) {
   const practice = isPracticeExam(exam);
   const subjects = [...exam.subjects].sort((a, b) => Number(b.ready) - Number(a.ready) || a.name.localeCompare(b.name));
   const ready = subjects.filter((subject) => subject.ready).length;
@@ -108,6 +124,7 @@ export function ExamSubjects() {
   };
   // The page's one sticker: the first subject the student has a goal in.
   const featured = subjects.find((subject) => subject.ready && hasGoalFor(subject.subject_id))?.subject_id;
+  const paged = usePaged(subjects, SUBJECTS_PER_PAGE, exam.examination_id);
 
   return (
     <div className="sj-page">
@@ -155,7 +172,7 @@ export function ExamSubjects() {
           </ExNote>
         ) : (
           <div className="exs-grid" style={{ '--cols': Math.min(3, Math.max(2, subjects.length)) } as CSSProperties}>
-            {subjects.map((subject, index) => (
+            {paged.items.map((subject, index) => (
               <SubjectCard
                 key={subject.subject_id}
                 subject={subject}
@@ -167,6 +184,7 @@ export function ExamSubjects() {
             ))}
           </div>
         )}
+        <Pager paged={paged} noun="subjects" label="Pages of subjects" anchorId="exs-title" />
       </section>
 
       <p className="exs-legend sj-small sj-muted">

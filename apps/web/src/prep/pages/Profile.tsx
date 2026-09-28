@@ -13,9 +13,13 @@ import { ClaimDialog } from '../AuthForms.js';
 import { progressApi, type Overview } from '../progressApi.js';
 import { IconArrowRight, IconCalendar, IconChevronRight, IconClock, IconLock, IconLogout, IconTarget } from '../icons.js';
 import { useIdentity, useLoad, usePageTitle, useStudent } from '../store.js';
-import { Button, CountUp, Dialog, PageHero, Skeleton, cx, daysUntil, initials, useToast } from '../ui.js';
+import { Button, CountUp, Dialog, PageHero, ShowMore, Skeleton, cx, daysUntil, initials, useShowMore, useToast } from '../ui.js';
+import { MetricTip, type MetricId } from './HowItsWorkedOut.js';
 import { Note, Section } from './Home.js';
 import './Profile.css';
+
+/** Goal tickets shown before "Show all". */
+const GOALS_SHOWN = 4;
 
 const DAY_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -134,11 +138,18 @@ export function Profile() {
     void signOut().then(() => navigate('/', { replace: true }));
   };
 
-  const record = [
-    { label: 'Day streak', value: overview?.streak_days, line: 'Days in a row you have practised', tone: 'yellow' },
-    { label: 'Questions practised', value: answered, line: `Across ${runs} finished ${runs === 1 ? 'run' : 'runs'}`, tone: 'lime' },
-    { label: 'Subjects checked', value: checkups, line: 'Subjects with a check-up done', tone: 'ink' },
+  const record: { label: string; value: number | undefined; line: string; tone: string; tip: MetricId }[] = [
+    { label: 'Day streak', value: overview?.streak_days, line: 'Days in a row with at least one answer', tone: 'yellow', tip: 'streak' },
+    {
+      label: 'Questions practised',
+      value: answered,
+      line: `Across ${runs} finished ${runs === 1 ? 'run' : 'runs'}`,
+      tone: 'lime',
+      tip: 'answered',
+    },
+    { label: 'Subjects checked', value: checkups, line: 'Subjects with a check-up done', tone: 'ink', tip: 'checked' },
   ];
+  const moreGoals = useShowMore(goals, GOALS_SHOWN);
 
   return (
     <div className="sj-page pro-page">
@@ -182,6 +193,7 @@ export function Profile() {
               <dt>
                 <i aria-hidden="true" />
                 {stat.label}
+                <MetricTip id={stat.tip} title={stat.tip === 'answered' ? 'Questions practised' : undefined} />
               </dt>
               <dd className="sj-num">{overview ? <CountUp value={stat.value ?? 0} /> : load.data ? '—' : <Skeleton height={40} width={56} />}</dd>
               <p>{stat.line}</p>
@@ -231,8 +243,9 @@ export function Profile() {
             Pick a subject, the score you want and the day you sit it. Your plan then counts down to exam day with you.
           </Note>
         ) : (
-          <ul className="pro-tickets">
-            {goals.map((goal) => (
+          <>
+          <ul className="pro-tickets" id="pro-goal-list">
+            {moreGoals.items.map((goal) => (
               <GoalTicket key={goal.subject_id} goal={goal} exam={examOf(goal.subject_id)} />
             ))}
             <li>
@@ -247,6 +260,8 @@ export function Profile() {
               </Link>
             </li>
           </ul>
+          <ShowMore more={moreGoals} noun="goals" controls="pro-goal-list" />
+          </>
         )}
       </Section>
 
