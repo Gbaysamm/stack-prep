@@ -1092,71 +1092,40 @@
   margin: 6px 0;
 }
 
-/* ---- The board's layout: fits a phone, reads well on a laptop ------------------------ */
+/* ---- The board's layout -------------------------------------------------------------- */
 /* Last in the file on purpose: these settle the layout over the rules above.
 
-   The coach card used to float over the bottom of the board, with the working told to stop
-   86px short of it. On a phone the card wraps to several lines and covered the working it was
-   talking about. The board is now a column: the working scrolls, and the card sits under it. */
+   Three bands, the same on every screen: a slim header (close, what this is, a progress
+   line), the board (a centred column of working that scrolls, the coach card under it), and
+   the controls. On a phone the controls stack; on a laptop the column stays at reading width
+   instead of stretching edge to edge. */
 .sp-coach {
   grid-template-rows: auto minmax(0, 1fr) auto;
-}
-.sp-board {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-.sp-ink {
-  position: static;
-  flex: 1 1 auto;
-  min-height: 0;
-  width: 100%;
-  /* A line of working is read across; past about this width the eye loses its place. */
-  max-width: 980px;
-  margin: 0 auto;
-  box-sizing: border-box;
-  padding: clamp(16px, 4vh, 40px) clamp(16px, 5vw, 64px) 16px;
-  font-size: clamp(17px, 1.1vw + 12px, 26px);
-}
-.sp-tutorcard {
-  position: static;
-  flex: none;
-  box-sizing: border-box;
-  width: calc(100% - 28px);
-  max-width: 952px;
-  margin: 0 auto 12px;
-}
-.sp-tutorcard.slim {
-  width: fit-content;
-  max-width: calc(100% - 28px);
-}
-.sp-tutorcard > div {
-  min-width: 0;
-}
-.sp-tutorcard p {
-  max-height: 30vh;
-  overflow-y: auto;
-}
-/* The question's rule on a white board (an older rule drew it white, for a dark board). */
-.sp-hl.sp-question {
-  border-bottom: 1px solid #ece8f3;
+  height: 100dvh;
+  background: #fff;
 }
 
-/* A long line of working scrolls sideways within itself rather than off the edge of the
-   screen. The small padding keeps the tops of fractions from being clipped. */
-.sp-hl .sp-item {
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding-block: 2px;
-}
-
-/* The top bar: the title gives way before anything spills. */
+/* Header ----------------------------------------------------------------------------- */
 .sp-cbar {
+  position: relative;
   min-width: 0;
+  gap: 10px;
+  padding: 10px max(14px, calc((100% - 980px) / 2 + 14px)) 13px;
+  background: #fff;
+  border-bottom: 1px solid #ece8f3;
+  backdrop-filter: none;
+}
+.sp-cbar > .sp-btn {
+  flex: none;
 }
 .sp-lesson {
-  flex: 0 1 auto;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
   overflow: hidden;
 }
 .sp-lesson span {
@@ -1169,39 +1138,155 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.sp-lesson small {
+  font-size: 10px;
+}
+.sp-lesson strong {
+  font-size: 15px;
+  line-height: 1.25;
+}
+/* The steps as one thin progress line along the bottom of the header: it fits any number of
+   steps on any screen, where a dash per step overflowed a phone. */
 .sp-steps-mini {
-  flex: 1 1 0;
-  min-width: 0;
-  justify-content: flex-end;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  display: flex;
+  gap: 2px;
+  margin: 0;
 }
 .sp-steps-mini i {
-  flex: 0 1 22px;
-  min-width: 3px;
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
+  height: 3px;
+  border-radius: 0;
+  background: #ece8f3;
+  transition: background 0.3s;
+}
+.sp-steps-mini i.on {
+  background: var(--purple);
 }
 
+/* Board ------------------------------------------------------------------------------ */
+.sp-board {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: #fff;
+}
+.sp-ink {
+  position: static;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: clamp(14px, 3vh, 32px) clamp(16px, 4vw, 40px) 20px;
+  font-size: clamp(17px, 0.9vw + 12px, 24px);
+  line-height: 1.55;
+}
+/* The question: set apart in a light panel, so the working below reads as the answer to it. */
+.sp-hl.sp-question {
+  opacity: 1;
+  font-size: 0.9em;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  border: 0;
+  border-radius: 14px;
+  background: #f6f3fb;
+}
+.sp-hl {
+  margin-bottom: 12px;
+}
+/* A long line of working scrolls sideways within itself rather than off the screen. */
+.sp-hl .sp-item {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: 2px;
+}
+.sp-hl.answer {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 12px;
+  background: #ecf8f0;
+}
+
+/* The coach: a card under the working, never over it. */
+.sp-tutorcard {
+  position: static;
+  flex: none;
+  box-sizing: border-box;
+  width: calc(100% - 24px);
+  max-width: 876px;
+  margin: 0 auto 10px;
+  padding: 10px 14px;
+  border-radius: 16px;
+}
+.sp-tutorcard.slim {
+  width: fit-content;
+  max-width: calc(100% - 24px);
+  padding: 6px 14px 6px 8px;
+}
+.sp-tutorcard > div {
+  min-width: 0;
+}
+.sp-tutorcard p {
+  max-height: 28vh;
+  overflow-y: auto;
+}
+
+/* Controls --------------------------------------------------------------------------- */
+.sp-dock {
+  gap: 12px;
+  padding: 10px max(14px, calc((100% - 900px) / 2 + 14px))
+    calc(10px + env(safe-area-inset-bottom));
+  border-top: 1px solid #ece8f3;
+}
+.sp-dock .ctl {
+  flex: none;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 999px;
+  background: #f6f3fb;
+}
+.sp-dock .ctl button {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 16px;
+}
+.sp-dock .ctl button:hover:not(:disabled) {
+  background: #fff;
+}
+.sp-ask input {
+  border-width: 1px;
+  background: #faf9fc;
+}
+
+/* Phone ------------------------------------------------------------------------------ */
 @media (max-width: 640px) {
   .sp-cbar {
+    padding: 8px 12px 11px;
     gap: 8px;
-    padding: 8px 10px;
-  }
-  .sp-lesson {
-    flex: 1 1 auto;
-    min-width: 0;
-    padding: 6px 10px;
-    border-radius: 12px;
   }
   .sp-lesson small {
-    font-size: 9.5px;
+    font-size: 9px;
   }
   .sp-lesson strong {
-    font-size: 13px;
+    font-size: 13.5px;
   }
-  /* No room for a dash per step on a phone; the coach card already says which step it is. */
-  .sp-steps-mini {
-    display: none;
+  .sp-ink {
+    padding: 12px 14px 14px;
   }
-  .sp-hl {
-    margin-bottom: 10px;
+  .sp-hl.sp-question {
+    padding: 10px 12px;
+    margin-bottom: 14px;
   }
   .sp-tutorcard {
     width: calc(100% - 16px);
@@ -1215,8 +1300,7 @@
   .sp-spoken .saying {
     font-size: 14px;
   }
-  /* The controls take their own row above the ask box: beside it, on a phone, the box was
-     left too narrow to type in. */
+  /* Controls on their own row above the ask box: beside it, the box was too narrow to use. */
   .sp-dock {
     flex-wrap: wrap;
     gap: 8px;
@@ -1224,16 +1308,12 @@
   }
   .sp-dock .ctl {
     order: -1;
-    width: 100%;
-    justify-content: center;
-    margin-left: 0;
-    gap: 14px;
+    margin: 0 auto;
   }
-  .sp-dock .ctl button {
-    width: 40px;
-    height: 40px;
+  .sp-ask {
+    flex-basis: 100%;
   }
-  /* 16px or more, or iOS zooms the whole page in when the box is tapped. */
+  /* 16px or more, or iOS zooms the page in when the box is tapped. */
   .sp-ask input {
     font-size: 16px;
     padding: 9px 12px;
@@ -1244,12 +1324,10 @@
   }
 }
 
+/* Laptop and up ---------------------------------------------------------------------- */
 @media (min-width: 1024px) {
   .sp-tutorcard p,
   .sp-spoken .saying {
     font-size: 15.5px;
-  }
-  .sp-dock {
-    padding-inline: max(16px, calc((100% - 980px) / 2 + 16px));
   }
 }
