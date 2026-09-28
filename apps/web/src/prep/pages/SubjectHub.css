@@ -57,16 +57,18 @@
   text-transform: uppercase;
   color: var(--gray-600);
 }
-/* Both figures sit on one bottom line, whatever their size. */
+/* Both figures stand on one baseline, whatever their size: the row is exactly as tall as the
+   big number, and the number has no leading of its own to hang below it. */
 .sj .hub-plan-figs dd {
   display: flex;
-  align-items: flex-end;
+  align-items: baseline;
   gap: 6px;
-  height: 48px;
+  height: 46px;
   margin: 0;
 }
 .sj .hub-plan-figs .sj-num {
   font-size: 52px;
+  line-height: 46px;
 }
 .sj .hub-plan-figs .of {
   padding-bottom: 2px;
@@ -75,12 +77,18 @@
   color: var(--gray-500);
 }
 .sj .hub-plan-figs .date {
-  align-self: flex-end;
   font-family: var(--f-display);
   font-weight: 600;
-  font-size: 26px;
+  font-size: 28px;
   letter-spacing: -0.02em;
-  line-height: 0.9;
+  line-height: 46px;
+}
+/* The line under each figure, the same height in both columns. */
+.sj .hub-plan-figs .hub-under {
+  min-height: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-600);
 }
 .sj .hub-days {
   font-size: 13px;

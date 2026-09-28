@@ -82,6 +82,7 @@ function PlanCard({ subject }: { subject: SubjectOverview }) {
             <span className="sj-num">{fmtScore(goal.target_score)}</span>
             <span className="of sj-mono">/100</span>
           </dd>
+          <span className="hub-under">The score you're aiming for</span>
         </div>
         <div>
           <dt>Exam day</dt>
@@ -89,7 +90,7 @@ function PlanCard({ subject }: { subject: SubjectOverview }) {
             <span className="date">{goal.exam_date ? shortDate(goal.exam_date) : 'Not set'}</span>
           </dd>
           {days !== null ? (
-            <span className={cx('hub-days', days < 0 && 'past')}>
+            <span className={cx('hub-days hub-under', days < 0 && 'past')}>
               {days < 0 ? 'This date has passed' : days === 0 ? 'It is today' : `${plural(days, 'day')} to go`}
               {days >= 0 ? <MetricTip id="days" /> : null}
             </span>

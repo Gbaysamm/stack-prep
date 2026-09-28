@@ -107,6 +107,12 @@ function whenReady(
 /** How long after a silent line goes up before its marks are drawn back over the board. */
 const MARK_LEAD_MS = 900;
 
+/** The turn from the board after a line is finished, before the marks go up on it. */
+const MARK_AFTER_WRITE_MS = 260;
+
+/** Marks for a line the hand never reported finishing go up after this long regardless. */
+const MARK_SAFETY_MS = 9000;
+
 /** How long a line is left up to be read when there is no voice to hear it by. */
 function readingMs(said: string): number {
   return Math.min(9000, Math.max(2500, said.length * 55));
@@ -695,6 +701,10 @@ export function Board({
   //: Which line's marks are up: the circles and arrows a beat draws back over earlier lines.
   //: Set a moment after its voice starts, so the mark lands on the words that point at it.
   const [pointing, setPointing] = useState<number | null>(null);
+  //: The beat whose marks are due, once the line they belong to has been written out.
+  const [wantPoint, setWantPoint] = useState<number | null>(null);
+  //: Bumped each time the hand finishes a line, so the wait below looks again.
+  const [writtenTick, setWrittenTick] = useState(0);
   //: The lesson's own voice is sounding, so the coach's face shows it is talking.
   const [voicing, setVoicing] = useState(false);
   const clips = useRef(new Map<number, HTMLAudioElement>());
@@ -774,7 +784,7 @@ export function Board({
       setQuestionUp(true);
       setHandMs(READ_HAND_MS);
       setItemsShown(entry?.items.length ?? 0);
-      later(() => setPointing(at), MARK_LEAD_MS);
+      later(() => setWantPoint(at), MARK_LEAD_MS);
       onward(entry ? readingMs(entry.say) : STEP_MS);
     };
     const stop = () => {
@@ -798,7 +808,7 @@ export function Board({
       setQuestionUp(true);
       setHandMs(READ_HAND_MS);
       setItemsShown(entry?.items.length ?? 0);
-      later(() => setPointing(index), MARK_LEAD_MS);
+      later(() => setWantPoint(index), MARK_LEAD_MS);
       onward(STEP_MS);
       return stop;
     }
@@ -808,6 +818,7 @@ export function Board({
       clip.currentTime = 0;
       setItemsShown(0);
       setPointing(null);
+      setWantPoint(null);
     }
     narrating.current = index;
     const writeAll = () => setItemsShown(entry.items.length);
@@ -827,7 +838,7 @@ export function Board({
       // The marks go up once the line they start from has been written: the teacher writes,
       // then turns and points back at where it came from.
       later(
-        () => setPointing(index),
+        () => setWantPoint(index),
         Math.max(0, (lead + 0.75 - clip.currentTime) * 1000),
       );
       entry.items.forEach((_, item) => {
@@ -1044,6 +1055,34 @@ export function Board({
               : silent
                 ? `Coach · no voice right now, read along · step ${shown} of ${lines.length}`
                 : `Coach · step ${shown} of ${lines.length}`;
+
+  // THE MARKS WAIT FOR THE WRITING. A beat's marks are due a moment after its voice starts, but
+  // they go up only once every piece of its line is on the board and the hand has finished it:
+  // a highlight under words not yet written, or a word crossed out before it exists, reads as
+  // the board knowing the answer before the teacher does. If the hand never reports (a line it
+  // could not measure), the marks go up anyway after a generous wait.
+  useEffect(() => {
+    const sheet = sheetRef.current;
+    if (!sheet) return;
+    const bump = () => setWrittenTick((value) => value + 1);
+    sheet.addEventListener(WRITTEN_EVENT, bump);
+    return () => sheet.removeEventListener(WRITTEN_EVENT, bump);
+  }, []);
+  useEffect(() => {
+    if (wantPoint === null || pointing === wantPoint) return;
+    const entry = lines[wantPoint];
+    const row = sheetRef.current?.querySelector(`[data-line="${wantPoint}"]`);
+    const items = row ? Array.from(row.querySelectorAll<HTMLElement>(".pb-item")) : [];
+    const done =
+      !entry ||
+      (items.length >= entry.items.length &&
+        items.every((item) => item.dataset.written !== undefined));
+    const timer = window.setTimeout(
+      () => setPointing(wantPoint),
+      done ? MARK_AFTER_WRITE_MS : MARK_SAFETY_MS,
+    );
+    return () => window.clearTimeout(timer);
+  }, [wantPoint, pointing, writtenTick, itemsShown, lines]);
 
   // THE MARKS. A beat may point back at a line already written — circle a term, underline
   // it, draw an arrow to where a line came from — the way a teacher turns to the board and
@@ -2449,7 +2488,12 @@ function Pen({
       seen.current.add(line);
       fresh.push(line);
     });
-    if (fresh.length === 0 || stillMotion() || !canClipPath()) return;
+    if (fresh.length === 0) return;
+    if (stillMotion() || !canClipPath()) {
+      // No hand: the lines stand at once, and count as written for the marks that wait on them.
+      fresh.forEach(written);
+      return;
+    }
     const state = hand.current;
     const lengths = fresh.map((line) => {
       const stroke =
@@ -2537,8 +2581,12 @@ function Pen({
   );
 }
 
-/** How far the marker leans from upright, clockwise: barrel up and to the right of the nib. */
-const PEN_ANGLE = 32;
+/**
+ * How far the marker is turned from upright, clockwise. Past a right angle, so the barrel runs
+ * down and to the right of the nib, towards the hand that holds it — the way a pen sits in a
+ * right-handed writer's fingers — and it never covers what has just been written to its left.
+ */
+const PEN_ANGLE = 135;
 
 /** How long the marker takes to get to the start of a new line, before the writing begins. */
 const STROKE_DELAY_MS = 180;
@@ -2557,6 +2605,18 @@ const REST_MS = 1400;
 
 /** Whether the marker is shown: yes, no, or faded back while it waits at the margin. */
 type Show = boolean | "wait";
+
+/**
+ * A line is written: say so on the line, and tell the board, whose marks for it are waiting.
+ * A teacher writes the line, then turns and points at it — never the other way round.
+ */
+function written(line: HTMLElement): void {
+  line.dataset.written = "";
+  line.closest(".pb-sheet")?.dispatchEvent(new Event(WRITTEN_EVENT));
+}
+
+/** Sent on the sheet each time the hand finishes a line. */
+const WRITTEN_EVENT = "pb-written";
 
 /** A clip path that shows nothing: a line queued but not yet reached. */
 const NOTHING = 'path("M0 0Z")';
@@ -2727,6 +2787,7 @@ function advance(
       // Finished: the whole line stands, and the hand goes back to the margin.
       spare = (job.units - script.total) / Math.max(job.rate, 1e-6);
       job.line.style.clipPath = "";
+      written(job.line);
       const end = script.segments[script.segments.length - 1]!;
       const from = onSheet(script, end.to);
       state.back = {
@@ -2796,12 +2857,13 @@ function begin(
   const script = readScript(job.line, sheet);
   if (!script) {
     job.line.style.clipPath = "";
+    written(job.line);
     return false;
   }
   job.script = script;
   const first = onSheet(script, script.segments[0]!.from);
-  // The first line comes in from the right, lifted, as a hand coming up to the board would.
-  const from: Pt = state.tip ?? [first[0] + 70, first[1] - 40];
+  // The first line comes in from below and to the right, lifted, where the writing hand is.
+  const from: Pt = state.tip ?? [first[0] + 70, first[1] + 60];
   const distance = Math.hypot(first[0] - from[0], first[1] - from[1]);
   job.from = from;
   job.fromLift = state.tip ? state.lift : 1;
