@@ -25,7 +25,7 @@
  */
 
 import katex from 'katex';
-import type { ReactNode } from 'react';
+import { useLayoutEffect, useRef, type ReactNode } from 'react';
 
 import 'katex/dist/katex.min.css';
 
@@ -47,6 +47,47 @@ function typeset(expression: string, displayMode: boolean): string | null {
   }
 }
 
+/** Smallest a table or formula is shrunk to before it scrolls sideways instead. */
+const MIN_FIT_SCALE = 0.55;
+
+/**
+ * A formula or table that cannot wrap, shrunk just enough to fit the width it is given.
+ *
+ * A frequency table in a question stem is wider than a phone, and a scroll bar hides the
+ * columns the question is about. So the type is scaled down to fit, re-measured whenever the
+ * box changes width; only past MIN_FIT_SCALE, where it would stop being readable, does it fall
+ * back to scrolling.
+ */
+function FitToWidth({ html, display }: { html: string; display: boolean }) {
+  const box = useRef<HTMLSpanElement>(null);
+  useLayoutEffect(() => {
+    const element = box.current;
+    const holder = element?.parentElement;
+    if (!element || !holder) return;
+    const fit = () => {
+      element.style.fontSize = '';
+      const natural = element.scrollWidth;
+      const room = holder.clientWidth;
+      if (natural > room + 1 && room > 0) {
+        const scale = Math.max(MIN_FIT_SCALE, room / natural);
+        element.style.fontSize = `${scale.toFixed(3)}em`;
+      }
+    };
+    fit();
+    const watcher = new ResizeObserver(fit);
+    watcher.observe(holder);
+    return () => watcher.disconnect();
+  }, [html]);
+  return (
+    <span
+      ref={box}
+      className={display ? 'sp-maths block sp-fit' : 'sp-maths sp-fit'}
+      // Not the model's text: KaTeX's markup, built from an escaped expression.
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+}
+
 export function Maths({ text }: { text: string }) {
   const parts: ReactNode[] = [];
   let cursor = 0;
@@ -60,10 +101,13 @@ export function Maths({ text }: { text: string }) {
     parts.push(
       html === null ? (
         match[0]
+      ) : display || html.includes('mtable') ? (
+        // A displayed formula or a table cannot wrap, so it is shrunk to fit its box.
+        <FitToWidth key={`${start}`} html={html} display={display} />
       ) : (
         <span
           key={`${start}`}
-          className={display ? 'sp-maths block' : 'sp-maths'}
+          className="sp-maths"
           // Not the model's text: KaTeX's markup, built from an escaped expression.
           dangerouslySetInnerHTML={{ __html: html }}
         />
