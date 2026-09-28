@@ -1514,10 +1514,11 @@ async def _lesson_beats(
     over the reviewed steps — and then the board writes each reviewed step whole, because a
     step's working cut down to fragments reads as working with lines missing.
     """
-    # The lesson written for this version, or else the one on the question's current version
-    # when it keys the same answer. A student can meet a question on a version it has since
-    # moved on from (a session started before a correction), and a lesson is only ever loaded
-    # onto the current version; without this they would get the bare reviewed steps.
+    # The lesson written for this version, or else the one on the question's current version.
+    # A student can meet a question on a version it has since moved on from (a session started
+    # before a correction), and a lesson is only ever loaded onto the current version; without
+    # this they would get the bare reviewed steps. Where the correction changed the answer, the
+    # old key was the mistake, so the corrected lesson is still the one to teach.
     written = (
         (
             await conn.execute(
@@ -1529,16 +1530,6 @@ async def _lesson_beats(
                     JOIN question_lessons l
                       ON l.question_version_id IN (seen.id, q.current_version_id)
                     WHERE seen.id = :v
-                      AND (
-                        l.question_version_id = seen.id
-                        OR (
-                          SELECT option_key FROM question_options
-                          WHERE question_version_id = seen.id AND is_correct
-                        ) = (
-                          SELECT option_key FROM question_options
-                          WHERE question_version_id = q.current_version_id AND is_correct
-                        )
-                      )
                     ORDER BY l.question_version_id = seen.id DESC
                     LIMIT 1
                     """
