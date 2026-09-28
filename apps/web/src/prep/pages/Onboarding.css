@@ -607,6 +607,15 @@
 .sj .onb-fact .sj-eyebrow {
   color: var(--gray-600);
 }
+.sj .onb-opt-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.sj .onb-opt-badge.must {
+  background: var(--yellow-100);
+  color: var(--gray-800);
+}
 .sj .onb-opt-badge {
   align-self: flex-start;
   padding: 3px 8px;
@@ -1073,6 +1082,73 @@
   font-size: 11px;
   font-weight: 700;
   color: var(--gray-500);
+}
+
+.sj .onb-sumdate {
+  flex: none;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--gray-700);
+}
+
+/* ------------------------------------------------------------ step 3: dates */
+.sj .onb-parthead .onb-parttip {
+  margin-left: -2px;
+}
+.sj .onb-partnote {
+  max-width: 62ch;
+  margin-top: -4px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--gray-600);
+}
+.sj .onb-papers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sj .onb-paper {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+  align-items: start;
+  gap: 8px 12px;
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  box-shadow: inset 0 0 0 1.5px var(--gray-200);
+}
+.sj .onb-paper-name {
+  display: flex;
+  align-items: center;
+  min-height: 50px;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 15.5px;
+}
+.sj .onb-paper-same {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.sj .onb-paper-same .sj-chip {
+  min-height: 36px;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+@media (max-width: 640px) {
+  .sj .onb-paper {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 12px 14px;
+  }
+  .sj .onb-paper-name {
+    min-height: 0;
+  }
+  .sj .onb-paper-same {
+    grid-column: 1;
+  }
 }
 
 /* ------------------------------------------------------------ finish */

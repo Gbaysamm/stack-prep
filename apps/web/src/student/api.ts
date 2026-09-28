@@ -16,6 +16,8 @@ export interface SubjectOffer {
   teachable_skills: number;
   ready: boolean;
   blocked_reason: string | null;
+  /** Every candidate of the exam sits it (UTME: Use of English). */
+  compulsory: boolean;
 }
 
 export interface ExaminationOffer {
@@ -23,12 +25,22 @@ export interface ExaminationOffer {
   short_name: string;
   name: string;
   exam_body: string;
+  /** Every subject is sat on one day (UTME): one date for the whole exam. False when each
+   *  paper has its own date (WAEC, NECO), some possibly on the same day. */
+  sits_together: boolean;
+  /** How many subjects one candidate may enter; null when there is no limit. */
+  max_subjects: number | null;
+  compulsory_subject_codes: string[];
   subjects: SubjectOffer[];
 }
 
 export interface Goal {
   subject_id: string;
   subject_name: string;
+  examination_id: string;
+  examination_short_name: string;
+  /** The date is the exam's one date, shared by all its subjects: changing it here changes all. */
+  shared_date: boolean;
   target_score: number | null;
   exam_date: string | null;
   minutes_per_day: number | null;
@@ -253,6 +265,13 @@ async function readError(response: Response): Promise<string> {
   return detail;
 }
 
+/** Fired on the window whenever a goal is saved or removed, so a countdown drawn elsewhere on
+ *  the page (the sidebar, the top bar) can fetch the new dates instead of showing the old. */
+export const GOALS_CHANGED = 'sj:goals-changed';
+function announceGoalsChanged() {
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event(GOALS_CHANGED));
+}
+
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`/v1${path}`, {
     headers: { 'content-type': 'application/json' },
@@ -277,7 +296,16 @@ export const api = {
     call<Goal>(`/student/${studentId}/goals/${subjectId}`, {
       method: 'PUT',
       body: JSON.stringify(goal),
+    }).then((saved) => {
+      announceGoalsChanged();
+      return saved;
     }),
+  /** Take a subject off the student's list. Its runs and answers are kept. */
+  removeGoal: async (studentId: string, subjectId: string) => {
+    const response = await fetch(`/v1/student/${studentId}/goals/${subjectId}`, { method: 'DELETE' });
+    if (!response.ok) throw new Error(await readError(response));
+    announceGoalsChanged();
+  },
   /** What this deployment has switched on. Asked rather than assumed, so a client never
    *  draws a microphone the server would refuse. */
   features: () => call<Features>('/features'),

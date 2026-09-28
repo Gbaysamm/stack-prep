@@ -19,10 +19,10 @@ here needs rewriting.
 from __future__ import annotations
 
 from datetime import date
-from typing import Annotated
+from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
@@ -47,6 +47,8 @@ class SubjectOffer(BaseModel):
     ready: bool
     #: Present when ready is false: the plain reason, for the student, not the operator.
     blocked_reason: str | None
+    #: Every candidate of this examination sits it (UTME: Use of English).
+    compulsory: bool = False
 
 
 class ExaminationOffer(BaseModel):
@@ -54,12 +56,23 @@ class ExaminationOffer(BaseModel):
     short_name: str
     name: str
     exam_body: str
+    #: Every subject is sat on one day (UTME), so a student has one date for the whole exam.
+    #: False when each paper has its own date (WAEC, NECO), some of them sharing a day.
+    sits_together: bool = False
+    #: How many subjects one candidate may enter; null when there is no limit.
+    max_subjects: int | None = None
+    compulsory_subject_codes: list[str] = Field(default_factory=list)
     subjects: list[SubjectOffer]
 
 
 class Goal(BaseModel):
     subject_id: UUID
     subject_name: str
+    examination_id: UUID
+    examination_short_name: str
+    #: True when this subject's date is the examination's one date, shared with every other
+    #: subject of it: changing it here changes it for all of them.
+    shared_date: bool
     target_score: float | None
     exam_date: date | None
     minutes_per_day: int | None
@@ -117,6 +130,7 @@ async def catalogue(
         conn,
         """
         SELECT e.id AS examination_id, e.short_name, e.name, e.exam_body,
+               e.sits_together, e.max_subjects, e.compulsory_subject_codes,
                s.id AS subject_id, s.code, s.name AS subject_name,
                (SELECT count(*) FROM deliverable_questions d WHERE d.subject_id = s.id)
                  AS deliverable_questions,
@@ -137,6 +151,9 @@ async def catalogue(
                 short_name=row["short_name"],
                 name=row["name"],
                 exam_body=row["exam_body"],
+                sits_together=bool(row["sits_together"]),
+                max_subjects=row["max_subjects"],
+                compulsory_subject_codes=list(row["compulsory_subject_codes"] or []),
                 subjects=[],
             ),
         )
@@ -163,6 +180,7 @@ async def catalogue(
                 teachable_skills=teachable,
                 ready=ready,
                 blocked_reason=reason,
+                compulsory=row["code"] in (row["compulsory_subject_codes"] or []),
             )
         )
     return list(offers.values())
@@ -179,9 +197,11 @@ async def goals(
         conn,
         """
         SELECT g.subject_id, s.name AS subject_name, g.target_score, g.exam_date,
-               g.minutes_per_day, g.study_days
+               g.minutes_per_day, g.study_days,
+               e.id AS examination_id, e.short_name, e.sits_together
         FROM student_exam_goals g
         JOIN subjects s ON s.id = g.subject_id
+        JOIN examinations e ON e.id = s.examination_id
         WHERE g.student_id = :student AND g.status = 'active'
         ORDER BY s.name
         """,
@@ -191,6 +211,9 @@ async def goals(
         Goal(
             subject_id=row["subject_id"],
             subject_name=row["subject_name"],
+            examination_id=row["examination_id"],
+            examination_short_name=row["short_name"],
+            shared_date=bool(row["sits_together"]),
             target_score=float(row["target_score"]) if row["target_score"] is not None else None,
             exam_date=row["exam_date"],
             minutes_per_day=row["minutes_per_day"],
@@ -221,6 +244,13 @@ async def set_goal(
     one updates the existing row rather than leaving two and hoping the reader picks the
     newer. The old values are overwritten: a goal is a current intention, and its history is
     not something anything downstream reads.
+
+    Two rules come from the examination rather than the subject:
+
+    * An examination sat in one sitting (UTME) has one date. Saving it for one subject saves it
+      for every active subject of that examination, and a subject added without a date takes
+      the one already set, so the student is never holding four answers to one question.
+    * An examination with a subject limit (UTME: four) refuses a fifth, and says which to do.
     """
     await require_student(request, conn, student_id)
     exists = (
@@ -228,6 +258,47 @@ async def set_goal(
     ).first()
     if exists is None:
         raise HTTPException(status_code=404, detail="unknown student")
+    exam = await _exam_of(conn, subject_id)
+    has_goal = (
+        await conn.execute(
+            text(
+                """
+                SELECT 1 FROM student_exam_goals
+                WHERE student_id = :student AND subject_id = :subject AND status = 'active'
+                """
+            ),
+            {"student": student_id, "subject": subject_id},
+        )
+    ).first() is not None
+    exam_date = goal.exam_date
+    if not has_goal:
+        siblings = await fetch_all(
+            conn,
+            """
+            SELECT g.exam_date
+            FROM student_exam_goals g
+            JOIN subjects s ON s.id = g.subject_id
+            WHERE g.student_id = :student AND g.status = 'active'
+              AND s.examination_id = :exam AND g.subject_id <> :subject
+            ORDER BY g.updated_at DESC
+            """,
+            student=student_id,
+            exam=exam["id"],
+            subject=subject_id,
+        )
+        limit = exam["max_subjects"]
+        if limit is not None and len(siblings) >= limit:
+            raise HTTPException(
+                status_code=409,
+                detail=(
+                    f"{exam['short_name']} is {_count_word(limit)} subjects. "
+                    "Remove one to add another."
+                ),
+            )
+        if exam_date is None and exam["sits_together"]:
+            exam_date = next(
+                (row["exam_date"] for row in siblings if row["exam_date"] is not None), None
+            )
     await conn.execute(
         text(
             """
@@ -247,16 +318,91 @@ async def set_goal(
             "student": student_id,
             "subject": subject_id,
             "target": goal.target_score,
-            "exam_date": goal.exam_date,
+            "exam_date": exam_date,
             "minutes": goal.minutes_per_day,
             "days": goal.study_days,
         },
     )
+    if exam["sits_together"] and exam_date is not None:
+        # One sitting, one date: every other subject of this examination moves with it.
+        await conn.execute(
+            text(
+                """
+                UPDATE student_exam_goals g
+                SET exam_date = :exam_date, updated_at = now()
+                FROM subjects s
+                WHERE s.id = g.subject_id AND s.examination_id = :exam
+                  AND g.student_id = :student AND g.status = 'active'
+                  AND g.exam_date IS DISTINCT FROM :exam_date
+                """
+            ),
+            {"exam_date": exam_date, "exam": exam["id"], "student": student_id},
+        )
     await conn.commit()
     for row in await goals(request, conn, student_id):
         if row.subject_id == subject_id:
             return row
     raise HTTPException(status_code=500, detail="the goal was written but could not be read back")
+
+
+@router.delete(
+    "/{student_id}/goals/{subject_id}",
+    status_code=204,
+    summary="Stop preparing for a subject",
+)
+async def remove_goal(
+    request: Request,
+    conn: Annotated[AsyncConnection, Depends(connection)],
+    student_id: UUID,
+    subject_id: UUID,
+) -> Response:
+    """Take a subject off the student's list, so another can take its place.
+
+    The goal is cancelled, not deleted, and nothing the student did in the subject is touched:
+    its runs and answers happened and still count if they add it back.
+    """
+    await require_student(request, conn, student_id)
+    await conn.execute(
+        text(
+            """
+            UPDATE student_exam_goals SET status = 'cancelled', updated_at = now()
+            WHERE student_id = :student AND subject_id = :subject AND status = 'active'
+            """
+        ),
+        {"student": student_id, "subject": subject_id},
+    )
+    await conn.commit()
+    return Response(status_code=204)
+
+
+_COUNT_WORDS = ("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
+
+
+def _count_word(count: int) -> str:
+    return _COUNT_WORDS[count] if 0 <= count < len(_COUNT_WORDS) else str(count)
+
+
+async def _exam_of(conn: AsyncConnection, subject_id: UUID) -> dict[str, Any]:
+    """The examination a subject belongs to, with the rules for how it is sat."""
+    row = (
+        (
+            await conn.execute(
+                text(
+                    """
+                    SELECT e.id, e.short_name, e.sits_together, e.max_subjects
+                    FROM subjects s JOIN examinations e ON e.id = s.examination_id
+                    WHERE s.id = :subject
+                    """
+                ),
+                {"subject": subject_id},
+            )
+        )
+        .mappings()
+        .first()
+    )
+    if row is None:
+        raise HTTPException(status_code=404, detail="unknown subject")
+    return dict(row)
 
 
 @router.get(

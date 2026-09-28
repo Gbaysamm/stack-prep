@@ -15,7 +15,6 @@ import {
   useNavigate,
 } from "react-router-dom";
 
-import { api } from "../student/api.js";
 import { ClaimDialog } from "./AuthForms.js";
 import {
   IconArrowLeft,
@@ -26,6 +25,7 @@ import {
   IconChevronDown,
   IconClose,
   IconFlame,
+  IconHelp,
   IconHome,
   IconLock,
   IconLogout,
@@ -33,9 +33,18 @@ import {
   IconTarget,
   IconUser,
 } from "./icons.js";
+import {
+  CountdownTip,
+  countdownNote,
+  countdownTo,
+  plainDays,
+  upcomingExams,
+  useExamCountdowns,
+  whenText,
+} from "./countdown.js";
 import { progressApi, type Overview } from "./progressApi.js";
 import { TitleProvider, useIdentity, useLoad, useStudent } from "./store.js";
-import { Dialog, Button, IconButton, daysUntil, initials } from "./ui.js";
+import { Dialog, Button, IconButton, initials } from "./ui.js";
 
 const NAV = [
   { to: "/home", label: "Home", icon: IconHome },
@@ -48,6 +57,7 @@ const NAV = [
 /** Places a student goes less often than every day: under the main list, and in the phone menu. */
 const MORE = [
   { to: "/exams", label: "Exams & subjects", icon: IconBook },
+  { to: "/help", label: "Help & guides", icon: IconHelp },
 ] as const;
 
 export function Brand({ light = true }: { light?: boolean }) {
@@ -65,20 +75,15 @@ export function Brand({ light = true }: { light?: boolean }) {
   );
 }
 
+/** The sidebar's exam card: the nearest exam day, counted per exam, and the others beneath. */
 function Countdown() {
   const student = useStudent();
-  const goals = useLoad(
-    () => api.goals(student.studentId),
-    [student.studentId],
-  );
-  const upcoming = (goals.data ?? [])
-    .map((goal) => ({ goal, days: daysUntil(goal.exam_date) }))
-    .filter(
-      (item): item is { goal: (typeof item)["goal"]; days: number } =>
-        item.days !== null && item.days >= 0,
-    )
-    .sort((a, b) => a.days - b.days)[0];
-  if (!upcoming) {
+  const exams = useExamCountdowns(student.studentId, undefined);
+  const upcoming = upcomingExams(exams);
+  const next = upcoming[0];
+  if (!next) {
+    // Still loading: an empty card of the same height would jump; draw nothing until known.
+    if (exams === undefined) return null;
     return (
       <div className="sj-countdown">
         <div className="sj-navlabel" style={{ padding: 0, marginBottom: 8 }}>
@@ -93,58 +98,62 @@ function Countdown() {
       </div>
     );
   }
+  const days = next.days_to_next ?? 0;
+  const note = countdownNote(next);
+  const others = upcoming.slice(1, 3);
   return (
     <div className="sj-countdown">
-      <div className="sj-navlabel" style={{ padding: 0, marginBottom: 10 }}>
-        Exam countdown
+      <div className="cd-head">
+        <span className="sj-navlabel">Exam countdown</span>
+        <CountdownTip onDark />
       </div>
       <div className="days">
-        {upcoming.days}
-        <span
-          style={{
-            fontSize: 16,
-            marginLeft: 6,
-            color: "#fff",
-            letterSpacing: 0,
-          }}
-        >
-          {upcoming.days === 1 ? "day" : "days"}
-        </span>
+        {days === 0 ? (
+          "Today"
+        ) : (
+          <>
+            {days}
+            <span className="unit">{days === 1 ? "day" : "days"}</span>
+          </>
+        )}
       </div>
-      <div className="what">
-        to {upcoming.goal.subject_name} · aiming for{" "}
-        {upcoming.goal.target_score}
-      </div>
+      <div className="what">{countdownTo(next)}</div>
+      {note ? <div className="cd-note">{note}</div> : null}
+      {others.length ? (
+        <ul className="cd-others" aria-label="Your other exams">
+          {others.map((exam) => (
+            <li key={exam.examination_id}>
+              <strong>{exam.short_name}</strong>
+              <span>{whenText(exam)}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </div>
   );
 }
 
-/** The laptop top bar's left side: the exam the student is working toward, and how far off it is. */
+/** The laptop top bar's left side: the nearest exam, counted per exam, and how it is counted. */
 function TopContext({ overview }: { overview: Overview | undefined }) {
-  const next = (overview?.subjects ?? [])
-    .filter(
-      (subject) =>
-        subject.goal?.days_to_exam != null && subject.goal.days_to_exam >= 0,
-    )
-    .sort(
-      (a, b) => (a.goal?.days_to_exam ?? 0) - (b.goal?.days_to_exam ?? 0),
-    )[0];
-  if (!next?.goal) return <div className="sj-topctx" />;
-  const days = next.goal.days_to_exam ?? 0;
+  const student = useStudent();
+  const next = upcomingExams(useExamCountdowns(student.studentId, overview))[0];
+  if (!next) return <div className="sj-topctx" />;
+  const days = next.days_to_next ?? 0;
   return (
     <div className="sj-topctx">
-      <Link to={`/subjects/${next.subject_id}`} className="sj-topchip">
+      <Link to={`/exams/${next.examination_id}`} className="sj-topchip">
         <IconCalendar size={17} />
         <span>
-          <strong>
-            {next.examination_short_name} {next.subject_name}
-          </strong>
+          <strong>{next.short_name}</strong>
           <span className="sep">·</span>
-          {days === 0
-            ? "exam day"
-            : `${days} ${days === 1 ? "day" : "days"} to go`}
+          {next.sits_together
+            ? days === 0
+              ? "exam day"
+              : `${plainDays(days)} to go`
+            : `next ${next.next_subject_names.length > 1 ? "papers" : "paper"}: ${whenText(next)}`}
         </span>
       </Link>
+      <CountdownTip className="sj-topctx-tip" />
     </div>
   );
 }
@@ -252,6 +261,10 @@ function ProfileMenu({
           <Link to="/exams" role="menuitem" className="sj-account-item">
             <IconBook size={18} />
             Exams &amp; subjects
+          </Link>
+          <Link to="/help" role="menuitem" className="sj-account-item">
+            <IconHelp size={18} />
+            Help &amp; guides
           </Link>
           <button
             type="button"

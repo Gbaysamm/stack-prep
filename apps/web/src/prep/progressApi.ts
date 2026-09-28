@@ -58,9 +58,32 @@ export interface PracticeRun {
   length: number;
 }
 
+export interface ExamPaper {
+  subject_id: string;
+  subject_name: string;
+  exam_date: string | null;
+  /** Negative once the paper has been sat. */
+  days_to_exam: number | null;
+}
+
+/** One exam's countdown. Sat together (UTME): to its one day. Paper by paper (WAEC, NECO): to
+ *  the nearest paper still to come, named in `next_subject_names`. Past dates are never next. */
+export interface ExamCountdown {
+  examination_id: string;
+  short_name: string;
+  name: string;
+  sits_together: boolean;
+  next_date: string | null;
+  days_to_next: number | null;
+  next_subject_names: string[];
+  papers: ExamPaper[];
+}
+
 export interface Overview {
   student: { student_id: string; display_name: string };
   subjects: SubjectOverview[];
+  /** Nearest first. What "days to exam" means across the app. */
+  exams: ExamCountdown[];
   /** Up to 8, newest first. */
   recent_runs: PracticeRun[];
   streak_days: number;
@@ -94,9 +117,11 @@ function visible(overview: Overview): Overview {
   const hidden = new Set(
     overview.subjects.filter((subject) => hiddenExam(subject.examination_short_name)).map((subject) => subject.subject_id),
   );
-  if (hidden.size === 0) return overview;
+  const exams = (overview.exams ?? []).filter((exam) => !hiddenExam(exam.short_name));
+  if (hidden.size === 0) return { ...overview, exams };
   return {
     ...overview,
+    exams,
     subjects: overview.subjects.filter((subject) => !hidden.has(subject.subject_id)),
     recent_runs: overview.recent_runs.filter((run) => !hidden.has(run.subject_id)),
   };

@@ -27,6 +27,7 @@ import { progressApi, type Overview } from '../progressApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
 import { Button, CountUp, Skeleton, Steps, cx, daysUntil, useToast } from '../ui.js';
 import { examTitle, isHiddenExam } from './Exams.js';
+import { CountdownTip } from '../countdown.js';
 import './Onboarding.css';
 
 const STEPS = [
@@ -99,6 +100,13 @@ function listText(names: string[]): string {
   return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
 }
 const clampScore = (value: number) => Math.max(1, Math.min(100, Math.round(value)));
+const COUNT_WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+const countWord = (n: number) => COUNT_WORDS[n] ?? String(n);
+/** "UTME is four subjects. Remove one to add another." — the server says the same on a fifth. */
+const fullText = (exam: ExaminationOffer) =>
+  `${exam.short_name} is ${countWord(exam.max_subjects ?? 0)} subjects. Remove one to add another.`;
+/** The subjects every candidate of this exam sits, in catalogue order. */
+const compulsoryOf = (exam: ExaminationOffer) => exam.subjects.filter((subject) => subject.compulsory);
 const nf = new Intl.NumberFormat('en-GB');
 
 /* ------------------------------------------------------------------ the page */
@@ -181,7 +189,10 @@ export function Onboarding() {
 type Choice = {
   examId: string;
   selected: string[];
+  /** The one date of an exam sat together (UTME). */
   examDate: string;
+  /** Each paper's own date, for an exam sat paper by paper (WAEC, NECO). */
+  dates: Record<string, string>;
   targets: Record<string, number>;
   minutes: number;
   days: number[];
@@ -198,10 +209,13 @@ function initialChoice(exams: ExaminationOffer[], goals: GoalRow[]): Choice {
   const daysed = known.find((goal) => goal.study_days?.length);
   const targets: Record<string, number> = {};
   for (const goal of goals) if (goal.target_score != null) targets[goal.subject_id] = clampScore(goal.target_score);
+  const dates: Record<string, string> = {};
+  for (const goal of goals) if (goal.exam_date) dates[goal.subject_id] = goal.exam_date.slice(0, 10);
   return {
     examId: exam?.examination_id ?? '',
     selected,
     examDate: dated?.exam_date?.slice(0, 10) ?? '',
+    dates,
     targets,
     minutes: paced?.minutes_per_day ?? 45,
     days: daysed?.study_days?.length ? [...daysed.study_days].sort((a, b) => a - b) : [1, 2, 3, 4, 5],
@@ -266,7 +280,18 @@ function Flow({
   const subjects = exam?.subjects ?? [];
   const chosen = subjects.filter((subject) => choice.selected.includes(subject.subject_id));
   const targetOf = (id: string) => choice.targets[id] ?? DEFAULT_TARGET;
-  const away = daysUntil(choice.examDate);
+  // UTME is sat in one sitting: one date. WAEC and NECO are sat paper by paper: a date each.
+  const together = exam?.sits_together ?? true;
+  const dateOf = (id: string) => (together ? choice.examDate : (choice.dates[id] ?? ''));
+  // The countdown's day: the one date, or the nearest paper still to come.
+  const nearest = together
+    ? choice.examDate
+    : (chosen
+        .map((subject) => dateOf(subject.subject_id))
+        .filter((day) => (daysUntil(day) ?? -1) > 0)
+        .sort()[0] ?? '');
+  const away = daysUntil(nearest);
+  const nearestNames = chosen.filter((subject) => dateOf(subject.subject_id) === nearest).map((subject) => subject.name);
   const goalFor = new Map(goals.map((goal) => [goal.subject_id, goal]));
 
   const update = (patch: Partial<Choice>) => {
@@ -279,8 +304,15 @@ function Flow({
     if (index === 0 && !exam) return 'Pick the exam you are sitting.';
     if (index === 1 && chosen.length === 0) return 'Pick at least one subject. You can add more later.';
     if (index === 2) {
-      if (!choice.examDate) return 'Pick the day of your exam. A best guess is fine; you can change it later.';
-      if (away === null || away < 1) return 'Pick an exam day after today.';
+      if (together) {
+        if (!choice.examDate) return 'Pick the day of your exam. A best guess is fine; you can change it later.';
+        if (away === null || away < 1) return 'Pick an exam day after today.';
+      } else {
+        const missing = chosen.filter((subject) => !dateOf(subject.subject_id));
+        if (missing.length) return `Pick the day of your ${listText(missing.map((subject) => subject.name))} paper. A best guess is fine.`;
+        const past = chosen.filter((subject) => (daysUntil(dateOf(subject.subject_id)) ?? 0) < 1);
+        if (past.length) return `Pick a day after today for ${listText(past.map((subject) => subject.name))}.`;
+      }
       if (choice.days.length === 0) return 'Pick at least one day you can study.';
     }
     return null;
@@ -316,15 +348,28 @@ function Flow({
     setSaving(true);
     setIssue(null);
     const payload = {
-      exam_date: choice.examDate,
       minutes_per_day: choice.minutes,
       study_days: [...choice.days].sort((a, b) => a - b),
     };
+    // Subjects of this exam the student unticked come off the list first, so a swap never runs
+    // into the exam's subject limit. Their practice is kept.
+    const dropped = subjects.filter((subject) => goalFor.has(subject.subject_id) && !choice.selected.includes(subject.subject_id));
+    try {
+      for (const subject of dropped) await api.removeGoal(student.studentId, subject.subject_id);
+    } catch (error) {
+      setSaving(false);
+      setIssue(`We could not update your subjects just now: ${(error as Error).message || 'try again'}.`);
+      return;
+    }
     // Only the subjects not yet saved: a retry after a half-finished save does not repeat work.
     const todo = chosen.filter((subject) => !saved[subject.subject_id]);
     const results = await Promise.allSettled(
       todo.map((subject) =>
-        api.setGoal(student.studentId, subject.subject_id, { ...payload, target_score: targetOf(subject.subject_id) }),
+        api.setGoal(student.studentId, subject.subject_id, {
+          ...payload,
+          exam_date: dateOf(subject.subject_id),
+          target_score: targetOf(subject.subject_id),
+        }),
       ),
     );
     const next = { ...saved };
@@ -367,9 +412,9 @@ function Flow({
   rail[0]!.value = exam ? exam.short_name : null;
   rail[1]!.value = chosen.length ? chosen.map((subject) => subject.name).join(', ') : null;
   rail[2]!.value =
-    choice.examDate && away != null && away > 0 ? (
+    nearest && away != null && away > 0 ? (
       <>
-        {shortDate(choice.examDate)}
+        {together ? shortDate(nearest) : `Next paper ${shortDate(nearest)}`}
         <br />
         {choice.minutes} min, {daysText(choice.days)}
       </>
@@ -392,7 +437,9 @@ function Flow({
     },
     {
       title: 'Set your goal',
-      lede: 'One exam day and one study rhythm for all your subjects, and the score you want in each.',
+      lede: together
+        ? `One ${exam?.short_name ?? 'exam'} date and one study rhythm for all your subjects, and the score you want in each.`
+        : 'The day of each paper, one study rhythm for all of them, and the score you want in each.',
     },
     {
       title: 'Here is your plan',
@@ -410,7 +457,9 @@ function Flow({
           firstName={firstName}
           chosen={chosen}
           saved={saved}
-          examDate={choice.examDate}
+          examDate={nearest}
+          together={together}
+          nearestNames={nearestNames}
           away={away}
           minutes={choice.minutes}
           days={choice.days}
@@ -444,7 +493,7 @@ function Flow({
                     if (examId === choice.examId) return;
                     const next = exams.find((item) => item.examination_id === examId);
                     const keep = choice.selected.filter((id) => next?.subjects.some((s) => s.subject_id === id));
-                    update({ examId, selected: keep });
+                    update({ examId, selected: next?.max_subjects ? keep.slice(0, next.max_subjects) : keep });
                   }}
                 />
                 <div className="onb-next">
@@ -464,26 +513,37 @@ function Flow({
                 exam={exam}
                 selected={choice.selected}
                 goalFor={goalFor}
-                onToggle={(id) =>
+                onToggle={(id) => {
+                  const adding = !choice.selected.includes(id);
+                  if (adding && exam.max_subjects != null && choice.selected.length >= exam.max_subjects) {
+                    setIssue(fullText(exam));
+                    return;
+                  }
                   update({
-                    selected: choice.selected.includes(id)
-                      ? choice.selected.filter((item) => item !== id)
-                      : subjects.filter((s) => s.subject_id === id || choice.selected.includes(s.subject_id)).map((s) => s.subject_id),
-                  })
-                }
-                onAll={() => update({ selected: subjects.filter((s) => s.ready).map((s) => s.subject_id) })}
+                    selected: adding
+                      ? subjects.filter((s) => s.subject_id === id || choice.selected.includes(s.subject_id)).map((s) => s.subject_id)
+                      : choice.selected.filter((item) => item !== id),
+                  });
+                }}
+                onAll={() => {
+                  // Compulsory subjects first, so a limit never leaves out the one everyone sits.
+                  const ready = subjects.filter((s) => s.ready).sort((a, b) => Number(b.compulsory) - Number(a.compulsory));
+                  update({ selected: ready.slice(0, exam.max_subjects ?? ready.length).map((s) => s.subject_id) });
+                }}
                 invalid={Boolean(issue)}
               />
             ) : null}
             {step === 2 ? (
               <GoalStep
                 examName={exam?.short_name ?? 'your exam'}
+                together={together}
                 chosen={chosen}
                 choice={choice}
                 away={away}
+                nearestNames={nearestNames}
                 targetOf={targetOf}
                 update={update}
-                invalidDate={Boolean(issue) && (!choice.examDate || away === null || away < 1)}
+                invalidDate={Boolean(issue) && (!nearest || away === null || away < 1)}
               />
             ) : null}
             {step === 3 && exam ? (
@@ -491,6 +551,7 @@ function Flow({
                 exam={exam}
                 chosen={chosen}
                 choice={choice}
+                dateOf={dateOf}
                 away={away}
                 targetOf={targetOf}
                 saved={saved}
@@ -663,30 +724,37 @@ function SubjectsStep({
   invalid: boolean;
 }) {
   const ready = exam.subjects.filter((subject) => subject.ready);
-  const isUtme = exam.short_name.toUpperCase() === 'UTME';
+  const limit = exam.max_subjects;
+  const compulsory = compulsoryOf(exam);
   const allOn = ready.length > 0 && ready.every((subject) => selected.includes(subject.subject_id));
+  const rest = limit != null ? limit - compulsory.length : 0;
   return (
     <div className="onb-subjects">
-      {isUtme ? (
+      {limit != null ? (
         <div className="onb-info">
           <div className="onb-info-head">
             <span className="onb-ico yellow" aria-hidden="true">
               <IconBook size={18} />
             </span>
-            <strong>UTME is four subjects</strong>
+            <strong>
+              {exam.short_name} is {countWord(limit)} subjects
+            </strong>
           </div>
           <p>
-            Everyone sits Use of English, plus three subjects for their course. We list only the subjects we already teach, so
-            pick each one here that you are sitting.
+            {compulsory.length
+              ? `Everyone sits ${listText(compulsory.map((subject) => subject.name))}, plus ${countWord(rest)} ${rest === 1 ? 'subject' : 'subjects'} for their course. `
+              : `Pick up to ${countWord(limit)}. `}
+            {exam.sits_together ? `All ${countWord(limit)} are sat together, on one day. ` : ''}
+            We list only the subjects we already teach, so pick each one here that you are sitting.
           </p>
         </div>
       ) : null}
 
       <div className="onb-blockhead">
         <span className="onb-label" id="onb-subjects-label">
-          {selected.length} of {ready.length} picked
+          {limit != null ? `${selected.length} of ${limit} picked` : `${selected.length} of ${ready.length} picked`}
         </span>
-        {ready.length > 1 ? (
+        {ready.length > 1 && (limit == null || ready.length <= limit) ? (
           <button type="button" className="onb-textbtn" onClick={onAll} disabled={allOn}>
             {allOn ? 'All picked' : 'Pick all'}
           </button>
@@ -742,8 +810,13 @@ function SubjectCard({
           {nf.format(subject.deliverable_questions)} past questions · {subject.teachable_skills} skills we teach
         </span>
       )}
-      {goal?.target_score != null ? (
-        <span className="onb-opt-badge sj-mono">Goal set · {Math.round(goal.target_score)}/100</span>
+      {subject.compulsory || goal?.target_score != null ? (
+        <span className="onb-opt-badges">
+          {subject.compulsory ? <span className="onb-opt-badge must sj-mono">Everyone sits this</span> : null}
+          {goal?.target_score != null ? (
+            <span className="onb-opt-badge sj-mono">Goal set · {Math.round(goal.target_score)}/100</span>
+          ) : null}
+        </span>
       ) : null}
     </label>
   );
@@ -753,17 +826,21 @@ function SubjectCard({
 
 function GoalStep({
   examName,
+  together,
   chosen,
   choice,
   away,
+  nearestNames,
   targetOf,
   update,
   invalidDate,
 }: {
   examName: string;
+  together: boolean;
   chosen: SubjectOffer[];
   choice: Choice;
   away: number | null;
+  nearestNames: string[];
   targetOf: (id: string) => number;
   update: (patch: Partial<Choice>) => void;
   invalidDate: boolean;
@@ -775,8 +852,9 @@ function GoalStep({
     return isoDay(date);
   })();
   const quick = [1, 2, 3].map((months) => ({ months, iso: monthsFromToday(months) }));
-  const good = choice.examDate && away != null && away > 0;
+  const good = away != null && away > 0;
   const isUtme = examName.toUpperCase() === 'UTME';
+  const setDate = (id: string, value: string) => update({ dates: { ...choice.dates, [id]: value } });
   const minuteChips = MINUTE_CHIPS.includes(choice.minutes) ? MINUTE_CHIPS : [...MINUTE_CHIPS, choice.minutes].sort((a, b) => a - b);
   const sortedDays = [...choice.days].sort((a, b) => a - b).join();
   const setTarget = (id: string, value: number) => update({ targets: { ...choice.targets, [id]: clampScore(value) } });
@@ -785,14 +863,21 @@ function GoalStep({
 
   return (
     <div className="onb-goal">
-      {/* --- exam day */}
+      {/* --- exam day: one for an exam sat together, one per paper otherwise */}
       <section className="onb-part" aria-labelledby="onb-part-date">
         <div className="onb-parthead">
           <span className="sj-mono">A</span>
           <h2 id="onb-part-date" className="onb-parttitle">
-            Exam day
+            {together ? `Your ${examName} date` : 'Your paper dates'}
           </h2>
+          <CountdownTip className="onb-parttip" />
         </div>
+        <p className="onb-partnote">
+          {together
+            ? `All your ${examName} papers are sat together on one day, so there is one date for every subject.`
+            : 'Each paper has its own day, and some share one. Your countdown is to the nearest paper still to come.'}
+        </p>
+        {together ? (
         <div className="onb-dategrid">
           <input
             id={dateId}
@@ -818,13 +903,18 @@ function GoalStep({
             ))}
           </div>
         </div>
+        ) : (
+          <PaperDates chosen={chosen} dates={choice.dates} setDate={setDate} tomorrow={tomorrow} invalid={invalidDate} />
+        )}
         <p className={cx('onb-count', good && 'on')} aria-live="polite">
           {good ? (
             <>
               <b>
-                {away} {away === 1 ? 'day' : 'days'} to go
+                {together
+                  ? `${away} ${away === 1 ? 'day' : 'days'} to go`
+                  : `Next paper: ${listText(nearestNames)} in ${away} ${away === 1 ? 'day' : 'days'}`}
               </b>
-              <span>{longDate(choice.examDate)}</span>
+              <span>{longDate(together ? choice.examDate : (choice.dates[chosen.find((s) => nearestNames.includes(s.name))?.subject_id ?? ''] ?? ''))}</span>
             </>
           ) : (
             <>
@@ -981,12 +1071,70 @@ function GoalStep({
   );
 }
 
+/** One date per paper, with a one-tap "same day as" for papers that share a day. */
+function PaperDates({
+  chosen,
+  dates,
+  setDate,
+  tomorrow,
+  invalid,
+}: {
+  chosen: SubjectOffer[];
+  dates: Record<string, string>;
+  setDate: (id: string, value: string) => void;
+  tomorrow: string;
+  invalid: boolean;
+}) {
+  return (
+    <ul className="onb-papers">
+      {chosen.map((subject) => {
+        const mine = dates[subject.subject_id] ?? '';
+        // Other papers' days, each once, named by the papers on it.
+        const sameDays = new Map<string, string[]>();
+        for (const other of chosen) {
+          const day = dates[other.subject_id];
+          if (other.subject_id !== subject.subject_id && day && day >= tomorrow) {
+            sameDays.set(day, [...(sameDays.get(day) ?? []), other.name]);
+          }
+        }
+        const inputId = `onb-paper-${subject.subject_id}`;
+        return (
+          <li key={subject.subject_id} className="onb-paper">
+            <label className="onb-paper-name" htmlFor={inputId}>
+              {subject.name}
+            </label>
+            <input
+              id={inputId}
+              type="date"
+              className="sj-input onb-dateinput"
+              value={mine}
+              min={tomorrow}
+              onChange={(event) => setDate(subject.subject_id, event.target.value)}
+              aria-invalid={(invalid && (!mine || mine < tomorrow)) || undefined}
+            />
+            {sameDays.size ? (
+              <div className="onb-paper-same" role="group" aria-label={`Same day as another paper, for ${subject.name}`}>
+                {[...sameDays].map(([day, names]) => (
+                  <button key={day} type="button" className="sj-chip" aria-pressed={mine === day} onClick={() => setDate(subject.subject_id, day)}>
+                    Same day as {listText(names)}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 /* ------------------------------------------------------------------ step 4: review */
 
 function ReviewStep({
   exam,
   chosen,
   choice,
+  dateOf,
   away,
   targetOf,
   saved,
@@ -995,6 +1143,7 @@ function ReviewStep({
   exam: ExaminationOffer;
   chosen: SubjectOffer[];
   choice: Choice;
+  dateOf: (id: string) => string;
   away: number | null;
   targetOf: (id: string) => number;
   saved: Record<string, GoalRow>;
@@ -1039,16 +1188,28 @@ function ReviewStep({
       step: 2,
       tone: 'yellow',
       icon: IconCalendar,
-      label: 'Exam day',
-      body: (
+      label: exam.sits_together ? `${exam.short_name} date` : 'Paper dates',
+      body: exam.sits_together ? (
         <>
           <strong>{longDate(choice.examDate)}</strong>
           {away != null && away > 0 ? (
             <span className="onb-sumnote">
               {away} {away === 1 ? 'day' : 'days'} from today
+              {chosen.length > 1 ? ', all your subjects sat together' : ''}
             </span>
           ) : null}
         </>
+      ) : (
+        <ul className="onb-sumsubjects">
+          {[...chosen]
+            .sort((a, b) => dateOf(a.subject_id).localeCompare(dateOf(b.subject_id)))
+            .map((subject) => (
+              <li key={subject.subject_id}>
+                <span className="onb-sumsubject">{subject.name}</span>
+                <span className="onb-sumdate">{shortDate(dateOf(subject.subject_id))}</span>
+              </li>
+            ))}
+        </ul>
       ),
     },
     {
@@ -1094,6 +1255,8 @@ function Finish({
   chosen,
   saved,
   examDate,
+  together,
+  nearestNames,
   away,
   minutes,
   days,
@@ -1105,6 +1268,8 @@ function Finish({
   chosen: SubjectOffer[];
   saved: Record<string, GoalRow>;
   examDate: string;
+  together: boolean;
+  nearestNames: string[];
   away: number | null;
   minutes: number;
   days: number[];
@@ -1167,9 +1332,11 @@ function Finish({
 
       <div className="onb-facts">
         <div className="onb-factcard sj-rise d1">
-          <span className="sj-eyebrow">Days to exam</span>
+          <span className="sj-eyebrow">{together ? 'Days to exam' : 'Days to next paper'}</span>
           <span className="sj-num">{away != null && away > 0 ? <CountUp value={away} /> : '–'}</span>
-          <span className="onb-factnote">{examDate ? `On ${shortDate(examDate)}` : 'Pick a day'}</span>
+          <span className="onb-factnote">
+            {!examDate ? 'Pick a day' : together ? `On ${shortDate(examDate)}` : `${listText(nearestNames)}, ${shortDate(examDate)}`}
+          </span>
         </div>
         <div className="onb-factcard sj-rise d2">
           <span className="sj-eyebrow">{chosen.length === 1 ? 'Target' : 'Subjects'}</span>

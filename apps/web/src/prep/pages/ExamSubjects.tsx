@@ -125,6 +125,14 @@ function ExamBody({
   // The page's one sticker: the first subject the student has a goal in.
   const featured = subjects.find((subject) => subject.ready && hasGoalFor(subject.subject_id))?.subject_id;
   const paged = usePaged(subjects, SUBJECTS_PER_PAGE, exam.examination_id);
+  // How the exam is sat, and how many subjects it takes: said once, above the cards.
+  const mine = subjects.filter((subject) => goalOf(subject.subject_id)).length;
+  const limit = exam.max_subjects;
+  const full = limit != null && mine >= limit;
+  const compulsory = subjects.filter((subject) => subject.compulsory).map((subject) => subject.name);
+  const rest = limit != null ? limit - compulsory.length : 0;
+  const words = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+  const word = (n: number) => words[n] ?? String(n);
 
   return (
     <div className="sj-page">
@@ -165,6 +173,29 @@ function ExamBody({
           <h2 id="exs-title" className="sj-display sj-h2">
             Pick the ones you are sitting
           </h2>
+          {!practice && (limit != null || exam.sits_together) ? (
+            <p className="exs-rule">
+              {limit != null ? (
+                <>
+                  <b>
+                    {exam.short_name} is {word(limit)} subjects
+                  </b>
+                  {compulsory.length
+                    ? `: ${compulsory.join(' and ')}, which everyone sits, and ${word(rest)} more. `
+                    : '. '}
+                </>
+              ) : null}
+              {exam.sits_together
+                ? `All are sat together on one day, so they share one exam date. `
+                : 'Each paper has its own day. '}
+              {limit != null ? (
+                <span className={cx('exs-rule-count', full && 'full')}>
+                  You have {mine} of {limit}
+                  {full ? '. Remove one to add another.' : '.'}
+                </span>
+              ) : null}
+            </p>
+          ) : null}
         </div>
         {subjects.length === 0 ? (
           <ExNote icon={<IconLayers size={18} />} title="No subjects yet">
@@ -180,6 +211,7 @@ function ExamBody({
                 overview={overview?.subjects.find((item) => item.subject_id === subject.subject_id)}
                 index={index}
                 featured={subject.subject_id === featured}
+                full={full}
               />
             ))}
           </div>
@@ -207,12 +239,15 @@ function SubjectCard({
   overview,
   index,
   featured,
+  full,
 }: {
   subject: SubjectOffer;
   goal: Goal | undefined;
   overview: Overview['subjects'][number] | undefined;
   index: number;
   featured: boolean;
+  /** The exam already has as many subjects as it allows. */
+  full: boolean;
 }) {
   const hasGoal = Boolean(goal && goal.target_score != null && goal.exam_date);
   const checkup = overview?.latest_checkup ?? null;
@@ -243,7 +278,13 @@ function SubjectCard({
       <div className="exs-head">
         <span className="exs-code sj-mono">{subject.code}</span>
         <h3 className="sj-display exs-name">{subject.name}</h3>
-        {subject.ready ? null : (
+        {subject.ready ? (
+          subject.compulsory ? (
+            <Badge tone="yellow" className="exs-badge">
+              Everyone sits this
+            </Badge>
+          ) : null
+        ) : (
           <Badge tone="ghost" className="exs-badge">
             <IconLock size={13} />
             Not ready
@@ -280,7 +321,7 @@ function SubjectCard({
       <div className="exs-cta">
         {subject.ready ? (
           <span className={cx('sj-btn block', !hasGoal && 'dark')}>
-            {hasGoal ? 'Open subject' : 'Set a goal'}
+            {hasGoal ? 'Open subject' : full ? 'Swap it in' : 'Set a goal'}
             <span className="arrow">
               <IconArrowRight size={18} />
             </span>

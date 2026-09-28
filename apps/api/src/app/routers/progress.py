@@ -17,7 +17,7 @@ from typing import Annotated, Any, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
@@ -184,9 +184,90 @@ class PracticeRunPage(BaseModel):
     next_before: datetime | None
 
 
+class ExamPaper(BaseModel):
+    subject_id: UUID
+    subject_name: str
+    exam_date: date | None
+    #: Calendar days from today in the student's timezone; negative once it has passed.
+    days_to_exam: int | None
+
+
+class ExamCountdown(BaseModel):
+    """How far off one examination is, worked out the way that examination is sat.
+
+    Sat together (UTME): every paper is on one day, so the countdown is to that day. Sat paper
+    by paper (WAEC, NECO): the countdown is to the nearest paper still to come, and
+    `next_subject_names` says which paper that is (more than one when they share the day).
+    A date already passed is never "next".
+    """
+
+    examination_id: UUID
+    short_name: str
+    name: str
+    sits_together: bool
+    #: The next exam day still to come, today included; null when none is set or all passed.
+    next_date: date | None
+    days_to_next: int | None
+    #: The papers sat on `next_date`, in name order.
+    next_subject_names: list[str]
+    #: Every subject the student has a goal in, by date (undated last).
+    papers: list[ExamPaper]
+
+
+def exam_countdowns(rows: list[dict[str, Any]], today: date) -> list[ExamCountdown]:
+    """Group goal rows into one countdown per examination, nearest first.
+
+    Each row needs examination_id, short_name, exam_name, sits_together, subject_id,
+    subject_name and exam_date. Exams with no date still to come sort last, by name.
+    """
+    grouped: dict[UUID, list[dict[str, Any]]] = {}
+    for row in rows:
+        grouped.setdefault(row["examination_id"], []).append(row)
+    countdowns: list[ExamCountdown] = []
+    for exam_rows in grouped.values():
+        first = exam_rows[0]
+        papers = sorted(
+            (
+                ExamPaper(
+                    subject_id=row["subject_id"],
+                    subject_name=row["subject_name"],
+                    exam_date=row["exam_date"],
+                    days_to_exam=(row["exam_date"] - today).days if row["exam_date"] else None,
+                )
+                for row in exam_rows
+            ),
+            key=lambda paper: (
+                paper.exam_date is None,
+                paper.exam_date or today,
+                paper.subject_name,
+            ),
+        )
+        upcoming = [p.exam_date for p in papers if p.exam_date is not None and p.exam_date >= today]
+        next_date = min(upcoming) if upcoming else None
+        countdowns.append(
+            ExamCountdown(
+                examination_id=first["examination_id"],
+                short_name=first["short_name"],
+                name=first["exam_name"],
+                sits_together=bool(first["sits_together"]),
+                next_date=next_date,
+                days_to_next=(next_date - today).days if next_date else None,
+                next_subject_names=sorted(
+                    p.subject_name for p in papers if next_date and p.exam_date == next_date
+                ),
+                papers=papers,
+            )
+        )
+    countdowns.sort(key=lambda c: (c.next_date is None, c.next_date or today, c.short_name))
+    return countdowns
+
+
 class Overview(BaseModel):
     student: Student
     subjects: list[SubjectOverview]
+    #: One countdown per examination the student has a goal in, nearest first. This is what
+    #: "days to exam" means across the app; a subject's own `goal.days_to_exam` is its paper.
+    exams: list[ExamCountdown] = Field(default_factory=list)
     recent_runs: list[PracticeRun]
     #: Consecutive calendar days, ending today or yesterday, with at least one answer.
     streak_days: int
@@ -299,6 +380,7 @@ async def overview(
           WHERE student_id = :student AND subject_id IS NOT NULL
         )
         SELECT s.id AS subject_id, s.name AS subject_name, e.short_name,
+               e.id AS examination_id, e.name AS exam_name, e.sits_together,
                g.target_score, g.exam_date, g.minutes_per_day, g.study_days,
                g.id IS NOT NULL AS has_goal,
                done.id AS checkup_id, done.ended_at AS checkup_finished_at,
@@ -401,6 +483,7 @@ async def overview(
     return Overview(
         student=Student(student_id=student["id"], display_name=student["display_name"]),
         subjects=subject_views,
+        exams=exam_countdowns([dict(row) for row in subjects if row["has_goal"]], today),
         recent_runs=[_run(run) for run in shown[:RECENT_RUNS]],
         streak_days=streak_days,
         active_today=active_today,

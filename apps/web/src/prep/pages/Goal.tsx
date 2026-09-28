@@ -7,7 +7,8 @@
 import { useEffect, useId, useRef, useState, type CSSProperties, type FormEvent, type ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { api, type Goal as GoalRow } from '../../student/api.js';
+import { api, type ExaminationOffer, type Goal as GoalRow } from '../../student/api.js';
+import { listNames } from '../countdown.js';
 import { progressApi, type Overview } from '../progressApi.js';
 import {
   IconArrowLeft,
@@ -20,7 +21,7 @@ import {
   IconTarget,
 } from '../icons.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
-import { Button, CountUp, PageHero, Skeleton, Steps, cx, daysUntil, useToast } from '../ui.js';
+import { Button, CountUp, Dialog, PageHero, Skeleton, Steps, cx, daysUntil, useToast } from '../ui.js';
 import './Goal.css';
 
 const STEPS = [
@@ -56,6 +57,11 @@ function longDate(iso: string): string {
   const date = new Date(`${iso}T00:00:00`);
   if (Number.isNaN(date.getTime())) return iso;
   return date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+function dayMonth(iso: string): string {
+  const date = new Date(`${iso}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return iso;
+  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
 function shortDate(iso: string): string {
   const date = new Date(`${iso}T00:00:00`);
@@ -184,6 +190,9 @@ export function Goal() {
       subjectName={subject.name}
       examLabel={exam.short_name.toUpperCase() === 'SANDBOX' ? 'Practice set' : exam.short_name}
       examId={exam.examination_id}
+      exam={exam}
+      goals={load.data[1]}
+      onChanged={load.reload}
       existing={existing}
       finishedCheckup={Boolean(subjectOverview?.latest_checkup)}
       openCheckupId={subjectOverview?.open_checkup_session_id ?? null}
@@ -196,6 +205,9 @@ function GoalStepper({
   subjectName,
   examLabel,
   examId,
+  exam,
+  goals,
+  onChanged,
   existing,
   finishedCheckup,
   openCheckupId,
@@ -204,6 +216,9 @@ function GoalStepper({
   subjectName: string;
   examLabel: string;
   examId: string;
+  exam: ExaminationOffer;
+  goals: GoalRow[];
+  onChanged: () => void;
   existing: GoalRow | undefined;
   finishedCheckup: boolean;
   openCheckupId: string | null;
@@ -212,6 +227,11 @@ function GoalStepper({
   const navigate = useNavigate();
   const toast = useToast();
   const hadGoal = Boolean(existing?.target_score != null && existing?.exam_date);
+  // How the exam is sat decides whose date this is: the whole exam's (UTME), or this paper's.
+  const together = exam.sits_together;
+  const siblings = goals.filter((goal) => goal.examination_id === exam.examination_id && goal.subject_id !== subjectId);
+  const sharedDate = together ? (siblings.find((goal) => goal.exam_date)?.exam_date?.slice(0, 10) ?? '') : '';
+  const full = !existing && exam.max_subjects != null && siblings.length >= exam.max_subjects;
 
   // Development only: `?step=0..3` opens on a step and `?step=4` on the saved moment, for screenshots.
   const devStep = import.meta.env.DEV ? Number(new URLSearchParams(window.location.search).get('step') ?? NaN) : NaN;
@@ -219,7 +239,7 @@ function GoalStepper({
   const [reached, setReached] = useState(hadGoal ? 3 : Number.isNaN(devStep) ? 0 : Math.min(devStep, 3));
   const [direction, setDirection] = useState<1 | -1>(1);
   const [target, setTarget] = useState(() => Math.round(existing?.target_score ?? 70));
-  const [examDate, setExamDate] = useState(existing?.exam_date?.slice(0, 10) ?? '');
+  const [examDate, setExamDate] = useState(existing?.exam_date?.slice(0, 10) ?? sharedDate);
   const [minutes, setMinutes] = useState(existing?.minutes_per_day ?? 45);
   const [days, setDays] = useState<number[]>(existing?.study_days?.length ? existing.study_days : [1, 2, 3, 4, 5]);
   const [issue, setIssue] = useState<string | null>(null);
@@ -294,11 +314,13 @@ function GoalStepper({
         study_days: [...days].sort((a, b) => a - b),
       });
       const sessions = result.sessions_before_exam;
+      const moved = together && siblings.length > 0 && examDate !== sharedDate;
+      const also = moved ? ` Your ${examLabel} date is changed for ${listNames(siblings.map((goal) => goal.subject_name))} too.` : '';
       if (finishedCheckup) {
-        toast(sessions != null ? `Goal saved. About ${sessions} study sessions before your exam.` : 'Goal saved.');
+        toast(sessions != null ? `Goal saved. About ${sessions} study sessions before your exam.${also}` : `Goal saved.${also}`);
         navigate(`/subjects/${subjectId}`);
       } else {
-        toast('Goal saved.');
+        toast(`Goal saved.${also}`);
         setSaved(result);
       }
     } catch (error) {
@@ -415,8 +437,19 @@ function GoalStepper({
     );
   }
 
+  /* -------------------------------------------------------------- the exam is full */
+  if (full) {
+    return (
+      <div className="sj-page goal-page">
+        <PageHero back={back} eyebrow={`${examLabel} · ${subjectName}`} title="Set your goal" />
+        <FullExam exam={exam} examLabel={examLabel} subjectName={subjectName} siblings={siblings} onChanged={onChanged} />
+      </div>
+    );
+  }
+
   /* -------------------------------------------------------------- the stepper */
   const StepIcon = STEPS[step]!.icon;
+  const dateWord = together ? `${examLabel} date` : 'Paper date';
   return (
     <div className="sj-page goal-page">
       <PageHero
@@ -449,7 +482,7 @@ function GoalStepper({
                       </span>
                       <span className="goal-steplabel">
                         <span className="sj-mono">0{index + 1}</span>
-                        {item.label}
+                        {item.key === 'date' ? dateWord : item.label}
                       </span>
                     </span>
                     {values[index] && index <= reached ? <span className="goal-stepvalue">{values[index]}</span> : null}
@@ -477,7 +510,7 @@ function GoalStepper({
               </span>
               <h2 className="sj-display sj-h2 goal-stagetitle" tabIndex={-1} ref={heading}>
                 {step === 0 && `What score are you aiming for?`}
-                {step === 1 && `When is your ${subjectName} exam?`}
+                {step === 1 && (together ? `When is your ${examLabel}?` : `When is your ${subjectName} paper?`)}
                 {step === 2 && 'How much can you study?'}
                 {step === 3 && 'Here is your goal'}
               </h2>
@@ -496,6 +529,10 @@ function GoalStepper({
             ) : null}
             {step === 1 ? (
               <DateStep
+                label={dateWord}
+                together={together}
+                examLabel={examLabel}
+                siblings={siblings}
                 examDate={examDate}
                 setExamDate={(value) => {
                   setIssue(null);
@@ -523,6 +560,8 @@ function GoalStepper({
             ) : null}
             {step === 3 ? (
               <ReviewStep
+                dateLabel={dateWord}
+                sharedWith={together ? siblings.map((goal) => goal.subject_name) : []}
                 target={target}
                 examDate={examDate}
                 away={away}
@@ -627,12 +666,20 @@ function ScoreStep({ target, setTarget }: { target: number; setTarget: (value: n
 /* ------------------------------------------------------------------ step 2: date */
 
 function DateStep({
+  label,
+  together,
+  examLabel,
+  siblings,
   examDate,
   setExamDate,
   tomorrow,
   away,
   invalid,
 }: {
+  label: string;
+  together: boolean;
+  examLabel: string;
+  siblings: GoalRow[];
   examDate: string;
   setExamDate: (value: string) => void;
   tomorrow: string;
@@ -642,12 +689,21 @@ function DateStep({
   const inputId = useId();
   const quick = [1, 2, 3].map((months) => ({ months, iso: monthsFromToday(months) }));
   const good = examDate && away != null && away > 0;
+  // Per paper: the other papers' days, so two papers on one day take one tap.
+  const sameDays = new Map<string, string[]>();
+  if (!together) {
+    for (const goal of siblings) {
+      const day = goal.exam_date?.slice(0, 10);
+      if (day && (daysUntil(day) ?? 0) > 0) sameDays.set(day, [...(sameDays.get(day) ?? []), goal.subject_name]);
+    }
+  }
+  const others = listNames(siblings.map((goal) => goal.subject_name));
   return (
     <div className="goal-date">
       <div className="goal-date-grid">
         <div className="goal-date-pick">
           <label className="goal-label" htmlFor={inputId}>
-            Exam day
+            {label}
           </label>
           <input
             id={inputId}
@@ -665,6 +721,30 @@ function DateStep({
               </button>
             ))}
           </div>
+          {sameDays.size ? (
+            <div className="goal-sameday" role="group" aria-label="Same day as another paper">
+              {[...sameDays].map(([day, names]) => (
+                <button key={day} type="button" className="sj-chip" aria-pressed={examDate === day} onClick={() => setExamDate(day)}>
+                  Same day as {listNames(names)} · {dayMonth(day)}
+                </button>
+              ))}
+            </div>
+          ) : null}
+          <p className="goal-shared">
+            <IconCalendar size={16} aria-hidden="true" />
+            {together ? (
+              <span>
+                <b>One date for all of {examLabel}.</b>{' '}
+                {siblings.length
+                  ? `Your subjects are sat together on one day, so changing it here changes it for ${others} too.`
+                  : 'Every subject is sat together on one day, so each subject you add shares this date.'}
+              </span>
+            ) : (
+              <span>
+                <b>Each paper has its own day.</b> Your countdown is to the nearest paper still to come.
+              </span>
+            )}
+          </p>
           <p className="goal-help">Not sure of the exact day yet? Pick your best guess. You can change it any time.</p>
         </div>
 
@@ -777,6 +857,8 @@ function RhythmStep({
 /* ------------------------------------------------------------------ step 4: review */
 
 function ReviewStep({
+  dateLabel,
+  sharedWith,
   target,
   examDate,
   away,
@@ -785,6 +867,8 @@ function ReviewStep({
   finishedCheckup,
   onEdit,
 }: {
+  dateLabel: string;
+  sharedWith: string[];
   target: number;
   examDate: string;
   away: number | null;
@@ -799,9 +883,14 @@ function ReviewStep({
       step: 1,
       tone: 'yellow',
       icon: IconCalendar,
-      label: 'Exam day',
+      label: dateLabel,
       value: longDate(examDate),
-      note: away != null && away > 0 ? `${away} ${away === 1 ? 'day' : 'days'} from today` : '',
+      note: [
+        away != null && away > 0 ? `${away} ${away === 1 ? 'day' : 'days'} from today` : '',
+        sharedWith.length ? `shared with ${listNames(sharedWith)}` : '',
+      ]
+        .filter(Boolean)
+        .join(', '),
     },
     {
       step: 2,
@@ -843,6 +932,107 @@ function ReviewStep({
         />
       </div>
     </div>
+  );
+}
+
+/* ------------------------------------------------------------------ the exam is full */
+
+/** A subject that would be one too many: say so, and let the student swap one out here. */
+function FullExam({
+  exam,
+  examLabel,
+  subjectName,
+  siblings,
+  onChanged,
+}: {
+  exam: ExaminationOffer;
+  examLabel: string;
+  subjectName: string;
+  siblings: GoalRow[];
+  onChanged: () => void;
+}) {
+  const student = useStudent();
+  const toast = useToast();
+  const [removing, setRemoving] = useState<GoalRow | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [issue, setIssue] = useState<string | null>(null);
+  const limit = exam.max_subjects ?? siblings.length;
+  const words = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+  const limitWord = words[limit] ?? String(limit);
+  const compulsory = exam.subjects.filter((subject) => exam.compulsory_subject_codes.includes(subject.code));
+  const compulsoryIds = new Set(compulsory.map((subject) => subject.subject_id));
+  const kept = siblings.filter((goal) => compulsoryIds.has(goal.subject_id)).map((goal) => goal.subject_name);
+
+  const remove = async () => {
+    if (!removing) return;
+    setBusy(true);
+    setIssue(null);
+    try {
+      await api.removeGoal(student.studentId, removing.subject_id);
+      toast(`${removing.subject_name} is off your list. Its practice is kept.`);
+      setRemoving(null);
+      onChanged();
+    } catch (error) {
+      setIssue((error as Error).message || 'We could not remove it just now. Try again.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="sj-card goal-note goal-full">
+        <div className="goal-note-head">
+          <span className="goal-ico" aria-hidden="true">
+            <IconBook size={18} />
+          </span>
+          <h3 className="sj-display sj-h3">
+            {examLabel} is {limitWord} {limit === 1 ? 'subject' : 'subjects'}
+          </h3>
+        </div>
+        <p>
+          You already have {limitWord}
+          {kept.length ? `, including ${listNames(kept)}, which everyone sits` : ''}. To add {subjectName}, take one of the
+          others off your list. Its practice and check-ups are kept, so you can add it back later.
+        </p>
+        <ul className="goal-full-list">
+          {siblings.map((goal) => (
+            <li key={goal.subject_id}>
+              <span className="goal-full-name">{goal.subject_name}</span>
+              {compulsoryIds.has(goal.subject_id) ? (
+                <span className="goal-full-tag">Everyone sits this</span>
+              ) : (
+                <button type="button" className="goal-textbtn" onClick={() => setRemoving(goal)}>
+                  Remove
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+        {issue ? (
+          <p className="goal-issue" role="alert">
+            {issue}
+          </p>
+        ) : null}
+      </div>
+      <Dialog
+        open={Boolean(removing)}
+        onClose={() => setRemoving(null)}
+        title={removing ? `Swap ${removing.subject_name} for ${subjectName}?` : ''}
+        actions={
+          <>
+            <Button tone="ghost" onClick={() => setRemoving(null)}>
+              Keep it
+            </Button>
+            <Button tone="dark" busy={busy} onClick={() => void remove()}>
+              Remove {removing?.subject_name}
+            </Button>
+          </>
+        }
+      >
+        {removing?.subject_name} comes off your plan. Nothing you have done in it is deleted, and you can add it back later.
+      </Dialog>
+    </>
   );
 }
 

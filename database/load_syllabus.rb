@@ -201,6 +201,12 @@ sql << insert_statement('examinations', {
   exam_body: exam.fetch('exam_body'), country_code: exam.fetch('country_code'),
   description: exam['description'], grading_system: nil, status: 'draft'
 })
+# How the exam is sat (migration 025). An UPDATE rather than part of the insert, so a row that
+# already exists picks the settings up too; left alone when the seed doesn't say.
+unless exam['sits_together'].nil?
+  codes = Array(exam['compulsory_subject_codes']).map { |code| sql_value(code.to_s) }.join(', ')
+  sql << "UPDATE examinations SET sits_together = #{sql_value(exam['sits_together'] == true)}, "          "max_subjects = #{sql_value(exam['max_subjects'])}, "          "compulsory_subject_codes = ARRAY[#{codes}]::text[] WHERE id = #{sql_value(exam_id)};"
+end
 sql << insert_statement('subjects', {
   id: subject_id, examination_id: exam_id, code: subject.fetch('code'),
   name: subject.fetch('name'), status: 'draft'
