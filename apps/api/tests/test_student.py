@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import uuid
 from collections.abc import AsyncIterator
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 import httpx
 import pytest
@@ -19,6 +19,14 @@ from sqlalchemy.ext.asyncio import AsyncConnection
 from app.db import database_is_reachable, get_engine
 from app.main import app
 from app.routers.student import SESSION_MINUTES, sessions_before
+
+
+def student_today() -> date:
+    """Today where the test students live. Countdowns are worked out in the student's own
+    timezone (Lagos by default), so near midnight UTC the server's date.today() is a day behind."""
+    # Lagos is UTC+1 all year (no daylight saving), and a fixed offset needs no tz database.
+    return datetime.now(timezone(timedelta(hours=1))).date()
+
 
 pytestmark = pytest.mark.integration
 
@@ -314,8 +322,8 @@ async def test_one_sitting_has_one_date_for_every_subject(
 ) -> None:
     ids = sittings_fixture
     student = ids["student"]
-    first = date.today() + timedelta(days=40)
-    moved = date.today() + timedelta(days=55)
+    first = student_today() + timedelta(days=40)
+    moved = student_today() + timedelta(days=55)
 
     saved = await client.put(f"/v1/student/{student}/goals/{ids['ta']}", json=_goal(first))
     assert saved.status_code == 200, saved.text
@@ -349,7 +357,7 @@ async def test_an_exam_refuses_more_subjects_than_it_allows(
 ) -> None:
     ids = sittings_fixture
     student = ids["student"]
-    when = date.today() + timedelta(days=40)
+    when = student_today() + timedelta(days=40)
     for key in ("ta", "tb"):
         response = await client.put(f"/v1/student/{student}/goals/{ids[key]}", json=_goal(when))
         assert response.status_code == 200, response.text
@@ -377,7 +385,7 @@ async def test_a_paper_by_paper_exam_counts_down_to_the_nearest_paper(
 ) -> None:
     ids = sittings_fixture
     student = ids["student"]
-    today = date.today()
+    today = student_today()
     # Physics has been sat already; Chemistry and Biology share the nearest day to come.
     plan = {
         "pa": today - timedelta(days=3),
@@ -418,7 +426,7 @@ async def test_exams_are_ordered_by_the_nearest_day_still_to_come(
 ) -> None:
     ids = sittings_fixture
     student = ids["student"]
-    today = date.today()
+    today = student_today()
     for key, days in (("ta", 50), ("pa", 20)):
         when = today + timedelta(days=days)
         response = await client.put(f"/v1/student/{student}/goals/{ids[key]}", json=_goal(when))
