@@ -17,12 +17,13 @@ from dataclasses import dataclass
 from typing import Annotated, Any
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncConnection
 
+from app.auth import require_session_owner, require_student
 from app.db import connection, fetch_all
 from app.figures import QuestionFigure, figures_for
 from app.routers.student import sessions_before
@@ -451,9 +452,7 @@ async def _next_state(
     target = next_level(outcomes, slot.start_level)
     seen = [row["question_version_id"] for row in answers]
 
-    question = await _pick_question(
-        conn, subject_id, slot, target, session_id, seen, student_id
-    )
+    question = await _pick_question(conn, subject_id, slot, target, session_id, seen, student_id)
     if question is None:
         # The topic ran out of questions. Rather than repeat one, the sitting ends and the
         # report says which topics went unassessed.
@@ -493,11 +492,12 @@ def _capacity(topics: list[TopicWeight]) -> int:
 
 @router.post("/start", response_model=CheckupState, summary="Begin a check-up")
 async def start(
-    conn: Annotated[AsyncConnection, Depends(connection)], request: StartCheckup
+    request: Request, conn: Annotated[AsyncConnection, Depends(connection)], body: StartCheckup
 ) -> CheckupState:
+    await require_student(request, conn, body.student_id)
     student = (
         await conn.execute(
-            text("SELECT status FROM students WHERE id = :id"), {"id": request.student_id}
+            text("SELECT status FROM students WHERE id = :id"), {"id": body.student_id}
         )
     ).first()
     if student is None:
@@ -513,21 +513,19 @@ async def start(
                 """
             ),
             {
-                "student": request.student_id,
-                "subject": request.subject_id,
+                "student": body.student_id,
+                "subject": body.subject_id,
                 "engine": ENGINE_VERSION,
             },
         )
     ).scalar_one()
     await conn.commit()
-    return await _next_state(
-        conn, session_id, request.subject_id, request.student_id
-    )
+    return await _next_state(conn, session_id, body.subject_id, body.student_id)
 
 
 @router.get("/{session_id}", response_model=CheckupState, summary="Where this sitting is")
 async def current(
-    conn: Annotated[AsyncConnection, Depends(connection)], session_id: UUID
+    request: Request, conn: Annotated[AsyncConnection, Depends(connection)], session_id: UUID
 ) -> CheckupState:
     """The next question of a sitting already in progress.
 
@@ -536,6 +534,7 @@ async def current(
     sitting or sending an answer the student never gave to get a question back. Both were
     worse than an endpoint.
     """
+    await require_session_owner(request, conn, session_id)
     session = (
         (
             await conn.execute(
@@ -553,9 +552,7 @@ async def current(
     )
     if session is None:
         raise HTTPException(status_code=404, detail="unknown check-up")
-    return await _next_state(
-        conn, session_id, session["subject_id"], session["student_id"]
-    )
+    return await _next_state(conn, session_id, session["subject_id"], session["student_id"])
 
 
 @router.post(
@@ -564,10 +561,12 @@ async def current(
     summary="Answer and get the next question",
 )
 async def answer(
+    request: Request,
     conn: Annotated[AsyncConnection, Depends(connection)],
     session_id: UUID,
     submission: AnswerIn,
 ) -> CheckupState:
+    await require_session_owner(request, conn, session_id)
     session = (
         (
             await conn.execute(
@@ -632,9 +631,7 @@ async def answer(
         message = str(original.args[0]) if original and original.args else str(error)
         raise HTTPException(status_code=409, detail=message.split("\n")[0]) from error
 
-    state = await _next_state(
-        conn, session_id, session["subject_id"], session["student_id"]
-    )
+    state = await _next_state(conn, session_id, session["subject_id"], session["student_id"])
     if state.finished:
         await conn.execute(
             text("UPDATE study_sessions SET ended_at = now() WHERE id = :id AND ended_at IS NULL"),
@@ -666,8 +663,7 @@ def _standings(
     summary = summarise(
         subject_id="subtopics",
         topics=[
-            TopicWeight(topic_id=unit.unit_id, share=unit.share, name=unit.name)
-            for unit in units
+            TopicWeight(topic_id=unit.unit_id, share=unit.share, name=unit.name) for unit in units
         ],
         answers=[
             TopicAnswers(topic_id=key, attempts=tuple(value)) for key, value in grouped.items()
@@ -763,8 +759,14 @@ async def _forecast(
 
 @router.get("/{session_id}/report", response_model=CheckupReport, summary="What the check-up found")
 async def report(
-    conn: Annotated[AsyncConnection, Depends(connection)], session_id: UUID
+    request: Request, conn: Annotated[AsyncConnection, Depends(connection)], session_id: UUID
 ) -> CheckupReport:
+    await require_session_owner(request, conn, session_id)
+    return await build_report(conn, session_id)
+
+
+async def build_report(conn: AsyncConnection, session_id: UUID) -> CheckupReport:
+    """The report itself, for the route above and for the home page's latest check-up."""
     session = (
         (
             await conn.execute(

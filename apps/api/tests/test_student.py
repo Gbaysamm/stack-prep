@@ -46,7 +46,7 @@ async def fixture() -> AsyncIterator[dict[str, str]]:
                         VALUES (:n, :ref, 'active', false) RETURNING id
                         """
                     ),
-                    {"n": f"Goal test student {suffix}", "ref": f"test:{suffix}"},
+                    {"n": f"Goal test student {suffix}", "ref": f"sandbox:test-{suffix}"},
                 )
             ).scalar_one()
         )
@@ -134,9 +134,7 @@ async def test_the_catalogue_shows_what_is_not_ready_and_why(
     response = await client.get("/v1/student/catalogue")
     assert response.status_code == 200, response.text
     subjects = {
-        subject["subject_id"]: subject
-        for exam in response.json()
-        for subject in exam["subjects"]
+        subject["subject_id"]: subject for exam in response.json() for subject in exam["subjects"]
     }
     mine = subjects[fixture["subject"]]
     # An active subject with no approved questions is listed, not hidden, and says why.

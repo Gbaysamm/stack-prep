@@ -22,11 +22,12 @@ from datetime import date
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
+from app.auth import require_student
 from app.db import connection, fetch_all
 
 router = APIRouter(prefix="/v1/student", tags=["student"])
@@ -171,8 +172,9 @@ async def catalogue(
     "/{student_id}/goals", response_model=list[Goal], summary="What this student is aiming at"
 )
 async def goals(
-    conn: Annotated[AsyncConnection, Depends(connection)], student_id: UUID
+    request: Request, conn: Annotated[AsyncConnection, Depends(connection)], student_id: UUID
 ) -> list[Goal]:
+    await require_student(request, conn, student_id)
     rows = await fetch_all(
         conn,
         """
@@ -207,6 +209,7 @@ async def goals(
     summary="Set the target and the date",
 )
 async def set_goal(
+    request: Request,
     conn: Annotated[AsyncConnection, Depends(connection)],
     student_id: UUID,
     subject_id: UUID,
@@ -219,6 +222,7 @@ async def set_goal(
     newer. The old values are overwritten: a goal is a current intention, and its history is
     not something anything downstream reads.
     """
+    await require_student(request, conn, student_id)
     exists = (
         await conn.execute(text("SELECT 1 FROM students WHERE id = :id"), {"id": student_id})
     ).first()
@@ -249,7 +253,7 @@ async def set_goal(
         },
     )
     await conn.commit()
-    for row in await goals(conn, student_id):
+    for row in await goals(request, conn, student_id):
         if row.subject_id == subject_id:
             return row
     raise HTTPException(status_code=500, detail="the goal was written but could not be read back")
@@ -259,13 +263,14 @@ async def set_goal(
     "/{student_id}/sittings", response_model=list[SittingSummary], summary="Check-ups so far"
 )
 async def sittings(
-    conn: Annotated[AsyncConnection, Depends(connection)], student_id: UUID
+    request: Request, conn: Annotated[AsyncConnection, Depends(connection)], student_id: UUID
 ) -> list[SittingSummary]:
     """Every check-up this student has started, finished or not.
 
     The unfinished one is the point: a student who closed the tab halfway should be offered
     the sitting they were in, not a fresh one that throws their answers away.
     """
+    await require_student(request, conn, student_id)
     rows = await fetch_all(
         conn,
         """

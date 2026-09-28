@@ -58,6 +58,7 @@ from fastapi import (
     File,
     Form,
     HTTPException,
+    Request,
     UploadFile,
 )
 from fastapi.responses import FileResponse, Response, StreamingResponse
@@ -66,6 +67,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from app import tutor, voice_store
+from app.auth import require_session_owner, require_student
 from app.config import Settings, get_settings
 from app.db import connection, fetch_all
 from app.figures import QuestionFigure, figures_for, resolve
@@ -519,12 +521,11 @@ async def _state(
 
 @router.post("/start", response_model=PracticeState, summary="Begin a guided session")
 async def start(
-    conn: Annotated[AsyncConnection, Depends(connection)], request: StartPractice
+    request: Request, conn: Annotated[AsyncConnection, Depends(connection)], body: StartPractice
 ) -> PracticeState:
+    await require_student(request, conn, body.student_id)
     student = (
-        await conn.execute(
-            text("SELECT 1 FROM students WHERE id = :id"), {"id": request.student_id}
-        )
+        await conn.execute(text("SELECT 1 FROM students WHERE id = :id"), {"id": body.student_id})
     ).first()
     if student is None:
         raise HTTPException(status_code=404, detail="unknown student")
@@ -539,9 +540,9 @@ async def start(
                 """
             ),
             {
-                "student": request.student_id,
-                "subject": request.subject_id,
-                "length": request.length,
+                "student": body.student_id,
+                "subject": body.subject_id,
+                "length": body.length,
                 "engine": ENGINE_VERSION,
             },
         )
@@ -632,7 +633,7 @@ async def _close_when_finished(
 
 @router.get("/{session_id}", response_model=PracticeState, summary="Where this session is")
 async def current(
-    conn: Annotated[AsyncConnection, Depends(connection)], session_id: UUID
+    request: Request, conn: Annotated[AsyncConnection, Depends(connection)], session_id: UUID
 ) -> PracticeState:
     """The session exactly where the student left it, for a client that has just reloaded.
 
@@ -645,6 +646,7 @@ async def current(
     reload after the board and before the next answer shows the board once more, which costs
     a click and never a lesson.
     """
+    await require_session_owner(request, conn, session_id)
     session = await _session(conn, session_id)
     last = (
         (
@@ -700,6 +702,7 @@ async def current(
     summary="Answer, and find out what happens next",
 )
 async def answer(
+    request: Request,
     conn: Annotated[AsyncConnection, Depends(connection)],
     session_id: UUID,
     submission: AnswerIn,
@@ -709,6 +712,7 @@ async def answer(
     The ladder is read from what is stored, not from anything the client says, so a client
     that replays or reorders its calls cannot talk its way past a hint or skip the board.
     """
+    await require_session_owner(request, conn, session_id)
     session = await _session(conn, session_id)
     already = await _hints_used(conn, session_id, submission.question_version_id)
 
@@ -773,7 +777,7 @@ async def answer(
     summary="Move on once the board has been read",
 )
 async def taught(
-    conn: Annotated[AsyncConnection, Depends(connection)], session_id: UUID
+    request: Request, conn: Annotated[AsyncConnection, Depends(connection)], session_id: UUID
 ) -> PracticeState:
     """Close the taught question and ask for the next one.
 
@@ -782,6 +786,7 @@ async def taught(
     the next question in it is one the student has not seen. Re-asking the same item would
     test whether they remember being told, which is not the same as knowing.
     """
+    await require_session_owner(request, conn, session_id)
     session = await _session(conn, session_id)
     return await _close_when_finished(conn, session, await _state(conn, session))
 
@@ -1195,6 +1200,7 @@ async def _record_turn(
     summary="Ask the coach about the working on the board",
 )
 async def ask(
+    request: Request,
     conn: Annotated[AsyncConnection, Depends(connection)],
     settings: Annotated[Settings, Depends(get_settings)],
     session_id: UUID,
@@ -1213,6 +1219,7 @@ async def ask(
     estimate moves. The turn is recorded because assistance is recorded (REQ-05) and because a
     reviewer reading a complaint needs the lesson that happened, not the one in the bank.
     """
+    await require_session_owner(request, conn, session_id)
     session = await _session(conn, session_id)
     await _must_be_at_the_board(conn, session_id, question.question_version_id)
 
@@ -1250,6 +1257,7 @@ async def ask(
     summary="Ask the coach, and watch it teach — voice and board",
 )
 async def ask_streaming(
+    request: Request,
     conn: Annotated[AsyncConnection, Depends(connection)],
     settings: Annotated[Settings, Depends(get_settings)],
     session_id: UUID,
@@ -1273,6 +1281,7 @@ async def ask_streaming(
     spoken line is on screen as text regardless, so a muted phone, a failed call or a
     deployment with `ai_speak` off is a quieter lesson and never a missing one.
     """
+    await require_session_owner(request, conn, session_id)
     session = await _session(conn, session_id)
     await _must_be_at_the_board(conn, session_id, question.question_version_id)
 
@@ -1413,6 +1422,7 @@ class Heard(BaseModel):
     summary="Turn a spoken question into words for the student to check",
 )
 async def listen(
+    request: Request,
     conn: Annotated[AsyncConnection, Depends(connection)],
     settings: Annotated[Settings, Depends(get_settings)],
     session_id: UUID,
@@ -1433,6 +1443,7 @@ async def listen(
     board, so the same guard applies: a session that has not missed this question twice
     cannot use this to spend the deployment's transcription budget.
     """
+    await require_session_owner(request, conn, session_id)
     if not settings.ai_listen:
         raise HTTPException(status_code=404, detail="not found")
 
@@ -1724,11 +1735,13 @@ async def _lesson_beats(
     summary="The worked solution as a lesson: what goes on the board, and what is said",
 )
 async def lesson(
+    request: Request,
     conn: Annotated[AsyncConnection, Depends(connection)],
     settings: Annotated[Settings, Depends(get_settings)],
     session_id: UUID,
     question_version_id: UUID,
 ) -> NarratedLesson:
+    await require_session_owner(request, conn, session_id)
     await _must_be_at_the_board(conn, session_id, question_version_id)
     beats, source = await _lesson_beats(conn, session_id, question_version_id, settings)
     return NarratedLesson(
@@ -1753,12 +1766,14 @@ async def lesson(
     summary="Hear one beat of the lesson",
 )
 async def lesson_voice(
+    request: Request,
     conn: Annotated[AsyncConnection, Depends(connection)],
     settings: Annotated[Settings, Depends(get_settings)],
     session_id: UUID,
     question_version_id: UUID,
     beat: int,
 ) -> Response:
+    await require_session_owner(request, conn, session_id)
     await _must_have_missed(conn, session_id, question_version_id)
     beats, _ = await _lesson_beats(conn, session_id, question_version_id, settings)
     if not 0 <= beat < len(beats):
@@ -1778,6 +1793,7 @@ async def lesson_voice(
     summary="Start preparing the lesson, so the board finds it ready",
 )
 async def warm_lesson(
+    request: Request,
     conn: Annotated[AsyncConnection, Depends(connection)],
     settings: Annotated[Settings, Depends(get_settings)],
     session_id: UUID,
@@ -1790,6 +1806,7 @@ async def warm_lesson(
     student needs it, and kept for everyone after. Nothing voices the whole bank in advance.
     A question without a written lesson has its narration written here too.
     """
+    await require_session_owner(request, conn, session_id)
     await _must_have_missed(conn, session_id, question_version_id)
     beats, _ = await _lesson_beats(conn, session_id, question_version_id, settings)
     lines = [beat.say for beat in beats]

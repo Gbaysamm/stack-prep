@@ -15,13 +15,14 @@ from datetime import date, datetime, timedelta
 from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
+from app.auth import require_student
 from app.db import connection, fetch_all
-from app.routers.checkup import report
+from app.routers.checkup import build_report
 from app.routers.practice import DEFAULT_LENGTH
 from app.routers.student import sessions_before
 
@@ -218,7 +219,7 @@ async def _latest_checkup(
     since lost its current version cannot be reported on, and is left empty rather than failed.
     """
     try:
-        found = await report(conn, session_id)
+        found = await build_report(conn, session_id)
     except HTTPException as error:
         if error.status_code == 409:
             return None
@@ -254,13 +255,14 @@ async def _latest_checkup(
     "/{student_id}/overview", response_model=Overview, summary="Everything the home page shows"
 )
 async def overview(
-    conn: Annotated[AsyncConnection, Depends(connection)], student_id: UUID
+    request: Request, conn: Annotated[AsyncConnection, Depends(connection)], student_id: UUID
 ) -> Overview:
     """One call for the student's home: each subject, the latest runs, and the streak.
 
     A handful of queries whatever the history: one for the subjects, one for the runs, one for
     the days studied, and one report per subject for its latest finished check-up.
     """
+    await require_student(request, conn, student_id)
     student = await _student(conn, student_id)
     today: date = student["today"]
 
@@ -392,6 +394,7 @@ def _run(row: dict[str, Any]) -> PracticeRun:
     summary="Every guided run, newest first",
 )
 async def practice_runs(
+    request: Request,
     conn: Annotated[AsyncConnection, Depends(connection)],
     student_id: UUID,
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
@@ -402,6 +405,7 @@ async def practice_runs(
     Paged by start time rather than by offset, so a run started while the student is reading
     the list does not push one they have already seen onto the next page twice.
     """
+    await require_student(request, conn, student_id)
     await _student(conn, student_id)
     rows = await fetch_all(
         conn,

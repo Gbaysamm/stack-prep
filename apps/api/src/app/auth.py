@@ -20,12 +20,13 @@ from uuid import UUID
 
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError
-from fastapi import Depends, Request, Response
+from fastapi import Depends, HTTPException, Request, Response
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 from starlette.concurrency import run_in_threadpool
 
 from app.db import connection
+from app.routers.dev import SANDBOX_PREFIX
 
 #: The cookie that carries the session token.
 SESSION_COOKIE = "sp_session"
@@ -155,3 +156,52 @@ async def current_student(
         )
     ).scalar_one_or_none()
     return student_id
+
+
+async def require_student(request: Request, conn: AsyncConnection, student_id: UUID) -> None:
+    """Refuse unless the caller may act as this student.
+
+    The signed-in student may act as themselves and nobody else (403). With no session, only a
+    legacy sandbox tester — a `sandbox:` student who never set a password — gets through, as
+    they did before accounts existed; anyone else must log in (401). An unknown student is
+    let past, so the route's own 404 still answers.
+    """
+    me = await current_student(request, conn)
+    if me == student_id:
+        return
+    if me is not None:
+        raise HTTPException(status_code=403, detail="That isn't your account.")
+    row = (
+        (
+            await conn.execute(
+                text(
+                    """
+                    SELECT coalesce(s.external_ref LIKE :prefix || '%', false) AS sandbox,
+                           EXISTS (SELECT 1 FROM student_credentials c
+                                   WHERE c.student_id = s.id) AS claimed
+                    FROM students s
+                    WHERE s.id = :id
+                    """
+                ),
+                {"id": student_id, "prefix": SANDBOX_PREFIX},
+            )
+        )
+        .mappings()
+        .first()
+    )
+    if row is None:
+        return
+    if row["sandbox"] and not row["claimed"]:
+        return
+    raise HTTPException(status_code=401, detail="Log in to continue.")
+
+
+async def require_session_owner(request: Request, conn: AsyncConnection, session_id: UUID) -> None:
+    """`require_student` for whoever owns this study session; an unknown one is let past."""
+    owner: UUID | None = (
+        await conn.execute(
+            text("SELECT student_id FROM study_sessions WHERE id = :id"), {"id": session_id}
+        )
+    ).scalar_one_or_none()
+    if owner is not None:
+        await require_student(request, conn, owner)

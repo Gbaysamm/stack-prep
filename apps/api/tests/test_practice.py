@@ -125,7 +125,7 @@ async def fixture() -> AsyncIterator[dict[str, str]]:
                         VALUES (:n, :ref, 'active', false) RETURNING id
                         """
                     ),
-                    {"n": f"Practice student {suffix}", "ref": f"test:{suffix}"},
+                    {"n": f"Practice student {suffix}", "ref": f"sandbox:test-{suffix}"},
                 )
             ).scalar_one()
         )

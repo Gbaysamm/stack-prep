@@ -324,8 +324,13 @@ export function AppShell() {
   useEffect(() => {
     if (check.error === "unknown student") {
       void signOut().then(() => navigate("/", { replace: true }));
+    } else if (check.error === "Log in to continue." || check.error === "That isn't your account.") {
+      // The server wants a login for this student (or this device holds someone else's):
+      // clear the stale identity and ask for one, coming back here afterwards.
+      const from = location.pathname;
+      void signOut().then(() => navigate("/?mode=login", { replace: true, state: { from } }));
     }
-  }, [check.error, navigate, signOut]);
+  }, [check.error, location.pathname, navigate, signOut]);
 
   // The phone menu closes when the student goes somewhere, or presses Escape.
   useEffect(() => setMenu(false), [location.pathname]);
