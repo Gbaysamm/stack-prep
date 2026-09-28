@@ -208,9 +208,13 @@ class PracticeState(BaseModel):
     position: int
     length: int
     answered: int
+    #: Right first time, with no hint, and not called a guess by the student.
     correct_unaided: int
     taught: int
     question: PracticeQuestion | None
+    #: Right first time with no hint, but the student said they guessed. Not counted in
+    #: `correct_unaided`: a lucky guess has not shown they understand it.
+    guessed_right: int = 0
     #: Set when the last answer was wrong and a hint is being offered.
     hint: str | None = None
     #: Set once the student has missed twice: the board's script.
@@ -432,7 +436,14 @@ async def _state(
                                                                  IS FALSE)
                             ) AS explained) AS taught,
                            (SELECT count(*) FROM scoring_attempts s
-                             WHERE s.session_id = :session AND s.is_correct) AS unaided
+                             WHERE s.session_id = :session AND s.is_correct) AS unaided,
+                           -- Right with no help, but the student's own word is that they
+                           -- guessed. `scoring_attempts` already keeps these out of
+                           -- `unaided`; counted here so the run can say so honestly.
+                           (SELECT count(*) FROM attempts g
+                             WHERE g.session_id = :session AND g.is_correct
+                               AND g.confidence = 'guessed' AND g.hint_count = 0
+                               AND NOT g.solution_viewed_before_answer) AS guessed_right
                     FROM attempts a WHERE a.session_id = :session
                     """
                 ),
@@ -497,8 +508,17 @@ async def _state(
     finished = question is None and stage == "asking"
     closing = None
     if finished:
+        guessed = int(counts["guessed_right"])
+        lucky = ""
+        if guessed:
+            lucky = (
+                "1 was right but guessed — it'll come back. "
+                if guessed == 1
+                else f"{guessed} were right but guessed — they'll come back. "
+            )
         closing = (
             f"{counts['unaided']} of {seen} answered without help. "
+            f"{lucky}"
             f"{counts['taught']} were taught rather than answered, and none of those counts "
             "as knowing it yet — the same ground comes back with fresh questions."
         )
@@ -509,6 +529,7 @@ async def _state(
         length=length,
         answered=seen,
         correct_unaided=int(counts["unaided"]),
+        guessed_right=int(counts["guessed_right"]),
         taught=int(counts["taught"]),
         question=question,
         hint=hint,
@@ -1565,6 +1586,62 @@ async def _must_have_missed(conn: AsyncConnection, session_id: UUID, version_id:
         raise HTTPException(status_code=409, detail="there is no lesson for this question yet")
 
 
+async def _latest_answer(
+    conn: AsyncConnection, session_id: UUID, version_id: UUID
+) -> dict[str, Any] | None:
+    """This sitting's latest answer to the question: whether it was right, and what was said."""
+    row = (
+        (
+            await conn.execute(
+                text(
+                    """
+                    SELECT is_correct, confidence FROM attempts
+                    WHERE session_id = :session AND question_version_id = :version
+                    ORDER BY answered_at_client DESC
+                    LIMIT 1
+                    """
+                ),
+                {"session": session_id, "version": version_id},
+            )
+        )
+        .mappings()
+        .first()
+    )
+    return dict(row) if row is not None else None
+
+
+async def _right_but_doubted(conn: AsyncConnection, session_id: UUID, version_id: UUID) -> bool:
+    """Whether this sitting's latest answer to the question was right but not believed.
+
+    Right, and the student said they guessed or were unsure. Nothing was missed, but a lucky
+    or shaky right answer has not shown they understand it, so the lesson is theirs to open
+    ("Show me why"). Read from what is stored, like every other door here.
+    """
+    latest = await _latest_answer(conn, session_id, version_id)
+    return (
+        latest is not None
+        and bool(latest["is_correct"])
+        and latest["confidence"] in ("guessed", "unsure")
+    )
+
+
+async def _lesson_is_open(
+    conn: AsyncConnection, session_id: UUID, version_id: UUID, *, whole: bool
+) -> None:
+    """Refuse the lesson unless this sitting has earned it.
+
+    `whole` is the lesson itself, which opens at the board (missed twice); otherwise its voice
+    and its preparation, which may start from the first miss. Either way a right answer the
+    student doubted opens it too.
+    """
+    if await _right_but_doubted(conn, session_id, version_id):
+        return
+    if whole:
+        await _must_be_at_the_board(conn, session_id, version_id)
+    else:
+        await _must_have_missed(conn, session_id, version_id)
+
+
 async def _mistake(
     conn: AsyncConnection, session_id: UUID, version_id: UUID, *, first: bool
 ) -> tuple[str | None, str | None]:
@@ -1706,7 +1783,11 @@ async def _lesson_beats(
             for moment in moments
         ]
         chose, _ = await _mistake(conn, session_id, version_id, first=False)
-        if chose and traps.get(chose):
+        # No trap when the option they ended on was the right one: a student who got there
+        # (however unsure) is not told about a mistake as if it were the one they made last.
+        latest = await _latest_answer(conn, session_id, version_id)
+        ended_right = latest is not None and bool(latest["is_correct"])
+        if chose and traps.get(chose) and not ended_right:
             beats.append(_Beat(board_index=None, write=[], at=[], say=str(traps[chose])))
         return beats, "script"
 
@@ -1742,7 +1823,7 @@ async def lesson(
     question_version_id: UUID,
 ) -> NarratedLesson:
     await require_session_owner(request, conn, session_id)
-    await _must_be_at_the_board(conn, session_id, question_version_id)
+    await _lesson_is_open(conn, session_id, question_version_id, whole=True)
     beats, source = await _lesson_beats(conn, session_id, question_version_id, settings)
     return NarratedLesson(
         source=source,
@@ -1774,7 +1855,7 @@ async def lesson_voice(
     beat: int,
 ) -> Response:
     await require_session_owner(request, conn, session_id)
-    await _must_have_missed(conn, session_id, question_version_id)
+    await _lesson_is_open(conn, session_id, question_version_id, whole=False)
     beats, _ = await _lesson_beats(conn, session_id, question_version_id, settings)
     if not 0 <= beat < len(beats):
         raise HTTPException(status_code=404, detail="no such beat")
@@ -1807,12 +1888,71 @@ async def warm_lesson(
     A question without a written lesson has its narration written here too.
     """
     await require_session_owner(request, conn, session_id)
-    await _must_have_missed(conn, session_id, question_version_id)
+    await _lesson_is_open(conn, session_id, question_version_id, whole=False)
     beats, _ = await _lesson_beats(conn, session_id, question_version_id, settings)
     lines = [beat.say for beat in beats]
     if settings.ai_speak:
         background.add_task(voice_store.voice_all, lines, settings)
     return {"beats": len(lines)}
+
+
+class LessonFeedbackIn(BaseModel):
+    """What the student said once the lesson was over."""
+
+    #: Which door they came through: two misses, or a right answer they guessed or doubted.
+    context: Literal["after_misses", "after_guess", "after_unsure"]
+    understood: Literal["got_it", "unsure", "too_hard"]
+    #: Whether the working matched what they did. Optional: not every student worked it out.
+    matched_working: Literal["yes", "partly", "no"] | None = None
+
+
+class LessonFeedbackOut(BaseModel):
+    id: UUID
+
+
+@router.post(
+    "/{session_id}/lesson/{question_version_id}/feedback",
+    response_model=LessonFeedbackOut,
+    status_code=201,
+    summary="Say whether the lesson landed",
+)
+async def lesson_feedback(
+    request: Request,
+    conn: Annotated[AsyncConnection, Depends(connection)],
+    session_id: UUID,
+    question_version_id: UUID,
+    feedback: LessonFeedbackIn,
+) -> LessonFeedbackOut:
+    """One row per answer. A student may answer again; the latest per question is the one read.
+
+    Only for a lesson this sitting could open, by the same rule as the lesson itself, so the
+    table cannot fill with opinions about lessons nobody saw.
+    """
+    await require_session_owner(request, conn, session_id)
+    session = await _session(conn, session_id)
+    await _lesson_is_open(conn, session_id, question_version_id, whole=True)
+    made = (
+        await conn.execute(
+            text(
+                """
+                INSERT INTO lesson_feedback (student_id, session_id, question_version_id,
+                  context, understood, matched_working)
+                VALUES (:student, :session, :version, :context, :understood, :matched)
+                RETURNING id
+                """
+            ),
+            {
+                "student": session["student_id"],
+                "session": session_id,
+                "version": question_version_id,
+                "context": feedback.context,
+                "understood": feedback.understood,
+                "matched": feedback.matched_working,
+            },
+        )
+    ).scalar_one()
+    await conn.commit()
+    return LessonFeedbackOut(id=made)
 
 
 @router.get(

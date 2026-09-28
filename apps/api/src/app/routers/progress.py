@@ -11,8 +11,9 @@ the report would not is two pages disagreeing about the same sitting.
 
 from __future__ import annotations
 
+import re
 from datetime import date, datetime, timedelta
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
@@ -34,12 +35,18 @@ RECENT_RUNS = 8
 #: How many subtopics the home page names as the ones to work on.
 WEAKEST = 3
 
+#: How many lessons the home page offers to go back to, and how much of each stem it shows.
+TO_REVISIT = 10
+STEM_EXCERPT_CHARS = 120
+
 #: The contexts a streak counts. Mock exams are not a study habit, and review has no session.
 STREAK_CONTEXTS = ("guided", "practice", "checkup")
 
 #: Every guided run this student has started, with the counts the loop itself keeps. The same
 #: tests `_state` in the practice router uses: taught is missed twice and never right, and an
-#: unaided right answer is one `scoring_attempts` lets through.
+#: unaided right answer is one `scoring_attempts` lets through. A right answer the student
+#: called a guess is not unaided; it is counted apart, as `guessed_right`, exactly as `_state`
+#: counts it.
 #:
 #: Finished is the stamp the loop now writes, or, for runs from before it wrote one, every
 #: question used up with none left waiting on its second try.
@@ -48,6 +55,7 @@ RUNS = """
            coalesce(ss.planned_items, :default_length) AS length,
            coalesce(q.answered, 0) AS answered,
            coalesce(u.correct_unaided, 0) AS correct_unaided,
+           coalesce(g.guessed_right, 0) AS guessed_right,
            coalesce(q.taught, 0) AS taught,
            (ss.ended_at IS NOT NULL
             OR (coalesce(q.answered, 0) >= coalesce(ss.planned_items, :default_length)
@@ -75,6 +83,12 @@ RUNS = """
       FROM scoring_attempts sa
       WHERE sa.session_id = ss.id AND sa.is_correct
     ) u ON true
+    LEFT JOIN LATERAL (
+      SELECT count(*) AS guessed_right
+      FROM attempts ga
+      WHERE ga.session_id = ss.id AND ga.is_correct AND ga.confidence = 'guessed'
+        AND ga.hint_count = 0 AND NOT ga.solution_viewed_before_answer
+    ) g ON true
     WHERE ss.student_id = :student AND ss.session_type = 'guided'
 """
 
@@ -123,6 +137,8 @@ class PracticeTotals(BaseModel):
     questions_answered: int
     correct_unaided: int
     taught: int
+    #: Right with no help but called a guess by the student; not in `correct_unaided`.
+    guessed_right: int = 0
 
 
 class SubjectOverview(BaseModel):
@@ -149,6 +165,8 @@ class PracticeRun(BaseModel):
     correct_unaided: int
     taught: int
     length: int
+    #: Right with no help but called a guess by the student; not in `correct_unaided`.
+    guessed_right: int = 0
 
 
 class PracticeRunDetail(PracticeRun):
@@ -360,6 +378,7 @@ async def overview(
                     runs_finished=sum(1 for run in mine if run["finished"]),
                     questions_answered=sum(int(run["answered"]) for run in mine),
                     correct_unaided=sum(int(run["correct_unaided"]) for run in mine),
+                    guessed_right=sum(int(run["guessed_right"]) for run in mine),
                     taught=sum(int(run["taught"]) for run in mine),
                 ),
             )
@@ -385,6 +404,7 @@ def _run(row: dict[str, Any]) -> PracticeRun:
         correct_unaided=int(row["correct_unaided"]),
         taught=int(row["taught"]),
         length=int(row["length"]),
+        guessed_right=int(row["guessed_right"]),
     )
 
 
@@ -440,3 +460,104 @@ async def practice_runs(
         runs=page,
         next_before=page[-1].started_at if len(page) == limit else None,
     )
+
+
+class LessonFeedbackCounts(BaseModel):
+    got_it: int = 0
+    unsure: int = 0
+    too_hard: int = 0
+    matched_yes: int = 0
+    matched_partly: int = 0
+    matched_no: int = 0
+
+
+class LessonToRevisit(BaseModel):
+    question_version_id: UUID
+    subject_id: UUID
+    subject_name: str
+    topic_name: str | None
+    subtopic_name: str | None
+    #: The start of the question, as plain text.
+    stem_excerpt: str
+    understood: Literal["unsure", "too_hard"]
+    at: datetime
+
+
+class LessonFeedbackSummary(BaseModel):
+    #: Over the latest answer per question, so a student who changed their mind counts once.
+    counts: LessonFeedbackCounts
+    #: Questions with any feedback.
+    total: int
+    #: Lessons the student said did not land, newest first.
+    to_revisit: list[LessonToRevisit]
+
+
+def stem_excerpt(stem: str, limit: int = STEM_EXCERPT_CHARS) -> str:
+    """The first ``limit`` characters of a stem, with markup and runs of space taken out."""
+    plain = re.sub(r"<[^>]+>", " ", stem)
+    plain = re.sub(r"[*_`#]+", "", plain)
+    plain = " ".join(plain.split())
+    if len(plain) <= limit:
+        return plain
+    return plain[: limit - 1].rstrip() + "…"
+
+
+@router.get(
+    "/{student_id}/lesson-feedback",
+    response_model=LessonFeedbackSummary,
+    summary="What the student said about their lessons, and which to go back to",
+)
+async def lesson_feedback(
+    request: Request, conn: Annotated[AsyncConnection, Depends(connection)], student_id: UUID
+) -> LessonFeedbackSummary:
+    await require_student(request, conn, student_id)
+    await _student(conn, student_id)
+    rows = await fetch_all(
+        conn,
+        """
+        WITH latest AS (
+          SELECT DISTINCT ON (f.question_version_id)
+                 f.question_version_id, f.understood, f.matched_working, f.created_at
+          FROM lesson_feedback f
+          WHERE f.student_id = :student
+          ORDER BY f.question_version_id, f.created_at DESC, f.id DESC
+        )
+        SELECT l.question_version_id, l.understood, l.matched_working, l.created_at,
+               v.stem, s.id AS subject_id, s.name AS subject_name,
+               topic.name AS topic_name, sub.name AS subtopic_name,
+               -- Hidden the way the web hides them: the sandbox and the test exams.
+               (upper(e.short_name) = 'SANDBOX' OR upper(e.short_name) LIKE 'PR%') AS hidden
+        FROM latest l
+        JOIN question_versions v ON v.id = l.question_version_id
+        JOIN subjects s ON s.id = v.subject_id
+        JOIN examinations e ON e.id = s.examination_id
+        LEFT JOIN question_classifications c
+          ON c.question_id = v.question_id AND c.classification_role = 'primary'
+        LEFT JOIN curriculum_items skill ON skill.id = c.curriculum_item_id
+        LEFT JOIN curriculum_items sub ON sub.id = skill.parent_id
+        LEFT JOIN curriculum_items topic ON topic.id = sub.parent_id
+        ORDER BY l.created_at DESC
+        """,
+        student=student_id,
+    )
+    counts = LessonFeedbackCounts()
+    for row in rows:
+        setattr(counts, row["understood"], getattr(counts, row["understood"]) + 1)
+        if row["matched_working"] is not None:
+            field = f"matched_{row['matched_working']}"
+            setattr(counts, field, getattr(counts, field) + 1)
+    to_revisit = [
+        LessonToRevisit(
+            question_version_id=row["question_version_id"],
+            subject_id=row["subject_id"],
+            subject_name=row["subject_name"],
+            topic_name=row["topic_name"],
+            subtopic_name=row["subtopic_name"],
+            stem_excerpt=stem_excerpt(str(row["stem"] or "")),
+            understood=row["understood"],
+            at=row["created_at"],
+        )
+        for row in rows
+        if row["understood"] in ("too_hard", "unsure") and not row["hidden"]
+    ][:TO_REVISIT]
+    return LessonFeedbackSummary(counts=counts, total=len(rows), to_revisit=to_revisit)

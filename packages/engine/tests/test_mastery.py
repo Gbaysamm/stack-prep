@@ -7,7 +7,10 @@ import math
 import pytest
 
 from engine.mastery import (
+    GUESS_K_FACTOR,
+    HINT_OUTCOME_CAP,
     K_FLOOR,
+    UNSURE_K_FACTOR,
     Attempt,
     SkillRating,
     band,
@@ -17,6 +20,7 @@ from engine.mastery import (
     displayed_mastery,
     is_suspected_guess,
     learning_rate,
+    predicted_probability,
     probability_correct,
     retained_mastery,
     update,
@@ -80,6 +84,48 @@ def test_suspected_guess_moves_theta_less() -> None:
     guessed = update(start, attempt(level=4, response_ms=5_000, expected_seconds=120))
     assert is_suspected_guess(attempt(level=4, response_ms=5_000, expected_seconds=120))
     assert guessed.theta < worked.theta
+
+
+def test_no_self_report_scores_exactly_as_before() -> None:
+    start = SkillRating(theta=0.2, scored_attempts=6, levels_seen=(2, 3))
+    assert update(start, attempt()) == update(start, attempt(confidence=None))
+    assert update(start, attempt()) == update(start, attempt(confidence="sure"))
+
+
+def test_a_right_answer_the_student_guessed_is_scored_like_a_hinted_guess() -> None:
+    start = SkillRating(theta=0.2, scored_attempts=6, levels_seen=(2, 3))
+    guessed = update(start, attempt(confidence="guessed"))
+    expected = predicted_probability(start, 3)
+    step = learning_rate(start.scored_attempts) * GUESS_K_FACTOR
+    assert guessed.theta == pytest.approx(start.theta + step * (HINT_OUTCOME_CAP - expected))
+    assert guessed.theta < update(start, attempt(confidence="sure")).theta
+    assert guessed.scored_attempts == start.scored_attempts + 1
+
+
+def test_a_self_reported_guess_that_was_also_fast_is_damped_once() -> None:
+    start = SkillRating(theta=-0.5, scored_attempts=4)
+    fast = {"level": 4, "response_ms": 5_000, "expected_seconds": 120}
+    both = update(start, attempt(confidence="guessed", **fast))
+    expected = predicted_probability(start, 4)
+    step = learning_rate(start.scored_attempts) * GUESS_K_FACTOR
+    assert both.theta == pytest.approx(start.theta + step * (HINT_OUTCOME_CAP - expected))
+
+
+def test_unsure_is_weaker_evidence_than_sure_but_still_evidence() -> None:
+    start = SkillRating(theta=-0.4, scored_attempts=5)
+    sure = update(start, attempt(confidence="sure"))
+    unsure = update(start, attempt(confidence="unsure"))
+    guessed = update(start, attempt(confidence="guessed"))
+    assert start.theta < guessed.theta < unsure.theta < sure.theta
+    assert unsure.theta - start.theta == pytest.approx((sure.theta - start.theta) * UNSURE_K_FACTOR)
+
+
+@pytest.mark.parametrize("said", ["sure", "unsure", "guessed", None])
+def test_a_wrong_answer_is_scored_the_same_whatever_was_said(said: str | None) -> None:
+    start = SkillRating(theta=0.5, scored_attempts=5)
+    assert update(start, attempt(is_correct=False, confidence=said)) == update(
+        start, attempt(is_correct=False)
+    )
 
 
 def test_a_fast_wrong_answer_is_not_a_guess() -> None:

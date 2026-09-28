@@ -48,9 +48,7 @@ _MASTERY_SCENARIOS: list[tuple[str, SkillRating, Attempt]] = [
     (
         "correct-with-hint",
         SkillRating(theta=0.2, scored_attempts=6, levels_seen=(2, 3)),
-        Attempt(
-            is_correct=True, level=3, response_ms=80_000, expected_seconds=90, hint_used=True
-        ),
+        Attempt(is_correct=True, level=3, response_ms=80_000, expected_seconds=90, hint_used=True),
     ),
     (
         "suspected-guess",
@@ -72,6 +70,55 @@ _MASTERY_SCENARIOS: list[tuple[str, SkillRating, Attempt]] = [
         "wrong-at-foundation",
         SkillRating(theta=-1.2, scored_attempts=11, levels_seen=(1, 2)),
         Attempt(is_correct=False, level=1, response_ms=45_000, expected_seconds=60),
+    ),
+    (
+        "said-sure-correct",
+        SkillRating(theta=0.2, scored_attempts=6, levels_seen=(2, 3)),
+        Attempt(
+            is_correct=True, level=3, response_ms=80_000, expected_seconds=90, confidence="sure"
+        ),
+    ),
+    (
+        "said-unsure-correct",
+        SkillRating(theta=0.2, scored_attempts=6, levels_seen=(2, 3)),
+        Attempt(
+            is_correct=True, level=3, response_ms=80_000, expected_seconds=90, confidence="unsure"
+        ),
+    ),
+    (
+        "said-guessed-correct",
+        SkillRating(theta=0.2, scored_attempts=6, levels_seen=(2, 3)),
+        Attempt(
+            is_correct=True, level=3, response_ms=80_000, expected_seconds=90, confidence="guessed"
+        ),
+    ),
+    (
+        "said-guessed-and-fast",
+        SkillRating(theta=-0.5, scored_attempts=4, levels_seen=(1, 2)),
+        Attempt(
+            is_correct=True, level=4, response_ms=5_000, expected_seconds=120, confidence="guessed"
+        ),
+    ),
+    (
+        "said-unsure-and-fast",
+        SkillRating(theta=-0.5, scored_attempts=4, levels_seen=(1, 2)),
+        Attempt(
+            is_correct=True, level=4, response_ms=5_000, expected_seconds=120, confidence="unsure"
+        ),
+    ),
+    (
+        "said-guessed-wrong",
+        SkillRating(theta=0.2, scored_attempts=6, levels_seen=(2, 3)),
+        Attempt(
+            is_correct=False, level=3, response_ms=80_000, expected_seconds=90, confidence="guessed"
+        ),
+    ),
+    (
+        "said-unsure-wrong",
+        SkillRating(theta=0.2, scored_attempts=6, levels_seen=(2, 3)),
+        Attempt(
+            is_correct=False, level=3, response_ms=80_000, expected_seconds=90, confidence="unsure"
+        ),
     ),
 ]
 
@@ -133,9 +180,7 @@ def _retention_cases() -> Iterator[dict[str, Any]]:
                 "half_life_days": half_life,
                 "chance_level": chance,
             },
-            "expected": {
-                "retained_mastery": retained_mastery(mastery, days, half_life, chance)
-            },
+            "expected": {"retained_mastery": retained_mastery(mastery, days, half_life, chance)},
         }
 
 

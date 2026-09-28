@@ -2,6 +2,21 @@
 
 One rating per student per skill. Each item has one primary skill and a
 difficulty taken from its level. Mirrored in packages/engine-ts/src/mastery.ts.
+
+This module, not the data model document, is what defines student mastery. In
+particular, how much an answer is worth depends on what the student said about it:
+
+* A correct answer the student says they **guessed** has not shown understanding.
+  It is scored like an answer given after a hint (outcome capped at
+  ``HINT_OUTCOME_CAP``) and with the guess damping (step * ``GUESS_K_FACTOR``).
+  The damping is applied once, whether the guess was self-reported, detected
+  from the response time, or both.
+* A correct answer the student was **unsure** of ("I think so") is weaker evidence
+  than one they were sure of: the step is scaled by ``UNSURE_K_FACTOR``. This
+  stacks with the response-time guess damping.
+* A correct answer they were **sure** of, or one with no self-report (``None``,
+  the student was not asked), is scored as before.
+* A wrong answer is scored the same whatever the student said.
 """
 
 from __future__ import annotations
@@ -12,6 +27,8 @@ from typing import Literal
 
 Band = Literal["not_assessed", "weak", "developing", "exam_ready", "strong", "maintained"]
 Confidence = Literal["low", "medium", "high"]
+#: What the student said about an answer, asked after answering and before being told.
+SelfReport = Literal["sure", "unsure", "guessed"]
 
 #: Objective items carry between two and six options; the chance of guessing one
 #: correctly is 1/option_count. Never assume four (ADR-0014).
@@ -36,6 +53,9 @@ HINT_OUTCOME_CAP = 0.5
 GUESS_TIME_FRACTION = 0.25
 GUESS_K_FACTOR = 0.5
 
+#: A correct answer the student was unsure of moves the rating this much less.
+UNSURE_K_FACTOR = 0.75
+
 MIN_SCORED_ATTEMPTS_FOR_BAND = 3
 HIGH_CONFIDENCE_ATTEMPTS = 8
 
@@ -59,6 +79,8 @@ class Attempt:
     expected_seconds: float
     hint_used: bool = False
     solution_viewed_before_answer: bool = False
+    #: The student's own word on the answer. None means they were not asked.
+    confidence: SelfReport | None = None
 
 
 def chance_level_for_options(option_count: int) -> float:
@@ -104,18 +126,29 @@ def update(rating: SkillRating, attempt: Attempt) -> SkillRating:
 
     Viewing the solution before answering teaches the student but tells us
     nothing about what they knew, so that attempt is not scored.
+
+    A correct answer the student says they guessed is scored like a hinted one
+    (credit capped at ``HINT_OUTCOME_CAP``) and damped like a suspected guess
+    (step * ``GUESS_K_FACTOR``); one they were unsure of moves the rating by
+    step * ``UNSURE_K_FACTOR``. Wrong answers are scored the same whatever the
+    student said. See the module docstring for the full rule.
     """
     if attempt.solution_viewed_before_answer:
         return rating
 
+    said_guessed = attempt.is_correct and attempt.confidence == "guessed"
+    said_unsure = attempt.is_correct and attempt.confidence == "unsure"
+
     expected = probability_correct(rating.theta, difficulty_for_level(attempt.level))
     outcome = 1.0 if attempt.is_correct else 0.0
-    if attempt.hint_used:
+    if attempt.hint_used or said_guessed:
         outcome = min(outcome, HINT_OUTCOME_CAP)
 
     step = learning_rate(rating.scored_attempts)
-    if is_suspected_guess(attempt):
+    if is_suspected_guess(attempt) or said_guessed:
         step *= GUESS_K_FACTOR
+    if said_unsure:
+        step *= UNSURE_K_FACTOR
 
     return SkillRating(
         theta=rating.theta + step * (outcome - expected),

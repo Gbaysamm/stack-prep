@@ -430,6 +430,138 @@ async def test_a_session_ends_when_its_questions_are_used_up(
     assert "2 of 2 answered without help" in (state["closing_note"] or "")
 
 
+async def test_a_lucky_guess_is_counted_apart_and_named_at_the_end(
+    client: httpx.AsyncClient, fixture: dict[str, str]
+) -> None:
+    """Right, but the student said they guessed: not unaided, and the closing note says so."""
+    state = await start(client, fixture, length=2)
+    state = await answer(client, state["session_id"], state, "A", confidence="guessed")
+    assert state["stage"] == "asking"
+    assert (state["correct_unaided"], state["guessed_right"]) == (0, 1)
+    state = await answer(client, state["session_id"], state, "A", confidence="sure")
+    assert state["stage"] == "finished"
+    assert (state["correct_unaided"], state["guessed_right"]) == (1, 1)
+    note = state["closing_note"] or ""
+    assert "1 of 2 answered without help" in note
+    assert "1 was right but guessed" in note
+
+
+async def test_a_guess_after_a_hint_is_help_not_a_lucky_guess(
+    client: httpx.AsyncClient, fixture: dict[str, str]
+) -> None:
+    state = await start(client, fixture)
+    state = await answer(client, state["session_id"], state, "B")
+    state = await answer(client, state["session_id"], state, "A", confidence="guessed")
+    assert (state["correct_unaided"], state["guessed_right"]) == (0, 0)
+
+
+@pytest.fixture
+def quiet_settings() -> Iterator[None]:
+    """No model and no voice: the lesson is the reviewed steps, and nothing is spoken."""
+    app.dependency_overrides[get_settings] = lambda: Settings(openai_api_key="", ai_speak=False)
+    yield
+    app.dependency_overrides.pop(get_settings, None)
+
+
+def lesson_url(session: str, version: str, tail: str = "") -> str:
+    return f"/v1/practice/{session}/lesson/{version}{tail}"
+
+
+@pytest.mark.parametrize("said", ["guessed", "unsure"])
+async def test_a_doubted_right_answer_opens_the_lesson(
+    client: httpx.AsyncClient, fixture: dict[str, str], quiet_settings: None, said: str
+) -> None:
+    state = await start(client, fixture)
+    session, version = state["session_id"], state["question"]["question_version_id"]
+    await answer(client, session, state, "A", confidence=said)
+
+    response = await client.get(lesson_url(session, version))
+    assert response.status_code == 200, response.text
+    assert response.json()["beats"]
+    warmed = await client.post(lesson_url(session, version, "/warm"))
+    assert warmed.status_code == 202, warmed.text
+    # The lesson opens; the coach's own door does not. `/ask` is still for the board.
+    assert (await ask(client, session, version, "why?"))["status"] == 409
+
+
+async def test_a_sure_right_answer_has_no_lesson(
+    client: httpx.AsyncClient, fixture: dict[str, str], quiet_settings: None
+) -> None:
+    state = await start(client, fixture)
+    session, version = state["session_id"], state["question"]["question_version_id"]
+    # Nothing answered yet: no lesson, as before.
+    assert (await client.get(lesson_url(session, version))).status_code == 409
+    assert (await client.post(lesson_url(session, version, "/warm"))).status_code == 409
+
+    await answer(client, session, state, "A", confidence="sure")
+    assert (await client.get(lesson_url(session, version))).status_code == 409
+    assert (await client.post(lesson_url(session, version, "/warm"))).status_code == 409
+    assert (await client.get(lesson_url(session, version, "/voice/0"))).status_code == 409
+
+
+async def test_the_lesson_opens_at_the_board_as_before(
+    client: httpx.AsyncClient, fixture: dict[str, str], quiet_settings: None
+) -> None:
+    state = await start(client, fixture)
+    session, version = state["session_id"], state["question"]["question_version_id"]
+    state = await answer(client, session, state, "B")
+    # One miss: the lesson may be prepared, but not opened.
+    assert (await client.post(lesson_url(session, version, "/warm"))).status_code == 202
+    assert (await client.get(lesson_url(session, version))).status_code == 409
+    await answer(client, session, state, "C")
+    assert (await client.get(lesson_url(session, version))).status_code == 200
+
+
+async def test_lesson_feedback_is_taken_only_where_the_lesson_opens(
+    client: httpx.AsyncClient, fixture: dict[str, str], quiet_settings: None
+) -> None:
+    state = await start(client, fixture)
+    session, guessed = state["session_id"], state["question"]["question_version_id"]
+    state = await answer(client, session, state, "A", confidence="guessed")
+    sure = state["question"]["question_version_id"]
+    await answer(client, session, state, "A", confidence="sure")
+
+    url = lesson_url(session, guessed, "/feedback")
+    made = await client.post(url, json={"context": "after_guess", "understood": "too_hard"})
+    assert made.status_code == 201, made.text
+    again = await client.post(
+        url, json={"context": "after_guess", "understood": "got_it", "matched_working": "partly"}
+    )
+    assert again.status_code == 201, again.text
+    assert again.json()["id"] != made.json()["id"]
+
+    for bad in (
+        {"context": "after_guess", "understood": "maybe"},
+        {"context": "whenever", "understood": "got_it"},
+        {"context": "after_guess", "understood": "got_it", "matched_working": "kind of"},
+        {"understood": "got_it"},
+    ):
+        assert (await client.post(url, json=bad)).status_code == 422, bad
+
+    refused = await client.post(
+        lesson_url(session, sure, "/feedback"),
+        json={"context": "after_unsure", "understood": "got_it"},
+    )
+    assert refused.status_code == 409
+    missing = await client.post(
+        lesson_url(str(uuid.uuid4()), guessed, "/feedback"),
+        json={"context": "after_guess", "understood": "got_it"},
+    )
+    assert missing.status_code == 404
+
+    async with get_engine().connect() as conn:
+        rows = (
+            await conn.execute(
+                text(
+                    "SELECT understood, matched_working FROM lesson_feedback "
+                    "WHERE session_id = :s ORDER BY created_at"
+                ),
+                {"s": session},
+            )
+        ).all()
+    assert [tuple(row) for row in rows] == [("too_hard", None), ("got_it", "partly")]
+
+
 # ---------------------------------------------------------------------------
 # Asking the coach
 #

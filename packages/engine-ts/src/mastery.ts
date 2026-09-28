@@ -4,6 +4,12 @@
  * Field names are snake_case to match the parity vectors and the wire format, so
  * fixtures can be applied without translation. Any change here must be made in
  * the Python engine first, then verified by `npm test` (ADR-0005).
+ *
+ * Self-reported confidence (see mastery.py for the full rule): a correct answer the
+ * student says they guessed is capped at HINT_OUTCOME_CAP and damped by
+ * GUESS_K_FACTOR (once, however the guess was spotted); a correct answer they were
+ * unsure of is damped by UNSURE_K_FACTOR; 'sure', null or absent is scored as before,
+ * and wrong answers are scored the same whatever was said.
  */
 
 export type Band =
@@ -15,6 +21,9 @@ export type Band =
   | 'maintained';
 
 export type Confidence = 'low' | 'medium' | 'high';
+
+/** What the student said about an answer, asked after answering and before being told. */
+export type SelfReport = 'sure' | 'unsure' | 'guessed';
 
 export interface SkillRating {
   theta: number;
@@ -29,6 +38,8 @@ export interface Attempt {
   expected_seconds: number;
   hint_used?: boolean;
   solution_viewed_before_answer?: boolean;
+  /** The student's own word on the answer. null or absent means they were not asked. */
+  confidence?: SelfReport | null;
 }
 
 /**
@@ -62,6 +73,7 @@ export const K_FLOOR = 0.08;
 export const HINT_OUTCOME_CAP = 0.5;
 export const GUESS_TIME_FRACTION = 0.25;
 export const GUESS_K_FACTOR = 0.5;
+export const UNSURE_K_FACTOR = 0.75;
 
 export const MIN_SCORED_ATTEMPTS_FOR_BAND = 3;
 export const HIGH_CONFIDENCE_ATTEMPTS = 8;
@@ -94,12 +106,16 @@ export function isSuspectedGuess(attempt: Attempt): boolean {
 export function update(rating: SkillRating, attempt: Attempt): SkillRating {
   if (attempt.solution_viewed_before_answer) return rating;
 
+  const saidGuessed = attempt.is_correct && attempt.confidence === 'guessed';
+  const saidUnsure = attempt.is_correct && attempt.confidence === 'unsure';
+
   const expected = probabilityCorrect(rating.theta, difficultyForLevel(attempt.level));
   let outcome = attempt.is_correct ? 1 : 0;
-  if (attempt.hint_used) outcome = Math.min(outcome, HINT_OUTCOME_CAP);
+  if (attempt.hint_used || saidGuessed) outcome = Math.min(outcome, HINT_OUTCOME_CAP);
 
   let step = learningRate(rating.scored_attempts);
-  if (isSuspectedGuess(attempt)) step *= GUESS_K_FACTOR;
+  if (isSuspectedGuess(attempt) || saidGuessed) step *= GUESS_K_FACTOR;
+  if (saidUnsure) step *= UNSURE_K_FACTOR;
 
   const levels = [...new Set([...rating.levels_seen, attempt.level])].sort((a, b) => a - b);
 

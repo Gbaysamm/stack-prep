@@ -143,6 +143,12 @@ async def test_another_account_is_refused(people: People, fixture: dict[str, str
         await start(stranger, student, fixture),
         await stranger.get(f"/v1/practice/{state['session_id']}"),
         await answer(stranger, state),
+        await stranger.get(f"/v1/student/{student}/lesson-feedback"),
+        await stranger.post(
+            f"/v1/practice/{state['session_id']}/lesson/"
+            f"{state['question']['question_version_id']}/feedback",
+            json={"context": "after_guess", "understood": "got_it"},
+        ),
     ):
         assert response.status_code == 403, response.text
         assert response.json() == {"detail": "That isn't your account."}

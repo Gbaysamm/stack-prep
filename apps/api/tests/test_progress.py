@@ -12,9 +12,11 @@ from datetime import date, timedelta
 
 import httpx
 import pytest
+from sqlalchemy import text
 from test_practice import answer, client, fixture, start
 
-from app.routers.progress import streak
+from app.db import get_engine
+from app.routers.progress import stem_excerpt, streak
 
 pytestmark = pytest.mark.integration
 
@@ -70,6 +72,7 @@ async def test_a_run_in_progress_is_on_the_home_page(
         "questions_answered": 2,
         "correct_unaided": 1,
         "taught": 0,
+        "guessed_right": 0,
     }
 
     [run] = home["recent_runs"]
@@ -160,3 +163,108 @@ async def test_the_home_page_reads_the_latest_check_up_through_the_report(
     assert latest["score_projected"] == report["projection"]["score_projected"]
     assert [line["name"] for line in latest["weakest_subtopics"]] == ["The subtopic"]
     assert subject["open_checkup_session_id"] is None
+
+
+async def test_a_lucky_guess_is_not_counted_as_known_on_the_home_page(
+    client: httpx.AsyncClient, fixture: dict[str, str]
+) -> None:
+    state = await start(client, fixture, length=2)
+    state = await answer(client, state["session_id"], state, "A", confidence="guessed")
+    state = await answer(client, state["session_id"], state, "A", confidence="unsure")
+    assert state["stage"] == "finished"
+
+    home = (await client.get(f"/v1/student/{fixture['student']}/overview")).json()
+    [run] = home["recent_runs"]
+    assert (run["answered"], run["correct_unaided"], run["guessed_right"]) == (2, 1, 1)
+    totals = home["subjects"][0]["practice"]
+    assert (totals["correct_unaided"], totals["guessed_right"]) == (1, 1)
+    [listed] = (await client.get(f"/v1/student/{fixture['student']}/practice")).json()["runs"]
+    assert (listed["correct_unaided"], listed["guessed_right"]) == (1, 1)
+
+
+async def test_lesson_feedback_is_summarised_from_the_latest_word(
+    client: httpx.AsyncClient, fixture: dict[str, str]
+) -> None:
+    url = f"/v1/student/{fixture['student']}/lesson-feedback"
+    empty = (await client.get(url)).json()
+    assert empty == {
+        "counts": {
+            "got_it": 0,
+            "unsure": 0,
+            "too_hard": 0,
+            "matched_yes": 0,
+            "matched_partly": 0,
+            "matched_no": 0,
+        },
+        "total": 0,
+        "to_revisit": [],
+    }
+
+    state = await start(client, fixture, length=3)
+    session = state["session_id"]
+    first = state["question"]["question_version_id"]
+    state = await answer(client, session, state, "A", confidence="guessed")
+    second = state["question"]["question_version_id"]
+    state = await answer(client, session, state, "A", confidence="unsure")
+
+    def feedback(version: str) -> str:
+        return f"/v1/practice/{session}/lesson/{version}/feedback"
+
+    for version, body in (
+        (first, {"context": "after_guess", "understood": "got_it"}),
+        # Changed their mind: the latest word is the one that counts.
+        (first, {"context": "after_guess", "understood": "too_hard", "matched_working": "no"}),
+        (second, {"context": "after_unsure", "understood": "got_it", "matched_working": "yes"}),
+    ):
+        response = await client.post(feedback(version), json=body)
+        assert response.status_code == 201, response.text
+
+    summary = (await client.get(url)).json()
+    assert summary["total"] == 2
+    assert summary["counts"] == {
+        "got_it": 1,
+        "unsure": 0,
+        "too_hard": 1,
+        "matched_yes": 1,
+        "matched_partly": 0,
+        "matched_no": 1,
+    }
+    # The fixture's exam is a test exam (PR...), which students never see listed.
+    assert summary["to_revisit"] == []
+
+    async with get_engine().begin() as conn:
+        short = (
+            await conn.execute(
+                text(
+                    "SELECT e.short_name FROM examinations e JOIN subjects s "
+                    "ON s.examination_id = e.id WHERE s.id = CAST(:s AS uuid)"
+                ),
+                {"s": fixture["subject_id"]},
+            )
+        ).scalar_one()
+        await conn.execute(
+            text("UPDATE examinations SET short_name = :new WHERE short_name = :old"),
+            {"new": "X" + short, "old": short},
+        )
+    try:
+        [revisit] = (await client.get(url)).json()["to_revisit"]
+    finally:
+        async with get_engine().begin() as conn:
+            await conn.execute(
+                text("UPDATE examinations SET short_name = :old WHERE short_name = :new"),
+                {"new": "X" + short, "old": short},
+            )
+    assert revisit["question_version_id"] == first
+    assert revisit["subject_id"] == fixture["subject_id"]
+    assert revisit["subject_name"] == "Practice subject"
+    assert (revisit["topic_name"], revisit["subtopic_name"]) == ("The topic", "The subtopic")
+    assert revisit["understood"] == "too_hard"
+    assert revisit["stem_excerpt"]
+    assert revisit["at"]
+
+
+def test_a_stem_excerpt_is_plain_and_short() -> None:
+    assert stem_excerpt("  <b>Find</b>   **x**\n if  x+1=2 ") == "Find x if x+1=2"
+    long = stem_excerpt("word " * 100)
+    assert len(long) <= 120
+    assert long.endswith("…")

@@ -1,5 +1,5 @@
 {
-  "engine_version": "0.2.0",
+  "engine_version": "0.3.0",
   "generated_by": "packages/engine (make fixtures)",
   "tolerance": 1e-09,
   "cases": [
@@ -18,7 +18,8 @@
           "response_ms": 70000,
           "expected_seconds": 90,
           "hint_used": false,
-          "solution_viewed_before_answer": false
+          "solution_viewed_before_answer": false,
+          "confidence": null
         }
       },
       "expected": {
@@ -49,7 +50,8 @@
           "response_ms": 120000,
           "expected_seconds": 90,
           "hint_used": false,
-          "solution_viewed_before_answer": false
+          "solution_viewed_before_answer": false,
+          "confidence": null
         }
       },
       "expected": {
@@ -84,7 +86,8 @@
           "response_ms": 95000,
           "expected_seconds": 120,
           "hint_used": false,
-          "solution_viewed_before_answer": false
+          "solution_viewed_before_answer": false,
+          "confidence": null
         }
       },
       "expected": {
@@ -120,7 +123,8 @@
           "response_ms": 80000,
           "expected_seconds": 90,
           "hint_used": true,
-          "solution_viewed_before_answer": false
+          "solution_viewed_before_answer": false,
+          "confidence": null
         }
       },
       "expected": {
@@ -155,7 +159,8 @@
           "response_ms": 5000,
           "expected_seconds": 120,
           "hint_used": false,
-          "solution_viewed_before_answer": false
+          "solution_viewed_before_answer": false,
+          "confidence": null
         }
       },
       "expected": {
@@ -191,7 +196,8 @@
           "response_ms": 40000,
           "expected_seconds": 90,
           "hint_used": false,
-          "solution_viewed_before_answer": true
+          "solution_viewed_before_answer": true,
+          "confidence": null
         }
       },
       "expected": {
@@ -226,7 +232,8 @@
           "response_ms": 45000,
           "expected_seconds": 60,
           "hint_used": false,
-          "solution_viewed_before_answer": false
+          "solution_viewed_before_answer": false,
+          "confidence": null
         }
       },
       "expected": {
@@ -241,6 +248,260 @@
         "displayed_mastery": 0.21258431331120423,
         "band": "weak",
         "confidence": "high"
+      }
+    },
+    {
+      "id": "mastery/said-sure-correct",
+      "kind": "mastery.update",
+      "input": {
+        "rating": {
+          "theta": 0.2,
+          "scored_attempts": 6,
+          "levels_seen": [
+            2,
+            3
+          ]
+        },
+        "attempt": {
+          "is_correct": true,
+          "level": 3,
+          "response_ms": 80000,
+          "expected_seconds": 90,
+          "hint_used": false,
+          "solution_viewed_before_answer": false,
+          "confidence": "sure"
+        }
+      },
+      "expected": {
+        "rating": {
+          "theta": 0.3125415006718805,
+          "scored_attempts": 7,
+          "levels_seen": [
+            2,
+            3
+          ]
+        },
+        "displayed_mastery": 0.577505491087617,
+        "band": "developing",
+        "confidence": "medium"
+      }
+    },
+    {
+      "id": "mastery/said-unsure-correct",
+      "kind": "mastery.update",
+      "input": {
+        "rating": {
+          "theta": 0.2,
+          "scored_attempts": 6,
+          "levels_seen": [
+            2,
+            3
+          ]
+        },
+        "attempt": {
+          "is_correct": true,
+          "level": 3,
+          "response_ms": 80000,
+          "expected_seconds": 90,
+          "hint_used": false,
+          "solution_viewed_before_answer": false,
+          "confidence": "unsure"
+        }
+      },
+      "expected": {
+        "rating": {
+          "theta": 0.2844061255039104,
+          "scored_attempts": 7,
+          "levels_seen": [
+            2,
+            3
+          ]
+        },
+        "displayed_mastery": 0.570626111651752,
+        "band": "developing",
+        "confidence": "medium"
+      }
+    },
+    {
+      "id": "mastery/said-guessed-correct",
+      "kind": "mastery.update",
+      "input": {
+        "rating": {
+          "theta": 0.2,
+          "scored_attempts": 6,
+          "levels_seen": [
+            2,
+            3
+          ]
+        },
+        "attempt": {
+          "is_correct": true,
+          "level": 3,
+          "response_ms": 80000,
+          "expected_seconds": 90,
+          "hint_used": false,
+          "solution_viewed_before_answer": false,
+          "confidence": "guessed"
+        }
+      },
+      "expected": {
+        "rating": {
+          "theta": 0.19377075033594027,
+          "scored_attempts": 7,
+          "levels_seen": [
+            2,
+            3
+          ]
+        },
+        "displayed_mastery": 0.5482916809935352,
+        "band": "developing",
+        "confidence": "medium"
+      }
+    },
+    {
+      "id": "mastery/said-guessed-and-fast",
+      "kind": "mastery.update",
+      "input": {
+        "rating": {
+          "theta": -0.5,
+          "scored_attempts": 4,
+          "levels_seen": [
+            1,
+            2
+          ]
+        },
+        "attempt": {
+          "is_correct": true,
+          "level": 4,
+          "response_ms": 5000,
+          "expected_seconds": 120,
+          "hint_used": false,
+          "solution_viewed_before_answer": false,
+          "confidence": "guessed"
+        }
+      },
+      "expected": {
+        "rating": {
+          "theta": -0.46038573411790124,
+          "scored_attempts": 5,
+          "levels_seen": [
+            1,
+            2,
+            4
+          ]
+        },
+        "displayed_mastery": 0.3868943209960938,
+        "band": "weak",
+        "confidence": "medium"
+      }
+    },
+    {
+      "id": "mastery/said-unsure-and-fast",
+      "kind": "mastery.update",
+      "input": {
+        "rating": {
+          "theta": -0.5,
+          "scored_attempts": 4,
+          "levels_seen": [
+            1,
+            2
+          ]
+        },
+        "attempt": {
+          "is_correct": true,
+          "level": 4,
+          "response_ms": 5000,
+          "expected_seconds": 120,
+          "hint_used": false,
+          "solution_viewed_before_answer": false,
+          "confidence": "unsure"
+        }
+      },
+      "expected": {
+        "rating": {
+          "theta": -0.4167178720169974,
+          "scored_attempts": 5,
+          "levels_seen": [
+            1,
+            2,
+            4
+          ]
+        },
+        "displayed_mastery": 0.39730240067188044,
+        "band": "weak",
+        "confidence": "medium"
+      }
+    },
+    {
+      "id": "mastery/said-guessed-wrong",
+      "kind": "mastery.update",
+      "input": {
+        "rating": {
+          "theta": 0.2,
+          "scored_attempts": 6,
+          "levels_seen": [
+            2,
+            3
+          ]
+        },
+        "attempt": {
+          "is_correct": false,
+          "level": 3,
+          "response_ms": 80000,
+          "expected_seconds": 90,
+          "hint_used": false,
+          "solution_viewed_before_answer": false,
+          "confidence": "guessed"
+        }
+      },
+      "expected": {
+        "rating": {
+          "theta": 0.06254150067188052,
+          "scored_attempts": 7,
+          "levels_seen": [
+            2,
+            3
+          ]
+        },
+        "displayed_mastery": 0.515630280758858,
+        "band": "developing",
+        "confidence": "medium"
+      }
+    },
+    {
+      "id": "mastery/said-unsure-wrong",
+      "kind": "mastery.update",
+      "input": {
+        "rating": {
+          "theta": 0.2,
+          "scored_attempts": 6,
+          "levels_seen": [
+            2,
+            3
+          ]
+        },
+        "attempt": {
+          "is_correct": false,
+          "level": 3,
+          "response_ms": 80000,
+          "expected_seconds": 90,
+          "hint_used": false,
+          "solution_viewed_before_answer": false,
+          "confidence": "unsure"
+        }
+      },
+      "expected": {
+        "rating": {
+          "theta": 0.06254150067188052,
+          "scored_attempts": 7,
+          "levels_seen": [
+            2,
+            3
+          ]
+        },
+        "displayed_mastery": 0.515630280758858,
+        "band": "developing",
+        "confidence": "medium"
       }
     },
     {
