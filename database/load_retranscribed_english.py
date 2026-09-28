@@ -93,7 +93,7 @@ EXAMINATION = "UTME"
 AUTHOR = "Hand re-transcription (UTME Use of English)"
 SECONDS_BY_LEVEL = {1: 30, 2: 45, 3: 60, 4: 80, 5: 100}
 OPTION_LETTERS = {"A", "B", "C", "D", "E"}
-POINT_KINDS = {"circle", "underline", "arrow", "box"}
+POINT_KINDS = {"circle", "underline", "arrow", "box", "highlight", "strike"}
 
 #: Said on every version this supersedes, so the reason is in the row and not only in a commit.
 NOTE = (

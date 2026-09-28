@@ -207,7 +207,7 @@ async def report_uncertain(conn: asyncpg.Connection, version_id: object, q: dict
 
 
 OPTION_LETTERS = {"A", "B", "C", "D", "E"}
-POINT_KINDS = {"circle", "underline", "arrow", "box"}
+POINT_KINDS = {"circle", "underline", "arrow", "box", "highlight", "strike"}
 
 
 def _clean_points(point: object, index: int, where: str) -> list[dict[str, object]]:

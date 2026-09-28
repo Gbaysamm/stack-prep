@@ -16,6 +16,7 @@ import {
   IconBolt,
   IconBulb,
   IconCheck,
+  IconHelp,
   IconHome,
   IconLayers,
   IconPlay,
@@ -32,6 +33,7 @@ import {
   PageHero,
   Ring,
   Skeleton,
+  cx,
   useNarrow,
   useToast,
 } from "../ui.js";
@@ -210,6 +212,8 @@ export function RunSummary() {
   const unaided = data.correct_unaided;
   const taught = data.taught;
   const hinted = Math.max(0, answered - unaided - taught);
+  // Newer servers also count right answers the student said they guessed; older ones don't.
+  const guessedRight = (data as { guessed_right?: number | null }).guessed_right;
   const head = headline(unaided, answered);
   const share = answered > 0 ? unaided / answered : 0;
 
@@ -258,7 +262,12 @@ export function RunSummary() {
           <p className="rs-note sj-small">
             Grouped by how they went, not in the order you saw them.
           </p>
-          <ul className="rs-legend">
+          <ul
+            className={cx(
+              "rs-legend",
+              typeof guessedRight === "number" && "four",
+            )}
+          >
             <li>
               <span className="rs-row">
                 <span className="rs-tile lime" aria-hidden="true">
@@ -295,6 +304,20 @@ export function RunSummary() {
               </span>
               <small>Taught, not known. They come back as fresh questions.</small>
             </li>
+            {typeof guessedRight === "number" ? (
+              <li>
+                <span className="rs-row">
+                  <span className="rs-tile orange" aria-hidden="true">
+                    <IconHelp size={16} />
+                  </span>
+                  <b>Right but guessed</b>
+                </span>
+                <span className="sj-num rs-legend-num">
+                  <CountUp value={guessedRight} />
+                </span>
+                <small>Lucky guesses aren’t counted as known. They come back.</small>
+              </li>
+            ) : null}
           </ul>
           {(run && run.topics.length > 0) || data.closing_note ? (
             <div className="rs-foot">

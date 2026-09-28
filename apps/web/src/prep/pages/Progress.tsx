@@ -8,14 +8,17 @@
  * says so when it is waiting on older runs to find more.
  */
 
-import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { Link, useNavigate } from "react-router-dom";
+
+import { Maths } from "../../Maths.js";
 
 import { api, type CheckupReport } from "../../student/api.js";
-import { IconArrowRight, IconBolt, IconChart, IconChevronRight, IconTarget } from "../icons.js";
+import { IconArrowRight, IconBolt, IconBook, IconChart, IconChevronRight, IconTarget } from "../icons.js";
+import { lessonFeedbackApi, type LessonToRevisit, type Understood } from "../lessonFeedbackApi.js";
 import { progressApi, type PracticeRunPage, type SubjectOverview } from "../progressApi.js";
 import { useLoad, usePageTitle, useStudent } from "../store.js";
-import { Badge, Button, CountUp, PageHero, Skeleton, cx } from "../ui.js";
+import { Badge, Button, CountUp, PageHero, Skeleton, cx, useToast } from "../ui.js";
 import {
   HeroStats,
   MasteryBar,
@@ -319,6 +322,231 @@ function StrengthsCard({ subject }: { subject: SubjectOverview }) {
 
 /* ================================================================== the page */
 
+/* ------------------------------------------------------------------ how lessons landed */
+
+const UNDERSTOOD_WORD: Record<Understood, string> = {
+  got_it: "Got it",
+  unsure: "Still unsure",
+  too_hard: "Too hard",
+};
+
+/** What the student said after each lesson on the board, and the lessons worth another look. */
+function LessonsLanded({ studentId, subjectId }: { studentId: string; subjectId: string | null }) {
+  const feedback = useLoad(() => {
+    // Dev only: `?demo=lessons` or `?demo=lessons-empty` draws the section before the server has data.
+    const demo = import.meta.env.DEV ? new URLSearchParams(window.location.search).get("demo") : null;
+    if (demo === "lessons-empty")
+      return Promise.resolve({
+        counts: { got_it: 0, unsure: 0, too_hard: 0, matched_yes: 0, matched_partly: 0, matched_no: 0 },
+        total: 0,
+        to_revisit: [],
+      });
+    if (demo === "lessons")
+      return Promise.resolve({
+        counts: { got_it: 7, unsure: 3, too_hard: 1, matched_yes: 4, matched_partly: 2, matched_no: 1 },
+        total: 11,
+        to_revisit: [
+          {
+            question_version_id: "demo-1",
+            subject_id: "33bb5ef4-bda4-5b88-83d9-41f7beff0dfd",
+            subject_name: "Mathematics",
+            topic_name: "Algebra",
+            subtopic_name: "Indices",
+            stem_excerpt: "If $\\dfrac{9^{2x-1}}{27^{x+1}} = 1$, find the value of $x$.",
+            understood: "too_hard" as const,
+            at: "2026-09-27T10:00:00Z",
+          },
+          {
+            question_version_id: "demo-2",
+            subject_id: "33bb5ef4-bda4-5b88-83d9-41f7beff0dfd",
+            subject_name: "Mathematics",
+            topic_name: "Geometry",
+            subtopic_name: "Euclidean geometry",
+            stem_excerpt: "Each of the interior angles of a regular polygon is $140^\\circ$. How many sides has the polygon?",
+            understood: "unsure" as const,
+            at: "2026-09-26T10:00:00Z",
+          },
+        ],
+      });
+    return lessonFeedbackApi.summary(studentId);
+  }, [studentId]);
+  const navigate = useNavigate();
+  const toast = useToast();
+  const [starting, setStarting] = useState<string | null>(null);
+
+  const practise = (item: LessonToRevisit) => {
+    setStarting(item.question_version_id);
+    api
+      .startPractice(studentId, item.subject_id)
+      .then((run) => navigate(`/practice/${run.session_id}`))
+      .catch((error: Error) => {
+        toast(`Couldn't start a run: ${error.message || "try again"}`);
+        setStarting(null);
+      });
+  };
+
+  let body: ReactNode;
+  if (feedback.error && !feedback.data) {
+    body = (
+      <Note
+        card
+        icon={<IconBolt size={18} />}
+        tone="pink"
+        title="We couldn't load this"
+        action={
+          <Button tone="soft" onClick={feedback.reload}>
+            Try again
+          </Button>
+        }
+      >
+        What you said after your lessons is safe. This is just a loading hiccup.
+      </Note>
+    );
+  } else if (!feedback.data) {
+    body = (
+      <div className="prog-ll-tiles">
+        {[0, 1, 2].map((i) => (
+          <Skeleton key={i} height={132} radius={14} />
+        ))}
+      </div>
+    );
+  } else if (feedback.data.total === 0) {
+    body = (
+      <Note
+        card
+        icon={<IconBook size={18} />}
+        title="No lessons yet"
+        action={
+          <Button to="/practice" trailing={<IconArrowRight size={18} />}>
+            Start practising
+          </Button>
+        }
+      >
+        When the coach works a question through with you on the board, you tell us how it landed. It adds up here,
+        with the lessons worth another look.
+      </Note>
+    );
+  } else {
+    const { counts, to_revisit } = feedback.data;
+    const matchedTotal = counts.matched_yes + counts.matched_partly + counts.matched_no;
+    const revisit = subjectId ? to_revisit.filter((item) => item.subject_id === subjectId) : to_revisit;
+    const tiles: { key: string; label: string; value: number; note: string; tone: string; level: number }[] = [
+      { key: "got", label: "Got it", value: counts.got_it, note: "Could do one like it now.", tone: "lime", level: 3 },
+      { key: "unsure", label: "Still unsure", value: counts.unsure, note: "Made some sense, not all.", tone: "purple", level: 2 },
+      { key: "hard", label: "Too hard", value: counts.too_hard, note: "Lost along the way.", tone: "yellow", level: 1 },
+    ];
+    const split = [
+      { key: "yes", label: "Yes, the same way", value: counts.matched_yes, tone: "lime" },
+      { key: "partly", label: "Partly", value: counts.matched_partly, tone: "purple" },
+      { key: "no", label: "No, I guessed", value: counts.matched_no, tone: "yellow" },
+    ];
+    body = (
+      <div className="prog-ll">
+        <div className="prog-ll-tiles">
+          {tiles.map((tile) => (
+            <div key={tile.key} className={cx("prog-ll-tile", tile.tone)}>
+              <span className="prog-ll-row">
+                <span className="prog-ll-gauge" aria-hidden="true">
+                  {[1, 2, 3].map((bar) => (
+                    <i key={bar} className={cx(bar <= tile.level && "on")} />
+                  ))}
+                </span>
+                <b>{tile.label}</b>
+              </span>
+              <span className="sj-num prog-ll-num">
+                <CountUp value={tile.value} />
+              </span>
+              <small>{tile.note}</small>
+            </div>
+          ))}
+        </div>
+
+        {matchedTotal > 0 ? (
+          <div className="sj-card prog-ll-split">
+            <div className="prog-ll-split-head">
+              <b>Was it how you thought?</b>
+              <span className="sj-mono">
+                {plural(matchedTotal, "right answer")} you weren't sure of
+              </span>
+            </div>
+            <div className="prog-ll-bar" role="img" aria-label={split.map((s) => `${s.label}: ${s.value}`).join(", ")}>
+              {split.map((s) =>
+                s.value > 0 ? (
+                  <span key={s.key} className={s.tone} style={{ flexGrow: s.value }} />
+                ) : null,
+              )}
+            </div>
+            <ul className="prog-ll-keys">
+              {split.map((s) => (
+                <li key={s.key}>
+                  <span className={cx("prog-ll-dot", s.tone)} aria-hidden="true" />
+                  {s.label}
+                  <b className="sj-mono">{s.value}</b>
+                </li>
+              ))}
+            </ul>
+            <p className="prog-ll-gloss">
+              "Yes" means your own working matched the coach's, so the right answer wasn't luck.
+            </p>
+          </div>
+        ) : null}
+
+        <div className="sj-card prog-ll-list">
+          <div className="prog-ll-split-head">
+            <b>Worth another look</b>
+            <span className="sj-mono">Lessons you found unclear or too hard</span>
+          </div>
+          {revisit.length === 0 ? (
+            <p className="prog-ll-none">
+              Nothing here: every lesson{subjectId ? " in this subject" : ""} landed. Keep going.
+            </p>
+          ) : (
+            <ul>
+              {revisit.map((item) => (
+                <li key={`${item.question_version_id}-${item.at}`} className="prog-ll-item">
+                  <div className="prog-ll-item-head">
+                    <span className="sj-eyebrow">
+                      {item.subject_name} · {item.subtopic_name}
+                    </span>
+                    <Badge tone={item.understood === "too_hard" ? "pink" : "yellow"}>
+                      {UNDERSTOOD_WORD[item.understood]}
+                    </Badge>
+                  </div>
+                  <p className="prog-ll-stem">
+                    <Maths text={item.stem_excerpt} />
+                  </p>
+                  <Button
+                    tone="soft"
+                    size="sm"
+                    busy={starting === item.question_version_id}
+                    disabled={starting !== null}
+                    onClick={() => practise(item)}
+                    trailing={<IconArrowRight size={16} />}
+                  >
+                    Practise this topic
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Section
+      eyebrow="After the board"
+      title="How your lessons landed"
+      id="prog-lessons"
+      className="sj-rise d4"
+      sub="What you told us after each lesson the coach worked through with you."
+    >
+      {body}
+    </Section>
+  );
+}
+
 export function Progress() {
   usePageTitle("Progress");
   const student = useStudent();
@@ -526,6 +754,8 @@ export function Progress() {
           </Section>
         ) : null}
       </div>
+
+      <LessonsLanded studentId={student.studentId} subjectId={filterSubject ? filterSubject.subject_id : null} />
 
       <Section
         eyebrow="Practice history"

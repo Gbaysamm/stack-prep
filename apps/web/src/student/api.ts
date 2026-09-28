@@ -199,7 +199,7 @@ export interface LessonBeat {
 export interface LessonPoint {
   /** The moment pointed at: its index from 0, or counted back from this beat when negative. */
   line: number;
-  kind: 'circle' | 'underline' | 'arrow' | 'box';
+  kind: 'circle' | 'underline' | 'arrow' | 'box' | 'highlight' | 'strike';
   /** A few words written beside the mark. */
   text?: string | null;
   /** Part of the line to mark rather than all of it, as it reads on the board (spaces ignored). */

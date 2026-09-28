@@ -526,3 +526,254 @@
     margin-right: 0;
   }
 }
+
+/* ---------------------------------------------------------------- how your lessons landed */
+.sj .prog-ll {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+.sj .prog-ll-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  align-items: stretch;
+}
+.sj .prog-ll-tile {
+  --tone: var(--green-500);
+  --wash: var(--green-100);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  padding: 20px;
+  border-radius: var(--r-lg);
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  transition:
+    transform var(--t-med) var(--ease),
+    box-shadow var(--t-med) var(--ease);
+}
+.sj .prog-ll-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--lift);
+}
+.sj .prog-ll-tile.purple {
+  --tone: var(--purple-600);
+  --wash: var(--purple-050);
+}
+.sj .prog-ll-tile.yellow {
+  --tone: var(--orange-500);
+  --wash: var(--yellow-100);
+}
+.sj .prog-ll-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.sj .prog-ll-row b {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+/* The same three rising bars the practice room uses for "how sure". */
+.sj .prog-ll-gauge {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 3px;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  padding: 7px 8px;
+  border-radius: var(--r-md);
+  background: var(--wash);
+  color: var(--tone);
+}
+.sj .prog-ll-gauge i {
+  display: block;
+  flex: 1;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0.2;
+}
+.sj .prog-ll-gauge i:nth-child(1) {
+  height: 36%;
+}
+.sj .prog-ll-gauge i:nth-child(2) {
+  height: 68%;
+}
+.sj .prog-ll-gauge i:nth-child(3) {
+  height: 100%;
+}
+.sj .prog-ll-gauge i.on {
+  opacity: 1;
+}
+.sj .prog-ll-num {
+  font-size: 44px;
+  color: var(--gray-900);
+}
+.sj .prog-ll-tile small {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--gray-600);
+}
+
+.sj .prog-ll-split,
+.sj .prog-ll-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  min-width: 0;
+}
+.sj .prog-ll-split-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+.sj .prog-ll-split-head b {
+  font-family: var(--f-display);
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+.sj .prog-ll-split-head .sj-mono {
+  font-size: 12px;
+  color: var(--gray-500);
+}
+.sj .prog-ll-bar {
+  display: flex;
+  gap: 4px;
+  height: 18px;
+}
+.sj .prog-ll-bar span {
+  flex-basis: 0;
+  min-width: 8px;
+  border-radius: var(--r-xs);
+  transform-origin: left center;
+  animation: prog-ll-grow 620ms var(--ease) both;
+}
+@keyframes prog-ll-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+.sj .prog-ll-bar .lime,
+.sj .prog-ll-dot.lime {
+  background: var(--green-400);
+}
+.sj .prog-ll-bar .purple,
+.sj .prog-ll-dot.purple {
+  background: var(--purple-300);
+}
+.sj .prog-ll-bar .yellow,
+.sj .prog-ll-dot.yellow {
+  background: var(--yellow-400);
+}
+.sj .prog-ll-keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .prog-ll-keys li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--gray-700);
+}
+.sj .prog-ll-keys b {
+  font-size: 14px;
+  color: var(--gray-900);
+}
+.sj .prog-ll-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+.sj .prog-ll-gloss,
+.sj .prog-ll-none {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--gray-600);
+}
+.sj .prog-ll-list ul {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .prog-ll-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 16px 0;
+  border-top: 1px solid var(--gray-100);
+  min-width: 0;
+}
+.sj .prog-ll-item:first-child {
+  padding-top: 4px;
+  border-top: 0;
+}
+.sj .prog-ll-item:last-child {
+  padding-bottom: 0;
+}
+.sj .prog-ll-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+.sj .prog-ll-item-head .sj-eyebrow {
+  min-width: 0;
+}
+.sj .prog-ll-item-head .sj-badge {
+  flex: none;
+}
+.sj .prog-ll-stem {
+  width: 100%;
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: var(--gray-900);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (max-width: 860px) {
+  .sj .prog-ll-tiles {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  /* A phone tile is one line: gauge and label, the number at the far end, the gloss under. */
+  .sj .prog-ll-tile {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px 12px;
+    padding: 14px 16px;
+  }
+  .sj .prog-ll-tile small {
+    grid-column: 1 / -1;
+  }
+  .sj .prog-ll-num {
+    font-size: 32px;
+  }
+  .sj .prog-ll-split,
+  .sj .prog-ll-list {
+    padding: 16px;
+  }
+}

@@ -33,6 +33,7 @@ import { Figures } from "../../Figures.js";
 import { Maths } from "../../Maths.js";
 import {
   api,
+  type NarratedLesson,
   type PracticeQuestion,
   type PracticeState,
 } from "../../student/api.js";
@@ -44,9 +45,14 @@ import {
   IconHelp,
   IconReplay,
   IconSpark,
-  IconTarget,
   IconVolume,
 } from "../icons.js";
+import {
+  lessonFeedbackApi,
+  type LessonContext,
+  type MatchedWorking,
+  type Understood,
+} from "../lessonFeedbackApi.js";
 import { progressApi } from "../progressApi.js";
 import { FocusShell } from "../shell.js";
 import { useLoad, usePageTitle, useStudent } from "../store.js";
@@ -70,43 +76,17 @@ const Board = lazy(() =>
   })),
 );
 
-/** Drawn here rather than in icons.tsx: only this page needs them. */
-function IconWave({ size = 22 }: { size?: number }) {
+/**
+ * How sure, drawn as a signal: three bars for "I knew it", two for "I think so", one for a
+ * guess. Drawn here rather than in icons.tsx: only this page needs it.
+ */
+function Gauge({ level }: { level: 1 | 2 | 3 }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.9}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M3 12c2-3.5 4-3.5 6 0s4 3.5 6 0 4-3.5 6 0" />
-    </svg>
-  );
-}
-function IconDice({ size = 22 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.9}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <rect x="4" y="4" width="16" height="16" rx="4" />
-      <circle cx="9" cy="9" r="1.2" fill="currentColor" stroke="none" />
-      <circle cx="15" cy="15" r="1.2" fill="currentColor" stroke="none" />
-      <circle cx="15" cy="9" r="1.2" fill="currentColor" stroke="none" />
-      <circle cx="9" cy="15" r="1.2" fill="currentColor" stroke="none" />
-    </svg>
+    <span className="pr-gauge" aria-hidden="true">
+      {[1, 2, 3].map((bar) => (
+        <span key={bar} className={cx("pr-gauge-bar", bar <= level && "on")} />
+      ))}
+    </span>
   );
 }
 
@@ -114,31 +94,37 @@ const CONFIDENCE: {
   value: Confidence;
   label: string;
   meaning: string;
-  icon: JSX.Element;
-  tone: string;
+  level: 1 | 2 | 3;
+  said: string;
 }[] = [
   {
     value: "sure",
     label: "I knew it",
     meaning: "I worked it out and I trust it.",
-    icon: <IconTarget size={18} />,
-    tone: "sure",
+    level: 3,
+    said: "You said you knew it",
   },
   {
     value: "unsure",
     label: "I think so",
     meaning: "Fairly sure, but not certain.",
-    icon: <IconWave size={18} />,
-    tone: "unsure",
+    level: 2,
+    said: "You said you think so",
   },
   {
     value: "guessed",
     label: "I guessed",
     meaning: "I picked one without really knowing.",
-    icon: <IconDice size={18} />,
-    tone: "guessed",
+    level: 1,
+    said: "You said you guessed",
   },
 ];
+
+/** The check-in after a lesson: why the board was opened, and for which question. */
+interface Checkin {
+  context: LessonContext;
+  versionId: string;
+}
 
 /** A right answer, held on screen before the next question replaces it. */
 interface Outcome {
@@ -207,6 +193,8 @@ export function PracticeRoom() {
   const [busy, setBusy] = useState(false);
   const [issue, setIssue] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
+  /** After a lesson on the board: the short check-in before the run goes on. */
+  const [checkin, setCheckin] = useState<Checkin | null>(null);
   // Whether the student may speak a question at the board, and whether the coach has a voice.
   // Both assumed off until the server says otherwise, so a refused microphone is never drawn.
   const [canSpeak, setCanSpeak] = useState(false);
@@ -274,6 +262,38 @@ export function PracticeRoom() {
     api.practiceWarm(sessionId, hintedVersion).catch(() => undefined);
   }, [canHear, hintedVersion, sessionId]);
 
+  // Dev only: `?demo=confidence|correct|hinted|guessed|unsure` jumps straight to that moment on
+  // the current question, so each screen can be looked at without playing a run to it.
+  const demoed = useRef(false);
+  useEffect(() => {
+    if (!import.meta.env.DEV || demoed.current || !state?.question) return;
+    if (state.stage !== "asking" && state.stage !== "hint") return;
+    const demo = new URLSearchParams(window.location.search).get("demo");
+    if (!demo) return;
+    demoed.current = true;
+    const first = state.question.options[0]?.option_key;
+    if (!first) return;
+    if (demo === "checkin" || demo === "checkin-misses") {
+      setCheckin({
+        context: demo === "checkin" ? "after_guess" : "after_misses",
+        versionId: state.question.question_version_id,
+      });
+    } else if (demo === "confidence") {
+      setSelected(first);
+      setConfirming(true);
+    } else if (["correct", "hinted", "guessed", "unsure"].includes(demo)) {
+      setOutcome({
+        kind: demo === "hinted" ? "second" : "right",
+        confidence:
+          demo === "guessed" ? "guessed" : demo === "unsure" ? "unsure" : "sure",
+        chose: first,
+        question: state.question,
+        number: numberOf(state).number,
+        next: state,
+      });
+    }
+  }, [state]);
+
   // A finished run has its own page.
   useEffect(() => {
     if (state?.stage === "finished" && !outcome) {
@@ -282,7 +302,9 @@ export function PracticeRoom() {
   }, [state?.stage, outcome, navigate, sessionId]);
 
   // Each new moment starts at the top.
-  const viewKey = outcome
+  const viewKey = checkin
+    ? `checkin-${checkin.versionId}`
+    : outcome
     ? `result-${outcome.question.question_version_id}`
     : `${state?.stage}-${state?.question?.question_version_id ?? ""}`;
   useEffect(() => {
@@ -350,15 +372,37 @@ export function PracticeRoom() {
     navigate(`/practice/${sessionId}/lesson`);
   };
 
-  const finishBoard = () => {
+  /** Right, but not trusted (a guess, or "I think so"): the board for the answered question. */
+  const openReview = () => {
+    tapped.current = true;
+    navigate(`/practice/${sessionId}/lesson`);
+  };
+
+  /**
+   * The board is done. Either way the student lands on the check-in in the room: after a right
+   * answer they were not sure of it asks two things, after two misses only whether it landed.
+   */
+  const leaveBoard = (context: LessonContext, versionId: string) => {
+    tapped.current = false;
+    setCheckin({ context, versionId });
+    navigate(`/practice/${sessionId}`, { replace: true });
+  };
+
+  /** After the check-in: two misses are recorded as taught; a review goes to the next question. */
+  const afterCheckin = () => {
+    if (!checkin) return;
+    if (checkin.context !== "after_misses") {
+      setCheckin(null);
+      pressOn();
+      return;
+    }
     setBusy(true);
     api
       .practiceTaught(sessionId)
       .then((next) => {
+        setCheckin(null);
         setState(next);
         askedAt.current = Date.now();
-        tapped.current = false;
-        navigate(`/practice/${sessionId}`, { replace: true });
       })
       .catch((error: Error) =>
         setIssue(error.message || "Something went wrong."),
@@ -369,6 +413,7 @@ export function PracticeRoom() {
   const answering =
     !!state &&
     !outcome &&
+    !checkin &&
     (state.stage === "asking" || state.stage === "hint") &&
     !!state.question;
 
@@ -543,9 +588,28 @@ export function PracticeRoom() {
   }
 
   const question = state.question;
+  const picked = question?.options.find(
+    (option) => option.option_key === selected,
+  );
 
   const lessonRoute =
-    state.stage === "explain" && question && tapped.current ? (
+    checkin ? (
+      <Navigate to={`/practice/${sessionId}`} replace />
+    ) : outcome && outcome.kind === "right" && tapped.current ? (
+      <ReviewBoard
+        sessionId={sessionId}
+        outcome={outcome}
+        subjectName={subjectName}
+        canHear={canHear}
+        canSpeak={canSpeak}
+        onDone={() =>
+          leaveBoard(
+            outcome.confidence === "guessed" ? "after_guess" : "after_unsure",
+            outcome.question.question_version_id,
+          )
+        }
+      />
+    ) : state.stage === "explain" && question && tapped.current ? (
       <Suspense fallback={<BoardLoading />}>
         <Board
           title={question.subtopic_name}
@@ -581,7 +645,9 @@ export function PracticeRoom() {
               handlers,
             )
           }
-          onDone={finishBoard}
+          onDone={() =>
+            leaveBoard("after_misses", question.question_version_id)
+          }
         />
       </Suspense>
     ) : (
@@ -591,8 +657,21 @@ export function PracticeRoom() {
     );
 
   let body: JSX.Element;
-  if (outcome) {
-    body = <Result outcome={outcome} onNext={pressOn} narrow={narrow} />;
+  if (checkin) {
+    body = (
+      <CheckIn
+        sessionId={sessionId}
+        checkin={checkin}
+        number={position.number}
+        busy={busy}
+        onDone={afterCheckin}
+        narrow={narrow}
+      />
+    );
+  } else if (outcome) {
+    body = (
+      <Result outcome={outcome} onNext={pressOn} onWhy={openReview} narrow={narrow} />
+    );
   } else if (state.stage === "explain" && question) {
     body = (
       <BeforeBoard
@@ -644,6 +723,19 @@ export function PracticeRoom() {
                 Asked before we mark it: a lucky guess should not count as
                 knowing it.
               </p>
+              {picked ? (
+                <div className="pr-conf-echo">
+                  <span className="pr-conf-echo-label sj-mono">
+                    Your answer
+                  </span>
+                  <span className="pr-conf-echo-row">
+                    <span className="key">{picked.option_key}</span>
+                    <span className="body">
+                      <Maths text={picked.body} />
+                    </span>
+                  </span>
+                </div>
+              ) : null}
               <div
                 className="pr-conf"
                 role="group"
@@ -653,12 +745,13 @@ export function PracticeRoom() {
                   <button
                     key={choice.value}
                     type="button"
-                    className={cx("pr-conf-card", choice.tone)}
+                    className={cx("pr-tile", `lv${choice.level}`)}
                     onClick={() => void send(choice.value)}
                     disabled={busy}
+                    aria-keyshortcuts={String(index + 1)}
                   >
-                    <span className="pr-conf-row">
-                      <span className="pr-conf-icon">{choice.icon}</span>
+                    <span className="pr-tile-top">
+                      <Gauge level={choice.level} />
                       <b>{choice.label}</b>
                       <kbd className="pr-kbd" aria-hidden="true">
                         {index + 1}
@@ -734,14 +827,19 @@ function Asking({
   return (
     <>
       {retry ? (
-        <section className="pr-miss" role="status" aria-live="polite">
-          <div className="pr-miss-head">
-            <span className="pr-miss-icon" aria-hidden="true">
-              <IconBulb size={18} />
+        <section
+          className="pr-panel miss pr-miss"
+          role="status"
+          aria-live="polite"
+        >
+          <div className="pr-panel-head">
+            <Medal tone="miss" />
+            <span className="pr-panel-eyebrow sj-mono">
+              Question {pad(number)} · first try missed
             </span>
-            <h2 className="sj-display">Not quite.</h2>
-            <span className="pr-miss-tag sj-mono">Hint</span>
+            <span className="pr-panel-tag sj-mono">Hint</span>
           </div>
+          <h2 className="sj-display pr-panel-title">Not quite.</h2>
           {state.hint ? (
             <p className="pr-hint">
               <Maths text={state.hint} />
@@ -756,10 +854,13 @@ function Asking({
               <Maths text={state.misconception.description} />
             </p>
           ) : null}
-          <p className="pr-miss-note">
-            <IconReplay size={16} />
-            This one won't count now. Try again.
-          </p>
+          <RunStrip
+            total={total}
+            number={number}
+            tone="miss"
+            right={state.correct_unaided}
+            note="This one won’t count now. Try again below."
+          />
         </section>
       ) : null}
 
@@ -861,93 +962,551 @@ function Asking({
   );
 }
 
-/* ================================================================== result */
+/* ================================================================== result family */
+
+/** The four moments that share one look: right, right after a hint, right but guessed, a miss. */
+type Tone = "right" | "unsure" | "second" | "guessed" | "miss" | "checkin";
+
+/** The round badge at the head of every result panel: a tick drawn in, or a bulb for a miss. */
+function Medal({ tone }: { tone: Tone }) {
+  return (
+    <span className={cx("pr-medal", tone)} aria-hidden="true">
+      <span className="pr-medal-ring" />
+      <span className="pr-medal-ring late" />
+      {tone === "miss" ? (
+        <IconBulb size={22} />
+      ) : (
+        <svg viewBox="0 0 48 48" width="28" height="28">
+          <path
+            d="M13 25.5 21 33l14.5-17"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      )}
+    </span>
+  );
+}
+
+/** A short burst of paper from behind the medal. CSS only; not drawn under reduced motion. */
+function Burst() {
+  return (
+    <span className="pr-burst" aria-hidden="true">
+      {Array.from({ length: 14 }, (_, index) => (
+        <i key={index} />
+      ))}
+    </span>
+  );
+}
+
+/**
+ * The run so far, one cell per question. Only the run's totals are known, not which earlier
+ * question went which way, so earlier cells are simply "done" and only this one is coloured.
+ */
+function RunStrip({
+  total,
+  number,
+  tone,
+  right,
+  note,
+}: {
+  total: number;
+  number: number;
+  tone: Tone;
+  right: number;
+  note?: string;
+}) {
+  const toGo = Math.max(0, total - number);
+  const labelled = total <= 15;
+  return (
+    <div className="pr-run">
+      <ol
+        className={cx("pr-run-cells", labelled && "labelled")}
+        style={{ gridTemplateColumns: `repeat(${total}, minmax(0, 1fr))` }}
+        aria-label={`Question ${number} of ${total}`}
+      >
+        {Array.from({ length: total }, (_, index) => {
+          const at = index + 1;
+          return (
+            <li
+              key={at}
+              className={cx(
+                "pr-run-cell",
+                at < number && "done",
+                at === number && `now ${tone}`,
+              )}
+            >
+              {labelled ? <span className="sj-mono">{at}</span> : null}
+            </li>
+          );
+        })}
+      </ol>
+      <p className="pr-run-note sj-mono">
+        <span>
+          <b>{right}</b> right first time
+        </span>
+        <span className="dot" aria-hidden="true" />
+        <span>{toGo === 0 ? "last question" : `${toGo} to go`}</span>
+      </p>
+      {note ? <p className="pr-run-extra">{note}</p> : null}
+    </div>
+  );
+}
 
 function Result({
   outcome,
   onNext,
+  onWhy,
   narrow,
 }: {
   outcome: Outcome;
   onNext: () => void;
+  onWhy: () => void;
   narrow: boolean;
 }) {
   const option = outcome.question.options.find(
     (item) => item.option_key === outcome.chose,
   );
   const last = outcome.next.stage === "finished";
-  const right = outcome.kind === "right";
-  const next = useRef<HTMLButtonElement>(null);
+  // A right answer they were not sure of is not celebrated as known: the working comes first.
+  const tone: Tone =
+    outcome.kind === "second"
+      ? "second"
+      : outcome.confidence === "guessed"
+        ? "guessed"
+        : outcome.confidence === "unsure"
+          ? "unsure"
+          : "right";
+  const check = tone === "guessed" || tone === "unsure";
+  const said = CONFIDENCE.find((item) => item.value === outcome.confidence);
+  const primary = useRef<HTMLButtonElement>(null);
   useEffect(() => {
-    next.current?.focus({ preventScroll: true });
+    primary.current?.focus({ preventScroll: true });
   }, []);
+
+  // Enter presses the one button from anywhere on the page, not only while it has focus.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Enter" || event.metaKey || event.ctrlKey || event.altKey)
+        return;
+      const target = event.target as HTMLElement | null;
+      if (target?.closest("button, a, input, textarea, select")) return;
+      event.preventDefault();
+      primary.current?.click();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const eyebrow =
+    tone === "second"
+      ? "right on the second try"
+      : tone === "guessed"
+        ? "right, but guessed"
+        : tone === "unsure"
+          ? "right, not sure"
+          : "right first time";
+  const title =
+    tone === "second"
+      ? "Got it this time."
+      : check
+        ? "Right answer — let’s check your thinking."
+        : "Correct.";
+  const praise =
+    tone === "second"
+      ? "That was the hint doing its job. It won’t count as known yet — a fresh question on this idea comes back later."
+      : tone === "guessed"
+        ? "Lucky guesses don’t count as knowing it. See the working, then tell us if it matches what you did."
+        : tone === "unsure"
+          ? "You were right but not certain. A quick look at the working will tell you whether to trust that thinking next time."
+          : praiseFor(outcome.confidence);
+
   return (
-    <section
-      className={cx("pr-result", right ? "right" : "second")}
-      aria-live="polite"
-    >
-      <span className="sj-eyebrow pr-result-eyebrow">
-        Question {pad(outcome.number)} ·{" "}
-        {right ? "right first time" : "right on the second try"}
-      </span>
-      <div className="pr-result-head">
-        <div className="pr-medal" aria-hidden="true">
-          <span className="pr-medal-ring" />
-          <span className="pr-medal-ring late" />
-          <svg viewBox="0 0 48 48" width="30" height="30">
-            <path
-              d="M13 25.5 21 33l14.5-17"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+    <section className={cx("pr-res", tone)} aria-live="polite">
+      <div className={cx("pr-panel", tone)}>
+        {tone === "right" ? <Burst /> : null}
+        <div className="pr-panel-head">
+          <Medal tone={tone} />
+          <span className="pr-panel-eyebrow sj-mono">
+            Question {pad(outcome.number)} · {eyebrow}
+          </span>
         </div>
-        <h2 className="sj-display sj-h1 pr-result-title">
-          {right ? "Correct." : "Got it this time."}
-        </h2>
+        <h2 className="sj-display pr-panel-title">{title}</h2>
+        {tone === "right" ? (
+          <span className="pr-plus">
+            <IconSpark size={16} />
+            +1 unaided
+          </span>
+        ) : tone === "unsure" ? (
+          <span className="pr-plus soft">
+            <IconCheck size={16} />
+            +1 unaided
+          </span>
+        ) : tone === "guessed" ? (
+          <span className="pr-plus amber">
+            <IconHelp size={16} />
+            Not counted as known yet
+          </span>
+        ) : (
+          <span className="pr-plus hinted">
+            <IconBulb size={16} />
+            Learnt with a hint
+          </span>
+        )}
+        <p className="pr-praise">{praise}</p>
+        <RunStrip
+          total={outcome.next.length}
+          number={outcome.number}
+          tone={tone}
+          right={outcome.next.correct_unaided}
+        />
       </div>
-      {right ? (
-        <span className="pr-plus">
-          <IconSpark size={16} />
-          +1 unaided
+
+      <div className="pr-recap">
+        <span className="sj-eyebrow pr-recap-eyebrow">
+          {outcome.question.subtopic_name}
         </span>
-      ) : (
-        <span className="pr-plus hinted">
-          <IconBulb size={16} />
-          Learnt with a hint
-        </span>
-      )}
-      <p className="pr-praise">
-        {right
-          ? praiseFor(outcome.confidence)
-          : "That was the hint doing its job. It won’t count as known yet — a fresh question on this idea comes back later."}
-      </p>
-      {option ? (
-        <div className="pr-yours">
-          <span className="key">{option.option_key}</span>
-          <span className="body">
-            <Maths text={option.body} />
-          </span>
-          <span className="pr-yours-tick" aria-label="correct">
-            <IconCheck size={18} />
-          </span>
+        <div className="pr-recap-stem">
+          <Maths text={outcome.question.stem} />
         </div>
-      ) : null}
-      <div className="pr-result-go">
+        {option ? (
+          <div className="pr-yours">
+            <span className="pr-yours-label sj-mono">Your answer</span>
+            <span className="pr-yours-row">
+              <span className="key">{option.option_key}</span>
+              <span className="body">
+                <Maths text={option.body} />
+              </span>
+              <span className="pr-yours-tick" aria-label="correct">
+                <IconCheck size={18} />
+              </span>
+            </span>
+          </div>
+        ) : null}
+        {said ? (
+          <span className={cx("pr-said", `lv${said.level}`)}>
+            <Gauge level={said.level} />
+            {said.said}
+          </span>
+        ) : null}
+      </div>
+
+      <div className="pr-res-go">
         <button
-          ref={next}
+          ref={primary}
           type="button"
           className={cx("sj-btn lg", narrow && "block")}
-          onClick={onNext}
+          onClick={check ? onWhy : onNext}
         >
-          {last ? "See how you did" : "Next question"}
-          <span className="arrow">
-            <IconArrowRight size={18} />
-          </span>
+          {check ? <IconBook size={18} /> : null}
+          {check
+            ? "Show me the working"
+            : last
+              ? "See how you did"
+              : "Next question"}
+          <kbd className="pr-enter sj-mono" aria-hidden="true">
+            Enter ↵
+          </kbd>
         </button>
+        {check ? (
+          <p className="pr-go-note">
+            A short lesson on this question, then two quick taps and on to{" "}
+            {last ? "your results" : "the next one"}.
+          </p>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+/**
+ * The board for a question answered right but not trusted (a guess, or "I think so"). The
+ * lesson is fetched first: its lines are the board's steps, and with the coach's voice on the
+ * same lesson is handed over to be spoken. If it cannot be had, the board reads what it has.
+ */
+function ReviewBoard({
+  sessionId,
+  outcome,
+  subjectName,
+  canHear,
+  canSpeak,
+  onDone,
+}: {
+  sessionId: string;
+  outcome: Outcome;
+  subjectName: string;
+  canHear: boolean;
+  canSpeak: boolean;
+  onDone: () => void;
+}) {
+  const question = outcome.question;
+  const version = question.question_version_id;
+  const [lesson, setLesson] = useState<NarratedLesson | "none" | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .practiceLesson(sessionId, version)
+      .then((loaded) => {
+        if (!cancelled) setLesson(loaded);
+      })
+      .catch(() => {
+        if (!cancelled) setLesson("none");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionId, version]);
+  if (lesson === null) return <BoardLoading />;
+  const loaded = lesson === "none" ? null : lesson;
+  return (
+    <Suspense fallback={<BoardLoading />}>
+      <Board
+        title={question.subtopic_name}
+        subtitle={`${subjectName} · the working`}
+        question={question.stem}
+        figures={question.figures}
+        steps={loaded ? loaded.beats.flatMap((beat) => beat.write) : []}
+        loadLesson={
+          canHear && loaded ? () => Promise.resolve(loaded) : undefined
+        }
+        answerLine={`The answer is ${outcome.chose}.`}
+        onListen={
+          canSpeak
+            ? (recording) => api.practiceListen(sessionId, version, recording)
+            : undefined
+        }
+        onAsk={(asked, stepIndex, handlers) =>
+          api.practiceAskStreaming(sessionId, version, asked, stepIndex, handlers)
+        }
+        onDone={onDone}
+      />
+    </Suspense>
+  );
+}
+
+/* ================================================================== check-in */
+
+interface Choice<T extends string> {
+  value: T;
+  label: string;
+  meaning: string;
+  level: 1 | 2 | 3;
+}
+
+const MATCHED: Choice<MatchedWorking>[] = [
+  {
+    value: "yes",
+    label: "Yes, the same way",
+    meaning: "The working matched what I did.",
+    level: 3,
+  },
+  {
+    value: "partly",
+    label: "Partly",
+    meaning: "Some of it was how I thought.",
+    level: 2,
+  },
+  {
+    value: "no",
+    label: "No — I guessed",
+    meaning: "I didn’t really work it out.",
+    level: 1,
+  },
+];
+
+const LANDED: Choice<Understood>[] = [
+  {
+    value: "got_it",
+    label: "Got it",
+    meaning: "I could do one like this now.",
+    level: 3,
+  },
+  {
+    value: "unsure",
+    label: "Still unsure",
+    meaning: "Some of it made sense, not all.",
+    level: 2,
+  },
+  {
+    value: "too_hard",
+    label: "Too hard",
+    meaning: "I lost it along the way.",
+    level: 1,
+  },
+];
+
+function ChoiceRow<T extends string>({
+  id,
+  step,
+  question,
+  choices,
+  value,
+  onChange,
+}: {
+  id: string;
+  step: string | null;
+  question: string;
+  choices: Choice<T>[];
+  value: T | null;
+  onChange: (value: T) => void;
+}) {
+  return (
+    <div className="pr-ask" role="group" aria-labelledby={id}>
+      <h3 className="pr-ask-q" id={id}>
+        {step ? <span className="pr-ask-step sj-mono">{step}</span> : null}
+        {question}
+      </h3>
+      <div className="pr-tiles">
+        {choices.map((choice) => (
+          <button
+            key={choice.value}
+            type="button"
+            className={cx(
+              "pr-tile",
+              `lv${choice.level}`,
+              value === choice.value && "on",
+            )}
+            aria-pressed={value === choice.value}
+            onClick={() => onChange(choice.value)}
+          >
+            <span className="pr-tile-top">
+              <Gauge level={choice.level} />
+              <b>{choice.label}</b>
+              <span className="pr-tile-tick" aria-hidden="true">
+                <IconCheck size={14} />
+              </span>
+            </span>
+            <small>{choice.meaning}</small>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CheckIn({
+  sessionId,
+  checkin,
+  number,
+  busy,
+  onDone,
+  narrow,
+}: {
+  sessionId: string;
+  checkin: Checkin;
+  number: number;
+  busy: boolean;
+  onDone: () => void;
+  narrow: boolean;
+}) {
+  const both = checkin.context !== "after_misses";
+  const [matched, setMatched] = useState<MatchedWorking | null>(null);
+  const [landed, setLanded] = useState<Understood | null>(null);
+  const [sending, setSending] = useState(false);
+  const [failed, setFailed] = useState<string | null>(null);
+  const ready = !!landed && (!both || !!matched);
+
+  const submit = () => {
+    if (!landed || !ready) return;
+    setSending(true);
+    setFailed(null);
+    lessonFeedbackApi
+      .send(sessionId, checkin.versionId, {
+        context: checkin.context,
+        understood: landed,
+        matched_working: both ? matched : null,
+      })
+      .then(() => onDone())
+      .catch((error: Error) =>
+        setFailed(error.message || "It didn’t save."),
+      )
+      .finally(() => setSending(false));
+  };
+
+  return (
+    <section className="pr-res checkin">
+      <div className="pr-panel checkin">
+        <div className="pr-panel-head">
+          <span className="pr-medal checkin" aria-hidden="true">
+            <IconBook size={22} />
+          </span>
+          <span className="pr-panel-eyebrow sj-mono">
+            Question {pad(number)} · after the lesson
+          </span>
+        </div>
+        <h2 className="sj-display pr-panel-title">Quick check-in.</h2>
+        <p className="pr-praise">
+          {both ? "Two taps" : "One tap"}, then on. It tells us whether this
+          idea needs another look — there are no wrong answers here.
+        </p>
+      </div>
+
+      <div className="pr-asks">
+        {both ? (
+          <ChoiceRow
+            id="pr-ask-matched"
+            step="1"
+            question="Was this how you worked it out?"
+            choices={MATCHED}
+            value={matched}
+            onChange={setMatched}
+          />
+        ) : null}
+        <ChoiceRow
+          id="pr-ask-landed"
+          step={both ? "2" : null}
+          question="How was this lesson?"
+          choices={LANDED}
+          value={landed}
+          onChange={setLanded}
+        />
+        {failed ? (
+          <div className="pr-ask-fail" role="alert">
+            <p>
+              <b>That didn’t save.</b> Your answers weren’t sent ({failed}).
+              You can try again, or carry on without them.
+            </p>
+            <div className="pr-ask-fail-go">
+              <button
+                type="button"
+                className="sj-btn sm"
+                onClick={submit}
+                disabled={sending || busy}
+              >
+                Try again
+              </button>
+              <button
+                type="button"
+                className="sj-btn ghost sm"
+                onClick={onDone}
+                disabled={sending || busy}
+              >
+                Continue anyway
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="pr-res-go">
+        <Button
+          size="lg"
+          block={narrow}
+          disabled={!ready}
+          busy={sending || busy}
+          onClick={submit}
+          trailing={sending || busy ? undefined : <IconArrowRight size={18} />}
+        >
+          {sending ? "Saving…" : "Continue"}
+        </Button>
+        {!ready ? (
+          <p className="pr-go-note">
+            {both ? "Answer both to carry on." : "Pick one to carry on."}
+          </p>
+        ) : null}
       </div>
     </section>
   );
