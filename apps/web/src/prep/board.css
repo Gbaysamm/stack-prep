@@ -209,39 +209,25 @@
 .pb-item + .pb-item {
   margin-top: 6px;
 }
-/* Written left to right as the voice reaches the line: a smooth, even wipe with a soft wet
-   edge where the ink is going on, and the marker's tip riding that edge (the pen, below). It
-   waits the moment the marker takes to get to the start of the line — STROKE_DELAY_MS in
-   Board.tsx. The line hugs its own writing, so the wipe crosses the ink at the marker's pace
-   rather than the width of the column. */
-@property --reveal {
-  syntax: "<length-percentage>";
-  inherits: false;
-  initial-value: 200%;
-}
+/* Written as the voice reaches the line, by the hand in Board.tsx (`Pen`): letter by letter
+   and atom by atom, each appearing as the marker's nib crosses it, through a clip path the
+   hand redraws every frame. What is here is only the fallback for a browser that cannot clip
+   to a path, or a line the hand never reaches: a plain wipe with a hard edge, after the same
+   short wait the marker takes to get to the start of the line (STROKE_DELAY_MS). The hand
+   switches this off on every line it writes. The line hugs its own writing, so either way the
+   ink crosses it at a hand's pace rather than the width of the column. */
 .pb-item {
   width: fit-content;
 }
 .pb-stroke {
-  --ink-edge: 10px;
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    #000 calc(var(--reveal) - var(--ink-edge)),
-    transparent var(--reveal)
-  );
-  mask-image: linear-gradient(
-    90deg,
-    #000 calc(var(--reveal) - var(--ink-edge)),
-    transparent var(--reveal)
-  );
   animation: pb-stroke var(--stroke, 600ms) linear 180ms both;
 }
 @keyframes pb-stroke {
   from {
-    --reveal: 0%;
+    clip-path: inset(-0.5em 100% -0.5em -0.5em);
   }
   to {
-    --reveal: calc(100% + 10px);
+    clip-path: inset(-0.5em -0.5em -0.5em -0.5em);
   }
 }
 .pb .sp-maths {
@@ -450,84 +436,91 @@
   }
 }
 
-/* The pen: a whiteboard marker whose tip rides the edge of the line being written. Placed
-   by Board.tsx (position on `.pb-pen`, put down and lifted off on `.pb-pen-lift`); it wobbles
-   a pixel as it goes, the way a hand does. Under the coach card, never over it. */
+/* The pen: a whiteboard marker held as a right-handed teacher holds one, its nib on the ink
+   and its barrel leaning up and away to the right. Board.tsx moves it every frame: the nib's
+   place on `.pb-pen`, the lean and the lift off the board on `.pb-pen-body`, and the shadow
+   it casts on `.pb-pen-shadow`, which stays on the board and slides away from the nib as the
+   marker comes up. Everything is drawn about the nib, at (0, 0) of each layer. Under the coach
+   card, never over it. */
 .pb-pen {
   position: absolute;
   left: 0;
   top: 0;
   z-index: 3;
-  width: 28px;
-  height: 33px;
-  /* The nib's point, not the corner of its box, sits on the line. */
-  margin: -31px 0 0 -4px;
+  width: 0;
+  height: 0;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 160ms var(--ease);
+  transition: opacity 200ms var(--ease);
   will-change: transform;
 }
 .pb-pen.on {
   opacity: 1;
 }
-.pb-pen-lift {
-  opacity: 0;
-  will-change: transform, opacity;
+.pb-pen-rig {
+  --pen-scale: 1;
+  position: absolute;
+  left: 0;
+  top: 0;
+  scale: var(--pen-scale);
+  transform-origin: 0 0;
+  transition: opacity 320ms var(--ease);
 }
-.pb-pen-wobble {
-  animation: pb-wobble 640ms linear infinite;
+.pb-pen-rig[data-show="0"] {
+  opacity: 0;
+}
+.pb-pen-rig[data-show="wait"] {
+  opacity: 0.5;
+}
+.pb-pen-body,
+.pb-pen-shadow {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-origin: 0 0;
+  will-change: transform;
 }
 .pb-pen svg {
+  position: absolute;
+  /* The viewBox starts at (-9, -84): this puts its (0, 0), the nib's point, on the layer's. */
+  left: -9px;
+  top: -84px;
   display: block;
   overflow: visible;
-  filter: drop-shadow(1px 2px 1.5px rgba(31, 0, 80, 0.25));
+}
+.pb-pen-shadow svg {
+  fill: rgba(31, 0, 80, 0.2);
+  filter: blur(2.5px);
 }
 .pb-pen-nib {
-  fill: var(--ink-900);
+  fill: var(--gray-900);
 }
-.pb-pen-collar {
-  fill: var(--gray-300, #c9c3d6);
+.pb-pen-nibtip {
+  fill: rgba(255, 255, 255, 0.16);
 }
-.pb-pen-body {
-  fill: var(--ink-900);
-}
-.pb-pen-shine {
-  fill: rgba(255, 255, 255, 0.22);
-}
-.pb-pen-cap {
-  fill: var(--green-400);
+.pb-pen-cone {
+  fill: #cfc8dc;
 }
 .pb-pen-band {
   fill: var(--purple-600);
 }
-/* Irregular on purpose: a steady bounce reads as a machine. */
-@keyframes pb-wobble {
-  0% {
-    transform: translate(0, 0);
-  }
-  14% {
-    transform: translate(0.2px, -0.8px);
-  }
-  29% {
-    transform: translate(0, 0.5px);
-  }
-  38% {
-    transform: translate(-0.2px, -0.3px);
-  }
-  55% {
-    transform: translate(0.1px, 1px);
-  }
-  67% {
-    transform: translate(0, -0.6px);
-  }
-  81% {
-    transform: translate(-0.1px, 0.7px);
-  }
-  92% {
-    transform: translate(0, -0.2px);
-  }
-  100% {
-    transform: translate(0, 0);
+.pb-pen-stripe {
+  fill: var(--green-400);
+}
+.pb-pen-shine {
+  fill: rgba(255, 255, 255, 0.85);
+}
+.pb-pen-clip {
+  fill: #2b2537;
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 0.6;
+}
+/* A smaller marker on a phone, where the writing is smaller too. */
+@media (max-width: 560px) {
+  .pb-pen-rig {
+    --pen-scale: 0.8;
   }
 }
 
@@ -994,7 +987,6 @@
 /* ---------------------------------------------------------------- motion */
 @media (prefers-reduced-motion: reduce) {
   .pb-stroke,
-  .pb-pen-wobble,
   .pb-line.answer,
   .pb-mark-line,
   .pb-mark-head,
@@ -1010,8 +1002,7 @@
   }
   /* Lines go up whole. */
   .pb-stroke {
-    -webkit-mask-image: none;
-    mask-image: none;
+    clip-path: none !important;
   }
   .pb-face-mouth {
     transition: none;

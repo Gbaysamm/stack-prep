@@ -2263,18 +2263,44 @@ function Marks({
 }
 
 /**
- * The pen: a whiteboard marker that writes the newest line, so the eye is taken to it rather
- * than having to find it — and so the line reads as written, not as uncovered.
+ * THE HAND. A whiteboard marker that writes each line out, so the eye is taken to the newest
+ * line and the line reads as written rather than uncovered.
  *
- * The line itself is revealed left to right by CSS (`.pb-stroke`, a linear wipe with a soft
- * wet edge), after a short wait while the marker gets to the start of it. The marker runs the
- * same clock: it glides to where the line starts during that wait, then its tip rides the
- * reveal edge at the same speed, with a small unsteady wobble, and lifts off the board once
- * the line is done. A line that wraps is still one wipe; the marker keeps to its last row.
+ * WHY THIS IS NOT A WIPE ANY MORE. The line used to be revealed by one linear mask sweeping
+ * left to right with a soft edge, and the marker rode that edge. Students saw it for what it
+ * was: the words already there, fading in from the left, with a pen sliding along in front.
+ * Nobody writes like that. A hand forms one letter, then the next; it hesitates between words
+ * and after a comma; it goes back to the margin for the next row. So the line is now read
+ * into the pieces a hand would make — every letter of the prose, every atom of the maths
+ * (a fraction's numerator, then its bar, then its denominator; a power after its base; a
+ * table cell by cell, row by row) — and each piece appears as the nib crosses it, with a
+ * hard edge exactly at the nib and nothing ahead of it.
  *
- * Lines are marked `data-ink` while they are being written; the marker goes to each once, not
- * at all to a line the student cannot see (they have scrolled up to reread), and nowhere when
- * a student would rather nothing moved.
+ * HOW IT IS SHOWN WITHOUT TOUCHING THE WORDS. The text belongs to React and to KaTeX, and the
+ * marks overlay measures it, so none of it is split into spans. The pieces are measured once
+ * when the line starts (Range rectangles for letters, the boxes KaTeX already draws for
+ * maths), and the line is shown through a clip path — the rows already finished, the row
+ * being written up to the last finished piece, and the piece under the nib up to the nib.
+ * Changing one clip path and three transforms a frame is all the work there is: no layout
+ * is read while a line is being written.
+ *
+ * THE CLOCK IS THE VOICE'S. Each line still takes what the lesson gives it — the marker's
+ * wait to reach the line and the `--stroke` its words allow — so the writing finishes as the
+ * sentence does. Within that time the hand has its own rhythm: letters by their width, each
+ * word a little quicker or slower than the last, a breath at a space and a longer one after
+ * a full stop. The clock stops when the student pauses or starts asking something, and the
+ * nib and the ink stop with it, mid-word, and carry on from there.
+ *
+ * THE MARKER. Held the way a right-handed teacher holds one: the barrel leaning up and away
+ * to the right of the nib, so the hand never covers what has just been written. It bobs up
+ * and down as it forms each letter, lifts a little between words (its shadow on the board
+ * drifting away from it), and at the end of a line lifts off and goes back to the margin
+ * where the next line will start, and waits there. It travels to every line; it never jumps.
+ *
+ * Lines are marked `data-ink` while they are being written, and each is written once. A line
+ * the student cannot see (they have scrolled up to reread) is still written, without the
+ * marker; and when a student would rather nothing moved, lines go up whole and there is no
+ * marker at all.
  */
 function Pen({
   sheetRef,
@@ -2283,6 +2309,7 @@ function Pen({
   canSee,
 }: {
   sheetRef: RefObject<HTMLDivElement>;
+  /** False while the lesson is paused for the student: the hand stops where it is. */
   active: boolean;
   /** Changes whenever something may have been written, so the pen looks again. */
   tick: string;
@@ -2290,148 +2317,219 @@ function Pen({
   canSee: (line: HTMLElement) => boolean;
 }) {
   const penRef = useRef<HTMLDivElement>(null);
-  const liftRef = useRef<HTMLDivElement>(null);
+  const rigRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const shadowRef = useRef<HTMLDivElement>(null);
   const seen = useRef(new WeakSet<Element>());
-  const place = useRef<Pt | null>(null);
-  //: The line being written and where it was when the marker's path was worked out.
-  const anchor = useRef<{ line: HTMLElement; left: number; top: number } | null>(null);
+  const hand = useRef<Hand>({
+    clock: 0,
+    queue: [],
+    job: null,
+    tip: null,
+    lift: 1,
+    back: null,
+    idle: 0,
+    replan: false,
+    stamp: -1,
+  });
+  const held = useRef(!active);
+  const canSeeRef = useRef(canSee);
+  //: Starts the frame loop if it has stopped. Set by the loop's own effect.
+  const wake = useRef<() => void>(() => undefined);
 
-  // THE LINE MAY MOVE UNDER THE MARKER. Its path is worked out once, when the line goes up,
-  // but a font arriving or the question above re-wrapping can shift the line after that. The
-  // marker is shifted with it, rather than finishing the line in mid-air.
+  useEffect(() => {
+    canSeeRef.current = canSee;
+  }, [canSee]);
+
+  useEffect(() => {
+    held.current = !active;
+    if (active) wake.current();
+  }, [active]);
+
+  // THE FRAME LOOP. Runs only while there is something to move: a line being written, the
+  // marker going back to the margin, or the wait before it is put away. It stops while the
+  // lesson is paused, and the clock with it.
   useEffect(() => {
     const sheet = sheetRef.current;
     const pen = penRef.current;
-    if (!sheet || !pen || typeof ResizeObserver === "undefined") return;
-    const follow = () => {
-      const held = anchor.current;
-      if (!held || !held.line.isConnected) return;
-      const base = sheet.getBoundingClientRect();
-      const box = held.line.getBoundingClientRect();
-      const dx = box.left - base.left - held.left;
-      const dy = box.top - base.top - held.top;
-      pen.style.translate =
-        Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5 ? "" : `${dx.toFixed(1)}px ${dy.toFixed(1)}px`;
+    const rig = rigRef.current;
+    const body = bodyRef.current;
+    const shadow = shadowRef.current;
+    if (!sheet || !pen || !rig || !body || !shadow) return;
+    const state = hand.current;
+    let frame = 0;
+    let last = 0;
+
+    const draw = (at: Pt, lift: number, tilt: number, show: Show) => {
+      state.tip = at;
+      state.lift = lift;
+      pen.style.transform = `translate3d(${at[0].toFixed(1)}px, ${at[1].toFixed(1)}px, 0)`;
+      const lean = (PEN_ANGLE + tilt).toFixed(2);
+      body.style.transform = `translate(${(lift * 5).toFixed(2)}px, ${(-lift * 10).toFixed(
+        2,
+      )}px) rotate(${lean}deg)`;
+      // The shadow stays on the board: it meets the nib when the nib is down and slides away
+      // from it as the marker comes off the board.
+      shadow.style.transform = `translate(${(2 + lift * 13).toFixed(2)}px, ${(
+        3 +
+        lift * 6
+      ).toFixed(2)}px) rotate(${lean}deg)`;
+      shadow.style.opacity = (0.85 - lift * 0.45).toFixed(2);
+      const flag = show === true ? "1" : show === false ? "0" : show;
+      if (rig.dataset.show !== flag) rig.dataset.show = flag;
     };
-    const observer = new ResizeObserver(follow);
-    observer.observe(sheet);
-    window.addEventListener("resize", follow);
-    void document.fonts?.ready.then(follow);
+
+    // Timed by the page's clock rather than the frame's stamp: the two agree in a browser, but
+    // where frames come more slowly than time passes, the writing must still keep to time.
+    const step = () => {
+      const now = performance.now();
+      frame = 0;
+      const dt = last ? Math.max(0, now - last) : 0;
+      last = now;
+      if (held.current) {
+        last = 0;
+        state.stamp = -1;
+        return;
+      }
+      state.clock += dt;
+      state.stamp = now;
+      if (state.replan && state.job?.script) {
+        state.replan = false;
+        const fresh = readScript(state.job.line, sheet);
+        if (fresh) {
+          const scale = fresh.total / state.job.script.total;
+          state.job.units *= scale;
+          state.job.rate *= scale;
+          state.job.script = fresh;
+        }
+      }
+      if (advance(state, sheet, dt, canSeeRef.current, draw)) {
+        frame = requestAnimationFrame(step);
+      } else {
+        last = 0;
+        state.stamp = -1;
+      }
+    };
+
+    wake.current = () => {
+      if (frame || held.current) return;
+      last = 0;
+      frame = requestAnimationFrame(step);
+    };
+
+    // A font arriving, the column changing width or a table being shrunk to fit moves the
+    // letters under the nib: the line being written is measured again on the next frame.
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(() => {
+        state.replan = true;
+      });
+      observer.observe(sheet);
+    }
+    wake.current();
     return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", follow);
+      if (frame) cancelAnimationFrame(frame);
+      frame = 0;
+      wake.current = () => undefined;
+      observer?.disconnect();
     };
   }, [sheetRef]);
 
+  // NEW LINES. Everything newly marked is queued in the order it sits on the board, and is
+  // hidden at once, before it is painted, so no line is ever seen whole and then written.
   useLayoutEffect(() => {
     const sheet = sheetRef.current;
-    const pen = penRef.current;
-    const lift = liftRef.current;
-    if (!sheet || !pen || !lift) return;
+    if (!sheet) return;
     const inks = sheet.querySelectorAll<HTMLElement>("[data-ink]");
-    const newest = inks[inks.length - 1];
-    if (!newest || seen.current.has(newest)) return;
+    const fresh: HTMLElement[] = [];
     // All of them, not just the newest: the question goes up with the first line, and must
     // not be written over again later when it is the last line still marked.
-    inks.forEach((element) => seen.current.add(element));
-    if (stillMotion() || typeof pen.animate !== "function") return;
-    const base = sheet.getBoundingClientRect();
-    const box = newest.getBoundingClientRect();
-    if (box.width < 1 || box.height < 1) return;
-    anchor.current = { line: newest, left: box.left - base.left, top: box.top - base.top };
-    pen.style.translate = "";
-
-    const style = window.getComputedStyle(newest);
-    const stroke = Number.parseFloat(style.getPropertyValue("--stroke")) || 600;
-    // Along the middle of the last row of writing: the whole line when it is one row (a tall
-    // fraction included), the bottom row when the words wrap.
-    const row = Number.parseFloat(style.lineHeight) || 28;
-    const padTop = Number.parseFloat(style.paddingTop) || 0;
-    const padBottom = Number.parseFloat(style.paddingBottom) || 0;
-    const inner = box.height - padTop - padBottom;
-    const wraps =
-      inner > row * 1.8 &&
-      newest.querySelector(".katex-display, .sp-maths.block") === null;
-    const y =
-      box.top -
-      base.top +
-      (wraps ? box.height - padBottom - row / 2 : padTop + inner / 2) +
-      row * 0.12;
-    // The reveal runs from 0 to the line's width plus its wet edge; the tip sits in the middle
-    // of that edge, where the ink is going on.
-    const left = box.left - base.left - INK_EDGE / 2;
-    const right = box.left - base.left + box.width + INK_EDGE / 2;
-    // Kept on the board: the marker leans right of its tip, and hanging off the edge of a
-    // phone would widen the page.
-    const edge = sheet.clientWidth - PEN_REACH;
-    const clamp = (x: number) => Math.max(0, Math.min(x, edge));
-    const start: Pt = [clamp(left), y];
-    const end: Pt = [clamp(right), y];
-    const from = place.current ?? start;
-    place.current = end;
-
-    const at = (p: Pt) =>
-      `translate(${p[0].toFixed(1)}px, ${p[1].toFixed(1)}px)`;
-    for (const running of pen.getAnimations()) running.cancel();
-    for (const running of lift.getAnimations()) running.cancel();
-    pen.style.transform = at(end);
-    if (!canSee(newest)) {
-      lift.style.opacity = "0";
-      return;
-    }
-    lift.style.opacity = "";
-
-    const glide = STROKE_DELAY_MS;
-    const total = glide + stroke + PEN_LIFT_MS;
-    const o = (ms: number) => Math.min(1, ms / total);
-    // Where the tip meets the edge of the board, if it does: the marker waits there while the
-    // wipe finishes, rather than running ahead of it or off the column.
-    const path: Keyframe[] = [
-      { offset: 0, transform: at(from), easing: "cubic-bezier(0.3, 0.7, 0.2, 1)" },
-      { offset: o(glide), transform: at(start), easing: "linear" },
-    ];
-    if (right > edge && left < edge) {
-      const reach = (edge - left) / (right - left);
-      path.push({ offset: o(glide + stroke * reach), transform: at(end), easing: "linear" });
-    }
-    path.push({ offset: o(glide + stroke), transform: at(end) });
-    path.push({ offset: 1, transform: at(end) });
-    pen.animate(path, { duration: total, fill: "both" });
-    // Put down on the board as it arrives, lifted off it as the line is finished.
-    const up = "translate(5px, -9px)";
-    const down = "translate(0, 0)";
-    lift.animate(
-      [
-        { offset: 0, opacity: 0, transform: up },
-        { offset: o(glide * 0.7), opacity: 1, transform: down },
-        { offset: o(glide + stroke), opacity: 1, transform: down, easing: "ease-in" },
-        { offset: 1, opacity: 0, transform: up },
-      ],
-      { duration: total, fill: "both" },
-    );
-  }, [canSee, sheetRef, tick]);
+    inks.forEach((line) => {
+      if (seen.current.has(line)) return;
+      seen.current.add(line);
+      fresh.push(line);
+    });
+    if (fresh.length === 0 || stillMotion() || !canClipPath()) return;
+    const state = hand.current;
+    const lengths = fresh.map((line) => {
+      const stroke =
+        Number.parseFloat(window.getComputedStyle(line).getPropertyValue("--stroke")) || 600;
+      line.style.animation = "none";
+      line.style.clipPath = NOTHING;
+      return stroke;
+    });
+    // Lines that go up together share the time the old wipe gave them side by side, stretched
+    // a little: one hand writes them one after the other, and a board that went up all at once
+    // on a silent read-along should still be written at a hand's pace.
+    const wants = lengths.map((stroke) => STROKE_DELAY_MS + stroke);
+    const sum = wants.reduce((a, b) => a + b, 0);
+    const room = Math.min(sum, Math.max(...wants, TOGETHER_MS));
+    // Now, not the last frame: frames can come further apart than the lines do.
+    const queued =
+      state.stamp >= 0 && !held.current
+        ? state.clock + Math.max(0, performance.now() - state.stamp)
+        : state.clock;
+    let due = queued;
+    fresh.forEach((line, index) => {
+      due += (room * wants[index]!) / sum;
+      state.queue.push({
+        line,
+        stroke: lengths[index]!,
+        due,
+        queued,
+        script: null,
+        from: [0, 0],
+        fromLift: 1,
+        approach: 0,
+        walked: 0,
+        units: 0,
+        rate: 0,
+        shown: false,
+      });
+    });
+    hurry(state);
+    wake.current();
+  }, [sheetRef, tick]);
 
   return (
-    <div
-      ref={penRef}
-      className={`pb-pen ${active ? "on" : ""}`}
-      aria-hidden="true"
-    >
-      <div className="pb-pen-lift" ref={liftRef}>
-        <div className="pb-pen-wobble">
+    <div ref={penRef} className={`pb-pen ${active ? "on" : ""}`} aria-hidden="true">
+      <div className="pb-pen-rig" ref={rigRef} data-show="0">
+        <div className="pb-pen-shadow" ref={shadowRef}>
+          <svg viewBox="-9 -84 18 86" width="18" height="86">
+            <path d="M-1.6 0h3.2l3.4-13.5h1.5v-50a3.5 3.5 0 0 0-3.5-3.5h-7a3.5 3.5 0 0 0-3.5 3.5v50h1.5z" />
+            <rect x="-7.4" y="-82" width="14.8" height="19" rx="3.8" />
+          </svg>
+        </div>
+        <div className="pb-pen-body" ref={bodyRef}>
           {/*
-            A whiteboard marker held at 35 degrees, drawn upright about its tip (0, 0) and
-            then leaned: chisel nib, collar, body in the brand ink, a lime cap on the end.
+            A whiteboard marker drawn upright about its nib (0, 0) and leaned by the hand:
+            a felt chisel nib, the grey cone that holds it, a white barrel with a band in the
+            brand's purple, and the cap posted on the end in the ink's own colour — the way a
+            teacher holds one, cap on the back so it is not lost.
           */}
-          <svg viewBox="-4 -31 28 33" width="28" height="33">
-            <g transform="rotate(35)">
-              <path className="pb-pen-nib" d="M-1.1 0h2.2l1.7-5.4h-5.6z" />
-              <rect className="pb-pen-collar" x="-3.3" y="-8.2" width="6.6" height="3.2" rx="0.8" />
-              <rect className="pb-pen-body" x="-3.7" y="-25" width="7.4" height="17.4" rx="1.8" />
-              <rect className="pb-pen-shine" x="-2.3" y="-23" width="1.3" height="13" rx="0.65" />
-              <rect className="pb-pen-cap" x="-4" y="-32" width="8" height="8.6" rx="2.2" />
-              <rect className="pb-pen-band" x="-4" y="-25.6" width="8" height="1.6" />
-            </g>
+          <svg viewBox="-9 -84 18 86" width="18" height="86">
+            <defs>
+              <linearGradient id="pb-pen-barrel" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0" stopColor="#d9d4e4" />
+                <stop offset="0.28" stopColor="#ffffff" />
+                <stop offset="0.62" stopColor="#f1eef7" />
+                <stop offset="1" stopColor="#bdb5cd" />
+              </linearGradient>
+              <linearGradient id="pb-pen-capshade" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0" stopColor="#3a3448" />
+                <stop offset="0.35" stopColor="#1b1726" />
+                <stop offset="1" stopColor="#0d0a14" />
+              </linearGradient>
+            </defs>
+            <path className="pb-pen-nib" d="M-1.6 0h3.2l1.6-6.4h-6.4z" />
+            <path className="pb-pen-nibtip" d="M-1.6 0h1.3l.9-6.4h-.6z" />
+            <path className="pb-pen-cone" d="M-3.2-6.2h6.4l2.2-7.6h-10.8z" />
+            <rect x="-6.5" y="-66.5" width="13" height="53.2" rx="3" fill="url(#pb-pen-barrel)" />
+            <rect className="pb-pen-band" x="-6.5" y="-47" width="13" height="15" />
+            <rect className="pb-pen-stripe" x="-6.5" y="-33.6" width="13" height="1.6" />
+            <rect className="pb-pen-shine" x="-4.4" y="-64" width="1.8" height="48" rx="0.9" />
+            <rect x="-7.4" y="-82" width="14.8" height="19" rx="3.8" fill="url(#pb-pen-capshade)" />
+            <rect className="pb-pen-clip" x="4.6" y="-80.5" width="3.6" height="15" rx="1.4" />
           </svg>
         </div>
       </div>
@@ -2439,18 +2537,608 @@ function Pen({
   );
 }
 
-/** How long the marker takes to get to the start of a new line, before the reveal begins.
- *  The same wait as `.pb-stroke`'s animation delay in board.css. */
+/** How far the marker leans from upright, clockwise: barrel up and to the right of the nib. */
+const PEN_ANGLE = 32;
+
+/** How long the marker takes to get to the start of a new line, before the writing begins. */
 const STROKE_DELAY_MS = 180;
 
-/** How long the marker takes to lift off once a line is done. */
-const PEN_LIFT_MS = 220;
+/** Lines that go up together are written one after another within about this long. */
+const TOGETHER_MS = 3400;
 
-/** The soft wet edge of the reveal, in pixels: `--ink-edge` in board.css. */
-const INK_EDGE = 10;
+/** Never less than this to write a line, however late it is: below it the letters blur. */
+const HURRIED_MS = 320;
 
-/** How far right of its tip the leaning marker reaches. */
-const PEN_REACH = 24;
+/** The lift and the trip back to the margin once a line is written. */
+const RETURN_MS = 520;
+
+/** How long the marker waits at the margin before it is put away. */
+const REST_MS = 1400;
+
+/** Whether the marker is shown: yes, no, or faded back while it waits at the margin. */
+type Show = boolean | "wait";
+
+/** A clip path that shows nothing: a line queued but not yet reached. */
+const NOTHING = 'path("M0 0Z")';
+
+function canClipPath(): boolean {
+  return typeof CSS !== "undefined" && typeof CSS.supports === "function"
+    ? CSS.supports("clip-path", NOTHING)
+    : false;
+}
+
+/** One piece of writing: a letter, a mathematical atom, or one part of a fraction. */
+interface Piece {
+  /** Its box, in pixels from the line's top-left corner. */
+  x0: number;
+  x1: number;
+  y0: number;
+  y1: number;
+  /** Which row of the line it is on, once the line wraps. */
+  row: number;
+  /** The fraction it is a part of, or -1: parts are shown by their own boxes until the last. */
+  group: number;
+  /** The last part of its fraction, after which the whole fraction counts as written. */
+  closes: boolean;
+  /** Where the whole fraction ends, once it is written. */
+  groupX1: number;
+  /** A letter of prose (formed at x-height), or anything else (formed about its middle). */
+  prose: boolean;
+  /** A fraction bar: one straight stroke, no letter-forming. */
+  bar: boolean;
+  /** The character, for prose: a comma or full stop makes the hand stop after it. */
+  char: string;
+}
+
+/** Part of the hand's path through a line, in units of writing time. */
+type Segment =
+  | {
+      ink: true;
+      piece: number;
+      u0: number;
+      u1: number;
+      from: Pt;
+      to: Pt;
+      /** How many up-and-down strokes form the piece, and how far each one goes. */
+      strokes: number;
+      reach: number;
+    }
+  | {
+      ink: false;
+      /** The piece the hand is on its way to. */
+      piece: number;
+      u0: number;
+      u1: number;
+      from: Pt;
+      to: Pt;
+      /** How far off the board it comes on the way: 0 a slide, 1 a full lift. */
+      lift: number;
+      /** A trip back to the start of the next row. */
+      back: boolean;
+    };
+
+/** A line, read into the hand's path through it. */
+interface Script {
+  pieces: Piece[];
+  segments: Segment[];
+  /** Where each row's band starts and ends, from the top of the line: rows + 1 edges. */
+  edges: number[];
+  /** Far enough to the right to take in everything on the line. */
+  right: number;
+  /** Room left round the writing for what spills past its boxes: tall signs, descenders. */
+  pad: number;
+  /** The line's top-left corner on the sheet. */
+  origin: Pt;
+  /** All the writing time, in units. */
+  total: number;
+  /** Where the next line's writing will start: under this one, at its margin. */
+  margin: Pt;
+}
+
+interface Job {
+  line: HTMLElement;
+  stroke: number;
+  /** When, on the hand's clock, the line should be finished, and when it went up. */
+  due: number;
+  queued: number;
+  script: Script | null;
+  from: Pt;
+  fromLift: number;
+  /** The trip to the line: how long it takes and how far along it the hand is. */
+  approach: number;
+  walked: number;
+  /** How far through the line's writing time the hand is, and how fast it is going. */
+  units: number;
+  rate: number;
+  /** Whether the marker is shown for this line. */
+  shown: boolean;
+}
+
+interface Hand {
+  /** Milliseconds of writing: stops while the lesson is paused. */
+  clock: number;
+  queue: Job[];
+  job: Job | null;
+  /** Where the nib is on the sheet, and how far off the board. */
+  tip: Pt | null;
+  lift: number;
+  /** The trip back to the margin after a line, if one is under way. */
+  back: { from: Pt; to: Pt; fromLift: number; start: number; shown: boolean } | null;
+  /** When the hand last finished something, for putting the marker away. */
+  idle: number;
+  replan: boolean;
+  /** When the clock was last moved on, or -1 while it is stopped. */
+  stamp: number;
+}
+
+const ease = (q: number) => 0.5 - Math.cos(Math.PI * Math.min(1, Math.max(0, q))) / 2;
+const mix = (a: Pt, b: Pt, q: number): Pt => [a[0] + (b[0] - a[0]) * q, a[1] + (b[1] - a[1]) * q];
+
+/**
+ * One frame of the hand: carry on writing, start the next line, go back to the margin or
+ * wait. Returns whether there is anything left to move.
+ */
+function advance(
+  state: Hand,
+  sheet: HTMLElement,
+  dt: number,
+  canSee: (line: HTMLElement) => boolean,
+  draw: (at: Pt, lift: number, tilt: number, show: Show) => void,
+): boolean {
+  let spare = dt;
+  for (let guard = 0; guard < 8; guard += 1) {
+    let job = state.job;
+    if (job && !job.line.isConnected) {
+      state.job = null;
+      job = null;
+    }
+    if (!job) {
+      const next = state.queue.shift();
+      if (!next) break;
+      if (!next.line.isConnected) continue;
+      if (!begin(state, next, sheet, canSee)) continue;
+      // Only the part of this frame since the line went up is spent on it.
+      spare = Math.min(spare, Math.max(0, state.clock - next.queued));
+      state.job = next;
+      state.back = null;
+      job = next;
+    }
+    const script = job.script!;
+    // On the way to the line.
+    if (job.walked < job.approach) {
+      const use = Math.min(spare, job.approach - job.walked);
+      job.walked += use;
+      spare -= use;
+      if (job.walked < job.approach) {
+        const q = job.walked / job.approach;
+        const first = script.segments[0]!;
+        const to = onSheet(script, first.from);
+        const at = mix(job.from, to, ease(q));
+        at[1] -= Math.sin(Math.PI * q) * 10 * job.fromLift;
+        const lift = Math.max(job.fromLift * (1 - ease(q)), Math.sin(Math.PI * q) * 0.5) * (1 - q * q);
+        draw(at, lift, -2 * Math.sin(Math.PI * q), job.shown);
+        return true;
+      }
+    }
+    // Writing.
+    job.units += spare * job.rate;
+    spare = 0;
+    if (job.units >= script.total) {
+      // Finished: the whole line stands, and the hand goes back to the margin.
+      spare = (job.units - script.total) / Math.max(job.rate, 1e-6);
+      job.line.style.clipPath = "";
+      const end = script.segments[script.segments.length - 1]!;
+      const from = onSheet(script, end.to);
+      state.back = {
+        from,
+        to: onSheet(script, script.margin),
+        fromLift: 0,
+        start: state.clock - spare,
+        shown: job.shown,
+      };
+      state.idle = state.clock - spare;
+      state.job = null;
+      continue;
+    }
+    const found = locate(script.segments, job.units);
+    const seg = script.segments[found]!;
+    const q = (job.units - seg.u0) / Math.max(seg.u1 - seg.u0, 1e-6);
+    const clip = clipFor(script, found, q);
+    if (job.line.style.clipPath !== clip) job.line.style.clipPath = clip;
+    if (seg.ink) {
+      // Forming the piece: along it at the pace of the writing, up and down as the letter is
+      // made, the marker rocking a degree or two with each stroke.
+      const along = mix(seg.from, seg.to, q);
+      const wave = Math.sin(2 * Math.PI * seg.strokes * q);
+      along[1] -= wave * seg.reach;
+      draw(onSheet(script, along), 0, 1.6 * Math.sin(2 * Math.PI * seg.strokes * q + 0.9), job.shown);
+    } else {
+      // Between pieces: a small hop over a space, a full lift back to the start of a row.
+      const e = ease(q);
+      const along = mix(seg.from, seg.to, e);
+      const arc = Math.sin(Math.PI * q);
+      along[1] -= arc * seg.lift * (seg.back ? 6 : 3);
+      draw(onSheet(script, along), arc * seg.lift, seg.back ? -3 * arc : -0.8 * arc, job.shown);
+    }
+    return true;
+  }
+  // Nothing being written: back to the margin, then waiting there, then put away.
+  const back = state.back;
+  if (back) {
+    const q = (state.clock - back.start) / RETURN_MS;
+    const lifted = Math.min(1, q * 2.4);
+    const at = mix(back.from, back.to, ease(q));
+    // A gentle breathing while it waits, so it reads as held, not parked.
+    const since = Math.max(0, state.clock - back.start - RETURN_MS);
+    at[1] += Math.sin(since / 380) * 0.8 * Math.min(1, since / 400);
+    const resting = state.clock - state.idle > REST_MS;
+    // Once it is there it steps back a little, half there, so that while it waits it does not
+    // stand in front of the line just written.
+    draw(
+      at,
+      lifted,
+      -2.5 * Math.sin(Math.PI * Math.min(1, q)),
+      !back.shown || resting ? false : q >= 1 ? "wait" : true,
+    );
+    return !resting;
+  }
+  if (state.tip) draw(state.tip, state.lift, 0, false);
+  return false;
+}
+
+/** Put the line's pieces in place and work out how long the hand has for it. */
+function begin(
+  state: Hand,
+  job: Job,
+  sheet: HTMLElement,
+  canSee: (line: HTMLElement) => boolean,
+): boolean {
+  const script = readScript(job.line, sheet);
+  if (!script) {
+    job.line.style.clipPath = "";
+    return false;
+  }
+  job.script = script;
+  const first = onSheet(script, script.segments[0]!.from);
+  // The first line comes in from the right, lifted, as a hand coming up to the board would.
+  const from: Pt = state.tip ?? [first[0] + 70, first[1] - 40];
+  const distance = Math.hypot(first[0] - from[0], first[1] - from[1]);
+  job.from = from;
+  job.fromLift = state.tip ? state.lift : 1;
+  job.approach = Math.min(420, Math.max(STROKE_DELAY_MS, 140 + distance * 0.35));
+  // Write at the hand's pace for the line when there is time; hurry when the voice is ahead.
+  const left = job.due - state.clock - job.approach;
+  const write = Math.min(job.stroke, Math.max(Math.min(job.stroke, HURRIED_MS), left));
+  job.rate = script.total / write;
+  job.shown = canSee(job.line);
+  return true;
+}
+
+/**
+ * The voice has moved on while the hand is still on an earlier line: that line is finished
+ * faster, so the one the voice is on is written while it is being said rather than after.
+ */
+function hurry(state: Hand): void {
+  const job = state.job;
+  const next = state.queue[0];
+  if (!job?.script || !next) return;
+  const remaining = job.script.total - job.units;
+  const walk = Math.max(0, job.approach - job.walked);
+  const finish = state.clock + walk + remaining / job.rate;
+  const latest = next.due - STROKE_DELAY_MS - Math.min(next.stroke, HURRIED_MS * 2);
+  if (finish <= latest) return;
+  const room = Math.max(HURRIED_MS * 0.6, latest - state.clock - walk);
+  job.rate = Math.max(job.rate, remaining / room);
+}
+
+/** A point on the line, on the sheet. */
+function onSheet(script: Script, at: Pt): Pt {
+  return [script.origin[0] + at[0], script.origin[1] + at[1]];
+}
+
+/** The segment the hand is in, `units` into the line. */
+function locate(segments: Segment[], units: number): number {
+  let low = 0;
+  let high = segments.length - 1;
+  while (low < high) {
+    const middle = (low + high + 1) >> 1;
+    if (segments[middle]!.u0 <= units) low = middle;
+    else high = middle - 1;
+  }
+  return low;
+}
+
+const box = (x0: number, y0: number, x1: number, y1: number) =>
+  x1 - x0 < 0.05 || y1 - y0 < 0.05
+    ? ""
+    : `M${x0.toFixed(1)} ${y0.toFixed(1)}H${x1.toFixed(1)}V${y1.toFixed(1)}H${x0.toFixed(1)}Z`;
+
+/**
+ * What of the line shows, `q` of the way through segment `at`: every row before this one,
+ * this row up to the last piece finished, the parts of a fraction under way, and the piece
+ * under the nib up to the nib — with a hard edge there, the way ink has one.
+ */
+function clipFor(script: Script, at: number, q: number): string {
+  const seg = script.segments[at]!;
+  const pieces = script.pieces;
+  const now = pieces[seg.piece]!;
+  const { edges, pad, right } = script;
+  const top = edges[now.row]!;
+  const bottom = edges[now.row + 1]!;
+  let d = now.row > 0 ? box(-pad, -pad, right, top) : "";
+  let done = -Infinity;
+  for (let index = seg.piece - 1; index >= 0; index -= 1) {
+    const piece = pieces[index]!;
+    if (piece.row !== now.row) break;
+    if (piece.group >= 0 && piece.group === now.group) {
+      d += box(piece.x0 - 2, piece.y0 - 2, piece.x1 + 2, piece.y1 + 2);
+      continue;
+    }
+    done = Math.max(done, piece.group >= 0 ? piece.groupX1 : piece.x1);
+  }
+  if (done > -Infinity) d += box(-pad, top, done + 1, bottom);
+  if (seg.ink) {
+    const edge = now.x0 + (now.x1 - now.x0) * q;
+    d +=
+      now.group >= 0
+        ? box(now.x0 - 2, now.y0 - 2, edge, now.y1 + 2)
+        : box(Math.min(now.x0 - 1, done > -Infinity ? done + 1 : now.x0), top, edge, bottom);
+  }
+  return `path("${d || "M0 0Z"}")`;
+}
+
+const ATOMS = ["mord", "mbin", "mrel", "mopen", "mclose", "mpunct", "minner", "mop", "mfrac", "msupsub", "mtable"];
+const isAtom = (element: Element) => ATOMS.some((name) => element.classList.contains(name));
+const PAUSES: Record<string, number> = { ",": 1.1, ";": 1.3, ":": 1.3, ".": 1.7, "?": 1.7, "!": 1.7 };
+
+/**
+ * Read a line into the pieces a hand would write it in, and the path through them.
+ *
+ * Measured from the page as it stands, once, when the line starts (and again if the page
+ * changes size under it). Prose is read letter by letter from its text; KaTeX is read by the
+ * atoms it has already laid out, going inside an atom only where a hand would lift — the
+ * parts of a fraction, the cells of a table, a power after its base.
+ */
+function readScript(line: HTMLElement, sheet: HTMLElement): Script | null {
+  const frame = line.getBoundingClientRect();
+  const base = sheet.getBoundingClientRect();
+  if (frame.width < 1 || frame.height < 1) return null;
+  const em = Number.parseFloat(window.getComputedStyle(line).fontSize) || 20;
+  const pieces: Piece[] = [];
+  let groups = 0;
+  const range = document.createRange();
+
+  const add = (rect: DOMRect, extra: Partial<Piece> = {}) => {
+    if (rect.width < 0.5 || rect.height < 0.5) return;
+    pieces.push({
+      x0: rect.left - frame.left,
+      x1: rect.right - frame.left,
+      y0: rect.top - frame.top,
+      y1: rect.bottom - frame.top,
+      row: 0,
+      group: -1,
+      closes: false,
+      groupX1: 0,
+      prose: false,
+      bar: false,
+      char: "",
+      ...extra,
+    });
+  };
+
+  // A fraction: numerator, bar, denominator, each where KaTeX stacked it.
+  const fraction = (element: Element): boolean => {
+    const stack = element.querySelector(":scope > .vlist-t > .vlist-r > .vlist");
+    if (!stack) return false;
+    const parts: { rect: DOMRect; bar: boolean }[] = [];
+    for (const layer of Array.from(stack.children)) {
+      const content = Array.from(layer.children).find((child) => !child.classList.contains("pstrut"));
+      if (!content) continue;
+      const rect = content.getBoundingClientRect();
+      if (rect.width < 0.5) continue;
+      parts.push({ rect, bar: content.classList.contains("frac-line") });
+    }
+    if (parts.length < 2) return false;
+    parts.sort((a, b) => a.rect.top - b.rect.top);
+    const group = groups;
+    groups += 1;
+    const end = element.getBoundingClientRect().right - frame.left;
+    parts.forEach((part, index) =>
+      add(part.rect, {
+        group,
+        closes: index === parts.length - 1,
+        groupX1: end,
+        bar: part.bar,
+      }),
+    );
+    return true;
+  };
+
+  // A table or an array: cell by cell along each row, the rows top to bottom.
+  const table = (element: Element): boolean => {
+    const cells: DOMRect[] = [];
+    for (const column of Array.from(element.children)) {
+      const stack = column.querySelector(":scope > .vlist-t > .vlist-r > .vlist");
+      if (!stack) continue;
+      for (const layer of Array.from(stack.children)) {
+        const content = Array.from(layer.children).find((child) => !child.classList.contains("pstrut"));
+        const rect = content?.getBoundingClientRect();
+        if (rect && rect.width >= 0.5) cells.push(rect);
+      }
+    }
+    if (cells.length === 0) return false;
+    cells.sort((a, b) => a.top + a.bottom - (b.top + b.bottom));
+    const rows: DOMRect[][] = [];
+    for (const cell of cells) {
+      const row = rows[rows.length - 1];
+      const middle = (cell.top + cell.bottom) / 2;
+      if (row && middle < row[0]!.bottom) row.push(cell);
+      else rows.push([cell]);
+    }
+    for (const row of rows) {
+      row.sort((a, b) => a.left - b.left);
+      row.forEach((cell) => add(cell));
+    }
+    return true;
+  };
+
+  const atom = (element: Element) => {
+    if (element.classList.contains("strut") || element.classList.contains("mspace")) return;
+    const rect = element.getBoundingClientRect();
+    if (rect.width < 0.5) return;
+    if (element.classList.contains("mfrac") && fraction(element)) return;
+    if (element.classList.contains("mtable") && table(element)) return;
+    const inside = Array.from(element.children).filter(
+      (child) => !child.classList.contains("strut") && child.getBoundingClientRect().width >= 0.5,
+    );
+    if (inside.length > 0 && inside.every(isAtom)) {
+      inside.forEach(atom);
+      return;
+    }
+    add(rect);
+  };
+
+  const walk = (node: Node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent ?? "";
+      let at = 0;
+      for (const char of text) {
+        const end = at + char.length;
+        if (char.trim() !== "") {
+          range.setStart(node, at);
+          range.setEnd(node, end);
+          const rect = Array.from(range.getClientRects()).find((r) => r.width >= 0.5);
+          if (rect) add(rect, { prose: true, char });
+        }
+        at = end;
+      }
+      return;
+    }
+    if (!(node instanceof Element)) return;
+    if (node.classList.contains("katex")) {
+      const html = node.querySelector(".katex-html");
+      for (const part of Array.from(html?.children ?? [])) {
+        if (part.classList.contains("base")) Array.from(part.children).forEach(atom);
+        else add(part.getBoundingClientRect());
+      }
+      return;
+    }
+    if (node instanceof SVGElement || node instanceof HTMLImageElement) {
+      add(node.getBoundingClientRect());
+      return;
+    }
+    node.childNodes.forEach(walk);
+  };
+  walk(line);
+  range.detach();
+  if (pieces.length === 0) return null;
+
+  // THE ROWS. A piece starts a new row when it is wholly below the row so far, or when the
+  // writing has gone back left and down — a wrap. A fraction's parts go back left and down
+  // on purpose, so they never start one.
+  const rows: { top: number; bottom: number }[] = [];
+  let lastRight = -Infinity;
+  for (const piece of pieces) {
+    const row = rows[rows.length - 1];
+    const middle = (piece.y0 + piece.y1) / 2;
+    const fresh =
+      !row ||
+      (piece.group < 0 &&
+        (piece.y0 >= row.bottom - 1 ||
+          (piece.x0 < lastRight - em * 0.5 && middle > row.bottom - (row.bottom - row.top) * 0.25)));
+    if (fresh) rows.push({ top: piece.y0, bottom: piece.y1 });
+    else {
+      row.top = Math.min(row.top, piece.y0);
+      row.bottom = Math.max(row.bottom, piece.y1);
+    }
+    piece.row = rows.length - 1;
+    if (piece.group < 0 || piece.closes) lastRight = piece.group < 0 ? piece.x1 : piece.groupX1;
+  }
+  const pad = em;
+  const edges = [-pad];
+  for (let index = 1; index < rows.length; index += 1) {
+    edges.push((rows[index - 1]!.bottom + rows[index]!.top) / 2);
+  }
+  edges.push(frame.height + pad);
+
+  // THE PATH, and how long each part of it takes, in units: a letter about as many as its
+  // width in ems, a mathematical sign a little more (it has more strokes to it), a word's
+  // letters all a touch quicker or slower than the last word's.
+  const random = seeded(
+    Array.from(line.textContent ?? "").reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) | 0, 7),
+  );
+  let pace = 0.9 + random() * 0.28;
+  const segments: Segment[] = [];
+  let units = 0;
+  const penAt = (piece: Piece, side: "from" | "to"): Pt => {
+    const x = side === "from" ? piece.x0 : piece.x1;
+    const h = piece.y1 - piece.y0;
+    const y = piece.bar
+      ? (piece.y0 + piece.y1) / 2
+      : piece.prose
+        ? piece.y0 + h * 0.6
+        : piece.y0 + h * 0.55;
+    return [x, y];
+  };
+  pieces.forEach((piece, index) => {
+    const before = pieces[index - 1];
+    if (before) {
+      const from = penAt(before, "to");
+      const to = penAt(piece, "from");
+      const dx = to[0] - from[0];
+      const dy = to[1] - from[1];
+      const back = piece.row !== before.row;
+      const pause = before.prose ? (PAUSES[before.char] ?? 0) : 0;
+      const hop = back || pause > 0 || dx > em * 0.12 || dx < -1 || Math.abs(dy) > em * 0.3;
+      if (hop) {
+        const distance = Math.hypot(dx, dy) / em;
+        const cost = back
+          ? Math.min(3.4, 1.3 + distance * 0.18)
+          : Math.min(1.4, 0.22 + distance * 0.4) + pause;
+        segments.push({
+          ink: false,
+          piece: index,
+          u0: units,
+          u1: units + cost,
+          from,
+          to,
+          lift: back ? 1 : Math.min(0.8, 0.25 + distance * 0.3 + pause * 0.2),
+          back,
+        });
+        units += cost;
+        // A new word, a new pace.
+        if (back || dx > em * 0.2) pace = 0.88 + random() * 0.3;
+      }
+    }
+    const width = (piece.x1 - piece.x0) / em;
+    const height = piece.y1 - piece.y0;
+    const cost = pace * (piece.bar ? 0.2 + width * 0.45 : piece.prose ? 0.3 + width : 0.4 + width * 1.1);
+    segments.push({
+      ink: true,
+      piece: index,
+      u0: units,
+      u1: units + cost,
+      from: penAt(piece, "from"),
+      to: penAt(piece, "to"),
+      strokes: piece.bar ? 0 : Math.max(1, Math.min(4, Math.round(width / 0.3))),
+      reach: piece.bar ? 0 : Math.min(height * 0.15, em * 0.14),
+    });
+    units += cost;
+  });
+
+  const firstOfLast = pieces.find((piece) => piece.row === rows.length - 1) ?? pieces[0]!;
+  const lowest = rows[rows.length - 1]!.bottom;
+  return {
+    pieces,
+    segments,
+    edges,
+    right: Math.max(frame.width, ...pieces.map((piece) => piece.x1)) + pad,
+    pad,
+    origin: [frame.left - base.left, frame.top - base.top],
+    total: units,
+    margin: [Math.min(pieces[0]!.x0, firstOfLast.x0), lowest + em * 1.5],
+  };
+}
 
 /* ---- Icons: the app's outline family (24 grid, 1.9 stroke, round caps) -------------------- */
 
