@@ -620,7 +620,7 @@
 }
 /* The question goes up as the teacher starts reading it. */
 .sp-hl.sp-question-in {
-  animation: sp-hand 1.4s linear both;
+  animation: sp-hand 0.9s steps(36, end) both;
 }
 /* Shown only when the browser will not play sound without a tap. */
 .sp-tap {
@@ -632,10 +632,11 @@
   font-size: 18px;
   padding: 14px 22px;
 }
-/* A line being written: revealed from left to right over --write-ms, the way a hand moves
-   across a board while the teacher talks, rather than appearing whole. */
+/* A line being written: put up in one quick stroke, left to right, at the moment the voice
+   reaches it, and then done. Spread over the whole sentence it read as a slow fade sweeping
+   right rather than a line being written, so --write-ms is capped short. No fade, no slide. */
 .sp-hl .sp-item.sp-hand {
-  animation: sp-hand var(--write-ms, 900ms) linear both;
+  animation: sp-hand min(var(--write-ms, 600ms), 700ms) steps(24, end) both;
 }
 @keyframes sp-hand {
   from {
@@ -672,7 +673,8 @@
 /* A step is put on the board as it is reached, so it fades in as it arrives rather than
    by switching a class on something that was already there. */
 .sp-hl.sp-written {
-  animation: sp-write 0.5s ease both;
+  /* Its lines write themselves; the block around them must not fade or slide as well. */
+  animation: none;
 }
 /* One piece of a step's working, written up while the teacher talks: each on its own line,
    fading in as the hand reaches it. */
