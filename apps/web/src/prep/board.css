@@ -138,8 +138,10 @@
 .pb .pb-sheet {
   position: relative;
   padding-top: clamp(18px, 4vh, 40px);
-  /* Room under the last line for the coach card floating over the bottom of the board. */
-  padding-bottom: calc(var(--coach-h, 60px) + 40px);
+  /* Room under the last line for the coach card floating over the bottom of the board: the
+     card's real reach, measured, and a little air — so the line being written is never under
+     it, and the board can always scroll far enough to show it. */
+  padding-bottom: calc(var(--coach-room, 76px) + 16px);
   font-size: clamp(18px, 0.85vw + 12px, 25px);
   line-height: 1.6;
   color: var(--gray-900);
@@ -207,17 +209,39 @@
 .pb-item + .pb-item {
   margin-top: 6px;
 }
-/* One stroke, left to right, as the voice reaches the line: no fade, no slide. It waits the
-   moment the pen takes to get to the start of the line. */
+/* Written left to right as the voice reaches the line: a smooth, even wipe with a soft wet
+   edge where the ink is going on, and the marker's tip riding that edge (the pen, below). It
+   waits the moment the marker takes to get to the start of the line — STROKE_DELAY_MS in
+   Board.tsx. The line hugs its own writing, so the wipe crosses the ink at the marker's pace
+   rather than the width of the column. */
+@property --reveal {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 200%;
+}
+.pb-item {
+  width: fit-content;
+}
 .pb-stroke {
-  animation: pb-stroke var(--stroke, 600ms) steps(24, end) 180ms both;
+  --ink-edge: 10px;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    #000 calc(var(--reveal) - var(--ink-edge)),
+    transparent var(--reveal)
+  );
+  mask-image: linear-gradient(
+    90deg,
+    #000 calc(var(--reveal) - var(--ink-edge)),
+    transparent var(--reveal)
+  );
+  animation: pb-stroke var(--stroke, 600ms) linear 180ms both;
 }
 @keyframes pb-stroke {
   from {
-    clip-path: inset(0 100% 0 0);
+    --reveal: 0%;
   }
   to {
-    clip-path: inset(0 0 0 0);
+    --reveal: calc(100% + 10px);
   }
 }
 .pb .sp-maths {
@@ -303,11 +327,21 @@
 }
 
 /* ---------------------------------------------------------------- the teacher's marks */
+/* No stacking context of its own (no z-index here), so the highlight layer can multiply into
+   the board underneath rather than into an empty layer. */
 .pb-marks {
   position: absolute;
   inset: 0;
-  z-index: 2;
   pointer-events: none;
+}
+.pb-marks-svg,
+.pb-mark-label {
+  z-index: 2;
+}
+/* Under the other marks, and multiplied into the board (see the highlight, below). */
+.pb-marks-svg.under {
+  z-index: 1;
+  mix-blend-mode: multiply;
 }
 .pb-marks-svg {
   position: absolute;
@@ -337,6 +371,28 @@
 .pb-mark.arrow path {
   stroke: var(--mark-purple);
   stroke-width: 2.4;
+}
+/* A highlighter pass: broad, flat-ended, translucent yellow, on the multiplied layer so the
+   words stay black and the yellow sits behind them. Swept left to right. */
+.pb .pb-mark.highlight path {
+  stroke: var(--yellow-300);
+  stroke-opacity: 0.55;
+  stroke-linecap: butt;
+}
+.pb-mark.highlight .pb-mark-line {
+  animation-duration: 400ms;
+  animation-timing-function: cubic-bezier(0.35, 0.1, 0.4, 1);
+}
+.pb-mark-label.highlight {
+  background: var(--yellow-100);
+}
+/* A crossing-out: a quick pink line through the words ruled out. */
+.pb-mark.strike path {
+  stroke-width: 2.8;
+}
+.pb-mark.strike .pb-mark-line {
+  animation-duration: 300ms;
+  animation-timing-function: cubic-bezier(0.5, 0, 0.6, 1);
 }
 /* Drawn on, the way a marker crosses the board: the stroke first, then the arrowhead. */
 .pb-mark-line {
@@ -394,40 +450,85 @@
   }
 }
 
-/* The pen: glides to the line being written and follows the stroke along it. */
+/* The pen: a whiteboard marker whose tip rides the edge of the line being written. Placed
+   by Board.tsx (position on `.pb-pen`, put down and lifted off on `.pb-pen-lift`); it wobbles
+   a pixel as it goes, the way a hand does. Under the coach card, never over it. */
 .pb-pen {
   position: absolute;
   left: 0;
   top: 0;
   z-index: 3;
   width: 28px;
-  height: 28px;
+  height: 33px;
   /* The nib's point, not the corner of its box, sits on the line. */
-  margin: -27px 0 0 -4.6px;
+  margin: -31px 0 0 -4px;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 260ms var(--ease);
-  filter: drop-shadow(0 2px 3px rgba(31, 0, 80, 0.22));
+  transition: opacity 160ms var(--ease);
   will-change: transform;
 }
 .pb-pen.on {
   opacity: 1;
 }
+.pb-pen-lift {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.pb-pen-wobble {
+  animation: pb-wobble 640ms linear infinite;
+}
 .pb-pen svg {
   display: block;
   overflow: visible;
+  filter: drop-shadow(1px 2px 1.5px rgba(31, 0, 80, 0.25));
+}
+.pb-pen-nib {
+  fill: var(--ink-900);
+}
+.pb-pen-collar {
+  fill: var(--gray-300, #c9c3d6);
 }
 .pb-pen-body {
-  fill: var(--purple-600);
+  fill: var(--ink-900);
+}
+.pb-pen-shine {
+  fill: rgba(255, 255, 255, 0.22);
 }
 .pb-pen-cap {
-  fill: none;
-  stroke: var(--white);
-  stroke-width: 1.6;
-  stroke-linecap: round;
+  fill: var(--green-400);
 }
-.pb-pen-tip {
-  fill: var(--ink-900);
+.pb-pen-band {
+  fill: var(--purple-600);
+}
+/* Irregular on purpose: a steady bounce reads as a machine. */
+@keyframes pb-wobble {
+  0% {
+    transform: translate(0, 0);
+  }
+  14% {
+    transform: translate(0.2px, -0.8px);
+  }
+  29% {
+    transform: translate(0, 0.5px);
+  }
+  38% {
+    transform: translate(-0.2px, -0.3px);
+  }
+  55% {
+    transform: translate(0.1px, 1px);
+  }
+  67% {
+    transform: translate(0, -0.6px);
+  }
+  81% {
+    transform: translate(-0.1px, 0.7px);
+  }
+  92% {
+    transform: translate(0, -0.2px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
 }
 
 /* Only when the browser will not play sound without a tap. */
@@ -842,7 +943,7 @@
   .pb .pb-sheet {
     font-size: 18px;
     padding-top: 16px;
-    padding-bottom: calc(var(--coach-h, 56px) + 30px);
+    padding-bottom: calc(var(--coach-room, 68px) + 16px);
   }
   .pb-question {
     margin-bottom: 22px;
@@ -893,6 +994,7 @@
 /* ---------------------------------------------------------------- motion */
 @media (prefers-reduced-motion: reduce) {
   .pb-stroke,
+  .pb-pen-wobble,
   .pb-line.answer,
   .pb-mark-line,
   .pb-mark-head,
@@ -905,6 +1007,11 @@
   }
   .pb-mark path {
     stroke-dashoffset: 0;
+  }
+  /* Lines go up whole. */
+  .pb-stroke {
+    -webkit-mask-image: none;
+    mask-image: none;
   }
   .pb-face-mouth {
     transition: none;

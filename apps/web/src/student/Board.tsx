@@ -155,10 +155,40 @@ const RETRY_WAIT_MS = 10000;
  *
  * Paced off its length, because a hand crossing a board takes longer for a longer line. The
  * first version wrote everything in a flat seven hundred milliseconds, which was over before
- * a student had looked up.
+ * a student had looked up. Counted on what the line puts on the board — its LaTeX without
+ * the markup — so `\displaystyle\int` is one sign and not sixteen letters.
  */
-function writeMs(line: string): number {
-  return Math.min(3200, 600 + line.length * 32);
+function inkMs(line: string): number {
+  return Math.min(2600, 450 + inkLength(line) * 42);
+}
+
+/**
+ * How long the reveal of a lesson line takes: a hand's pace for its length, but never more
+ * than most of the time its words take to say — the voice leads, and the line is finished
+ * before the next one is due.
+ */
+function strokeMs(line: string, handMs: number): number {
+  return Math.round(Math.max(380, Math.min(handMs * 0.85, inkMs(line))));
+}
+
+/** How long the hand may take over a line when there is no voice to keep time with. */
+const READ_HAND_MS = 2600;
+
+/** Roughly how many characters a line puts on the board: its LaTeX without the markup. */
+function inkLength(line: string): number {
+  return line
+    .replace(/\\[a-zA-Z]+|[{}$^_&\\]/g, "")
+    .replace(/\s+/g, " ").length;
+}
+
+/** The room left between the line being written and the top of the coach card. */
+const FOLLOW_GAP = 16;
+
+function stillMotion(): boolean {
+  return (
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
 }
 
 /** How long to hold a beat that has no audio, so a silent lesson still reads at a pace. */
@@ -742,6 +772,7 @@ export function Board({
     // The voice has failed: the line goes up and stays long enough to be read.
     const readAlong = (entry: Entry | undefined, at: number) => {
       setQuestionUp(true);
+      setHandMs(READ_HAND_MS);
       setItemsShown(entry?.items.length ?? 0);
       later(() => setPointing(at), MARK_LEAD_MS);
       onward(entry ? readingMs(entry.say) : STEP_MS);
@@ -765,6 +796,7 @@ export function Board({
     if (!entry || clip === null) {
       // No voice at all here: the board is read, not heard, so it writes as before.
       setQuestionUp(true);
+      setHandMs(READ_HAND_MS);
       setItemsShown(entry?.items.length ?? 0);
       later(() => setPointing(index), MARK_LEAD_MS);
       onward(STEP_MS);
@@ -873,19 +905,6 @@ export function Board({
     [],
   );
 
-  // Keep the newest line in view: a long solution should scroll itself rather than write
-  // below the fold and wait to be found. `played` is here as well as `shown`, because the
-  // board fills from two directions — the reviewed steps and the coach's own hand — and a
-  // line written below the fold looks to a student exactly like a line that was rubbed out.
-  // Only lines already reached are on the board at all, so the bottom is the newest line and
-  // not the empty room the unwritten steps used to hold, which scrolled the question away.
-  useEffect(() => {
-    inkRef.current?.scrollTo({
-      top: inkRef.current.scrollHeight,
-      behavior: "smooth",
-    });
-  }, [shown, played, asked]);
-
   // Which line of the working the question is about. Null once the board has moved past the
   // steps onto the answer line, or before it has written anything.
   const stepIndex = shown > 0 ? (lines[shown - 1]?.step ?? null) : null;
@@ -908,6 +927,8 @@ export function Board({
       // Worked out before `keep` clears the board: whether the coach's last word was a
       // question decides whether what they have just typed is an answer to it.
       const answering = awaitingAnswer();
+      // They will want to watch the answer being written, wherever they had scrolled to.
+      following.current = true;
       keep();
       rewind();
       setAskedKind(answering ? "answered" : "asked");
@@ -1053,40 +1074,152 @@ export function Board({
     return sets;
   }, [asked, lines, pointing, shown]);
 
-  // The coach card floats over the bottom of the board, so the board leaves room under its
-  // last line for it — measured, because the card grows when the voice fails and the words
-  // are written out instead.
+  // FOLLOWING THE HAND. The line being written is always in view, above the coach card that
+  // floats over the bottom of the board. The board used to scroll to its bottom once a step
+  // had gone up — by which time the line was being written underneath the card, and a line
+  // written where it cannot be seen looks to a student exactly like a line that was never
+  // written. Now it moves as each piece STARTS, to the piece itself: that is not always the
+  // bottom, because earlier questions kept under the working sit below the lesson line.
+  //
+  // The card's real height is measured, because it grows with the caption, and the board
+  // keeps that much room (and a little air) under the line being written.
+  //
+  // A student who scrolls up to reread is left there: the board follows only while they are
+  // at the bottom, and picks up again when they come back down.
   const stageRef = useRef<HTMLDivElement>(null);
   const coachRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
+  //: How far the coach card reaches up from the bottom of the board, in pixels.
+  const coachRoom = useRef(76);
+  const following = useRef(true);
+  //: The newest thing written, which the board keeps in view.
+  const newest = useRef<HTMLElement | null>(null);
+  const followed = useRef(new WeakSet<Element>());
+
+  /** Scroll just far enough that `target` sits whole above the coach card. */
+  const keepInView = useCallback((target: HTMLElement | null) => {
+    const ink = inkRef.current;
+    if (!ink || !target || !target.isConnected) return;
+    const view = ink.getBoundingClientRect();
+    const box = target.getBoundingClientRect();
+    const ceiling = view.top + 12;
+    const floor = view.bottom - coachRoom.current - FOLLOW_GAP;
+    let by = box.bottom > floor ? box.bottom - floor : 0;
+    // Taller than the room there is: its top stays in view, where the writing starts.
+    if (box.top - by < ceiling) by = box.top - ceiling;
+    if (Math.abs(by) < 2) return;
+    ink.scrollTo({
+      top: ink.scrollTop + by,
+      behavior: stillMotion() ? "auto" : "smooth",
+    });
+  }, []);
+
+  /** Is `target` where the student can see it, clear of the coach card? */
+  const inSight = useCallback((target: HTMLElement) => {
+    const ink = inkRef.current;
+    if (!ink) return false;
+    const view = ink.getBoundingClientRect();
+    const box = target.getBoundingClientRect();
+    return (
+      box.bottom <= view.bottom - coachRoom.current + 2 && box.top >= view.top
+    );
+  }, []);
+
+  /** The marker writes only where the board is following, or the line is in sight anyway. */
+  const penCanSee = useCallback(
+    (target: HTMLElement) => following.current || inSight(target),
+    [inSight],
+  );
+
+  // Whatever has just started being written: the question, a lesson line, the student's own
+  // question, a line of the coach's answer.
+  const inkTick = `${shown}.${itemsShown}.${played}.${beats.length}.${questionUp}.${
+    asked ?? ""
+  }.${written.length}`;
+  useLayoutEffect(() => {
+    const sheet = sheetRef.current;
+    if (!sheet) return;
+    const marked = sheet.querySelectorAll<HTMLElement>(
+      "[data-ink], [data-follow]",
+    );
+    const latest = marked[marked.length - 1];
+    if (!latest || followed.current.has(latest)) return;
+    // Everything marked now counts as seen, so a line that went up alongside a newer one (the
+    // question, with the first line) is not mistaken for new writing once the newer is done.
+    marked.forEach((element) => followed.current.add(element));
+    // The whole line it belongs to — the answer's green card, not just the words in it.
+    newest.current = latest.closest<HTMLElement>(".pb-line, .pb-coachline") ?? latest;
+    if (following.current) keepInView(newest.current);
+  }, [inkTick, keepInView]);
+
+  // Whether the student has moved the board themselves. Only their own scrolling counts —
+  // the board's smooth scrolling fires the same events and must not switch itself off.
+  useEffect(() => {
+    const ink = inkRef.current;
+    if (!ink) return;
+    let touched = -Infinity;
+    const touch = () => {
+      touched = performance.now();
+    };
+    const keys = (event: KeyboardEvent) => {
+      if (
+        ["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "].includes(
+          event.key,
+        ) &&
+        !(event.target instanceof HTMLInputElement)
+      )
+        touch();
+    };
+    const scrolled = () => {
+      if (performance.now() - touched > 900) return;
+      const nearBottom =
+        ink.scrollHeight - ink.scrollTop - ink.clientHeight < 96;
+      following.current =
+        nearBottom || (newest.current !== null && inSight(newest.current));
+    };
+    ink.addEventListener("wheel", touch, { passive: true });
+    ink.addEventListener("touchmove", touch, { passive: true });
+    ink.addEventListener("pointerdown", touch);
+    ink.addEventListener("scroll", scrolled, { passive: true });
+    window.addEventListener("keydown", keys);
+    return () => {
+      ink.removeEventListener("wheel", touch);
+      ink.removeEventListener("touchmove", touch);
+      ink.removeEventListener("pointerdown", touch);
+      ink.removeEventListener("scroll", scrolled);
+      window.removeEventListener("keydown", keys);
+    };
+  }, [inSight]);
+
+  // The room the card takes, measured whenever it (or the board) changes size. A card that
+  // grows over the line being written moves the board up with it; so does a line that grows
+  // once its maths or figure has finished laying out.
   useEffect(() => {
     const coach = coachRef.current;
     const stage = stageRef.current;
     if (!coach || !stage || typeof ResizeObserver === "undefined") return;
-    let height = 0;
-    const observer = new ResizeObserver(() => {
-      const ink = inkRef.current;
-      const grew = coach.offsetHeight - height;
-      height = coach.offsetHeight;
-      // Measured before the room changes: was the student reading the newest line?
-      const atBottom =
-        ink !== null &&
-        ink.scrollHeight - ink.scrollTop - ink.clientHeight < 48 + Math.max(0, grew);
-      stage.style.setProperty("--coach-h", `${height}px`);
-      // The card grew over the newest line: move the board up with it.
-      if (ink && atBottom && grew > 0)
-        ink.scrollTo({ top: ink.scrollHeight, behavior: "smooth" });
-    });
+    const measure = () => {
+      const bottom = (inkRef.current ?? stage).getBoundingClientRect().bottom;
+      const room = Math.max(
+        0,
+        Math.round(bottom - coach.getBoundingClientRect().top),
+      );
+      coachRoom.current = room;
+      stage.style.setProperty("--coach-h", `${coach.offsetHeight}px`);
+      stage.style.setProperty("--coach-room", `${room}px`);
+      if (following.current) keepInView(newest.current);
+    };
+    const observer = new ResizeObserver(measure);
     observer.observe(coach);
+    observer.observe(stage);
+    if (sheetRef.current) observer.observe(sheetRef.current);
     return () => observer.disconnect();
-  }, []);
+  }, [keepInView]);
 
   const talking = speaking !== null || voicing;
-  const penActive =
-    !needsTap &&
-    (writing ||
-      speaking !== null ||
-      (asked === null && !paused && !finished && shown > 0));
+  // The marker puts itself down for each line and lifts off when it is done, so it is only
+  // held back while the board is waiting for a tap or has stepped back for the student.
+  const penActive = !needsTap && !(paused && asked === null && !waiting);
   // Only the lesson dims while the student types: the coach's answer to them is what they
   // are reading, and it stays at full strength.
   const dim = paused && asked === null && !waiting;
@@ -1174,7 +1307,7 @@ export function Board({
                 <div
                   className="pb-question-text pb-stroke"
                   data-ink=""
-                  style={{ "--stroke": "700ms" } as CSSProperties}
+                  style={{ "--stroke": "1100ms" } as CSSProperties}
                 >
                   <Maths text={question} />
                 </div>
@@ -1203,12 +1336,12 @@ export function Board({
                         key={item + String(piece)}
                         className={current ? "pb-item pb-stroke" : "pb-item"}
                         data-ink={current ? "" : undefined}
-                        // Written in one quick stroke as its words begin, not flashed up
-                        // whole and not faded in.
+                        // Written left to right as its words begin, at a hand's pace for its
+                        // length, and always finished within the time its words take.
                         style={
                           current
                             ? ({
-                                "--stroke": `${Math.min(700, handMs)}ms`,
+                                "--stroke": `${strokeMs(item, handMs)}ms`,
                               } as CSSProperties)
                             : undefined
                         }
@@ -1256,7 +1389,7 @@ export function Board({
               the way a teacher writes the question down before answering it.
             */}
             {asked !== null ? (
-              <div className="pb-asked">
+              <div className="pb-asked" data-follow="">
                 <span className="pb-tag sj-mono">{askedKind}</span>
                 <span>{asked}</span>
               </div>
@@ -1292,7 +1425,7 @@ export function Board({
                       // Long lines take longer to write, the way a hand does — up to a point.
                       style={
                         {
-                          "--stroke": `${Math.min(700, writeMs(line.text))}ms`,
+                          "--stroke": `${Math.min(1800, inkMs(line.text))}ms`,
                         } as CSSProperties
                       }
                     >
@@ -1307,7 +1440,8 @@ export function Board({
             <Pen
               sheetRef={sheetRef}
               active={penActive}
-              tick={`${shown}.${itemsShown}.${played}.${beats.length}.${questionUp}`}
+              tick={inkTick}
+              canSee={penCanSee}
             />
           </div>
         </div>
@@ -1380,6 +1514,7 @@ export function Board({
               aria-label="Replay this step"
               onClick={() => {
                 resume();
+                following.current = true;
                 narrating.current = null;
                 setReplayed((count) => count + 1);
               }}
@@ -1407,6 +1542,7 @@ export function Board({
               aria-label={nextLabel}
               onClick={() => {
                 resume();
+                following.current = true;
                 if (finished) onDone();
                 else advance();
               }}
@@ -1496,7 +1632,7 @@ export function Board({
   );
 }
 
-/* ---- Marks: circles, underlines and arrows drawn back over the board ------------------- */
+/* ---- Marks: circles, underlines, arrows, highlights and crossings-out over the board ----- */
 
 type MarkState = "live" | "past" | "gone";
 
@@ -1519,6 +1655,8 @@ interface Shape {
   kind: LessonPoint["kind"];
   state: MarkState;
   d: string;
+  /** A highlighter's breadth, where the mark is one. */
+  width?: number;
   head: string | null;
   label: Label | null;
 }
@@ -1562,11 +1700,17 @@ function through(points: Pt[]): string {
   return d;
 }
 
-/** One character of board text as it is matched: spaces gone, every minus the same minus. */
+/**
+ * One character of board text as it is matched: spaces gone, every minus the same minus, and
+ * — so a mark finds its words in a plain English sentence as well as in maths — case, the
+ * punctuation around words and the `*` a lesson marks its target word with ignored.
+ */
 function fold(char: string): string {
   if (/[\s​-‍⁠﻿]/.test(char)) return "";
   if (char === "−" || char === "–") return "-";
-  return char;
+  if (/[.,;:!?'"`*‘’“”…]/.test(char)) return "";
+  const lower = char.toLowerCase();
+  return lower.length === 1 ? lower : char;
 }
 
 /** The text of a line (leaving out KaTeX's hidden copy), one node at a time. */
@@ -1603,6 +1747,35 @@ function union(rects: DOMRect[]): Box | null {
  * a circle hugs the words — or where one piece of it sits when `at` names it.
  */
 function inkBox(root: Element, at?: string | null): Box | null {
+  return union(inkRects(root, at));
+}
+
+/**
+ * The same, row by row: one box for each line of text the ink runs across, so a highlight
+ * or a crossing-out over words that wrap follows the words rather than filling the block.
+ */
+function inkRows(root: Element, at?: string | null): Box[] {
+  const rows: Box[] = [];
+  const rects = inkRects(root, at)
+    .filter((r) => r.width >= 0.5 && r.height >= 0.5)
+    .sort((a, b) => a.top - b.top || a.left - b.left);
+  for (const r of rects) {
+    const middle = (r.top + r.bottom) / 2;
+    const row = rows.find(
+      (box) => middle > box.top && middle < box.bottom,
+    );
+    if (row) {
+      row.left = Math.min(row.left, r.left);
+      row.right = Math.max(row.right, r.right);
+      row.top = Math.min(row.top, r.top);
+      row.bottom = Math.max(row.bottom, r.bottom);
+    } else rows.push({ left: r.left, top: r.top, right: r.right, bottom: r.bottom });
+  }
+  return rows;
+}
+
+/** The glyph boxes behind `inkBox`, kept to the part of a sideways-scrolling line on screen. */
+function inkRects(root: Element, at?: string | null): DOMRect[] {
   const nodes = textNodes(root);
   const range = document.createRange();
   const rects: DOMRect[] = [];
@@ -1649,16 +1822,15 @@ function inkBox(root: Element, at?: string | null): Box | null {
       flush();
     }
   }
-  const box = union(rects);
-  if (!box) return null;
   // A long line scrolls sideways inside itself: keep the mark to the part that is on screen.
   const frame = root.getBoundingClientRect();
-  return {
-    left: Math.max(box.left, frame.left),
-    right: Math.min(box.right, frame.right),
-    top: box.top,
-    bottom: box.bottom,
-  };
+  return rects
+    .map((r) => {
+      const left = Math.max(r.left, frame.left);
+      const right = Math.min(r.right, frame.right);
+      return new DOMRect(left, r.top, Math.max(0, right - left), r.height);
+    })
+    .filter((r) => r.width > 0);
 }
 
 function relative(box: Box, base: DOMRect): Box {
@@ -1736,6 +1908,50 @@ function drawBox(box: Box, rnd: () => number): string {
   return `M${f(c0)} Q${f(mid(c0, c1))} ${f(c1)} Q${f(mid(c1, c2))} ${f(c2)} Q${f(mid(c2, c3))} ${f(c3)} Q${f(mid(c3, c0))} ${f(c0)} L${f(end)}`;
 }
 
+/**
+ * A highlighter pass along each row: a broad flat stroke, a touch uneven top and bottom and
+ * not quite level, the way a chisel marker goes across words.
+ */
+function drawHighlight(rows: Box[], rnd: () => number): { d: string; width: number } {
+  let d = "";
+  let width = 0;
+  for (const row of rows) {
+    const height = row.bottom - row.top;
+    width = Math.max(width, height * 0.82);
+    const x0 = row.left - 3 + (rnd() - 0.5) * 2;
+    const x1 = row.right + 3 + (rnd() - 0.5) * 3;
+    const y = (row.top + row.bottom) / 2 + height * 0.04;
+    const tilt = (rnd() - 0.5) * 2.2;
+    const points: Pt[] = [];
+    const count = Math.max(3, Math.round((x1 - x0) / 60) + 2);
+    for (let i = 0; i < count; i += 1) {
+      const t = i / (count - 1);
+      points.push([x0 + (x1 - x0) * t, y + tilt * (t - 0.5) + (rnd() - 0.5) * 1.4]);
+    }
+    d += (d ? " " : "") + through(points);
+  }
+  return { d, width };
+}
+
+/** A crossing-out: one quick line through each row, rising a little, overshooting the ends. */
+function drawStrike(rows: Box[], rnd: () => number): string {
+  let d = "";
+  for (const row of rows) {
+    const height = row.bottom - row.top;
+    const y = (row.top + row.bottom) / 2 + height * 0.06;
+    const x0 = row.left - 5;
+    const x1 = row.right + 6;
+    const rise = Math.min(5, (x1 - x0) * 0.03) + rnd() * 1.5;
+    const points: Pt[] = [];
+    for (let i = 0; i < 4; i += 1) {
+      const t = i / 3;
+      points.push([x0 + (x1 - x0) * t, y + rise * (0.5 - t) + (rnd() - 0.5) * 1.6]);
+    }
+    d += (d ? " " : "") + through(points);
+  }
+  return d;
+}
+
 function arrowHead(tip: Pt, from: Pt): string {
   const angle = Math.atan2(tip[1] - from[1], tip[0] - from[0]);
   const size = 10;
@@ -1757,6 +1973,11 @@ function bezierAt(p0: Pt, c1: Pt, c2: Pt, p3: Pt, t: number): Pt {
   ];
 }
 
+/** About how wide a label's chip is: 13px semibold, and its padding. */
+function labelWidth(text: string): number {
+  return Math.min(text.length * 7.4 + 22, 260);
+}
+
 /** Room a label needs beside its mark before it is put on the other side instead. */
 const LABEL_ROOM = 150;
 
@@ -1767,7 +1988,28 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
   const minX = 6;
   const maxX = width - 6;
   const shapes: Shape[] = [];
-  for (const set of sets) {
+  // Where labels already sit, so a second one on the same line does not land on the first.
+  const placed: Box[] = [];
+  const labelBox = (label: Label): Box => {
+    const w = labelWidth(label.text);
+    const left =
+      label.side === "right" ? label.x : label.side === "left" ? label.x - w : label.x - w / 2;
+    const top = label.side === "above" ? label.y - 22 : label.y - 11;
+    return { left, top, right: left + w, bottom: top + 22 };
+  };
+  const clashes = (label: Label) => {
+    const a = labelBox(label);
+    return placed.some(
+      (b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top,
+    );
+  };
+  const push = (shape: Shape) => {
+    if (shape.label && shape.state !== "gone") placed.push(labelBox(shape.label));
+    shapes.push(shape);
+  };
+  // The mark being made now gets first choice of where its words go.
+  const order: Record<MarkState, number> = { live: 0, past: 1, gone: 2 };
+  for (const set of [...sets].sort((a, b) => order[a.state] - order[b.state])) {
     set.points.forEach((point, k) => {
       const target = point.line < 0 ? set.index + point.line : point.line;
       if (target < 0 || target > set.index) return;
@@ -1790,6 +2032,28 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
               ? { x: left, y, side: "left", text }
               : null
           : null;
+      // Words for a mark inside a run of text — an underlined word, a highlighted clue, a
+      // crossed-out option: after the end of its row, where the board is clear, else just
+      // above the mark. Beside the mark itself they sat on top of the next words.
+      const inline = (rows: Box[]): Label | null => {
+        const first = rows[0];
+        const last = rows[rows.length - 1];
+        if (!text || !first || !last) return null;
+        const w = labelWidth(text);
+        const middle = (last.top + last.bottom) / 2;
+        const rowEnd =
+          inkRows(line)
+            .map((row) => relative(row, base))
+            .find((row) => middle > row.top && middle < row.bottom)?.right ?? last.right;
+        const options: Label[] = [];
+        if (rowEnd + 12 + w <= width) options.push({ x: rowEnd + 12, y: middle, side: "right", text });
+        const cx = Math.min(
+          Math.max((first.left + first.right) / 2, w / 2 + 2),
+          width - w / 2 - 2,
+        );
+        options.push({ x: cx, y: first.top - 2, side: "above", text });
+        return options.find((option) => !clashes(option)) ?? options[options.length - 1]!;
+      };
 
       if (point.kind === "circle" || point.kind === "box") {
         const d = point.kind === "circle" ? drawCircle(box, rnd) : drawBox(box, rnd);
@@ -1800,18 +2064,37 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
           text && cx + rx + 4 + LABEL_ROOM > width
             ? { x: Math.min(Math.max(cx, 70), width - 70), y: box.top - 8, side: "above", text }
             : beside(cx + rx + 4, cx - rx - 4, box.top - 2);
-        shapes.push({ key, kind: point.kind, state: set.state, d, head: null, label });
+        push({ key, kind: point.kind, state: set.state, d, head: null, label });
+        return;
+      }
+      if (point.kind === "highlight" || point.kind === "strike") {
+        const rows = inkRows(line, point.at).map((row) => relative(row, base));
+        if (rows.length === 0) rows.push(box);
+        const label = inline(rows);
+        if (point.kind === "highlight") {
+          const { d, width } = drawHighlight(rows, rnd);
+          push({ key, kind: "highlight", state: set.state, d, width, head: null, label });
+        } else {
+          push({
+            key,
+            kind: "strike",
+            state: set.state,
+            d: drawStrike(rows, rnd),
+            head: null,
+            label,
+          });
+        }
         return;
       }
       if (point.kind === "underline") {
         const d = drawUnderline(box, rnd);
-        shapes.push({
+        push({
           key,
           kind: "underline",
           state: set.state,
           d,
           head: null,
-          label: beside(box.right + 12, box.left - 8, box.bottom - 4),
+          label: inline(inkRows(line, point.at).map((row) => relative(row, base))),
         });
         return;
       }
@@ -1870,7 +2153,7 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
       const d = `M${f(start[0])} ${f(start[1])} C${f(c1[0])} ${f(c1[1])} ${f(c2[0])} ${f(c2[1])} ${f(tip[0])} ${f(tip[1])}`;
       const mid = bezierAt(start, c1, c2, tip, 0.5);
       if (!atStart) label = beside(mid[0] + 8, mid[0] - 8, mid[1]);
-      shapes.push({
+      push({
         key,
         kind: "arrow",
         state: set.state,
@@ -1933,10 +2216,29 @@ function Marks({
   }, [measure, sheetRef]);
 
   if (shapes.length === 0) return null;
+  const highlights = shapes.filter((shape) => shape.kind === "highlight");
   return (
     <div className="pb-marks" aria-hidden="true">
+      {/*
+        Highlights on a layer of their own, multiplied into the board: the yellow goes behind
+        the words, which stay black, the way a highlighter pen works on paper.
+      */}
+      {highlights.length ? (
+        <svg className="pb-marks-svg under">
+          {highlights.map((shape) => (
+            <g key={shape.key} className={`pb-mark highlight ${shape.state}`}>
+              <path
+                className="pb-mark-line"
+                d={shape.d}
+                pathLength={1}
+                style={{ strokeWidth: shape.width }}
+              />
+            </g>
+          ))}
+        </svg>
+      ) : null}
       <svg className="pb-marks-svg">
-        {shapes.map((shape) => (
+        {shapes.filter((shape) => shape.kind !== "highlight").map((shape) => (
           <g key={shape.key} className={`pb-mark ${shape.kind} ${shape.state}`}>
             <path className="pb-mark-line" d={shape.d} pathLength={1} />
             {shape.head ? (
@@ -1961,85 +2263,194 @@ function Marks({
 }
 
 /**
- * The pen: a nib that moves to where the board is being written and follows the stroke along
- * the line, so the eye is taken to the new line rather than having to find it.
+ * The pen: a whiteboard marker that writes the newest line, so the eye is taken to it rather
+ * than having to find it — and so the line reads as written, not as uncovered.
  *
- * It glides to the start of the newest line, then crosses it in the time the line takes to be
- * written. Lines are marked `data-ink` when they are being written; the pen goes to each one
- * once, and nowhere when a student would rather nothing moved.
+ * The line itself is revealed left to right by CSS (`.pb-stroke`, a linear wipe with a soft
+ * wet edge), after a short wait while the marker gets to the start of it. The marker runs the
+ * same clock: it glides to where the line starts during that wait, then its tip rides the
+ * reveal edge at the same speed, with a small unsteady wobble, and lifts off the board once
+ * the line is done. A line that wraps is still one wipe; the marker keeps to its last row.
+ *
+ * Lines are marked `data-ink` while they are being written; the marker goes to each once, not
+ * at all to a line the student cannot see (they have scrolled up to reread), and nowhere when
+ * a student would rather nothing moved.
  */
 function Pen({
   sheetRef,
   active,
   tick,
+  canSee,
 }: {
   sheetRef: RefObject<HTMLDivElement>;
   active: boolean;
   /** Changes whenever something may have been written, so the pen looks again. */
   tick: string;
+  /** Whether a line is (or is about to be scrolled) where the student can see it. */
+  canSee: (line: HTMLElement) => boolean;
 }) {
   const penRef = useRef<HTMLDivElement>(null);
+  const liftRef = useRef<HTMLDivElement>(null);
   const seen = useRef(new WeakSet<Element>());
   const place = useRef<Pt | null>(null);
+  //: The line being written and where it was when the marker's path was worked out.
+  const anchor = useRef<{ line: HTMLElement; left: number; top: number } | null>(null);
+
+  // THE LINE MAY MOVE UNDER THE MARKER. Its path is worked out once, when the line goes up,
+  // but a font arriving or the question above re-wrapping can shift the line after that. The
+  // marker is shifted with it, rather than finishing the line in mid-air.
+  useEffect(() => {
+    const sheet = sheetRef.current;
+    const pen = penRef.current;
+    if (!sheet || !pen || typeof ResizeObserver === "undefined") return;
+    const follow = () => {
+      const held = anchor.current;
+      if (!held || !held.line.isConnected) return;
+      const base = sheet.getBoundingClientRect();
+      const box = held.line.getBoundingClientRect();
+      const dx = box.left - base.left - held.left;
+      const dy = box.top - base.top - held.top;
+      pen.style.translate =
+        Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5 ? "" : `${dx.toFixed(1)}px ${dy.toFixed(1)}px`;
+    };
+    const observer = new ResizeObserver(follow);
+    observer.observe(sheet);
+    window.addEventListener("resize", follow);
+    void document.fonts?.ready.then(follow);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", follow);
+    };
+  }, [sheetRef]);
 
   useLayoutEffect(() => {
     const sheet = sheetRef.current;
     const pen = penRef.current;
-    if (!sheet || !pen) return;
+    const lift = liftRef.current;
+    if (!sheet || !pen || !lift) return;
     const inks = sheet.querySelectorAll<HTMLElement>("[data-ink]");
     const newest = inks[inks.length - 1];
     if (!newest || seen.current.has(newest)) return;
-    seen.current.add(newest);
-    const ink = inkBox(newest);
-    if (!ink) return;
-    const box = relative(ink, sheet.getBoundingClientRect());
-    const y = box.bottom - 2;
-    // Kept inside the sheet: a pen hanging off the edge of a phone would widen the board.
-    const edge = sheet.clientWidth - 26;
-    const start: Pt = [Math.min(box.left, edge), y];
-    const end: Pt = [Math.min(box.right + 2, edge), y];
+    // All of them, not just the newest: the question goes up with the first line, and must
+    // not be written over again later when it is the last line still marked.
+    inks.forEach((element) => seen.current.add(element));
+    if (stillMotion() || typeof pen.animate !== "function") return;
+    const base = sheet.getBoundingClientRect();
+    const box = newest.getBoundingClientRect();
+    if (box.width < 1 || box.height < 1) return;
+    anchor.current = { line: newest, left: box.left - base.left, top: box.top - base.top };
+    pen.style.translate = "";
+
+    const style = window.getComputedStyle(newest);
+    const stroke = Number.parseFloat(style.getPropertyValue("--stroke")) || 600;
+    // Along the middle of the last row of writing: the whole line when it is one row (a tall
+    // fraction included), the bottom row when the words wrap.
+    const row = Number.parseFloat(style.lineHeight) || 28;
+    const padTop = Number.parseFloat(style.paddingTop) || 0;
+    const padBottom = Number.parseFloat(style.paddingBottom) || 0;
+    const inner = box.height - padTop - padBottom;
+    const wraps =
+      inner > row * 1.8 &&
+      newest.querySelector(".katex-display, .sp-maths.block") === null;
+    const y =
+      box.top -
+      base.top +
+      (wraps ? box.height - padBottom - row / 2 : padTop + inner / 2) +
+      row * 0.12;
+    // The reveal runs from 0 to the line's width plus its wet edge; the tip sits in the middle
+    // of that edge, where the ink is going on.
+    const left = box.left - base.left - INK_EDGE / 2;
+    const right = box.left - base.left + box.width + INK_EDGE / 2;
+    // Kept on the board: the marker leans right of its tip, and hanging off the edge of a
+    // phone would widen the page.
+    const edge = sheet.clientWidth - PEN_REACH;
+    const clamp = (x: number) => Math.max(0, Math.min(x, edge));
+    const start: Pt = [clamp(left), y];
+    const end: Pt = [clamp(right), y];
     const from = place.current ?? start;
     place.current = end;
-    const at = (p: Pt) => `translate(${p[0].toFixed(1)}px, ${p[1].toFixed(1)}px)`;
-    pen.style.transform = at(end);
-    const still =
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (still || typeof pen.animate !== "function") return;
-    const stroke =
-      Number.parseFloat(newest.style.getPropertyValue("--stroke")) || 600;
-    const glide = PEN_GLIDE_MS;
+
+    const at = (p: Pt) =>
+      `translate(${p[0].toFixed(1)}px, ${p[1].toFixed(1)}px)`;
     for (const running of pen.getAnimations()) running.cancel();
-    pen.animate(
+    for (const running of lift.getAnimations()) running.cancel();
+    pen.style.transform = at(end);
+    if (!canSee(newest)) {
+      lift.style.opacity = "0";
+      return;
+    }
+    lift.style.opacity = "";
+
+    const glide = STROKE_DELAY_MS;
+    const total = glide + stroke + PEN_LIFT_MS;
+    const o = (ms: number) => Math.min(1, ms / total);
+    // Where the tip meets the edge of the board, if it does: the marker waits there while the
+    // wipe finishes, rather than running ahead of it or off the column.
+    const path: Keyframe[] = [
+      { offset: 0, transform: at(from), easing: "cubic-bezier(0.3, 0.7, 0.2, 1)" },
+      { offset: o(glide), transform: at(start), easing: "linear" },
+    ];
+    if (right > edge && left < edge) {
+      const reach = (edge - left) / (right - left);
+      path.push({ offset: o(glide + stroke * reach), transform: at(end), easing: "linear" });
+    }
+    path.push({ offset: o(glide + stroke), transform: at(end) });
+    path.push({ offset: 1, transform: at(end) });
+    pen.animate(path, { duration: total, fill: "both" });
+    // Put down on the board as it arrives, lifted off it as the line is finished.
+    const up = "translate(5px, -9px)";
+    const down = "translate(0, 0)";
+    lift.animate(
       [
-        { transform: at(from), easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" },
-        { transform: at(start), offset: glide / (glide + stroke), easing: "linear" },
-        { transform: at(end) },
+        { offset: 0, opacity: 0, transform: up },
+        { offset: o(glide * 0.7), opacity: 1, transform: down },
+        { offset: o(glide + stroke), opacity: 1, transform: down, easing: "ease-in" },
+        { offset: 1, opacity: 0, transform: up },
       ],
-      { duration: glide + stroke },
+      { duration: total, fill: "both" },
     );
-  }, [sheetRef, tick]);
+  }, [canSee, sheetRef, tick]);
 
   return (
     <div
       ref={penRef}
-      className={`pb-pen ${active && place.current ? "on" : ""}`}
+      className={`pb-pen ${active ? "on" : ""}`}
       aria-hidden="true"
     >
-      <svg viewBox="0 0 28 28" width="28" height="28">
-        <path
-          className="pb-pen-body"
-          d="M6.2 21.8 20.6 7.4a2.6 2.6 0 0 1 3.7 3.7L9.9 25.5l-5.3 1.6z"
-        />
-        <path className="pb-pen-cap" d="m18.4 9.6 3.7 3.7" />
-        <circle className="pb-pen-tip" cx="4.6" cy="27.1" r="1.6" />
-      </svg>
+      <div className="pb-pen-lift" ref={liftRef}>
+        <div className="pb-pen-wobble">
+          {/*
+            A whiteboard marker held at 35 degrees, drawn upright about its tip (0, 0) and
+            then leaned: chisel nib, collar, body in the brand ink, a lime cap on the end.
+          */}
+          <svg viewBox="-4 -31 28 33" width="28" height="33">
+            <g transform="rotate(35)">
+              <path className="pb-pen-nib" d="M-1.1 0h2.2l1.7-5.4h-5.6z" />
+              <rect className="pb-pen-collar" x="-3.3" y="-8.2" width="6.6" height="3.2" rx="0.8" />
+              <rect className="pb-pen-body" x="-3.7" y="-25" width="7.4" height="17.4" rx="1.8" />
+              <rect className="pb-pen-shine" x="-2.3" y="-23" width="1.3" height="13" rx="0.65" />
+              <rect className="pb-pen-cap" x="-4" y="-32" width="8" height="8.6" rx="2.2" />
+              <rect className="pb-pen-band" x="-4" y="-25.6" width="8" height="1.6" />
+            </g>
+          </svg>
+        </div>
+      </div>
     </div>
   );
 }
 
-/** How long the pen takes to get to the start of a new line, before the stroke begins. */
-const PEN_GLIDE_MS = 180;
+/** How long the marker takes to get to the start of a new line, before the reveal begins.
+ *  The same wait as `.pb-stroke`'s animation delay in board.css. */
+const STROKE_DELAY_MS = 180;
+
+/** How long the marker takes to lift off once a line is done. */
+const PEN_LIFT_MS = 220;
+
+/** The soft wet edge of the reveal, in pixels: `--ink-edge` in board.css. */
+const INK_EDGE = 10;
+
+/** How far right of its tip the leaning marker reaches. */
+const PEN_REACH = 24;
 
 /* ---- Icons: the app's outline family (24 grid, 1.9 stroke, round caps) -------------------- */
 
