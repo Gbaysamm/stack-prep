@@ -541,6 +541,11 @@ function LessonsLanded({ studentId, subjectId }: { studentId: string; subjectId:
       id="prog-lessons"
       className="sj-rise d4"
       sub="What you told us after each lesson the coach worked through with you."
+      action={
+        <Button tone="soft" size="sm" to="/progress/check-ins" trailing={<IconArrowRight size={16} />}>
+          Every check-in, explained
+        </Button>
+      }
     >
       {body}
     </Section>

@@ -248,6 +248,8 @@ async def test_lesson_feedback_is_summarised_from_the_latest_word(
         )
     try:
         [revisit] = (await client.get(url)).json()["to_revisit"]
+        # The student's own record keeps every answer, the changed mind too, newest first.
+        entries = (await client.get(f"{url}/entries")).json()["entries"]
     finally:
         async with get_engine().begin() as conn:
             await conn.execute(
@@ -261,6 +263,17 @@ async def test_lesson_feedback_is_summarised_from_the_latest_word(
     assert revisit["understood"] == "too_hard"
     assert revisit["stem_excerpt"]
     assert revisit["at"]
+    assert [(e["question_version_id"], e["understood"]) for e in entries] == [
+        (second, "got_it"),
+        (first, "too_hard"),
+        (first, "got_it"),
+    ]
+    assert entries[1]["context"] == "after_guess"
+    assert entries[1]["matched_working"] == "no"
+    assert entries[1]["session_id"] == session
+    # A test exam's check-ins are left out of the record, as they are from the summary.
+    assert (await client.get(f"{url}/entries")).json() == {"entries": []}
+
 
 
 def test_a_stem_excerpt_is_plain_and_short() -> None:

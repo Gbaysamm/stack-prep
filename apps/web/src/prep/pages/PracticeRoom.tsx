@@ -22,6 +22,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import {
+  Link,
   Navigate,
   Route,
   Routes,
@@ -53,6 +54,7 @@ import {
   type MatchedWorking,
   type Understood,
 } from "../lessonFeedbackApi.js";
+import { MATCHED_WORD, UNDERSTOOD_WORD, WHY_BOARD, type Word } from "../checkinWords.js";
 import { progressApi } from "../progressApi.js";
 import { FocusShell } from "../shell.js";
 import { useLoad, usePageTitle, useStudent } from "../store.js";
@@ -65,6 +67,7 @@ import {
   useNarrow,
   useToast,
 } from "../ui.js";
+import "./CheckIns.css";
 import "./PracticeRoom.css";
 
 type Confidence = "sure" | "unsure" | "guessed";
@@ -119,6 +122,33 @@ const CONFIDENCE: {
     said: "You said you guessed",
   },
 ];
+
+/**
+ * A wrong answer, read against how sure the student said they were: each tells a different
+ * story, and the student should hear which one theirs is.
+ */
+const MISSED_WITH: Record<Confidence, { first: string; second: string }> = {
+  sure: {
+    first: "You said you knew it, so something in the working went a different way. The hint points at where.",
+    second:
+      "You were sure both times, so this is a real gap, not a slip. Watch for the step where the coach’s working differs from yours.",
+  },
+  unsure: {
+    first: "You weren’t sure, and that was a fair read. Use the hint to pin it down.",
+    second: "You weren’t sure, and now you’ll see exactly which step was shaky.",
+  },
+  guessed: {
+    first: "You said you guessed. Read the hint and try to work it out this time, rather than guess again.",
+    second: "You said you guessed, which was honest. This is new ground for you, and the lesson is the right next step.",
+  },
+};
+
+/** Two misses, held on screen before the page that opens the board. */
+interface MissedTwice {
+  first: string | null;
+  second: string;
+  confidence: Confidence | null;
+}
 
 /** The check-in after a lesson: why the board was opened, and for which question. */
 interface Checkin {
@@ -195,6 +225,10 @@ export function PracticeRoom() {
   const [tick, setTick] = useState(0);
   /** After a lesson on the board: the short check-in before the run goes on. */
   const [checkin, setCheckin] = useState<Checkin | null>(null);
+  /** How sure the student said they were on the answer just marked wrong. */
+  const [missConfidence, setMissConfidence] = useState<Confidence | null>(null);
+  /** Set when the second try is wrong too: the moment that says so, before the board. */
+  const [missedTwice, setMissedTwice] = useState<MissedTwice | null>(null);
   // Whether the student may speak a question at the board, and whether the coach has a voice.
   // Both assumed off until the server says otherwise, so a refused microphone is never drawn.
   const [canSpeak, setCanSpeak] = useState(false);
@@ -262,21 +296,28 @@ export function PracticeRoom() {
     api.practiceWarm(sessionId, hintedVersion).catch(() => undefined);
   }, [canHear, hintedVersion, sessionId]);
 
-  // Dev only: `?demo=confidence|correct|hinted|guessed|unsure` jumps straight to that moment on
+  // Dev only: `?demo=confidence|correct|hinted|guessed|unsure|twice|saved` jumps straight to that moment on
   // the current question, so each screen can be looked at without playing a run to it.
   const demoed = useRef(false);
   useEffect(() => {
     if (!import.meta.env.DEV || demoed.current || !state?.question) return;
-    if (state.stage !== "asking" && state.stage !== "hint") return;
     const demo = new URLSearchParams(window.location.search).get("demo");
     if (!demo) return;
+    const anyStage = ["twice", "saved", "checkin", "checkin-misses"].includes(demo);
+    if (!anyStage && state.stage !== "asking" && state.stage !== "hint") return;
     demoed.current = true;
     const first = state.question.options[0]?.option_key;
     if (!first) return;
-    if (demo === "checkin" || demo === "checkin-misses") {
+    if (demo === "checkin" || demo === "checkin-misses" || demo === "saved") {
       setCheckin({
-        context: demo === "checkin" ? "after_guess" : "after_misses",
+        context: demo === "checkin-misses" ? "after_misses" : "after_guess",
         versionId: state.question.question_version_id,
+      });
+    } else if (demo === "twice") {
+      setMissedTwice({
+        first: first,
+        second: state.question.options[1]?.option_key ?? first,
+        confidence: "guessed",
       });
     } else if (demo === "confidence") {
       setSelected(first);
@@ -333,6 +374,13 @@ export function PracticeRoom() {
             next.question?.question_version_id ?? question.question_version_id;
           if (next.stage === "hint") keepWrong(sessionId, version, chose);
           else keepWrong(sessionId, version, null);
+          setMissConfidence(confidence);
+          if (next.stage === "explain")
+            setMissedTwice({
+              first: prev.stage === "hint" ? wrong : null,
+              second: chose,
+              confidence,
+            });
           setWrong(next.stage === "hint" ? chose : null);
           setState(next);
           askedAt.current = Date.now();
@@ -356,7 +404,7 @@ export function PracticeRoom() {
         setBusy(false);
       }
     },
-    [selected, sessionId, state, toast],
+    [selected, sessionId, state, toast, wrong],
   );
 
   const pressOn = useCallback(() => {
@@ -693,6 +741,7 @@ export function PracticeRoom() {
         total={total}
         selected={selected}
         wrong={wrong}
+        missConfidence={missConfidence}
         busy={busy}
         onSelect={setSelected}
         onCheck={() => setConfirming(true)}
@@ -714,6 +763,16 @@ export function PracticeRoom() {
             <div className="pr-col pr-view" key={viewKey}>
               {body}
             </div>
+            <MissedTwiceDialog
+              missed={missedTwice}
+              question={question}
+              correctKey={state.correct_option_key}
+              onClose={() => setMissedTwice(null)}
+              onStart={() => {
+                setMissedTwice(null);
+                openBoard();
+              }}
+            />
             <Dialog
               open={confirming}
               onClose={() => setConfirming(false)}
@@ -797,6 +856,7 @@ function Asking({
   total,
   selected,
   wrong,
+  missConfidence,
   busy,
   onSelect,
   onCheck,
@@ -809,6 +869,7 @@ function Asking({
   total: number;
   selected: string | null;
   wrong: string | null;
+  missConfidence: Confidence | null;
   busy: boolean;
   onSelect: (key: string) => void;
   onCheck: () => void;
@@ -840,6 +901,9 @@ function Asking({
             <span className="pr-panel-tag sj-mono">Hint</span>
           </div>
           <h2 className="sj-display pr-panel-title">Not quite.</h2>
+          {missConfidence ? (
+            <p className="pr-said">{MISSED_WITH[missConfidence].first}</p>
+          ) : null}
           {state.hint ? (
             <p className="pr-hint">
               <Maths text={state.hint} />
@@ -1287,6 +1351,88 @@ function ReviewBoard({
   );
 }
 
+/* ================================================================== two misses */
+
+/**
+ * The second try was wrong too. Said plainly, with both tries and the answer, and what happens
+ * now, so the student is never dropped onto the board page without knowing why.
+ */
+function MissedTwiceDialog({
+  missed,
+  question,
+  correctKey,
+  onClose,
+  onStart,
+}: {
+  missed: MissedTwice | null;
+  question: PracticeQuestion | null;
+  correctKey: string | null;
+  onClose: () => void;
+  onStart: () => void;
+}) {
+  const option = (key: string | null) =>
+    key ? question?.options.find((item) => item.option_key === key) : undefined;
+  const tries = missed
+    ? [
+        { label: "First try", option: option(missed.first) },
+        { label: missed.first ? "Second try" : "Your answer", option: option(missed.second) },
+      ].filter((item) => item.option)
+    : [];
+  const answer = option(correctKey);
+  return (
+    <Dialog
+      open={!!missed}
+      onClose={onClose}
+      title={missed?.first ? "Not this time either." : "Not this one."}
+      actions={
+        <>
+          <Button tone="ghost" onClick={onClose}>
+            Not yet
+          </Button>
+          <Button onClick={onStart} trailing={<IconArrowRight size={18} />}>
+            Show me the working
+          </Button>
+        </>
+      }
+    >
+      <div className="pr-twice">
+        <ul className="pr-twice-tries">
+          {tries.map((item) => (
+            <li key={item.label} className="pr-twice-try wrong">
+              <span className="pr-twice-label sj-mono">{item.label}</span>
+              <span className="pr-twice-row">
+                <span className="key">{item.option!.option_key}</span>
+                <span className="body">
+                  <Maths text={item.option!.body} />
+                </span>
+              </span>
+            </li>
+          ))}
+          {answer ? (
+            <li className="pr-twice-try right">
+              <span className="pr-twice-label sj-mono">The answer</span>
+              <span className="pr-twice-row">
+                <span className="key">{answer.option_key}</span>
+                <span className="body">
+                  <Maths text={answer.body} />
+                </span>
+              </span>
+            </li>
+          ) : null}
+        </ul>
+        {missed?.confidence ? <p className="pr-twice-said">{MISSED_WITH[missed.confidence].second}</p> : null}
+        <div className="ci-what">
+          <span className="ci-what-label sj-mono">What happens now</span>
+          <ul>
+            <li>The coach works it through on the board, one line at a time.</li>
+            <li>{WHY_BOARD.after_misses.then}</li>
+          </ul>
+        </div>
+      </div>
+    </Dialog>
+  );
+}
+
 /* ================================================================== check-in */
 
 interface Choice<T extends string> {
@@ -1403,10 +1549,16 @@ function CheckIn({
   narrow: boolean;
 }) {
   const both = checkin.context !== "after_misses";
-  const [matched, setMatched] = useState<MatchedWorking | null>(null);
-  const [landed, setLanded] = useState<Understood | null>(null);
+  // Dev only: `?demo=saved` opens on the saved moment, answered.
+  const demoSaved =
+    import.meta.env.DEV && new URLSearchParams(window.location.search).get("demo") === "saved";
+  const [matched, setMatched] = useState<MatchedWorking | null>(demoSaved ? "partly" : null);
+  const [landed, setLanded] = useState<Understood | null>(demoSaved ? "unsure" : null);
   const [sending, setSending] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
+  /** Once saved, the answers stay on screen with what they mean until the student goes on. */
+  const [saved, setSaved] = useState(demoSaved);
+  const toast = useToast();
   const ready = !!landed && (!both || !!matched);
 
   const submit = () => {
@@ -1419,12 +1571,76 @@ function CheckIn({
         understood: landed,
         matched_working: both ? matched : null,
       })
-      .then(() => onDone())
+      .then(() => {
+        setSaved(true);
+        toast("Check-in saved");
+      })
       .catch((error: Error) =>
         setFailed(error.message || "It didn’t save."),
       )
       .finally(() => setSending(false));
   };
+
+  if (saved && landed) {
+    const said: { question: string; word: Word }[] = [
+      { question: "Before the lesson", word: WHY_BOARD[checkin.context] },
+      ...(both && matched ? [{ question: "Was this how you worked it out?", word: MATCHED_WORD[matched] }] : []),
+      { question: "How was this lesson?", word: UNDERSTOOD_WORD[landed] },
+    ];
+    return (
+      <section className="pr-res checkin">
+        <div className="pr-panel checkin" role="status" aria-live="polite">
+          <div className="pr-panel-head">
+            <span className="pr-medal checkin saved" aria-hidden="true">
+              <IconCheck size={22} />
+            </span>
+            <span className="pr-panel-eyebrow sj-mono">
+              Question {pad(number)} · check-in saved
+            </span>
+          </div>
+          <h2 className="sj-display pr-panel-title">Saved. Here’s what it means.</h2>
+          <p className="pr-praise">
+            Thanks for being straight with us. Your answers decide what you should look at again, not your score.
+          </p>
+        </div>
+
+        <ul className="pr-saved">
+          {said.map((item) => (
+            <li key={item.question} className="pr-saved-row">
+              <span className="pr-saved-q sj-mono">{item.question}</span>
+              <span className={cx("ci-pill", item.word.tone)}>
+                <span className={cx("ci-dot", item.word.tone)} aria-hidden="true" />
+                {item.word.label}
+              </span>
+              <span className="pr-saved-means">{item.word.means}</span>
+              <span className="pr-saved-then">
+                <span className="sj-mono">Then</span> {item.word.then}
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="pr-res-go">
+          <Button
+            size="lg"
+            block={narrow}
+            busy={busy}
+            onClick={onDone}
+            trailing={busy ? undefined : <IconArrowRight size={18} />}
+          >
+            Next question
+          </Button>
+          <p className="pr-go-note">
+            Everything you’ve said is kept in{" "}
+            <Link to="/progress/check-ins" target="_blank" rel="noreferrer">
+              Your check-ins
+            </Link>
+            , with what each answer means.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="pr-res checkin">

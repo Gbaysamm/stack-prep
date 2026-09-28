@@ -1,0 +1,293 @@
+/* Your check-ins: the key (three cards, what each answer means) and the record (one card per
+   check-in, what was said and what it means). Colours follow the check-in tiles: lime for
+   the answers that landed, purple for part-way, yellow for the ones worth another look. */
+
+.sj .ci-aside {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+.sj .ci-aside-num {
+  font-size: 64px;
+  line-height: 1;
+  color: var(--yellow-300);
+}
+.sj .ci-aside-cap {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* ---------------------------------------------------------------- the key */
+.sj .ci-key {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.sj .ci-key-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px 22px;
+  min-width: 0;
+}
+.sj .ci-key-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-900);
+}
+.sj .ci-key-card ul {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .ci-mean {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 0;
+  border-top: 1px solid var(--gray-100);
+}
+.sj .ci-mean:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+.sj .ci-mean:last-child {
+  padding-bottom: 0;
+}
+.sj .ci-mean-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--ink-900);
+}
+.sj .ci-mean-text {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--gray-700);
+}
+.sj .ci-mean-then {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--gray-600);
+}
+.sj .ci-mean-then .sj-mono {
+  margin-right: 4px;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--purple-600);
+}
+
+.sj .ci-dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+.sj .ci-dot.lime {
+  background: var(--green-400);
+}
+.sj .ci-dot.purple {
+  background: var(--purple-300);
+}
+.sj .ci-dot.yellow {
+  background: var(--yellow-400);
+}
+
+/* ---------------------------------------------------------------- the record */
+.sj .ci-filter {
+  margin-bottom: 16px;
+}
+.sj .ci-chip-n {
+  margin-left: 8px;
+  font-size: 11.5px;
+  opacity: 0.7;
+}
+.sj .ci-none {
+  margin: 8px 0 0;
+  color: var(--gray-600);
+}
+.sj .ci-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0 0 18px;
+  padding: 0;
+  list-style: none;
+}
+.sj .ci-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px 22px;
+  min-width: 0;
+  border-left: 4px solid var(--green-400);
+}
+.sj .ci-entry.unsure {
+  border-left-color: var(--purple-300);
+}
+.sj .ci-entry.too_hard {
+  border-left-color: var(--yellow-400);
+}
+.sj .ci-entry-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+.sj .ci-entry-head .sj-eyebrow {
+  min-width: 0;
+}
+.sj .ci-when {
+  flex: none;
+  font-size: 12px;
+  color: var(--gray-500);
+}
+.sj .ci-stem {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--ink-900);
+  overflow-wrap: anywhere;
+}
+
+.sj .ci-said {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  margin: 0;
+}
+.sj .ci-said > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sj .ci-said dt {
+  font-family: var(--font-mono, inherit);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+}
+.sj .ci-said dd {
+  margin: 0;
+}
+.sj .ci-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-900);
+  background: var(--green-100);
+}
+.sj .ci-pill.purple {
+  background: var(--purple-100);
+}
+.sj .ci-pill.yellow {
+  background: var(--yellow-100);
+}
+
+.sj .ci-what {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  background: var(--purple-050);
+}
+.sj .ci-what-label {
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--purple-600);
+}
+.sj .ci-what ul {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .ci-what li {
+  position: relative;
+  padding-left: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--gray-800);
+}
+.sj .ci-what li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--purple-500);
+}
+.sj .ci-entry-go {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.sj details.ci-key-card {
+  gap: 0;
+  padding: 0;
+}
+.sj details.ci-key-card > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  cursor: pointer;
+  list-style: none;
+}
+.sj details.ci-key-card > summary::-webkit-details-marker {
+  display: none;
+}
+.sj details.ci-key-card > summary svg {
+  flex: none;
+  color: var(--gray-500);
+  transition: transform 0.2s ease;
+}
+.sj details.ci-key-card[open] > summary svg {
+  transform: rotate(180deg);
+}
+.sj details.ci-key-card > ul {
+  padding: 0 16px 16px;
+}
+
+@media (max-width: 1100px) {
+  .sj .ci-key {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 560px) {
+  .sj .ci-entry,
+  .sj div.ci-key-card {
+    padding: 16px;
+  }
+  .sj .ci-key {
+    gap: 10px;
+  }
+  .sj .ci-entry-head {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sj .ci-aside-num {
+    font-size: 48px;
+  }
+}

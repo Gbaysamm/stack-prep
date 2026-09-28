@@ -38,6 +38,22 @@ export interface LessonFeedbackSummary {
   to_revisit: LessonToRevisit[];
 }
 
+/** One check-in as the student gave it: every answer, the changed mind too. */
+export interface CheckinEntry {
+  id: string;
+  at: string;
+  session_id: string;
+  question_version_id: string;
+  context: LessonContext;
+  understood: Understood;
+  matched_working: MatchedWorking | null;
+  subject_id: string;
+  subject_name: string;
+  topic_name: string | null;
+  subtopic_name: string | null;
+  stem_excerpt: string;
+}
+
 async function send<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`/v1${path}`, {
     headers: { 'content-type': 'application/json', accept: 'application/json' },
@@ -63,4 +79,6 @@ export const lessonFeedbackApi = {
       body: JSON.stringify(body),
     }),
   summary: (studentId: string) => send<LessonFeedbackSummary>(`/student/${studentId}/lesson-feedback`),
+  entries: (studentId: string) =>
+    send<{ entries: CheckinEntry[] }>(`/student/${studentId}/lesson-feedback/entries`).then((body) => body.entries),
 };

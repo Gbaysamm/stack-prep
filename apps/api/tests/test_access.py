@@ -144,6 +144,7 @@ async def test_another_account_is_refused(people: People, fixture: dict[str, str
         await stranger.get(f"/v1/practice/{state['session_id']}"),
         await answer(stranger, state),
         await stranger.get(f"/v1/student/{student}/lesson-feedback"),
+        await stranger.get(f"/v1/student/{student}/lesson-feedback/entries"),
         await stranger.post(
             f"/v1/practice/{state['session_id']}/lesson/"
             f"{state['question']['question_version_id']}/feedback",

@@ -576,3 +576,85 @@ async def lesson_feedback(
         if row["understood"] in ("too_hard", "unsure") and not row["hidden"]
     ][:TO_REVISIT]
     return LessonFeedbackSummary(counts=counts, total=len(rows), to_revisit=to_revisit)
+
+
+#: The most check-ins one listing returns: years of daily practice for one student.
+CHECKINS_MAX = 500
+
+
+class CheckinEntry(BaseModel):
+    """One check-in, as the student gave it, with the question it was about."""
+
+    id: UUID
+    at: datetime
+    session_id: UUID
+    question_version_id: UUID
+    #: Why the board opened: two misses, or a right answer the student guessed or doubted.
+    context: Literal["after_misses", "after_guess", "after_unsure"]
+    understood: Literal["got_it", "unsure", "too_hard"]
+    matched_working: Literal["yes", "partly", "no"] | None
+    subject_id: UUID
+    subject_name: str
+    topic_name: str | None
+    subtopic_name: str | None
+    stem_excerpt: str
+
+
+class CheckinList(BaseModel):
+    entries: list[CheckinEntry]
+
+
+@router.get(
+    "/{student_id}/lesson-feedback/entries",
+    response_model=CheckinList,
+    summary="Every check-in the student has given after a lesson, newest first",
+)
+async def lesson_feedback_entries(
+    request: Request, conn: Annotated[AsyncConnection, Depends(connection)], student_id: UUID
+) -> CheckinList:
+    """Every answer, not only the latest per question: this is the student's own record."""
+    await require_student(request, conn, student_id)
+    await _student(conn, student_id)
+    rows = await fetch_all(
+        conn,
+        """
+        SELECT f.id, f.created_at, f.session_id, f.question_version_id, f.context,
+               f.understood, f.matched_working, v.stem,
+               s.id AS subject_id, s.name AS subject_name,
+               topic.name AS topic_name, sub.name AS subtopic_name
+        FROM lesson_feedback f
+        JOIN question_versions v ON v.id = f.question_version_id
+        JOIN subjects s ON s.id = v.subject_id
+        JOIN examinations e ON e.id = s.examination_id
+        LEFT JOIN question_classifications c
+          ON c.question_id = v.question_id AND c.classification_role = 'primary'
+        LEFT JOIN curriculum_items skill ON skill.id = c.curriculum_item_id
+        LEFT JOIN curriculum_items sub ON sub.id = skill.parent_id
+        LEFT JOIN curriculum_items topic ON topic.id = sub.parent_id
+        WHERE f.student_id = :student
+          AND NOT (upper(e.short_name) = 'SANDBOX' OR upper(e.short_name) LIKE 'PR%')
+        ORDER BY f.created_at DESC, f.id DESC
+        LIMIT :limit
+        """,
+        student=student_id,
+        limit=CHECKINS_MAX,
+    )
+    return CheckinList(
+        entries=[
+            CheckinEntry(
+                id=row["id"],
+                at=row["created_at"],
+                session_id=row["session_id"],
+                question_version_id=row["question_version_id"],
+                context=row["context"],
+                understood=row["understood"],
+                matched_working=row["matched_working"],
+                subject_id=row["subject_id"],
+                subject_name=row["subject_name"],
+                topic_name=row["topic_name"],
+                subtopic_name=row["subtopic_name"],
+                stem_excerpt=stem_excerpt(str(row["stem"] or "")),
+            )
+            for row in rows
+        ]
+    )

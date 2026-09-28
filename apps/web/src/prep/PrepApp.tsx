@@ -9,6 +9,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import './prep.css';
+import { CheckIns } from './pages/CheckIns.js';
 import { CheckupHub } from './pages/CheckupHub.js';
 import { CheckupReport } from './pages/CheckupReport.js';
 import { CheckupRoom } from './pages/CheckupRoom.js';
@@ -64,6 +65,7 @@ export function PrepApp() {
                 <Route path="/checkup" element={<CheckupHub />} />
                 <Route path="/checkup/:sessionId/report" element={<CheckupReport />} />
                 <Route path="/progress" element={<Progress />} />
+                <Route path="/progress/check-ins" element={<CheckIns />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/how-its-worked-out" element={<HowItsWorkedOut />} />
                 <Route path="*" element={<NotFound />} />

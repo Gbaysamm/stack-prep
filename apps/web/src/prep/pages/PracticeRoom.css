@@ -1602,3 +1602,126 @@
 .sj .sj-focus:has(.pr-main) {
   background: var(--paper);
 }
+
+/* ---------------------------------------------------------------- what the student said */
+/* Under "Not quite": the miss read against how sure they said they were. */
+.sj .pr-said {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+/* Two misses: both tries crossed through, the answer in green, then what happens now. */
+.sj .pr-twice {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 6px;
+}
+.sj .pr-twice-tries {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .pr-twice-try {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  background: var(--pink-100);
+}
+.sj .pr-twice-try.right {
+  background: var(--green-100);
+}
+.sj .pr-twice-label {
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray-600);
+}
+.sj .pr-twice-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+  color: var(--ink-900);
+}
+.sj .pr-twice-row .key {
+  flex: none;
+  font-weight: 700;
+}
+.sj .pr-twice-row .body {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.sj .pr-twice-try.wrong .pr-twice-row .body {
+  text-decoration: line-through;
+  text-decoration-color: var(--pink-500);
+  text-decoration-thickness: 2px;
+}
+.sj .pr-twice-said {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--gray-800);
+}
+
+/* After a check-in is saved: each answer, what it means, what happens because of it. */
+.sj .pr-saved {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 18px 0 0;
+  padding: 4px 22px;
+  list-style: none;
+  border-radius: var(--r-lg);
+  background: #fff;
+  border: 1px solid var(--gray-200);
+}
+.sj .pr-saved-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 16px 0;
+  border-top: 1px solid var(--gray-100);
+}
+.sj .pr-saved-row:first-child {
+  border-top: 0;
+}
+.sj .pr-saved-q {
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+}
+.sj .pr-saved-means {
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--gray-800);
+}
+.sj .pr-saved-then {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--gray-600);
+}
+.sj .pr-saved-then .sj-mono {
+  margin-right: 4px;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--purple-600);
+}
+.sj .pr-go-note a {
+  color: var(--purple-600);
+  font-weight: 600;
+}
+@media (max-width: 560px) {
+  .sj .pr-saved {
+    padding: 2px 16px;
+  }
+}
