@@ -2300,3 +2300,12 @@
   overflow-x: auto;
   overflow-y: hidden;
 }
+
+/* Figures never push past their box: each image may shrink to the width available. */
+.sj .sp-figures {
+  max-width: 100%;
+}
+.sj .sp-figures > * {
+  min-width: 0;
+  max-width: 100%;
+}
