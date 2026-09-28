@@ -1091,3 +1091,152 @@
   height: auto;
   margin: 6px 0;
 }
+
+/* ---- The board's layout: fits a phone, reads well on a laptop ------------------------ */
+/* Last in the file on purpose: these settle the layout over the rules above.
+
+   The coach card used to float over the bottom of the board, with the working told to stop
+   86px short of it. On a phone the card wraps to several lines and covered the working it was
+   talking about. The board is now a column: the working scrolls, and the card sits under it. */
+.sp-coach {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+.sp-board {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.sp-ink {
+  position: static;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  /* A line of working is read across; past about this width the eye loses its place. */
+  max-width: 980px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: clamp(16px, 4vh, 40px) clamp(16px, 5vw, 64px) 16px;
+  font-size: clamp(17px, 1.1vw + 12px, 26px);
+}
+.sp-tutorcard {
+  position: static;
+  flex: none;
+  box-sizing: border-box;
+  width: calc(100% - 28px);
+  max-width: 952px;
+  margin: 0 auto 12px;
+}
+.sp-tutorcard.slim {
+  width: fit-content;
+  max-width: calc(100% - 28px);
+}
+.sp-tutorcard > div {
+  min-width: 0;
+}
+.sp-tutorcard p {
+  max-height: 30vh;
+  overflow-y: auto;
+}
+/* The question's rule on a white board (an older rule drew it white, for a dark board). */
+.sp-hl.sp-question {
+  border-bottom: 1px solid #ece8f3;
+}
+
+/* A long line of working scrolls sideways within itself rather than off the edge of the
+   screen. The small padding keeps the tops of fractions from being clipped. */
+.sp-hl .sp-item {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: 2px;
+}
+
+/* The top bar: the title gives way before anything spills. */
+.sp-cbar {
+  min-width: 0;
+}
+.sp-lesson {
+  flex: 0 1 auto;
+  overflow: hidden;
+}
+.sp-lesson span {
+  min-width: 0;
+}
+.sp-lesson small,
+.sp-lesson strong {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sp-steps-mini {
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: flex-end;
+}
+.sp-steps-mini i {
+  flex: 0 1 22px;
+  min-width: 3px;
+}
+
+@media (max-width: 640px) {
+  .sp-cbar {
+    gap: 8px;
+    padding: 8px 10px;
+  }
+  .sp-lesson {
+    padding: 6px 10px;
+  }
+  .sp-hl {
+    margin-bottom: 10px;
+  }
+  .sp-tutorcard {
+    width: calc(100% - 16px);
+    margin-bottom: 8px;
+    padding: 8px 10px;
+  }
+  .sp-tutorcard.slim {
+    max-width: calc(100% - 16px);
+  }
+  .sp-tutorcard p,
+  .sp-spoken .saying {
+    font-size: 14px;
+  }
+  /* The controls take their own row above the ask box: beside it, on a phone, the box was
+     left too narrow to type in. */
+  .sp-dock {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+  }
+  .sp-dock .ctl {
+    order: -1;
+    width: 100%;
+    justify-content: center;
+    margin-left: 0;
+    gap: 14px;
+  }
+  .sp-dock .ctl button {
+    width: 40px;
+    height: 40px;
+  }
+  /* 16px or more, or iOS zooms the whole page in when the box is tapped. */
+  .sp-ask input {
+    font-size: 16px;
+    padding: 9px 12px;
+  }
+  .sp-ask .note {
+    font-size: 11.5px;
+    padding-left: 12px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .sp-tutorcard p,
+  .sp-spoken .saying {
+    font-size: 15.5px;
+  }
+  .sp-dock {
+    padding-inline: max(16px, calc((100% - 980px) / 2 + 16px));
+  }
+}
