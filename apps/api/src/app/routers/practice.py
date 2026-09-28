@@ -1514,10 +1514,35 @@ async def _lesson_beats(
     over the reviewed steps — and then the board writes each reviewed step whole, because a
     step's working cut down to fragments reads as working with lines missing.
     """
+    # The lesson written for this version, or else the one on the question's current version
+    # when it keys the same answer. A student can meet a question on a version it has since
+    # moved on from (a session started before a correction), and a lesson is only ever loaded
+    # onto the current version; without this they would get the bare reviewed steps.
     written = (
         (
             await conn.execute(
-                text("SELECT moments, traps FROM question_lessons WHERE question_version_id = :v"),
+                text(
+                    """
+                    SELECT l.moments, l.traps
+                    FROM question_versions seen
+                    JOIN questions q ON q.id = seen.question_id
+                    JOIN question_lessons l
+                      ON l.question_version_id IN (seen.id, q.current_version_id)
+                    WHERE seen.id = :v
+                      AND (
+                        l.question_version_id = seen.id
+                        OR (
+                          SELECT option_key FROM question_options
+                          WHERE question_version_id = seen.id AND is_correct
+                        ) = (
+                          SELECT option_key FROM question_options
+                          WHERE question_version_id = q.current_version_id AND is_correct
+                        )
+                      )
+                    ORDER BY l.question_version_id = seen.id DESC
+                    LIMIT 1
+                    """
+                ),
                 {"v": version_id},
             )
         )
