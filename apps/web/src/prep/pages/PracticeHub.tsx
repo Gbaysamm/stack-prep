@@ -9,9 +9,8 @@
  */
 
 import { useEffect, useState, type ReactNode } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
-import { api } from "../../student/api.js";
 import {
   IconArrowRight,
   IconBulb,
@@ -61,12 +60,6 @@ import "./PracticeHub.css";
 
 /** Runs per page in the history, as on the progress page. */
 const PAGE = 12;
-
-const LENGTHS = [
-  { value: 5, label: "Quick" },
-  { value: 10, label: "Standard" },
-  { value: 20, label: "Long" },
-] as const;
 
 /** "Today · 13:18", "Yesterday · 09:02", "Mon 21 Sep". */
 export function whenLabel(iso: string): string {
@@ -447,24 +440,8 @@ function SubjectPanel({
   subject: SubjectOverview;
   open: PracticeRun | undefined;
 }) {
-  const student = useStudent();
-  const navigate = useNavigate();
-  const toast = useToast();
-  const [length, setLength] = useState<number>(10);
-  const [starting, setStarting] = useState(false);
   const hasOpen = !!subject.open_practice_session_id;
   const finished = subject.practice.runs_finished;
-
-  const start = () => {
-    setStarting(true);
-    api
-      .startPractice(student.studentId, subject.subject_id, length)
-      .then((state) => navigate(`/practice/${state.session_id}`))
-      .catch((error: Error) => {
-        toast(`Couldn’t start the run: ${error.message || "try again"}`);
-        setStarting(false);
-      });
-  };
 
   const p = subject.practice;
 
@@ -500,7 +477,9 @@ function SubjectPanel({
         )}
       </header>
 
-      <div className="ph-start">
+      {/* A run under way is the one thing to pick up here. A new run starts from the build
+          card below, so there is one way in, not two. */}
+      <div className={cx("ph-start", !hasOpen && "empty")}>
         {hasOpen ? (
           <Link
             to={`/practice/${subject.open_practice_session_id}`}
@@ -541,65 +520,10 @@ function SubjectPanel({
             </span>
           </Link>
         ) : null}
-
-        <div className="ph-new">
-          <div className="ph-new-head">
-            <span className="ph-new-title">
-              {hasOpen ? "Or start a fresh run" : "How long a run?"}
-              <span className="sj-muted"> You can stop any time.</span>
-            </span>
-            <ChooseLink subjectId={subject.subject_id} className="wide" />
-          </div>
-          <div className="ph-new-row">
-            <div
-              className="ph-lengths"
-              role="radiogroup"
-              aria-label="Run length"
-            >
-              {LENGTHS.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  role="radio"
-                  aria-checked={length === option.value}
-                  className={cx("ph-length", length === option.value && "on")}
-                  onClick={() => setLength(option.value)}
-                >
-                  <b>{option.label}</b>
-                  <span className="sj-mono">{option.value} questions</span>
-                </button>
-              ))}
-            </div>
-            <Button
-              tone={hasOpen || subject.open_checkup_session_id ? "soft" : "primary"}
-              busy={starting}
-              onClick={start}
-              className="ph-new-go"
-              trailing={starting ? undefined : <IconArrowRight size={18} />}
-            >
-              {starting
-                ? "Picking questions…"
-                : `Start a ${length}-question run`}
-            </Button>
-          </div>
-          {/* On a phone the way to choose topics comes after the start, not between the question and its answers. */}
-          <ChooseLink subjectId={subject.subject_id} className="narrow" />
-        </div>
       </div>
 
       <SubjectStanding subject={subject} />
     </article>
-  );
-}
-
-/** Into the run builder for this subject. Drawn once per layout: beside the question on a laptop, under the start on a phone. */
-function ChooseLink({ subjectId, className }: { subjectId: string; className: string }) {
-  return (
-    <Link to={`/practice/new?subject=${subjectId}`} className={cx("ph-choose", className)}>
-      <IconLayers size={16} />
-      Choose topics and years
-      <IconChevronRight size={16} className="ph-choose-go" />
-    </Link>
   );
 }
 

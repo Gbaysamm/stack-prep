@@ -355,6 +355,18 @@ const UNDERSTOOD_WORD: Record<Understood, string> = {
   too_hard: "Too hard",
 };
 
+/** One colour per subject in "Worth another look", in the order the subjects appear. */
+const SUBJECT_TONES = ["purple", "teal", "orange", "pink", "blue"] as const;
+
+/** "Use of English" → "En", "Mathematics" → "Ma", "Christian Religious Studies" → "CR". */
+function initialsOf(name: string): string {
+  const words = name
+    .split(/\s+/)
+    .filter((word) => !["use", "of", "and", "in", "the"].includes(word.toLowerCase()));
+  if (words.length >= 2) return (words[0]![0]! + words[1]![0]!).toUpperCase();
+  return (words[0] ?? name).slice(0, 2);
+}
+
 /** What the student said after each lesson on the board, and the lessons worth another look. */
 function LessonsLanded({ studentId, subjectId }: { studentId: string; subjectId: string | null }) {
   const feedback = useLoad(() => {
@@ -526,12 +538,24 @@ function LessonsLanded({ studentId, subjectId }: { studentId: string; subjectId:
               Nothing here: every lesson{subjectId ? " in this subject" : ""} landed. Keep going.
             </p>
           ) : (
-            groupBySubject(revisit).map((group) => (
-              <section key={group.subject_id} className="prog-ll-group" aria-label={group.subject_name}>
+            <div className="prog-ll-groups">
+            {groupBySubject(revisit).map((group, index) => (
+              // Each subject is its own block, in its own colour, so English and Maths never
+              // run together into one list.
+              <section
+                key={group.subject_id}
+                className={cx("prog-ll-group", SUBJECT_TONES[index % SUBJECT_TONES.length])}
+                aria-label={group.subject_name}
+              >
                 <div className="prog-ll-group-head">
                   <span className="prog-ll-group-name">
-                    {group.subject_name}
-                    <small>{plural(group.items.length, "lesson")}</small>
+                    <span className="prog-ll-group-tile" aria-hidden="true">
+                      {initialsOf(group.subject_name)}
+                    </span>
+                    <span className="prog-ll-group-words">
+                      <b>{group.subject_name}</b>
+                      <small>{plural(group.items.length, "lesson")} to look at again</small>
+                    </span>
                   </span>
                   <Button
                     tone="soft"
@@ -558,7 +582,8 @@ function LessonsLanded({ studentId, subjectId }: { studentId: string; subjectId:
                   ))}
                 </ul>
               </section>
-            ))
+            ))}
+            </div>
           )}
         </div>
       </div>
