@@ -1,10 +1,9 @@
-/* Progress: the run strip (the page's signature), a check-up card per subject beside the topic
-   picture, and the run history. The topic list and legend are shared with the subject page. */
+/* Progress: the subject switcher, the run strip (the page's signature), every subject as a row,
+   the topic picture for one subject, and the run history. The topic list and legend are shared
+   with the subject page. */
 
 .sj .prog-filter {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  min-width: 0;
 }
 
 /* ---------------------------------------------------------------- the run strip */
@@ -139,27 +138,9 @@
 }
 
 /* ---------------------------------------------------------------- subjects + strengths */
-.sj .prog-duo {
-  display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  grid-template-rows: auto auto 1fr;
-  column-gap: 18px;
-}
-/* Both sections share rows, so their cards start on the same line. */
-.sj .prog-duo > .home-sec {
-  display: grid;
-  grid-row: span 3;
-  grid-template-rows: subgrid;
-  row-gap: 0;
-}
+/* The strip's columns: the number sits well clear of its bar. */
 .sj .prog-col {
-  display: flex;
-  flex-direction: column;
   gap: 18px;
-  min-width: 0;
-}
-.sj .prog-col > .prog-subject:last-child {
-  flex: 1;
 }
 .sj .prog-panel {
   display: flex;
@@ -168,103 +149,33 @@
   min-width: 0;
   padding: 20px;
 }
-
-.sj .prog-subject {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  padding: 20px;
-}
-.sj .prog-subject-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 14px;
-  font-size: 14px;
-}
-.sj .prog-subject-head .text {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-}
-.sj .prog-snap {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding-top: 18px;
-  border-top: 1px dashed var(--gray-200);
-}
-.sj .prog-snap .label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--gray-600);
-}
-.sj .prog-snap .num {
-  display: flex;
+/* A figure in the subjects table; its label only shows on a phone, where the header is gone. */
+.sj .prog-fig {
+  display: inline-flex;
   align-items: baseline;
   gap: 6px;
 }
-.sj .prog-snap .sj-num {
-  font-size: 60px;
+.sj .prog-fig b {
+  font-size: 18px;
   color: var(--ink-900);
 }
-.sj .prog-snap .sj-num.dim {
-  color: var(--gray-300);
+.sj .prog-fig small {
+  display: none;
+  font-size: 12px;
+  color: var(--gray-600);
 }
-.sj .prog-snap .of {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--gray-500);
-}
-.sj .prog-snap .line {
-  max-width: 48ch;
+.sj .prog-rowlink {
   font-size: 13.5px;
-  line-height: 1.5;
-  color: var(--gray-600);
-  text-wrap: pretty;
-}
-.sj .prog-mini {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin: 0;
-  padding: 16px 0 0;
-  border-top: 1px dashed var(--gray-200);
-}
-.sj .prog-mini > div {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-  padding: 0 16px;
-  border-left: 1px solid var(--gray-200);
-}
-.sj .prog-mini > div:first-child {
-  padding-left: 0;
-  border-left: 0;
-}
-.sj .prog-mini dt {
-  font-family: var(--f-mono);
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--gray-600);
   white-space: nowrap;
 }
-.sj .prog-mini dd {
-  margin: 0;
-  font-size: 30px;
+.sj .prog-rowlink.warn {
+  color: var(--gray-900);
 }
-.sj .prog-subject-actions {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px 18px;
-  margin-top: auto;
-  font-size: 14px;
+.sj .prog-rowlink.warn .ss-dot {
+  margin-right: 2px;
+}
+.sj #prog-strengths > .ss {
+  margin-top: 14px;
 }
 
 /* ---------------------------------------------------------------- legend (shared) */
@@ -464,14 +375,13 @@
 }
 
 @media (max-width: 860px) {
-  .sj .prog-duo {
-    row-gap: 20px;
-  }
   .sj .prog-col {
     gap: 14px;
   }
+  .sj .prog-fig small {
+    display: inline;
+  }
   .sj .prog-panel,
-  .sj .prog-subject,
   .sj .prog-strip {
     padding: 16px;
   }
@@ -485,17 +395,6 @@
   }
   .sj .prog-strip-cols {
     gap: 6px;
-  }
-  .sj .prog-filter {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    margin-left: -16px;
-    margin-right: -16px;
-    padding: 2px 16px 6px;
-    scrollbar-width: none;
-  }
-  .sj .prog-filter .sj-chip {
-    flex: none;
   }
 }
 

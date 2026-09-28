@@ -116,326 +116,57 @@
   padding-bottom: 6px;
 }
 
-/* ---------------------------------------------------------------- subject cards */
-.sj .ch-list {
+/* ---------------------------------------------------------------- subject rows */
+.sj .ch-sechead-row {
   display: flex;
-  flex-direction: column;
-  gap: 18px;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px 18px;
+  margin-bottom: 14px;
 }
-/* One wide card per subject. Desktop: name and meta on the left, the actions on the right of the
-   same rows; the score panel runs the full width beneath. */
-.sj .ch-subj {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas:
-    "head actions"
-    "meta actions"
-    "panel panel"
-    "weak weak"
-    "issue issue";
-  column-gap: 22px;
-  row-gap: 0;
-  min-width: 0;
-  padding: 20px;
-  transition:
-    transform var(--t-med) var(--ease),
-    box-shadow var(--t-med) var(--ease),
-    border-color var(--t-med) var(--ease);
+.sj .ch-sechead-row .ch-sechead {
+  margin-bottom: 0;
 }
-.sj article.ch-subj:hover {
-  transform: translateY(-2px);
-  border-color: var(--purple-200);
-  box-shadow: 6px 6px 0 var(--purple-100);
-}
-/* The page's one sticker: a check-up left halfway. */
-.sj .ch-subj.is-open {
-  border: 1.5px solid var(--gray-900);
-  box-shadow: 6px 6px 0 var(--yellow-400);
-}
-.sj article.ch-subj.is-open:hover {
-  border-color: var(--gray-900);
-  box-shadow: 8px 8px 0 var(--yellow-400);
-}
-.sj .ch-subj-head {
-  grid-area: head;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-.sj .ch-subj-name {
-  min-width: 0;
-  font-size: 26px;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  text-wrap: balance;
-}
-.sj .ch-subj-badge {
+.sj .ch-addlink {
   flex: none;
-}
-.sj .ch-subj-meta {
-  grid-area: meta;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 18px;
-  margin-top: 12px;
-  font-size: 13px;
-  color: var(--gray-600);
-}
-.sj .ch-subj-meta span {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-}
-.sj .ch-subj-meta span:first-child:not(:has(svg)) {
-  font-family: var(--f-mono);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  color: var(--purple-600);
-}
-.sj .ch-subj-meta svg {
-  color: var(--purple-600);
-}
-.sj .ch-actions {
-  grid-area: actions;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding-bottom: 6px; /* room for the button's ledge */
-}
-
-/* The score panel: the number on the left, the scale across the rest. */
-.sj .ch-panel,
-.sj .ch-blank {
-  grid-area: panel;
-  margin-top: 18px;
-}
-.sj .ch-panel {
-  display: grid;
-  grid-template-columns: minmax(0, 230px) minmax(0, 1fr);
-  gap: 32px;
-  align-items: center;
-  padding: 20px 26px 20px 20px;
-  border-radius: var(--r-md);
-  color: #fff;
-  background:
-    radial-gradient(60% 140% at 100% 0%, rgba(107, 11, 255, 0.5), transparent 70%),
-    radial-gradient(40% 90% at 70% 140%, rgba(254, 118, 152, 0.22), transparent 70%),
-    var(--ink-900);
-}
-.sj .ch-panel-score {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-}
-.sj .ch-panel-label {
-  font-family: var(--f-mono);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--green-400);
-}
-.sj .ch-panel-num {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-}
-.sj .ch-panel-num .sj-num {
-  font-size: 64px;
-  color: #fff;
-}
-.sj .ch-panel-num .of {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--purple-200);
-}
-.sj .ch-panel-note {
-  font-size: 13px;
-  line-height: 1.45;
-  color: rgba(255, 255, 255, 0.72);
-  text-wrap: pretty;
-}
-
-/* The scale. Everything on it is placed by --at, a percentage along the track. */
-.sj .ch-scale {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  margin: 0 10px;
-}
-.sj .ch-scale-flags {
-  position: relative;
-  height: 30px;
-}
-.sj .ch-flag {
-  position: absolute;
-  bottom: 6px;
-  left: var(--at);
-  transform: translateX(-50%);
-  display: inline-flex;
-  align-items: center;
-  height: 22px;
-  padding: 0 8px;
-  border-radius: var(--r-xs);
-  background: var(--yellow-300);
-  color: var(--ink-900);
-  font-family: var(--f-mono);
-  font-size: 11px;
-  font-weight: 700;
-  white-space: nowrap;
-  animation: ch-drop 480ms 400ms var(--ease-spring) both;
-}
-@keyframes ch-drop {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -6px);
-  }
-}
-.sj .ch-scale-track {
-  position: relative;
-  height: 12px;
-  border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.12);
-}
-.sj .ch-scale-track .band {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  border-radius: inherit;
-  background: rgba(133, 222, 76, 0.34);
-  box-shadow: inset 0 0 0 1.5px rgba(133, 222, 76, 0.6);
-  transform-origin: center;
-  animation: ch-grow 700ms 150ms var(--ease) both;
-}
-@keyframes ch-grow {
-  from {
-    opacity: 0;
-    transform: scaleX(0.2);
-  }
-}
-.sj .ch-scale-track .pole {
-  position: absolute;
-  top: -8px;
-  bottom: -8px;
-  left: var(--at);
-  width: 3px;
-  margin-left: -1.5px;
-  border-radius: 2px;
-  background: var(--yellow-300);
-}
-.sj .ch-scale-track .dot {
-  position: absolute;
-  top: 50%;
-  left: var(--at);
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--green-400);
-  box-shadow:
-    0 0 0 4px var(--ink-900),
-    0 0 0 8px rgba(133, 222, 76, 0.22);
-  transform: translate(-50%, -50%);
-  animation: ch-pop 480ms 300ms var(--ease-spring) both;
-}
-@keyframes ch-pop {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.3);
-  }
-}
-.sj .ch-scale-ticks {
-  position: relative;
-  height: 16px;
-  margin-top: 12px;
-  font-size: 11px;
-  color: rgba(215, 189, 255, 0.6);
-}
-.sj .ch-scale-ticks span {
-  position: absolute;
-  left: var(--at);
-  transform: translateX(-50%);
-}
-.sj .ch-scale-range {
-  margin-top: 8px;
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--green-400);
-}
-
-/* No score yet: the same anatomy as every card, on grey. */
-.sj .ch-blank {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 18px 20px;
-  border-radius: var(--r-md);
-  background: var(--gray-100);
-}
-.sj .ch-blank-head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.sj .ch-blank-head strong {
-  font-size: 15px;
-  font-weight: 600;
-}
-.sj .ch-blank .ch-ico {
-  background: #fff;
-}
-.sj .ch-blank.open {
-  background: var(--yellow-100);
-}
-.sj .ch-blank.open .ch-ico {
-  background: var(--yellow-300);
-  color: var(--ink-900);
-}
-.sj .ch-blank.nogoal .ch-ico {
-  background: var(--pink-100);
-  color: #9c1d4c;
-}
-.sj .ch-blank p {
-  max-width: 70ch;
   font-size: 14px;
-  line-height: 1.5;
-  color: var(--gray-700);
-  text-wrap: pretty;
 }
-
-.sj .ch-weak {
-  grid-area: weak;
+.sj .ch-skel {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 12px;
-  margin-top: 14px;
-  font-size: 13.5px;
+  flex-direction: column;
+  gap: 8px;
+}
+.sj .ch-weakcell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 13px;
   color: var(--gray-700);
 }
-.sj .ch-weak .sj-eyebrow {
+.sj .ch-weakcell span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sj .ch-weakcell b {
+  font-size: 11px;
   color: #9c1d4c;
 }
-.sj .ch-weak-item {
+.sj .ch-weakcell.none {
+  color: var(--gray-300);
+}
+.sj .ch-rowacts {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-height: 30px;
-  padding: 4px 10px;
-  border-radius: var(--r-sm);
-  background: var(--pink-100);
-  font-weight: 500;
+  justify-content: flex-end;
+  gap: 16px;
 }
-.sj .ch-weak-item b {
-  font-size: 12px;
-  color: #9c1d4c;
+.sj .ch-report {
+  font-size: 13.5px;
 }
+
 .sj .ch-issue {
-  grid-area: issue;
   margin: 14px 0 0;
   padding: 10px 14px;
   border-radius: var(--r-sm);
@@ -474,28 +205,8 @@
 }
 
 /* ---------------------------------------------------------------- responsive */
-@media (max-width: 1100px) {
-  .sj .ch-subj {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      "head"
-      "meta"
-      "panel"
-      "weak"
-      "issue"
-      "actions";
-  }
-  .sj .ch-actions {
-    margin-top: 18px;
-  }
-  .sj .ch-panel {
-    grid-template-columns: minmax(0, 200px) minmax(0, 1fr);
-    gap: 26px;
-  }
-}
-
 @media (max-width: 860px) {
-  /* On a phone the subject card right below carries the same number: the hero stays lean. */
+  /* On a phone the rows right below carry the same numbers: the hero stays lean. */
   .sj .ch-page .sj-hero-aside {
     display: none;
   }
@@ -509,33 +220,12 @@
   .sj .ch-section + .ch-section {
     margin-top: 20px;
   }
-  .sj .ch-note,
-  .sj .ch-subj {
+  .sj .ch-note {
     padding: 16px;
   }
-  .sj .ch-subj-name {
-    font-size: 22px;
-  }
-  .sj .ch-subj-name {
-    flex: 1;
-  }
-  .sj .ch-panel {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 18px;
-    padding: 16px;
-  }
-  .sj .ch-panel-num .sj-num {
-    font-size: 52px;
-  }
-  .sj .ch-scale {
-    margin: 0 11px;
-  }
-  .sj .ch-blank {
-    padding: 16px;
-  }
-  .sj .ch-actions {
-    flex-direction: column;
-    align-items: stretch;
+  /* On a phone the report link moves under the name's line; the button keeps its place. */
+  .sj .ch-rows .ch-rowacts {
+    gap: 12px;
   }
   .sj .ch-note-actions,
   .sj .ch-note-actions > * {
@@ -554,8 +244,7 @@
 }
 
 /* ================================================================ info tips and the capped list */
-.sj .ch-stat-label,
-.sj .ch-panel-label {
+.sj .ch-stat-label {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -563,16 +252,4 @@
 .sj .ch-stat-chips > .sj-info {
   align-self: center;
 }
-.sj .ch-weak-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.sj .ch-subj-meta .sj-info {
-  margin-left: -1px;
-}
-.sj .ch-more {
-  justify-self: start;
-  align-self: flex-start;
-  margin-top: 0;
-}
+

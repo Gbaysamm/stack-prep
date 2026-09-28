@@ -18,14 +18,23 @@ import { IconArrowRight, IconBolt, IconBook, IconChart, IconChevronRight, IconTa
 import { lessonFeedbackApi, type LessonToRevisit, type Understood } from "../lessonFeedbackApi.js";
 import { progressApi, type PracticeRunPage, type SubjectOverview } from "../progressApi.js";
 import { useLoad, usePageTitle, useStudent } from "../store.js";
-import { Badge, Button, CountUp, PageHero, Skeleton, cx, useToast } from "../ui.js";
+import { Badge, Button, CountUp, PageHero, Pager, Skeleton, cx, usePaged, useToast } from "../ui.js";
+import {
+  ALL,
+  ScoreCell,
+  SubjectName,
+  SubjectRows,
+  SubjectSwitcher,
+  useOverview,
+  useSubjectChoice,
+  type SubjectColumn,
+} from "../SubjectSwitcher.js";
 import {
   HeroStats,
   MasteryBar,
   Note,
   RunRow,
   Section,
-  fmtScore,
   masteryWord,
   plural,
   runHref,
@@ -197,77 +206,82 @@ function RunStrip({ runs }: { runs: Run[] }) {
   );
 }
 
-/* ================================================================== subject check-up card */
+/* ================================================================== every subject, as rows */
 
-function SubjectSummary({ subject }: { subject: SubjectOverview }) {
-  const latest = subject.latest_checkup;
-  const p = subject.practice;
-  const rate = p.questions_answered > 0 ? p.correct_unaided / p.questions_answered : null;
-  return (
-    <article className="sj-card prog-subject">
-      <header className="prog-subject-head">
-        <div className="text">
-          <span className="sj-eyebrow">{subject.examination_short_name}</span>
-          <h3 className="sj-display sj-h3">{subject.subject_name}</h3>
-        </div>
-        <Link className="sj-link" to={`/subjects/${subject.subject_id}`}>
-          Open <IconArrowRight size={14} />
-        </Link>
-      </header>
-
-      <div className="prog-snap">
-        <span className="label sj-mono">Predicted score</span>
-        <div className="num">
-          {latest?.score_now !== null && latest?.score_now !== undefined ? (
-            <>
-              <span className="sj-num">{fmtScore(latest.score_now)}</span>
-              <span className="sj-mono of">/100</span>
-            </>
-          ) : (
-            <span className="sj-num dim">—</span>
-          )}
-        </div>
-        <p className="line">
-          {latest
-            ? latest.score_now !== null
-              ? `What you'd likely get if you sat the exam today. From your ${plural(latest.answered, "question")} check-up on ${shortDate(latest.finished_at)}.`
-              : "Add a target and exam date and this check-up turns into a predicted score."
-            : "A check-up shows where you stand and what to practise first."}
-        </p>
-      </div>
-
-      <dl className="prog-mini">
-        <div>
-          <dt>Runs</dt>
-          <dd className="sj-num">{p.runs_finished}</dd>
-        </div>
-        <div>
-          <dt>Answered</dt>
-          <dd className="sj-num">{p.questions_answered}</dd>
-        </div>
-        <div>
-          <dt>First time</dt>
-          <dd className="sj-num">{rate === null ? "—" : `${Math.round(rate * 100)}%`}</dd>
-        </div>
-      </dl>
-
-      <div className="prog-subject-actions">
-        {latest ? (
-          <Button to={`/checkup/${latest.session_id}/report`} tone="soft" size="sm" trailing={<IconArrowRight size={16} />}>
-            Read the report
-          </Button>
-        ) : (
-          <Button to={`/subjects/${subject.subject_id}`} tone="soft" size="sm" trailing={<IconArrowRight size={16} />}>
-            Take a check-up
-          </Button>
-        )}
-        {latest && latest.score_now === null ? (
-          <Link className="sj-link" to={`/subjects/${subject.subject_id}/goal`}>
-            Set my goal
+/** Latest check-up and practice for every subject, one row each, ten to a page. */
+function SubjectTable({ subjects, selected }: { subjects: SubjectOverview[]; selected: string | null }) {
+  const paged = usePaged(subjects, 10);
+  const columns: SubjectColumn[] = [
+    {
+      key: "name",
+      head: "Subject",
+      width: "minmax(0, 1.4fr)",
+      phone: "lead",
+      cell: (s) => <SubjectName subject={s} to={<Link to={`/subjects/${s.subject_id}`}>{s.subject_name}</Link>} />,
+    },
+    { key: "score", head: "Predicted score", width: "minmax(0, 1.3fr)", phone: "full", cell: (s) => <ScoreCell subject={s} /> },
+    {
+      key: "runs",
+      head: "Runs",
+      width: "64px",
+      align: "end",
+      cell: (s) => <Fig value={s.practice.runs_finished} label="runs" />,
+    },
+    {
+      key: "answered",
+      head: "Answered",
+      width: "84px",
+      align: "end",
+      cell: (s) => <Fig value={s.practice.questions_answered} label="answered" />,
+    },
+    {
+      key: "rate",
+      head: "First time",
+      width: "84px",
+      align: "end",
+      cell: (s) => {
+        const p = s.practice;
+        return (
+          <Fig
+            value={p.questions_answered > 0 ? `${Math.round((p.correct_unaided / p.questions_answered) * 100)}%` : "—"}
+            label="first time"
+          />
+        );
+      },
+    },
+    {
+      key: "go",
+      head: "Check-up",
+      width: "150px",
+      align: "end",
+      phone: "end",
+      cell: (s) =>
+        s.latest_checkup ? (
+          <Link className="sj-link prog-rowlink" to={`/checkup/${s.latest_checkup.session_id}/report`}>
+            Read the report <IconArrowRight size={14} />
           </Link>
-        ) : null}
-      </div>
-    </article>
+        ) : (
+          <Link className="sj-link prog-rowlink warn" to={`/checkup?subject=${s.subject_id}`}>
+            <span className="ss-dot yellow" aria-hidden="true" /> Take a check-up
+          </Link>
+        ),
+    },
+  ];
+  return (
+    <>
+      <SubjectRows subjects={paged.items} columns={columns} label="Your subjects" selected={selected} id="prog-subject-rows" />
+      <Pager paged={paged} noun="subjects" anchorId="prog-subject-rows" />
+    </>
+  );
+}
+
+/** A number in a table cell; on a phone its label comes along, since the header is gone. */
+function Fig({ value, label }: { value: ReactNode; label: string }) {
+  return (
+    <span className="prog-fig">
+      <b className="sj-num">{value}</b>
+      <small>{label}</small>
+    </span>
   );
 }
 
@@ -282,14 +296,14 @@ function StrengthsCard({ subject }: { subject: SubjectOverview }) {
       {!latest ? (
         <Note
           icon={<IconTarget size={18} />}
-          title="No check-up yet"
+          title={`No ${subject.subject_name} check-up yet`}
           action={
-            <Button to={`/subjects/${subject.subject_id}`} trailing={<IconArrowRight size={18} />}>
-              Take a check-up
+            <Button to={`/checkup?subject=${subject.subject_id}`} trailing={<IconArrowRight size={18} />}>
+              Take the {subject.subject_name} check-up
             </Button>
           }
         >
-          Your topic strengths come from a check-up. It's short, and it's where your plan starts.
+          {subject.subject_name}'s topic strengths come from a check-up. It's about 15 questions, and it's where the plan starts.
         </Note>
       ) : report.error ? (
         <Note
@@ -555,13 +569,12 @@ function LessonsLanded({ studentId, subjectId }: { studentId: string; subjectId:
 export function Progress() {
   usePageTitle("Progress");
   const student = useStudent();
-  const overview = useLoad(() => progressApi.overview(student.studentId), [student.studentId]);
+  const overview = useOverview(student.studentId);
   const first = useLoad(() => progressApi.runs(student.studentId, PAGE), [student.studentId]);
   const [extra, setExtra] = useState<PracticeRunPage["runs"]>([]);
   const [next, setNext] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [moreError, setMoreError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<string>("all");
 
   useEffect(() => {
     if (first.data) {
@@ -587,18 +600,14 @@ export function Progress() {
 
   const subjects = overview.data?.subjects ?? [];
   const runs = [...(first.data?.runs ?? []), ...extra];
-  const shown = filter === "all" ? runs : runs.filter((run) => run.subject_id === filter);
+  // The page's subject: every subject unless one is asked for (?subject=).
+  const [filter, setFilter] = useSubjectChoice(subjects, { allowAll: true, defaultAll: true });
+  const shown = filter === ALL || !filter ? runs : runs.filter((run) => run.subject_id === filter);
   const filterSubject = subjects.find((s) => s.subject_id === filter);
   const scope = filterSubject ? [filterSubject] : subjects;
-  const strengthSubject = filterSubject ?? subjects.find((s) => s.latest_checkup) ?? subjects[0];
-  // Subjects with runs but no goal or sitting still get a chip.
-  const chipSubjects = useMemo(() => {
-    const seen = new Map<string, string>();
-    for (const s of subjects) seen.set(s.subject_id, s.subject_name);
-    for (const r of runs) if (!seen.has(r.subject_id)) seen.set(r.subject_id, r.subject_name);
-    return [...seen.entries()];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subjects, runs.length]);
+  // Topics need one subject: the page's, else their own choice (?topics=), checked ones first.
+  const [topicsId, setTopicsId] = useSubjectChoice(subjects, { param: "topics", prefer: (s) => !!s.latest_checkup });
+  const strengthSubject = filterSubject ?? subjects.find((s) => s.subject_id === topicsId) ?? subjects[0];
 
   const totals = scope.reduce(
     (sum, s) => ({
@@ -703,16 +712,15 @@ export function Progress() {
     <div className="sj-page prog">
       {hero}
 
-      {chipSubjects.length > 1 ? (
-        <div className="prog-filter sj-rise" role="group" aria-label="Show subject">
-          <button type="button" className="sj-chip" aria-pressed={filter === "all"} onClick={() => setFilter("all")}>
-            All subjects
-          </button>
-          {chipSubjects.map(([id, name]) => (
-            <button key={id} type="button" className="sj-chip" aria-pressed={filter === id} onClick={() => setFilter(id)}>
-              {name}
-            </button>
-          ))}
+      {subjects.length > 1 ? (
+        <div className="prog-filter sj-rise">
+          <SubjectSwitcher
+            subjects={subjects}
+            value={filter}
+            onChange={setFilter}
+            allowAll
+            label="Show progress for"
+          />
         </div>
       ) : null}
 
@@ -726,39 +734,42 @@ export function Progress() {
         {!first.data && !first.error ? <Skeleton height={250} radius={14} /> : <RunStrip runs={shown} />}
       </Section>
 
-      <div className="prog-duo">
+      <Section
+        eyebrow={subjects.length > 1 ? `Latest check-up · ${plural(subjects.length, "subject")}` : "Latest check-up"}
+        title={subjects.length > 1 ? "Your subjects" : "Your score"}
+        id="prog-subjects"
+        className="sj-rise d2"
+        sub="Predicted score: what you'd likely get if you sat the exam today, against your target."
+      >
+        <SubjectTable subjects={subjects} selected={filterSubject?.subject_id ?? null} />
+      </Section>
+
+      {strengthSubject ? (
         <Section
-          eyebrow="Latest check-up"
-          title={scope.length > 1 ? "Your subjects" : "Your score"}
-          id="prog-subjects"
-          className="sj-rise d2"
-          sub="Predicted score: what you'd likely get if you sat the exam today."
+          eyebrow={`Topic strengths · ${strengthSubject.subject_name}`}
+          title="How each topic stands"
+          id="prog-strengths"
+          className="sj-rise d3"
+          sub="Mastery: how often we think you'd get a question on it right. Weakest first; open a topic to see its parts."
+          action={
+            strengthSubject.latest_checkup ? (
+              <Link className="sj-link" to={`/checkup/${strengthSubject.latest_checkup.session_id}/report`}>
+                Full report <IconArrowRight size={14} />
+              </Link>
+            ) : null
+          }
         >
-          <div className="prog-col">
-            {scope.map((s) => (
-              <SubjectSummary key={s.subject_id} subject={s} />
-            ))}
-          </div>
+          {subjects.length > 1 ? (
+            <SubjectSwitcher
+              subjects={subjects}
+              value={strengthSubject.subject_id}
+              onChange={(id) => (filterSubject ? setFilter(id) : setTopicsId(id))}
+              label="Topics for"
+            />
+          ) : null}
+          <StrengthsCard key={strengthSubject.subject_id} subject={strengthSubject} />
         </Section>
-        {strengthSubject ? (
-          <Section
-            eyebrow={`Topic strengths · ${strengthSubject.subject_name}`}
-            title="How each topic stands"
-            id="prog-strengths"
-            className="sj-rise d3"
-            sub="Mastery: how often we think you'd get a question on it right. Weakest first; open a topic to see its parts."
-            action={
-              strengthSubject.latest_checkup ? (
-                <Link className="sj-link" to={`/checkup/${strengthSubject.latest_checkup.session_id}/report`}>
-                  Full report <IconArrowRight size={14} />
-                </Link>
-              ) : null
-            }
-          >
-            <StrengthsCard subject={strengthSubject} />
-          </Section>
-        ) : null}
-      </div>
+      ) : null}
 
       <LessonsLanded studentId={student.studentId} subjectId={filterSubject ? filterSubject.subject_id : null} />
 
@@ -822,7 +833,7 @@ export function Progress() {
             <>
               <ul className="home-runs">
                 {shown.map((run) => (
-                  <RunRow key={run.session_id} run={run} detail />
+                  <RunRow key={run.session_id} run={run} detail showSubject={!filterSubject} />
                 ))}
               </ul>
               {next ? (

@@ -1,0 +1,579 @@
+/* The cross-subject pieces: switcher, subject rows, score and status cells. Every class starts
+   `ss-`. Pills and rows sit on the page's left edge; corners stay small. */
+
+.sj .ss-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- status dot */
+.sj .ss-dot {
+  display: inline-block;
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gray-300);
+}
+.sj .ss-dot.lime {
+  background: var(--green-500);
+}
+.sj .ss-dot.yellow {
+  background: var(--yellow-400);
+  box-shadow: 0 0 0 2px var(--yellow-100);
+}
+.sj .ss-dot.pink {
+  background: var(--pink-500);
+}
+.sj .ss-dot.purple {
+  background: var(--purple-600);
+}
+
+/* ---------------------------------------------------------------- pills */
+.sj .ss {
+  position: relative;
+  min-width: 0;
+}
+.sj .ss-pills {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* Room for the focus ring, taken back so the first pill sits on the page edge. */
+  padding: 4px;
+  margin: -4px;
+}
+.sj .ss-pills::-webkit-scrollbar {
+  display: none;
+}
+.sj .ss-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: var(--r-sm);
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--gray-200);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--gray-800);
+  white-space: nowrap;
+  transition:
+    background var(--t-fast) var(--ease),
+    box-shadow var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease);
+}
+.sj .ss-pill:hover {
+  box-shadow: inset 0 0 0 1px var(--gray-300), 0 2px 8px rgba(31, 0, 80, 0.06);
+}
+.sj .ss-pill:active {
+  transform: scale(0.98);
+}
+.sj .ss-pill[aria-checked='true'] {
+  background: var(--ink-900);
+  color: #fff;
+  box-shadow: none;
+}
+.sj .ss-pill:focus-visible {
+  outline-offset: 2px;
+}
+.sj .ss-name {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+.sj .ss-exam {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--gray-500);
+}
+.sj .ss-pill[aria-checked='true'] .ss-exam {
+  color: rgba(255, 255, 255, 0.55);
+}
+.sj .ss-score,
+.sj .ss-count {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gray-600);
+}
+.sj .ss-pill[aria-checked='true'] .ss-score,
+.sj .ss-pill[aria-checked='true'] .ss-count {
+  color: var(--green-400);
+}
+/* A run in progress: a small ring beside the name. */
+.sj .ss-run {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: var(--yellow-100);
+  color: #5a4600;
+}
+.sj .ss-run svg {
+  fill: currentColor;
+}
+.sj .ss-pill[aria-checked='true'] .ss-run {
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--yellow-300);
+}
+.sj .ss-pill[aria-checked='true'] .ss-dot.yellow {
+  box-shadow: none;
+}
+
+/* ---------------------------------------------------------------- the collapsed switcher */
+.sj .ss-menu {
+  display: inline-block;
+  max-width: 100%;
+}
+.sj .ss-trigger {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  width: max-content;
+  min-width: 380px;
+  max-width: 100%;
+  min-height: 48px;
+  padding: 8px 12px 8px 14px;
+  border-radius: var(--r-md);
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--gray-200);
+  text-align: left;
+  transition: box-shadow var(--t-fast) var(--ease);
+}
+.sj .ss-trigger:hover,
+.sj .ss-menu.open .ss-trigger {
+  box-shadow: inset 0 0 0 1px var(--gray-300), 0 2px 8px rgba(31, 0, 80, 0.06);
+}
+.sj .ss-trigger-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+}
+.sj .ss-trigger-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--gray-900);
+}
+.sj .ss-trigger-value .ss-name {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sj .ss-trigger-count {
+  font-size: 11.5px;
+  color: var(--gray-500);
+  white-space: nowrap;
+}
+.sj .ss-chev {
+  color: var(--gray-600);
+  transition: transform var(--t-med) var(--ease);
+}
+.sj .ss-menu.open .ss-chev {
+  transform: rotate(180deg);
+}
+
+.sj .ss-pop {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  padding: 8px;
+  border-radius: var(--r-md);
+  background: #fff;
+  box-shadow:
+    0 0 0 1px var(--gray-200),
+    0 18px 40px rgba(31, 0, 80, 0.16);
+  animation: ss-pop 160ms var(--ease) both;
+}
+@keyframes ss-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+.sj .ss-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 12px;
+  border-radius: var(--r-sm);
+  background: var(--gray-100);
+  color: var(--gray-500);
+}
+.sj .ss-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: none;
+  font: inherit;
+  font-size: 15px;
+  color: var(--gray-900);
+}
+.sj .ss-search:focus-within {
+  box-shadow: inset 0 0 0 1.5px var(--purple-300);
+}
+.sj .ss-options {
+  max-height: min(360px, 55vh);
+  margin: 6px 0 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+.sj .ss-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 6px 10px;
+  border-radius: var(--r-xs);
+  cursor: pointer;
+}
+.sj .ss-option.active {
+  background: var(--gray-100);
+}
+.sj .ss-option-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+.sj .ss-option-text b {
+  font-weight: 600;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sj .ss-option-text small {
+  font-size: 12px;
+  color: var(--gray-600);
+}
+.sj .ss-option .ss-tick {
+  color: var(--purple-600);
+}
+.sj .ss-option.on b {
+  color: var(--ink-900);
+}
+.sj .ss-none {
+  padding: 12px 10px;
+  font-size: 13.5px;
+  color: var(--gray-600);
+}
+.sj .ss-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 6px;
+  padding: 8px 10px 4px;
+  border-top: 1px solid var(--gray-100);
+  font-size: 10.5px;
+  color: var(--gray-500);
+}
+.sj .ss-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ---------------------------------------------------------------- subject rows */
+/* Boxless: rows stand on the page between hairlines, their text on the page's left edge. The
+   hover wash reaches 12px past the edge so the words never move. */
+.sj .ss-table {
+  min-width: 0;
+}
+.sj .ss-tr {
+  display: grid;
+  grid-template-columns: var(--cols);
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+  padding: 12px;
+  margin: 0 -12px;
+  border-radius: var(--r-sm);
+}
+.sj .ss-tbody .ss-tr {
+  position: relative;
+  min-height: 64px;
+  transition: background var(--t-fast) var(--ease);
+}
+.sj .ss-tbody .ss-tr + .ss-tr::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 12px;
+  right: 12px;
+  border-top: 1px solid var(--gray-200);
+}
+.sj .ss-tbody .ss-tr:hover {
+  background: rgba(255, 255, 255, 0.75);
+}
+.sj .ss-tbody .ss-tr:hover::before,
+.sj .ss-tbody .ss-tr:hover + .ss-tr::before {
+  border-color: transparent;
+}
+/* The row the rest of the page is showing: a quiet wash, its name in ink. */
+.sj .ss-tbody .ss-tr.on {
+  background: rgba(255, 255, 255, 0.7);
+}
+.sj .ss-tbody .ss-tr.on::before,
+.sj .ss-tbody .ss-tr.on + .ss-tr::before {
+  border-color: transparent;
+}
+.sj .ss-headrow {
+  margin: 0;
+  padding: 0 0 8px;
+  border-bottom: 1px solid var(--gray-300);
+  border-radius: 0;
+}
+.sj .ss-th {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+  min-width: 0;
+}
+.sj .ss-td {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 14px;
+}
+.sj .ss-th.end,
+.sj .ss-td.end {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.sj .ss-cellname {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.sj .ss-cellname b {
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.25;
+  color: var(--gray-900);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sj .ss-cellname b a:hover {
+  color: var(--purple-600);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.sj .ss-cellname small {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--gray-500);
+}
+
+.sj .ss-statuscell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.sj .ss-statusline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 13.5px;
+  color: var(--gray-800);
+  white-space: nowrap;
+}
+.sj .ss-statuscell small {
+  padding-left: 16px;
+  font-size: 12px;
+  color: var(--gray-600);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sj .ss-scorecell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
+.sj .ss-scorecell-top {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+.sj .ss-scorecell-num {
+  font-size: 22px;
+  color: var(--ink-900);
+}
+.sj .ss-scorecell.empty {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 8px;
+}
+.sj .ss-scorecell.empty .ss-scorecell-num {
+  color: var(--gray-300);
+}
+.sj .ss-scorecell small {
+  font-size: 12px;
+  color: var(--gray-600);
+  white-space: nowrap;
+}
+.sj .ss-gap {
+  color: #9c1d4c !important;
+}
+.sj .ss-gap.ok {
+  color: var(--green-600) !important;
+}
+.sj .ss-mini {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 180px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--gray-200);
+}
+.sj .ss-mini .fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 2px;
+  background: var(--ink-900);
+}
+.sj .ss-mini .target {
+  position: absolute;
+  top: -4px;
+  width: 2px;
+  height: 12px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--yellow-400);
+}
+
+/* ---------------------------------------------------------------- phone */
+@media (max-width: 860px) {
+  /* The pill row runs to the screen's edge and scrolls; the first pill stays on the page edge. */
+  .sj .ss-pills {
+    margin-right: -16px;
+    padding-right: 16px;
+  }
+  .sj .ss-menu,
+  .sj .ss-trigger {
+    width: 100%;
+  }
+  .sj .ss-trigger {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 2px;
+  }
+  .sj .ss-trigger-label {
+    grid-column: 1;
+  }
+  .sj .ss-trigger-value {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .sj .ss-trigger-count {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+  .sj .ss-chev {
+    grid-column: 2;
+    grid-row: 1 / 3;
+  }
+  .sj .ss-pop {
+    width: 100%;
+    max-width: none;
+  }
+
+  .sj .ss-table .ss-headrow {
+    display: none;
+  }
+  .sj .ss-thead {
+    border-bottom: 1px solid var(--gray-300);
+  }
+  .sj .ss-tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    padding: 14px 12px;
+  }
+  .sj .ss-td {
+    order: 3;
+  }
+  /* A line break after the name and the action: everything else starts the second line. */
+  .sj .ss-tbody .ss-tr:has(.ph-lead)::after {
+    content: '';
+    order: 2;
+    flex-basis: 100%;
+    height: 0;
+    margin-top: -8px;
+  }
+  .sj .ss-td.ph-lead {
+    order: 0;
+    flex: 1 1 0;
+  }
+  .sj .ss-td.ph-full {
+    flex: 1 1 100%;
+  }
+  .sj .ss-td.ph-inline {
+    flex: 0 1 auto;
+  }
+  .sj .ss-td.ph-end {
+    order: 1;
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+  /* A score sharing its line: the number and the gap, without the bar. */
+  .sj .ss-td.ph-inline .ss-scorecell {
+    width: auto;
+  }
+  .sj .ss-td.ph-inline .ss-mini {
+    display: none;
+  }
+  .sj .ss-td.ph-hide {
+    display: none;
+  }
+  .sj .ss-mini {
+    max-width: none;
+  }
+}
+
+/* Sections rise in with a transform, so each is its own stacking context: lift the page block
+   that holds an open list above the blocks after it. */
+.sj .sj-page > *:has(.ss-menu.open) {
+  position: relative;
+  z-index: 30;
+}

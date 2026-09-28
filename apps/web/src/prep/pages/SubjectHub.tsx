@@ -7,13 +7,14 @@
  * plan all need it.
  */
 
-import { useMemo } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useEffect, useMemo, type ReactNode } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { api, type CheckupReport } from '../../student/api.js';
 import { IconArrowRight, IconBolt, IconBook, IconCalendar, IconClock, IconTarget, IconTrophy } from '../icons.js';
 import { progressApi, type SubjectOverview } from '../progressApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
+import { SubjectSwitcher, rememberSubject, useOverview } from '../SubjectSwitcher.js';
 import { Button, CountUp, PageHero, Pager, ShowMore, Skeleton, Track, cx, usePaged, useShowMore } from '../ui.js';
 import { MetricTip } from './HowItsWorkedOut.js';
 import {
@@ -366,7 +367,18 @@ function useHeroActions(subject: SubjectOverview, hasGoal: boolean) {
   return { primary, secondary, error: practice.error ?? checkup.error };
 }
 
-function HubBody({ subject, exam, runs }: { subject: SubjectOverview; exam?: { short_name: string; exam_body: string }; runs: ReturnType<typeof useRuns> }) {
+function HubBody({
+  subject,
+  exam,
+  runs,
+  switcher,
+}: {
+  subject: SubjectOverview;
+  exam?: { short_name: string; exam_body: string };
+  runs: ReturnType<typeof useRuns>;
+  /** The other subjects, one tap away, when there are any. */
+  switcher?: ReactNode;
+}) {
   const starter = useStartPractice();
   const hasGoal = !!subject.goal && subject.goal.target_score !== null;
   const hero = useHeroActions(subject, hasGoal);
@@ -420,6 +432,7 @@ function HubBody({ subject, exam, runs }: { subject: SubjectOverview; exam?: { s
         aside={stats.length > 0 ? <HeroStats stats={stats} /> : undefined}
       />
       {hero.error ? <Alert>{hero.error}</Alert> : null}
+      {switcher}
 
       <Section eyebrow="Predicted score" title="Where you stand" id="hub-stand" className="sj-rise d1">
         <Standing subject={subject} />
@@ -531,8 +544,12 @@ function useRuns(studentId: string) {
 export function SubjectHub() {
   const { subjectId = '' } = useParams();
   const student = useStudent();
-  const overview = useLoad(() => progressApi.overview(student.studentId), [student.studentId]);
+  const overview = useOverview(student.studentId);
   const catalogue = useLoad(() => api.catalogue(), []);
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (subjectId) rememberSubject(subjectId);
+  }, [subjectId]);
   const runs = useRuns(student.studentId);
 
   const fromOverview = overview.data?.subjects.find((s) => s.subject_id === subjectId);
@@ -608,7 +625,21 @@ export function SubjectHub() {
 
   return (
     <div className="sj-page hub">
-      <HubBody subject={subject} exam={exam} runs={runs} />
+      <HubBody
+        subject={subject}
+        exam={exam}
+        runs={runs}
+        switcher={
+          fromOverview && overview.data.subjects.length > 1 ? (
+            <SubjectSwitcher
+              subjects={overview.data.subjects}
+              value={subject.subject_id}
+              onChange={(id) => navigate(`/subjects/${id}`)}
+              label="Subject"
+            />
+          ) : undefined
+        }
+      />
     </div>
   );
 }

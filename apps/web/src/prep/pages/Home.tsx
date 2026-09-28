@@ -21,8 +21,21 @@ import {
   IconTarget,
   IconTrophy,
 } from '../icons.js';
-import { progressApi, type Overview, type PracticeRun, type SubjectOverview, type WeakSubtopic } from '../progressApi.js';
-import { useLoad, usePageTitle, useStudent } from '../store.js';
+import type { Overview, PracticeRun, SubjectOverview, WeakSubtopic } from '../progressApi.js';
+import {
+  ScoreCell,
+  StatusCell,
+  SubjectName,
+  SubjectRows,
+  SubjectSwitcher,
+  byUrgency,
+  isDemoSubject,
+  subjectStatus,
+  useOverview,
+  useSubjectChoice,
+  type SubjectColumn,
+} from '../SubjectSwitcher.js';
+import { usePageTitle, useStudent } from '../store.js';
 import { Badge, Button, CountUp, PageHero, ShowMore, Steps, Skeleton, Track, cx, greeting, useShowMore, useToast } from '../ui.js';
 import { HOW_PATH, MetricTip, type MetricId } from './HowItsWorkedOut.js';
 import './Home.css';
@@ -583,23 +596,31 @@ type NextStep =
   | { kind: 'practice'; subject: SubjectOverview };
 
 function decideNext(overview: Overview, focus: SubjectOverview | undefined): NextStep {
-  const ordered = focus ? [focus, ...overview.subjects.filter((s) => s !== focus)] : overview.subjects;
-  for (const subject of ordered) {
-    if (subject.open_practice_session_id) {
-      const run = overview.recent_runs.find((r) => r.session_id === subject.open_practice_session_id);
-      return { kind: 'resume-run', subject, sessionId: subject.open_practice_session_id, run };
-    }
-  }
+  // Most urgent first (a half-done check-up, a subject with no check-up, an open run, the
+  // widest gap), with the dashboard's focus subject winning a tie.
+  const ordered = byUrgency(focus ? [focus, ...overview.subjects.filter((s) => s !== focus)] : overview.subjects);
   for (const subject of ordered) {
     if (subject.open_checkup_session_id) return { kind: 'resume-checkup', subject, sessionId: subject.open_checkup_session_id };
   }
   for (const subject of ordered) {
     if (subject.goal && !subject.latest_checkup) return { kind: 'first-checkup', subject };
   }
+  for (const subject of ordered) {
+    if (subject.open_practice_session_id) {
+      const run = overview.recent_runs.find((r) => r.session_id === subject.open_practice_session_id);
+      return { kind: 'resume-run', subject, sessionId: subject.open_practice_session_id, run };
+    }
+  }
   if (!ordered.some((s) => s.goal)) return { kind: 'set-goal', subject: ordered[0] };
   const practised = ordered.find((s) => s.latest_checkup);
   if (practised) return { kind: 'practice', subject: practised };
   return { kind: 'set-goal', subject: ordered[0] };
+}
+
+/** An open run elsewhere, when the hero is pointing at something else. */
+function otherOpenRun(overview: Overview, step: NextStep): SubjectOverview | undefined {
+  if (step.kind === 'resume-run') return undefined;
+  return overview.subjects.find((s) => s.open_practice_session_id);
 }
 
 function todayLabel(): string {
@@ -612,7 +633,7 @@ function firstName(overview: Overview): string {
 }
 
 /** The hero: hello, the one next step, and the countdown and streak on the right. */
-function Hero({ overview, step, focus }: { overview: Overview; step: NextStep; focus?: SubjectOverview }) {
+function Hero({ overview, step }: { overview: Overview; step: NextStep; focus?: SubjectOverview }) {
   const practice = useStartPractice();
   const checkup = useStartCheckup();
   const name = step.subject?.subject_name ?? '';
@@ -650,8 +671,12 @@ function Hero({ overview, step, focus }: { overview: Overview; step: NextStep; f
       secondary = <Link to="/checkup">What a check-up does</Link>;
       break;
     case 'first-checkup':
-      lead = `See where you stand in ${name}.`;
-      body = "A short check-up finds what you know and what's holding your score down, then predicts your score.";
+      lead = overview.subjects.some((s) => s.latest_checkup)
+        ? `Take your ${name} check-up.`
+        : `See where you stand in ${name}.`;
+      body = overview.subjects.some((s) => s.latest_checkup)
+        ? `${name} has no check-up yet, so it has no predicted score and no plan. About 15 questions fixes that.`
+        : "A short check-up finds what you know and what's holding your score down, then predicts your score.";
       action = (
         <Button
           tone="lime"
@@ -660,10 +685,17 @@ function Hero({ overview, step, focus }: { overview: Overview; step: NextStep; f
           onClick={() => checkup.start(step.subject.subject_id)}
           trailing={<IconArrowRight size={18} />}
         >
-          Take my first check-up
+          Take my {name} check-up
         </Button>
       );
-      secondary = <Link to="/checkup">What a check-up does</Link>;
+      {
+        const open = otherOpenRun(overview, step);
+        secondary = open ? (
+          <Link to={`/practice/${open.open_practice_session_id}`}>Or finish your {open.subject_name} run</Link>
+        ) : (
+          <Link to="/checkup">What a check-up does</Link>
+        );
+      }
       break;
     case 'set-goal':
       lead = 'Set the score you are aiming for.';
@@ -708,14 +740,16 @@ function Hero({ overview, step, focus }: { overview: Overview; step: NextStep; f
     }
   }
 
-  const days = focus?.goal?.days_to_exam;
+  // Counted per exam, not per subject (prep/countdown.tsx): UTME's one day, or WAEC's next paper.
+  const nextExam = (overview.exams ?? []).find((exam) => exam.days_to_next != null && exam.days_to_next >= 0);
+  const days = nextExam?.days_to_next;
   const stats: Parameters<typeof HeroStats>[0]['stats'] = [];
-  if (focus && days !== null && days !== undefined && days >= 0) {
+  if (nextExam && days !== null && days !== undefined) {
     stats.push({
-      label: 'Days to exam',
+      label: nextExam.sits_together ? 'Days to exam' : 'Days to next paper',
       value: <CountUp value={days} />,
       tone: 'yellow',
-      note: `${focus.examination_short_name} ${focus.subject_name}`,
+      note: nextExam.sits_together ? nextExam.short_name : `${nextExam.short_name} ${nextExam.next_subject_names.join(' and ')}`,
       tip: 'days',
     });
   }
@@ -867,55 +901,135 @@ function HomeSkeleton() {
   );
 }
 
-function SubjectCards({ subjects }: { subjects: SubjectOverview[] }) {
-  const more = useShowMore(subjects, 6);
+/** Starts a check-up or a run from a row, remembering which row is busy. */
+function useRowStarters() {
+  const practice = useStartPractice();
+  const checkup = useStartCheckup();
+  const [checking, setChecking] = useState<string | null>(null);
+  return {
+    busy: (id: string) => practice.busy === id || (checkup.busy && checking === id),
+    anyBusy: practice.busy !== null || checkup.busy,
+    practise: (id: string) => void practice.start(id),
+    check: (id: string) => {
+      setChecking(id);
+      void checkup.start(id);
+    },
+    error: practice.error ?? checkup.error,
+  };
+}
+
+/** The one next thing for a subject, as a row's action. */
+function SubjectNext({ subject, starters }: { subject: SubjectOverview; starters: ReturnType<typeof useRowStarters> }) {
+  const st = subjectStatus(subject);
+  const id = subject.subject_id;
+  const demo = isDemoSubject(id);
+  if (st.kind === 'checkup-open') {
+    return (
+      <Button size="sm" tone="dark" to={`/checkup/${subject.open_checkup_session_id}`} trailing={<IconArrowRight size={16} />}>
+        Finish check-up
+      </Button>
+    );
+  }
+  if (st.kind === 'no-goal') {
+    return (
+      <Button size="sm" tone="ghost" to={`/subjects/${id}/goal`}>
+        Set a goal
+      </Button>
+    );
+  }
+  if (st.kind === 'no-checkup') {
+    return (
+      <Button
+        size="sm"
+        tone="dark"
+        busy={starters.busy(id)}
+        disabled={demo || (starters.anyBusy && !starters.busy(id))}
+        onClick={() => starters.check(id)}
+        trailing={starters.busy(id) ? undefined : <IconArrowRight size={16} />}
+      >
+        Take check-up
+      </Button>
+    );
+  }
+  if (subject.open_practice_session_id) {
+    return (
+      <Button size="sm" tone="ghost" to={`/practice/${subject.open_practice_session_id}`}>
+        Resume run
+      </Button>
+    );
+  }
+  return (
+    <Button
+      size="sm"
+      tone="ghost"
+      busy={starters.busy(id)}
+      disabled={demo || (starters.anyBusy && !starters.busy(id))}
+      onClick={() => starters.practise(id)}
+    >
+      Practise
+    </Button>
+  );
+}
+
+/**
+ * Every subject at a glance: its check-up, its predicted score against the target, and the one
+ * next thing to do, most urgent first. A subject with no check-up can't hide here.
+ */
+function SubjectsGlance({ subjects, selected }: { subjects: SubjectOverview[]; selected: string | null }) {
+  const starters = useRowStarters();
+  const ordered = byUrgency(subjects);
+  const more = useShowMore(ordered, 8);
+  const unchecked = subjects.filter((s) => !s.latest_checkup).length;
+  const columns: SubjectColumn[] = [
+    {
+      key: 'name',
+      head: 'Subject',
+      width: 'minmax(0, 1.5fr)',
+      phone: 'lead',
+      cell: (s) => <SubjectName subject={s} to={<Link to={`/subjects/${s.subject_id}`}>{s.subject_name}</Link>} />,
+    },
+    {
+      key: 'status',
+      head: 'Check-up',
+      width: 'minmax(0, 1.1fr)',
+      cell: (s) => (
+        <StatusCell
+          subject={s}
+          detail={
+            s.latest_checkup
+              ? shortDate(s.latest_checkup.finished_at)
+              : s.goal?.days_to_exam != null && s.goal.days_to_exam >= 0
+                ? `${plural(s.goal.days_to_exam, 'day')} to the exam`
+                : undefined
+          }
+        />
+      ),
+    },
+    { key: 'score', head: 'Predicted score', width: 'minmax(0, 1.3fr)', phone: 'inline', cell: (s) => <ScoreCell subject={s} /> },
+    {
+      key: 'next',
+      head: 'Next',
+      width: '150px',
+      align: 'end',
+      phone: 'end',
+      cell: (s) => <SubjectNext subject={s} starters={starters} />,
+    },
+  ];
   return (
     <Section
-      eyebrow="All your subjects"
+      eyebrow={`${plural(subjects.length, 'subject')}${unchecked > 0 ? ` · ${unchecked} without a check-up` : ''}`}
       title="Your subjects"
       id="home-subjects"
-      className="sj-rise d4"
+      className="sj-rise d1"
       action={
         <Link className="sj-link" to="/exams">
           Add a subject <IconArrowRight size={14} />
         </Link>
       }
     >
-      <div className="home-subjects" id="home-subject-list">
-        {more.items.map((s) => {
-          const latest = s.latest_checkup;
-          const days = s.goal?.days_to_exam;
-          return (
-            <Link key={s.subject_id} to={`/subjects/${s.subject_id}`} className="sj-card hover home-subject">
-              <div className="top">
-                <span className="sj-eyebrow">{s.examination_short_name}</span>
-                {days !== null && days !== undefined && days >= 0 ? (
-                  <span className="sj-mono home-subject-days">{plural(days, 'day')} to go</span>
-                ) : null}
-              </div>
-              <h3 className="sj-display sj-h3">{s.subject_name}</h3>
-              <div className="home-subject-score">
-                {latest?.score_now !== null && latest?.score_now !== undefined ? (
-                  <>
-                    <span className="sj-num">{fmtScore(latest.score_now)}</span>
-                    <span className="sj-muted sj-small">
-                      predicted{s.goal?.target_score ? ` · aiming for ${fmtScore(s.goal.target_score)}` : ''}
-                    </span>
-                  </>
-                ) : (
-                  <span className="sj-muted sj-small">
-                    {latest ? 'Set a goal to see your score' : s.goal ? 'No check-up yet' : 'No goal yet'}
-                  </span>
-                )}
-              </div>
-              <span className="go">
-                Open <IconArrowRight size={16} />
-              </span>
-            </Link>
-          );
-        })}
-      </div>
+      <SubjectRows subjects={more.items} columns={columns} label="Your subjects" selected={selected} id="home-subject-list" />
       <ShowMore more={more} noun="subjects" controls="home-subject-list" />
+      {starters.error ? <Alert>{starters.error}</Alert> : null}
     </Section>
   );
 }
@@ -923,7 +1037,7 @@ function SubjectCards({ subjects }: { subjects: SubjectOverview[] }) {
 export function Home() {
   usePageTitle('Home');
   const student = useStudent();
-  const overview = useLoad(() => progressApi.overview(student.studentId), [student.studentId]);
+  const overview = useOverview(student.studentId);
   const starter = useStartPractice();
 
   if (!overview.data) {
@@ -978,7 +1092,6 @@ function HomeBody({
   focus,
   many,
   step,
-  weak,
   starter,
 }: {
   data: Overview;
@@ -990,32 +1103,40 @@ function HomeBody({
 }) {
   const subjects = data.subjects;
   const recent = useShowMore(data.recent_runs, 4);
+  // The subject the score and weak spots follow: ?subject=, else the last one chosen, else the
+  // most urgent.
+  const [chosenId, choose] = useSubjectChoice(subjects);
+  const chosen = subjects.find((s) => s.subject_id === chosenId) ?? focus;
+  const weak = chosen?.latest_checkup?.weakest_subtopics ?? [];
   return (
     <div className="sj-page home">
       <Hero overview={data} step={step} focus={focus} />
 
-      {focus ? (
+      {many ? <SubjectsGlance subjects={subjects} selected={chosen?.subject_id ?? null} /> : null}
+
+      {chosen ? (
         <Section
-          eyebrow={`Predicted score · ${focus.examination_short_name} ${focus.subject_name}`}
+          eyebrow={`Predicted score · ${chosen.examination_short_name} ${chosen.subject_name}`}
           title="Where you stand"
           id="home-stand"
-          className="sj-rise d1"
+          className="sj-rise d2"
           action={
-            <Link className="sj-link" to={`/subjects/${focus.subject_id}`}>
-              {focus.subject_name} plan <IconArrowRight size={14} />
+            <Link className="sj-link" to={`/subjects/${chosen.subject_id}`}>
+              {chosen.subject_name} plan <IconArrowRight size={14} />
             </Link>
           }
         >
-          <Standing subject={focus} />
+          {many ? <SubjectSwitcher subjects={subjects} value={chosen.subject_id} onChange={choose} label="Show subject" /> : null}
+          <Standing key={chosen.subject_id} subject={chosen} />
         </Section>
       ) : null}
 
       <div className="home-duo">
         <Section
-          eyebrow="Work on next"
+          eyebrow={many && chosen ? `Work on next · ${chosen.subject_name}` : 'Work on next'}
           title="Your weakest spots"
           id="home-weak"
-          className="sj-rise d2"
+          className="sj-rise d3"
           tip={<MetricTip id="weakest" />}
           sub={
             <>
@@ -1025,27 +1146,30 @@ function HomeBody({
           }
         >
           <div className="sj-card home-panel">
-            {weak.length > 0 && focus ? (
+            {weak.length > 0 && chosen ? (
               <>
-                <WeakList subject={focus} weak={weak} starter={starter} />
+                <WeakList subject={chosen} weak={weak} starter={starter} />
                 <p className="home-note">A run starts with the spot your plan puts first, then works down the list.</p>
                 {starter.error ? <Alert>{starter.error}</Alert> : null}
               </>
             ) : (
-              <Note icon={<IconTarget size={18} />} title={focus?.latest_checkup ? 'Nothing weak to single out' : 'Nothing to show yet'}>
-                {focus?.latest_checkup
+              <Note
+                icon={<IconTarget size={18} />}
+                title={chosen?.latest_checkup ? 'Nothing weak to single out' : `No ${chosen?.subject_name ?? ''} check-up yet`}
+              >
+                {chosen?.latest_checkup
                   ? 'Your check-up found nothing weak enough to single out. Keep practising to hold it.'
-                  : 'Take a check-up and the spots holding your score down show up here, weakest first.'}
+                  : `Take a ${chosen?.subject_name ?? ''} check-up and the spots holding that score down show up here, weakest first.`}
               </Note>
             )}
           </div>
         </Section>
 
         <Section
-          eyebrow="Recent practice"
+          eyebrow={many ? 'Recent practice · every subject' : 'Recent practice'}
           title="Your practice so far"
           id="home-runs"
-          className="sj-rise d3"
+          className="sj-rise d4"
           sub="Right first time means no hint needed. Taught means the coach worked it through with you."
         >
           <div className="sj-card home-panel">
@@ -1072,8 +1196,6 @@ function HomeBody({
           </div>
         </Section>
       </div>
-
-      {many ? <SubjectCards subjects={subjects} /> : null}
     </div>
   );
 }

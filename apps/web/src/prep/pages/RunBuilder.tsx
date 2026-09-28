@@ -12,7 +12,8 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { IconArrowRight, IconBook, IconCalendar, IconCheck, IconChevronDown, IconClose, IconLayers, IconReplay, IconTarget } from '../icons.js';
-import { progressApi } from '../progressApi.js';
+import type { SubjectOverview } from '../progressApi.js';
+import { SubjectSwitcher, rememberSubject, useOverview } from '../SubjectSwitcher.js';
 import { Refused, orGone, runsApi, type PracticeOptions, type StartRunIn } from '../runsApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
 import { Button, CountUp, PageHero, Skeleton, cx } from '../ui.js';
@@ -37,13 +38,16 @@ export function RunBuilder() {
   usePageTitle('Build a run');
   const student = useStudent();
   const [params, setParams] = useSearchParams();
-  const overview = useLoad(() => progressApi.overview(student.studentId), [student.studentId]);
+  const overview = useOverview(student.studentId);
   const subjects = overview.data?.subjects ?? [];
   const asked = params.get('subject');
   const subjectId = subjects.some((s) => s.subject_id === asked) ? asked : (subjects[0]?.subject_id ?? null);
   const subject = subjects.find((s) => s.subject_id === subjectId);
 
-  const pick = (id: string) => setParams({ subject: id }, { replace: true });
+  const pick = (id: string) => {
+    rememberSubject(id);
+    setParams({ subject: id }, { replace: true });
+  };
 
   const hero = (aside?: ReactNode) => (
     <PageHero
@@ -97,7 +101,7 @@ export function RunBuilder() {
     <Builder
       key={subject.subject_id}
       studentId={student.studentId}
-      subjects={subjects.map((s) => ({ id: s.subject_id, name: s.subject_name, exam: s.examination_short_name }))}
+      subjects={subjects}
       subjectId={subject.subject_id}
       onSubject={pick}
       hero={hero}
@@ -115,7 +119,7 @@ function Builder({
   hero,
 }: {
   studentId: string;
-  subjects: { id: string; name: string; exam: string }[];
+  subjects: SubjectOverview[];
   subjectId: string;
   onSubject: (id: string) => void;
   hero: (aside?: ReactNode) => ReactNode;
@@ -219,27 +223,8 @@ function Builder({
 
       <div className="rb-layout">
         <div className="rb-steps">
-          <Step n={1} title="Subject" status={subjects.find((s) => s.id === subjectId)?.name} className="d1">
-            <div className="rb-subjects" role="radiogroup" aria-label="Subject">
-              {subjects.map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  role="radio"
-                  aria-checked={s.id === subjectId}
-                  className={cx('rb-subject', s.id === subjectId && 'on')}
-                  onClick={() => s.id !== subjectId && onSubject(s.id)}
-                >
-                  <span className="rb-subject-exam sj-mono">{s.exam}</span>
-                  <b>{s.name}</b>
-                  {s.id === subjectId ? (
-                    <span className="rb-subject-tick" aria-hidden="true">
-                      <IconCheck size={14} />
-                    </span>
-                  ) : null}
-                </button>
-              ))}
-            </div>
+          <Step n={1} title="Subject" status={subjects.find((s) => s.subject_id === subjectId)?.subject_name} className="d1">
+            <SubjectSwitcher subjects={subjects} value={subjectId} onChange={(id) => id !== subjectId && onSubject(id)} label="Subject" />
           </Step>
 
           {options.error && data === undefined ? (
