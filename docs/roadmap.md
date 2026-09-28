@@ -405,6 +405,13 @@ Every change to the engine runs against the set in CI, and a failure blocks the 
 - Low-bandwidth mode: preload the whole form before the start, then minimal traffic during the mock.
 - Guardian digest delivery service (channel adapter; opt-in required; templated content).
 
+**Founder's brief for the student-side exam mode (28 Sep 2026, not started)**
+- Its own page and its own system, separate from practice: a real test with nothing in the way. No hints, no board and no coach until it is over, full screen, focused.
+- The student sets it up: up to four subjects sat together (the UTME way), the number of questions per subject, and the time allowed.
+- A report at the end: per subject and overall.
+- Its own history: every test listed with its report, and tests can be deleted, the same way practice runs can.
+- Results count as evidence that the student is improving: they feed the predicted score and progress, not just a separate list.
+
 **Acceptance criteria**
 - [ ] A–D selects an answer, N/P moves next/previous, F flags, S opens submit confirmation; a full mock can be completed without a mouse (automated end-to-end test)
 - [ ] Auto-submit at 0:00 records unanswered items as `unanswered`, not `wrong`
