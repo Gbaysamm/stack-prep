@@ -34,6 +34,14 @@ student.
 - **Rate limiting** on code requests and verification attempts, per phone or email
   and per IP.
 
+## Amendments
+
+- **2026-09-28:** students sign up with email or phone + password (Argon2id) now; one-time
+  codes can follow for resets. Sessions are opaque tokens whose SHA-256 is kept in
+  PostgreSQL (`auth_sessions`, migration `022_student_accounts.sql`) rather than Redis, behind
+  the `sp_session` cookie (httpOnly, SameSite=Lax, Secure over https, 30-day sliding expiry).
+  A login is locked for 15 minutes after 10 failed attempts.
+
 ## Consequences
 
 - We operate our own authentication: lockout rules, code expiry, replay protection,

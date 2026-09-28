@@ -191,6 +191,19 @@ export interface LessonBeat {
   voice_url: string;
   /** The moment that gives the answer, which the board marks. */
   answer: boolean;
+  /** Marks drawn over earlier lines while this beat is said: circles, underlines, arrows. */
+  point?: LessonPoint[] | null;
+}
+
+/** A teacher's mark on the board, pointing back at a line already written. */
+export interface LessonPoint {
+  /** The moment pointed at: its index from 0, or counted back from this beat when negative. */
+  line: number;
+  kind: 'circle' | 'underline' | 'arrow' | 'box';
+  /** A few words written beside the mark. */
+  text?: string | null;
+  /** Part of the line to mark rather than all of it, as it reads on the board (spaces ignored). */
+  at?: string | null;
 }
 
 export interface NarratedLesson {

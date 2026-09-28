@@ -1,0 +1,407 @@
+/*
+ * Accounts: the splash while the session is checked, the create-account and log-in forms (on the
+ * ink welcome card, or on a white dialog), and the sandbox banner in the app shell.
+ */
+
+.sj .sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------------------------------------------------------------- splash */
+.auth-splash {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.auth-splash.ink {
+  background: var(--ink-900);
+  color: #fff;
+}
+.auth-splash.paper {
+  background: var(--paper);
+  color: var(--ink-900);
+}
+.auth-splash-in {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  /* Only shows if the check takes a moment; a quick answer never flashes it. */
+  animation: sj-fade 300ms var(--ease) 260ms both;
+}
+.auth-splash-in img {
+  display: block;
+  filter: drop-shadow(-2px 4px 4px rgba(255, 18, 127, 0.3));
+}
+.auth-splash-word {
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+}
+.auth-splash-line {
+  font-size: 13.5px;
+  opacity: 0.66;
+}
+.auth-splash-bar {
+  position: relative;
+  width: 96px;
+  height: 3px;
+  margin-top: 8px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: currentColor;
+  opacity: 0.9;
+}
+.auth-splash.ink .auth-splash-bar {
+  background: rgba(255, 255, 255, 0.14);
+}
+.auth-splash.paper .auth-splash-bar {
+  background: var(--purple-100);
+}
+.auth-splash-bar > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  border-radius: 2px;
+  background: var(--green-400);
+  animation: auth-slide 1.1s var(--ease) infinite;
+}
+.auth-splash.paper .auth-splash-bar > span {
+  background: var(--purple-600);
+}
+@keyframes auth-slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+/* ---------------------------------------------------------------- forms (light) */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  text-align: left;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.auth-labelrow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.sj .auth-labelrow label {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--gray-800);
+}
+
+.sj .auth-input {
+  min-height: 52px;
+  padding: 13px 16px;
+  font-size: 16px;
+  color: var(--gray-900);
+  background: var(--gray-100);
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--r-btn);
+  transition:
+    background var(--t-fast) var(--ease),
+    border-color var(--t-fast) var(--ease),
+    box-shadow var(--t-fast) var(--ease);
+}
+.sj .auth-input:hover {
+  border-color: var(--gray-300);
+}
+.sj .auth-input:focus {
+  background: #fff;
+  border-color: var(--purple-600);
+  box-shadow: 0 0 0 4px var(--purple-050);
+}
+.sj .auth-input::placeholder {
+  color: var(--gray-500);
+}
+.sj .auth-field.bad .auth-input {
+  border-color: var(--danger);
+  background: #fff;
+}
+.sj .auth-field.bad .auth-input:focus {
+  box-shadow: 0 0 0 4px var(--danger-100);
+}
+.sj .auth-input:disabled {
+  opacity: 0.65;
+}
+/* Browser autofill keeps our fill instead of its yellow. */
+.sj .auth-input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 40px var(--gray-100) inset;
+  -webkit-text-fill-color: var(--gray-900);
+}
+
+.sj .auth-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 12.5px;
+  line-height: 18px;
+  color: var(--gray-600);
+}
+.sj .auth-msg.err {
+  color: var(--danger);
+  font-weight: 500;
+}
+.sj .auth-msg.err > svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+/* Inline text buttons: "Forgot password?", "Log in instead". */
+.sj .auth-inline {
+  display: inline;
+  padding: 0;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--purple-600);
+  text-decoration: underline;
+  text-decoration-color: var(--purple-200);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: text-decoration-color var(--t-fast) var(--ease);
+}
+.sj .auth-inline:hover {
+  text-decoration-color: currentColor;
+}
+.sj .auth-msg.err .auth-inline {
+  color: var(--danger);
+  text-decoration-color: currentColor;
+}
+
+/* The password box and its eye, inside the field on the right. */
+.auth-pw {
+  position: relative;
+}
+.sj .auth-pw .auth-input {
+  padding-right: 52px;
+}
+.sj .auth-eye {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  width: 44px;
+  height: 44px;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-md);
+  color: var(--gray-500);
+  transition: color var(--t-fast) var(--ease);
+}
+.sj .auth-eye:hover,
+.sj .auth-eye[aria-pressed='true'] {
+  color: var(--gray-800);
+}
+
+/* Strength: four segments, then one line on how to make it stronger, and the word. */
+.auth-strength {
+  --lvl: var(--gray-200);
+  --lvl-text: var(--gray-600);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 2px;
+}
+.auth-strength.short {
+  --lvl: var(--pink-500);
+  --lvl-text: var(--danger);
+}
+.auth-strength.weak {
+  --lvl: var(--yellow-400);
+  --lvl-text: var(--orange-500);
+}
+.auth-strength.okay,
+.auth-strength.strong {
+  --lvl: var(--green-500);
+  --lvl-text: var(--green-600);
+}
+.auth-meter {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+}
+.auth-meter > span {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--gray-200);
+  transition: background var(--t-med) var(--ease);
+}
+.auth-meter > span.on {
+  background: var(--lvl);
+}
+.sj .auth-strength-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12.5px;
+  line-height: 18px;
+  color: var(--gray-600);
+}
+.auth-strength.need .auth-strength-hint {
+  color: var(--danger);
+  font-weight: 500;
+}
+.auth-strength-label {
+  flex: none;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--lvl-text);
+}
+
+/* Confirm: does it match? */
+.auth-match {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.auth-match.ok {
+  color: var(--green-600);
+  font-weight: 600;
+}
+.auth-match.no {
+  color: var(--danger);
+  font-weight: 500;
+}
+
+/* A form-wide problem: wrong password, too many tries, offline. */
+.sj .auth-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--r-btn);
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--danger);
+  background: var(--danger-100);
+  animation: sj-pop 240ms var(--ease-spring) both;
+}
+.sj .auth-alert > svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+.sj .auth-submit {
+  min-height: 52px;
+  margin-top: 6px;
+}
+/* While it works, the button keeps its colour (a spinner shows) rather than greying out. */
+.sj .auth-form[aria-busy='true'] .auth-submit:disabled {
+  background: var(--purple-600);
+  color: #fff;
+  box-shadow: 0 6px 0 var(--purple-700);
+  opacity: 0.9;
+}
+.sj .auth-consent {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--gray-500);
+  text-wrap: pretty;
+}
+
+.sj .auth-dialog-lede {
+  margin: 0 0 20px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--gray-600);
+  text-wrap: pretty;
+}
+
+/* ---------------------------------------------------------------- sandbox banner */
+.auth-bannerwrap {
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 18px 32px 0;
+}
+.auth-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 10px 10px 12px;
+  border-radius: var(--r-lg);
+  background: var(--yellow-100);
+  box-shadow: inset 0 0 0 1px rgba(255, 199, 0, 0.55);
+  color: var(--ink-900);
+  animation: sj-view-in 360ms var(--ease) both;
+}
+.auth-banner-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-md);
+  background: var(--yellow-300);
+  box-shadow: inset 0 0 0 1px rgba(31, 0, 80, 0.08);
+}
+.sj .auth-banner-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--gray-700);
+}
+.auth-banner-text strong {
+  font-weight: 600;
+  color: var(--ink-900);
+}
+.sj .auth-banner .sj-btn {
+  flex: none;
+}
+
+@media (max-width: 860px) {
+  .auth-bannerwrap {
+    padding: 12px 16px 0;
+  }
+  .auth-banner {
+    align-items: center;
+    gap: 10px;
+    padding: 8px 8px 8px 10px;
+  }
+  .auth-banner-icon {
+    width: 30px;
+    height: 30px;
+  }
+  .sj .auth-banner-text {
+    font-size: 13px;
+    line-height: 18px;
+  }
+  .auth-banner-text .more {
+    display: none;
+  }
+}
+

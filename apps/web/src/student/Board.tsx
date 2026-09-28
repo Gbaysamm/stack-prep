@@ -33,14 +33,22 @@
  * one, the board writes the full reviewed steps on a reading clock, as it always did.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { CSSProperties } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import type { CSSProperties, ReactNode, RefObject } from "react";
 
-import type { NarratedLesson, TutorReply } from "./api.js";
+import type { LessonPoint, NarratedLesson, TutorReply } from "./api.js";
 import { Coach } from "./Coach.js";
 import { Figures, type QuestionFigure } from "../Figures.js";
 import { Maths } from "../Maths.js";
-import "./theme.css";
+import "../prep/prep.css";
+import "../prep/board.css";
 
 const STEP_MS = 5200;
 
@@ -67,6 +75,8 @@ interface Entry {
   /** Which reviewed step this is, for asking about it; null for the opening and the answer. */
   step: number | null;
   answer: boolean;
+  /** Marks drawn back over earlier lines while this is said: circles, underlines, arrows. */
+  point: LessonPoint[];
 }
 
 /**
@@ -93,6 +103,9 @@ function whenReady(
     clip.addEventListener("error", no);
   });
 }
+
+/** How long after a silent line goes up before its marks are drawn back over the board. */
+const MARK_LEAD_MS = 900;
 
 /** How long a line is left up to be read when there is no voice to hear it by. */
 function readingMs(said: string): number {
@@ -290,6 +303,7 @@ export function Board({
           voice: beat.voice_url,
           step: beat.board_index !== null && !answer ? beat.board_index : null,
           answer,
+          point: beat.point ?? [],
         };
       });
     }
@@ -302,6 +316,7 @@ export function Board({
         voice: null,
         step: index,
         answer: false,
+        point: [],
       })),
       {
         label: null,
@@ -311,6 +326,7 @@ export function Board({
         voice: null,
         step: null,
         answer: true,
+        point: [],
       },
     ];
   }, [answerLine, lesson, steps]);
@@ -643,6 +659,11 @@ export function Board({
   //: every line waiting in turn for a voice that is not coming.
   const [silent, setSilent] = useState(false);
   const [replayed, setReplayed] = useState(0);
+  //: Which line's marks are up: the circles and arrows a beat draws back over earlier lines.
+  //: Set a moment after its voice starts, so the mark lands on the words that point at it.
+  const [pointing, setPointing] = useState<number | null>(null);
+  //: The lesson's own voice is sounding, so the coach's face shows it is talking.
+  const [voicing, setVoicing] = useState(false);
   const clips = useRef(new Map<number, HTMLAudioElement>());
   const narrating = useRef<number | null>(null);
   const clipFor = useCallback(
@@ -697,10 +718,11 @@ export function Board({
         });
       }, delay);
     // The voice has failed: the line goes up and stays long enough to be read.
-    const readAlong = (entry: Entry | undefined) => {
+    const readAlong = (entry: Entry | undefined, at: number) => {
       setSilent(true);
       setQuestionUp(true);
       setItemsShown(entry?.items.length ?? 0);
+      later(() => setPointing(at), MARK_LEAD_MS);
       onward(entry ? readingMs(entry.say) : STEP_MS);
     };
     const stop = () => {
@@ -716,13 +738,14 @@ export function Board({
     const entry = lines[index];
     const clip = clipFor(index);
     if (entry && clip !== null && (silent || clip.error)) {
-      readAlong(entry);
+      readAlong(entry, index);
       return stop;
     }
     if (!entry || clip === null) {
       // No voice at all here: the board is read, not heard, so it writes as before.
       setQuestionUp(true);
       setItemsShown(entry?.items.length ?? 0);
+      later(() => setPointing(index), MARK_LEAD_MS);
       onward(STEP_MS);
       return stop;
     }
@@ -731,6 +754,7 @@ export function Board({
     if (narrating.current !== index) {
       clip.currentTime = 0;
       setItemsShown(0);
+      setPointing(null);
     }
     narrating.current = index;
     const writeAll = () => setItemsShown(entry.items.length);
@@ -747,6 +771,12 @@ export function Board({
       const count = Math.max(1, entry.items.length);
       setHandMs(Math.max(450, ((seconds * 0.92 - lead) * 1000) / count));
       if (index === 0) later(() => setQuestionUp(true), 0);
+      // The marks go up once the line they start from has been written: the teacher writes,
+      // then turns and points back at where it came from.
+      later(
+        () => setPointing(index),
+        Math.max(0, (lead + 0.75 - clip.currentTime) * 1000),
+      );
       entry.items.forEach((_, item) => {
         const fraction = entry.at[item] ?? item / count;
         const due =
@@ -759,19 +789,21 @@ export function Board({
     };
     clip.onended = () => {
       unfollow();
+      setVoicing(false);
       writeAll();
       // A breath, not a pause: the next beat's voice is already here.
       onward(250);
     };
     clip.onerror = () => {
       if (cancelled) return;
-      readAlong(entry);
+      readAlong(entry, index);
     };
     clip
       .play()
       .then(() => {
         if (cancelled) return;
         setVoiceBlocked(false);
+        setVoicing(true);
         pace();
         const analyser = listen(clip);
         if (analyser) follow(analyser);
@@ -785,7 +817,7 @@ export function Board({
           return;
         }
         setVoiceBlocked(true);
-        readAlong(entry);
+        readAlong(entry, index);
       });
     return () => {
       stop();
@@ -793,6 +825,7 @@ export function Board({
       clip.onerror = null;
       clip.pause();
       unfollow();
+      setVoicing(false);
     };
   }, [
     advance,
@@ -968,158 +1001,292 @@ export function Board({
                 ? `Coach · no voice right now, read along · step ${shown} of ${lines.length}`
                 : `Coach · step ${shown} of ${lines.length}`;
 
+  // THE MARKS. A beat may point back at a line already written — circle a term, underline
+  // it, draw an arrow to where a line came from — the way a teacher turns to the board and
+  // points. The current beat's marks are drawn in full; the last beat's stay, faded, until
+  // the next beat that points at something; older ones are rubbed out so the board does not
+  // fill with arrows. None show while the coach is answering a question: they belong to the
+  // lesson, not the answer.
+  const markSets: MarkSet[] = useMemo(() => {
+    const current = shown - 1;
+    let past = -1;
+    for (let index = current - 1; index >= 0; index -= 1) {
+      if (lines[index]?.point.length) {
+        past = index;
+        break;
+      }
+    }
+    const sets: MarkSet[] = [];
+    lines.forEach((line, index) => {
+      if (!line.point.length || index > current) return;
+      let state: MarkState;
+      if (asked !== null) state = "gone";
+      else if (index === current) {
+        if (pointing !== index) return;
+        state = "live";
+      } else state = index === past ? "past" : "gone";
+      sets.push({ index, points: line.point, state });
+    });
+    return sets;
+  }, [asked, lines, pointing, shown]);
+
+  // The coach card floats over the bottom of the board, so the board leaves room under its
+  // last line for it — measured, because the card grows when the voice fails and the words
+  // are written out instead.
+  const stageRef = useRef<HTMLDivElement>(null);
+  const coachRef = useRef<HTMLDivElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const coach = coachRef.current;
+    const stage = stageRef.current;
+    if (!coach || !stage || typeof ResizeObserver === "undefined") return;
+    let height = 0;
+    const observer = new ResizeObserver(() => {
+      const ink = inkRef.current;
+      const grew = coach.offsetHeight - height;
+      height = coach.offsetHeight;
+      // Measured before the room changes: was the student reading the newest line?
+      const atBottom =
+        ink !== null &&
+        ink.scrollHeight - ink.scrollTop - ink.clientHeight < 48 + Math.max(0, grew);
+      stage.style.setProperty("--coach-h", `${height}px`);
+      // The card grew over the newest line: move the board up with it.
+      if (ink && atBottom && grew > 0)
+        ink.scrollTo({ top: ink.scrollHeight, behavior: "smooth" });
+    });
+    observer.observe(coach);
+    return () => observer.disconnect();
+  }, []);
+
+  const talking = speaking !== null || voicing;
+  const penActive =
+    !needsTap &&
+    (writing ||
+      speaking !== null ||
+      (asked === null && !paused && !finished && shown > 0));
+  // Only the lesson dims while the student types: the coach's answer to them is what they
+  // are reading, and it stays at full strength.
+  const dim = paused && asked === null && !waiting;
+  const progress = lines.length ? Math.min(1, shown / lines.length) : 0;
+  const showCaption = played === 0;
+  const showTranscript = voiceBlocked && played > 0;
+  const nextLabel = finished ? "Done" : "Next step";
+
   return (
-    <div className="sp sp-coach">
-      <div className="sp-cbar">
-        <button className="sp-btn sm light" type="button" onClick={onDone}>
-          Close
-        </button>
-        <div className="sp-lesson">
-          <span>
-            <small>{subtitle}</small>
-            <strong>{title}</strong>
+    <div className={`sj pb ${talking ? "is-talking" : ""}`}>
+      <header className="pb-bar">
+        <div className="pb-col pb-bar-in">
+          <button
+            className="sj-btn ghost sm pb-close"
+            type="button"
+            aria-label="Close the board"
+            onClick={onDone}
+          >
+            <IconClose />
+            <span>Close</span>
+          </button>
+          <div className="pb-what">
+            <span className="sj-eyebrow pb-what-sub">{subtitle}</span>
+            <strong className="pb-what-title">{title}</strong>
+          </div>
+          <span
+            className="pb-count sj-mono"
+            aria-label={
+              finished
+                ? "Every step is on the board"
+                : `Step ${shown} of ${lines.length}`
+            }
+          >
+            {finished ? (
+              <>
+                <IconCheck size={14} /> Done
+              </>
+            ) : (
+              <>
+                <b>{Math.max(0, shown)}</b>
+                <span>/</span>
+                {lines.length}
+              </>
+            )}
           </span>
         </div>
-        <div className="sp-steps-mini">
-          {lines.map((line, index) => (
-            <i
-              key={line.say + String(index)}
-              className={index < shown ? "on" : ""}
-            />
-          ))}
+        <div
+          className="pb-progress"
+          role="progressbar"
+          aria-label="How much of the working is on the board"
+          aria-valuemin={0}
+          aria-valuemax={lines.length}
+          aria-valuenow={shown}
+        >
+          <span style={{ width: `${progress * 100}%` }} />
         </div>
-      </div>
+      </header>
 
-      <div className={`sp-board ${paused ? "dim" : ""}`}>
+      <main className="pb-stage" ref={stageRef}>
         {needsTap ? (
-          <button
-            type="button"
-            className="sp-btn sp-tap"
-            onClick={() => {
-              // The tap is what the browser needs; the lesson then carries on from here.
-              setNeedsTap(false);
-              setReplayed((count) => count + 1);
-            }}
-          >
-            ▶ Tap to start the lesson
-          </button>
+          <div className="pb-tap">
+            <button
+              type="button"
+              className="sj-btn lg"
+              onClick={() => {
+                // The tap is what the browser needs; the lesson then carries on from here.
+                setNeedsTap(false);
+                setReplayed((count) => count + 1);
+              }}
+            >
+              <IconPlay size={18} />
+              Tap to start the lesson
+            </button>
+          </div>
         ) : null}
-        <div className="sp-ink sp-textbook" ref={inkRef}>
-          {questionUp ? (
-            <>
-              <span className="sp-hl show sp-question sp-question-in">
-                <Maths text={question} />
-              </span>
-              <Figures figures={figures} compact />
-            </>
-          ) : null}
-          {lines.slice(0, shown).map((line, index) => {
-            const current = index === shown - 1;
-            const items = current
-              ? line.items.slice(0, itemsShown)
-              : line.items;
-            if (items.length === 0) return null;
-            return (
-              <span
-                key={line.say + String(index)}
-                className={`sp-hl show sp-written ${line.answer ? "answer" : ""}`}
-              >
-                {items.map((item, piece) => (
-                  <span
-                    key={item + String(piece)}
-                    className="sp-item sp-hand"
-                    // Written out over the time its words take, not flashed up whole.
-                    style={
-                      {
-                        "--write-ms": `${current ? handMs : 0}ms`,
-                      } as CSSProperties
-                    }
+
+        <div className="pb-ink" ref={inkRef}>
+          <div
+            className={`pb-col pb-sheet sp-textbook ${dim ? "dim" : ""}`}
+            ref={sheetRef}
+          >
+            {questionUp ? (
+              <section className="pb-question" aria-label="The question">
+                <span className="sj-eyebrow">The question</span>
+                <div
+                  className="pb-question-text pb-stroke"
+                  data-ink=""
+                  style={{ "--stroke": "700ms" } as CSSProperties}
+                >
+                  <Maths text={question} />
+                </div>
+                <Figures figures={figures} compact />
+              </section>
+            ) : null}
+
+            <div className="pb-lesson">
+              {lines.slice(0, shown).map((line, index) => {
+                const current = index === shown - 1;
+                const items = current
+                  ? line.items.slice(0, itemsShown)
+                  : line.items;
+                if (items.length === 0) return null;
+                return (
+                  <div
+                    key={line.say + String(index)}
+                    data-line={index}
+                    className={`pb-line ${line.answer ? "answer" : ""}`}
                   >
-                    <Maths text={item} />
-                  </span>
-                ))}
-              </span>
-            );
-          })}
+                    {line.answer ? (
+                      <span className="pb-answer-tag sj-mono">Answer</span>
+                    ) : null}
+                    {items.map((item, piece) => (
+                      <div
+                        key={item + String(piece)}
+                        className={current ? "pb-item pb-stroke" : "pb-item"}
+                        data-ink={current ? "" : undefined}
+                        // Written in one quick stroke as its words begin, not flashed up
+                        // whole and not faded in.
+                        style={
+                          current
+                            ? ({
+                                "--stroke": `${Math.min(700, handMs)}ms`,
+                              } as CSSProperties)
+                            : undefined
+                        }
+                      >
+                        <Maths text={item} />
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
 
-          {/*
-            Earlier questions and what was written under them. Kept, because a board is not
-            wiped between questions — a student who asked something ten minutes ago should
-            still be able to look back and find it.
-          */}
-          {written.map((line, index) =>
-            line.kind === "drawn" ? (
-              <span
-                key={`kept-${index}`}
-                className="sp-hl show coach kept sp-drawing"
-              >
-                <span className="n">coach</span>
-                <span dangerouslySetInnerHTML={{ __html: line.text }} />
-              </span>
-            ) : line.kind !== "coach" ? (
-              <span key={`kept-${index}`} className="sp-hl show coach-asked">
-                <span className="n">{line.kind}</span>
-                {line.text}
-              </span>
-            ) : (
-              <span key={`kept-${index}`} className="sp-hl show coach kept">
-                <span className="n">coach</span>
-                <Maths text={line.text} />
-              </span>
-            ),
-          )}
-
-          {/*
-            What the coach is writing now, under the reviewed working and marked as the
-            coach's own hand rather than the board's. The question they asked goes up first,
-            the way a teacher writes the question down before answering it.
-          */}
-          {asked !== null ? (
-            <span className="sp-hl show coach-asked">
-              <span className="n">{askedKind}</span>
-              {asked}
-            </span>
-          ) : null}
-          {/*
-            FLATTENED, AND EVERY LINE KEYED. Mapping beats to arrays of lines left the outer
-            array unkeyed, so React rebuilt the whole run of board lines whenever a new beat
-            arrived — which restarted the writing animation on every line already up, and
-            each new line appeared to wipe the ones before it off the board.
-          */}
-          {beats.slice(0, played).flatMap((beat, index) =>
-            beat.board.map((line, row) =>
-              line.kind === "draw" ? (
-                <span
-                  key={`coach-${index}-${row}`}
-                  className="sp-hl show coach sp-drawing"
+            {/*
+              Earlier questions and what was written under them. Kept, because a board is not
+              wiped between questions — a student who asked something ten minutes ago should
+              still be able to look back and find it.
+            */}
+            {written.map((line, index) =>
+              line.kind === "drawn" ? (
+                <div
+                  key={`kept-${index}`}
+                  className="pb-coachline kept drawing"
                 >
-                  <span className="n">coach</span>
-                  {/*
-                    The server has already reduced this to a whitelist of shapes — no script,
-                    no foreignObject, no URL of any kind — which is why it can be set as
-                    markup here. The sanitising is done there because that is where it can be
-                    tested, and it is the only place this markup is ever allowed in from.
-                  */}
+                  <span className="pb-tag sj-mono">coach</span>
                   <span dangerouslySetInnerHTML={{ __html: line.text }} />
-                </span>
+                </div>
+              ) : line.kind !== "coach" ? (
+                <div key={`kept-${index}`} className="pb-asked kept">
+                  <span className="pb-tag sj-mono">{line.kind}</span>
+                  <span>{line.text}</span>
+                </div>
               ) : (
-                <span
-                  key={`coach-${index}-${row}`}
-                  className="sp-hl show coach"
-                  // Long lines take longer to write, the way a hand does.
-                  style={
-                    { "--write-ms": `${writeMs(line.text)}ms` } as CSSProperties
-                  }
-                >
-                  <span className="n">coach</span>
-                  <Maths text={line.text} />
-                </span>
+                <div key={`kept-${index}`} className="pb-coachline kept">
+                  <span className="pb-tag sj-mono">coach</span>
+                  <div className="pb-item">
+                    <Maths text={line.text} />
+                  </div>
+                </div>
               ),
-            ),
-          )}
-          {writing || speaking !== null ? (
-            <span className="sp-nib" aria-hidden="true" />
-          ) : null}
+            )}
+
+            {/*
+              What the coach is writing now, under the reviewed working and marked as the
+              coach's own hand rather than the board's. The question they asked goes up first,
+              the way a teacher writes the question down before answering it.
+            */}
+            {asked !== null ? (
+              <div className="pb-asked">
+                <span className="pb-tag sj-mono">{askedKind}</span>
+                <span>{asked}</span>
+              </div>
+            ) : null}
+            {/*
+              FLATTENED, AND EVERY LINE KEYED. Mapping beats to arrays of lines left the outer
+              array unkeyed, so React rebuilt the whole run of board lines whenever a new beat
+              arrived — which restarted the writing animation on every line already up, and
+              each new line appeared to wipe the ones before it off the board.
+            */}
+            {beats.slice(0, played).flatMap((beat, index) =>
+              beat.board.map((line, row) =>
+                line.kind === "draw" ? (
+                  <div
+                    key={`coach-${index}-${row}`}
+                    className="pb-coachline drawing"
+                  >
+                    <span className="pb-tag sj-mono">coach</span>
+                    {/*
+                      The server has already reduced this to a whitelist of shapes — no script,
+                      no foreignObject, no URL of any kind — which is why it can be set as
+                      markup here. The sanitising is done there because that is where it can be
+                      tested, and it is the only place this markup is ever allowed in from.
+                    */}
+                    <span dangerouslySetInnerHTML={{ __html: line.text }} />
+                  </div>
+                ) : (
+                  <div key={`coach-${index}-${row}`} className="pb-coachline">
+                    <span className="pb-tag sj-mono">coach</span>
+                    <div
+                      className="pb-item pb-stroke"
+                      data-ink=""
+                      // Long lines take longer to write, the way a hand does — up to a point.
+                      style={
+                        {
+                          "--stroke": `${Math.min(700, writeMs(line.text))}ms`,
+                        } as CSSProperties
+                      }
+                    >
+                      <Maths text={line.text} />
+                    </div>
+                  </div>
+                ),
+              ),
+            )}
+
+            <Marks sheetRef={sheetRef} sets={markSets} />
+            <Pen
+              sheetRef={sheetRef}
+              active={penActive}
+              tick={`${shown}.${itemsShown}.${played}.${beats.length}.${questionUp}`}
+            />
+          </div>
         </div>
 
         {/*
@@ -1132,144 +1299,786 @@ export function Board({
           a lesson lost to a muted phone, a failed call or a student who cannot hear it, so
           where there is no audio the sentence is written out instead.
         */}
-        <div
-          className={`sp-tutorcard ${paused ? "paused" : ""} ${voiceBlocked ? "" : "slim"}`}
-        >
-          <Coach
-            faceRef={faceRef}
-            speaking={speaking !== null}
-            listening={recording}
-          />
-          <div>
-            <div className="who">
-              <span className="dot" />
-              {status}
-            </div>
-            {voiceBlocked && played > 0 ? (
-              <div className="sp-spoken">
-                {beats.slice(0, played).map((beat, index) =>
-                  beat.said ? (
-                    <p
-                      key={`said-${index}`}
-                      className={speaking === index ? "saying now" : "saying"}
-                    >
-                      <Maths text={beat.said} />
-                    </p>
-                  ) : null,
-                )}
+        <div className="pb-coachdock">
+          <div className="pb-col">
+            <div
+              ref={coachRef}
+              className={`pb-coach ${paused ? "paused" : ""} ${
+                talking ? "talking" : ""
+              } ${showCaption || showTranscript ? "" : "slim"}`}
+              aria-live="polite"
+            >
+              <span className="pb-avatar">
+                <Coach
+                  faceRef={faceRef}
+                  speaking={talking}
+                  listening={recording}
+                />
+              </span>
+              <div className="pb-coach-body">
+                <div className="pb-who sj-mono">
+                  <span className="pb-dot" />
+                  {status}
+                </div>
+                {showTranscript ? (
+                  <div className="pb-spoken">
+                    {beats.slice(0, played).map((beat, index) =>
+                      beat.said ? (
+                        <p
+                          key={`said-${index}`}
+                          className={speaking === index ? "now" : ""}
+                        >
+                          <Maths text={beat.said} />
+                        </p>
+                      ) : null,
+                    )}
+                  </div>
+                ) : showCaption ? (
+                  <p className="pb-caption">
+                    {waiting ? (
+                      "Let me look at that with you…"
+                    ) : (
+                      <Maths text={caption} />
+                    )}
+                  </p>
+                ) : null}
               </div>
-            ) : played === 0 ? (
-              <p>
-                {waiting ? (
-                  "Let me look at that with you…"
-                ) : (
-                  <Maths text={caption} />
-                )}
-              </p>
-            ) : null}
+            </div>
           </div>
         </div>
-      </div>
+      </main>
 
-      <div className="sp-dock">
-        <form className="sp-ask" onSubmit={send}>
-          <div className="row">
-            <input
-              value={draft}
-              onChange={(event) => {
-                setDraft(event.target.value);
-                // A student typing a question is no longer reading the board, and a step that
-                // scrolls past mid-sentence is the step they were about to ask about.
-                if (event.target.value !== "") setPaused(true);
-              }}
-              onKeyDown={(event) => {
-                // Submitted here rather than left to the form, because this box is mostly
-                // used on a phone, where sending is the keyboard's own Go key and not a tap
-                // on the button beside it.
-                if (event.key === "Enter") void send(event);
-              }}
-              placeholder={
-                stepIndex === null
-                  ? "Ask the coach about the working…"
-                  : `Ask about step ${stepIndex + 1}…`
-              }
-              aria-label="Ask the coach about this working"
-              maxLength={ASK_MAX_CHARS}
-              disabled={waiting}
-            />
-            {onListen ? (
-              <button
-                className={`sp-btn sm light sp-mic ${recording ? "on" : ""}`}
-                type="button"
-                onClick={() =>
-                  void (recording ? stopRecording() : startRecording())
-                }
-                disabled={waiting || listening}
-                aria-label={recording ? "Stop recording" : "Ask by speaking"}
-                title={recording ? "Stop recording" : "Ask by speaking"}
-              >
-                {listening ? "…" : recording ? "■" : "🎤"}
-              </button>
-            ) : null}
+      <footer className="pb-dock">
+        <div className="pb-col pb-dock-in">
+          <div className="pb-ctl" role="group" aria-label="Lesson controls">
             <button
-              className="sp-btn sm"
-              type="submit"
-              disabled={waiting || draft.trim() === ""}
+              type="button"
+              title="Replay this step"
+              aria-label="Replay this step"
+              onClick={() => {
+                resume();
+                narrating.current = null;
+                setReplayed((count) => count + 1);
+              }}
+              disabled={shown === 0}
             >
-              {waiting ? "…" : "Ask"}
+              <IconReplay />
+            </button>
+            <button
+              type="button"
+              title={paused ? "Resume" : "Pause"}
+              aria-label={paused ? "Resume" : "Pause"}
+              aria-pressed={paused}
+              onClick={() => {
+                resume();
+                setPaused((value) => !value);
+              }}
+              disabled={finished}
+            >
+              {paused ? <IconPlay /> : <IconPause />}
+            </button>
+            <button
+              type="button"
+              className={`next ${finished ? "done" : ""}`}
+              title={nextLabel}
+              aria-label={nextLabel}
+              onClick={() => {
+                resume();
+                if (finished) onDone();
+                else advance();
+              }}
+            >
+              {finished ? <IconCheck /> : <IconNext />}
             </button>
           </div>
-          <span className="note">
-            {askIssue
-              ? askIssue
-              : voiceBlocked
-                ? "I cannot play the voice here, so the lesson is written out instead."
-                : recording
-                  ? "Listening… press stop when you have finished your question."
-                  : listening
-                    ? "Writing down what you said…"
-                    : turn && turn.asks_left <= LOW_ON_ASKS
-                      ? `${turn.asks_left} more question${turn.asks_left === 1 ? "" : "s"} today.`
-                      : "Lost a step? Ask about it — the coach answers from this working."}
-          </span>
-        </form>
-        <div className="ctl">
-          <button
-            type="button"
-            title="Replay this step"
-            onClick={() => {
-              resume();
-              narrating.current = null;
-              setReplayed((count) => count + 1);
-            }}
-            disabled={shown === 0}
-          >
-            ↺
-          </button>
-          <button
-            type="button"
-            title={paused ? "Resume" : "Pause"}
-            onClick={() => {
-              resume();
-              setPaused((value) => !value);
-            }}
-            disabled={finished}
-          >
-            {paused ? "▶" : "❚❚"}
-          </button>
-          <button
-            type="button"
-            title="Next step"
-            onClick={() => {
-              resume();
-              if (finished) onDone();
-              else advance();
-            }}
-          >
-            {finished ? "✓" : "→"}
-          </button>
+
+          <form className="pb-ask" onSubmit={send}>
+            <div className={`pb-askbox ${recording ? "recording" : ""}`}>
+              <input
+                value={draft}
+                onChange={(event) => {
+                  setDraft(event.target.value);
+                  // A student typing a question is no longer reading the board, and a step
+                  // that scrolls past mid-sentence is the step they were about to ask about.
+                  if (event.target.value !== "") setPaused(true);
+                }}
+                onKeyDown={(event) => {
+                  // Submitted here rather than left to the form, because this box is mostly
+                  // used on a phone, where sending is the keyboard's own Go key and not a tap
+                  // on the button beside it.
+                  if (event.key === "Enter") void send(event);
+                }}
+                placeholder={
+                  stepIndex === null
+                    ? "Ask about the working…"
+                    : `Ask about step ${stepIndex + 1}…`
+                }
+                aria-label="Ask the coach about this working"
+                maxLength={ASK_MAX_CHARS}
+                disabled={waiting}
+                enterKeyHint="send"
+              />
+              {onListen ? (
+                <button
+                  className={`pb-mic ${recording ? "on" : ""}`}
+                  type="button"
+                  onClick={() =>
+                    void (recording ? stopRecording() : startRecording())
+                  }
+                  disabled={waiting || listening}
+                  aria-label={recording ? "Stop recording" : "Ask by speaking"}
+                  aria-pressed={recording}
+                  title={recording ? "Stop recording" : "Ask by speaking"}
+                >
+                  {listening ? (
+                    <span className="pb-busy" aria-hidden="true" />
+                  ) : recording ? (
+                    <IconStop />
+                  ) : (
+                    <IconMic />
+                  )}
+                </button>
+              ) : null}
+              <button
+                className="pb-send"
+                type="submit"
+                disabled={waiting || draft.trim() === ""}
+                aria-label="Ask the coach"
+                title="Ask the coach"
+              >
+                {waiting ? (
+                  <span className="pb-busy" aria-hidden="true" />
+                ) : (
+                  <IconSend />
+                )}
+              </button>
+            </div>
+            <span className={`pb-note ${askIssue ? "issue" : ""}`}>
+              {askIssue
+                ? askIssue
+                : voiceBlocked
+                  ? "I cannot play the voice here, so the lesson is written out instead."
+                  : recording
+                    ? "Listening… press stop when you have finished your question."
+                    : listening
+                      ? "Writing down what you said…"
+                      : turn && turn.asks_left <= LOW_ON_ASKS
+                        ? `${turn.asks_left} more question${turn.asks_left === 1 ? "" : "s"} today.`
+                        : "Lost a step? Ask about it — the coach answers from this working."}
+            </span>
+          </form>
         </div>
-      </div>
+      </footer>
     </div>
   );
 }
+
+/* ---- Marks: circles, underlines and arrows drawn back over the board ------------------- */
+
+type MarkState = "live" | "past" | "gone";
+
+interface MarkSet {
+  /** The line (entry) whose beat draws these marks. */
+  index: number;
+  points: LessonPoint[];
+  state: MarkState;
+}
+
+interface Box {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+}
+
+interface Shape {
+  key: string;
+  kind: LessonPoint["kind"];
+  state: MarkState;
+  d: string;
+  head: string | null;
+  label: Label | null;
+}
+
+/** A mark's few words: beside it on the right, on the left, or centred above it. */
+interface Label {
+  x: number;
+  y: number;
+  side: "right" | "left" | "above";
+  text: string;
+}
+
+/** A small seeded generator, so a mark wobbles the same way every time it is redrawn. */
+function seeded(seed: number): () => number {
+  let a = seed >>> 0 || 1;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+type Pt = [number, number];
+
+/** A smooth open curve through the points (Catmull–Rom, as cubic Béziers). */
+function through(points: Pt[]): string {
+  const f = (n: number) => n.toFixed(1);
+  const first = points[0];
+  if (!first) return "";
+  let d = `M${f(first[0])} ${f(first[1])}`;
+  for (let i = 0; i < points.length - 1; i += 1) {
+    const p1 = points[i]!;
+    const p2 = points[i + 1]!;
+    const p0 = points[i - 1] ?? p1;
+    const p3 = points[i + 2] ?? p2;
+    const c1: Pt = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
+    const c2: Pt = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+    d += ` C${f(c1[0])} ${f(c1[1])} ${f(c2[0])} ${f(c2[1])} ${f(p2[0])} ${f(p2[1])}`;
+  }
+  return d;
+}
+
+/** One character of board text as it is matched: spaces gone, every minus the same minus. */
+function fold(char: string): string {
+  if (/[\s​-‍⁠﻿]/.test(char)) return "";
+  if (char === "−" || char === "–") return "-";
+  return char;
+}
+
+/** The text of a line (leaving out KaTeX's hidden copy), one node at a time. */
+function textNodes(root: Element): Text[] {
+  const nodes: Text[] = [];
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  while (walker.nextNode()) {
+    const node = walker.currentNode as Text;
+    if (node.parentElement?.closest(".katex-mathml")) continue;
+    if (node.data.trim() === "") continue;
+    nodes.push(node);
+  }
+  return nodes;
+}
+
+function union(rects: DOMRect[]): Box | null {
+  let box: Box | null = null;
+  for (const r of rects) {
+    if (r.width < 0.5 || r.height < 0.5) continue;
+    box = box
+      ? {
+          left: Math.min(box.left, r.left),
+          top: Math.min(box.top, r.top),
+          right: Math.max(box.right, r.right),
+          bottom: Math.max(box.bottom, r.bottom),
+        }
+      : { left: r.left, top: r.top, right: r.right, bottom: r.bottom };
+  }
+  return box;
+}
+
+/**
+ * Where the ink of an element sits on the screen — the glyphs, not the block around them, so
+ * a circle hugs the words — or where one piece of it sits when `at` names it.
+ */
+function inkBox(root: Element, at?: string | null): Box | null {
+  const nodes = textNodes(root);
+  const range = document.createRange();
+  const rects: DOMRect[] = [];
+  const whole = () => {
+    for (const node of nodes) {
+      range.selectNodeContents(node);
+      rects.push(...Array.from(range.getClientRects()));
+    }
+  };
+  const needle = at ? Array.from(at).map(fold).join("") : "";
+  if (!needle) whole();
+  else {
+    let compact = "";
+    const where: { node: Text; offset: number }[] = [];
+    for (const node of nodes) {
+      for (let offset = 0; offset < node.data.length; offset += 1) {
+        const char = fold(node.data.charAt(offset));
+        if (!char) continue;
+        compact += char;
+        where.push({ node, offset });
+      }
+    }
+    const found = compact.indexOf(needle);
+    const first = found < 0 ? undefined : where[found];
+    if (!first) whole();
+    else {
+      // One range per run of characters inside the same text node.
+      let start = first;
+      let last = first;
+      const flush = () => {
+        range.setStart(start.node, start.offset);
+        range.setEnd(last.node, last.offset + 1);
+        rects.push(...Array.from(range.getClientRects()));
+      };
+      for (let i = found + 1; i < found + needle.length; i += 1) {
+        const next = where[i];
+        if (!next) break;
+        if (next.node !== last.node) {
+          flush();
+          start = next;
+        }
+        last = next;
+      }
+      flush();
+    }
+  }
+  const box = union(rects);
+  if (!box) return null;
+  // A long line scrolls sideways inside itself: keep the mark to the part that is on screen.
+  const frame = root.getBoundingClientRect();
+  return {
+    left: Math.max(box.left, frame.left),
+    right: Math.min(box.right, frame.right),
+    top: box.top,
+    bottom: box.bottom,
+  };
+}
+
+function relative(box: Box, base: DOMRect): Box {
+  return {
+    left: box.left - base.left,
+    top: box.top - base.top,
+    right: box.right - base.left,
+    bottom: box.bottom - base.top,
+  };
+}
+
+function lineAt(sheet: HTMLElement, index: number): HTMLElement | null {
+  return sheet.querySelector<HTMLElement>(`[data-line="${index}"]`);
+}
+
+/** The newest line on the board at or before `index`: where a beat's arrows start from. */
+function lineFrom(sheet: HTMLElement, index: number): HTMLElement | null {
+  for (let at = index; at >= 0; at -= 1) {
+    const found = lineAt(sheet, at);
+    if (found) return found;
+  }
+  return null;
+}
+
+function drawCircle(box: Box, rnd: () => number): string {
+  const cx = (box.left + box.right) / 2;
+  const cy = (box.top + box.bottom) / 2;
+  const ry = Math.max(13, (box.bottom - box.top) / 2 + 6);
+  // Never taller than it is wide: round a single figure, not bracket it.
+  const rx = Math.max(ry + 5, (box.right - box.left) / 2 + 10);
+  const start = -2.35 + (rnd() - 0.5) * 0.3;
+  // A hand does not close a circle exactly: it goes a little past where it began.
+  const sweep = Math.PI * 2 + 0.5;
+  const points: Pt[] = [];
+  const count = 22;
+  for (let i = 0; i < count; i += 1) {
+    const t = i / (count - 1);
+    const angle = start + sweep * t;
+    const wobble = 1 + (rnd() - 0.5) * 0.06;
+    const grow = 1 + 0.08 * t;
+    points.push([
+      cx + Math.cos(angle) * rx * grow * wobble,
+      cy + Math.sin(angle) * ry * grow * wobble,
+    ]);
+  }
+  return through(points);
+}
+
+function drawUnderline(box: Box, rnd: () => number): string {
+  const x0 = box.left - 3;
+  const x1 = box.right + 6;
+  const y = box.bottom + 3;
+  const points: Pt[] = [];
+  for (let i = 0; i < 5; i += 1) {
+    const t = i / 4;
+    points.push([x0 + (x1 - x0) * t, y + (rnd() - 0.5) * 2.4 - t * 1.6]);
+  }
+  return through(points);
+}
+
+function drawBox(box: Box, rnd: () => number): string {
+  const j = () => (rnd() - 0.5) * 3;
+  const l = box.left - 7;
+  const r = box.right + 7;
+  const t = box.top - 5;
+  const b = box.bottom + 5;
+  const corner = (x: number, y: number): Pt => [x + j(), y + j()];
+  const c0 = corner(l, t);
+  const c1 = corner(r, t);
+  const c2 = corner(r, b);
+  const c3 = corner(l, b);
+  const f = (p: Pt) => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`;
+  const mid = (a: Pt, z: Pt): Pt => [(a[0] + z[0]) / 2 + j(), (a[1] + z[1]) / 2 + j()];
+  const end: Pt = [c0[0] + 10, c0[1] - 1.5];
+  return `M${f(c0)} Q${f(mid(c0, c1))} ${f(c1)} Q${f(mid(c1, c2))} ${f(c2)} Q${f(mid(c2, c3))} ${f(c3)} Q${f(mid(c3, c0))} ${f(c0)} L${f(end)}`;
+}
+
+function arrowHead(tip: Pt, from: Pt): string {
+  const angle = Math.atan2(tip[1] - from[1], tip[0] - from[0]);
+  const size = 10;
+  const a1 = angle + Math.PI - 0.5;
+  const a2 = angle + Math.PI + 0.5;
+  const f = (n: number) => n.toFixed(1);
+  return `M${f(tip[0] + Math.cos(a1) * size)} ${f(tip[1] + Math.sin(a1) * size)} L${f(tip[0])} ${f(tip[1])} L${f(tip[0] + Math.cos(a2) * size)} ${f(tip[1] + Math.sin(a2) * size)}`;
+}
+
+function bezierAt(p0: Pt, c1: Pt, c2: Pt, p3: Pt, t: number): Pt {
+  const u = 1 - t;
+  const a = u * u * u;
+  const b = 3 * u * u * t;
+  const c = 3 * u * t * t;
+  const e = t * t * t;
+  return [
+    a * p0[0] + b * c1[0] + c * c2[0] + e * p3[0],
+    a * p0[1] + b * c1[1] + c * c2[1] + e * p3[1],
+  ];
+}
+
+/** Room a label needs beside its mark before it is put on the other side instead. */
+const LABEL_ROOM = 150;
+
+function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
+  const base = sheet.getBoundingClientRect();
+  const width = sheet.clientWidth;
+  // The sheet's own side gutters are usable: arrows may bow into them but not past them.
+  const minX = 6;
+  const maxX = width - 6;
+  const shapes: Shape[] = [];
+  for (const set of sets) {
+    set.points.forEach((point, k) => {
+      const target = point.line < 0 ? set.index + point.line : point.line;
+      if (target < 0 || target > set.index) return;
+      const line = lineAt(sheet, target);
+      if (!line) return;
+      const whole = inkBox(line);
+      const found = point.at ? inkBox(line, point.at) : whole;
+      if (!found || !whole) return;
+      const box = relative(found, base);
+      const lineBox = relative(whole, base);
+      const rnd = seeded(set.index * 131 + k * 17 + target * 7 + 3);
+      const key = `${set.index}-${k}`;
+      const text = point.text?.trim() || null;
+      // Right of the mark where there is room, else left of it, never off the board.
+      const beside = (right: number, left: number, y: number): Label | null =>
+        text
+          ? right + LABEL_ROOM <= width
+            ? { x: right, y, side: "right", text }
+            : left - LABEL_ROOM >= 0
+              ? { x: left, y, side: "left", text }
+              : null
+          : null;
+
+      if (point.kind === "circle" || point.kind === "box") {
+        const d = point.kind === "circle" ? drawCircle(box, rnd) : drawBox(box, rnd);
+        const rx = (box.right - box.left) / 2 + 12;
+        const cx = (box.left + box.right) / 2;
+        // Beside the circle at its shoulder; on a narrow board, sat on top of it instead.
+        const label: Label | null =
+          text && cx + rx + 4 + LABEL_ROOM > width
+            ? { x: Math.min(Math.max(cx, 70), width - 70), y: box.top - 8, side: "above", text }
+            : beside(cx + rx + 4, cx - rx - 4, box.top - 2);
+        shapes.push({ key, kind: point.kind, state: set.state, d, head: null, label });
+        return;
+      }
+      if (point.kind === "underline") {
+        const d = drawUnderline(box, rnd);
+        shapes.push({
+          key,
+          kind: "underline",
+          state: set.state,
+          d,
+          head: null,
+          label: beside(box.right + 12, box.left - 8, box.bottom - 4),
+        });
+        return;
+      }
+
+      // An arrow, from the line this beat wrote back to the one it came from.
+      if (target === set.index) return;
+      const fromLine = lineFrom(sheet, set.index);
+      const fromInk = fromLine ? inkBox(fromLine) : null;
+      if (!fromInk) return;
+      const from = relative(fromInk, base);
+      const fromY = (from.top + from.bottom) / 2;
+      // A whole line, or the end of one, is reached from the right-hand side, where the board
+      // is clear; the start of a line from the left margin; a piece in the middle of a line
+      // from underneath.
+      const atEnd = !point.at || Math.abs(box.right - lineBox.right) < 8;
+      const atStart = !atEnd && Math.abs(box.left - lineBox.left) < 8;
+      let start: Pt;
+      let tip: Pt;
+      let c1: Pt;
+      let c2: Pt;
+      let label: Label | null = null;
+      if (atStart) {
+        start = [from.left - 6, fromY];
+        tip = [box.left - 6, (box.top + box.bottom) / 2];
+        const bow = Math.max(minX, Math.min(from.left, box.left) - 34);
+        c1 = [bow, start[1]];
+        c2 = [bow, tip[1]];
+        // The words go at the line the arrow starts from, where the margin has no room.
+        label = beside(from.right + 34, -1, fromY);
+      } else if (atEnd) {
+        const right = Math.max(from.right, box.right);
+        let bow = right + Math.min(90, Math.max(30, Math.abs(fromY - box.top) * 0.3));
+        if (bow <= maxX) {
+          start = [from.right + 10, fromY];
+          tip = [box.right + 9, (box.top + box.bottom) / 2];
+        } else {
+          // No room on the right: bow out into the left margin instead.
+          const left = Math.min(from.left, box.left);
+          bow = Math.max(minX, left - 34);
+          start = [from.left - 6, fromY];
+          tip = [box.left - 6, (box.top + box.bottom) / 2];
+        }
+        bow = Math.min(maxX, bow);
+        c1 = [bow, start[1]];
+        c2 = [bow, tip[1]];
+      } else {
+        start = [Math.min(maxX - 4, from.right + 10), fromY];
+        tip = [(box.left + box.right) / 2, box.bottom + 5];
+        c1 = [Math.min(maxX, Math.max(start[0], box.right) + 36), start[1]];
+        c2 = [Math.min(maxX, tip[0] + 22), tip[1] + 40];
+      }
+      const wob = (p: Pt): Pt => [p[0] + (rnd() - 0.5) * 6, p[1] + (rnd() - 0.5) * 6];
+      c1 = wob(c1);
+      c2 = wob(c2);
+      const f = (n: number) => n.toFixed(1);
+      const d = `M${f(start[0])} ${f(start[1])} C${f(c1[0])} ${f(c1[1])} ${f(c2[0])} ${f(c2[1])} ${f(tip[0])} ${f(tip[1])}`;
+      const mid = bezierAt(start, c1, c2, tip, 0.5);
+      if (!atStart) label = beside(mid[0] + 8, mid[0] - 8, mid[1]);
+      shapes.push({
+        key,
+        kind: "arrow",
+        state: set.state,
+        d,
+        head: arrowHead(tip, bezierAt(start, c1, c2, tip, 0.9)),
+        label,
+      });
+    });
+  }
+  return shapes;
+}
+
+/**
+ * The teacher's marks over the board, drawn by hand.
+ *
+ * An SVG laid over the sheet the working is written on, in the sheet's own coordinates — so
+ * scrolling the board carries the marks with the lines. Measured from where the lines really
+ * are, and measured again whenever the sheet changes size (a new line, a phone turned
+ * sideways, a font arriving late).
+ */
+function Marks({
+  sheetRef,
+  sets,
+}: {
+  sheetRef: RefObject<HTMLDivElement>;
+  sets: MarkSet[];
+}) {
+  const [shapes, setShapes] = useState<Shape[]>([]);
+  const measure = useCallback(() => {
+    const sheet = sheetRef.current;
+    if (!sheet || sets.length === 0) {
+      setShapes((now) => (now.length ? [] : now));
+      return;
+    }
+    setShapes(measureMarks(sheet, sets));
+  }, [sets, sheetRef]);
+
+  useLayoutEffect(measure, [measure]);
+  useEffect(() => {
+    const sheet = sheetRef.current;
+    if (!sheet) return;
+    let frame = 0;
+    const again = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(measure);
+    };
+    const observer =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(again);
+    observer?.observe(sheet);
+    window.addEventListener("resize", again);
+    // A line that scrolls sideways inside itself moves the marks on it.
+    sheet.addEventListener("scroll", again, true);
+    void document.fonts?.ready.then(again);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer?.disconnect();
+      window.removeEventListener("resize", again);
+      sheet.removeEventListener("scroll", again, true);
+    };
+  }, [measure, sheetRef]);
+
+  if (shapes.length === 0) return null;
+  return (
+    <div className="pb-marks" aria-hidden="true">
+      <svg className="pb-marks-svg">
+        {shapes.map((shape) => (
+          <g key={shape.key} className={`pb-mark ${shape.kind} ${shape.state}`}>
+            <path className="pb-mark-line" d={shape.d} pathLength={1} />
+            {shape.head ? (
+              <path className="pb-mark-head" d={shape.head} pathLength={1} />
+            ) : null}
+          </g>
+        ))}
+      </svg>
+      {shapes.map((shape) =>
+        shape.label ? (
+          <span
+            key={`label-${shape.key}`}
+            className={`pb-mark-label ${shape.kind} ${shape.state} ${shape.label.side}`}
+            style={{ left: shape.label.x, top: shape.label.y }}
+          >
+            {shape.label.text}
+          </span>
+        ) : null,
+      )}
+    </div>
+  );
+}
+
+/**
+ * The pen: a nib that moves to where the board is being written and follows the stroke along
+ * the line, so the eye is taken to the new line rather than having to find it.
+ *
+ * It glides to the start of the newest line, then crosses it in the time the line takes to be
+ * written. Lines are marked `data-ink` when they are being written; the pen goes to each one
+ * once, and nowhere when a student would rather nothing moved.
+ */
+function Pen({
+  sheetRef,
+  active,
+  tick,
+}: {
+  sheetRef: RefObject<HTMLDivElement>;
+  active: boolean;
+  /** Changes whenever something may have been written, so the pen looks again. */
+  tick: string;
+}) {
+  const penRef = useRef<HTMLDivElement>(null);
+  const seen = useRef(new WeakSet<Element>());
+  const place = useRef<Pt | null>(null);
+
+  useLayoutEffect(() => {
+    const sheet = sheetRef.current;
+    const pen = penRef.current;
+    if (!sheet || !pen) return;
+    const inks = sheet.querySelectorAll<HTMLElement>("[data-ink]");
+    const newest = inks[inks.length - 1];
+    if (!newest || seen.current.has(newest)) return;
+    seen.current.add(newest);
+    const ink = inkBox(newest);
+    if (!ink) return;
+    const box = relative(ink, sheet.getBoundingClientRect());
+    const y = box.bottom - 2;
+    // Kept inside the sheet: a pen hanging off the edge of a phone would widen the board.
+    const edge = sheet.clientWidth - 26;
+    const start: Pt = [Math.min(box.left, edge), y];
+    const end: Pt = [Math.min(box.right + 2, edge), y];
+    const from = place.current ?? start;
+    place.current = end;
+    const at = (p: Pt) => `translate(${p[0].toFixed(1)}px, ${p[1].toFixed(1)}px)`;
+    pen.style.transform = at(end);
+    const still =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (still || typeof pen.animate !== "function") return;
+    const stroke =
+      Number.parseFloat(newest.style.getPropertyValue("--stroke")) || 600;
+    const glide = PEN_GLIDE_MS;
+    for (const running of pen.getAnimations()) running.cancel();
+    pen.animate(
+      [
+        { transform: at(from), easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" },
+        { transform: at(start), offset: glide / (glide + stroke), easing: "linear" },
+        { transform: at(end) },
+      ],
+      { duration: glide + stroke },
+    );
+  }, [sheetRef, tick]);
+
+  return (
+    <div
+      ref={penRef}
+      className={`pb-pen ${active && place.current ? "on" : ""}`}
+      aria-hidden="true"
+    >
+      <svg viewBox="0 0 28 28" width="28" height="28">
+        <path
+          className="pb-pen-body"
+          d="M6.2 21.8 20.6 7.4a2.6 2.6 0 0 1 3.7 3.7L9.9 25.5l-5.3 1.6z"
+        />
+        <path className="pb-pen-cap" d="m18.4 9.6 3.7 3.7" />
+        <circle className="pb-pen-tip" cx="4.6" cy="27.1" r="1.6" />
+      </svg>
+    </div>
+  );
+}
+
+/** How long the pen takes to get to the start of a new line, before the stroke begins. */
+const PEN_GLIDE_MS = 180;
+
+/* ---- Icons: the app's outline family (24 grid, 1.9 stroke, round caps) -------------------- */
+
+function icon(paths: ReactNode) {
+  return function Icon({ size = 20 }: { size?: number }) {
+    return (
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.9}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        {paths}
+      </svg>
+    );
+  };
+}
+
+const IconClose = icon(
+  <>
+    <path d="M6 6l12 12" />
+    <path d="M18 6 6 18" />
+  </>,
+);
+const IconReplay = icon(
+  <>
+    <path d="M3 12a9 9 0 1 0 3-6.7" />
+    <path d="M3 4v5h5" />
+  </>,
+);
+const IconPlay = icon(
+  <path d="M7 4.8v14.4a1 1 0 0 0 1.5.9l11.2-7.2a1 1 0 0 0 0-1.7L8.5 3.9A1 1 0 0 0 7 4.8Z" fill="currentColor" />,
+);
+const IconPause = icon(
+  <>
+    <rect x="6" y="4.5" width="4" height="15" rx="1.2" fill="currentColor" />
+    <rect x="14" y="4.5" width="4" height="15" rx="1.2" fill="currentColor" />
+  </>,
+);
+const IconNext = icon(
+  <>
+    <path d="M5 12h14" />
+    <path d="m13 6 6 6-6 6" />
+  </>,
+);
+const IconCheck = icon(<path d="m5 12.5 4.5 4.5L19 7.5" />);
+const IconMic = icon(
+  <>
+    <rect x="9" y="3" width="6" height="11" rx="3" />
+    <path d="M5.5 11a6.5 6.5 0 0 0 13 0" />
+    <path d="M12 17.5V21" />
+  </>,
+);
+const IconStop = icon(<rect x="6.5" y="6.5" width="11" height="11" rx="2" fill="currentColor" />);
+const IconSend = icon(
+  <>
+    <path d="M12 19V5" />
+    <path d="m5.5 11.5 6.5-6.5 6.5 6.5" />
+  </>,
+);

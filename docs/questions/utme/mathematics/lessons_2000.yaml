@@ -1147,16 +1147,25 @@ lessons:
         write: 'Area of each disc $= \pi x^{2}$'
       - say: 'Adding up all those discs from $y = 0$ to $y = 3$ gives the volume. So $V$ equals pi times the integral from 0 to 3 of $x$ squared, $dy$.'
         write: '$V = \pi\displaystyle\int_{0}^{3} x^{2}\,dy$'
+        point:
+          - { line: 0, kind: circle, at: '0 ≤ y ≤ 3', text: 'the limits' }
       - say: 'But we are integrating with respect to $y$, so we need $x$ squared written in terms of $y$. For that, let''s go back to the equation of the curve.'
         write: 'From $y = x^{2} - 1$:'
+        point:
+          - { line: 0, kind: arrow, at: 'y = x2 − 1', text: 'the curve' }
       - say: 'Add 1 to both sides, and $x$ squared equals $y$ plus 1.'
         write: '$x^{2} = y + 1$'
       - say: 'Now we replace the $x$ squared in our integral with $y$ plus 1.'
         write: '$V = \pi\displaystyle\int_{0}^{3} (y + 1)\,dy$'
+        point:
+          - { line: 2, kind: circle, at: 'x2' }
+          - { line: 4, kind: arrow, text: 'swap it in' }
       - say: 'Let''s integrate. $y$ integrates to $y$ squared over 2, and 1 integrates to $y$.'
         write: '$= \pi\left[\dfrac{y^{2}}{2} + y\right]_{0}^{3}$'
       - say: 'Now we put in the limits: the value at the top limit, 3, minus the value at the bottom limit, 0.'
         write: '$= \pi\left[\left(\dfrac{3^{2}}{2} + 3\right) - \left(\dfrac{0^{2}}{2} + 0\right)\right]$'
+        point:
+          - { line: 0, kind: underline, at: '0 ≤ y ≤ 3', text: 'top 3, bottom 0' }
       - say: 'At 3, 3 squared is 9, so that bracket is 9 over 2 plus 3. At 0, everything is zero, so the second bracket disappears.'
         write: '$= \pi\left(\dfrac{9}{2} + 3\right)$'
       - say: 'To add 9 over 2 and 3, we write the 3 as 6 over 2. Then 9 over 2 plus 6 over 2 is 15 over 2.'

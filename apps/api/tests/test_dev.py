@@ -379,6 +379,8 @@ async def test_every_table_that_points_at_a_student_is_cleared_here() -> None:
                         JOIN pg_class cl ON cl.oid = c.conrelid
                         WHERE c.contype = 'f'
                           AND c.confrelid = 'students'::regclass
+                          -- A cascading key (credentials, sessions) cannot block the delete.
+                          AND c.confdeltype <> 'c'
                         """
                     )
                 )

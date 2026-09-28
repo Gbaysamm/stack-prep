@@ -17,7 +17,7 @@ from sqlalchemy import text
 from app.config import Settings, get_settings
 from app.db import database_is_reachable, get_engine
 from app.main import app
-from app.routers.practice import _figures, _practice_history, _prior_turns, _record_in
+from app.routers.practice import _figures, _points, _practice_history, _prior_turns, _record_in
 
 pytestmark = pytest.mark.integration
 
@@ -230,6 +230,7 @@ async def fixture() -> AsyncIterator[dict[str, str]]:
             "DELETE FROM tutor_turns WHERE student_id = CAST(:student AS uuid)",
             "DELETE FROM attempts WHERE student_id = CAST(:student AS uuid)",
             "DELETE FROM study_sessions WHERE student_id = CAST(:student AS uuid)",
+            "DELETE FROM student_exam_goals WHERE student_id = CAST(:student AS uuid)",
             "DELETE FROM students WHERE id = CAST(:student AS uuid)",
             "DELETE FROM question_classifications WHERE subject_id = CAST(:subject_id AS uuid)",
             # Approved content is immutable by design, so a fixture has to withdraw before it
@@ -350,6 +351,72 @@ async def test_the_ladder_cannot_be_talked_past(
     assert state["stage"] == "hint"
     state = await answer(client, state["session_id"], first, "B")
     assert state["stage"] == "explain"
+
+
+async def test_a_reload_at_the_hint_keeps_the_hint(
+    client: httpx.AsyncClient, fixture: dict[str, str]
+) -> None:
+    """A refresh after the first miss is the same hint on the same question, not a new one."""
+    state = await start(client, fixture)
+    hinted = await answer(client, state["session_id"], state, "B")
+    response = await client.get(f"/v1/practice/{state['session_id']}")
+    assert response.status_code == 200, response.text
+    resumed = response.json()
+    assert resumed["stage"] == "hint"
+    assert resumed["hint"] == hinted["hint"] == "the general hint"
+    assert resumed["misconception"] == hinted["misconception"]
+    assert resumed["question"] == hinted["question"]
+    assert resumed["position"] == hinted["position"]
+
+
+async def test_a_reload_at_the_board_keeps_the_board(
+    client: httpx.AsyncClient, fixture: dict[str, str]
+) -> None:
+    state = await start(client, fixture)
+    state = await answer(client, state["session_id"], state, "B")
+    board = await answer(client, state["session_id"], state, "C")
+    response = await client.get(f"/v1/practice/{state['session_id']}")
+    assert response.status_code == 200, response.text
+    resumed = response.json()
+    assert resumed["stage"] == "explain"
+    assert resumed["solution_steps"] == board["solution_steps"] == ["first step", "second step"]
+    assert resumed["correct_option_key"] == "A"
+    assert resumed["question"] == board["question"]
+    assert resumed["taught"] == 1
+
+
+async def test_a_reload_after_a_right_retry_moves_on(
+    client: httpx.AsyncClient, fixture: dict[str, str]
+) -> None:
+    state = await start(client, fixture)
+    asked = state["question"]["question_version_id"]
+    state = await answer(client, state["session_id"], state, "B")
+    state = await answer(client, state["session_id"], state, "A")
+    resumed = (await client.get(f"/v1/practice/{state['session_id']}")).json()
+    assert resumed["stage"] == "asking"
+    assert resumed["question"]["question_version_id"] != asked
+
+
+async def test_a_finished_session_is_stamped_and_stays_finished(
+    client: httpx.AsyncClient, fixture: dict[str, str]
+) -> None:
+    """The last question ending at the board still ends the sitting once the board is read."""
+    state = await start(client, fixture, length=1)
+    session = state["session_id"]
+    state = await answer(client, session, state, "B")
+    state = await answer(client, session, state, "C")
+    assert state["stage"] == "explain"
+    done = (await client.post(f"/v1/practice/{session}/taught")).json()
+    assert done["stage"] == "finished"
+    # Not the board again: the sitting is over, and the table says so.
+    assert (await client.get(f"/v1/practice/{session}")).json()["stage"] == "finished"
+    async with get_engine().connect() as conn:
+        ended = (
+            await conn.execute(
+                text("SELECT ended_at FROM study_sessions WHERE id = :id"), {"id": session}
+            )
+        ).scalar()
+    assert ended is not None
 
 
 async def test_a_session_ends_when_its_questions_are_used_up(
@@ -1000,3 +1067,28 @@ async def test_a_speech_handle_belongs_to_its_own_sitting(
     assert (
         await client.get(f"/v1/practice/{uuid.uuid4()}/speech/not-a-real-handle")
     ).status_code == 404
+
+
+def test_a_lessons_marks_pass_through_and_a_bad_one_is_dropped() -> None:
+    """A moment's `point` reaches the board as written; a malformed mark is left out.
+
+    The marks are decoration over a lesson that teaches without them, so one that is wrong
+    must not take the lesson down with it.
+    """
+    points = _points(
+        [
+            {"line": 0, "kind": "circle", "at": "0 <= y <= 3", "text": "the limits"},
+            {"line": -1, "kind": "arrow"},
+            {"line": "2", "kind": "arrow"},
+            {"line": 1, "kind": "scribble"},
+            {"line": True, "kind": "box"},
+            "not a mark",
+        ]
+    )
+    assert points is not None
+    assert [point.model_dump() for point in points] == [
+        {"line": 0, "kind": "circle", "text": "the limits", "at": "0 <= y <= 3"},
+        {"line": -1, "kind": "arrow", "text": None, "at": None},
+    ]
+    assert _points(None) is None
+    assert _points([{"line": 1, "kind": "nope"}]) is None

@@ -1,0 +1,127 @@
+/**
+ * Accounts: sign up, log in, log out, and "who am I". The session is an HttpOnly cookie
+ * (`sp_session`) the browser keeps for us; every call is same-origin, so fetch sends it by default.
+ */
+
+export interface AuthUser {
+  student_id: string;
+  display_name: string;
+  login: string;
+}
+
+export interface SignupBody {
+  display_name: string;
+  login: string;
+  password: string;
+  /** A sandbox student to turn into this account, so their progress comes with them. */
+  claim_student_id?: string;
+}
+
+/** Which form field a server error is about, when that is clear from the response. */
+export type AuthField = 'display_name' | 'login' | 'password';
+
+export class AuthError extends Error {
+  status: number;
+  field?: AuthField;
+  constructor(message: string, status: number, field?: AuthField) {
+    super(message);
+    this.status = status;
+    this.field = field;
+  }
+}
+
+const OFFLINE = "We couldn't reach Stack Prep. Check your connection and try again.";
+
+function fieldFrom(text: string): AuthField | undefined {
+  if (/password/i.test(text)) return 'password';
+  if (/\b(e-?mail|phone|login|number)\b/i.test(text)) return 'login';
+  if (/\bname\b/i.test(text)) return 'display_name';
+  return undefined;
+}
+
+/** FastAPI sends `detail` as a sentence for our own errors, or a list for validation failures. */
+async function failure(response: Response): Promise<AuthError> {
+  let message = '';
+  let field: AuthField | undefined;
+  try {
+    const body = (await response.json()) as { detail?: unknown };
+    const detail = body.detail;
+    if (typeof detail === 'string') {
+      message = detail;
+      field = fieldFrom(detail);
+    } else if (Array.isArray(detail) && detail.length) {
+      const first = detail[0] as { msg?: string; loc?: unknown[] };
+      const where = String(first.loc?.[first.loc.length - 1] ?? '');
+      field = (['display_name', 'login', 'password'] as const).find((name) => name === where);
+      message = (first.msg ?? '').replace(/^Value error, /, '');
+    }
+  } catch {
+    /* not JSON */
+  }
+  if (!message) {
+    message =
+      response.status === 429
+        ? 'Too many tries. Wait a minute, then try again.'
+        : response.status >= 500
+          ? 'Something went wrong on our side. Try again in a moment.'
+          : 'That did not work. Check your details and try again.';
+  }
+  return new AuthError(message, response.status, field);
+}
+
+async function send(path: string, init?: RequestInit): Promise<Response> {
+  let response: Response;
+  try {
+    response = await fetch(`/v1/auth${path}`, {
+      credentials: 'same-origin',
+      headers: { 'content-type': 'application/json' },
+      ...init,
+    });
+  } catch {
+    throw new AuthError(OFFLINE, 0);
+  }
+  if (!response.ok) throw await failure(response);
+  return response;
+}
+
+export const authApi = {
+  signup: async (body: SignupBody) =>
+    (await (await send('/signup', { method: 'POST', body: JSON.stringify(body) })).json()) as AuthUser,
+  login: async (login: string, password: string) =>
+    (await (await send('/login', { method: 'POST', body: JSON.stringify({ login, password }) })).json()) as AuthUser,
+  logout: async () => {
+    await send('/logout', { method: 'POST' });
+  },
+  /** The signed-in student, or null when there is no session (401). Other failures throw. */
+  me: async (): Promise<AuthUser | null> => {
+    try {
+      return (await (await send('/me')).json()) as AuthUser;
+    } catch (error) {
+      if (error instanceof AuthError && (error.status === 401 || error.status === 403)) return null;
+      throw error;
+    }
+  },
+};
+
+/* ------------------------------------------------------------------ login ids */
+
+/** Strips the spacing people type into phone numbers. */
+const squash = (value: string) => value.replace(/[\s()-]/g, '');
+
+export function looksLikePhone(value: string): boolean {
+  return /^\+?\d/.test(value.trim()) && /^[+\d\s()-]*$/.test(value.trim());
+}
+
+/** An email address, or a Nigerian mobile number in any of the usual shapes. */
+export function validLogin(value: string): boolean {
+  const text = value.trim();
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(text)) return true;
+  const digits = squash(text);
+  return /^(\+?234\d{10}|0\d{10}|[789]\d{9})$/.test(digits);
+}
+
+/** What we send: emails as typed (trimmed), phone numbers without their spaces. */
+export function cleanLogin(value: string): string {
+  const text = value.trim();
+  return looksLikePhone(text) ? squash(text) : text;
+}

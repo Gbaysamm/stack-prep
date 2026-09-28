@@ -207,6 +207,42 @@ async def report_uncertain(conn: asyncpg.Connection, version_id: object, q: dict
 
 
 OPTION_LETTERS = {"A", "B", "C", "D", "E"}
+POINT_KINDS = {"circle", "underline", "arrow", "box"}
+
+
+def _clean_points(point: object, index: int, where: str) -> list[dict[str, object]]:
+    """A moment's marks on the board (circle, underline, arrow, box), checked.
+
+    `line` is the moment pointed at: its index in the lesson from 0, or counted back from this
+    moment when negative. It must be this moment or an earlier one, since a mark cannot point
+    at a line that has not been written yet.
+    """
+    if not isinstance(point, list) or not point:
+        raise SystemExit(f"{where}: point is a list of marks")
+    marks: list[dict[str, object]] = []
+    for mark in point:
+        if not isinstance(mark, dict):
+            raise SystemExit(f"{where}: each mark is a mapping")
+        line, kind = mark.get("line"), mark.get("kind")
+        if isinstance(line, bool) or not isinstance(line, int):
+            raise SystemExit(f"{where}: a mark's line is a moment number")
+        target = index + line if line < 0 else line
+        if not 0 <= target <= index:
+            raise SystemExit(f"{where}: a mark can only point at this moment or an earlier one")
+        if kind not in POINT_KINDS:
+            raise SystemExit(f"{where}: a mark's kind is one of {sorted(POINT_KINDS)}")
+        clean: dict[str, object] = {"line": line, "kind": kind}
+        for key in ("text", "at"):
+            value = mark.get(key)
+            if value is not None:
+                if not isinstance(value, str) or not value.strip():
+                    raise SystemExit(f"{where}: a mark's {key} is a few words or nothing")
+                clean[key] = value.strip()
+        unknown = set(mark) - {"line", "kind", "text", "at"}
+        if unknown:
+            raise SystemExit(f"{where}: a mark has unknown keys {sorted(unknown)}")
+        marks.append(clean)
+    return marks
 
 
 def read_lessons() -> dict[tuple[int, int], dict]:
@@ -238,6 +274,11 @@ def read_lessons() -> dict[tuple[int, int], dict]:
                     entry["write"] = write.strip()
                 if moment.get("answer"):
                     entry["answer"] = True
+                point = moment.get("point")
+                if point is not None:
+                    entry["point"] = _clean_points(
+                        point, len(clean), f"{where} moment {len(clean)}"
+                    )
                 clean.append(entry)
             traps = lesson.get("traps") or {}
             if not isinstance(traps, dict) or not set(traps) <= OPTION_LETTERS:

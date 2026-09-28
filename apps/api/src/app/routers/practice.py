@@ -550,12 +550,148 @@ async def start(
     return await _state(conn, await _session(conn, session_id))
 
 
+async def _hint_state(
+    conn: AsyncConnection, session: dict[str, Any], version_id: UUID, chose: str
+) -> PracticeState:
+    """The first miss: a hint, and the same question again."""
+    hints = (
+        await conn.execute(
+            text("SELECT hints FROM question_versions WHERE id = :v"),
+            {"v": version_id},
+        )
+    ).scalar()
+    chosen = (
+        (
+            await conn.execute(
+                text(
+                    """
+                    SELECT m.name, m.description, m.remediation_note
+                    FROM question_options o
+                    JOIN misconceptions m ON m.id = o.misconception_id
+                    WHERE o.question_version_id = :v AND o.option_key = :k
+                    """
+                ),
+                {"v": version_id, "k": chose},
+            )
+        )
+        .mappings()
+        .first()
+    )
+    return await _state(
+        conn,
+        session,
+        stage="hint",
+        # A hint written for the mistake the student actually made beats the general one,
+        # and is used whenever the option they chose carries an explanation.
+        hint=(
+            str(chosen["remediation_note"])
+            if chosen is not None and chosen["remediation_note"]
+            else (next(iter(hints or [""]), "") or "Read the question again, slowly.")
+        ),
+        misconception=Misconception(**dict(chosen)) if chosen is not None else None,
+        repeat_version_id=version_id,
+    )
+
+
+async def _explain_state(
+    conn: AsyncConnection, session: dict[str, Any], version_id: UUID, key: str
+) -> PracticeState:
+    """Missed with the hint in hand: the board, with the reviewed working and the answer."""
+    steps = (
+        await conn.execute(
+            text("SELECT solution_steps FROM question_versions WHERE id = :v"),
+            {"v": version_id},
+        )
+    ).scalar()
+    return await _state(
+        conn,
+        session,
+        stage="explain",
+        solution_steps=[str(step) for step in (steps or [])],
+        correct_option_key=key,
+        repeat_version_id=version_id,
+    )
+
+
+async def _close_when_finished(
+    conn: AsyncConnection, session: dict[str, Any], state: PracticeState
+) -> PracticeState:
+    """Stamp the end of a sitting the moment the loop says it is over.
+
+    Without it a guided session never ends in the table, and anything listing a student's
+    runs has to guess which ones they walked away from.
+    """
+    if state.stage == "finished" and session["ended_at"] is None:
+        await conn.execute(
+            text("UPDATE study_sessions SET ended_at = now() WHERE id = :id AND ended_at IS NULL"),
+            {"id": session["id"]},
+        )
+        await conn.commit()
+    return state
+
+
 @router.get("/{session_id}", response_model=PracticeState, summary="Where this session is")
 async def current(
     conn: Annotated[AsyncConnection, Depends(connection)], session_id: UUID
 ) -> PracticeState:
-    """The next question, for a client that has just reloaded."""
-    return await _state(conn, await _session(conn, session_id))
+    """The session exactly where the student left it, for a client that has just reloaded.
+
+    Read from the last attempt, the same way the answer endpoint reads the ladder. A first
+    miss not yet answered again comes back as the hint on the same question; two misses come
+    back as the board. Serving a fresh question instead would skip the retry, or the lesson,
+    for anyone who refreshed at the wrong moment.
+
+    One thing is not stored: pressing on from the board (`/taught` writes nothing). So a
+    reload after the board and before the next answer shows the board once more, which costs
+    a click and never a lesson.
+    """
+    session = await _session(conn, session_id)
+    last = (
+        (
+            await conn.execute(
+                text(
+                    """
+                    SELECT a.question_version_id, a.selected_option_key,
+                           count(*) OVER () AS tries,
+                           bool_or(coalesce(a.is_correct, false)) OVER () AS ever_right
+                    FROM attempts a
+                    WHERE a.session_id = :session
+                      AND a.question_version_id = (
+                        SELECT question_version_id FROM attempts
+                        WHERE session_id = :session
+                        ORDER BY answered_at_client DESC, received_at DESC
+                        LIMIT 1
+                      )
+                    ORDER BY a.answered_at_client DESC, a.received_at DESC
+                    LIMIT 1
+                    """
+                ),
+                {"session": session_id},
+            )
+        )
+        .mappings()
+        .first()
+    )
+    if session["ended_at"] is not None or last is None or last["ever_right"]:
+        return await _state(conn, session)
+    if int(last["tries"]) == 1:
+        return await _hint_state(
+            conn, session, last["question_version_id"], str(last["selected_option_key"])
+        )
+    key = (
+        await conn.execute(
+            text(
+                """
+                SELECT option_key FROM question_options
+                WHERE question_version_id = :version AND is_correct
+                """
+            ),
+            {"version": last["question_version_id"]},
+        )
+    ).scalar()
+    if key is None:
+        return await _state(conn, session)
+    return await _explain_state(conn, session, last["question_version_id"], str(key))
 
 
 @router.post(
@@ -619,63 +755,16 @@ async def answer(
     await conn.commit()
 
     if correct:
-        return await _state(conn, session)
+        return await _close_when_finished(conn, session, await _state(conn, session))
 
     # First miss: a hint, and the same question again.
     if already == 0:
-        hints = (
-            await conn.execute(
-                text("SELECT hints FROM question_versions WHERE id = :v"),
-                {"v": submission.question_version_id},
-            )
-        ).scalar()
-        chosen = (
-            (
-                await conn.execute(
-                    text(
-                        """
-                        SELECT m.name, m.description, m.remediation_note
-                        FROM question_options o
-                        JOIN misconceptions m ON m.id = o.misconception_id
-                        WHERE o.question_version_id = :v AND o.option_key = :k
-                        """
-                    ),
-                    {"v": submission.question_version_id, "k": submission.selected_option_key},
-                )
-            )
-            .mappings()
-            .first()
-        )
-        return await _state(
-            conn,
-            session,
-            stage="hint",
-            # A hint written for the mistake the student actually made beats the general one,
-            # and is used whenever the option they chose carries an explanation.
-            hint=(
-                str(chosen["remediation_note"])
-                if chosen is not None and chosen["remediation_note"]
-                else (next(iter(hints or [""]), "") or "Read the question again, slowly.")
-            ),
-            misconception=Misconception(**dict(chosen)) if chosen is not None else None,
-            repeat_version_id=submission.question_version_id,
+        return await _hint_state(
+            conn, session, submission.question_version_id, submission.selected_option_key
         )
 
     # Missed with the hint in hand: show the working.
-    steps = (
-        await conn.execute(
-            text("SELECT solution_steps FROM question_versions WHERE id = :v"),
-            {"v": submission.question_version_id},
-        )
-    ).scalar()
-    return await _state(
-        conn,
-        session,
-        stage="explain",
-        solution_steps=[str(step) for step in (steps or [])],
-        correct_option_key=str(key),
-        repeat_version_id=submission.question_version_id,
-    )
+    return await _explain_state(conn, session, submission.question_version_id, str(key))
 
 
 @router.post(
@@ -693,7 +782,8 @@ async def taught(
     the next question in it is one the student has not seen. Re-asking the same item would
     test whether they remember being told, which is not the same as knowing.
     """
-    return await _state(conn, await _session(conn, session_id))
+    session = await _session(conn, session_id)
+    return await _close_when_finished(conn, session, await _state(conn, session))
 
 
 async def _asks_used_today(conn: AsyncConnection, student_id: UUID) -> int:
@@ -1359,6 +1449,51 @@ async def listen(
     return Heard(asked=heard)
 
 
+#: How a beat may mark an earlier line on the board, the way a teacher circles a term or draws
+#: an arrow back to where a line came from.
+PointKind = Literal["circle", "underline", "arrow", "box"]
+
+
+class LessonPoint(BaseModel):
+    #: The line pointed at: the index of a moment in this lesson (from 0), or counted back from
+    #: this beat when negative (-1 is the moment just before it).
+    line: int
+    kind: PointKind
+    #: A few words written beside the mark.
+    text: str | None = None
+    #: Part of the line to mark rather than all of it, as it reads on the board (spaces ignored).
+    at: str | None = None
+
+
+def _points(raw: object) -> list[LessonPoint] | None:
+    """A moment's `point` list as the board draws it, or None when it has none.
+
+    Lenient on purpose: a mark is decoration over a lesson that already teaches without it, so a
+    malformed one is dropped rather than taking the lesson down.
+    """
+    if not isinstance(raw, list):
+        return None
+    kept: list[LessonPoint] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        line, kind = item.get("line"), item.get("kind")
+        if isinstance(line, bool) or not isinstance(line, int):
+            continue
+        if kind not in ("circle", "underline", "arrow", "box"):
+            continue
+        label, at = item.get("text"), item.get("at")
+        kept.append(
+            LessonPoint(
+                line=line,
+                kind=kind,
+                text=(str(label).strip() or None) if label is not None else None,
+                at=(str(at).strip() or None) if at is not None else None,
+            )
+        )
+    return kept or None
+
+
 class LessonBeat(BaseModel):
     #: Which reviewed step this beat teaches, for asking about it: a step's index, one past the
     #: last for the answer, or None where the beat is not one step (an opening, or any moment
@@ -1373,6 +1508,8 @@ class LessonBeat(BaseModel):
     voice_url: str
     #: The moment that gives the answer, which the board marks.
     answer: bool = False
+    #: Marks drawn over earlier lines while this beat is said: circles, underlines, arrows.
+    point: list[LessonPoint] | None = None
 
 
 class NarratedLesson(BaseModel):
@@ -1390,6 +1527,7 @@ class _Beat:
     at: list[float]
     say: str
     answer: bool = False
+    point: list[LessonPoint] | None = None
 
 
 async def _must_have_missed(conn: AsyncConnection, session_id: UUID, version_id: UUID) -> None:
@@ -1552,6 +1690,7 @@ async def _lesson_beats(
                 at=[0.0] if moment.get("write") else [],
                 say=str(moment["say"]),
                 answer=bool(moment.get("answer")),
+                point=_points(moment.get("point")),
             )
             for moment in moments
         ]
@@ -1602,6 +1741,7 @@ async def lesson(
                 say=beat.say,
                 voice_url=f"/v1/practice/{session_id}/lesson/{question_version_id}/voice/{index}",
                 answer=beat.answer,
+                point=beat.point,
             )
             for index, beat in enumerate(beats)
         ],

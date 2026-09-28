@@ -16,12 +16,14 @@ from app import figures
 from app.config import get_settings
 from app.db import dispose_engine
 from app.routers import (
+    accounts,
     checkup,
     curriculum,
     dev,
     health,
     pool,
     practice,
+    progress,
     publishing,
     review,
     student,
@@ -52,6 +54,7 @@ def create_app() -> FastAPI:
         allow_headers=["content-type", "authorization"],
     )
     app.include_router(health.router)
+    app.include_router(accounts.router)
     app.include_router(curriculum.router)
     app.include_router(review.router)
     app.include_router(publishing.router)
@@ -60,6 +63,7 @@ def create_app() -> FastAPI:
     app.include_router(practice.router)
     app.include_router(figures.router)
     app.include_router(student.router)
+    app.include_router(progress.router)
     # Student creation without a login, for building the student side. The router refuses to
     # answer unless app_env is local or ci, so shipping it is not the same as exposing it.
     app.include_router(dev.router)

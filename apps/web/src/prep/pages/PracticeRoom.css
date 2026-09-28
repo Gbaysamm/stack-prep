@@ -1,0 +1,952 @@
+/* Practice run (focus mode). Every class starts `pr-`. */
+
+.sj .pr-main {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(
+      34rem 22rem at 92% 0%,
+      rgba(254, 118, 152, 0.09),
+      transparent 70%
+    ),
+    radial-gradient(
+      36rem 26rem at 6% 100%,
+      rgba(107, 11, 255, 0.07),
+      transparent 70%
+    ),
+    var(--paper);
+}
+.sj .pr-col {
+  width: 100%;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 32px 32px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  flex: 1;
+}
+.sj .pr-view {
+  animation: pr-in 380ms var(--ease) both;
+}
+@keyframes pr-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+/* ---------------------------------------------------------------- the bar's score pill */
+.sj .pr-score {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 6px 12px 6px 10px;
+  border-radius: var(--r-pill);
+  background: var(--green-100);
+  color: #14561a;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+.sj .pr-score b {
+  font-size: 14px;
+  font-weight: 700;
+}
+.sj .pr-score.bump {
+  animation: pr-bump 520ms var(--ease-spring) both;
+}
+@keyframes pr-bump {
+  0% {
+    transform: scale(0.8);
+    background: var(--green-400);
+  }
+  60% {
+    transform: scale(1.08);
+  }
+}
+
+/* ---------------------------------------------------------------- question card */
+.sj .pr-qcard {
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--r-xl);
+  padding: 26px 26px 26px;
+  box-shadow: var(--lift);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.sj .pr-qcard.pr-skel {
+  gap: 12px;
+}
+.sj .pr-qhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.sj .pr-qno {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--purple-600);
+}
+.sj .pr-qno span {
+  color: var(--gray-500);
+}
+.sj .pr-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+.sj .pr-tags .sj-badge {
+  white-space: normal;
+  line-height: 1.25;
+  max-width: 100%;
+}
+.sj .pr-passage {
+  margin-bottom: 18px;
+  padding: 14px 18px;
+  max-height: 320px;
+  overflow: auto;
+  border-radius: var(--r-md);
+  background: var(--purple-050);
+  font-size: 15px;
+  line-height: 1.65;
+}
+.sj .pr-passage-title {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.sj .pr-instructions {
+  margin-bottom: 10px;
+  font-size: 13.5px;
+  color: var(--gray-600);
+}
+.sj .pr-stem {
+  margin: 0 0 22px;
+  font-family: var(--f-body);
+  font-weight: 500;
+  font-size: clamp(19px, 1.7vw, 22px);
+  line-height: 1.5;
+  letter-spacing: 0;
+  text-wrap: pretty;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.sj .pr-figures {
+  margin: -6px 0 22px;
+  overflow-x: auto;
+}
+.sj .pr-option {
+  align-items: center;
+  min-height: 58px;
+}
+.sj .pr-option .body {
+  padding-top: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.sj .pr-option.wrong {
+  opacity: 1;
+}
+.sj .pr-option.wrong .body {
+  color: #7a1b2c;
+  text-decoration: line-through;
+  text-decoration-color: rgba(199, 44, 65, 0.45);
+}
+.sj .pr-first {
+  flex: none;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--danger);
+}
+
+/* ---------------------------------------------------------------- actions */
+/* Pinned to the bottom of the window whenever the question runs past it, so the one action
+   is always in reach; with a short question it simply sits under the card. */
+.sj .pr-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 22px;
+  margin: 0;
+  padding: 14px 0 18px;
+  /* No fill on a laptop: a paper band showed as a pale box over the page's tint. */
+  background: none;
+}
+.sj .pr-keys {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--gray-500);
+}
+.sj .pr-keys .pr-kbd + .pr-kbd,
+.sj .pr-keys .pr-kbd.wide {
+  margin-left: 10px;
+}
+.sj .pr-kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 7px;
+  border-radius: var(--r-xs);
+  background: #fff;
+  box-shadow:
+    inset 0 0 0 1.5px var(--gray-200),
+    0 2px 0 var(--gray-200);
+  font-family: var(--f-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--gray-700);
+}
+.sj .pr-check {
+  order: -1;
+  min-width: 212px;
+}
+
+/* ---------------------------------------------------------------- the miss (hint) */
+.sj .pr-miss {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  border-radius: var(--r-xl);
+  background: linear-gradient(135deg, var(--pink-100), var(--orange-100));
+  border: 1.5px solid var(--gray-900);
+  box-shadow: 6px 6px 0 var(--pink-400);
+  animation: pr-shake 460ms var(--ease) both;
+}
+@keyframes pr-shake {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  45% {
+    opacity: 1;
+    transform: translateX(-5px);
+  }
+  70% {
+    transform: translateX(4px);
+  }
+  100% {
+    transform: none;
+  }
+}
+.sj .pr-miss-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-md);
+  background: var(--orange-500);
+  color: #fff;
+}
+/* Icon, title and tag on one line; the hint starts at the panel's own left edge. */
+.sj .pr-miss-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2px;
+}
+.sj .pr-miss-head h2 {
+  font-size: 24px;
+  line-height: 1;
+}
+.sj .pr-miss-tag {
+  margin-left: auto;
+  padding: 6px 9px;
+  border-radius: var(--r-sm);
+  background: #fff;
+  color: #8a3700;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.sj .pr-hint {
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--gray-900);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.sj .pr-trap {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--gray-700);
+}
+.sj .pr-trap b {
+  color: #9c1d4c;
+  font-weight: 600;
+}
+.sj .pr-miss-note {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #8a3700;
+}
+.sj .pr-miss-note svg {
+  flex: none;
+}
+
+/* ---------------------------------------------------------------- confidence sheet */
+.sj .pr-conf-why {
+  font-size: 14px;
+  color: var(--gray-600);
+}
+.sj .pr-conf {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  margin-top: 18px;
+}
+.sj .pr-conf-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  text-align: left;
+  border-radius: var(--r-md);
+  background: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--gray-200);
+  color: var(--gray-900);
+  transition:
+    box-shadow var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease),
+    background var(--t-fast) var(--ease);
+}
+.sj .pr-conf-card:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 0 0 1.5px var(--gray-900),
+    4px 4px 0 var(--purple-200);
+}
+.sj .pr-conf-card:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: inset 0 0 0 1.5px var(--gray-900);
+}
+.sj .pr-conf-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.sj .pr-conf-row b {
+  flex: 1;
+  min-width: 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.sj .pr-conf-card small {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--gray-600);
+}
+.sj .pr-conf-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-md);
+}
+.sj .pr-conf-card.sure .pr-conf-icon {
+  background: var(--green-100);
+  color: var(--green-600);
+}
+.sj .pr-conf-card.unsure .pr-conf-icon {
+  background: var(--purple-050);
+  color: var(--purple-600);
+}
+.sj .pr-conf-card.guessed .pr-conf-icon {
+  background: var(--yellow-100);
+  color: #5a4600;
+}
+.sj .pr-conf-skip {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 12px;
+}
+.sj .pr-conf-skip button {
+  min-height: 44px;
+  margin-left: -12px;
+  padding: 10px 12px;
+  border-radius: var(--r-btn);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-600);
+  transition:
+    color var(--t-fast) var(--ease),
+    background var(--t-fast) var(--ease);
+}
+.sj .pr-conf-skip button:hover:not(:disabled) {
+  color: var(--purple-600);
+  background: var(--purple-050);
+}
+
+/* ---------------------------------------------------------------- result */
+.sj .pr-result {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 14px;
+  margin: auto 0;
+  padding: 32px;
+  border-radius: var(--r-xl);
+  background: #fff;
+  border: 1.5px solid var(--gray-900);
+  box-shadow: 8px 8px 0 var(--green-400);
+}
+.sj .pr-result.second {
+  box-shadow: 8px 8px 0 var(--yellow-400);
+}
+.sj .pr-result-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+.sj .pr-medal {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--green-500);
+  color: #fff;
+  box-shadow: 0 4px 0 var(--green-600);
+  animation: pr-pop 520ms var(--ease-spring) both;
+}
+.sj .pr-result.second .pr-medal {
+  background: var(--green-400);
+  color: var(--ink-900);
+  box-shadow: 0 4px 0 var(--ink-900);
+}
+.sj .pr-medal path {
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  animation: pr-draw 420ms 220ms var(--ease) forwards;
+}
+.sj .pr-medal-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid var(--green-400);
+  opacity: 0;
+  animation: pr-ring 900ms 120ms var(--ease) both;
+}
+.sj .pr-medal-ring.late {
+  animation-delay: 320ms;
+}
+@keyframes pr-pop {
+  from {
+    transform: scale(0.4) rotate(-12deg);
+    opacity: 0;
+  }
+}
+@keyframes pr-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes pr-ring {
+  0% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+.sj .pr-result-eyebrow {
+  color: var(--green-600);
+}
+.sj .pr-result.second .pr-result-eyebrow {
+  color: #5a4600;
+}
+.sj .pr-result-title {
+  min-width: 0;
+  text-wrap: balance;
+}
+.sj .pr-plus {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 7px 14px;
+  border-radius: var(--r-sm);
+  background: var(--green-400);
+  color: var(--ink-900);
+  font-family: var(--f-mono);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  animation: pr-in 420ms 260ms var(--ease) both;
+}
+.sj .pr-plus.hinted {
+  background: var(--yellow-300);
+}
+.sj .pr-praise {
+  max-width: 52ch;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--gray-700);
+  text-wrap: pretty;
+}
+.sj .pr-yours {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  margin-top: 4px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: #eef9e8;
+  box-shadow: inset 0 0 0 2px var(--green-500);
+  text-align: left;
+  font-size: 16px;
+}
+.sj .pr-yours .key,
+.sj .pr-answer .key {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: var(--r-sm);
+  background: var(--green-500);
+  color: #fff;
+  font-family: var(--f-mono);
+  font-weight: 700;
+  font-size: 13px;
+}
+.sj .pr-yours .body {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.sj .pr-yours-tick {
+  display: grid;
+  place-items: center;
+  flex: none;
+  color: var(--green-600);
+}
+.sj .pr-result-go {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  margin-top: 8px;
+}
+.sj .pr-result-go .sj-btn:not(.block) {
+  min-width: 240px;
+}
+
+/* ---------------------------------------------------------------- before the board */
+.sj .pr-explain {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  margin: auto 0;
+  border-radius: var(--r-xl);
+  background: #fff;
+  border: 1.5px solid var(--gray-900);
+  box-shadow: 8px 8px 0 var(--purple-300);
+  overflow: hidden;
+}
+.sj .pr-slate {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-height: 220px;
+  padding: 26px 26px 44px;
+  background:
+    radial-gradient(80% 50% at 100% 0%, rgba(107, 11, 255, 0.3), transparent 70%),
+    radial-gradient(60% 40% at 0% 100%, rgba(254, 118, 152, 0.12), transparent 70%),
+    var(--ink-900);
+  color: #fff;
+  overflow: hidden;
+}
+.sj .pr-slate-q {
+  font-size: 17px;
+  line-height: 1.55;
+  color: #fff;
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  animation: pr-in 520ms 120ms var(--ease) both;
+}
+/* The question and its working sit in the middle of the slate, whatever its height. */
+.sj .pr-slate-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: auto;
+}
+.sj .pr-slate-q {
+  margin-top: auto;
+}
+.sj .pr-slate-lines span {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.85);
+  transform-origin: left center;
+  animation: pr-write 700ms var(--ease) both;
+}
+.sj .pr-slate-lines span:nth-child(1) {
+  width: 78%;
+  animation-delay: 150ms;
+}
+.sj .pr-slate-lines span:nth-child(2) {
+  width: 58%;
+  animation-delay: 650ms;
+}
+.sj .pr-slate-lines span:nth-child(3) {
+  width: 66%;
+  animation-delay: 1150ms;
+}
+.sj .pr-slate-lines span:nth-child(4) {
+  width: 72%;
+  animation-delay: 1650ms;
+}
+.sj .pr-slate-lines span:nth-child(5) {
+  width: 48%;
+  animation-delay: 2150ms;
+}
+.sj .pr-slate-lines span.short {
+  width: 34%;
+  background: var(--green-400);
+  animation-delay: 2650ms;
+}
+@keyframes pr-write {
+  from {
+    transform: scaleX(0);
+  }
+}
+.sj .pr-slate-chalk {
+  position: absolute;
+  right: 22px;
+  bottom: 22px;
+  width: 44px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--yellow-300);
+  transform: rotate(-18deg);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
+}
+.sj .pr-slate-tag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--purple-200);
+}
+.sj .pr-explain-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 32px;
+  min-width: 0;
+}
+.sj .pr-explain-title {
+  text-wrap: balance;
+}
+.sj .pr-explain-lead {
+  font-size: 15.5px;
+  color: var(--gray-700);
+}
+.sj .pr-points {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.sj .pr-points li {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 0;
+  border-top: 1px solid var(--gray-100);
+}
+.sj .pr-points li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.sj .pr-point-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sj .pr-point-row b {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+.sj .pr-point-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--gray-700);
+}
+.sj .pr-point-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-md);
+  background: var(--purple-050);
+  color: var(--purple-600);
+}
+.sj .pr-point-icon.sound {
+  background: var(--yellow-300);
+  color: var(--ink-900);
+  animation: pr-pulse 1.8s var(--ease) infinite;
+}
+@keyframes pr-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 199, 0, 0.5);
+  }
+  60% {
+    box-shadow: 0 0 0 8px rgba(255, 199, 0, 0);
+  }
+}
+.sj .pr-answer {
+  width: 100%;
+  margin: 4px 0 6px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: #eef9e8;
+  box-shadow: inset 0 0 0 1.5px var(--green-400);
+}
+.sj .pr-answer-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green-600);
+}
+.sj .pr-answer-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  min-width: 0;
+}
+.sj .pr-answer-row > span:last-child {
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.sj .pr-explain-note {
+  width: 100%;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--gray-500);
+}
+
+/* ---------------------------------------------------------------- errors */
+.sj .pr-issue {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: auto 0;
+}
+.sj .pr-issue-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+/* ---------------------------------------------------------------- laptop-narrow */
+@media (max-width: 1100px) {
+  .sj .pr-col {
+    max-width: 740px;
+  }
+}
+
+/* ---------------------------------------------------------------- phone */
+@media (max-width: 860px) {
+  .sj .pr-col {
+    padding: 18px 16px 0;
+    gap: 14px;
+  }
+  .sj .pr-qcard {
+    padding: 16px;
+    border-radius: var(--r-lg);
+  }
+  .sj .pr-qhead {
+    margin-bottom: 14px;
+    gap: 10px;
+  }
+  .sj .pr-stem {
+    font-size: 18px;
+    margin-bottom: 18px;
+  }
+  .sj .pr-option {
+    padding: 12px 14px;
+    font-size: 15.5px;
+  }
+  /* The one action sits in a glass bar pinned to the bottom, clear of the home indicator. */
+  .sj .pr-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    margin: 0 -16px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: rgba(255, 255, 255, 0.72);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    backdrop-filter: blur(18px) saturate(180%);
+    border-top: 1px solid rgba(31, 0, 80, 0.06);
+  }
+  .sj .pr-keys {
+    display: none;
+  }
+  .sj .pr-check {
+    width: 100%;
+    min-width: 0;
+  }
+  .sj .pr-miss {
+    padding: 16px;
+    box-shadow: 5px 5px 0 var(--pink-400);
+    border-radius: var(--r-lg);
+  }
+  .sj .pr-miss-head h2 {
+    font-size: 22px;
+  }
+  .sj .pr-hint {
+    font-size: 15px;
+  }
+  .sj .pr-result {
+    margin: 8px 0 24px;
+    padding: 18px 16px;
+    box-shadow: 5px 5px 0 var(--green-400);
+    border-radius: var(--r-lg);
+  }
+  .sj .pr-result.second {
+    box-shadow: 5px 5px 0 var(--yellow-400);
+  }
+  .sj .pr-medal {
+    width: 48px;
+    height: 48px;
+  }
+  .sj .pr-result-head {
+    gap: 12px;
+  }
+  .sj .pr-explain {
+    grid-template-columns: minmax(0, 1fr);
+    margin: 8px 0 24px;
+    box-shadow: 5px 5px 0 var(--purple-300);
+    border-radius: var(--r-lg);
+  }
+  .sj .pr-slate {
+    min-height: 0;
+    gap: 14px;
+    padding: 16px 16px 22px;
+  }
+  .sj .pr-slate-q {
+    font-size: 16px;
+    -webkit-line-clamp: 3;
+  }
+  .sj .pr-slate-lines {
+    gap: 10px;
+    padding-right: 64px;
+  }
+  .sj .pr-slate-chalk {
+    right: 16px;
+    bottom: 16px;
+  }
+  .sj .pr-explain-body {
+    padding: 18px 16px;
+  }
+  .sj .pr-issue {
+    margin: 8px 0 24px;
+  }
+  .sj .pr-score-word {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------- board loading */
+.sj .pr-boardwait {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: var(--ink-900);
+  color: var(--purple-100);
+  font-weight: 500;
+}
+.sj .pr-boardwait-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--green-400);
+  animation: pr-pulse 1.2s var(--ease) infinite;
+}
+
+/* The focus bar's text lines up with the question card's content, not a wider column. */
+.sj .sj-focus:has(.pr-main) .sj-focusbar {
+  padding-left: max(16px, calc((100% - 716px) / 2));
+  padding-right: max(16px, calc((100% - 716px) / 2));
+}
+@media (max-width: 860px) {
+  .sj .sj-focus:has(.pr-main) .sj-focusbar {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+/* A keyboard ring that keeps the option's own shape. */
+.sj .pr-option:focus-visible,
+.sj .pr-conf-card:focus-visible {
+  outline-offset: 2px;
+  border-radius: var(--r-md);
+}
+
+@media (max-width: 860px) {
+  /* A phone's slate is a short strip: four lines of working are plenty. */
+  .sj .pr-slate-lines span.more {
+    display: none;
+  }
+}

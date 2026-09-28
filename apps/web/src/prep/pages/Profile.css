@@ -1,0 +1,397 @@
+/* Profile: the hero with the student's initials, their record, goals as exam tickets (the page's
+   signature), and the account. Sections and notes come from Home.css. */
+
+/* ------------------------------------------------------------ avatar (hero aside) */
+.sj .pro-avatar {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  border-radius: var(--r-xl);
+  background: var(--purple-600);
+  color: #fff;
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: 38px;
+  letter-spacing: -0.03em;
+  box-shadow: 6px 6px 0 var(--green-400);
+  transform: rotate(-4deg);
+}
+
+/* ------------------------------------------------------------ record */
+.sj .pro-record {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  padding: 22px 24px;
+}
+.sj .pro-record > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 0 24px;
+  border-left: 1px solid var(--gray-200);
+}
+.sj .pro-record > div:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+.sj .pro-record dt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--gray-600);
+  white-space: nowrap;
+}
+.sj .pro-record dt i {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--ink-900);
+}
+.sj .pro-record .yellow dt i {
+  background: var(--yellow-400);
+}
+.sj .pro-record .lime dt i {
+  background: var(--green-400);
+}
+.sj .pro-record dd {
+  min-height: 56px;
+  margin: 0;
+  font-size: 56px;
+  color: var(--ink-900);
+}
+.sj .pro-record p {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--gray-600);
+}
+
+/* ------------------------------------------------------------ goal tickets */
+.sj .pro-tickets {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .pro-tickets > li {
+  display: flex;
+  min-width: 0;
+}
+.sj .pro-ticket {
+  position: relative;
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  width: 100%;
+  border-radius: var(--r-lg);
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  transition:
+    transform var(--t-med) var(--ease),
+    box-shadow var(--t-med) var(--ease),
+    border-color var(--t-med) var(--ease);
+}
+.sj .pro-ticket:hover {
+  transform: translateY(-3px);
+  border-color: var(--gray-900);
+  box-shadow: 6px 6px 0 var(--yellow-400);
+}
+.sj .pro-ticket:active {
+  transform: translateY(-1px);
+  box-shadow: 3px 3px 0 var(--yellow-400);
+}
+/* The stub: the target, torn off along a perforated edge. */
+.sj .pro-ticket-stub {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 20px 18px;
+  border-radius: calc(var(--r-lg) - 1px) 0 0 calc(var(--r-lg) - 1px);
+  background: var(--yellow-300);
+  color: var(--ink-900);
+}
+.sj .pro-ticket-stub::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  right: -1px;
+  width: 2px;
+  background: repeating-linear-gradient(180deg, var(--gray-300) 0 5px, transparent 5px 10px);
+}
+.sj .pro-ticket-stub .label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+.sj .pro-ticket-stub .sj-num {
+  font-size: 52px;
+}
+.sj .pro-ticket-stub .of {
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.6;
+}
+.sj .pro-ticket-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  padding: 20px;
+}
+.sj .pro-ticket-body .top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+.sj .pro-ticket-body .edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--purple-600);
+}
+.sj .pro-ticket-body .edit svg {
+  transition: transform var(--t-med) var(--ease);
+}
+.sj .pro-ticket:hover .edit svg {
+  transform: translateX(3px);
+}
+.sj .pro-ticket-body strong {
+  font-size: 24px;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+.sj .pro-ticket-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: 13px;
+  color: var(--gray-600);
+}
+.sj .pro-ticket-meta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.sj .pro-ticket-meta svg {
+  flex: none;
+  color: var(--gray-500);
+}
+.sj .pro-ticket-days {
+  margin-top: auto;
+  padding: 3px 8px;
+  border-radius: var(--r-xs);
+  background: var(--yellow-100);
+  color: #5a4600;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.sj .pro-ticket-days.past {
+  background: var(--orange-100);
+  color: #8a3700;
+}
+
+/* The last slot: add another subject. */
+.sj .pro-ticket-add {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  padding: 20px;
+  border-radius: var(--r-lg);
+  border: 1.5px dashed var(--gray-300);
+  color: var(--ink-900);
+  transition:
+    border-color var(--t-med) var(--ease),
+    background var(--t-med) var(--ease);
+}
+.sj .pro-ticket-add:hover {
+  border-color: var(--purple-600);
+  background: var(--purple-050);
+}
+.sj .pro-ticket-add .txt {
+  max-width: 44ch;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--gray-600);
+}
+
+/* ------------------------------------------------------------ account */
+.sj .pro-account {
+  padding: 4px 20px;
+}
+.sj .pro-facts {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin: 0;
+}
+.sj .pro-facts > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 56px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--gray-100);
+}
+.sj .pro-facts > div:last-child {
+  border-bottom: 0;
+}
+.sj .pro-facts dt {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-900);
+}
+.sj .pro-facts dt small {
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--gray-600);
+}
+.sj .pro-facts dd {
+  flex: none;
+  margin: 0;
+  font-size: 14px;
+  color: var(--gray-700);
+  text-align: right;
+}
+.sj .pro-idrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.sj .pro-idrow code {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gray-700);
+}
+.sj .pro-copy {
+  min-height: 32px;
+  padding: 4px 12px;
+  border-radius: var(--r-sm);
+  background: var(--purple-050);
+  color: var(--purple-700);
+  font-size: 12.5px;
+  font-weight: 600;
+  transition:
+    background var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease);
+}
+.sj .pro-copy:hover {
+  background: var(--purple-100);
+}
+.sj .pro-copy:active {
+  transform: scale(0.95);
+}
+.sj .pro-facts .out .sj-btn.ghost:hover {
+  box-shadow: inset 0 0 0 1.5px var(--danger);
+  color: var(--danger);
+}
+
+/* ------------------------------------------------------------ responsive */
+.sj .pro-page {
+  container-type: inline-size;
+}
+@container (max-width: 960px) {
+  .sj .pro-tickets {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 860px) {
+  .sj .pro-avatar {
+    position: absolute;
+    top: 20px;
+    right: 18px;
+    width: 64px;
+    height: 64px;
+    border-radius: var(--r-lg);
+    font-size: 26px;
+    box-shadow: 4px 4px 0 var(--green-400);
+  }
+  .sj .pro-page .sj-hero-aside {
+    position: static;
+  }
+  .sj .pro-page .sj-hero-title,
+  .sj .pro-page .sj-hero-eyebrow {
+    padding-right: 84px;
+  }
+  .sj .pro-record {
+    padding: 16px;
+  }
+  .sj .pro-record > div {
+    padding: 0 12px;
+  }
+  .sj .pro-record dt {
+    white-space: normal;
+    align-items: flex-start;
+    min-height: 26px;
+    font-size: 10px;
+    line-height: 1.3;
+  }
+  .sj .pro-record dt i {
+    margin-top: 3px;
+  }
+  .sj .pro-record dd {
+    min-height: 40px;
+    font-size: 40px;
+  }
+  .sj .pro-record p {
+    display: none;
+  }
+  .sj .pro-tickets {
+    gap: 14px;
+  }
+  .sj .pro-ticket-add {
+    padding: 16px;
+  }
+  .sj .pro-account {
+    padding: 2px 16px;
+  }
+  .sj .pro-facts > div.out {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 0 16px;
+  }
+  .sj .pro-ticket {
+    grid-template-columns: 88px minmax(0, 1fr);
+  }
+  .sj .pro-ticket-stub {
+    padding: 16px 14px;
+  }
+  .sj .pro-ticket-stub .sj-num {
+    font-size: 40px;
+  }
+  .sj .pro-ticket-body {
+    padding: 16px;
+  }
+  .sj .pro-ticket-body strong {
+    font-size: 20px;
+  }
+}

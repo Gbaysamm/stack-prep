@@ -1,0 +1,286 @@
+/*
+ * Welcome: a split screen. Left half, the ink brand panel, pinned to the window while the right
+ * half (a light surface with the form in a 400px column) scrolls if it has to. On a phone the ink
+ * becomes a short band with the brand and the headline, and the form rises over it as a white
+ * sheet with rounded top corners.
+ */
+
+.sj .wel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 100vh;
+  background: #fff;
+}
+
+/* ---------------------------------------------------------------- brand side (ink) */
+.wel-brandside {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  color: #fff;
+  background: var(--ink-900);
+}
+.wel-sky {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.wel-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+}
+.wel-blob.a {
+  width: 520px;
+  height: 520px;
+  right: -200px;
+  top: -200px;
+  background: rgba(254, 118, 152, 0.3);
+}
+.wel-blob.b {
+  width: 620px;
+  height: 620px;
+  left: -240px;
+  bottom: -300px;
+  background: rgba(107, 11, 255, 0.55);
+}
+.wel-brandside-in {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 36px clamp(32px, 5vw, 72px) 30px;
+}
+
+.wel-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+.wel-brand img {
+  display: block;
+  filter: drop-shadow(-2px 4px 4px rgba(255, 18, 127, 0.3));
+}
+
+/* The pitch sits in the middle of the panel's height, between the brand and the foot. */
+.wel-pitch {
+  margin: auto 0;
+  padding: 32px 0;
+  max-width: 520px;
+}
+.sj .wel-title {
+  color: #fff;
+  font-size: clamp(40px, 4.3vw, 62px);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+.sj .wel-title em {
+  font-style: normal;
+  color: var(--green-400);
+}
+.sj .wel-lede {
+  max-width: 42ch;
+  margin-top: 18px;
+  font-size: 16.5px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.76);
+  text-wrap: pretty;
+}
+
+.wel-points {
+  list-style: none;
+  margin: 32px 0 0;
+  padding: 22px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-top: 1px solid rgba(215, 189, 255, 0.16);
+}
+.wel-point {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.wel-point-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-sm);
+  color: var(--ink-900);
+}
+.wel-point-icon.lime {
+  background: var(--green-400);
+}
+.wel-point-icon.pink {
+  background: var(--pink-500);
+}
+.wel-point-icon.yellow {
+  background: var(--yellow-300);
+}
+.wel-point-text {
+  font-size: 14.5px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.7);
+}
+.wel-point-text strong {
+  font-weight: 600;
+  color: #fff;
+}
+
+.sj .wel-foot {
+  font-size: 12.5px;
+}
+.sj .wel-foot-dark {
+  color: rgba(255, 255, 255, 0.46);
+}
+.sj .wel-foot-light {
+  display: none;
+}
+
+/* ---------------------------------------------------------------- form side (light) */
+.wel-formside {
+  min-width: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 48px 32px;
+  background: #fff;
+}
+.wel-formcol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+/* The form is centred in the panel's height (and so against the pitch on the left) for either
+   tab; when it is taller than the window, the margins collapse and the page scrolls. */
+.wel-stack {
+  width: 100%;
+  max-width: 400px;
+  margin: auto;
+}
+.wel-panel {
+  display: none;
+  min-width: 0;
+}
+.wel-panel.on {
+  display: block;
+  animation: sj-fade 260ms var(--ease) both;
+}
+
+.sj .wel-formtitle {
+  font-size: 34px;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--ink-900);
+  outline: none;
+}
+.sj .wel-formsub {
+  margin: 8px 0 28px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--gray-600);
+  text-wrap: balance;
+}
+.sj .wel-switch {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--gray-100);
+  font-size: 14px;
+  color: var(--gray-600);
+}
+.sj .wel-switch a {
+  font-weight: 600;
+  color: var(--purple-600);
+  text-decoration: underline;
+  text-decoration-color: var(--purple-200);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  border-radius: 4px;
+  transition: text-decoration-color var(--t-fast) var(--ease);
+}
+.sj .wel-switch a:hover {
+  text-decoration-color: var(--purple-600);
+}
+
+/* ---------------------------------------------------------------- phone */
+@media (max-width: 900px) {
+  /* The white sheet always reaches the bottom of the screen, however short the form. */
+  .sj .wel {
+    display: flex;
+    flex-direction: column;
+    background: var(--ink-900);
+  }
+  .wel-brandside {
+    position: relative;
+    height: auto;
+  }
+  .wel-brandside-in {
+    height: auto;
+    padding: 20px 20px 52px;
+  }
+  .wel-pitch {
+    margin: 0;
+    padding: 36px 0 0;
+  }
+  .sj .wel-title {
+    font-size: clamp(36px, 10.5vw, 48px);
+  }
+  .sj .wel-lede,
+  .wel-points,
+  .sj .wel-foot-dark {
+    display: none;
+  }
+  .wel-blob.a {
+    width: 360px;
+    height: 360px;
+    right: -160px;
+    top: -170px;
+  }
+  .wel-blob.b {
+    width: 420px;
+    height: 420px;
+    left: -200px;
+    bottom: -300px;
+  }
+
+  .wel-formside {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    min-height: 0;
+    margin-top: -24px;
+    padding: 28px 20px calc(24px + env(safe-area-inset-bottom));
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+    box-shadow: 0 -10px 30px rgba(31, 0, 80, 0.18);
+  }
+  .wel-stack {
+    max-width: none;
+    margin: 0;
+  }
+  .sj .wel-formtitle {
+    font-size: 28px;
+  }
+  .sj .wel-formsub {
+    margin-bottom: 22px;
+    font-size: 14.5px;
+  }
+  .sj .wel-foot-light {
+    display: block;
+    margin-top: 28px;
+    color: var(--gray-500);
+    text-wrap: balance;
+  }
+}
+.wel-panel[hidden] {
+  display: none;
+}

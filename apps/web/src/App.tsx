@@ -11,11 +11,11 @@
 
 import { CheckupPage } from './checkup/CheckupPage.js';
 import { ReviewPage } from './review/ReviewPage.js';
-import { StudentApp } from './student/StudentApp.js';
+import { PrepApp } from './prep/PrepApp.js';
 
 export function App() {
   const path = window.location.pathname;
-  if (path.startsWith('/student')) return <StudentApp />;
+  if (path.startsWith('/student')) return <PrepApp />;
   if (path.startsWith('/checkup')) return <CheckupPage />;
   return <ReviewPage />;
 }

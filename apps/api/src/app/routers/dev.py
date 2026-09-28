@@ -66,7 +66,11 @@ class SandboxSubject(BaseModel):
 CLEAR_STUDENTS_SQL = text(
     """
 WITH doomed AS (
-    SELECT id FROM students WHERE external_ref LIKE :prefix || '%'
+    -- A sandbox student who has since signed up (claimed at /v1/auth/signup) is a real
+    -- account now, and is left alone.
+    SELECT s.id FROM students s
+    WHERE s.external_ref LIKE :prefix || '%'
+      AND NOT EXISTS (SELECT 1 FROM student_credentials c WHERE c.student_id = s.id)
 ),
 cleared_turns AS (
     DELETE FROM tutor_turns WHERE student_id IN (SELECT id FROM doomed)

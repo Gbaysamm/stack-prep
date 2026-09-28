@@ -1,0 +1,269 @@
+/* Subject hub: the hero, the score scale, weak spots beside the plan, the two actions, topics
+   and runs. Sections, notes and the scale come from Home.css. */
+
+/* ---------------------------------------------------------------- weak spots + plan */
+.sj .hub-duo {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  grid-template-rows: auto auto 1fr;
+  column-gap: 18px;
+}
+/* Both sections share rows, so their cards start and end on the same lines. */
+.sj .hub-duo > .home-sec {
+  display: grid;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
+  row-gap: 0;
+}
+.sj .hub-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  padding: 20px;
+}
+
+/* ---------------------------------------------------------------- plan */
+.sj .hub-plan {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px;
+}
+.sj .hub-plan-figs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+}
+.sj .hub-plan-figs > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  padding: 0 20px;
+  border-left: 1px solid var(--gray-200);
+}
+.sj .hub-plan-figs > div:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+.sj .hub-plan-figs dt,
+.sj .hub-plan-week .label {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--gray-600);
+}
+/* Both figures sit on one bottom line, whatever their size. */
+.sj .hub-plan-figs dd {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 48px;
+  margin: 0;
+}
+.sj .hub-plan-figs .sj-num {
+  font-size: 52px;
+}
+.sj .hub-plan-figs .of {
+  padding-bottom: 2px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gray-500);
+}
+.sj .hub-plan-figs .date {
+  align-self: flex-end;
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: 26px;
+  letter-spacing: -0.02em;
+  line-height: 0.9;
+}
+.sj .hub-days {
+  font-size: 13px;
+  font-weight: 600;
+  color: #5a4600;
+}
+.sj .hub-days.past {
+  color: #8a3700;
+}
+.sj .hub-plan-week {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--gray-200);
+}
+.sj .hub-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 40px));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .hub-week li {
+  display: grid;
+  place-items: center;
+  height: 36px;
+  border-radius: var(--r-sm);
+  background: var(--gray-100);
+  color: var(--gray-500);
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-weight: 700;
+}
+.sj .hub-week li.on {
+  background: var(--yellow-300);
+  color: var(--ink-900);
+  box-shadow: inset 0 0 0 1.5px var(--ink-900);
+}
+.sj .hub-plan-none {
+  font-size: 13.5px;
+  color: var(--gray-600);
+}
+.sj .hub-plan-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13.5px;
+  color: var(--gray-700);
+}
+.sj .hub-plan-facts li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sj .hub-plan-facts svg {
+  flex: none;
+  color: var(--gray-500);
+}
+.sj .hub-plan-edit {
+  align-self: flex-start;
+  margin-top: auto;
+  font-size: 14px;
+}
+
+/* ---------------------------------------------------------------- actions */
+.sj .hub-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: stretch;
+}
+.sj .hub-action {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 20px;
+  transition:
+    transform var(--t-med) var(--ease),
+    box-shadow var(--t-med) var(--ease),
+    border-color var(--t-med) var(--ease);
+}
+.sj .hub-action:hover {
+  border-color: var(--purple-200);
+  box-shadow: 6px 6px 0 var(--purple-100);
+  transform: translateY(-2px);
+}
+.sj .hub-action-text {
+  max-width: 58ch;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--gray-600);
+  text-wrap: pretty;
+}
+.sj .hub-action-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sj .hub-action-progress .sj-mono {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gray-600);
+}
+.sj .hub-action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 6px;
+  padding-bottom: 4px;
+}
+
+.sj .hub-skel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sj .hub-skel-page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.sj .hub-skel-duo {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: 18px;
+}
+
+/* ---------------------------------------------------------------- responsive */
+.sj .hub {
+  container-type: inline-size;
+}
+@container (max-width: 960px) {
+  .sj .hub-duo,
+  .sj .hub-skel-duo {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    row-gap: 28px;
+  }
+  .sj .hub-duo > .home-sec {
+    display: block;
+    grid-row: auto;
+  }
+  .sj .hub-duo > .home-sec > .home-secsub {
+    margin-top: 8px;
+  }
+  .sj .hub-duo > .home-sec > .sj-card {
+    margin-top: 14px;
+  }
+}
+
+@media (max-width: 860px) {
+  .sj .hub-duo {
+    row-gap: 20px;
+  }
+  .sj .hub-actions {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+  .sj .hub-plan,
+  .sj .hub-action,
+  .sj .hub-panel {
+    padding: 16px;
+  }
+  .sj .hub-action-buttons {
+    flex-direction: column;
+  }
+  .sj .hub-action-buttons > * {
+    width: 100%;
+  }
+  .sj .hub-skel-page {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 400px) {
+  .sj .hub-week {
+    gap: 5px;
+  }
+}

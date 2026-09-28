@@ -1,0 +1,308 @@
+/* Exam subjects: a card per subject. Every card has the same four rows (head, numbers, where
+   you are, button) as a subgrid of the page grid, so cards side by side line up row for row. */
+
+.sj .exs-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.sj .exs-eyebrow > span[aria-hidden] {
+  opacity: 0.5;
+}
+
+/* Hero aside: how much of the exam is open. */
+.sj .exs-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 220px;
+  padding: 18px 20px;
+  border-radius: var(--r-lg);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(215, 189, 255, 0.18);
+}
+.sj .exs-stat-label {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green-400);
+}
+.sj .exs-stat-num {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.sj .exs-stat-num .sj-num {
+  font-size: 56px;
+  color: #fff;
+}
+.sj .exs-stat-num .unit {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.82);
+}
+.sj .exs-stat-note {
+  max-width: 24ch;
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.sj .exs-sechead {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.sj .exs-sechead h2 {
+  text-wrap: balance;
+}
+
+.sj .exs-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
+  column-gap: 22px;
+  row-gap: 22px;
+  align-items: stretch;
+}
+
+.sj .exs-card {
+  position: relative;
+  display: grid;
+  grid-row: span 4;
+  grid-template-rows: subgrid;
+  row-gap: 14px;
+  min-width: 0;
+  padding: 20px;
+  border-radius: var(--r-lg);
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  color: var(--gray-900);
+  transition:
+    transform var(--t-med) var(--ease),
+    box-shadow var(--t-med) var(--ease),
+    border-color var(--t-med) var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+.sj a.exs-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--purple-200);
+  box-shadow: 6px 6px 0 var(--purple-100);
+}
+.sj a.exs-card:active {
+  transform: translateY(0);
+  box-shadow: 2px 2px 0 var(--purple-100);
+}
+.sj a.exs-card:focus-visible {
+  outline-offset: 4px;
+  border-radius: var(--r-lg);
+}
+/* A subject with a goal is the student's own: an ink edge. The first one wears the sticker. */
+.sj .exs-card.has-goal {
+  border: 1.5px solid var(--gray-900);
+}
+.sj a.exs-card.has-goal:hover {
+  border-color: var(--gray-900);
+}
+.sj .exs-card.featured {
+  box-shadow: 6px 6px 0 var(--yellow-400);
+}
+.sj a.exs-card.featured:hover {
+  box-shadow: 9px 9px 0 var(--yellow-400);
+}
+.sj a.exs-card.featured:active {
+  box-shadow: 3px 3px 0 var(--yellow-400);
+}
+.sj .exs-card.off {
+  background: var(--gray-100);
+  border-color: transparent;
+  color: var(--gray-600);
+  cursor: not-allowed;
+}
+.sj .exs-card.off .exs-name,
+.sj .exs-card.off .sj-num {
+  color: var(--gray-500);
+}
+
+/* Row 1: the code tile and the name on one line. */
+.sj .exs-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.sj .exs-code {
+  display: grid;
+  place-items: center;
+  flex: none;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  border-radius: var(--r-md);
+  background: var(--ink-900);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.sj .exs-card.off .exs-code {
+  background: var(--gray-300);
+  color: var(--gray-700);
+}
+.sj .exs-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 22px;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+.sj .exs-badge {
+  flex: none;
+}
+
+/* Row 2: two numbers. */
+.sj .exs-nums {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.sj .exs-num {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: var(--purple-050);
+}
+.sj .exs-num:nth-child(2) {
+  background: var(--green-100);
+}
+.sj .exs-card.off .exs-num {
+  background: rgba(255, 255, 255, 0.7);
+}
+.sj .exs-num .sj-num {
+  font-size: 30px;
+  color: var(--ink-900);
+}
+.sj .exs-num-label {
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--gray-600);
+}
+
+/* Row 3: where you are, one line each, icon inline. */
+.sj .exs-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .exs-facts li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--gray-700);
+}
+.sj .exs-fact-ico {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-sm);
+  background: var(--gray-100);
+  color: var(--gray-500);
+}
+.sj .exs-facts li.yellow .exs-fact-ico {
+  background: var(--yellow-100);
+  color: #5a4600;
+}
+.sj .exs-facts li.green .exs-fact-ico {
+  background: var(--green-100);
+  color: #14561a;
+}
+.sj .exs-facts li.purple .exs-fact-ico {
+  background: var(--purple-050);
+  color: var(--purple-600);
+}
+.sj .exs-facts li.none {
+  color: var(--gray-500);
+}
+.sj .exs-blocked {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--gray-600);
+}
+
+/* Row 4: the button, on the bottom edge. */
+.sj .exs-cta {
+  align-self: end;
+  padding-bottom: 6px; /* room for the button's ledge */
+}
+.sj .exs-btn-off {
+  background: var(--gray-200);
+  color: var(--gray-500);
+  box-shadow: 0 6px 0 var(--gray-300);
+}
+.sj a.exs-card:hover .sj-btn .arrow {
+  transform: translateX(3px);
+}
+
+.sj .exs-legend {
+  margin-top: 28px;
+  max-width: 80ch;
+  line-height: 1.6;
+}
+.sj .exs-legend b {
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.sj .exs-card.exs-skel {
+  cursor: default;
+}
+
+@media (max-width: 1100px) {
+  .sj .exs-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 860px) {
+  /* On a phone the cards say it: the hero stays lean. */
+  .sj .sj-hero-aside:has(.exs-stat) {
+    display: none;
+  }
+  .sj .exs-stat {
+    min-width: 0;
+    padding: 16px;
+  }
+  .sj .exs-stat-num .sj-num {
+    font-size: 44px;
+  }
+  .sj .exs-stat-note {
+    max-width: none;
+  }
+  .sj .exs-grid {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 18px;
+  }
+  .sj .exs-card {
+    padding: 16px;
+  }
+  .sj .exs-card.featured {
+    box-shadow: 5px 5px 0 var(--yellow-400);
+  }
+  .sj .exs-legend {
+    margin-top: 20px;
+  }
+}

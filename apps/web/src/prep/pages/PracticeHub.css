@@ -1,0 +1,634 @@
+/* Practice hub. Every class starts `ph-`. */
+
+/* ---------------------------------------------------------------- shared anatomy */
+/* Icon tile and title on one line; whatever follows starts at the card's own left edge. */
+.sj .ph-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.sj .ph-row > h2,
+.sj .ph-row > b {
+  min-width: 0;
+  text-wrap: balance;
+}
+.sj .ph-tile {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-md);
+  background: var(--purple-050);
+  color: var(--purple-600);
+}
+.sj .ph-tile.solid {
+  background: var(--purple-600);
+  color: #fff;
+}
+.sj .ph-tile.yellow {
+  background: var(--yellow-300);
+  color: var(--ink-900);
+}
+.sj .ph-tile.pink {
+  background: var(--pink-100);
+  color: #9c1d4c;
+}
+
+/* A section on the page: eyebrow and title 8px apart, 14px to what follows. */
+.sj .ph-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.sj .ph-section > h2 {
+  text-wrap: balance;
+}
+.sj .ph-section > .sj-steps {
+  margin-top: 14px;
+}
+.sj .ph-lead {
+  max-width: 62ch;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--gray-600);
+}
+.sj .ph-subjects {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+}
+.sj .ph-skel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.sj .ph-issue {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 560px;
+}
+
+/* ---------------------------------------------------------------- hero stat */
+.sj .ph-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  width: 232px;
+  padding: 18px;
+  border-radius: var(--r-lg);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.sj .ph-stat-label {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green-400);
+}
+.sj .ph-stat-num {
+  font-size: 52px;
+  color: #fff;
+}
+.sj .ph-stat-of {
+  margin-left: 2px;
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.5);
+}
+.sj .ph-stat-note {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ---------------------------------------------------------------- subject card */
+.sj .ph-subject {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 26px;
+  min-width: 0;
+}
+.sj .ph-subject-head {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.sj .ph-subject-body {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 26px;
+  align-items: stretch;
+}
+.sj .ph-side {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+}
+
+/* The open run: the whole block is the way back in. */
+.sj .ph-open {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  border-radius: var(--r-lg);
+  background: var(--purple-050);
+  transition:
+    transform var(--t-med) var(--ease),
+    background var(--t-med) var(--ease);
+}
+.sj .ph-open:hover {
+  background: var(--purple-100);
+}
+.sj .ph-open:hover .arrow {
+  transform: translateX(3px);
+}
+.sj .ph-open:active .ph-open-go {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 var(--ledge);
+}
+.sj .ph-open-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.sj .ph-open-when {
+  color: var(--gray-600);
+}
+.sj .ph-open-count {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 4px;
+}
+.sj .ph-open-count .sj-num {
+  font-size: 44px;
+  color: var(--ink-900);
+}
+.sj .ph-open-of {
+  font-weight: 600;
+  color: var(--gray-700);
+}
+.sj .ph-open-strip .ph-strip {
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.sj .ph-open-strip .ph-strip i {
+  width: 22px;
+  height: 30px;
+  border-radius: var(--r-xs);
+}
+.sj .ph-open-strip .ph-strip i:not(.lime):not(.yellow):not(.pink) {
+  background: #fff;
+}
+.sj .ph-open-meta {
+  color: var(--gray-600);
+}
+/* In the two-column card the block matches its neighbour's height; the button sits at its foot. */
+.sj .ph-open-go {
+  margin-top: auto;
+}
+.sj .ph-open-meta {
+  margin-bottom: 6px;
+}
+
+/* A fresh run. */
+.sj .ph-new {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.sj .ph-new-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.sj .ph-new-title {
+  font-weight: 600;
+  font-size: 15px;
+}
+.sj .ph-lengths {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.sj .ph-length {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+  min-height: 64px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--gray-200);
+  text-align: left;
+  transition:
+    box-shadow var(--t-fast) var(--ease),
+    background var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease);
+}
+.sj .ph-length b {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.sj .ph-length span {
+  font-size: 11.5px;
+  color: var(--gray-600);
+  line-height: 1.2;
+}
+.sj .ph-length:hover {
+  box-shadow: inset 0 0 0 1.5px var(--purple-300);
+}
+.sj .ph-length:active {
+  transform: scale(0.97);
+}
+.sj .ph-length.on {
+  background: var(--purple-600);
+  color: #fff;
+  box-shadow: 0 4px 0 var(--purple-700);
+}
+.sj .ph-length.on span {
+  color: var(--purple-200);
+}
+
+.sj .ph-aims {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sj .ph-aims-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-600);
+}
+.sj .ph-aims-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sj .ph-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 5px 12px;
+  border-radius: var(--r-sm);
+  background: var(--pink-100);
+  color: #9c1d4c;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.sj .ph-nocheck {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--r-md);
+  background: var(--yellow-100);
+}
+.sj .ph-nocheck b {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-900);
+}
+.sj .ph-nocheck-text {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #4a3a00;
+}
+
+.sj .ph-totals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  padding-top: 18px;
+  border-top: 1px dashed var(--gray-200);
+}
+.sj .ph-totals > div {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 0;
+}
+.sj .ph-totals > div + div {
+  padding-left: 18px;
+  border-left: 1px solid var(--gray-100);
+}
+.sj .ph-totals dt {
+  font-size: 12px;
+  color: var(--gray-600);
+  line-height: 1.3;
+}
+.sj .ph-totals dd {
+  margin: 0;
+  font-size: 28px;
+}
+
+/* ---------------------------------------------------------------- what a run is */
+.sj .ph-how {
+  margin-top: 28px;
+}
+/* Each step's rule wears the colour that moment leaves in a run strip. */
+.sj .ph-how .sj-step:nth-child(1) {
+  border-top-color: var(--purple-300);
+}
+.sj .ph-how .sj-step:nth-child(2) {
+  border-top-color: var(--green-400);
+}
+.sj .ph-how .sj-step:nth-child(3) {
+  border-top-color: var(--yellow-400);
+}
+.sj .ph-how .sj-step:nth-child(4) {
+  border-top-color: var(--pink-400);
+}
+.sj .ph-how .sj-step {
+  border-top-width: 3px;
+  padding-top: 15px;
+}
+
+/* ---------------------------------------------------------------- history */
+.sj .ph-history {
+  margin-top: 28px;
+}
+.sj .ph-section-head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sj .ph-key {
+  list-style: none;
+  margin: 12px 0 14px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-size: 13px;
+  color: var(--gray-600);
+}
+.sj .ph-key li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.sj .ph-key i {
+  display: block;
+  width: 10px;
+  height: 14px;
+  border-radius: 3px;
+}
+.sj .ph-key i.lime {
+  background: var(--green-400);
+}
+.sj .ph-key i.yellow {
+  background: var(--yellow-400);
+}
+.sj .ph-key i.pink {
+  background: var(--pink-400);
+}
+.sj .ph-key i.empty {
+  background: var(--gray-100);
+  box-shadow: inset 0 0 0 1px var(--gray-200);
+}
+.sj .ph-runs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.sj .ph-norun {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+}
+.sj .ph-norun b {
+  font-weight: 600;
+  font-size: 15px;
+}
+.sj .ph-run {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 22px;
+  min-height: 76px;
+  padding: 16px 20px;
+  border-radius: var(--r-lg);
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  transition:
+    transform var(--t-med) var(--ease),
+    box-shadow var(--t-med) var(--ease),
+    border-color var(--t-med) var(--ease);
+}
+.sj .ph-run:hover {
+  transform: translateY(-2px);
+  border-color: var(--purple-200);
+  box-shadow: 0 10px 24px rgba(31, 0, 80, 0.08);
+}
+.sj .ph-run:active {
+  transform: translateY(0);
+}
+.sj .ph-run-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.sj .ph-run-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.sj .ph-run-title b {
+  font-weight: 600;
+  font-size: 15px;
+}
+.sj .ph-run-badge {
+  min-height: 22px;
+  padding: 3px 9px;
+  font-size: 11px;
+}
+.sj .ph-run-sub {
+  color: var(--gray-600);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sj .ph-run-score {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.sj .ph-run-num {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gray-700);
+}
+.sj .ph-strip {
+  display: flex;
+  gap: 3px;
+}
+.sj .ph-strip i {
+  display: block;
+  width: 10px;
+  height: 14px;
+  border-radius: 3px;
+  background: var(--gray-100);
+  box-shadow: inset 0 0 0 1px var(--gray-200);
+}
+.sj .ph-strip i.lime {
+  background: var(--green-400);
+  box-shadow: none;
+}
+.sj .ph-strip i.yellow {
+  background: var(--yellow-400);
+  box-shadow: none;
+}
+.sj .ph-strip i.pink {
+  background: var(--pink-400);
+  box-shadow: none;
+}
+.sj .ph-run-go {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  min-width: 96px;
+  color: var(--purple-600);
+  font-weight: 600;
+  font-size: 13.5px;
+}
+.sj .ph-run-go svg {
+  transition: transform var(--t-med) var(--ease);
+}
+.sj .ph-run:hover .ph-run-go svg {
+  transform: translateX(3px);
+}
+
+/* ---------------------------------------------------------------- narrower */
+@media (max-width: 1100px) {
+  /* Two columns are too tight here: the open run and the fresh run stack. */
+  .sj .ph-subject-body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+  }
+  .sj .ph-open-go {
+    margin-top: 6px;
+  }
+  .sj .ph-how .sj-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .sj .ph-subjects {
+    gap: 18px;
+  }
+  .sj .ph-subject-body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+  .sj .ph-side {
+    gap: 18px;
+  }
+  .sj .ph-how {
+    margin-top: 20px;
+  }
+  .sj .ph-how .sj-steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sj .ph-stat {
+    width: auto;
+    padding: 14px 16px;
+  }
+  .sj .ph-stat-num {
+    font-size: 44px;
+  }
+  .sj .ph-subject {
+    padding: 16px;
+    gap: 18px;
+  }
+  .sj .ph-open {
+    padding: 14px;
+  }
+  .sj .ph-lengths {
+    gap: 8px;
+  }
+  .sj .ph-length {
+    padding: 10px 12px;
+    min-height: 60px;
+  }
+  .sj .ph-length span {
+    font-size: 10.5px;
+  }
+  .sj .ph-totals dd {
+    font-size: 24px;
+  }
+  .sj .ph-totals > div + div {
+    padding-left: 12px;
+  }
+  .sj .ph-history {
+    margin-top: 20px;
+  }
+  .sj .ph-run {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "main go"
+      "score score";
+    gap: 12px;
+    padding: 16px;
+  }
+  .sj .ph-run-main {
+    grid-area: main;
+  }
+  .sj .ph-run-go {
+    grid-area: go;
+    min-width: 0;
+  }
+  .sj .ph-run-action {
+    display: none;
+  }
+  .sj .ph-run-score {
+    grid-area: score;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 12px;
+    border-top: 1px dashed var(--gray-200);
+  }
+  .sj .ph-strip i {
+    width: 8px;
+    height: 12px;
+  }
+}
+
+/* The stat panel is this hero's picture; the stacked-blocks art would show through behind it. */
+.sj .ph .sj-hero:has(.ph-stat) .sj-hero-art {
+  display: none;
+}

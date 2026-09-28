@@ -1,0 +1,915 @@
+/*
+ * The coach's board, in the Stack Prep design system.
+ *
+ * A full-screen focus page: a slim glass bar (close, what this is, which step, a thin progress
+ * line), a bright white board with the working in one centred column, the coach docked over the
+ * bottom of the board as a small glass card, and the controls and ask box in a glass dock.
+ * Every band shares one column (`.pb-col`: 900px, the same side gutter), so the close button,
+ * the question panel, the working, the coach and the ask box all start on the same edge.
+ *
+ * The root carries `.sj` itself, so the board brings its tokens with it wherever it is mounted —
+ * inside the new app or the old practice screen.
+ */
+
+.sj.pb {
+  --col: 900px;
+  --gut: clamp(16px, 4vw, 40px);
+  --mark-pink: var(--pink-500);
+  --mark-purple: var(--purple-600);
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  /* One column no wider than the screen. Left to size itself, a grid grows to fit its widest
+     line of maths, and on a phone the whole board ran off the right-hand edge. */
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--white);
+}
+.pb > * {
+  min-width: 0;
+}
+.pb .pb-col {
+  width: 100%;
+  max-width: var(--col);
+  margin-inline: auto;
+  padding-inline: var(--gut);
+  min-width: 0;
+}
+
+/* ---------------------------------------------------------------- bar */
+.pb-bar {
+  position: relative;
+  z-index: 6;
+  padding-top: env(safe-area-inset-top);
+  background: rgba(255, 255, 255, 0.8);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  backdrop-filter: blur(18px) saturate(180%);
+  border-bottom: 1px solid var(--gray-100);
+}
+.pb .pb-bar-in {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 64px;
+  padding-block: 10px;
+}
+.sj .pb-close {
+  flex: none;
+}
+.pb-what {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.pb-what-sub,
+.pb-what-title {
+  display: block;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pb-what-title {
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: 19px;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--gray-900);
+}
+.pb-count {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 34px;
+  padding: 6px 13px;
+  border-radius: var(--r-pill);
+  background: var(--purple-050);
+  color: var(--purple-600);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.pb-count b {
+  color: var(--ink-900);
+}
+.pb-count span {
+  opacity: 0.5;
+}
+.pb-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 3px;
+  background: var(--gray-100);
+}
+.pb-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--purple-600);
+  border-radius: 0 3px 3px 0;
+  transition: width 500ms var(--ease);
+}
+
+/* ---------------------------------------------------------------- the board */
+.pb-stage {
+  position: relative;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--white);
+}
+.pb-ink {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.pb .pb-sheet {
+  position: relative;
+  padding-top: clamp(18px, 4vh, 40px);
+  /* Room under the last line for the coach card floating over the bottom of the board. */
+  padding-bottom: calc(var(--coach-h, 60px) + 40px);
+  font-size: clamp(18px, 0.85vw + 12px, 25px);
+  line-height: 1.6;
+  color: var(--gray-900);
+}
+.pb-question,
+.pb-lesson,
+.pb-marks {
+  transition: opacity 240ms var(--ease);
+}
+/* Paused while the student types: the lesson steps back, the place is kept. */
+.pb-sheet.dim .pb-question,
+.pb-sheet.dim .pb-lesson,
+.pb-sheet.dim .pb-marks {
+  opacity: 0.4;
+}
+
+/* The question, in a soft panel: what the working below is the answer to. */
+.pb-question {
+  margin: 0 0 30px;
+  padding: 16px 22px 20px;
+  border-radius: var(--r-lg);
+  background: var(--purple-050);
+}
+.pb-question > .sj-eyebrow {
+  display: block;
+  margin-bottom: 6px;
+}
+.pb-question-text {
+  font-size: 0.86em;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+.pb .sp-figures {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 12px;
+  border-radius: var(--r-md);
+  background: var(--white);
+}
+.pb .sp-figures img {
+  display: block;
+  max-width: 100%;
+  max-height: 240px;
+  width: auto;
+  height: auto;
+}
+
+/* The working: one line at a time, each written in a single quick stroke. */
+.pb-line {
+  margin: 0 0 14px;
+  min-width: 0;
+}
+.pb-item {
+  display: block;
+  max-width: 100%;
+  /* A long line of working scrolls sideways within itself, never the page. */
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: 3px;
+  scrollbar-width: thin;
+}
+.pb-item + .pb-item {
+  margin-top: 6px;
+}
+/* One stroke, left to right, as the voice reaches the line: no fade, no slide. It waits the
+   moment the pen takes to get to the start of the line. */
+.pb-stroke {
+  animation: pb-stroke var(--stroke, 600ms) steps(24, end) 180ms both;
+}
+@keyframes pb-stroke {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+.pb .sp-maths {
+  max-width: 100%;
+}
+.pb .sp-maths.block {
+  display: block;
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin: 0.4em 0;
+}
+
+/* The answer: a green sticker, the one line the eye should land on last. */
+.pb-line.answer {
+  display: inline-block;
+  max-width: 100%;
+  margin-top: 10px;
+  padding: 10px 20px 12px;
+  border: 2px solid var(--ink-900);
+  border-radius: var(--r-lg);
+  background: var(--green-100);
+  box-shadow: 5px 5px 0 var(--green-400);
+  color: var(--ink-900);
+  animation: pb-stick 380ms var(--ease-spring) both;
+}
+.pb-answer-tag {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--green-600);
+}
+@keyframes pb-stick {
+  from {
+    transform: scale(0.94) rotate(-1.2deg);
+  }
+}
+
+/* The coach's own hand, under the reviewed working: marked apart so the two never blur. */
+.pb-tag {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--purple-500);
+}
+.pb-coachline {
+  margin: 0 0 12px;
+  padding-left: 14px;
+  border-left: 3px solid var(--purple-200);
+  min-width: 0;
+}
+.pb-coachline.drawing svg {
+  display: block;
+  width: min(280px, 60%);
+  height: auto;
+  margin: 6px 0;
+}
+.pb-asked {
+  margin: 26px 0 14px;
+  padding: 12px 16px;
+  border-radius: var(--r-md);
+  background: var(--gray-100);
+  font-family: var(--f-body);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--gray-700);
+  overflow-wrap: anywhere;
+}
+.pb-asked > span:last-child {
+  font-style: italic;
+}
+/* Earlier questions and answers: still legible, stepped back. */
+.pb-coachline.kept,
+.pb-asked.kept {
+  opacity: 0.55;
+}
+
+/* ---------------------------------------------------------------- the teacher's marks */
+.pb-marks {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.pb-marks-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.pb-mark {
+  transition: opacity 420ms var(--ease);
+}
+.pb-mark.past {
+  opacity: 0.3;
+}
+.pb-mark.gone {
+  opacity: 0;
+}
+.pb-mark path {
+  fill: none;
+  stroke: var(--mark-pink);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.pb-mark.arrow path {
+  stroke: var(--mark-purple);
+  stroke-width: 2.4;
+}
+/* Drawn on, the way a marker crosses the board: the stroke first, then the arrowhead. */
+.pb-mark-line {
+  animation: pb-draw 520ms cubic-bezier(0.45, 0.05, 0.3, 1) forwards;
+}
+.pb-mark-head {
+  animation: pb-draw 170ms ease-out 470ms forwards;
+}
+@keyframes pb-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.pb-mark-label {
+  position: absolute;
+  max-width: 44vw;
+  padding: 2px 9px 3px;
+  border-radius: var(--r-xs);
+  font-family: var(--f-body);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--ink-900);
+  background: var(--pink-100);
+  transform: translate(0, -50%) rotate(-2deg);
+  transform-origin: left center;
+  animation: pb-label 260ms var(--ease-spring) 380ms both;
+  transition: opacity 420ms var(--ease);
+}
+.pb-mark-label.left {
+  transform: translate(-100%, -50%) rotate(-2deg);
+  transform-origin: right center;
+}
+.pb-mark-label.above {
+  transform: translate(-50%, -100%) rotate(-2deg);
+  transform-origin: center bottom;
+}
+.pb-mark-label.arrow {
+  background: var(--purple-050);
+  color: var(--purple-700);
+}
+.pb-mark-label.past {
+  opacity: 0.3;
+}
+.pb-mark-label.gone {
+  opacity: 0;
+}
+@keyframes pb-label {
+  from {
+    opacity: 0;
+    scale: 0.7;
+  }
+}
+
+/* The pen: glides to the line being written and follows the stroke along it. */
+.pb-pen {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  width: 28px;
+  height: 28px;
+  /* The nib's point, not the corner of its box, sits on the line. */
+  margin: -27px 0 0 -4.6px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 260ms var(--ease);
+  filter: drop-shadow(0 2px 3px rgba(31, 0, 80, 0.22));
+  will-change: transform;
+}
+.pb-pen.on {
+  opacity: 1;
+}
+.pb-pen svg {
+  display: block;
+  overflow: visible;
+}
+.pb-pen-body {
+  fill: var(--purple-600);
+}
+.pb-pen-cap {
+  fill: none;
+  stroke: var(--white);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+.pb-pen-tip {
+  fill: var(--ink-900);
+}
+
+/* Only when the browser will not play sound without a tap. */
+.pb-tap {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.55);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+
+/* ---------------------------------------------------------------- the coach */
+.pb-coachdock {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 14px;
+  z-index: 4;
+  pointer-events: none;
+}
+.pb-coachdock > .pb-col {
+  display: flex;
+}
+.pb-coach {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  padding: 10px 18px 12px 10px;
+  border-radius: var(--r-lg);
+  background: rgba(255, 255, 255, 0.76);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--gray-100);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 12px 32px rgba(31, 0, 80, 0.12);
+}
+.pb-coach.slim {
+  width: auto;
+  max-width: 100%;
+  align-items: center;
+  padding: 6px 18px 6px 6px;
+  border-radius: var(--r-lg);
+}
+.pb-avatar {
+  position: relative;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+.pb-coach.talking .pb-avatar::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--purple-300);
+  animation: pb-ring 1.2s ease-out infinite;
+}
+@keyframes pb-ring {
+  from {
+    transform: scale(0.92);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.18);
+    opacity: 0;
+  }
+}
+.pb-coach-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-top: 2px;
+}
+.pb-coach.slim .pb-coach-body {
+  padding-top: 0;
+}
+.pb-who {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  color: var(--purple-600);
+}
+.pb-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green-500);
+  animation: pb-pulse 1.2s ease-in-out infinite;
+}
+.pb-coach.paused .pb-dot {
+  background: var(--yellow-400);
+  animation: none;
+}
+@keyframes pb-pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+.pb-caption,
+.pb-spoken p {
+  margin: 3px 0 0;
+  font-family: var(--f-body);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--gray-800);
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+.pb-caption {
+  max-height: 26vh;
+  overflow-y: auto;
+}
+.pb-spoken {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 30vh;
+  overflow-y: auto;
+  margin-top: 4px;
+  padding-right: 4px;
+}
+.pb-spoken p {
+  margin: 0;
+  opacity: 0.6;
+  transition: opacity 180ms var(--ease);
+}
+.pb-spoken p.now {
+  opacity: 1;
+  font-weight: 500;
+}
+
+/* The coach's face: drawn, not loaded. The mouth is scaled by `--mouth`, which the player
+   writes from the loudness of the sound actually playing; shut is 0.08 so the lips show. */
+.pb-face {
+  display: block;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--purple-600);
+  overflow: hidden;
+}
+.pb-face-body {
+  fill: var(--ink-800);
+}
+.pb-face-skin {
+  /* Illustration colour: the one tone the palette has no token for. */
+  fill: #e8b98a;
+}
+.pb-face-hair,
+.pb-face-eyes circle {
+  fill: var(--ink-900);
+}
+.pb-face-eyes circle {
+  transform-origin: center 26px;
+  animation: pb-blink 5.5s infinite;
+}
+.pb-face-mouth {
+  fill: #7a3b3b;
+  transform: scaleY(var(--mouth, 0.08));
+  transform-origin: 32px 35px;
+  transition: transform 60ms linear;
+}
+/* A face that never blinks is a picture, not a person. */
+@keyframes pb-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+.pb-face.listening {
+  animation: pb-listening 1.2s ease-in-out infinite;
+}
+@keyframes pb-listening {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(199, 44, 65, 0.55);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(199, 44, 65, 0);
+  }
+}
+
+/* ---------------------------------------------------------------- the dock */
+.pb-dock {
+  position: relative;
+  z-index: 6;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: rgba(255, 255, 255, 0.84);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  backdrop-filter: blur(18px) saturate(180%);
+  border-top: 1px solid var(--gray-100);
+}
+.pb .pb-dock-in {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding-block: 12px 12px;
+}
+
+/* Watch, then ask: the lesson's controls first, in one group. */
+.pb-ctl {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: calc(var(--r-btn) + 4px);
+  background: var(--gray-100);
+}
+.sj .pb-ctl button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-btn);
+  color: var(--gray-900);
+  transition:
+    background var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease),
+    box-shadow var(--t-fast) var(--ease);
+}
+.sj .pb-ctl button:hover:not(:disabled) {
+  background: var(--white);
+}
+.sj .pb-ctl button:active:not(:disabled) {
+  transform: scale(0.94);
+}
+.sj .pb-ctl button:disabled {
+  opacity: 0.35;
+}
+.sj .pb-ctl button.next {
+  color: var(--white);
+  background: var(--purple-600);
+  box-shadow: 0 3px 0 var(--purple-700);
+}
+.sj .pb-ctl button.next:hover:not(:disabled) {
+  background: var(--purple-500);
+}
+.sj .pb-ctl button.next:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--purple-700);
+}
+.sj .pb-ctl button.next.done {
+  color: var(--ink-900);
+  background: var(--green-400);
+  box-shadow: 0 3px 0 var(--ink-900);
+}
+.sj .pb-ctl button.next.done:active {
+  box-shadow: 0 1px 0 var(--ink-900);
+}
+
+/* The ask box: one field holding the words, the microphone and send. */
+.pb-ask {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.pb-askbox {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 52px;
+  padding: 4px 4px 4px 20px;
+  border-radius: calc(var(--r-btn) + 4px);
+  background: var(--white);
+  box-shadow: inset 0 0 0 1.5px var(--gray-200);
+  transition: box-shadow var(--t-fast) var(--ease);
+}
+.pb-askbox:focus-within {
+  box-shadow:
+    inset 0 0 0 2px var(--purple-600),
+    0 0 0 4px var(--purple-050);
+}
+.pb-askbox.recording {
+  box-shadow:
+    inset 0 0 0 2px var(--danger),
+    0 0 0 4px var(--danger-100);
+}
+.sj .pb-askbox input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: 15px;
+  color: var(--gray-900);
+}
+.sj .pb-askbox input:focus-visible {
+  outline: none;
+}
+.pb-askbox input::placeholder {
+  color: var(--gray-500);
+}
+.pb-askbox input:disabled {
+  opacity: 0.55;
+}
+.sj .pb-mic,
+.sj .pb-send {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-btn);
+  transition:
+    background var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease);
+}
+.sj .pb-mic {
+  color: var(--gray-700);
+}
+.sj .pb-mic:hover:not(:disabled) {
+  background: var(--gray-100);
+}
+.sj .pb-mic.on {
+  color: var(--danger);
+  background: var(--danger-100);
+  animation: pb-pulse 1.1s ease-in-out infinite;
+}
+.sj .pb-send {
+  color: var(--white);
+  background: var(--purple-600);
+}
+.sj .pb-send:hover:not(:disabled) {
+  background: var(--purple-500);
+}
+.sj .pb-mic:active:not(:disabled),
+.sj .pb-send:active:not(:disabled) {
+  transform: scale(0.92);
+}
+.sj .pb-send:disabled {
+  color: var(--gray-500);
+  background: var(--gray-100);
+}
+.pb-busy {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: pb-spin 700ms linear infinite;
+}
+@keyframes pb-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.pb-note {
+  display: block;
+  margin-top: 6px;
+  padding-left: 20px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--gray-600);
+}
+.pb-note.issue {
+  color: var(--danger);
+}
+
+/* ---------------------------------------------------------------- phone */
+@media (max-width: 640px) {
+  .pb .pb-bar-in {
+    gap: 10px;
+    min-height: 58px;
+    padding-block: 8px;
+  }
+  /* The close button keeps its name for screen readers and loses its word on screen. */
+  .sj .pb-close {
+    width: 40px;
+    min-height: 40px;
+    padding: 0;
+  }
+  .pb-close span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .pb-what-sub {
+    font-size: 10px;
+  }
+  .pb-what-title {
+    font-size: 16px;
+  }
+  .pb-count {
+    min-height: 30px;
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+  .pb .pb-sheet {
+    font-size: 18px;
+    padding-top: 16px;
+    padding-bottom: calc(var(--coach-h, 56px) + 30px);
+  }
+  .pb-question {
+    margin-bottom: 22px;
+    padding: 12px 14px 14px;
+    border-radius: var(--r-md);
+  }
+  .pb-line.answer {
+    padding: 8px 14px 10px;
+  }
+  .pb-coachdock {
+    bottom: 10px;
+  }
+  .pb-coach {
+    padding: 8px 12px 10px 8px;
+    border-radius: var(--r-lg);
+  }
+  .pb-caption,
+  .pb-spoken p {
+    font-size: 14px;
+  }
+  .pb-caption {
+    max-height: 18vh;
+  }
+  /* The controls on their own row above a full-width ask box: beside it, the box was too
+     narrow to type in. */
+  .pb .pb-dock-in {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding-block: 10px;
+  }
+  .pb-ctl {
+    align-self: center;
+  }
+  /* 16px or more, or iOS zooms the page in when the box is tapped. */
+  .sj .pb-askbox input {
+    font-size: 16px;
+  }
+  .pb-askbox {
+    padding-left: 16px;
+  }
+  .pb-note {
+    padding-left: 16px;
+    font-size: 11.5px;
+  }
+}
+
+/* ---------------------------------------------------------------- motion */
+@media (prefers-reduced-motion: reduce) {
+  .pb-stroke,
+  .pb-line.answer,
+  .pb-mark-line,
+  .pb-mark-head,
+  .pb-mark-label,
+  .pb-face-eyes circle,
+  .pb-face.listening,
+  .pb-coach.talking .pb-avatar::after,
+  .sj .pb-mic.on {
+    animation: none;
+  }
+  .pb-mark path {
+    stroke-dashoffset: 0;
+  }
+  .pb-face-mouth {
+    transition: none;
+  }
+  .pb-pen {
+    display: none;
+  }
+}

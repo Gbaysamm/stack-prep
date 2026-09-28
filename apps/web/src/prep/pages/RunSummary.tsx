@@ -1,0 +1,395 @@
+/**
+ * The end of a practice run.
+ *
+ * Proud, and honest about what the numbers mean: right first time is what the student knows;
+ * a question the coach had to work through is taught, not known, and it comes back. Only the
+ * run's totals are stored per run, so the strip groups the questions by how they went rather
+ * than pretending to remember their order.
+ */
+
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+
+import { api } from "../../student/api.js";
+import {
+  IconArrowRight,
+  IconBolt,
+  IconBulb,
+  IconCheck,
+  IconHome,
+  IconLayers,
+  IconPlay,
+  IconReplay,
+  IconTarget,
+} from "../icons.js";
+import { progressApi } from "../progressApi.js";
+import { useLoad, usePageTitle, useStudent } from "../store.js";
+import {
+  Badge,
+  Button,
+  Card,
+  CountUp,
+  PageHero,
+  Ring,
+  Skeleton,
+  useNarrow,
+  useToast,
+} from "../ui.js";
+import { RunStrip, whenLabel } from "./PracticeHub.js";
+import "./RunSummary.css";
+
+function headline(
+  unaided: number,
+  answered: number,
+): { title: string; line: string } {
+  if (answered === 0)
+    return {
+      title: "Run closed.",
+      line: "No questions were answered in this one.",
+    };
+  const share = unaided / answered;
+  if (share >= 0.8)
+    return {
+      title: "That was a strong run.",
+      line: "Most of these you knew cold. Keep the streak going.",
+    };
+  if (share >= 0.5)
+    return {
+      title: "Good, solid work.",
+      line: "More right than not — and the misses are now things you have been shown.",
+    };
+  if (share > 0)
+    return {
+      title: "Every miss taught you something.",
+      line: "This is exactly the ground to be covering. It gets easier from here.",
+    };
+  return {
+    title: "You showed up for the hard ones.",
+    line: "None came easy today, and every one was worked through. That is how it starts.",
+  };
+}
+
+export function RunSummary() {
+  const { sessionId = "" } = useParams();
+  const student = useStudent();
+  const navigate = useNavigate();
+  const toast = useToast();
+  const narrow = useNarrow();
+  const state = useLoad(() => api.practiceCurrent(sessionId), [sessionId]);
+  const runs = useLoad(
+    () => progressApi.runs(student.studentId, 50),
+    [student.studentId],
+  );
+  const overview = useLoad(
+    () => progressApi.overview(student.studentId),
+    [student.studentId],
+  );
+  const [starting, setStarting] = useState(false);
+
+  const run = runs.data?.runs.find((item) => item.session_id === sessionId);
+  const subject = overview.data?.subjects.find(
+    (item) => item.subject_id === run?.subject_id,
+  );
+  const weakest = subject?.latest_checkup?.weakest_subtopics[0];
+  usePageTitle(run ? `${run.subject_name} run` : "Run summary");
+
+  const again = () => {
+    if (!run) return;
+    setStarting(true);
+    api
+      .startPractice(student.studentId, run.subject_id, run.length)
+      .then((next) => navigate(`/practice/${next.session_id}`))
+      .catch((error: Error) => {
+        toast(`Couldn’t start the run: ${error.message || "try again"}`);
+        setStarting(false);
+      });
+  };
+
+  if (state.error && !state.data) {
+    return (
+      <div className="sj-page rs">
+        <PageHero
+          back={{ to: "/practice", label: "Practice" }}
+          eyebrow="Run summary"
+          title="We couldn’t load this run"
+        />
+        <Card sticker="pink" className="rs-issue">
+          <div className="rs-row">
+            <span className="rs-tile pink" aria-hidden="true">
+              <IconReplay size={18} />
+            </span>
+            <b>Something got in the way</b>
+          </div>
+          <p className="sj-muted">{state.error}</p>
+          <div className="rs-issue-actions">
+            <Button icon={<IconReplay size={18} />} onClick={state.reload}>
+              Try again
+            </Button>
+            <Button tone="ghost" to="/practice">
+              Back to practice
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  const data = state.data;
+  if (!data) {
+    return (
+      <div className="sj-page rs" aria-busy="true">
+        <Skeleton height={188} radius={18} />
+        <div style={{ height: 22 }} />
+        <Skeleton width={120} height={12} />
+        <div style={{ height: 8 }} />
+        <Skeleton width={240} height={28} />
+        <div style={{ height: 14 }} />
+        <Skeleton height={300} radius={14} />
+      </div>
+    );
+  }
+
+  if (data.stage !== "finished") {
+    // A question being retried is counted as seen but has no outcome yet.
+    const done =
+      data.stage === "asking" ? data.answered : Math.max(0, data.answered - 1);
+    return (
+      <div className="sj-page rs">
+        <PageHero
+          back={{ to: "/practice", label: "Practice" }}
+          eyebrow={`Run summary${run ? ` · ${run.subject_name}` : ""}`}
+          title="This run isn’t finished yet"
+          sub="Pick it up where you left off. The summary appears when the last question is done."
+          actions={
+            <Button
+              to={`/practice/${sessionId}`}
+              size="lg"
+              tone="lime"
+              trailing={<IconArrowRight size={18} />}
+            >
+              Resume run
+            </Button>
+          }
+          aside={
+            <div className="rs-aside">
+              <Ring
+                value={data.length ? done / data.length : 0}
+                size={narrow ? 104 : 132}
+                stroke={12}
+                color="var(--yellow-300)"
+              >
+                <span className="sj-num rs-ring-num small">
+                  {done}
+                  <span className="rs-ring-of">/{data.length}</span>
+                </span>
+              </Ring>
+              <span className="rs-aside-cap">answered so far</span>
+            </div>
+          }
+        />
+        <section className="rs-section sj-rise d1" aria-labelledby="rs-sofar">
+          <span className="sj-eyebrow">So far</span>
+          <h2 id="rs-sofar" className="sj-display sj-h2">
+            How it is going
+          </h2>
+          <div className="sj-card rs-open">
+            <div className="rs-strip-big">
+              <RunStrip run={{ ...data, answered: done }} />
+            </div>
+            <p className="sj-muted">
+              {data.correct_unaided} right first time · {data.taught} taught ·{" "}
+              {data.length - done} still to go
+            </p>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  const answered = data.answered;
+  const unaided = data.correct_unaided;
+  const taught = data.taught;
+  const hinted = Math.max(0, answered - unaided - taught);
+  const head = headline(unaided, answered);
+  const share = answered > 0 ? unaided / answered : 0;
+
+  return (
+    <div className="sj-page rs">
+      <PageHero
+        back={{ to: "/practice", label: "Practice" }}
+        eyebrow={`Run complete${run ? ` · ${run.subject_name} · ${whenLabel(run.started_at)}` : ""}`}
+        title={head.title}
+        sub={head.line}
+        aside={
+          // The number that matters, big: right with no hint and no help.
+          <div className="rs-aside">
+            <Ring
+              value={share}
+              size={narrow ? 112 : 156}
+              stroke={narrow ? 11 : 14}
+              color="var(--green-400)"
+            >
+              <span className="sj-num rs-ring-num">
+                <CountUp value={unaided} />
+                <span className="rs-ring-of">/{answered}</span>
+              </span>
+            </Ring>
+            <span className="rs-aside-cap">right first time</span>
+          </div>
+        }
+      />
+
+      <section className="rs-section sj-rise d1" aria-labelledby="rs-break-title">
+        <span className="sj-eyebrow">Breakdown</span>
+        <h2 id="rs-break-title" className="sj-display sj-h2">
+          How the {answered} went
+        </h2>
+        <div className="sj-card rs-break">
+          <div className="rs-strip-big">
+            <RunStrip
+              run={{
+                answered,
+                correct_unaided: unaided,
+                taught,
+                length: answered,
+              }}
+            />
+          </div>
+          <p className="rs-note sj-small">
+            Grouped by how they went, not in the order you saw them.
+          </p>
+          <ul className="rs-legend">
+            <li>
+              <span className="rs-row">
+                <span className="rs-tile lime" aria-hidden="true">
+                  <IconCheck size={16} />
+                </span>
+                <b>Right first time</b>
+              </span>
+              <span className="sj-num rs-legend-num">
+                <CountUp value={unaided} />
+              </span>
+              <small>Counts as known.</small>
+            </li>
+            <li>
+              <span className="rs-row">
+                <span className="rs-tile yellow" aria-hidden="true">
+                  <IconBulb size={16} />
+                </span>
+                <b>Right after a hint</b>
+              </span>
+              <span className="sj-num rs-legend-num">
+                <CountUp value={hinted} />
+              </span>
+              <small>You got there, but it isn’t counted as known yet.</small>
+            </li>
+            <li>
+              <span className="rs-row">
+                <span className="rs-tile pink" aria-hidden="true">
+                  <IconPlay size={14} />
+                </span>
+                <b>Taught on the board</b>
+              </span>
+              <span className="sj-num rs-legend-num">
+                <CountUp value={taught} />
+              </span>
+              <small>Taught, not known. They come back as fresh questions.</small>
+            </li>
+          </ul>
+          {(run && run.topics.length > 0) || data.closing_note ? (
+            <div className="rs-foot">
+              {run && run.topics.length > 0 ? (
+                <div className="rs-topics">
+                  <span className="rs-topics-label sj-mono">
+                    <IconLayers size={14} /> Topics covered
+                  </span>
+                  <div className="rs-chips">
+                    {run.topics.map((topic) => (
+                      <Badge key={topic} tone="ghost" className="rs-chip">
+                        {topic}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+              {data.closing_note ? (
+                <p className="rs-closing">{data.closing_note}</p>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      </section>
+
+      <section className="rs-section sj-rise d2" aria-labelledby="rs-next-title">
+        <span className="sj-eyebrow">Next up</span>
+        <h2 id="rs-next-title" className="sj-display sj-h2">
+          Keep it going
+        </h2>
+        <div className="rs-next-grid">
+          <button
+            type="button"
+            className="rs-next-card primary"
+            onClick={again}
+            disabled={!run || starting}
+          >
+            <span className="rs-row">
+              <span className="rs-tile lime" aria-hidden="true">
+                <IconBolt size={18} />
+              </span>
+              <b>{starting ? "Picking questions…" : "Another run"}</b>
+            </span>
+            <span className="rs-next-text">
+              {run
+                ? `${run.length} more ${run.subject_name} questions, aimed at what’s still weak.`
+                : "Loading…"}
+            </span>
+            <span className="rs-next-go">
+              Start
+              <IconArrowRight size={18} />
+            </span>
+          </button>
+          {weakest && subject ? (
+            <button
+              type="button"
+              className="rs-next-card"
+              onClick={() => navigate(`/subjects/${subject.subject_id}`)}
+            >
+              <span className="rs-row">
+                <span className="rs-tile pink" aria-hidden="true">
+                  <IconTarget size={18} />
+                </span>
+                <b>Your weakest area</b>
+              </span>
+              <span className="rs-next-text">
+                {weakest.name} · {weakest.topic_name}
+              </span>
+              <span className="rs-next-go">
+                Open subject
+                <IconArrowRight size={18} />
+              </span>
+            </button>
+          ) : null}
+          <button
+            type="button"
+            className="rs-next-card"
+            onClick={() => navigate("/home")}
+          >
+            <span className="rs-row">
+              <span className="rs-tile ink" aria-hidden="true">
+                <IconHome size={18} />
+              </span>
+              <b>Back home</b>
+            </span>
+            <span className="rs-next-text">
+              See your plan and how far you’ve come.
+            </span>
+            <span className="rs-next-go">
+              Home
+              <IconArrowRight size={18} />
+            </span>
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}

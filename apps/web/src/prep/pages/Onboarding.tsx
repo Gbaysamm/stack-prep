@@ -1,0 +1,1267 @@
+/**
+ * Onboarding: the first thing a new student sees after typing their name. Four short steps on
+ * one focus page — the exam, the subjects, one goal for all of them, a look over it — and then a
+ * finish that hands them straight to their first check-up. Nothing is discovered later from the
+ * sidebar, and nobody lands on a dashboard full of "set this up" cards.
+ *
+ * A student who comes back here finds their current choices filled in, so it doubles as the one
+ * place to re-plan every subject at once.
+ */
+
+import { useEffect, useId, useRef, useState, type CSSProperties, type FormEvent, type ReactNode, type RefObject } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+
+import { api, type ExaminationOffer, type Goal as GoalRow, type SubjectOffer } from '../../student/api.js';
+import {
+  IconArrowLeft,
+  IconArrowRight,
+  IconBook,
+  IconCalendar,
+  IconCheck,
+  IconClock,
+  IconLock,
+  IconReplay,
+  IconTarget,
+} from '../icons.js';
+import { progressApi, type Overview } from '../progressApi.js';
+import { useLoad, usePageTitle, useStudent } from '../store.js';
+import { Button, CountUp, Skeleton, Steps, cx, daysUntil, useToast } from '../ui.js';
+import { examTitle, isHiddenExam } from './Exams.js';
+import './Onboarding.css';
+
+const STEPS = [
+  { key: 'exam', label: 'Exam', icon: IconTarget },
+  { key: 'subjects', label: 'Subjects', icon: IconBook },
+  { key: 'goal', label: 'Your goal', icon: IconCalendar },
+  { key: 'review', label: 'Review', icon: IconCheck },
+] as const;
+
+const MINUTE_CHIPS = [15, 30, 45, 60, 90];
+const DAYS = [
+  { n: 1, short: 'Mon', long: 'Monday' },
+  { n: 2, short: 'Tue', long: 'Tuesday' },
+  { n: 3, short: 'Wed', long: 'Wednesday' },
+  { n: 4, short: 'Thu', long: 'Thursday' },
+  { n: 5, short: 'Fri', long: 'Friday' },
+  { n: 6, short: 'Sat', long: 'Saturday' },
+  { n: 7, short: 'Sun', long: 'Sunday' },
+];
+const DEFAULT_TARGET = 70;
+
+/* ------------------------------------------------------------------ small helpers */
+
+function isoDay(date: Date): string {
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+function monthsFromToday(months: number): string {
+  const date = new Date();
+  date.setMonth(date.getMonth() + months);
+  return isoDay(date);
+}
+function longDate(iso: string): string {
+  const date = new Date(`${iso}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return iso;
+  return date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+function shortDate(iso: string): string {
+  const date = new Date(`${iso}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return iso;
+  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+/** "about 7 in every 10", or "7 or 8" when the score sits between two. */
+function perTen(target: number): string {
+  if (target >= 97) return 'almost every question';
+  if (target < 8) return 'very few questions';
+  const exact = target / 10;
+  const low = Math.floor(exact);
+  const frac = exact - low;
+  if (frac >= 0.3 && frac <= 0.7) return `about ${low} or ${low + 1} in every 10 questions`;
+  return `about ${Math.round(exact)} in every 10 questions`;
+}
+function duration(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  if (hours === 0) return `${rest} min`;
+  return rest ? `${hours} h ${rest} min` : `${hours} h`;
+}
+function daysText(days: number[]): string {
+  const sorted = [...days].sort((a, b) => a - b);
+  if (sorted.length === 7) return 'every day';
+  if (sorted.join() === '1,2,3,4,5') return 'weekdays';
+  if (sorted.join() === '6,7') return 'weekends';
+  const run = sorted.length >= 3 && sorted.every((n, i) => i === 0 || n === sorted[i - 1]! + 1);
+  if (run) return `${DAYS[sorted[0]! - 1]?.short} to ${DAYS[sorted[sorted.length - 1]! - 1]?.short}`;
+  return sorted.map((n) => DAYS[n - 1]?.short).join(', ');
+}
+function listText(names: string[]): string {
+  if (names.length <= 1) return names[0] ?? '';
+  return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+}
+const clampScore = (value: number) => Math.max(1, Math.min(100, Math.round(value)));
+const nf = new Intl.NumberFormat('en-GB');
+
+/* ------------------------------------------------------------------ the page */
+
+export function Onboarding() {
+  usePageTitle('Set up');
+  const student = useStudent();
+  const [finished, setFinished] = useState(false);
+  const load = useLoad(
+    () =>
+      Promise.all([
+        api.catalogue(),
+        api.goals(student.studentId),
+        progressApi.overview(student.studentId).catch(() => null as Overview | null),
+      ]),
+    [student.studentId],
+  );
+
+  let body: ReactNode;
+  if (load.error && !load.data) {
+    body = (
+      <div className="onb-main">
+        <div className="sj-card onb-note">
+          <div className="onb-note-head">
+            <span className="onb-ico" aria-hidden="true">
+              <IconReplay size={18} />
+            </span>
+            <h2 className="sj-display sj-h3">We could not load your setup</h2>
+          </div>
+          <p>{load.error}. Check your connection and try again; nothing is lost.</p>
+          <div className="onb-note-actions">
+            <Button tone="soft" onClick={load.reload}>
+              Try again
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  } else if (!load.data) {
+    body = <OnboardingSkeleton />;
+  } else {
+    const [catalogue, goals, overview] = load.data;
+    body = (
+      <Flow
+        exams={catalogue.filter((exam) => !isHiddenExam(exam))}
+        goals={goals}
+        overview={overview}
+        name={overview?.student.display_name || student.displayName}
+        onFinished={() => setFinished(true)}
+      />
+    );
+  }
+
+  return (
+    <div className="onb">
+      <div className="onb-sky" aria-hidden="true">
+        <span className="a" />
+        <span className="b" />
+      </div>
+      <header className="onb-bar">
+        <div className="onb-wrap onb-bar-in">
+          <Link to="/home" className="onb-brand" aria-label="Stack Prep home">
+            <img src="/brand/mark-96.png" alt="" width={34} height={34} />
+            <span>Stack Prep</span>
+          </Link>
+          {finished ? null : (
+            <Link to="/home" className="onb-skip">
+              Skip for now
+            </Link>
+          )}
+        </div>
+      </header>
+      {body}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ the flow */
+
+type Choice = {
+  examId: string;
+  selected: string[];
+  examDate: string;
+  targets: Record<string, number>;
+  minutes: number;
+  days: number[];
+};
+
+function initialChoice(exams: ExaminationOffer[], goals: GoalRow[]): Choice {
+  const goalFor = new Map(goals.map((goal) => [goal.subject_id, goal]));
+  const examWithGoal = exams.find((exam) => exam.subjects.some((subject) => goalFor.has(subject.subject_id)));
+  const exam = exams.length === 1 ? exams[0] : examWithGoal;
+  const selected = exam ? exam.subjects.filter((s) => s.ready && goalFor.has(s.subject_id)).map((s) => s.subject_id) : [];
+  const known = selected.map((id) => goalFor.get(id)!).filter(Boolean);
+  const dated = known.find((goal) => goal.exam_date);
+  const paced = known.find((goal) => goal.minutes_per_day);
+  const daysed = known.find((goal) => goal.study_days?.length);
+  const targets: Record<string, number> = {};
+  for (const goal of goals) if (goal.target_score != null) targets[goal.subject_id] = clampScore(goal.target_score);
+  return {
+    examId: exam?.examination_id ?? '',
+    selected,
+    examDate: dated?.exam_date?.slice(0, 10) ?? '',
+    targets,
+    minutes: paced?.minutes_per_day ?? 45,
+    days: daysed?.study_days?.length ? [...daysed.study_days].sort((a, b) => a - b) : [1, 2, 3, 4, 5],
+  };
+}
+
+function Flow({
+  exams,
+  goals,
+  overview,
+  name,
+  onFinished,
+}: {
+  exams: ExaminationOffer[];
+  goals: GoalRow[];
+  overview: Overview | null;
+  name: string;
+  onFinished: () => void;
+}) {
+  const student = useStudent();
+  const toast = useToast();
+  const firstName = name.trim().split(/\s+/)[0] || 'there';
+  const returning = goals.some((goal) => goal.target_score != null && goal.exam_date);
+
+  // Development only: `?step=0..3` opens on a step and `?step=4` on the finish, for screenshots.
+  const devStep = import.meta.env.DEV ? Number(new URLSearchParams(window.location.search).get('step') ?? NaN) : NaN;
+  const hasDev = !Number.isNaN(devStep);
+
+  const [choice, setChoice] = useState<Choice>(() => {
+    const start = initialChoice(exams, goals);
+    if (hasDev && devStep >= 2) {
+      const exam = exams.find((e) => e.examination_id === start.examId);
+      if (!start.selected.length && exam) start.selected = exam.subjects.filter((s) => s.ready).map((s) => s.subject_id);
+      if (!start.examDate) start.examDate = monthsFromToday(7);
+    }
+    return start;
+  });
+  const [step, setStep] = useState(hasDev ? Math.max(0, Math.min(3, devStep)) : 0);
+  const [reached, setReached] = useState(returning ? 3 : hasDev ? Math.min(3, Math.max(0, devStep)) : 0);
+  const [direction, setDirection] = useState<1 | -1>(1);
+  const [issue, setIssue] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState<Record<string, GoalRow>>({});
+  const [done, setDone] = useState(hasDev && devStep >= 4);
+  useEffect(() => {
+    if (done) onFinished();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const heading = useRef<HTMLHeadingElement>(null);
+  const firstRender = useRef(true);
+
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    heading.current?.focus({ preventScroll: true });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [step, done]);
+
+  const exam = exams.find((item) => item.examination_id === choice.examId);
+  const subjects = exam?.subjects ?? [];
+  const chosen = subjects.filter((subject) => choice.selected.includes(subject.subject_id));
+  const targetOf = (id: string) => choice.targets[id] ?? DEFAULT_TARGET;
+  const away = daysUntil(choice.examDate);
+  const goalFor = new Map(goals.map((goal) => [goal.subject_id, goal]));
+
+  const update = (patch: Partial<Choice>) => {
+    setIssue(null);
+    setSaved({});
+    setChoice((current) => ({ ...current, ...patch }));
+  };
+
+  const problem = (index: number): string | null => {
+    if (index === 0 && !exam) return 'Pick the exam you are sitting.';
+    if (index === 1 && chosen.length === 0) return 'Pick at least one subject. You can add more later.';
+    if (index === 2) {
+      if (!choice.examDate) return 'Pick the day of your exam. A best guess is fine; you can change it later.';
+      if (away === null || away < 1) return 'Pick an exam day after today.';
+      if (choice.days.length === 0) return 'Pick at least one day you can study.';
+    }
+    return null;
+  };
+
+  const go = (next: number) => {
+    if (next > step) {
+      for (let index = step; index < next; index += 1) {
+        const found = problem(index);
+        if (found) {
+          setDirection(index < step ? -1 : 1);
+          setStep(index);
+          setIssue(found);
+          return;
+        }
+      }
+    }
+    setIssue(null);
+    setDirection(next > step ? 1 : -1);
+    setStep(next);
+    setReached((current) => Math.max(current, next));
+  };
+
+  const save = async () => {
+    for (let index = 0; index < 3; index += 1) {
+      const found = problem(index);
+      if (found) {
+        go(index);
+        setIssue(found);
+        return;
+      }
+    }
+    setSaving(true);
+    setIssue(null);
+    const payload = {
+      exam_date: choice.examDate,
+      minutes_per_day: choice.minutes,
+      study_days: [...choice.days].sort((a, b) => a - b),
+    };
+    // Only the subjects not yet saved: a retry after a half-finished save does not repeat work.
+    const todo = chosen.filter((subject) => !saved[subject.subject_id]);
+    const results = await Promise.allSettled(
+      todo.map((subject) =>
+        api.setGoal(student.studentId, subject.subject_id, { ...payload, target_score: targetOf(subject.subject_id) }),
+      ),
+    );
+    const next = { ...saved };
+    const failed: string[] = [];
+    let reason = '';
+    results.forEach((result, index) => {
+      const subject = todo[index]!;
+      if (result.status === 'fulfilled') next[subject.subject_id] = result.value;
+      else {
+        failed.push(subject.name);
+        reason ||= (result.reason as Error)?.message ?? '';
+      }
+    });
+    setSaved(next);
+    setSaving(false);
+    if (failed.length) {
+      const good = chosen.filter((subject) => next[subject.subject_id]).map((subject) => subject.name);
+      setIssue(
+        `${good.length ? `We saved ${listText(good)}, but not ${listText(failed)} yet.` : 'We could not save your goal just now.'} ${
+          /fetch|network/i.test(reason) ? 'Check your connection and try again.' : 'Try again in a moment.'
+        }`,
+      );
+      return;
+    }
+    toast(chosen.length > 1 ? `Your goals for ${chosen.length} subjects are saved.` : 'Your goal is saved.');
+    setDone(true);
+    onFinished();
+  };
+
+  const onSubmit = (event: FormEvent) => {
+    event.preventDefault();
+    if (step < 3) go(step + 1);
+    else void save();
+  };
+
+  const rail: { value: ReactNode; state: 'done' | 'current' | 'todo' }[] = STEPS.map((_, index) => ({
+    state: done ? 'done' : index === step ? 'current' : index <= reached ? 'done' : 'todo',
+    value: null,
+  }));
+  rail[0]!.value = exam ? exam.short_name : null;
+  rail[1]!.value = chosen.length ? chosen.map((subject) => subject.name).join(', ') : null;
+  rail[2]!.value =
+    choice.examDate && away != null && away > 0 ? (
+      <>
+        {shortDate(choice.examDate)}
+        <br />
+        {choice.minutes} min, {daysText(choice.days)}
+      </>
+    ) : null;
+  rail[3]!.value = done ? 'Saved' : null;
+
+  const StepIcon = STEPS[step]!.icon;
+  const pieces: { title: string; lede: ReactNode }[] = [
+    {
+      title: !returning ? `Welcome, ${firstName}` : exams.length === 1 ? 'Your exam' : 'Which exam are you sitting?',
+      lede:
+        (!returning ? 'Four quick steps and your plan is ready. ' : '') +
+        (exams.length === 1
+          ? `${exams[0]!.short_name} is the exam we prepare you for right now, so we have picked it for you.`
+          : 'First, pick the exam you are preparing for. Its subjects come next.'),
+    },
+    {
+      title: 'Which subjects are you sitting?',
+      lede: 'Pick every one you want to prepare for. You get a check-up and a daily plan for each.',
+    },
+    {
+      title: 'Set your goal',
+      lede: 'One exam day and one study rhythm for all your subjects, and the score you want in each.',
+    },
+    {
+      title: 'Here is your plan',
+      lede: 'Check it over. You can change any of it later.',
+    },
+  ];
+
+  return (
+    <div className="onb-main">
+      <Rail rail={rail} step={step} reached={reached} done={done} firstName={firstName} onGo={go} />
+
+      {done ? (
+        <Finish
+          heading={heading}
+          firstName={firstName}
+          chosen={chosen}
+          saved={saved}
+          examDate={choice.examDate}
+          away={away}
+          minutes={choice.minutes}
+          days={choice.days}
+          overview={overview}
+          targetOf={targetOf}
+        />
+      ) : (
+        <form className="onb-stage sj-rise d1" onSubmit={onSubmit} noValidate>
+          <div className="onb-stagehead">
+            <div className="sj-eyebrow">
+              Step {step + 1} of {STEPS.length}
+            </div>
+            <div className="onb-stagerow">
+              <span className="onb-stageicon" aria-hidden="true">
+                <StepIcon size={18} />
+              </span>
+              <h1 className="sj-display sj-h2 onb-stagetitle" tabIndex={-1} ref={heading}>
+                {pieces[step]!.title}
+              </h1>
+            </div>
+            <p className="onb-lede">{pieces[step]!.lede}</p>
+          </div>
+
+          <div key={step} className={cx('onb-body', direction > 0 ? 'fwd' : 'bwd')}>
+            {step === 0 ? (
+              <>
+                <ExamStep
+                  exams={exams}
+                  examId={choice.examId}
+                  onPick={(examId) => {
+                    if (examId === choice.examId) return;
+                    const next = exams.find((item) => item.examination_id === examId);
+                    const keep = choice.selected.filter((id) => next?.subjects.some((s) => s.subject_id === id));
+                    update({ examId, selected: keep });
+                  }}
+                />
+                <div className="onb-next">
+                  <span className="sj-eyebrow">Then</span>
+                  <Steps
+                    steps={[
+                      { title: 'Your subjects', body: 'Pick the ones you are sitting.' },
+                      { title: 'Your goal', body: 'Your exam day, target score and study days.' },
+                      { title: 'Your first check-up', body: 'A short set of questions that predicts your score today.' },
+                    ]}
+                  />
+                </div>
+              </>
+            ) : null}
+            {step === 1 && exam ? (
+              <SubjectsStep
+                exam={exam}
+                selected={choice.selected}
+                goalFor={goalFor}
+                onToggle={(id) =>
+                  update({
+                    selected: choice.selected.includes(id)
+                      ? choice.selected.filter((item) => item !== id)
+                      : subjects.filter((s) => s.subject_id === id || choice.selected.includes(s.subject_id)).map((s) => s.subject_id),
+                  })
+                }
+                onAll={() => update({ selected: subjects.filter((s) => s.ready).map((s) => s.subject_id) })}
+                invalid={Boolean(issue)}
+              />
+            ) : null}
+            {step === 2 ? (
+              <GoalStep
+                examName={exam?.short_name ?? 'your exam'}
+                chosen={chosen}
+                choice={choice}
+                away={away}
+                targetOf={targetOf}
+                update={update}
+                invalidDate={Boolean(issue) && (!choice.examDate || away === null || away < 1)}
+              />
+            ) : null}
+            {step === 3 && exam ? (
+              <ReviewStep
+                exam={exam}
+                chosen={chosen}
+                choice={choice}
+                away={away}
+                targetOf={targetOf}
+                saved={saved}
+                onEdit={go}
+              />
+            ) : null}
+          </div>
+
+          {issue ? (
+            <p className="onb-issue" role="alert">
+              {issue}
+            </p>
+          ) : null}
+
+          <div className="onb-actions">
+            {step > 0 ? (
+              <Button tone="ghost" onClick={() => go(step - 1)} icon={<IconArrowLeft size={18} />}>
+                Back
+              </Button>
+            ) : (
+              <span className="onb-actions-note sj-small sj-muted">About a minute. You can change it all later.</span>
+            )}
+            {step < 3 ? (
+              <Button type="submit" trailing={<IconArrowRight size={18} />}>
+                Continue
+              </Button>
+            ) : (
+              <Button type="submit" tone="lime" busy={saving} trailing={saving ? undefined : <IconCheck size={18} />}>
+                {saving ? 'Saving…' : issue && Object.keys(saved).length ? 'Try again' : 'Save and continue'}
+              </Button>
+            )}
+          </div>
+        </form>
+      )}
+    </div>
+  );
+
+}
+
+/* ------------------------------------------------------------------ the rail */
+
+function Rail({
+  rail,
+  step,
+  reached,
+  done,
+  firstName,
+  onGo,
+}: {
+  rail: { value: ReactNode; state: 'done' | 'current' | 'todo' }[];
+  step: number;
+  reached: number;
+  done: boolean;
+  firstName: string;
+  onGo: (step: number) => void;
+}) {
+  return (
+    <nav className="onb-rail sj-rise" aria-label="Setup steps">
+      <div className="onb-rail-art" aria-hidden="true">
+        <span className="b1" />
+        <span className="b2" />
+        <span className="b3" />
+      </div>
+      <div className="onb-rail-head">
+        <span className="sj-eyebrow">Setting up · {firstName}</span>
+        <span className="sj-display onb-rail-title">Your plan</span>
+      </div>
+      <ol className="onb-rail-steps" style={{ '--at': done ? STEPS.length : step } as CSSProperties}>
+        {STEPS.map((item, index) => {
+          const Icon = item.icon;
+          const { state, value } = rail[index]!;
+          return (
+            <li key={item.key}>
+              <button
+                type="button"
+                className={cx('onb-railbtn', state)}
+                onClick={() => onGo(index)}
+                disabled={done || (index > reached && index !== step + 1)}
+                aria-current={!done && index === step ? 'step' : undefined}
+              >
+                <span className="onb-railrow">
+                  <span className="onb-raildot" aria-hidden="true">
+                    {state === 'done' ? <IconCheck size={16} /> : <Icon size={16} />}
+                  </span>
+                  <span className="onb-raillabel">
+                    <span className="sj-mono">0{index + 1}</span>
+                    {item.label}
+                  </span>
+                </span>
+                <span className="onb-railvalue">{value ?? (state === 'todo' ? 'Not yet' : index === 3 ? 'Ready when you are' : 'Not picked yet')}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+      <p className="onb-rail-foot">Your goal turns practice into a plan that counts down to exam day.</p>
+    </nav>
+  );
+}
+
+/* ------------------------------------------------------------------ step 1: exam */
+
+function ExamStep({ exams, examId, onPick }: { exams: ExaminationOffer[]; examId: string; onPick: (id: string) => void }) {
+  const name = useId();
+  if (exams.length === 0) {
+    return (
+      <div className="onb-empty">
+        <p>No exams are open yet. Come back soon.</p>
+      </div>
+    );
+  }
+  return (
+    <div className={cx('onb-exams', exams.length === 1 && 'single')} role="radiogroup" aria-label="Exam">
+      {exams.map((exam, index) => {
+        const ready = exam.subjects.filter((subject) => subject.ready).length;
+        const on = exam.examination_id === examId;
+        return (
+          <label key={exam.examination_id} className={cx('onb-opt onb-exam', on && 'on', `sj-rise d${Math.min(index + 1, 4)}`)}>
+            <input
+              className="onb-sr"
+              type="radio"
+              name={name}
+              value={exam.examination_id}
+              checked={on}
+              onChange={() => onPick(exam.examination_id)}
+            />
+            <span className="onb-opt-head">
+              <span className="onb-opt-ico ink" aria-hidden="true">
+                <IconTarget size={18} />
+              </span>
+              <span className="onb-opt-title sj-display">{exam.short_name}</span>
+              <span className="onb-tick round" aria-hidden="true">
+                {on ? <IconCheck size={14} /> : null}
+              </span>
+            </span>
+            <span className="onb-exam-name">{examTitle(exam)}</span>
+            <span className="onb-opt-meta">Set by {exam.exam_body}</span>
+            <span className="onb-exam-facts">
+              <span className="onb-fact">
+                <span className="sj-num">{ready}</span>
+                <span className="sj-eyebrow">{ready === 1 ? 'Subject ready' : 'Subjects ready'}</span>
+              </span>
+              <span className="onb-fact">
+                <span className="sj-num">{nf.format(exam.subjects.reduce((sum, s) => sum + (s.ready ? s.deliverable_questions : 0), 0))}</span>
+                <span className="sj-eyebrow">Past questions</span>
+              </span>
+            </span>
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ step 2: subjects */
+
+function SubjectsStep({
+  exam,
+  selected,
+  goalFor,
+  onToggle,
+  onAll,
+  invalid,
+}: {
+  exam: ExaminationOffer;
+  selected: string[];
+  goalFor: Map<string, GoalRow>;
+  onToggle: (id: string) => void;
+  onAll: () => void;
+  invalid: boolean;
+}) {
+  const ready = exam.subjects.filter((subject) => subject.ready);
+  const isUtme = exam.short_name.toUpperCase() === 'UTME';
+  const allOn = ready.length > 0 && ready.every((subject) => selected.includes(subject.subject_id));
+  return (
+    <div className="onb-subjects">
+      {isUtme ? (
+        <div className="onb-info">
+          <div className="onb-info-head">
+            <span className="onb-ico yellow" aria-hidden="true">
+              <IconBook size={18} />
+            </span>
+            <strong>UTME is four subjects</strong>
+          </div>
+          <p>
+            Everyone sits Use of English, plus three subjects for their course. We list only the subjects we already teach, so
+            pick each one here that you are sitting.
+          </p>
+        </div>
+      ) : null}
+
+      <div className="onb-blockhead">
+        <span className="onb-label" id="onb-subjects-label">
+          {selected.length} of {ready.length} picked
+        </span>
+        {ready.length > 1 ? (
+          <button type="button" className="onb-textbtn" onClick={onAll} disabled={allOn}>
+            {allOn ? 'All picked' : 'Pick all'}
+          </button>
+        ) : null}
+      </div>
+
+      <div className={cx('onb-subgrid', invalid && 'invalid')} role="group" aria-labelledby="onb-subjects-label">
+        {exam.subjects.map((subject, index) => (
+          <SubjectCard
+            key={subject.subject_id}
+            subject={subject}
+            on={selected.includes(subject.subject_id)}
+            goal={goalFor.get(subject.subject_id)}
+            onToggle={() => onToggle(subject.subject_id)}
+            delay={index}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SubjectCard({
+  subject,
+  on,
+  goal,
+  onToggle,
+  delay,
+}: {
+  subject: SubjectOffer;
+  on: boolean;
+  goal: GoalRow | undefined;
+  onToggle: () => void;
+  delay: number;
+}) {
+  const disabled = !subject.ready;
+  return (
+    <label className={cx('onb-opt onb-subject', on && 'on', disabled && 'off', `sj-rise d${Math.min(delay + 1, 4)}`)}>
+      <input className="onb-sr" type="checkbox" checked={on} disabled={disabled} onChange={onToggle} />
+      <span className="onb-opt-head">
+        <span className={cx('onb-opt-ico', on ? 'purple' : 'soft')} aria-hidden="true">
+          {disabled ? <IconLock size={18} /> : <IconBook size={18} />}
+        </span>
+        <span className="onb-opt-title">{subject.name}</span>
+        <span className="onb-tick" aria-hidden="true">
+          {on ? <IconCheck size={14} /> : null}
+        </span>
+      </span>
+      {disabled ? (
+        <span className="onb-opt-meta">{subject.blocked_reason ?? 'Not ready yet. We are still building it.'}</span>
+      ) : (
+        <span className="onb-opt-meta">
+          {nf.format(subject.deliverable_questions)} past questions · {subject.teachable_skills} skills we teach
+        </span>
+      )}
+      {goal?.target_score != null ? (
+        <span className="onb-opt-badge sj-mono">Goal set · {Math.round(goal.target_score)}/100</span>
+      ) : null}
+    </label>
+  );
+}
+
+/* ------------------------------------------------------------------ step 3: goal */
+
+function GoalStep({
+  examName,
+  chosen,
+  choice,
+  away,
+  targetOf,
+  update,
+  invalidDate,
+}: {
+  examName: string;
+  chosen: SubjectOffer[];
+  choice: Choice;
+  away: number | null;
+  targetOf: (id: string) => number;
+  update: (patch: Partial<Choice>) => void;
+  invalidDate: boolean;
+}) {
+  const dateId = useId();
+  const tomorrow = (() => {
+    const date = new Date();
+    date.setDate(date.getDate() + 1);
+    return isoDay(date);
+  })();
+  const quick = [1, 2, 3].map((months) => ({ months, iso: monthsFromToday(months) }));
+  const good = choice.examDate && away != null && away > 0;
+  const isUtme = examName.toUpperCase() === 'UTME';
+  const minuteChips = MINUTE_CHIPS.includes(choice.minutes) ? MINUTE_CHIPS : [...MINUTE_CHIPS, choice.minutes].sort((a, b) => a - b);
+  const sortedDays = [...choice.days].sort((a, b) => a - b).join();
+  const setTarget = (id: string, value: number) => update({ targets: { ...choice.targets, [id]: clampScore(value) } });
+  const toggleDay = (n: number) =>
+    update({ days: choice.days.includes(n) ? choice.days.filter((d) => d !== n) : [...choice.days, n].sort((a, b) => a - b) });
+
+  return (
+    <div className="onb-goal">
+      {/* --- exam day */}
+      <section className="onb-part" aria-labelledby="onb-part-date">
+        <div className="onb-parthead">
+          <span className="sj-mono">A</span>
+          <h2 id="onb-part-date" className="onb-parttitle">
+            Exam day
+          </h2>
+        </div>
+        <div className="onb-dategrid">
+          <input
+            id={dateId}
+            type="date"
+            className="sj-input onb-dateinput"
+            value={choice.examDate}
+            min={tomorrow}
+            onChange={(event) => update({ examDate: event.target.value })}
+            aria-invalid={invalidDate || undefined}
+            aria-labelledby="onb-part-date"
+          />
+          <div className="onb-quick" role="group" aria-label="Quick picks for exam day">
+            {quick.map(({ months, iso }) => (
+              <button
+                key={months}
+                type="button"
+                className="sj-chip"
+                aria-pressed={choice.examDate === iso}
+                onClick={() => update({ examDate: iso })}
+              >
+                In {months} {months === 1 ? 'month' : 'months'}
+              </button>
+            ))}
+          </div>
+        </div>
+        <p className={cx('onb-count', good && 'on')} aria-live="polite">
+          {good ? (
+            <>
+              <b>
+                {away} {away === 1 ? 'day' : 'days'} to go
+              </b>
+              <span>{longDate(choice.examDate)}</span>
+            </>
+          ) : (
+            <>
+              <b>No day yet</b>
+              <span>
+                {isUtme
+                  ? 'UTME usually falls around April or May. Pick your best guess and change it when JAMB confirms your day.'
+                  : 'Pick your best guess. You can change it any time.'}
+              </span>
+            </>
+          )}
+        </p>
+      </section>
+
+      {/* --- targets */}
+      <section className="onb-part" aria-labelledby="onb-part-target">
+        <div className="onb-parthead">
+          <span className="sj-mono">B</span>
+          <h2 id="onb-part-target" className="onb-parttitle">
+            Your target {chosen.length > 1 ? 'in each subject' : 'score'}
+          </h2>
+        </div>
+        <ul className="onb-targets">
+          {chosen.map((subject) => {
+            const value = targetOf(subject.subject_id);
+            return (
+              <li key={subject.subject_id} className="onb-target">
+                <div className="onb-target-top">
+                  <span className="onb-target-text">
+                    <span className="onb-target-name">{subject.name}</span>
+                    <span className="onb-target-note">{perTen(value).replace(/^a/, 'A').replace('in every 10', 'in 10')} right</span>
+                  </span>
+                  <output className="onb-target-num" aria-live="polite">
+                    <span className="sj-num">{value}</span>
+                    <span className="sj-mono">/100</span>
+                  </output>
+                </div>
+                <div className="onb-target-control">
+                  <button
+                    type="button"
+                    className="onb-nudge"
+                    onClick={() => setTarget(subject.subject_id, value - 5)}
+                    disabled={value <= 1}
+                    aria-label={`Five less for ${subject.name}`}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M5 12h14" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+                    </svg>
+                  </button>
+                  <input
+                    type="range"
+                    min={1}
+                    max={100}
+                    step={1}
+                    value={value}
+                    onChange={(event) => setTarget(subject.subject_id, Number(event.target.value))}
+                    className="onb-range"
+                    style={{ '--pct': `${((value - 1) / 99) * 100}%` } as CSSProperties}
+                    aria-label={`Target score in ${subject.name}, out of 100`}
+                    aria-valuetext={`${value} out of 100`}
+                  />
+                  <button
+                    type="button"
+                    className="onb-nudge"
+                    onClick={() => setTarget(subject.subject_id, value + 5)}
+                    disabled={value >= 100}
+                    aria-label={`Five more for ${subject.name}`}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M5 12h14M12 5v14" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+                    </svg>
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      {/* --- rhythm */}
+      <section className="onb-part" aria-labelledby="onb-part-rhythm">
+        <div className="onb-parthead">
+          <span className="sj-mono">C</span>
+          <h2 id="onb-part-rhythm" className="onb-parttitle">
+            Your study rhythm
+          </h2>
+        </div>
+        <div className="onb-block">
+          <span className="onb-label" id="onb-minutes-label">
+            On a study day, you can give
+          </span>
+          <div className="onb-minutes" role="group" aria-labelledby="onb-minutes-label">
+            {minuteChips.map((value) => (
+              <button
+                key={value}
+                type="button"
+                className="sj-chip"
+                aria-pressed={choice.minutes === value}
+                onClick={() => update({ minutes: value })}
+              >
+                {value} min
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="onb-block">
+          <div className="onb-blockhead">
+            <span className="onb-label" id="onb-days-label">
+              On these days
+            </span>
+            <span className="onb-quickdays">
+              <button type="button" className={cx('onb-textbtn', sortedDays === '1,2,3,4,5' && 'on')} onClick={() => update({ days: [1, 2, 3, 4, 5] })}>
+                Weekdays
+              </button>
+              <button
+                type="button"
+                className={cx('onb-textbtn', choice.days.length === 7 && 'on')}
+                onClick={() => update({ days: [1, 2, 3, 4, 5, 6, 7] })}
+              >
+                Every day
+              </button>
+            </span>
+          </div>
+          <div className="onb-days" role="group" aria-labelledby="onb-days-label">
+            {DAYS.map((day) => {
+              const on = choice.days.includes(day.n);
+              return (
+                <button
+                  key={day.n}
+                  type="button"
+                  className={cx('onb-day', on && 'on')}
+                  aria-pressed={on}
+                  aria-label={day.long}
+                  onClick={() => toggleDay(day.n)}
+                >
+                  {day.short}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <p className="onb-weekly" aria-live="polite">
+          {choice.days.length ? (
+            <>
+              That is <b>{duration(choice.minutes * choice.days.length)}</b> a week, over {choice.days.length}{' '}
+              {choice.days.length === 1 ? 'day' : 'days'}.
+            </>
+          ) : (
+            'Pick at least one day.'
+          )}
+        </p>
+      </section>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ step 4: review */
+
+function ReviewStep({
+  exam,
+  chosen,
+  choice,
+  away,
+  targetOf,
+  saved,
+  onEdit,
+}: {
+  exam: ExaminationOffer;
+  chosen: SubjectOffer[];
+  choice: Choice;
+  away: number | null;
+  targetOf: (id: string) => number;
+  saved: Record<string, GoalRow>;
+  onEdit: (step: number) => void;
+}) {
+  const rows: { step: number; tone: string; icon: typeof IconTarget; label: string; body: ReactNode }[] = [
+    {
+      step: 0,
+      tone: 'ink',
+      icon: IconTarget,
+      label: 'Exam',
+      body: (
+        <>
+          <strong>{exam.short_name}</strong>
+          <span className="onb-sumnote">{examTitle(exam)}</span>
+        </>
+      ),
+    },
+    {
+      step: 1,
+      tone: 'purple',
+      icon: IconBook,
+      label: chosen.length === 1 ? 'Subject and target' : 'Subjects and targets',
+      body: (
+        <ul className="onb-sumsubjects">
+          {chosen.map((subject) => (
+            <li key={subject.subject_id}>
+              <span className="onb-sumsubject">
+                {saved[subject.subject_id] ? <IconCheck size={14} aria-hidden="true" /> : null}
+                {subject.name}
+              </span>
+              <span className="onb-sumtarget">
+                <span className="sj-num">{targetOf(subject.subject_id)}</span>
+                <span className="sj-mono">/100</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      ),
+    },
+    {
+      step: 2,
+      tone: 'yellow',
+      icon: IconCalendar,
+      label: 'Exam day',
+      body: (
+        <>
+          <strong>{longDate(choice.examDate)}</strong>
+          {away != null && away > 0 ? (
+            <span className="onb-sumnote">
+              {away} {away === 1 ? 'day' : 'days'} from today
+            </span>
+          ) : null}
+        </>
+      ),
+    },
+    {
+      step: 2,
+      tone: 'lime',
+      icon: IconClock,
+      label: 'Study rhythm',
+      body: (
+        <>
+          <strong>
+            {choice.minutes} min, {daysText(choice.days)}
+          </strong>
+          <span className="onb-sumnote">{duration(choice.minutes * choice.days.length)} a week</span>
+        </>
+      ),
+    },
+  ];
+  return (
+    <ul className="onb-summary">
+      {rows.map(({ step, tone, icon: Icon, label, body }) => (
+        <li key={label} className="onb-sumrow">
+          <span className="onb-sumhead">
+            <span className={cx('onb-ico', tone)} aria-hidden="true">
+              <Icon size={18} />
+            </span>
+            <span className="sj-eyebrow">{label}</span>
+            <button type="button" className="onb-textbtn" onClick={() => onEdit(step)} aria-label={`Change ${label.toLowerCase()}`}>
+              Change
+            </button>
+          </span>
+          {body}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/* ------------------------------------------------------------------ finish */
+
+function Finish({
+  heading,
+  firstName,
+  chosen,
+  saved,
+  examDate,
+  away,
+  minutes,
+  days,
+  overview,
+  targetOf,
+}: {
+  heading: RefObject<HTMLHeadingElement>;
+  firstName: string;
+  chosen: SubjectOffer[];
+  saved: Record<string, GoalRow>;
+  examDate: string;
+  away: number | null;
+  minutes: number;
+  days: number[];
+  overview: Overview | null;
+  targetOf: (id: string) => number;
+}) {
+  const student = useStudent();
+  const navigate = useNavigate();
+  const info = (id: string) => overview?.subjects.find((subject) => subject.subject_id === id);
+  // A check-up is due in every chosen subject that has not had a finished one.
+  const due = chosen.filter((subject) => !info(subject.subject_id)?.latest_checkup);
+  const [pick, setPick] = useState(due[0]?.subject_id ?? '');
+  const [starting, setStarting] = useState(false);
+  const [issue, setIssue] = useState<string | null>(null);
+  const picked = due.find((subject) => subject.subject_id === pick) ?? due[0];
+  const open = picked ? info(picked.subject_id)?.open_checkup_session_id ?? null : null;
+  const sessions = chosen.map((subject) => saved[subject.subject_id]?.sessions_before_exam).find((n) => n != null) ?? null;
+
+  const start = async () => {
+    if (!picked) return;
+    if (open) {
+      navigate(`/checkup/${open}`);
+      return;
+    }
+    setStarting(true);
+    setIssue(null);
+    try {
+      const state = await api.start(student.studentId, picked.subject_id);
+      navigate(`/checkup/${state.session_id}`);
+    } catch (error) {
+      setIssue(`We could not start your check-up just now: ${(error as Error).message || 'try again'}.`);
+      setStarting(false);
+    }
+  };
+
+  const names = listText(chosen.map((subject) => subject.name));
+  return (
+    <section className="onb-stage onb-done sj-rise d1" aria-labelledby="onb-done-title">
+      <div className="onb-stagehead">
+        <div className="sj-eyebrow">All set</div>
+        <div className="onb-stagerow">
+          <span className="onb-stageicon lime" aria-hidden="true">
+            <IconCheck size={18} />
+          </span>
+          <h1 id="onb-done-title" className="sj-display sj-h2 onb-stagetitle" tabIndex={-1} ref={heading}>
+            You're set up, {firstName}
+          </h1>
+        </div>
+        <p className="onb-lede">
+          Your {chosen.length > 1 ? 'goals are' : 'goal is'} saved for {names}.{' '}
+          {picked ? (
+            <>
+              Next, a short <span className="onb-nowrap">check-up</span> finds where you stand, so your practice starts at the right step.
+            </>
+          ) : (
+            "Your dashboard has today's practice ready."
+          )}
+        </p>
+      </div>
+
+      <div className="onb-facts">
+        <div className="onb-factcard sj-rise d1">
+          <span className="sj-eyebrow">Days to exam</span>
+          <span className="sj-num">{away != null && away > 0 ? <CountUp value={away} /> : '–'}</span>
+          <span className="onb-factnote">{examDate ? `On ${shortDate(examDate)}` : 'Pick a day'}</span>
+        </div>
+        <div className="onb-factcard sj-rise d2">
+          <span className="sj-eyebrow">{chosen.length === 1 ? 'Target' : 'Subjects'}</span>
+          <span className="sj-num">
+            <CountUp value={chosen.length === 1 ? targetOf(chosen[0]!.subject_id) : chosen.length} />
+          </span>
+          <span className="onb-factnote">
+            {chosen.length === 1 ? `Out of 100 in ${chosen[0]!.name}` : names}
+          </span>
+        </div>
+        <div className="onb-factcard sj-rise d3">
+          <span className="sj-eyebrow">{sessions != null ? 'Study sessions' : 'Study days a week'}</span>
+          <span className="sj-num">{sessions != null ? <CountUp value={sessions} /> : <CountUp value={days.length} />}</span>
+          <span className="onb-factnote">
+            {sessions != null ? `${minutes} minutes, ${daysText(days)}, before your exam` : `${minutes} minutes each, ${daysText(days)}`}
+          </span>
+        </div>
+      </div>
+
+      {picked && due.length > 1 ? (
+        <div className="onb-block">
+          <span className="onb-label" id="onb-first-label">
+            Start your check-ups with
+          </span>
+          <div className="onb-firstpick" role="group" aria-labelledby="onb-first-label">
+            {due.map((subject) => (
+              <button
+                key={subject.subject_id}
+                type="button"
+                className="sj-chip"
+                aria-pressed={picked.subject_id === subject.subject_id}
+                onClick={() => setPick(subject.subject_id)}
+              >
+                {subject.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {issue ? (
+        <p className="onb-issue" role="alert">
+          {issue}
+        </p>
+      ) : null}
+
+      <div className="onb-actions onb-done-actions">
+        {picked ? (
+          <>
+            <Button size="lg" tone="ghost" to="/home">
+              Go to my dashboard
+            </Button>
+            <Button size="lg" tone="lime" busy={starting} onClick={() => void start()} trailing={starting ? undefined : <IconArrowRight size={18} />}>
+              {open ? 'Continue my check-up' : 'Take my first check-up'}
+            </Button>
+          </>
+        ) : (
+          <>
+            <span />
+            <Button size="lg" tone="lime" to="/home" trailing={<IconArrowRight size={18} />}>
+              Go to my dashboard
+            </Button>
+          </>
+        )}
+      </div>
+      {picked ? (
+        <p className="onb-done-note sj-small sj-muted">
+          The {picked.name} check-up has no pass or fail. Stop any time; it saves as you go.
+        </p>
+      ) : null}
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ loading */
+
+function OnboardingSkeleton() {
+  return (
+    <div className="onb-main" aria-busy="true" aria-label="Loading your setup">
+      <div className="onb-rail onb-rail-skel">
+        <Skeleton height={12} width={120} />
+        <Skeleton height={28} width="60%" />
+        {[0, 1, 2, 3].map((key) => (
+          <Skeleton key={key} height={52} radius={10} />
+        ))}
+      </div>
+      <div className="onb-stage">
+        <Skeleton height={12} width={90} />
+        <Skeleton height={34} width="60%" radius={8} />
+        <Skeleton height={16} width="80%" />
+        <Skeleton height={180} radius={14} />
+      </div>
+    </div>
+  );
+}
