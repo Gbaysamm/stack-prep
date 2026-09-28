@@ -57,30 +57,52 @@ echo "==> Loading re-transcribed content"
 # Only when there is something to load, and only after a backup: once the bank matches the
 # transcriptions this is one quick check. A failure here is reported, not fatal -- the load
 # is one transaction, so a failed one has changed nothing, and the release still goes out.
+#
+# Mathematics first, then Use of English. One backup covers both, taken only if either has
+# work; each loads only if it has work, and one failing does not stop the other.
+# English also repairs mojibake (a curly quote stored as three garbled characters) in any
+# English text its files do not cover.
 CONTENT_REVIEWER="${CONTENT_REVIEWER:-Abdulmalik}"
+CONTENT_LOADERS=("load_retranscribed_maths.py" "load_retranscribed_english.py --fix-encoding")
 DB_URL=$(grep '^DATABASE_URL=' .env | cut -d= -f2- | sed 's/+asyncpg//')
+load_content() {
+  local script=$1
+  shift
+  DATABASE_URL="$DB_URL" uv run --frozen python "database/$script" "$@" < /dev/null
+}
+due=()
 set +e
-DATABASE_URL="$DB_URL" uv run --frozen python database/load_retranscribed_maths.py --pending \
-  > /dev/null < /dev/null
-pending=$?
+for loader in "${CONTENT_LOADERS[@]}"; do
+  # shellcheck disable=SC2086  # the loader's flags are meant to split
+  load_content $loader --pending > /dev/null
+  pending=$?
+  if [ "$pending" = 10 ]; then
+    due+=("$loader")
+  elif [ "$pending" != 0 ]; then
+    echo "::warning::Could not check ${loader%% *} (exit $pending)."
+  fi
+done
 set -e
-if [ "$pending" = 10 ]; then
+if [ "${#due[@]}" -gt 0 ]; then
   mkdir -p "$ROOT/backups"
   backup="$ROOT/backups/before-content-$(date +%F-%H%M%S).sql.gz"
   if ! command -v pg_dump > /dev/null; then
     echo "::warning::Content not loaded: no pg_dump on PATH to take a backup first."
   elif ! pg_dump "$DB_URL" | gzip > "$backup"; then
     echo "::warning::Content not loaded: the backup failed."
-  elif ! DATABASE_URL="$DB_URL" uv run --frozen python database/load_retranscribed_maths.py \
-         --reviewer-name "$CONTENT_REVIEWER" --apply < /dev/null; then
-    echo "::warning::Loading the re-transcribed content failed; nothing was changed."
   else
-    echo "    loaded, approved by $CONTENT_REVIEWER; backup at $backup"
+    for loader in "${due[@]}"; do
+      # shellcheck disable=SC2086
+      if ! load_content $loader --reviewer-name "$CONTENT_REVIEWER" --apply; then
+        echo "::warning::${loader%% *} failed; nothing it would have loaded was changed."
+      else
+        echo "    ${loader%% *}: loaded, approved by $CONTENT_REVIEWER"
+      fi
+    done
+    echo "    backup at $backup"
   fi
-elif [ "$pending" = 0 ]; then
-  echo "    already up to date"
 else
-  echo "::warning::Could not check the re-transcribed content (exit $pending)."
+  echo "    already up to date"
 fi
 
 echo "==> Building the web client"

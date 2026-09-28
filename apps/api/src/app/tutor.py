@@ -1414,6 +1414,8 @@ def for_the_voice(line: str) -> str:
     spoken = speak_text(line)
     spoken = spoken.replace("<", " is less than ").replace(">", " is greater than ")
     spoken = re.sub(r"[${}\\^]", " ", spoken)
+    # English items mark the tested word as *word*; the voice says the word, not the stars.
+    spoken = spoken.replace("*", "")
     return re.sub(r"\s{2,}", " ", spoken).strip()
 
 

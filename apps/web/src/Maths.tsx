@@ -88,13 +88,41 @@ function FitToWidth({ html, display }: { html: string; display: boolean }) {
   );
 }
 
+/** `*word*` in English items: the word the question is about, underlined on the paper. */
+const TARGET = /\*([^*\n]+)\*/g;
+
+/**
+ * Prose around the mathematics. Blank lines are paragraph breaks (a passage keeps its
+ * paragraphs), and `*word*` is the tested word, shown the way the paper shows it. Plain React
+ * text throughout: nothing here becomes HTML.
+ */
+function prose(text: string, key: string): ReactNode[] {
+  const out: ReactNode[] = [];
+  text.split(/\n\s*\n/).forEach((paragraph, p) => {
+    if (p > 0) out.push(<span key={`${key}-br${p}`} className="sp-para-break" aria-hidden="true" />);
+    let at = 0;
+    for (const hit of paragraph.matchAll(TARGET)) {
+      const from = hit.index ?? 0;
+      if (from > at) out.push(paragraph.slice(at, from));
+      out.push(
+        <em key={`${key}-t${p}-${from}`} className="sp-target">
+          {hit[1]}
+        </em>,
+      );
+      at = from + hit[0].length;
+    }
+    if (at < paragraph.length) out.push(paragraph.slice(at));
+  });
+  return out;
+}
+
 export function Maths({ text }: { text: string }) {
   const parts: ReactNode[] = [];
   let cursor = 0;
 
   for (const match of text.matchAll(SEGMENT)) {
     const start = match.index ?? 0;
-    if (start > cursor) parts.push(text.slice(cursor, start));
+    if (start > cursor) parts.push(...prose(text.slice(cursor, start), `p${cursor}`));
 
     const display = match[1] !== undefined;
     const html = typeset((match[1] ?? match[2] ?? '').trim(), display);
@@ -116,6 +144,6 @@ export function Maths({ text }: { text: string }) {
     cursor = start + match[0].length;
   }
 
-  if (cursor < text.length) parts.push(text.slice(cursor));
+  if (cursor < text.length) parts.push(...prose(text.slice(cursor), `p${cursor}`));
   return <>{parts}</>;
 }

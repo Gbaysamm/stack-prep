@@ -73,29 +73,50 @@ echo "==> Loading re-transcribed content"
 # a person's decision, recorded on every row -- only when there is something to load, and
 # only after a backup. A failure is reported, not fatal: the load is one transaction, so a
 # failed one has changed nothing, and the release still goes out.
+#
+# Mathematics first, then Use of English. One backup covers both, taken only if either has
+# work; each loads only if it has work, and one failing does not stop the other.
+# English also repairs mojibake (a curly quote stored as three garbled characters) in any
+# English text its files do not cover.
 CONTENT_REVIEWER="${CONTENT_REVIEWER:-Abdulmalik}"
+CONTENT_LOADERS=("load_retranscribed_maths.py" "load_retranscribed_english.py --fix-encoding")
 load_content() {
+  local script=$1
+  shift
   compose run --rm --no-deps -T -v "$APP:/repo:ro" -w /repo -e PYTHONDONTWRITEBYTECODE=1 \
-    api python database/load_retranscribed_maths.py "$@" < /dev/null
+    api python "database/$script" "$@" < /dev/null
 }
+due=()
 set +e
-load_content --pending > /dev/null
-pending=$?
+for loader in "${CONTENT_LOADERS[@]}"; do
+  # shellcheck disable=SC2086  # the loader's flags are meant to split
+  load_content $loader --pending > /dev/null
+  pending=$?
+  if [ "$pending" = 10 ]; then
+    due+=("$loader")
+  elif [ "$pending" != 0 ]; then
+    echo "::warning::Could not check ${loader%% *} (exit $pending)."
+  fi
+done
 set -e
-if [ "$pending" = 10 ]; then
+if [ "${#due[@]}" -gt 0 ]; then
   mkdir -p "$ROOT/backups"
   backup="$ROOT/backups/before-content-$(date +%F-%H%M%S).sql.gz"
   if ! compose exec -T postgres pg_dump -U scorepilot scorepilot < /dev/null | gzip > "$backup"; then
     echo "::warning::Content not loaded: the backup failed."
-  elif ! load_content --reviewer-name "$CONTENT_REVIEWER" --apply; then
-    echo "::warning::Loading the re-transcribed content failed; nothing was changed."
   else
-    echo "    loaded, approved by $CONTENT_REVIEWER; backup at $backup"
+    for loader in "${due[@]}"; do
+      # shellcheck disable=SC2086
+      if ! load_content $loader --reviewer-name "$CONTENT_REVIEWER" --apply; then
+        echo "::warning::${loader%% *} failed; nothing it would have loaded was changed."
+      else
+        echo "    ${loader%% *}: loaded, approved by $CONTENT_REVIEWER"
+      fi
+    done
+    echo "    backup at $backup"
   fi
-elif [ "$pending" = 0 ]; then
-  echo "    already up to date"
 else
-  echo "::warning::Could not check the re-transcribed content (exit $pending)."
+  echo "    already up to date"
 fi
 
 echo "==> Starting API and worker"
