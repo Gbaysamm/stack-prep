@@ -147,6 +147,9 @@ interface Beat {
  */
 const VOICES_AHEAD = 3;
 
+/** How long a line's second try may take before that line is read along without its voice. */
+const RETRY_WAIT_MS = 10000;
+
 /**
  * How long a board line takes to be written.
  *
@@ -666,13 +669,19 @@ export function Board({
   const [voicing, setVoicing] = useState(false);
   const clips = useRef(new Map<number, HTMLAudioElement>());
   const narrating = useRef<number | null>(null);
+  //: Beats whose voice could not be had even after a second try: read along for those alone.
+  const failedBeats = useRef(new Set<number>());
+  //: Voice failures in a row. One slow line is not a broken voice; three in a row are.
+  const misses = useRef(0);
   const clipFor = useCallback(
-    (index: number): HTMLAudioElement | null => {
+    (index: number, fresh = false): HTMLAudioElement | null => {
       const url = lines[index]?.voice;
       if (!url) return null;
       let clip = clips.current.get(index);
-      if (!clip) {
-        clip = new Audio(url);
+      if (!clip || fresh) {
+        clip?.pause();
+        // A second try asks again rather than replaying the browser's cached failure.
+        clip = new Audio(fresh ? `${url}${url.includes("?") ? "&" : "?"}try=${Date.now()}` : url);
         clip.preload = "auto";
         clips.current.set(index, clip);
       }
@@ -680,9 +689,18 @@ export function Board({
     },
     [lines],
   );
+  // Only the beat being said and the next two are fetched. Asking for every beat at once made
+  // the server voice a dozen lines together, and the slowest of them timed out.
   useEffect(() => {
-    lines.forEach((_, index) => clipFor(index));
-  }, [clipFor, lines]);
+    for (let index = Math.max(0, shown - 1); index < Math.min(lines.length, shown + 2); index += 1) {
+      clipFor(index);
+    }
+  }, [clipFor, lines, shown]);
+  const missed = (index: number) => {
+    failedBeats.current.add(index);
+    misses.current += 1;
+    if (misses.current >= 3) setSilent(true);
+  };
 
   useEffect(() => {
     if (paused || preparing || needsTap) return;
@@ -707,19 +725,22 @@ export function Board({
           1200,
         );
         timers.push(slow);
-        void whenReady(next, VOICE_WAIT_MS).then((ready) => {
-          window.clearTimeout(slow);
-          if (cancelled) return;
-          setGettingReady(false);
-          // One line's voice not coming means the rest are not either: the server makes
-          // them all the same way. Read along from here instead of waiting at every line.
-          if (!ready) setSilent(true);
-          advance();
-        });
+        const beat = shown;
+        void whenReady(next, VOICE_WAIT_MS)
+          .then((ready) =>
+            ready || cancelled ? ready : whenReady(clipFor(beat, true), RETRY_WAIT_MS),
+          )
+          .then((ready) => {
+            window.clearTimeout(slow);
+            if (cancelled) return;
+            setGettingReady(false);
+            // This beat alone is read along; the voice is tried again on the next one.
+            if (!ready) missed(beat);
+            advance();
+          });
       }, delay);
     // The voice has failed: the line goes up and stays long enough to be read.
     const readAlong = (entry: Entry | undefined, at: number) => {
-      setSilent(true);
       setQuestionUp(true);
       setItemsShown(entry?.items.length ?? 0);
       later(() => setPointing(at), MARK_LEAD_MS);
@@ -737,7 +758,7 @@ export function Board({
     const index = shown - 1;
     const entry = lines[index];
     const clip = clipFor(index);
-    if (entry && clip !== null && (silent || clip.error)) {
+    if (entry && clip !== null && (silent || clip.error || failedBeats.current.has(index))) {
       readAlong(entry, index);
       return stop;
     }
@@ -796,6 +817,7 @@ export function Board({
     };
     clip.onerror = () => {
       if (cancelled) return;
+      missed(index);
       readAlong(entry, index);
     };
     clip
@@ -804,6 +826,7 @@ export function Board({
         if (cancelled) return;
         setVoiceBlocked(false);
         setVoicing(true);
+        misses.current = 0;
         pace();
         const analyser = listen(clip);
         if (analyser) follow(analyser);
@@ -816,7 +839,7 @@ export function Board({
           setNeedsTap(true);
           return;
         }
-        setVoiceBlocked(true);
+        missed(index);
         readAlong(entry, index);
       });
     return () => {

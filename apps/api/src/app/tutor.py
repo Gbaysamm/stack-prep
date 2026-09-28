@@ -1478,8 +1478,9 @@ async def speak(
     can run longer than one sentence of the coach's.
 
     `patient` is for the background voicing of whole lessons: nobody is waiting, so a busy
-    service is waited out (the SDK backs off as the service asks). A student's line is tried
-    once, because every retry is dead air on the board.
+    service is waited out (the SDK backs off as the service asks). A student's line gets one
+    quick retry: a single hiccup should not cost a line its voice, but more retries are dead
+    air on the board.
     """
     global _speech_rests_until
     line = for_the_voice(line)
@@ -1498,7 +1499,7 @@ async def speak(
     client = AsyncOpenAI(
         api_key=settings.openai_api_key,
         timeout=CALL_TIMEOUT_SECONDS if not patient else 60.0,
-        max_retries=6 if patient else 0,
+        max_retries=6 if patient else 1,
     )
     try:
         spoken = await client.audio.speech.create(
