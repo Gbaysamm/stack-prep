@@ -950,3 +950,33 @@
     display: none;
   }
 }
+
+/* Before the board, on a laptop: the slate and the explanation side by side need room, so the
+   column widens for this card only, the two halves share it evenly, and the question on the
+   slate is shown in full rather than cut off. */
+@media (min-width: 861px) {
+  .sj .pr-col:has(.pr-explain) {
+    max-width: 1120px;
+  }
+  .sj .pr-explain {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .sj .pr-slate {
+    padding: 32px 34px 48px;
+  }
+  .sj .pr-slate-q {
+    font-size: 18px;
+    -webkit-line-clamp: 12;
+  }
+  .sj .pr-explain-body {
+    padding: 36px 40px;
+  }
+}
+
+/* The room fills the window, so its tinted paper never stops short of the bottom edge. */
+.sj .pr-main {
+  flex: 1 0 auto;
+}
+.sj .sj-focus:has(.pr-main) {
+  background: var(--paper);
+}
