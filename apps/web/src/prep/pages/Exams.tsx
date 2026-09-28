@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import { api, type ExaminationOffer, type Goal } from '../../student/api.js';
 import { IconArrowRight, IconBook, IconCheck, IconReplay } from '../icons.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
-import { Badge, Button, PageHero, Skeleton, Steps, Track, cx } from '../ui.js';
+import { Button, PageHero, Skeleton, Steps, cx } from '../ui.js';
 import './Exams.css';
 
 /** The sandbox: a demo set from the early days. Kept out of the student app. */
@@ -26,6 +26,102 @@ export function orderExams(exams: ExaminationOffer[]): ExaminationOffer[] {
 /** "Unified Tertiary Matriculation Examination (UTME)" reads better without the repeat. */
 export const examTitle = (exam: ExaminationOffer) =>
   exam.name.replace(new RegExp(`\\s*\\(${exam.short_name}\\)\\s*$`, 'i'), '').trim() || exam.name;
+
+/** How many chips a card shows before "+N more": enough to recognise the exam, never a wall. */
+const CHIPS = 6;
+
+/**
+ * One exam. Top: who sets it, its name, and the one way in. Bottom: the student's own subjects
+ * against the exam's limit ("2 of 4 subjects chosen", one cell per place), then the subjects
+ * themselves, chosen ones first.
+ */
+function ExamCard({
+  exam,
+  chosen,
+  index,
+  solo,
+  featured,
+}: {
+  exam: ExaminationOffer;
+  chosen: Set<string>;
+  index: number;
+  solo: boolean;
+  featured: boolean;
+}) {
+  const mine = exam.subjects.filter((subject) => chosen.has(subject.subject_id));
+  const others = exam.subjects.filter((subject) => !chosen.has(subject.subject_id));
+  const ready = exam.subjects.filter((subject) => subject.ready).length;
+  const max = exam.max_subjects;
+  const compulsory = exam.subjects.filter((subject) => subject.compulsory).map((subject) => subject.name);
+  const shown = [...mine, ...others].slice(0, Math.max(CHIPS, mine.length));
+  const hidden = exam.subjects.length - shown.length;
+
+  const count =
+    max !== null ? (
+      <>
+        <b className="sj-num">{mine.length}</b> of {max} subjects chosen
+      </>
+    ) : (
+      <>
+        <b className="sj-num">{mine.length}</b> {mine.length === 1 ? 'subject' : 'subjects'} chosen
+      </>
+    );
+  const rule = [
+    max !== null ? `You sit up to ${max}` : `${exam.subjects.length} on offer`,
+    compulsory.length > 0 ? `${compulsory.join(' and ')} ${compulsory.length === 1 ? 'is' : 'are'} compulsory` : null,
+    ready < exam.subjects.length ? `${ready} of ${exam.subjects.length} ready to study` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+  return (
+    <Link
+      to={`/exams/${exam.examination_id}`}
+      className={cx('ex-card sj-rise', `d${Math.min(index + 1, 4)}`, solo && 'solo', featured && 'featured')}
+      aria-label={`${exam.short_name}: ${examTitle(exam)}. ${mine.length}${max !== null ? ` of ${max}` : ''} subjects chosen.`}
+    >
+      <div className="ex-id">
+        <p className="ex-body">Set by {bodyShort(exam.exam_body)}</p>
+        <h3 className="sj-display ex-short">{exam.short_name}</h3>
+        <p className="ex-name">{examTitle(exam)}</p>
+      </div>
+      <span className={cx('sj-btn ex-cta', mine.length > 0 ? 'soft' : 'primary')}>
+        {mine.length > 0 ? 'Change subjects' : ready > 0 ? 'Choose subjects' : 'See subjects'}
+        <span className="arrow">
+          <IconArrowRight size={18} />
+        </span>
+      </span>
+
+      <div className="ex-foot">
+        <div className="ex-count">
+          <span className="ex-count-line">{count}</span>
+          {max !== null ? (
+            <span className="ex-places" aria-hidden="true">
+              {Array.from({ length: max }, (_, i) => (
+                <i key={i} className={cx(i < mine.length && 'on')} />
+              ))}
+            </span>
+          ) : null}
+        </div>
+        {rule ? <p className="ex-rule">{rule}</p> : null}
+        {shown.length > 0 ? (
+          <ul className="ex-subjects" aria-label="Subjects">
+            {shown.map((subject) => (
+              <li
+                key={subject.subject_id}
+                className={cx(chosen.has(subject.subject_id) && 'mine', !subject.ready && 'off')}
+              >
+                {chosen.has(subject.subject_id) ? <IconCheck size={13} /> : null}
+                {subject.name}
+              </li>
+            ))}
+            {hidden > 0 ? <li className="more">+{hidden} more</li> : null}
+          </ul>
+        ) : null}
+      </div>
+    </Link>
+  );
+}
 
 const HOW = [
   { title: 'Choose your exam', body: 'The exam you are sitting. Its subjects come next.' },
@@ -123,16 +219,14 @@ export function Exams() {
         ) : !load.data ? (
           <div className="ex-grid solo" aria-busy="true" aria-label="Loading exams">
             <div className="ex-card solo ex-skel">
-              <div className="ex-head">
-                <Skeleton height={34} width={34} radius={10} />
-                <Skeleton height={30} width="30%" />
+              <div className="ex-id">
+                <Skeleton height={12} width={90} />
+                <Skeleton height={34} width="30%" />
+                <Skeleton height={16} width="60%" />
               </div>
-              <Skeleton height={16} width="70%" />
-              <Skeleton height={12} width="45%" />
               <div className="ex-foot">
-                <Skeleton height={20} width="60%" />
-                <Skeleton height={5} />
-                <Skeleton height={18} width={140} />
+                <Skeleton height={20} width="40%" />
+                <Skeleton height={28} width="70%" />
               </div>
             </div>
           </div>
@@ -142,62 +236,16 @@ export function Exams() {
           </ExNote>
         ) : (
           <div className={cx('ex-grid', solo && 'solo')}>
-            {exams.map((exam, index) => {
-              const total = exam.subjects.length;
-              const ready = exam.subjects.filter((subject) => subject.ready).length;
-              const goalsHere = goalsIn(exam);
-              return (
-                <Link
-                  key={exam.examination_id}
-                  to={`/exams/${exam.examination_id}`}
-                  className={cx(
-                    'ex-card sj-rise',
-                    `d${Math.min(index + 1, 4)}`,
-                    solo && 'solo',
-                    exam.examination_id === featured && 'featured',
-                  )}
-                  aria-label={`${exam.short_name}: ${examTitle(exam)}. ${ready} of ${total} subjects ready.`}
-                >
-                  <p className="ex-body">Set by {bodyShort(exam.exam_body)}</p>
-                  <div className="ex-head">
-                    <h3 className="sj-display ex-short">{exam.short_name}</h3>
-                    {goalsHere > 0 ? (
-                      <Badge tone="dark" dot className="ex-badge">
-                        {goalsHere} {goalsHere === 1 ? 'goal' : 'goals'} set
-                      </Badge>
-                    ) : null}
-                  </div>
-                  <p className="ex-name">{examTitle(exam)}</p>
-
-                  <div className="ex-foot">
-                    <div className="ex-stats">
-                      <span>
-                        <b className="sj-num">{total}</b> {total === 1 ? 'subject' : 'subjects'}
-                      </span>
-                      <span className="ex-dot" aria-hidden="true" />
-                      <span>
-                        <b className="sj-num">{ready}</b> ready to study
-                      </span>
-                    </div>
-                    <Track value={ready} max={Math.max(total, 1)} thin onDark label={`${ready} of ${total} subjects ready`} />
-                    {total > 0 ? (
-                      <ul className="ex-subjects" aria-label="Subjects">
-                        {exam.subjects.map((subject) => (
-                          <li key={subject.subject_id} className={cx(goalIds.has(subject.subject_id) && 'mine', !subject.ready && 'off')}>
-                            {goalIds.has(subject.subject_id) ? <IconCheck size={13} /> : null}
-                            {subject.name}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : null}
-                    <span className="ex-cta">
-                      {ready > 0 ? 'Choose subjects' : 'See subjects'}
-                      <IconArrowRight size={18} />
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
+            {exams.map((exam, index) => (
+              <ExamCard
+                key={exam.examination_id}
+                exam={exam}
+                chosen={goalIds}
+                index={index}
+                solo={solo}
+                featured={exam.examination_id === featured}
+              />
+            ))}
           </div>
         )}
       </section>

@@ -24,7 +24,6 @@ import {
   IconCalendar,
   IconChevronDown,
   IconClose,
-  IconFlame,
   IconHelp,
   IconHome,
   IconLock,
@@ -43,6 +42,7 @@ import {
   whenText,
 } from "./countdown.js";
 import { progressApi, type Overview } from "./progressApi.js";
+import { StreakChip } from "./Streak.js";
 import { TitleProvider, useIdentity, useLoad, useStudent } from "./store.js";
 import { Dialog, Button, IconButton, initials } from "./ui.js";
 
@@ -400,15 +400,7 @@ export function AppShell() {
               <TopContext overview={check.data} />
               <div className="right">
                 {check.data ? (
-                  <span
-                    className={`sj-streak sj-topstreak ${check.data.active_today ? "on" : ""}`}
-                    title="Days in a row you have practised"
-                  >
-                    <IconFlame size={17} />
-                    {check.data.streak_days > 0
-                      ? `${check.data.streak_days}-day streak`
-                      : "No streak yet"}
-                  </span>
+                  <StreakChip overview={check.data} studentId={student.studentId} />
                 ) : null}
                 <ProfileMenu
                   name={student.displayName}

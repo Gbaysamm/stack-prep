@@ -484,30 +484,38 @@ function Verdict({ report, goalPath }: { report: Report; goalPath: string }) {
   const p = report.projection!;
   if (p.target_score === null) return null;
   const short = p.target_score - p.score_projected;
-  if (p.shortfall_note || short > 0) {
+  if (short > 0) {
+    // The gap as the headline figure, the plain reason beside it, and the one way to change it.
     return (
-      <Notice
-        tone="short"
-        className="sj-rise d2"
-        icon={<IconTarget size={18} />}
-        title={
-          <>
-            This plan reaches {fmt(p.score_projected)}
-            {short > 0 ? `, ${fmt(short)} short of your ${fmt(p.target_score)}` : ''}
-          </>
-        }
-        action={
-          <>
-            <Button size="sm" tone="ghost" to={goalPath}>
-              Adjust my goal
-            </Button>
-            <span className="cp-tipline">
-              How this is worked out <MetricTip id="gap" />
-            </span>
-          </>
-        }
-      >
-        {p.shortfall_note ? wholeNumbers(p.shortfall_note) : undefined}
+      <div className="cp-short sj-rise d2" role="note">
+        <div className="cp-short-fig" aria-hidden="true">
+          <span className="sj-num">{fmt(short)}</span>
+          <span>{Math.round(short) === 1 ? 'mark' : 'marks'} short</span>
+        </div>
+        <div className="cp-short-text">
+          <strong>
+            This plan gets you to {fmt(p.score_projected)} by exam day. You’re aiming for {fmt(p.target_score)}.
+          </strong>
+          <p>
+            The last {fmt(short)} {Math.round(short) === 1 ? 'mark needs' : 'marks need'} more study
+            time: more days a week, or longer each day. Moving the same hours around won’t close the gap.
+          </p>
+        </div>
+        <div className="cp-short-actions">
+          <Button size="sm" tone="dark" to={goalPath} trailing={<IconArrowRight size={16} />}>
+            Adjust my goal
+          </Button>
+          <span className="cp-tipline">
+            How this is worked out <MetricTip id="gap" />
+          </span>
+        </div>
+      </div>
+    );
+  }
+  if (p.shortfall_note) {
+    return (
+      <Notice tone="short" className="sj-rise d2" icon={<IconTarget size={18} />} title="Short of your target">
+        {wholeNumbers(p.shortfall_note)}
       </Notice>
     );
   }
@@ -643,6 +651,19 @@ function Topics({ report }: { report: Report }) {
             <MetricTip id="mastery" />
           </p>
         </div>
+      </div>
+
+      {/* One quiet bar: what the colours mean on the left, the order on the right. */}
+      <div className="cp-topicbar">
+        <ul className="cp-bandkey" aria-label="What the colours mean">
+          {(['strong', 'holding', 'shaky', 'teach', 'none'] as Band[]).map((band) => (
+            <li key={band}>
+              <span className={cx('swatch', band)} aria-hidden="true" />
+              <b>{BAND_LABEL[band]}</b>
+              {band === 'none' ? null : <span>{BAND_GLOSS[band]}</span>}
+            </li>
+          ))}
+        </ul>
         <div className="cp-seg" role="group" aria-label="Order topics">
           <button type="button" aria-pressed={!weakestFirst} onClick={() => setWeakestFirst(false)}>
             Syllabus order
@@ -652,16 +673,6 @@ function Topics({ report }: { report: Report }) {
           </button>
         </div>
       </div>
-
-      <ul className="cp-bandkey" aria-label="What the colours mean">
-        {(['strong', 'holding', 'shaky', 'teach', 'none'] as Band[]).map((band) => (
-          <li key={band}>
-            <span className={cx('swatch', band)} />
-            <b>{BAND_LABEL[band]}</b>
-            <span>{BAND_GLOSS[band]}</span>
-          </li>
-        ))}
-      </ul>
 
       <div className="cp-topics">
         {paged.items.map(({ topic, subtopics, share }, index) => (

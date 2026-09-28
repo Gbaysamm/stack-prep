@@ -1,0 +1,221 @@
+/* The streak: the chip in the top bar and the dialog it opens. Classes start `sk-`, except the
+   chip's own, which the top bar already styles (`.sj-streak`, `.sj-topstreak`). */
+
+/* The chip is a button now: it keeps the chip's look and gains hover and focus. */
+/* `.sj button` resets every button; the chip's own look is restated at that strength. */
+.sj button.sj-topstreak {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px 14px 8px 11px;
+  border-radius: var(--r-sm);
+  background: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--gray-200);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--gray-900);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    box-shadow var(--t-fast) var(--ease),
+    background var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease);
+}
+.sj button.sj-topstreak.on {
+  background: var(--orange-100);
+  box-shadow: inset 0 0 0 1.5px #ffc79c;
+  color: #8a3700;
+}
+.sj button.sj-topstreak:hover {
+  box-shadow: inset 0 0 0 1.5px var(--gray-300), 0 4px 12px rgba(31, 0, 80, 0.08);
+}
+.sj button.sj-topstreak.on:hover {
+  box-shadow: inset 0 0 0 1.5px #ffa86a, 0 4px 12px rgba(229, 92, 0, 0.14);
+}
+.sj button.sj-topstreak:active {
+  transform: scale(0.97);
+}
+.sj .sj-topstreak-short {
+  display: none;
+}
+
+.sk-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.sj .sk {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: var(--gray-700);
+}
+
+/* The number, big, with the flame beside it. */
+.sj .sk-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.sj .sk-flame {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--r-md);
+  background: var(--gray-100);
+  color: var(--gray-500);
+}
+.sj .sk-flame.on {
+  background: var(--orange-100);
+  color: var(--orange-500);
+}
+.sj .sk-num {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.sj .sk-num .sj-num {
+  font-size: 56px;
+  line-height: 1;
+  color: var(--ink-900);
+}
+.sj .sk-unit {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+/* Today: done, or still to do. */
+.sj .sk-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.sj .sk-status.done {
+  background: var(--green-100);
+  color: #14561a;
+}
+.sj .sk-status.wait {
+  background: var(--yellow-100);
+  color: #5c4700;
+}
+.sj .sk-status-ico {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+.sj .sk-status.done .sk-status-ico {
+  background: var(--green-500);
+  color: #fff;
+}
+.sj .sk-status.wait .sk-status-ico {
+  box-shadow: inset 0 0 0 2px var(--yellow-400);
+}
+
+/* Two weeks of days, oldest on the left, today last. */
+.sj .sk-days-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sj .sk-days-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--gray-500);
+}
+.sj .sk-days {
+  display: grid;
+  grid-template-columns: repeat(14, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .sk-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.sj .sk-dot {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  max-width: 26px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--gray-100);
+  color: #fff;
+}
+.sj .sk-day.done .sk-dot {
+  background: var(--orange-500);
+}
+.sj .sk-day.today .sk-dot {
+  background: #fff;
+  box-shadow: inset 0 0 0 2px var(--orange-500);
+}
+.sj .sk-day.is-today.done .sk-dot {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--orange-500);
+}
+.sj .sk-wd {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-500);
+  white-space: nowrap;
+}
+.sj .sk-day.is-today .sk-wd {
+  color: var(--ink-900);
+}
+/* "Today" is wider than a letter: let it overflow into its neighbours' gap, centred. */
+.sj .sk-day.is-today {
+  overflow: visible;
+}
+
+.sj .sk-rule {
+  padding-top: 14px;
+  border-top: 1px solid var(--gray-100);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--gray-600);
+}
+
+@media (max-width: 860px) {
+  /* On a phone the chip sits in the top bar too, as the flame and the number. */
+  .sj .sj-topbar button.sj-topstreak {
+    display: inline-flex !important;
+    min-height: 36px;
+    padding: 6px 10px 6px 8px;
+    gap: 4px;
+  }
+  .sj .sj-topstreak-long {
+    display: none;
+  }
+  .sj .sj-topstreak-short {
+    display: inline;
+  }
+  .sj .sk-num .sj-num {
+    font-size: 48px;
+  }
+  .sj .sk-days {
+    gap: 2px;
+  }
+  .sj .sk-wd {
+    font-size: 10px;
+  }
+}

@@ -29,7 +29,7 @@ import {
   type SubjectOverview,
 } from "../progressApi.js";
 import { runsApi } from "../runsApi.js";
-import { useLoad, usePageTitle, useStudent } from "../store.js";
+import { useCachedLoad, useLoad, usePageTitle, useStudent } from "../store.js";
 import {
   ALL,
   StatusCell,
@@ -466,10 +466,12 @@ function SubjectPanel({
       });
   };
 
+  const p = subject.practice;
+
   return (
     <article className="ph-panel" aria-labelledby="ph-panel-title">
-      <div className="ph-start">
-        <header className="ph-panel-head">
+      <header className="ph-panel-head">
+        <div className="ph-panel-name">
           <span className="sj-eyebrow">
             {subject.examination_short_name} ·{" "}
             {finished === 0 ? "no runs finished yet" : `${finished} ${finished === 1 ? "run" : "runs"} finished`}
@@ -477,8 +479,28 @@ function SubjectPanel({
           <h2 id="ph-panel-title" className="sj-display sj-h2">
             {subject.subject_name}
           </h2>
-        </header>
+        </div>
+        {p.questions_answered > 0 ? (
+          <dl className="ph-totals" aria-label={`${subject.subject_name} practice so far`}>
+            <div>
+              <dd className="sj-num">{p.questions_answered}</dd>
+              <dt>answered</dt>
+            </div>
+            <div>
+              <dd className="sj-num">{p.correct_unaided}</dd>
+              <dt>right first time</dt>
+            </div>
+            <div>
+              <dd className="sj-num">{p.taught}</dd>
+              <dt>taught</dt>
+            </div>
+          </dl>
+        ) : (
+          <p className="ph-totals-none">No questions answered yet</p>
+        )}
+      </header>
 
+      <div className="ph-start">
         {hasOpen ? (
           <Link
             to={`/practice/${subject.open_practice_session_id}`}
@@ -524,48 +546,44 @@ function SubjectPanel({
           <div className="ph-new-head">
             <span className="ph-new-title">
               {hasOpen ? "Or start a fresh run" : "How long a run?"}
+              <span className="sj-muted"> You can stop any time.</span>
             </span>
-            <span className="sj-small sj-muted">You can stop any time.</span>
+            <ChooseLink subjectId={subject.subject_id} className="wide" />
           </div>
-          <div
-            className="ph-lengths"
-            role="radiogroup"
-            aria-label="Run length"
-          >
-            {LENGTHS.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                role="radio"
-                aria-checked={length === option.value}
-                className={cx("ph-length", length === option.value && "on")}
-                onClick={() => setLength(option.value)}
-              >
-                <b>{option.label}</b>
-                <span className="sj-mono">{option.value} questions</span>
-              </button>
-            ))}
-          </div>
-          <div className="ph-new-actions">
+          <div className="ph-new-row">
+            <div
+              className="ph-lengths"
+              role="radiogroup"
+              aria-label="Run length"
+            >
+              {LENGTHS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={length === option.value}
+                  className={cx("ph-length", length === option.value && "on")}
+                  onClick={() => setLength(option.value)}
+                >
+                  <b>{option.label}</b>
+                  <span className="sj-mono">{option.value} questions</span>
+                </button>
+              ))}
+            </div>
             <Button
-              tone={hasOpen ? "soft" : "primary"}
+              tone={hasOpen || subject.open_checkup_session_id ? "soft" : "primary"}
               busy={starting}
               onClick={start}
+              className="ph-new-go"
               trailing={starting ? undefined : <IconArrowRight size={18} />}
             >
               {starting
                 ? "Picking questions…"
                 : `Start a ${length}-question run`}
             </Button>
-            <Link
-              to={`/practice/new?subject=${subject.subject_id}`}
-              className="ph-choose"
-            >
-              <IconLayers size={16} />
-              Choose topics and years
-              <IconChevronRight size={16} className="ph-choose-go" />
-            </Link>
           </div>
+          {/* On a phone the way to choose topics comes after the start, not between the question and its answers. */}
+          <ChooseLink subjectId={subject.subject_id} className="narrow" />
         </div>
       </div>
 
@@ -574,13 +592,26 @@ function SubjectPanel({
   );
 }
 
-/** The panel's right side: the check-up, what runs aim at, and this subject's practice so far. */
+/** Into the run builder for this subject. Drawn once per layout: beside the question on a laptop, under the start on a phone. */
+function ChooseLink({ subjectId, className }: { subjectId: string; className: string }) {
+  return (
+    <Link to={`/practice/new?subject=${subjectId}`} className={cx("ph-choose", className)}>
+      <IconLayers size={16} />
+      Choose topics and years
+      <IconChevronRight size={16} className="ph-choose-go" />
+    </Link>
+  );
+}
+
+/**
+ * The panel's foot: where the subject stands, as one band across the full width. Checked, it is
+ * the predicted score, what runs aim at, and the report; otherwise the one step that comes next.
+ */
 function SubjectStanding({ subject }: { subject: SubjectOverview }) {
   const checkup = useStartCheckup();
   const status = subjectStatus(subject);
   const latest = subject.latest_checkup;
   const weak = latest?.weakest_subtopics.slice(0, 3) ?? [];
-  const p = subject.practice;
   // The gap the rest of the app quotes: where the plan gets to by exam day, against the target.
   const projectedGap =
     status.target !== null && status.score !== null
@@ -591,22 +622,20 @@ function SubjectStanding({ subject }: { subject: SubjectOverview }) {
   if (status.kind === "checkup-open") {
     body = (
       <Callout
-        tone="yellow"
         icon={<IconReplay size={18} />}
         title="Finish your check-up"
         action={
-          <Button to={`/checkup/${subject.open_checkup_session_id}`} size="sm" trailing={<IconArrowRight size={16} />}>
+          <Button to={`/checkup/${subject.open_checkup_session_id}`} size="sm" tone="dark" trailing={<IconArrowRight size={16} />}>
             Resume check-up
           </Button>
         }
       >
-        Your answers so far are saved. When it is done, runs aim at what it finds.
+        Your answers so far are saved. Once it is done, runs aim at what it finds.
       </Callout>
     );
   } else if (status.kind === "no-goal") {
     body = (
       <Callout
-        tone="yellow"
         icon={<IconTrophy size={18} />}
         title={`No ${subject.subject_name} goal yet`}
         action={
@@ -621,12 +650,12 @@ function SubjectStanding({ subject }: { subject: SubjectOverview }) {
   } else if (status.kind === "no-checkup") {
     body = (
       <Callout
-        tone="yellow"
         icon={<IconBulb size={18} />}
         title={`No ${subject.subject_name} check-up yet`}
         action={
           <Button
             size="sm"
+            tone="dark"
             busy={checkup.busy}
             disabled={isDemoSubject(subject.subject_id)}
             onClick={() => checkup.start(subject.subject_id)}
@@ -636,12 +665,12 @@ function SubjectStanding({ subject }: { subject: SubjectOverview }) {
           </Button>
         }
       >
-        You can practise now, but about 15 questions first tell us which topics to aim your runs at, and predict your score.
+        About 15 questions tell us which topics to aim your runs at, and predict your score.
       </Callout>
     );
   } else {
     body = (
-      <>
+      <div className="ph-stand">
         <div className="ph-score">
           {status.score !== null ? (
             <>
@@ -672,11 +701,12 @@ function SubjectStanding({ subject }: { subject: SubjectOverview }) {
             </span>
           )}
         </div>
-        {weak.length > 0 ? (
-          <div className="ph-aims">
-            <span className="ph-aims-label">
-              <IconTarget size={16} /> Runs aim at your weakest areas first
-            </span>
+        <div className="ph-aims">
+          <span className="ph-aims-label">
+            <IconTarget size={16} />
+            {weak.length > 0 ? "Runs aim at these first" : "Runs aim at your weakest areas first"}
+          </span>
+          {weak.length > 0 ? (
             <div className="ph-aims-chips">
               {weak.map((item) => (
                 <span key={item.subtopic_id} className="ph-chip">
@@ -685,67 +715,51 @@ function SubjectStanding({ subject }: { subject: SubjectOverview }) {
                 </span>
               ))}
             </div>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
         {latest ? (
           <Link className="sj-link ph-report" to={`/checkup/${latest.session_id}/report`}>
-            Read the check-up report <IconArrowRight size={14} />
+            Check-up report <IconArrowRight size={14} />
           </Link>
         ) : null}
-      </>
+      </div>
     );
   }
 
   return (
-    <aside className="ph-standing" aria-label={`Where ${subject.subject_name} stands`}>
-      <span className="sj-eyebrow ph-standing-eyebrow">Where it stands</span>
+    <footer className="ph-standing" aria-label={`Where ${subject.subject_name} stands`}>
       {body}
       {checkup.error ? (
         <p className="ph-alert" role="alert">
           {checkup.error}
         </p>
       ) : null}
-      <dl className="ph-totals">
-        <div>
-          <dt>Answered</dt>
-          <dd className="sj-num">{p.questions_answered}</dd>
-        </div>
-        <div>
-          <dt>Right first time</dt>
-          <dd className="sj-num">{p.correct_unaided}</dd>
-        </div>
-        <div>
-          <dt>Taught</dt>
-          <dd className="sj-num">{p.taught}</dd>
-        </div>
-      </dl>
-    </aside>
+    </footer>
   );
 }
 
+/** The next step for an unchecked subject: icon, words and the one button, on one line. */
 function Callout({
-  tone,
   icon,
   title,
   children,
   action,
 }: {
-  tone: "yellow";
   icon: ReactNode;
   title: string;
   children: ReactNode;
   action: ReactNode;
 }) {
   return (
-    <div className={cx("ph-callout", tone)}>
-      <div className="ph-row">
-        <span className="ph-tile yellow" aria-hidden="true">
-          {icon}
-        </span>
+    <div className="ph-callout">
+      <span className="ph-tile yellow" aria-hidden="true">
+        {icon}
+      </span>
+      <span className="ph-callout-text">
         <b>{title}</b>
-      </div>
-      <p>{children}</p>
-      <div>{action}</div>
+        <span>{children}</span>
+      </span>
+      <span className="ph-callout-go">{action}</span>
     </div>
   );
 }
@@ -1001,14 +1015,11 @@ const BUILD_LENGTHS = [5, 10, 20, 40];
 
 type Options = NonNullable<Awaited<ReturnType<typeof runsApi.options>>>;
 
+/** The builder's range for a subject, remembered per subject so switching back is instant. */
 function useOptions(subjectId: string) {
   const student = useStudent();
-  return useLoad<Options | null>(
-    () =>
-      isDemoSubject(subjectId)
-        ? Promise.resolve(null)
-        : runsApi.options(student.studentId, subjectId).catch(() => null),
-    [student.studentId, subjectId],
+  return useCachedLoad<Options | null>(`options:${student.studentId}:${subjectId}`, () =>
+    isDemoSubject(subjectId) ? Promise.resolve(null) : runsApi.options(student.studentId, subjectId).catch(() => null),
   );
 }
 

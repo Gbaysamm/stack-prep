@@ -17,7 +17,7 @@ import { api, type CheckupReport } from "../../student/api.js";
 import { IconArrowRight, IconBolt, IconBook, IconChart, IconChevronRight, IconTarget } from "../icons.js";
 import { lessonFeedbackApi, type LessonToRevisit, type Understood } from "../lessonFeedbackApi.js";
 import { progressApi, type PracticeRunPage, type SubjectOverview } from "../progressApi.js";
-import { useLoad, usePageTitle, useStudent } from "../store.js";
+import { useCachedLoad, useLoad, usePageTitle, useStudent } from "../store.js";
 import { Badge, Button, CountUp, PageHero, Pager, Skeleton, cx, usePaged, useToast } from "../ui.js";
 import {
   ALL,
@@ -287,9 +287,9 @@ function Fig({ value, label }: { value: ReactNode; label: string }) {
 
 function StrengthsCard({ subject }: { subject: SubjectOverview }) {
   const latest = subject.latest_checkup;
-  const report = useLoad<CheckupReport | null>(
-    () => (latest ? api.report(latest.session_id) : Promise.resolve(null)),
-    [latest?.session_id],
+  // Remembered per check-up, so switching subjects back and forth never waits twice.
+  const report = useCachedLoad<CheckupReport | null>(`report:${latest?.session_id ?? "none"}`, () =>
+    latest ? api.report(latest.session_id) : Promise.resolve(null),
   );
   return (
     <div className="sj-card prog-panel">
@@ -337,6 +337,17 @@ function StrengthsCard({ subject }: { subject: SubjectOverview }) {
 /* ================================================================== the page */
 
 /* ------------------------------------------------------------------ how lessons landed */
+
+/** Lessons to revisit, one group per subject in the order they first appear (newest first). */
+function groupBySubject(items: LessonToRevisit[]) {
+  const groups: { subject_id: string; subject_name: string; items: LessonToRevisit[] }[] = [];
+  for (const item of items) {
+    const group = groups.find((g) => g.subject_id === item.subject_id);
+    if (group) group.items.push(item);
+    else groups.push({ subject_id: item.subject_id, subject_name: item.subject_name, items: [item] });
+  }
+  return groups;
+}
 
 const UNDERSTOOD_WORD: Record<Understood, string> = {
   got_it: "Got it",
@@ -388,10 +399,10 @@ function LessonsLanded({ studentId, subjectId }: { studentId: string; subjectId:
   const toast = useToast();
   const [starting, setStarting] = useState<string | null>(null);
 
-  const practise = (item: LessonToRevisit) => {
-    setStarting(item.question_version_id);
+  const practise = (subject: string) => {
+    setStarting(subject);
     api
-      .startPractice(studentId, item.subject_id)
+      .startPractice(studentId, subject)
       .then((run) => navigate(`/practice/${run.session_id}`))
       .catch((error: Error) => {
         toast(`Couldn't start a run: ${error.message || "try again"}`);
@@ -506,42 +517,48 @@ function LessonsLanded({ studentId, subjectId }: { studentId: string; subjectId:
         ) : null}
 
         <div className="sj-card prog-ll-list">
-          <div className="prog-ll-split-head">
+          <div className="prog-ll-list-head">
             <b>Worth another look</b>
-            <span className="sj-mono">Lessons you found unclear or too hard</span>
+            <span>Lessons you said were unclear or too hard.</span>
           </div>
           {revisit.length === 0 ? (
             <p className="prog-ll-none">
               Nothing here: every lesson{subjectId ? " in this subject" : ""} landed. Keep going.
             </p>
           ) : (
-            <ul>
-              {revisit.map((item) => (
-                <li key={`${item.question_version_id}-${item.at}`} className="prog-ll-item">
-                  <div className="prog-ll-item-head">
-                    <span className="sj-eyebrow">
-                      {item.subject_name} · {item.subtopic_name}
-                    </span>
-                    <Badge tone={item.understood === "too_hard" ? "pink" : "yellow"}>
-                      {UNDERSTOOD_WORD[item.understood]}
-                    </Badge>
-                  </div>
-                  <p className="prog-ll-stem">
-                    <Maths text={item.stem_excerpt} />
-                  </p>
+            groupBySubject(revisit).map((group) => (
+              <section key={group.subject_id} className="prog-ll-group" aria-label={group.subject_name}>
+                <div className="prog-ll-group-head">
+                  <span className="prog-ll-group-name">
+                    {group.subject_name}
+                    <small>{plural(group.items.length, "lesson")}</small>
+                  </span>
                   <Button
                     tone="soft"
                     size="sm"
-                    busy={starting === item.question_version_id}
+                    busy={starting === group.subject_id}
                     disabled={starting !== null}
-                    onClick={() => practise(item)}
+                    onClick={() => practise(group.subject_id)}
                     trailing={<IconArrowRight size={16} />}
                   >
-                    Practise this topic
+                    Practise {group.subject_name}
                   </Button>
-                </li>
-              ))}
-            </ul>
+                </div>
+                <ul>
+                  {group.items.map((item) => (
+                    <li key={`${item.question_version_id}-${item.at}`} className="prog-ll-item">
+                      <span className="prog-ll-item-top">
+                        <b>{item.subtopic_name}</b>
+                        <span className={cx("prog-ll-flag", item.understood)}>{UNDERSTOOD_WORD[item.understood]}</span>
+                      </span>
+                      <p className="prog-ll-stem">
+                        <Maths text={item.stem_excerpt} />
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))
           )}
         </div>
       </div>

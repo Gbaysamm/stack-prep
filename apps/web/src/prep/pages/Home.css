@@ -11,23 +11,41 @@
 .sj :is(.home, .prog, .hub, .pro-page) > * + * {
   margin-top: 28px;
 }
+/* The hero's one quiet link, beside the button on the same centre line: plain white words and
+   a small arrow, underlined only on hover. */
 .sj .home-hero-link a {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
   min-height: 44px;
+  padding: 0 4px;
+  border-radius: var(--r-sm);
   font-weight: 600;
   font-size: 14.5px;
-  color: #fff;
-  text-decoration: underline;
-  text-decoration-color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.86);
+  text-decoration: none;
   text-underline-offset: 4px;
-  transition: text-decoration-color var(--t-fast) var(--ease);
+  transition: color var(--t-fast) var(--ease);
+}
+.sj .home-hero-link a::after {
+  content: "\2192";
+  font-weight: 500;
+  transition: transform var(--t-med) var(--ease);
 }
 .sj .home-hero-link a:hover {
+  color: #fff;
+  text-decoration: underline;
   text-decoration-color: var(--green-400);
+}
+.sj .home-hero-link a:hover::after {
+  transform: translateX(3px);
 }
 .sj .home-hero-link {
   display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+}
+.sj :is(.home, .hub) .sj-hero-actions {
   align-items: center;
 }
 
@@ -129,12 +147,16 @@
 }
 .sj .home-sechead {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 8px 18px;
+  gap: 12px 18px;
 }
+/* The heading keeps at least this much room: an action too wide to sit beside it (a button,
+   on a phone) drops under it instead of squeezing the heading into a narrow column. */
 .sj .home-sechead .text {
   display: flex;
+  flex: 1 1 220px;
   flex-direction: column;
   gap: 8px;
   min-width: 0;
@@ -864,6 +886,19 @@
   }
   .sj :is(.home, .prog, .hub, .pro-page) .sj-hero-actions > * {
     flex: none;
+  }
+  .sj .home-hero-link {
+    margin-left: 0;
+  }
+  /* A long label ("Take my Use of English check-up") wraps inside the band, never past it. */
+  .sj :is(.home, .hub) .sj-hero-actions {
+    max-width: 100%;
+  }
+  .sj :is(.home, .hub) .sj-hero-actions > .sj-btn {
+    max-width: 100%;
+    white-space: normal;
+    line-height: 1.25;
+    text-align: left;
   }
   .sj .home-hstats {
     width: 100%;

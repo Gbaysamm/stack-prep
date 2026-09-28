@@ -233,6 +233,47 @@ export function useLoad<T>(fetcher: () => Promise<T>, key: unknown[]): Loaded<T>
   return { data, error, loading, reload };
 }
 
+/** What `useCachedLoad` has fetched this visit, by key: kept so going back to a subject is instant. */
+const loaded = new Map<string, unknown>();
+
+/**
+ * `useLoad` for data that follows a choice on the page (the subject in the switcher): keyed by a
+ * string, remembered for the visit, and shown at once when the same key comes round again, while
+ * a fresh copy is fetched quietly behind it. A key never seen before has no data (so the previous
+ * subject's never shows under the new one's name) and `loading` is true until it arrives.
+ */
+export function useCachedLoad<T>(cacheKey: string, fetcher: () => Promise<T>): Loaded<T> {
+  const [state, setState] = useState<{ key: string; data: T | undefined; error: string | null; loading: boolean }>(
+    () => ({ key: cacheKey, data: loaded.get(cacheKey) as T | undefined, error: null, loading: true }),
+  );
+  const [tick, setTick] = useState(0);
+  const latest = useRef(0);
+  const fetcherRef = useRef(fetcher);
+  fetcherRef.current = fetcher;
+
+  useEffect(() => {
+    const call = ++latest.current;
+    setState({ key: cacheKey, data: loaded.get(cacheKey) as T | undefined, error: null, loading: true });
+    fetcherRef
+      .current()
+      .then((value) => {
+        loaded.set(cacheKey, value);
+        if (call === latest.current) setState({ key: cacheKey, data: value, error: null, loading: false });
+      })
+      .catch((failure: Error) => {
+        if (call === latest.current)
+          setState((current) => ({ ...current, error: failure.message || 'Something went wrong.', loading: false }));
+      });
+  }, [cacheKey, tick]);
+
+  const reload = useCallback(() => setTick((value) => value + 1), []);
+  // The render straight after the key changes comes before the effect: answer for the new key.
+  if (state.key !== cacheKey) {
+    return { data: loaded.get(cacheKey) as T | undefined, error: null, loading: true, reload };
+  }
+  return { data: state.data, error: state.error, loading: state.loading, reload };
+}
+
 /* ------------------------------------------------------------------ page title */
 
 const TitleContext = createContext<(title: string) => void>(() => undefined);

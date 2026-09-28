@@ -604,6 +604,56 @@
   line-height: 1.5;
   color: var(--gray-600);
 }
+/* Worth another look: the title and one plain line, then a group per subject. Each group has
+   one way to practise (a run is per subject); its lessons are quiet rows under it. */
+.sj .prog-ll-list {
+  gap: 0;
+  padding: 0;
+}
+.sj .prog-ll-list-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 20px 20px 16px;
+}
+.sj .prog-ll-list-head b {
+  font-family: var(--f-display);
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+.sj .prog-ll-list-head span {
+  font-size: 13.5px;
+  color: var(--gray-600);
+}
+.sj .prog-ll-list > .prog-ll-none {
+  padding: 0 20px 20px;
+}
+.sj .prog-ll-group {
+  border-top: 1px solid var(--gray-200);
+}
+.sj .prog-ll-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  flex-wrap: wrap;
+  padding: 12px 20px;
+  background: #faf9fc;
+}
+.sj .prog-ll-group-name {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink-900);
+}
+.sj .prog-ll-group-name small {
+  font-weight: 500;
+  font-size: 12.5px;
+  color: var(--gray-500);
+}
 .sj .prog-ll-list ul {
   display: flex;
   flex-direction: column;
@@ -614,40 +664,52 @@
 .sj .prog-ll-item {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 16px 0;
+  gap: 4px;
+  min-width: 0;
+  padding: 14px 20px;
   border-top: 1px solid var(--gray-100);
-  min-width: 0;
 }
-.sj .prog-ll-item:first-child {
-  padding-top: 4px;
-  border-top: 0;
-}
-.sj .prog-ll-item:last-child {
-  padding-bottom: 0;
-}
-.sj .prog-ll-item-head {
+.sj .prog-ll-item-top {
   display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  min-width: 0;
+}
+.sj .prog-ll-item-top b {
+  font-weight: 600;
+  font-size: 14.5px;
+  color: var(--gray-900);
+}
+/* The student's own word, as a small dot and label beside the name, not a pill at the far edge. */
+.sj .prog-ll-flag {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  width: 100%;
-  min-width: 0;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--gray-600);
+  white-space: nowrap;
 }
-.sj .prog-ll-item-head .sj-eyebrow {
-  min-width: 0;
+.sj .prog-ll-flag::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--yellow-400);
+  transform: translateY(-1px);
 }
-.sj .prog-ll-item-head .sj-badge {
-  flex: none;
+.sj .prog-ll-flag.too_hard::before {
+  background: var(--pink-500);
 }
 .sj .prog-ll-stem {
   width: 100%;
-  font-size: 15.5px;
+  max-width: 88ch;
+  font-size: 14px;
   line-height: 1.55;
-  color: var(--gray-900);
+  color: var(--gray-600);
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -672,7 +734,18 @@
     font-size: 32px;
   }
   .sj .prog-ll-split,
-  .sj .prog-ll-list {
-    padding: 16px;
+  .sj .prog-ll-list-head {
+    padding: 16px 16px 14px;
+  }
+  .sj .prog-ll-list > .prog-ll-none {
+    padding: 0 16px 16px;
+  }
+  .sj .prog-ll-group-head,
+  .sj .prog-ll-item {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .sj .prog-ll-group-head .sj-btn {
+    width: 100%;
   }
 }

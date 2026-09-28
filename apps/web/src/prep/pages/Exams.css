@@ -1,5 +1,5 @@
-/* Exams: one card per exam, every card built on the same four rows (head, name, body, foot).
-   The rows are a subgrid of the page grid, so cards side by side share every baseline. */
+/* Exams: one card per exam. Each card has two bands: who sets it, its name and the one way in on
+   top; the student's subjects against the exam's limit below. One exam gets the full width. */
 
 .sj .ex-sechead {
   display: flex;
@@ -14,26 +14,28 @@
 .sj .ex-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 22px;
-  row-gap: 22px;
+  gap: 22px;
   align-items: stretch;
 }
+.sj .ex-grid.solo {
+  grid-template-columns: minmax(0, 1fr);
+}
 
+/* ---------------------------------------------------------------- the card */
 .sj .ex-card {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
   display: grid;
-  grid-row: span 4;
-  grid-template-rows: subgrid;
-  row-gap: 10px;
-  align-content: start;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "id cta"
+    "foot foot";
+  align-items: center;
+  column-gap: 24px;
   min-width: 0;
-  padding: 20px;
   border-radius: var(--r-lg);
   background: #fff;
   border: 1px solid var(--gray-200);
   color: var(--gray-900);
+  overflow: hidden;
   transition:
     transform var(--t-med) var(--ease),
     box-shadow var(--t-med) var(--ease),
@@ -41,165 +43,167 @@
   -webkit-tap-highlight-color: transparent;
 }
 .sj a.ex-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   border-color: var(--purple-200);
-  box-shadow: 6px 6px 0 var(--purple-100);
+  box-shadow: 0 10px 24px rgba(31, 0, 80, 0.07);
 }
 .sj a.ex-card:active {
   transform: translateY(0);
 }
 .sj .ex-card:focus-visible {
   outline-offset: 4px;
-  border-radius: var(--r-lg);
+}
+.sj a.ex-card:hover .ex-cta .arrow {
+  transform: translateX(3px);
 }
 
-/* Real exams: deep ink with the brand glow, like the page hero. */
-.sj .ex-card.ink {
-  border-color: transparent;
-  color: #fff;
-  background:
-    radial-gradient(70% 90% at 100% 0%, rgba(107, 11, 255, 0.5), transparent 65%),
-    radial-gradient(50% 70% at 85% 130%, rgba(254, 118, 152, 0.26), transparent 70%),
-    var(--ink-900);
-}
-.sj a.ex-card.ink:hover {
-  border-color: transparent;
-  box-shadow: 6px 6px 0 var(--purple-300);
-}
-/* The exam the student is working towards wears the page's one sticker. */
-.sj .ex-card.ink.featured {
-  border: 1.5px solid var(--gray-900);
-  box-shadow: 6px 6px 0 var(--pink-400);
-}
-.sj a.ex-card.ink.featured:hover {
-  box-shadow: 9px 9px 0 var(--pink-400);
-}
-.sj a.ex-card.ink.featured:active {
-  box-shadow: 3px 3px 0 var(--pink-400);
-}
-/* Row 1: icon tile and name on one line, the badge at the end. */
-.sj .ex-head {
+/* Top band: the exam itself. */
+.sj .ex-id {
+  grid-area: id;
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 6px;
   min-width: 0;
+  padding: 22px 0 20px 24px;
 }
-.sj .ex-ico {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--r-md);
-  background: var(--purple-050);
-  color: var(--purple-600);
-}
-.sj .ex-card.ink .ex-ico {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--green-400);
+.sj .ex-body {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--gray-500);
 }
 .sj .ex-short {
-  flex: 1;
-  min-width: 0;
-  font-size: 30px;
+  font-size: 34px;
   line-height: 1;
   letter-spacing: -0.03em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: inherit;
+  color: var(--ink-900);
 }
-.sj .ex-badge {
-  flex: none;
-}
-.sj .ex-card.ink .sj-badge.dark {
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-}
-.sj .ex-card.ink .sj-badge.dark .dot {
-  background: var(--green-400);
-}
-
-/* Rows 2 and 3 start at the card's left edge. */
 .sj .ex-name {
-  margin-top: 4px;
-  max-width: 40ch;
+  margin: 0;
   font-size: 15px;
   line-height: 1.45;
   color: var(--gray-700);
   text-wrap: balance;
 }
-.sj .ex-card.ink .ex-name {
-  color: rgba(255, 255, 255, 0.84);
-}
-.sj .ex-body {
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  line-height: 1.5;
-  color: var(--gray-500);
-  text-wrap: balance;
-}
-.sj .ex-card.ink .ex-body {
-  color: var(--purple-200);
+.sj .ex-cta {
+  grid-area: cta;
+  margin-right: 24px;
+  margin-bottom: 6px;
 }
 
-/* Row 4: the numbers, the line and the call, pinned to the bottom. */
+/* Bottom band: the student's subjects, on the paper tint. */
 .sj .ex-foot {
-  align-self: end;
+  grid-area: foot;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-top: 14px;
-  border-top: 1px solid var(--gray-100);
+  gap: 10px;
+  min-width: 0;
+  padding: 16px 24px 18px;
+  background: #faf9fc;
+  border-top: 1px solid var(--gray-200);
 }
-.sj .ex-card.ink .ex-foot {
-  border-top-color: rgba(215, 189, 255, 0.16);
-}
-.sj .ex-stats {
+.sj .ex-count {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 4px 12px;
-  font-size: 14px;
+  gap: 8px 16px;
 }
-.sj .ex-stats b {
-  font-size: 22px;
+.sj .ex-count-line {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+.sj .ex-count-line b {
   margin-right: 2px;
+  font-size: 22px;
+  color: var(--ink-900);
 }
-.sj .ex-dot {
-  align-self: center;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: 0.45;
+/* One cell per place the exam allows: filled for each subject chosen. */
+.sj .ex-places {
+  display: inline-flex;
+  gap: 4px;
 }
-.sj .ex-cta {
+.sj .ex-places i {
+  width: 26px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--gray-200);
+}
+.sj .ex-places i.on {
+  background: var(--green-500);
+}
+.sj .ex-rule {
+  margin: -4px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--gray-600);
+}
+
+/* The exam's subjects, the student's own first and ticked. */
+.sj .ex-subjects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .ex-subjects li {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-height: 24px;
+  gap: 6px;
+  min-height: 28px;
+  padding: 4px 10px;
+  border-radius: var(--r-xs);
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--gray-200);
+  font-size: 12.5px;
   font-weight: 600;
-  font-size: 15px;
-  color: var(--purple-600);
+  color: var(--gray-700);
 }
-.sj .ex-card.ink .ex-cta {
-  color: var(--green-400);
+.sj .ex-subjects li.mine {
+  background: var(--green-100);
+  box-shadow: none;
+  color: #14561a;
 }
-.sj .ex-cta svg {
-  transition: transform var(--t-med) var(--ease);
+.sj .ex-subjects li.off {
+  opacity: 0.55;
 }
-.sj a.ex-card:hover .ex-cta svg {
-  transform: translateX(4px);
+.sj .ex-subjects li.more {
+  background: none;
+  box-shadow: none;
+  padding-left: 4px;
+  font-weight: 500;
+  color: var(--gray-500);
+}
+
+/* Two or more exams side by side: the button moves under the name. */
+.sj .ex-grid:not(.solo) .ex-card {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "id"
+    "cta"
+    "foot";
+  align-content: start;
+}
+.sj .ex-grid:not(.solo) .ex-cta {
+  justify-self: start;
+  margin: 0 0 20px 24px;
+}
+.sj .ex-grid:not(.solo) .ex-foot {
+  align-self: end;
 }
 
 /* Loading */
 .sj .ex-card.ex-skel {
   cursor: default;
 }
+.sj .ex-card.ex-skel .ex-foot {
+  gap: 12px;
+}
 
-/* Message card: icon and title on one line, words and button beneath, all left. */
+/* ---------------------------------------------------------------- message card */
+/* Icon and title on one line, words and button beneath, all left. */
 .sj .ex-note {
   display: flex;
   flex-direction: column;
@@ -215,6 +219,16 @@
 .sj .ex-note-head h3 {
   text-wrap: balance;
 }
+.sj .ex-ico {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-md);
+  background: var(--purple-050);
+  color: var(--purple-600);
+}
 .sj .ex-note p {
   max-width: 60ch;
   font-size: 14px;
@@ -228,29 +242,6 @@
   gap: 12px;
   margin-top: 8px;
   padding-bottom: 6px;
-}
-
-@media (max-width: 860px) {
-  .sj .ex-grid {
-    grid-template-columns: minmax(0, 1fr);
-    row-gap: 18px;
-  }
-  .sj .ex-card {
-    padding: 16px;
-  }
-  .sj .ex-card.ink.featured {
-    box-shadow: 5px 5px 0 var(--pink-400);
-  }
-  .sj .ex-short {
-    font-size: 26px;
-  }
-  .sj .ex-note {
-    padding: 16px;
-  }
-  .sj .ex-note-actions,
-  .sj .ex-note-actions > * {
-    width: 100%;
-  }
 }
 
 /* ---------------------------------------------------------------- hero aside */
@@ -297,77 +288,40 @@
   margin-top: 28px;
 }
 
-/* One exam: a single wide card, the words on the left and the numbers on the right. */
-.sj .ex-grid.solo {
-  grid-template-columns: minmax(0, 1fr);
-}
-.sj .ex-card.solo {
-  grid-row: auto;
-  grid-template-rows: none;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-  grid-template-areas:
-    "head foot"
-    "name foot"
-    "body foot";
-  column-gap: 44px;
-  align-content: start;
-  padding: 26px;
-}
-.sj .ex-card.solo .ex-head {
-  grid-area: head;
-}
-.sj .ex-card.solo .ex-short {
-  font-size: 44px;
-}
-.sj .ex-card.solo .ex-name {
-  grid-area: name;
-  font-size: 17px;
-}
-.sj .ex-card.solo .ex-body {
-  grid-area: body;
-}
-.sj .ex-card.solo .ex-foot {
-  grid-area: foot;
-  align-self: stretch;
-  justify-content: center;
-  padding: 0 0 0 44px;
-  border-top: 0;
-  border-left: 1px solid var(--gray-200);
-}
-.sj .ex-card.solo.ex-skel .ex-foot {
-  border-left-color: var(--gray-200);
-}
-
-/* The exam's subjects, the student's own ticked. */
-.sj .ex-subjects {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 2px 0 0;
-  padding: 0;
-  list-style: none;
-}
-.sj .ex-subjects li {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 28px;
-  padding: 4px 10px;
-  border-radius: var(--r-sm);
-  background: var(--gray-100);
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--gray-800);
-}
-.sj .ex-subjects li.mine {
-  background: var(--green-100);
-  color: #14561a;
-}
-.sj .ex-subjects li.off {
-  opacity: 0.55;
-}
-
 @media (max-width: 860px) {
+  .sj .ex-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+  .sj .ex-card,
+  .sj .ex-grid:not(.solo) .ex-card {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "id"
+      "cta"
+      "foot";
+  }
+  .sj .ex-id {
+    padding: 16px 16px 14px;
+  }
+  .sj .ex-short {
+    font-size: 30px;
+  }
+  .sj .ex-foot {
+    padding: 14px 16px;
+  }
+  .sj .ex-cta,
+  .sj .ex-grid:not(.solo) .ex-cta {
+    justify-self: stretch;
+    margin: 0 16px 20px;
+  }
+  .sj .ex-note {
+    padding: 16px;
+  }
+  .sj .ex-note-actions,
+  .sj .ex-note-actions > * {
+    width: 100%;
+  }
   .sj .ex-page .sj-hero-aside {
     width: 100%;
   }
@@ -381,68 +335,5 @@
   }
   .sj .ex-section + .ex-section {
     margin-top: 20px;
-  }
-  .sj .ex-card.solo {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      "body"
-      "head"
-      "name"
-      "foot";
-    row-gap: 8px;
-    padding: 16px;
-  }
-  .sj .ex-card.solo .ex-short {
-    font-size: 30px;
-  }
-  .sj .ex-card.solo .ex-name {
-    font-size: 15px;
-  }
-  .sj .ex-card.solo .ex-foot {
-    margin-top: 4px;
-    padding: 14px 0 0;
-    border-left: 0;
-    border-top: 1px solid rgba(215, 189, 255, 0.16);
-  }
-}
-
-/* On the light card, the one exam carries a quiet lime edge instead of a second ink block
-   under the ink hero: the page keeps one dark surface. */
-.sj a.ex-card.solo {
-  border-left: 4px solid var(--green-400);
-}
-
-/* The exam card reads top to bottom: who sets it (a small label), the exam (the headline, with
-   the goal badge on the same line), then its full name. No icon beside a word this big. */
-.sj .ex-card .ex-body {
-  margin: 0;
-  font-family: var(--f-mono);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--purple-600);
-}
-.sj .ex-card .ex-head {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.sj .ex-card .ex-head .ex-badge {
-  margin-left: auto;
-}
-.sj .ex-card .ex-name {
-  margin: 0;
-  font-size: 16px;
-  line-height: 1.45;
-  color: var(--gray-700);
-}
-@media (min-width: 861px) {
-  .sj .ex-card.solo {
-    grid-template-areas:
-      "body foot"
-      "head foot"
-      "name foot";
-    row-gap: 8px;
   }
 }

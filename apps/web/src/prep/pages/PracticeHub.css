@@ -111,10 +111,12 @@
   gap: 14px;
   min-width: 0;
 }
-/* One subject across the full width: starting a run on the left, where it stands on the right. */
+/* One subject, read top to bottom in three bands across the full width: the name and its
+   totals, starting a run, then where it stands. No side-by-side columns, so no column is ever
+   left half-empty, whatever state the subject is in. */
 .sj .ph-panel {
-  display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   border-radius: var(--r-lg);
   background: #fff;
@@ -122,24 +124,77 @@
   overflow: hidden;
 }
 .sj .ph-panel-skel {
-  gap: 18px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
   padding: 22px;
 }
-.sj .ph-start {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  min-width: 0;
-  padding: 22px 24px 24px;
-}
+
+/* Band 1: the name on the left, what has been done on the right, on one line. */
 .sj .ph-panel-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px 24px;
+  min-width: 0;
+  padding: 22px 24px 0;
+}
+.sj .ph-panel-name {
   display: flex;
   flex-direction: column;
   gap: 8px;
   min-width: 0;
 }
-.sj .ph-panel-head h2 {
+.sj .ph-panel-name h2 {
   text-wrap: balance;
+}
+.sj .ph-totals {
+  display: flex;
+  align-items: flex-end;
+  margin: 0 0 3px;
+  padding: 0;
+}
+.sj .ph-totals > div {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  padding: 0 16px;
+}
+.sj .ph-totals > div:first-child {
+  padding-left: 0;
+}
+.sj .ph-totals > div:last-child {
+  padding-right: 0;
+}
+.sj .ph-totals > div + div {
+  border-left: 1px solid var(--gray-200);
+}
+.sj .ph-totals dd {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--ink-900);
+}
+.sj .ph-totals dt {
+  font-size: 13px;
+  color: var(--gray-600);
+  white-space: nowrap;
+}
+.sj .ph-totals-none {
+  margin-bottom: 3px;
+  font-size: 13.5px;
+  color: var(--gray-600);
+}
+
+/* Band 2: the open run, then a fresh one. */
+.sj .ph-start {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+  padding: 20px 24px 24px;
 }
 
 /* The open run: one row, the whole row is the way back in. */
@@ -202,22 +257,34 @@
   flex: none;
 }
 
-/* A fresh run. */
+/* A fresh run: the question and the builder link on one line, the lengths and the start below. */
 .sj .ph-new {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 .sj .ph-new-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 4px 16px;
   flex-wrap: wrap;
+  min-height: 44px;
 }
 .sj .ph-new-title {
   font-weight: 600;
   font-size: 15px;
+  color: var(--gray-900);
+}
+.sj .ph-new-title .sj-muted {
+  font-weight: 400;
+  font-size: 13.5px;
+}
+.sj .ph-new-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
 }
 .sj .ph-lengths {
   display: grid;
@@ -266,31 +333,29 @@
 .sj .ph-length.on span {
   color: var(--green-400);
 }
-.sj .ph-new-actions {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px 22px;
-  margin-top: 6px;
-}
 
-/* The right side: where the subject stands. A quieter column on the paper tint. */
+/* Band 3: where it stands, on the paper tint, the full width of the card. */
 .sj .ph-standing {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   min-width: 0;
-  padding: 22px 24px 24px;
+  padding: 18px 24px;
   background: #faf9fc;
-  border-left: 1px solid var(--gray-200);
+  border-top: 1px solid var(--gray-200);
 }
-.sj .ph-standing-eyebrow {
-  color: var(--gray-500);
+/* Checked: score | what runs aim at | the report, in three aligned cells. */
+.sj .ph-stand {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px 28px;
 }
 .sj .ph-score {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 14px;
+  min-width: 0;
 }
 .sj .ph-score-num {
   display: inline-flex;
@@ -298,7 +363,8 @@
   gap: 4px;
 }
 .sj .ph-score-num .sj-num {
-  font-size: 48px;
+  font-size: 44px;
+  line-height: 1;
   color: var(--ink-900);
 }
 .sj .ph-score-num .sj-mono {
@@ -309,22 +375,21 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding-bottom: 4px;
   font-size: 13.5px;
+  line-height: 1.4;
   color: var(--gray-600);
 }
 .sj .ph-score-words b {
   font-weight: 600;
   color: var(--gray-900);
 }
-.sj .ph-report {
-  align-self: flex-start;
-  font-size: 14px;
-}
 .sj .ph-aims {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 0;
+  padding-left: 28px;
+  border-left: 1px solid var(--gray-200);
 }
 .sj .ph-aims-label {
   display: inline-flex;
@@ -357,51 +422,35 @@
   font-size: 11px;
   color: #9c1d4c;
 }
+.sj .ph-report {
+  justify-self: end;
+  white-space: nowrap;
+  font-size: 14px;
+}
 
+/* Not checked yet: the one next step, icon | words | button, on one line. */
 .sj .ph-callout {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px 16px;
+}
+.sj .ph-callout-text {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
+  gap: 2px;
+  min-width: 0;
 }
-.sj .ph-callout b {
+.sj .ph-callout-text b {
   font-size: 15px;
   font-weight: 600;
   color: var(--ink-900);
 }
-.sj .ph-callout p {
+.sj .ph-callout-text span {
   font-size: 13.5px;
   line-height: 1.5;
-  color: var(--gray-700);
-}
-
-.sj .ph-totals {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin: auto 0 0;
-  padding-top: 16px;
-  border-top: 1px solid var(--gray-200);
-}
-.sj .ph-totals > div {
-  display: flex;
-  flex-direction: column-reverse;
-  justify-content: flex-end;
-  gap: 6px;
-  min-width: 0;
-}
-.sj .ph-totals > div + div {
-  padding-left: 14px;
-  border-left: 1px solid var(--gray-200);
-}
-.sj .ph-totals dt {
-  font-size: 12px;
   color: var(--gray-600);
-  line-height: 1.3;
-}
-.sj .ph-totals dd {
-  margin: 0;
-  font-size: 24px;
-  color: var(--ink-900);
+  text-wrap: pretty;
 }
 
 /* History: the heading on the left, which runs on the right. */
@@ -638,13 +687,13 @@
 
 /* ---------------------------------------------------------------- narrower */
 @media (max-width: 1100px) {
-  /* Too tight for two columns: where it stands moves under the run controls. */
-  .sj .ph-panel {
-    grid-template-columns: minmax(0, 1fr);
+  /* The report link drops under the score and the aims. */
+  .sj .ph-stand {
+    grid-template-columns: auto minmax(0, 1fr);
   }
-  .sj .ph-standing {
-    border-left: 0;
-    border-top: 1px solid var(--gray-200);
+  .sj .ph-report {
+    grid-column: 1 / -1;
+    justify-self: start;
   }
   .sj .ph-how .sj-steps {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -652,20 +701,86 @@
 }
 
 @media (max-width: 860px) {
-  .sj .ph-start,
+  .sj .ph-panel-head {
+    padding: 16px 16px 0;
+  }
+  .sj .ph-start {
+    padding: 16px;
+    gap: 16px;
+  }
   .sj .ph-standing {
     padding: 16px;
+  }
+  .sj .ph-totals {
+    width: 100%;
+    margin: 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--gray-100);
+  }
+  .sj .ph-totals > div {
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sj .ph-totals dd {
+    font-size: 22px;
+  }
+  .sj .ph-totals dt {
+    font-size: 12px;
+    white-space: normal;
   }
   .sj .ph-open {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
   }
-  .sj .ph-new-actions > .sj-btn {
+  .sj .ph-new-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    min-height: 0;
+  }
+  .sj .ph-new-title .sj-muted {
+    display: block;
+  }
+  .sj .ph-new-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sj .ph-new-go {
     width: 100%;
   }
   .sj .ph-score-num .sj-num {
     font-size: 40px;
+  }
+  .sj .ph-stand {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+  .sj .ph-aims {
+    padding: 14px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--gray-200);
+  }
+  .sj .ph-report {
+    grid-column: auto;
+  }
+  /* Icon and title on one line; the words and the button start at the card's left edge. */
+  .sj .ph-callout {
+    grid-template-columns: auto minmax(0, 1fr);
+    row-gap: 10px;
+  }
+  .sj .ph-callout-text {
+    display: contents;
+  }
+  .sj .ph-callout-text > span {
+    grid-column: 1 / -1;
+    margin-top: -4px;
+  }
+  .sj .ph-callout-go {
+    grid-column: 1 / -1;
+  }
+  .sj .ph-callout-go > .sj-btn {
+    width: 100%;
   }
   .sj .ph-how {
     margin-top: 20px;
@@ -689,12 +804,6 @@
   }
   .sj .ph-length span {
     font-size: 10.5px;
-  }
-  .sj .ph-totals dd {
-    font-size: 24px;
-  }
-  .sj .ph-totals > div + div {
-    padding-left: 12px;
   }
   .sj .ph-history {
     margin-top: 20px;
@@ -1125,6 +1234,18 @@
   color: var(--purple-700);
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+.sj .ph-choose.narrow {
+  display: none;
+}
+@media (max-width: 860px) {
+  .sj .ph-choose.wide {
+    display: none;
+  }
+  .sj .ph-choose.narrow {
+    display: inline-flex;
+    align-self: flex-start;
+  }
 }
 .sj .ph-choose-go {
   transition: transform var(--t-med) var(--ease);

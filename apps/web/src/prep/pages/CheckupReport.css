@@ -568,8 +568,8 @@
   box-shadow: inset 0 0 0 1.5px var(--gray-200);
 }
 .sj .cp-seg button {
-  min-height: 40px;
-  padding: 8px 16px;
+  min-height: 36px;
+  padding: 6px 14px;
   border-radius: var(--r-sm);
   font-size: 13.5px;
   font-weight: 600;
@@ -598,25 +598,35 @@
     var(--gray-100) 5px 10px
   );
 }
+/* The topics' toolbar: the colour key, unboxed, on the left; the order switch on the right.
+   One row, one hairline under it, everything on the same centre line. */
+.sj .cp-topicbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin: 0 0 18px;
+  padding: 0 0 14px;
+  border-bottom: 1px solid var(--gray-200);
+}
 .sj .cp-bandkey {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin: 0 0 18px;
+  align-items: center;
+  gap: 8px 18px;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 .sj .cp-bandkey li {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  min-height: 34px;
-  padding: 6px 12px;
-  border-radius: var(--r-sm);
-  background: #fff;
-  box-shadow: inset 0 0 0 1px var(--gray-200);
-  font-size: 12.5px;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1.3;
   color: var(--gray-600);
+  white-space: nowrap;
 }
 .sj .cp-bandkey b {
   font-weight: 600;
@@ -1197,9 +1207,9 @@
     flex: 1;
   }
   .sj .cp-bandkey {
-    gap: 6px;
+    gap: 8px 14px;
   }
-  .sj .cp-bandkey li span:last-child {
+  .sj .cp-bandkey li span:not(.swatch) {
     display: none;
   }
   .sj .cp-split {
@@ -1324,5 +1334,99 @@
   }
   .sj .cp-notice-actions > .cp-tipline {
     width: auto;
+  }
+}
+
+/* ---------------------------------------------------------------- short of the target */
+/* The gap as a figure on the left, the plain reason in the middle, the one way to change it on
+   the right: the width of the card is used, and the eye reads the number first. */
+.sj .cp-short {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px 24px;
+  margin-top: 18px;
+  padding: 18px 22px 18px 18px;
+  border-radius: var(--r-lg);
+  background: var(--pink-100);
+}
+.sj .cp-short-fig {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+  min-width: 108px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(254, 118, 152, 0.35);
+}
+.sj .cp-short-fig .sj-num {
+  font-size: 40px;
+  line-height: 1;
+  color: #9c1d4c;
+}
+.sj .cp-short-fig span:last-child {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+.sj .cp-short-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.sj .cp-short-text strong {
+  font-size: 16.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink-900);
+  text-wrap: balance;
+}
+.sj .cp-short-text p {
+  max-width: 64ch;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--gray-700);
+  text-wrap: pretty;
+}
+.sj .cp-short-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+.sj .cp-short-actions .cp-tipline {
+  min-height: 28px;
+}
+@media (max-width: 860px) {
+  .sj .cp-short {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    padding: 16px;
+  }
+  .sj .cp-short-fig {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: flex-start;
+    gap: 8px;
+    min-width: 0;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .sj .cp-short-fig .sj-num {
+    font-size: 36px;
+  }
+  .sj .cp-short-fig span:last-child {
+    font-size: 14px;
+  }
+  .sj .cp-short-actions {
+    align-items: stretch;
+  }
+  .sj .cp-short-actions .cp-tipline {
+    align-self: flex-start;
   }
 }

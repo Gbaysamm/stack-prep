@@ -207,7 +207,8 @@ export function withDemoSubjects(overview: Overview): Overview {
               target_score: target,
             }
           : null,
-      open_checkup_session_id: null,
+      // Every seventh one has a check-up left half done, so that state can be seen too.
+      open_checkup_session_id: i % 7 === 3 ? `demo-checkup-${i}` : null,
       open_practice_session_id: i % 5 === 2 ? `demo-run-${i}` : null,
       practice: {
         runs_finished: checked ? (i * 3) % 9 : 0,

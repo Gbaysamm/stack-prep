@@ -13,7 +13,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api, type CheckupReport } from '../../student/api.js';
 import { IconArrowRight, IconBolt, IconBook, IconCalendar, IconClock, IconTarget, IconTrophy } from '../icons.js';
 import { progressApi, type SubjectOverview } from '../progressApi.js';
-import { useLoad, usePageTitle, useStudent } from '../store.js';
+import { useCachedLoad, useLoad, usePageTitle, useStudent } from '../store.js';
 import { SubjectSwitcher, rememberSubject, useOverview } from '../SubjectSwitcher.js';
 import { Button, CountUp, PageHero, Pager, ShowMore, Skeleton, Track, cx, usePaged, useShowMore } from '../ui.js';
 import { MetricTip } from './HowItsWorkedOut.js';
@@ -240,9 +240,8 @@ const TOPICS_SHOWN = 6;
 
 function Topics({ subject }: { subject: SubjectOverview }) {
   const latest = subject.latest_checkup;
-  const report = useLoad<CheckupReport | null>(
-    () => (latest ? api.report(latest.session_id) : Promise.resolve(null)),
-    [latest?.session_id],
+  const report = useCachedLoad<CheckupReport | null>(`report:${latest?.session_id ?? 'none'}`, () =>
+    latest ? api.report(latest.session_id) : Promise.resolve(null),
   );
   // Weakest first, the order TopicStrengths shows them in, so the cap keeps the weakest.
   const ordered = useMemo(
@@ -634,7 +633,7 @@ export function SubjectHub() {
             <SubjectSwitcher
               subjects={overview.data.subjects}
               value={subject.subject_id}
-              onChange={(id) => navigate(`/subjects/${id}`)}
+              onChange={(id) => navigate(`/subjects/${id}`, { replace: true })}
               label="Subject"
             />
           ) : undefined

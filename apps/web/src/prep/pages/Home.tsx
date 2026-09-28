@@ -668,7 +668,7 @@ function Hero({ overview, step }: { overview: Overview; step: NextStep; focus?: 
           Resume check-up
         </Button>
       );
-      secondary = <Link to="/checkup">What a check-up does</Link>;
+      // Mid check-up, what it does is known; how its numbers are read is the useful link.
       break;
     case 'first-checkup':
       lead = overview.subjects.some((s) => s.latest_checkup)
@@ -784,17 +784,14 @@ function Hero({ overview, step }: { overview: Overview; step: NextStep; focus?: 
             <b>{lead}</b>
           </span>{' '}
           {body}
-          <span className="home-how-phone">
-            <Link to={HOW_PATH}>How your numbers are worked out</Link>
-          </span>
         </>
       }
       actions={
         <>
           {action}
-          {secondary ? <span className="home-hero-link">{secondary}</span> : null}
-          <span className="home-hero-link quiet">
-            <Link to={HOW_PATH}>How your numbers are worked out</Link>
+          {/* One quiet way to read more, never two: the step's own link, else how the numbers work. */}
+          <span className="home-hero-link">
+            {secondary ?? <Link to={HOW_PATH}>How your numbers are worked out</Link>}
           </span>
         </>
       }
