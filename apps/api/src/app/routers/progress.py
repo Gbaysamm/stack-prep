@@ -50,6 +50,9 @@ STREAK_CONTEXTS = ("guided", "practice", "checkup")
 #:
 #: Finished is the stamp the loop now writes, or, for runs from before it wrote one, every
 #: question used up with none left waiting on its second try.
+#:
+#: A run the student deleted is still here, marked `hidden`: its answers still count, so the
+#: totals keep it, and only the lists of runs leave it out.
 RUNS = """
     SELECT ss.id AS session_id, ss.subject_id, s.name AS subject_name, ss.started_at,
            coalesce(ss.planned_items, :default_length) AS length,
@@ -59,7 +62,8 @@ RUNS = """
            coalesce(q.taught, 0) AS taught,
            (ss.ended_at IS NOT NULL
             OR (coalesce(q.answered, 0) >= coalesce(ss.planned_items, :default_length)
-                AND NOT coalesce(q.mid_question, false))) AS finished
+                AND NOT coalesce(q.mid_question, false))) AS finished,
+           ss.hidden_at IS NOT NULL AS hidden
     FROM study_sessions ss
     JOIN subjects s ON s.id = ss.subject_id
     LEFT JOIN LATERAL (
@@ -342,10 +346,20 @@ async def overview(
     )
     streak_days, active_today = streak([row["day"] for row in days], today)
 
+    # A deleted run is not shown or offered to resume, but the work in it still happened.
+    shown = [run for run in runs if not run["hidden"]]
+
     subject_views: list[SubjectOverview] = []
     for row in subjects:
         mine = [run for run in runs if run["subject_id"] == row["subject_id"]]
-        open_run = next((run for run in mine if not run["finished"]), None)
+        open_run = next(
+            (
+                run
+                for run in shown
+                if run["subject_id"] == row["subject_id"] and not run["finished"]
+            ),
+            None,
+        )
         goal = None
         if row["has_goal"]:
             study_days = list(row["study_days"]) if row["study_days"] else None
@@ -387,7 +401,7 @@ async def overview(
     return Overview(
         student=Student(student_id=student["id"], display_name=student["display_name"]),
         subjects=subject_views,
-        recent_runs=[_run(run) for run in runs[:RECENT_RUNS]],
+        recent_runs=[_run(run) for run in shown[:RECENT_RUNS]],
         streak_days=streak_days,
         active_today=active_today,
     )
@@ -431,6 +445,7 @@ async def practice_runs(
         conn,
         f"""
         WITH runs AS ({RUNS}
+          AND ss.hidden_at IS NULL
           AND (CAST(:before AS timestamptz) IS NULL OR ss.started_at < CAST(:before AS timestamptz))
           ORDER BY ss.started_at DESC
           LIMIT :limit

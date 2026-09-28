@@ -128,10 +128,44 @@ Confidence = Literal["guessed", "unsure", "sure"]
 Stage = Literal["asking", "hint", "explain", "finished"]
 
 
+class RunFilters(BaseModel):
+    """What a student chose to practise, when they chose.
+
+    A question qualifies when its subtopic is one of `subtopic_ids` or sits under one of
+    `topic_ids` (both empty means no narrowing by subject matter), and, when `exam_years` is
+    given, it was set in one of those years.
+    """
+
+    topic_ids: list[UUID] = Field(default_factory=list)
+    subtopic_ids: list[UUID] = Field(default_factory=list)
+    exam_years: list[int] = Field(default_factory=list)
+
+    def is_empty(self) -> bool:
+        return not (self.topic_ids or self.subtopic_ids or self.exam_years)
+
+
+#: Said when a student's choice leaves nothing to ask.
+NOTHING_MATCHES = "No questions match that choice yet. Try more topics or years."
+
+
 class StartPractice(BaseModel):
     student_id: UUID
     subject_id: UUID
     length: int = Field(default=DEFAULT_LENGTH, ge=1, le=40)
+    #: All optional. Absent or empty, the run is planned by the engine as it always was.
+    topic_ids: list[UUID] | None = Field(default=None, max_length=200)
+    subtopic_ids: list[UUID] | None = Field(default=None, max_length=500)
+    exam_years: list[Annotated[int, Field(ge=1900, le=2200)]] | None = Field(
+        default=None, max_length=100
+    )
+
+    def filters(self) -> RunFilters | None:
+        chosen = RunFilters(
+            topic_ids=list(dict.fromkeys(self.topic_ids or [])),
+            subtopic_ids=list(dict.fromkeys(self.subtopic_ids or [])),
+            exam_years=sorted(set(self.exam_years or []), reverse=True),
+        )
+        return None if chosen.is_empty() else chosen
 
 
 class AnswerIn(BaseModel):
@@ -224,17 +258,31 @@ class PracticeState(BaseModel):
     misconception: Misconception | None = None
     #: Said plainly to the student when the sitting ends.
     closing_note: str | None = None
+    #: The student's choice for a custom run; null for an ordinary one.
+    filters: RunFilters | None = None
+
+
+def session_filters(session: dict[str, Any]) -> RunFilters | None:
+    """The filters stored on a session, or None for an ordinary run."""
+    raw = session.get("practice_filters")
+    if raw is None:
+        return None
+    if isinstance(raw, str):
+        raw = json.loads(raw)
+    return RunFilters.model_validate(raw)
 
 
 async def _session(conn: AsyncConnection, session_id: UUID) -> dict[str, Any]:
+    """A guided session, or 404. A run the student deleted is gone as far as they can reach."""
     row = (
         (
             await conn.execute(
                 text(
                     """
-                    SELECT id, student_id, subject_id, planned_items, ended_at
+                    SELECT id, student_id, subject_id, planned_items, ended_at, started_at,
+                           practice_filters
                     FROM study_sessions
-                    WHERE id = :id AND session_type = 'guided'
+                    WHERE id = :id AND session_type = 'guided' AND hidden_at IS NULL
                     """
                 ),
                 {"id": session_id},
@@ -248,16 +296,81 @@ async def _session(conn: AsyncConnection, session_id: UUID) -> dict[str, Any]:
     return dict(row)
 
 
-async def _plan(conn: AsyncConnection, student_id: UUID, subject_id: UUID) -> list[str]:
+def allowed_units(units: list[UnitWeight], filters: RunFilters | None) -> list[UnitWeight]:
+    """The subtopics a run may draw from: all of them, or the ones the student chose."""
+    if filters is None or not (filters.topic_ids or filters.subtopic_ids):
+        return list(units)
+    topics = {str(topic_id) for topic_id in filters.topic_ids}
+    subtopics = {str(subtopic_id) for subtopic_id in filters.subtopic_ids}
+    return [unit for unit in units if unit.topic_id in topics or unit.unit_id in subtopics]
+
+
+async def _plan(
+    conn: AsyncConnection,
+    student_id: UUID,
+    subject_id: UUID,
+    filters: RunFilters | None = None,
+) -> list[str]:
     """Subtopics in the order the projection says they earn the most marks.
 
     Read from the same engine the report reads, so what the student is taught and what they
-    were told they would be taught cannot drift apart.
+    were told they would be taught cannot drift apart. A student's own choice narrows the list
+    but does not reorder it: within what they picked, the plan still goes first where it earns
+    the most.
     """
     units, _ = await _subtopics(conn, subject_id)
     standings = await _standings_from_history(conn, student_id, units)
     result = project(standings, sessions_available=len(units))
-    return [line.unit_id for line in result.plan]
+    allowed = {unit.unit_id for unit in allowed_units(units, filters)}
+    return [line.unit_id for line in result.plan if line.unit_id in allowed]
+
+
+async def _available(
+    conn: AsyncConnection,
+    subject_id: UUID,
+    student_id: UUID,
+    subtopic_ids: list[str],
+    exam_years: list[int],
+) -> int:
+    """How many questions a run narrowed this way could still ask this student.
+
+    The same pool `_pick` draws from (deliverable, not held out, never met before), so a run
+    shortened to this many can actually be served.
+    """
+    if not subtopic_ids:
+        return 0
+    value = (
+        await conn.execute(
+            text(
+                """
+                WITH deliverable AS MATERIALIZED (
+                  SELECT dq.question_id, dq.primary_skill_id, q.exam_year
+                  FROM deliverable_questions dq
+                  JOIN questions q ON q.id = dq.question_id AND q.usage_pool <> :pool
+                  WHERE dq.subject_id = :subject
+                )
+                SELECT count(DISTINCT d.question_id)
+                FROM deliverable d
+                JOIN curriculum_items skill ON skill.id = d.primary_skill_id
+                WHERE skill.parent_id::text = ANY(CAST(:subs AS text[]))
+                  AND (cardinality(CAST(:years AS int[])) = 0
+                       OR d.exam_year = ANY(CAST(:years AS int[])))
+                  AND NOT EXISTS (
+                      SELECT 1 FROM student_question_history h
+                      WHERE h.student_id = :student AND h.question_id = d.question_id
+                  )
+                """
+            ),
+            {
+                "pool": EXCLUDED_POOL,
+                "subject": subject_id,
+                "subs": subtopic_ids,
+                "years": exam_years,
+                "student": student_id,
+            },
+        )
+    ).scalar()
+    return int(value or 0)
 
 
 async def _standings_from_history(
@@ -334,14 +447,19 @@ async def _level_for(conn: AsyncConnection, student_id: UUID, subtopic_id: str) 
 
 
 async def _pick(
-    conn: AsyncConnection, subject_id: UUID, student_id: UUID, subtopic_id: str, level: int
+    conn: AsyncConnection,
+    subject_id: UUID,
+    student_id: UUID,
+    subtopic_id: str,
+    level: int,
+    exam_years: list[int] | None = None,
 ) -> dict[str, Any] | None:
     rows = await fetch_all(
         conn,
         """
         WITH deliverable AS MATERIALIZED (
           SELECT dq.question_id, dq.question_version_id, dq.mastery_level_number,
-                 dq.primary_skill_id
+                 dq.primary_skill_id, q.exam_year
           FROM deliverable_questions dq
           JOIN questions q ON q.id = dq.question_id AND q.usage_pool <> :pool
           WHERE dq.subject_id = :subject
@@ -356,6 +474,8 @@ async def _pick(
         JOIN curriculum_items sub ON sub.id = skill.parent_id
         JOIN curriculum_items topic ON topic.id = sub.parent_id
         WHERE sub.id = CAST(:sub AS uuid)
+          AND (cardinality(CAST(:years AS int[])) = 0
+               OR dq.exam_year = ANY(CAST(:years AS int[])))
           AND NOT EXISTS (
               SELECT 1 FROM student_question_history h
               WHERE h.student_id = :student AND h.question_id = dq.question_id
@@ -369,6 +489,7 @@ async def _pick(
         sub=subtopic_id,
         student=str(student_id),
         level=level,
+        years=list(exam_years or []),
     )
     return rows[0] if rows else None
 
@@ -417,6 +538,7 @@ async def _state(
     repeat_version_id: UUID | None = None,
 ) -> PracticeState:
     """The whole loop's state, rebuilt from what is stored rather than carried in memory."""
+    filters = session_filters(session)
     counts = (
         (
             await conn.execute(
@@ -491,10 +613,16 @@ async def _state(
                 figures=await figures_for(conn, repeat_version_id),
             )
     elif stage == "asking" and seen < length:
-        for subtopic_id in await _plan(conn, session["student_id"], session["subject_id"]):
+        plan = await _plan(conn, session["student_id"], session["subject_id"], filters)
+        for subtopic_id in plan:
             level = await _level_for(conn, session["student_id"], subtopic_id)
             picked = await _pick(
-                conn, session["subject_id"], session["student_id"], subtopic_id, level
+                conn,
+                session["subject_id"],
+                session["student_id"],
+                subtopic_id,
+                level,
+                filters.exam_years if filters is not None else None,
             )
             if picked is not None:
                 question = PracticeQuestion(
@@ -537,6 +665,7 @@ async def _state(
         correct_option_key=correct_option_key,
         misconception=misconception,
         closing_note=closing,
+        filters=filters,
     )
 
 
@@ -550,21 +679,39 @@ async def start(
     ).first()
     if student is None:
         raise HTTPException(status_code=404, detail="unknown student")
+    length = body.length
+    filters = body.filters()
+    if filters is not None:
+        # A custom run is shortened to what its choice can actually serve, and refused
+        # outright when that is nothing, rather than started and finished on the spot.
+        units, _ = await _subtopics(conn, body.subject_id)
+        available = await _available(
+            conn,
+            body.subject_id,
+            body.student_id,
+            [unit.unit_id for unit in allowed_units(units, filters)],
+            filters.exam_years,
+        )
+        if available == 0:
+            raise HTTPException(status_code=422, detail=NOTHING_MATCHES)
+        length = min(length, available)
     session_id = (
         await conn.execute(
             text(
                 """
                 INSERT INTO study_sessions (student_id, subject_id, session_type,
-                  planned_items, engine_version)
-                VALUES (:student, :subject, 'guided', :length, :engine)
+                  planned_items, engine_version, practice_filters)
+                VALUES (:student, :subject, 'guided', :length, :engine,
+                  CAST(:filters AS jsonb))
                 RETURNING id
                 """
             ),
             {
                 "student": body.student_id,
                 "subject": body.subject_id,
-                "length": body.length,
+                "length": length,
                 "engine": ENGINE_VERSION,
+                "filters": filters.model_dump_json() if filters is not None else None,
             },
         )
     ).scalar_one()
@@ -1483,7 +1630,7 @@ async def listen(
 
 #: How a beat may mark an earlier line on the board, the way a teacher circles a term or draws
 #: an arrow back to where a line came from.
-PointKind = Literal["circle", "underline", "arrow", "box"]
+PointKind = Literal["circle", "underline", "arrow", "box", "highlight", "strike"]
 
 
 class LessonPoint(BaseModel):
@@ -1512,7 +1659,7 @@ def _points(raw: object) -> list[LessonPoint] | None:
         line, kind = item.get("line"), item.get("kind")
         if isinstance(line, bool) or not isinstance(line, int):
             continue
-        if kind not in ("circle", "underline", "arrow", "box"):
+        if kind not in ("circle", "underline", "arrow", "box", "highlight", "strike"):
             continue
         label, at = item.get("text"), item.get("at")
         kept.append(

@@ -26,6 +26,7 @@ from app.routers import (
     progress,
     publishing,
     review,
+    runs,
     student,
 )
 
@@ -64,6 +65,7 @@ def create_app() -> FastAPI:
     app.include_router(figures.router)
     app.include_router(student.router)
     app.include_router(progress.router)
+    app.include_router(runs.router)
     # Student creation without a login, for building the student side. The router refuses to
     # answer unless app_env is local or ci, so shipping it is not the same as exposing it.
     app.include_router(dev.router)
