@@ -1086,32 +1086,20 @@ export function Board({
 
   // THE MARKS. A beat may point back at a line already written — circle a term, underline
   // it, draw an arrow to where a line came from — the way a teacher turns to the board and
-  // points. The current beat's marks are drawn in full; the last beat's stay, faded, until
-  // the next beat that points at something; older ones are rubbed out so the board does not
-  // fill with arrows. None show while the coach is answering a question: they belong to the
-  // lesson, not the answer.
+  // points. Once drawn, a mark stays, as solid as when it went up: a teacher does not rub out
+  // the circle round the value they just used, and a student scrolling back should find every
+  // arrow and underline the lesson made, not a board that forgets. The current beat's marks
+  // wait for their line to be written (above); every earlier beat's stay as they were.
   const markSets: MarkSet[] = useMemo(() => {
     const current = shown - 1;
-    let past = -1;
-    for (let index = current - 1; index >= 0; index -= 1) {
-      if (lines[index]?.point.length) {
-        past = index;
-        break;
-      }
-    }
     const sets: MarkSet[] = [];
     lines.forEach((line, index) => {
       if (!line.point.length || index > current) return;
-      let state: MarkState;
-      if (asked !== null) state = "gone";
-      else if (index === current) {
-        if (pointing !== index) return;
-        state = "live";
-      } else state = index === past ? "past" : "gone";
-      sets.push({ index, points: line.point, state });
+      if (index === current && pointing !== index) return;
+      sets.push({ index, points: line.point, state: "live" });
     });
     return sets;
-  }, [asked, lines, pointing, shown]);
+  }, [lines, pointing, shown]);
 
   // FOLLOWING THE HAND. The line being written is always in view, above the coach card that
   // floats over the bottom of the board. The board used to scroll to its bottom once a step
