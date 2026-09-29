@@ -10,23 +10,28 @@ exam_year: 1983
 lessons:
   1:
     moments:
-      - say: 'We have five measurements: 5, 9, 3, 5 and 8. We want the median, $M$, and the mode, $D$, written as a pair.'
+      - say: 'We have five measurements: 5, 9, 3, 5 and 8. We want the median, $M$, and the mode, $D$, written as a pair. Picture them as five cards.'
+        doodle: {name: 'custom:1983_q01_a', id: cards, caption: 'five measurements'}
         write: 'Data: $5,\ 9,\ 3,\ 5,\ 8$'
       - say: 'First, what do the words mean? The median is the middle value, once the numbers are put in order.'
         write: 'Median $M$: the middle value, in order'
       - say: 'And the mode is the value that appears most often.'
         write: 'Mode $D$: the most frequent value'
-      - say: 'So let''s put the numbers in order, smallest first. The smallest is 3, then the two 5s, then 8, then 9.'
+      - say: 'So let''s put the cards in order, smallest first. The smallest is 3, then the two 5s, then 8, then 9.'
+        doodle_do: [{id: cards, op: stage, stage: 'custom:1983_q01_a2'}]
         write: 'In order: $3,\ 5,\ 5,\ 8,\ 9$'
       - say: 'How many values are there? Five. With five values, the middle one is the third, because two values sit on each side of it.'
         write: '$n = 5$, so the middle is the 3rd value'
-      - say: 'Now count along the ordered list: 3 is first, 5 is second, and 5 is third. So the median is 5.'
+      - say: 'Now count along the bottom row of cards: 3 is first, 5 is second, and 5 is third. So the median is 5.'
+        doodle_do: [{id: cards, op: circle, part: mid}]
         write: 'Median: $M = 5$'
         point:
           - {line: 4, kind: circle, at: '3rd', text: 'the middle'}
+          - {line: 5, kind: highlight, at: 'M=5', to: {doodle: cards, part: mid}}
       - say: 'Now the mode. Go back to the ordered list and count each value: 3 appears once, 5 appears twice, 8 once and 9 once.'
         write: 'Counts: $3 \to 1,\ \ 5 \to 2,\ \ 8 \to 1,\ \ 9 \to 1$'
-      - say: '5 appears more often than any other value, so the mode is 5.'
+      - say: 'Look at the two green cards. 5 appears more often than any other value, so the mode is 5.'
+        doodle_do: [{id: cards, op: highlight, part: s5}, {id: cards, op: highlight, part: mid}]
         write: 'Mode: $D = 5$'
         point:
           - {line: 6, kind: circle, at: '5→2', text: 'most often'}
@@ -40,16 +45,20 @@ lessons:
       E: 'You went for 7, 5. The mode is right, but the median is the middle value after sorting: 3, 5, 5, 8, 9. The middle one is 5, not 7.'
   2:
     moments:
-      - say: 'Two partners, X and Y, share the profit in the ratio 4 to 5. At the end of the year, Y got ₦5,000 more than X. We want the total profit.'
-        doodle: {name: 'custom:1983_q02_a', caption: 'Profit shared X : Y = 4 : 5'}
+      - say: 'Picture the profit as two sacks of money. Two partners, X and Y, share the profit in the ratio 4 to 5. At the end of the year, Y got ₦5,000 more than X. We want the total profit.'
+        doodle: {name: 'custom:1983_q02_a', id: sacks, caption: 'Profit shared X : Y = 4 : 5'}
         write: 'Ratio: $X : Y = 4 : 5$'
       - say: 'Think of the profit as cut into equal parts. X gets 4 of the parts and Y gets 5 of them.'
         write: 'X gets 4 parts, Y gets 5 parts'
       - say: 'So how many more parts does Y get than X? 5 minus 4 is 1. Y gets 1 part more.'
         write: 'Difference: $5 - 4 = 1$ part'
-      - say: 'And the question says Y got ₦5,000 more than X. So that 1 extra part must be worth ₦5,000.'
+      - say: 'Look at the extra on Y''s sack. And the question says Y got ₦5,000 more than X. So that 1 extra part must be worth ₦5,000.'
+        doodle_do: [{id: sacks, op: circle, part: diff}]
         write: '1 part = ₦5,000'
-      - say: 'Now the whole profit. Going back to the ratio, the total number of parts is 4 plus 5, which is 9.'
+        point:
+          - {line: 3, kind: highlight, at: '₦5,000', to: {doodle: sacks, part: diff}}
+      - say: 'Now the whole profit, both sacks together. Going back to the ratio, the total number of parts is 4 plus 5, which is 9.'
+        doodle_do: [{id: sacks, op: stage, stage: 'custom:1983_q02_a2'}]
         write: 'Total parts: $4 + 5 = 9$'
       - say: 'Each of those 9 parts is worth ₦5,000, so the total profit is 9 times 5,000.'
         write: 'Total profit $= 9 \times 5{,}000$'
@@ -58,9 +67,11 @@ lessons:
           - {line: 5, kind: move, from: {line: 3, at: '₦5,000'}, at: '5,000', text: 'each part'}
       - say: '9 times 5,000 is 45,000.'
         write: '$= 45{,}000$'
-      - say: 'Let''s check. X gets 4 parts, and 4 times 5,000 is 20,000.'
+      - say: 'Let''s check, sack by sack. X gets 4 parts, and 4 times 5,000 is 20,000.'
+        doodle_do: [{id: sacks, op: label, part: x, text: '₦20,000'}]
         write: 'X: $4 \times 5{,}000 = 20{,}000$'
       - say: 'Y gets 5 parts, and 5 times 5,000 is 25,000.'
+        doodle_do: [{id: sacks, op: label, part: 'y', text: '₦25,000'}]
         write: 'Y: $5 \times 5{,}000 = 25{,}000$'
       - say: 'The difference is 25,000 minus 20,000, which is 5,000, just as the question said.'
         write: 'Difference: $25{,}000 - 20{,}000 = 5{,}000$'
@@ -121,11 +132,13 @@ lessons:
       E: 'You went for 135 degrees. That''s the interior angle of a regular octagon, with 8 sides. A hexagon has 6 sides, so each interior angle is 180 minus 60, which is 120.'
   4:
     moments:
-      - say: 'Three expressions are all equal to each other: $4x - 3$, $3x + y$ and $2y + 5x - 12$. We want $x$ and $y$.'
+      - say: 'Three expressions are all equal to each other: $4x - 3$, $3x + y$ and $2y + 5x - 12$. We want $x$ and $y$. Picture them as a chain of three.'
+        doodle: {name: 'custom:1983_q04_a', id: chain, caption: 'one chain, two links'}
         write: '$4x - 3 = 3x + y = 2y + 5x - 12$'
       - say: 'A chain like this holds two equations. We''ll set the first expression equal to the second, and then the second equal to the third.'
         write: 'Two equations from one chain'
-      - say: 'First pair: $4x - 3$ equals $3x + y$.'
+      - say: 'Take the top link. First pair: $4x - 3$ equals $3x + y$.'
+        doodle_do: [{id: chain, op: highlight, part: l1}]
         write: 'First pair: $4x - 3 = 3x + y$'
       - say: 'Subtract $3x$ from both sides. $4x$ minus $3x$ is $x$, so $x - 3$ equals $y$.'
         write: '$x - 3 = y$'
@@ -134,7 +147,8 @@ lessons:
         point:
           - {line: 4, kind: move, from: {line: 3, at: '=y'}, at: '−y', text: 'across'}
           - {line: 4, kind: move, from: {line: 3, at: '−3'}, at: '=3', text: 'across'}
-      - say: 'Second pair: $3x + y$ equals $2y + 5x - 12$.'
+      - say: 'Now the bottom link. Second pair: $3x + y$ equals $2y + 5x - 12$.'
+        doodle_do: [{id: chain, op: highlight, part: l2}]
         write: 'Second pair: $3x + y = 2y + 5x - 12$'
       - say: 'Bring the letters to the left by subtracting $2y$ and $5x$ from both sides.'
         write: '$3x - 5x + y - 2y = -12$'
@@ -160,7 +174,8 @@ lessons:
           - {line: 12, kind: move, from: {line: 11, at: '=5'}, at: '[[5]]−y', text: 'sub in'}
       - say: 'So $y$ is 5 minus 3, which is 2.'
         write: '$y = 5 - 3 = 2$'
-      - say: 'Let''s check all three expressions. 4 times 5, minus 3, is 17. 3 times 5, plus 2, is 17. And 2 times 2, plus 5 times 5, minus 12, is 4 plus 25 minus 12, which is 17.'
+      - say: 'Let''s check all three links of the chain. 4 times 5, minus 3, is 17. 3 times 5, plus 2, is 17. And 2 times 2, plus 5 times 5, minus 12, is 4 plus 25 minus 12, which is 17.'
+        doodle_do: [{id: chain, op: label, part: e1, text: '17'}, {id: chain, op: label, part: e2, text: '17'}, {id: chain, op: label, part: e3, text: '17'}]
         write: 'Check: $4(5) - 3 = 17,\ \ 3(5) + 2 = 17,\ \ 2(2) + 5(5) - 12 = 17$'
       - say: 'So $x = 5$ and $y = 2$, which is answer choice A.'
         write: '$x = 5,\ y = 2$'
@@ -172,9 +187,11 @@ lessons:
       E: 'You went for $x = -5$ and $y = -2$. Both signs are wrong. Adding the equations gives $3x = 15$, so $x$ is positive 5, and $y = x - 3$ is positive 2.'
   5:
     moments:
-      - say: 'We''re told that $x = 1$ is a root of $x^3 - 2x^2 - 5x + 6 = 0$. We want the other two roots.'
+      - say: 'We''re told that $x = 1$ is a root of $x^3 - 2x^2 - 5x + 6 = 0$. We want the other two roots. Picture the curve: it crosses the axis three times.'
+        doodle: {name: 'custom:1983_q05_a', id: curve, caption: 'three crossings, one known'}
         write: '$x^{3} - 2x^{2} - 5x + 6 = 0$'
-      - say: 'If 1 is a root, then $x - 1$ is a factor. So we divide the cubic by $x - 1$, and a quadratic will be left over.'
+      - say: 'That known crossing is at 1. If 1 is a root, then $x - 1$ is a factor. So we divide the cubic by $x - 1$, and a quadratic will be left over.'
+        doodle_do: [{id: curve, op: circle, part: r1}]
         write: 'Root $x = 1$, so $(x - 1)$ is a factor'
       - say: 'Let''s use synthetic division. Write down the coefficients of the cubic: 1, negative 2, negative 5 and 6. We divide by the root, 1.'
         write: 'Coefficients: $1,\ -2,\ -5,\ 6$'
@@ -197,7 +214,8 @@ lessons:
         write: '$-3 \times 2 = -6,\quad -3 + 2 = -1$'
       - say: 'So the quadratic factorises as $x - 3$ times $x + 2$.'
         write: '$x^{2} - x - 6 = (x - 3)(x + 2)$'
-      - say: 'Set each factor to zero. $x - 3 = 0$ gives $x = 3$, and $x + 2 = 0$ gives $x = -2$.'
+      - say: 'Set each factor to zero. $x - 3 = 0$ gives $x = 3$, and $x + 2 = 0$ gives $x = -2$. Those are the two missing crossings.'
+        doodle_do: [{id: curve, op: label, part: r3, text: '3'}, {id: curve, op: label, part: r2, text: '−2'}]
         write: '$x - 3 = 0 \Rightarrow x = 3,\quad x + 2 = 0 \Rightarrow x = -2$'
       - say: 'Let''s check $x = 3$ in the original cubic: 27 minus 18 minus 15 plus 6 is zero.'
         write: 'At $x = 3$: $27 - 18 - 15 + 6 = 0$'
@@ -206,6 +224,8 @@ lessons:
       - say: 'So the other roots are 3 and negative 2, which is answer choice C.'
         write: 'Other roots: $x = 3$ and $x = -2$'
         answer: true
+        point:
+          - {line: 13, kind: highlight, at: 'x=3', to: {doodle: curve, part: r3}}
     traps:
       A: 'You went for negative 3 and 2. Those are the numbers inside the brackets, not the roots. The factor $x - 3$ is zero when $x$ is positive 3, and $x + 2$ is zero when $x$ is negative 2.'
       B: 'You went for negative 2 and 2. Negative 2 is a root, but 2 is not: 8 minus 8 minus 10 plus 6 is negative 4, not zero. The other root is 3.'
@@ -213,15 +233,19 @@ lessons:
       E: 'You went for negative 3 and 1. The 1 was already given, and negative 3 is not a root at all. The quadratic left over is $(x - 3)(x + 2)$, giving 3 and negative 2.'
   6:
     moments:
-      - say: '$x$ is jointly proportional to the cube of $y$ and the fourth power of $z$. We halve $y$, double $z$, and ask how $x$ changes.'
+      - say: '$x$ is jointly proportional to the cube of $y$ and the fourth power of $z$. We halve $y$, double $z$, and ask how $x$ changes. Picture $x$ as a row of tiles multiplied together.'
+        doodle: {name: 'custom:1983_q06_a', id: tiles, caption: 'three y tiles, four z tiles'}
         write: '$x \propto y^{3}z^{4}$'
       - say: 'Jointly proportional means $x$ equals a constant, $k$, times $y$ cubed times $z$ to the fourth.'
         write: '$x = ky^{3}z^{4}$'
-      - say: 'Halving $y$ turns it into $y$ over 2. Doubling $z$ turns it into $2z$. Let''s put those into the formula to get the new $x$.'
+      - say: 'On the tiles, watch every $y$ get halved and every $z$ get doubled. Halving $y$ turns it into $y$ over 2. Doubling $z$ turns it into $2z$. Let''s put those into the formula to get the new $x$.'
+        doodle_do: [{id: tiles, op: stage, stage: 'custom:1983_q06_a2'}]
         write: 'New $x = k\left(\dfrac{y}{2}\right)^{3}(2z)^{4}$'
       - say: 'Each bracket keeps its own power. $y$ over 2, cubed, is $y$ cubed over 2 cubed, and 2 cubed is 8.'
+        doodle_do: [{id: tiles, op: label, part: ys, text: '½ × ½ × ½ = ⅛'}]
         write: '$\left(\dfrac{y}{2}\right)^{3} = \dfrac{y^{3}}{2^{3}} = \dfrac{y^{3}}{8}$'
       - say: '$2z$ to the fourth is 2 to the fourth times $z$ to the fourth. 2 times 2 times 2 times 2 is 16.'
+        doodle_do: [{id: tiles, op: label, part: zs, text: '2 × 2 × 2 × 2 = 16'}]
         write: '$(2z)^{4} = 2^{4}z^{4} = 16z^{4}$'
       - say: 'Now put both of those back into the new $x$.'
         write: 'New $x = k \times \dfrac{y^{3}}{8} \times 16z^{4}$'
@@ -313,14 +337,16 @@ lessons:
     moments:
       - say: 'We know $\cos z = L$, where $z$ is acute. We want the expression cot $z$ minus cosec $z$, over sec $z$ plus tan $z$, written in terms of $L$.'
         write: '$\dfrac{\cot z - \operatorname{cosec} z}{\sec z + \tan z}$'
-      - say: 'The plan: write everything using sine and cosine, simplify, then replace them with $L$. First we need $\sin z$, and for that we use the identity sine squared plus cos squared equals 1.'
+      - say: 'Picture a right triangle with hypotenuse 1 and the side next to $z$ equal to $L$, so $\cos z = L$. The plan: write everything using sine and cosine, simplify, then replace them with $L$. First we need $\sin z$, and for that we use the identity sine squared plus cos squared equals 1.'
+        doodle: {name: 'custom:1983_q08_a', id: tri, caption: 'cos z = L over 1'}
         write: '$\sin^{2}z + \cos^{2}z = 1$'
       - say: 'Put $L$ in for $\cos z$ and move it across. $\sin^2 z$ is 1 minus $L$ squared.'
         write: '$\sin^{2}z = 1 - L^{2}$'
         point:
           - {line: 1, kind: box, text: 'identity'}
           - {line: 2, kind: move, from: {line: 1, at: 'cos2z'}, at: '−L2', text: 'across, as L²'}
-      - say: 'Since $z$ is acute, its sine is positive, so $\sin z$ is the positive square root.'
+      - say: 'Since $z$ is acute, its sine is positive, so $\sin z$ is the positive square root. It is the third side of the triangle.'
+        doodle_do: [{id: tri, op: label, part: opp, text: 'sin z'}]
         write: '$\sin z = \sqrt{1 - L^{2}}$'
       - say: 'Now the top of our expression. Cot is cos over sin, and cosec is 1 over sin.'
         write: 'Top: $\cot z - \operatorname{cosec} z = \dfrac{\cos z}{\sin z} - \dfrac{1}{\sin z}$'
@@ -337,6 +363,7 @@ lessons:
       - say: 'On top, $L$ times $L - 1$ is $L^2 - L$. On the bottom, $\sin z$ times $1 + \sin z$ is $\sin z + \sin^2 z$.'
         write: '$= \dfrac{L^{2} - L}{\sin z + \sin^{2}z}$'
       - say: 'Now go back to the two lines we found at the start: $\sin z$ is the root of $1 - L^2$, and $\sin^2 z$ is $1 - L^2$.'
+        doodle_do: [{id: tri, op: pulse, part: opp}]
         write: '$= \dfrac{L^{2} - L}{\sqrt{1 - L^{2}} + (1 - L^{2})}$'
         point:
           - {line: 11, kind: move, from: {line: 3, at: '1−L2'}, at: '[[1−L2]]+(', text: 'sin z'}
@@ -353,12 +380,19 @@ lessons:
     moments:
       - say: 'We multiply 0.0000152 by 0.00042 and write the answer as $A$ times 10 to the $B$, with $A$ between 1 and 10.'
         write: '$0.0000152 \times 0.00042 = A \times 10^{B}$'
-      - say: 'The easiest way is to put each number in standard form first: a number from 1 up to 10, times a power of 10.'
+      - say: 'The easiest way is to put each number in standard form first: a number from 1 up to 10, times a power of 10. Watch the decimal point hop.'
+        doodle: {name: 'custom:1983_q09_a', id: hops, caption: 'the point hops right'}
         write: 'Standard form: $A \times 10^{B}$ with $1 \le A < 10$'
       - say: 'For 0.0000152, the decimal point moves 5 places to the right to give 1.52. Moving it right means a negative power, so it''s 1.52 times 10 to the negative 5.'
+        doodle_do: [{id: hops, op: stage, stage: 'custom:1983_q09_a2'}]
         write: '$0.0000152 = 1.52 \times 10^{-5}$'
+        point:
+          - {line: 2, kind: highlight, at: '10−5', to: {doodle: hops, part: hops1}}
       - say: 'For 0.00042, the point moves 4 places to the right to give 4.2. So it''s 4.2 times 10 to the negative 4.'
+        doodle_do: [{id: hops, op: stage, stage: 'custom:1983_q09_a3'}]
         write: '$0.00042 = 4.2 \times 10^{-4}$'
+        point:
+          - {line: 3, kind: highlight, at: '10−4', to: {doodle: hops, part: hops2}}
       - say: 'Now put both back into the product, and group the numbers together and the powers of 10 together.'
         write: 'Product $= (1.52 \times 4.2) \times (10^{-5} \times 10^{-4})$'
       - say: 'First the numbers. Split 4.2 into 4 and 0.2. 1.52 times 4 is 6.08, and 1.52 times 0.2 is 0.304.'
@@ -386,15 +420,18 @@ lessons:
     moments:
       - say: '$x + 2$ and $x - 1$ are both factors of $lx^3 + 2kx^2 + 24$. We want the values of $l$ and $k$.'
         write: '$f(x) = lx^{3} + 2kx^{2} + 24$'
-      - say: 'The factor theorem says: if $x - a$ is a factor, then putting $x = a$ into the expression gives zero.'
+      - say: 'The factor theorem says: if $x - a$ is a factor, then putting $x = a$ into the expression gives zero. Picture each factor as a key that must make the lock read zero.'
+        doodle: {name: 'custom:1983_q10_a', id: keys, caption: 'each factor is a key to zero'}
         write: 'Factor theorem: $(x - a)$ a factor $\Rightarrow f(a) = 0$'
-      - say: 'For the factor $x - 1$, setting it to zero gives $x = 1$. So we put 1 in place of $x$.'
+      - say: 'First key. For the factor $x - 1$, setting it to zero gives $x = 1$. So we put 1 in place of $x$.'
+        doodle_do: [{id: keys, op: highlight, part: key1}]
         write: '$f(1) = l(1)^{3} + 2k(1)^{2} + 24 = 0$'
         point:
           - {line: 1, kind: box, text: 'the rule'}
       - say: '1 cubed and 1 squared are both 1. That''s equation one.'
         write: '$l + 2k + 24 = 0 \quad (1)$'
-      - say: 'For the factor $x + 2$, setting it to zero gives $x = -2$, not positive 2. So we put negative 2 in place of $x$.'
+      - say: 'Second key. For the factor $x + 2$, setting it to zero gives $x = -2$, not positive 2. So we put negative 2 in place of $x$.'
+        doodle_do: [{id: keys, op: highlight, part: key2}]
         write: '$f(-2) = l(-2)^{3} + 2k(-2)^{2} + 24 = 0$'
       - say: 'Negative 2 cubed is negative 8, and negative 2 squared is 4. $2k$ times 4 is $8k$.'
         write: '$-8l + 8k + 24 = 0$'
@@ -418,9 +455,11 @@ lessons:
         write: 'From (2): $l = -9 + 3 = -6$'
         point:
           - {line: 12, kind: move, from: {line: 11, at: '=−9'}, at: '−9+3', text: 'k'}
-      - say: 'Check at $x = 1$: negative 6, plus 2 times negative 9, plus 24. That''s negative 6 minus 18 plus 24, which is zero.'
+      - say: 'Try the first key in the lock. Check at $x = 1$: negative 6, plus 2 times negative 9, plus 24. That''s negative 6 minus 18 plus 24, which is zero.'
+        doodle_do: [{id: keys, op: arrow, part: key1, to_part: lock}]
         write: 'Check $f(1)$: $-6 + 2(-9) + 24 = -6 - 18 + 24 = 0$'
-      - say: 'And at $x = -2$: negative 8 times negative 6 is 48, and 8 times negative 9 is negative 72. 48 minus 72 plus 24 is zero.'
+      - say: 'And the second key. And at $x = -2$: negative 8 times negative 6 is 48, and 8 times negative 9 is negative 72. 48 minus 72 plus 24 is zero.'
+        doodle_do: [{id: keys, op: arrow, part: key2, to_part: lock}]
         write: 'Check $f(-2)$: $-8(-6) + 8(-9) + 24 = 48 - 72 + 24 = 0$'
       - say: 'So $l = -6$ and $k = -9$, which is answer choice A.'
         write: '$l = -6,\ k = -9$'
@@ -432,13 +471,16 @@ lessons:
       E: 'You went for $l = 6$ and $k = 0$. At $x = 1$ that gives 6 plus 24, which is 30, not zero. Remember the factor $x + 2$ means putting in $x = -2$.'
   11:
     moments:
-      - say: 'We want to make $T$ the subject of this equation: $av$ over $1 - v$ equals the cube root of $2v + T$ over $2aT$.'
+      - say: 'We want to make $T$ the subject of this equation: $av$ over $1 - v$ equals the cube root of $2v + T$ over $2aT$. Picture $T$ wrapped in layers.'
+        doodle: {name: 'custom:1983_q11_a', id: layers, caption: 'T is wrapped in layers'}
         write: '$\dfrac{av}{1 - v} = \sqrt[3]{\dfrac{2v + T}{2aT}}$'
-      - say: '$T$ is trapped inside a cube root, so the first job is to remove the root. The opposite of a cube root is cubing, so we cube both sides.'
+      - say: 'Peel the outer layer first. $T$ is trapped inside a cube root, so the first job is to remove the root. The opposite of a cube root is cubing, so we cube both sides.'
+        doodle_do: [{id: layers, op: cross, part: root}]
         write: '$\left(\dfrac{av}{1 - v}\right)^{3} = \dfrac{2v + T}{2aT}$'
       - say: 'Cubing a fraction cubes the top and the bottom. $av$ cubed is $a^3v^3$, and the bottom becomes $1 - v$, cubed.'
         write: '$\dfrac{a^{3}v^{3}}{(1 - v)^{3}} = \dfrac{2v + T}{2aT}$'
-      - say: 'Now clear the fractions by cross-multiplying: the top of each side times the bottom of the other.'
+      - say: 'Next layer, the fraction. Now clear the fractions by cross-multiplying: the top of each side times the bottom of the other.'
+        doodle_do: [{id: layers, op: cross, part: frac}]
         write: '$2aT \times a^{3}v^{3} = (1 - v)^{3}(2v + T)$'
         point:
           - {line: 3, kind: move, from: {line: 2, at: '2aT'}, at: '2aT', text: 'up and across'}
@@ -455,7 +497,8 @@ lessons:
         write: '$T\left[2a^{4}v^{3} - (1 - v)^{3}\right] = 2v(1 - v)^{3}$'
         point:
           - {line: 7, kind: move, from: {line: 6, at: 'v3[[T]]'}, at: 'T', text: 'taken out'}
-      - say: 'Finally, divide both sides by the square bracket to leave $T$ by itself.'
+      - say: 'Finally, divide both sides by the square bracket to leave $T$ by itself. $T$ is out of its wrapping.'
+        doodle_do: [{id: layers, op: circle, part: core}]
         write: '$T = \dfrac{2v(1 - v)^{3}}{2a^{4}v^{3} - (1 - v)^{3}}$'
         point:
           - {line: 8, kind: move, from: {line: 7, at: '[2a4v3−(1−v)3]'}, at: '2a4v3−(1−v)3', text: 'divide by it'}
@@ -517,7 +560,8 @@ lessons:
       E: 'You went for 28. No sector gives that many pupils. Solving $9x - 18 = 360$ gives $x = 42$, the Additional Mathematics angle is 60 degrees, and 60 over 360 of the 60 pupils is 10.'
   13:
     moments:
-      - say: 'We want the value of 0.3 cubed minus 0.2 cubed.'
+      - say: 'We want the value of 0.3 cubed minus 0.2 cubed. Picture two cubes, with edges 0.3 and 0.2.'
+        doodle: {name: 'custom:1983_q13_a', id: cubes, caption: 'two cubes'}
         write: '$(0.3)^{3} - (0.2)^{3}$'
       - say: 'The plan: cube each decimal separately, then subtract. The danger is the decimal point, so we''ll count decimal places carefully.'
         write: 'Plan: cube each number, then subtract'
@@ -526,17 +570,20 @@ lessons:
       - say: 'Take the first two. 3 times 3 is 9, and there are two decimal places, so 0.3 times 0.3 is 0.09.'
         write: '$0.3 \times 0.3 = 0.09$'
       - say: 'Then times the last 0.3. 9 times 3 is 27, now with three decimal places. So 0.3 cubed is 0.027.'
+        doodle_do: [{id: cubes, op: label, part: big, text: '0.027'}]
         write: '$(0.3)^{3} = 0.09 \times 0.3 = 0.027$'
       - say: 'Now 0.2 cubed, the same way. 2 times 2 is 4, so 0.2 times 0.2 is 0.04.'
         write: '$0.2 \times 0.2 = 0.04$'
       - say: 'And 4 times 2 is 8, with three decimal places. So 0.2 cubed is 0.008.'
+        doodle_do: [{id: cubes, op: label, part: small, text: '0.008'}]
         write: '$(0.2)^{3} = 0.04 \times 0.2 = 0.008$'
       - say: 'Now go back to the question and put in the two cubes we found.'
         write: '$(0.3)^{3} - (0.2)^{3} = 0.027 - 0.008$'
         point:
           - {line: 7, kind: move, from: {line: 4, at: '=0.027'}, at: '0.027'}
           - {line: 7, kind: move, from: {line: 6, at: '=0.008'}, at: '0.008'}
-      - say: '27 minus 8 is 19, and we keep three decimal places, so the difference is 0.019.'
+      - say: 'Take the small cube away from the big one. 27 minus 8 is 19, and we keep three decimal places, so the difference is 0.019.'
+        doodle_do: [{id: cubes, op: cross, part: small}]
         write: '$= 0.019$'
       - say: 'Let''s check with the difference of two cubes: $a^3 - b^3$ is $a - b$ times $a^2 + ab + b^2$.'
         write: 'Check: $a^{3} - b^{3} = (a - b)(a^{2} + ab + b^{2})$'
@@ -556,15 +603,18 @@ lessons:
     moments:
       - say: '$y$ varies partly as the square of $x$ and partly as the inverse of the square root of $x$. We know $y = 2$ when $x = 1$, and $y = 6$ when $x = 4$.'
         write: 'Given: $y = 2$ when $x = 1$; $y = 6$ when $x = 4$'
-      - say: 'Partly and partly means $y$ is the sum of two parts, each with its own constant. One part goes with $x$ squared, the other with 1 over root $x$. Call the constants $a$ and $b$.'
+      - say: 'Partly and partly means $y$ is the sum of two parts, each with its own constant. One part goes with $x$ squared, the other with 1 over root $x$. Call the constants $a$ and $b$. Picture two taps filling one tank.'
+        doodle: {name: 'custom:1983_q14_a', id: tank, caption: 'two parts fill y'}
         write: '$y = ax^{2} + \dfrac{b}{\sqrt{x}}$'
       - say: 'Now use the first pair of values: put in $x = 1$ and $y = 2$.'
         write: 'At $x = 1$: $2 = a(1)^{2} + \dfrac{b}{\sqrt{1}}$'
-      - say: '1 squared is 1, and the square root of 1 is 1. So $a$ plus $b$ is 2. That''s equation one.'
+      - say: 'At $x = 1$ the tank holds 2. 1 squared is 1, and the square root of 1 is 1. So $a$ plus $b$ is 2. That''s equation one.'
+        doodle_do: [{id: tank, op: fill, to: 0.33}, {id: tank, op: label, part: tank, text: 'y = 2'}]
         write: '$a + b = 2 \quad (1)$'
       - say: 'Now the second pair: put in $x = 4$ and $y = 6$.'
         write: 'At $x = 4$: $6 = a(4)^{2} + \dfrac{b}{\sqrt{4}}$'
-      - say: '4 squared is 16, and the square root of 4 is 2. So $16a$ plus $b$ over 2 equals 6.'
+      - say: 'At $x = 4$ the tank holds 6. 4 squared is 16, and the square root of 4 is 2. So $16a$ plus $b$ over 2 equals 6.'
+        doodle_do: [{id: tank, op: fill, to: 1.0}, {id: tank, op: label, part: tank, text: 'y = 6'}]
         write: '$16a + \dfrac{b}{2} = 6$'
       - say: 'Multiply every term by 2 to clear the fraction. $16a$ times 2 is $32a$, and 6 times 2 is 12. That''s equation two.'
         write: '$32a + b = 12 \quad (2)$'
@@ -578,7 +628,8 @@ lessons:
         write: 'From (1): $b = 2 - \dfrac{10}{31} = \dfrac{62}{31} - \dfrac{10}{31} = \dfrac{52}{31}$'
         point:
           - {line: 10, kind: move, from: {line: 9, at: '3110'}, at: 'b=2[[−3110]]', text: 'a'}
-      - say: 'Now put $a$ and $b$ back into the formula we started with.'
+      - say: 'Now put $a$ and $b$ back into the formula we started with. One for each tap.'
+        doodle_do: [{id: tank, op: label, part: tapa, text: 'a = 10/31'}, {id: tank, op: label, part: tapb, text: 'b = 52/31'}]
         write: '$y = \dfrac{10}{31}x^{2} + \dfrac{52}{31} \times \dfrac{1}{\sqrt{x}}$'
         point:
           - {line: 11, kind: move, from: {line: 9, at: '3110'}, at: '3110', text: 'a'}
@@ -609,19 +660,23 @@ lessons:
           - {line: 5, kind: move, from: {line: 2, at: '(x−3)(x+3)'}, at: '(x−3)(x+3)'}
           - {line: 5, kind: move, from: {line: 3, at: 'x(x−3)'}, at: 'x(x−3)'}
           - {line: 5, kind: move, from: {line: 4, at: '(x−7)(x+7)'}, at: '(x−7)(x+7)'}
-      - say: 'Multiply the tops together and the bottoms together to make one fraction.'
+      - say: 'Multiply the tops together and the bottoms together to make one fraction. Picture each factor as a tile.'
+        doodle: {name: 'custom:1983_q15_a', id: tiles, caption: 'factor tiles', size: scene}
         write: '$= \dfrac{x(x - 7)(x - 3)}{(x - 3)(x + 3)(x - 7)(x + 7)}$'
-      - say: '$x - 7$ is on the top and on the bottom, so it cancels.'
+      - say: '$x - 7$ is on the top and on the bottom, so it cancels. Cross out the pink pair.'
+        doodle_do: [{id: tiles, op: cross, part: t7}, {id: tiles, op: cross, part: b7}]
         write: '$= \dfrac{x(x - 3)}{(x - 3)(x + 3)(x + 7)}$'
         point:
           - {line: 6, kind: strike, at: 'x[[(x−7)]]', text: 'cancels'}
           - {line: 6, kind: strike, at: '(x+3)[[(x−7)]]'}
-      - say: '$x - 3$ is also on both the top and the bottom, so that cancels too.'
+      - say: '$x - 3$ is also on both the top and the bottom, so that cancels too. Cross out the blue pair.'
+        doodle_do: [{id: tiles, op: cross, part: t3}, {id: tiles, op: cross, part: b3}]
         write: '$= \dfrac{x}{(x + 3)(x + 7)}$'
         point:
           - {line: 7, kind: strike, at: 'x[[(x−3)]]', text: 'cancels'}
           - {line: 7, kind: strike, at: '[[(x−3)]](x+3)'}
       - say: 'What''s left is $x$ over $x + 3$ times $x + 7$, which is answer choice D.'
+        doodle_do: [{id: tiles, op: circle, part: tx}]
         write: 'Simplified: $\dfrac{x}{(x + 3)(x + 7)}$'
         answer: true
     traps:
@@ -695,11 +750,14 @@ lessons:
         write: 'Median: the middle score, in order'
       - say: 'From smallest to largest: 21, 23, 29, 40, 41, 43, 47, then 50, 50, 55, 56, 70, 70, 73.'
         write: 'In order: $21, 23, 29, 40, 41, 43, 47, 50, 50, 55, 56, 70, 70, 73$'
-      - say: 'How many scores are there? 14.'
+      - say: 'Picture one student for each score. How many scores are there? 14.'
+        doodle: {name: 'student-small', id: class, caption: 'one student per score', repeat: 14, layout: row}
         write: 'Number of scores: $n = 14$'
-      - say: '14 is even, so there is no single middle score. Two scores share the middle: the 7th and the 8th, with 6 scores on either side. The median is their average.'
+      - say: 'Split the line of students down the middle. 14 is even, so there is no single middle score. Two scores share the middle: the 7th and the 8th, with 6 scores on either side. The median is their average.'
+        doodle_do: [{id: class, op: split, n: 7, text: '1st to 7th | 8th to 14th'}]
         write: 'Median $= \dfrac{7\text{th} + 8\text{th}}{2}$'
       - say: 'Count along the ordered list: 21, 23, 29, 40, 41, 43, and the 7th is 47.'
+        doodle_do: [{id: class, op: count, n: 7}]
         write: '7th score $= 47$'
         point:
           - {line: 2, kind: circle, at: '47', text: '7th'}
@@ -892,23 +950,27 @@ lessons:
         write: 'Place values: $32,\ 16,\ 8,\ 4,\ 2,\ 1$'
       - say: 'So 1, 0, 0, 1, 0, 0 means one 32, no 16, no 8, one 4, no 2 and no 1.'
         write: '$100100_{2} = 1 \times 32 + 0 \times 16 + 0 \times 8 + 1 \times 4 + 0 \times 2 + 0 \times 1$'
-      - say: 'That''s 32 plus 4, which is 36.'
+      - say: 'That''s 32 plus 4, which is 36. Picture 36 dots.'
+        doodle: {name: 'custom:1983_q21_a', id: dots, caption: '36 dots in a square'}
         write: '$= 32 + 4 = 36$'
       - say: 'Go back to the question: $x$ squared equals this number. So $x$ squared is 36.'
         write: '$x^{2} = 36$'
         point:
           - {line: 5, kind: move, from: {line: 4, at: '=36'}, at: '36'}
-      - say: 'The square root of 36 is 6. So $x$ is 6 in base ten.'
+      - say: 'Arrange the 36 dots in a square. The square root of 36 is 6. So $x$ is 6 in base ten.'
+        doodle_do: [{id: dots, op: label, part: side, text: '6'}]
         write: '$x = \sqrt{36} = 6_{10}$'
       - say: 'But the question wants $x$ in base 4. To convert, divide by 4 and keep the remainders. 6 divided by 4 is 1, remainder 2.'
         write: '$6 \div 4 = 1$ remainder $2$'
       - say: 'Then 1 divided by 4 is 0, remainder 1. We stop at zero.'
         write: '$1 \div 4 = 0$ remainder $1$'
-      - say: 'Read the remainders from the bottom up: 1, then 2. So 6 is 1, 2 in base 4.'
+      - say: 'Read the remainders from the bottom up: 1, then 2. So 6 is 1, 2 in base 4. One bundle of 4, and 2 loose sticks.'
+        doodle_do: [{id: dots, op: stage, stage: 'custom:1983_q21_a2'}]
         write: '$6_{10} = 12_{4}$'
         point:
           - {line: 8, kind: circle, at: 'remainder1', text: 'first'}
           - {line: 7, kind: circle, at: 'remainder2', text: 'then'}
+          - {line: 9, kind: highlight, at: '124', to: {doodle: dots, part: bundle}}
       - say: 'Let''s check: 1, 2 in base 4 is one 4 plus 2, which is 6, and 6 squared is 36. It works.'
         write: 'Check: $12_{4} = 1 \times 4 + 2 = 6$, and $6^{2} = 36$'
       - say: 'So $x$ is 1, 2 in base 4, which is answer choice B.'
@@ -936,15 +998,19 @@ lessons:
         write: 'Third term: $\tfrac{1}{12}\log_{10}a^{7} = \tfrac{7}{12}\log_{10}a$'
         point:
           - {line: 4, kind: move, from: {line: 4, at: 'a[[7]]='}, at: '=[[127]]log', text: 'down in front'}
-      - say: 'Now put the three terms back together, keeping the minus sign on the last one.'
+      - say: 'Now put the three terms back together, keeping the minus sign on the last one. Picture the pluses on one pan and the minus on the other.'
+        doodle: {name: 'custom:1983_q22_a', id: scale, caption: 'plus on the left, minus on the right'}
         write: 'Expression $= \tfrac{1}{3}\log_{10}a + \tfrac{1}{4}\log_{10}a - \tfrac{7}{12}\log_{10}a$'
       - say: 'Every term has log $a$ in it, so take log $a$ out as a common factor.'
         write: '$= \left(\tfrac{1}{3} + \tfrac{1}{4} - \tfrac{7}{12}\right)\log_{10}a$'
       - say: 'Put the fractions over 12. 1 over 3 is 4 over 12, and 1 over 4 is 3 over 12.'
+        doodle_do: [{id: scale, op: label, part: left, text: '4/12 + 3/12'}]
         write: '$= \left(\tfrac{4}{12} + \tfrac{3}{12} - \tfrac{7}{12}\right)\log_{10}a$'
-      - say: 'On top, 4 plus 3 is 7, and 7 minus 7 is zero.'
+      - say: 'On top, 4 plus 3 is 7, and 7 minus 7 is zero. The two pans balance exactly.'
+        doodle_do: [{id: scale, op: highlight, part: beam}]
         write: '$= \tfrac{4 + 3 - 7}{12}\log_{10}a = \tfrac{0}{12}\log_{10}a$'
       - say: 'Zero times anything is zero, whatever $a$ is. So the whole expression is 0, which is answer choice C.'
+        doodle_do: [{id: scale, op: label, part: beam, text: 'balanced: 0'}]
         write: '$= 0$'
         answer: true
     traps:
@@ -954,13 +1020,17 @@ lessons:
       E: 'You went for $a$. The logs don''t combine to give $a$ itself. Written as multiples of log $a$, the coefficients cancel exactly, so the answer is 0.'
   23:
     moments:
-      - say: '$w$ varies inversely as $V$, and $u$ varies directly as $w$ cubed. We want a formula linking $u$ and $V$, given $u = 1$ when $V = 2$.'
+      - say: '$w$ varies inversely as $V$, and $u$ varies directly as $w$ cubed. We want a formula linking $u$ and $V$, given $u = 1$ when $V = 2$. Picture a chain from $V$ through $w$ to $u$.'
+        doodle: {name: 'custom:1983_q23_a', id: chain, caption: 'V to w to u'}
         write: 'Given: $u = 1$ when $V = 2$'
       - say: 'First link: $w$ varies inversely as $V$. That means $w$ is a constant, $k$, divided by $V$.'
+        doodle_do: [{id: chain, op: highlight, part: flip}]
         write: 'First link: $w = \dfrac{k}{V}$'
       - say: 'Second link: $u$ varies directly as $w$ cubed. So $u$ is another constant, $c$, times $w$ cubed.'
+        doodle_do: [{id: chain, op: highlight, part: cubed}]
         write: 'Second link: $u = cw^{3}$'
-      - say: 'To link $u$ with $V$, we get rid of $w$. Take the first link, $w$ equals $k$ over $V$, and put it into the second.'
+      - say: 'Jump straight from $V$ to $u$. To link $u$ with $V$, we get rid of $w$. Take the first link, $w$ equals $k$ over $V$, and put it into the second.'
+        doodle_do: [{id: chain, op: arrow, part: vb, to_part: ub}]
         write: '$u = c\left(\dfrac{k}{V}\right)^{3}$'
         point:
           - {line: 3, kind: move, from: {line: 1, at: 'Vk'}, at: '(Vk)', text: 'in for w'}
@@ -977,7 +1047,8 @@ lessons:
         write: '$1 = \dfrac{K}{8}$'
       - say: 'Multiply both sides by 8, and $K$ is 8.'
         write: '$K = 8$'
-      - say: 'Put $K = 8$ back into our formula.'
+      - say: 'Put $K = 8$ back into our formula. That is the end of the chain.'
+        doodle_do: [{id: chain, op: label, part: ub, text: '8 ÷ V³'}]
         write: '$u = \dfrac{8}{V^{3}}$'
         point:
           - {line: 9, kind: move, from: {line: 8, at: '8'}, at: '8', text: 'K'}
@@ -993,7 +1064,8 @@ lessons:
       D: 'You went for $V = 8u^2$. When $u = 1$ it gives $V = 8$, not 2. The correct link has $V$ cubed, from $w$ being cubed: $u$ equals 8 over $V$ cubed.'
   24:
     moments:
-      - say: 'We have two equations: $x^2 + y - 8 = 0$ and $y + 5x - 2 = 0$. We want the values of $x$.'
+      - say: 'We have two equations: $x^2 + y - 8 = 0$ and $y + 5x - 2 = 0$. We want the values of $x$. Picture a curve and a straight line crossing: we want where they meet.'
+        doodle: {name: 'custom:1983_q24_a', id: graph, caption: 'a curve and a line meet twice'}
         write: '$x^{2} + y - 8 = 0, \quad y + 5x - 2 = 0$'
       - say: 'The second equation is a straight line, so it''s easy to make $y$ the subject.'
         write: 'From $y + 5x - 2 = 0$:'
@@ -1002,7 +1074,8 @@ lessons:
         point:
           - {line: 2, kind: move, from: {line: 1, at: '+5x'}, at: '−5x', text: 'across'}
           - {line: 2, kind: move, from: {line: 1, at: '−2'}, at: '[[2]]−5x', text: 'across'}
-      - say: 'Now substitute this into the first equation, in place of $y$.'
+      - say: 'That is the straight line. Now substitute this into the first equation, in place of $y$.'
+        doodle_do: [{id: graph, op: highlight, part: line}]
         write: '$x^{2} + (2 - 5x) - 8 = 0$'
         point:
           - {line: 3, kind: move, from: {line: 2, at: '2−5x'}, at: '(2−5x)', text: 'in for y'}
@@ -1012,7 +1085,8 @@ lessons:
         write: '$-6 \times 1 = -6,\quad -6 + 1 = -5$'
       - say: 'So the quadratic factorises as $x - 6$ times $x + 1$.'
         write: '$(x - 6)(x + 1) = 0$'
-      - say: 'Set each bracket to zero: $x$ is 6 or $x$ is negative 1.'
+      - say: 'Set each bracket to zero: $x$ is 6 or $x$ is negative 1. Those are the two meeting points.'
+        doodle_do: [{id: graph, op: label, part: p1, text: 'x = −1'}, {id: graph, op: label, part: p2, text: 'x = 6'}]
         write: '$x - 6 = 0 \Rightarrow x = 6,\quad x + 1 = 0 \Rightarrow x = -1$'
       - say: 'Let''s check $x = 6$, using $y = 2 - 5x$. $y$ is 2 minus 30, which is negative 28. Then 36 minus 28 minus 8 is zero.'
         write: '$x = 6$: $y = 2 - 30 = -28$, and $36 - 28 - 8 = 0$'
@@ -1036,9 +1110,11 @@ lessons:
         write: 'At $x = 3$: $3^{3} - 3 + 3 = 27 - 3 + 3 = 27$'
       - say: 'At $x = -1$: negative 1 cubed is negative 1, and minus negative 1 is plus 1. So negative 1 plus 1 plus 3 is 3. It matches.'
         write: 'At $x = -1$: $(-1)^{3} - (-1) + 3 = -1 + 1 + 3 = 3$'
-      - say: 'Now the missing one. Put negative 2 in place of $x$, and keep it in brackets so the signs stay safe.'
+      - say: 'Picture the rule as a machine. Now the missing one. Put negative 2 in place of $x$, and keep it in brackets so the signs stay safe.'
+        doodle: {name: 'custom:1983_q25_a', id: machine, caption: 'the rule is a machine'}
         write: 'At $x = -2$: $y = (-2)^{3} - (-2) + 3$'
-      - say: 'Negative 2 cubed: negative 2 times negative 2 is 4, and 4 times negative 2 is negative 8.'
+      - say: 'Negative 2 cubed: negative 2 times negative 2 is 4, and 4 times negative 2 is negative 8. That happens inside the machine.'
+        doodle_do: [{id: machine, op: label, part: machine, text: '(−2)³ = −8'}]
         write: '$(-2)^{3} = (-2)(-2)(-2) = -8$'
       - say: 'And minus negative 2 is plus 2.'
         write: '$-(-2) = +2$'
@@ -1049,7 +1125,8 @@ lessons:
           - {line: 7, kind: move, from: {line: 6, at: '+2'}, at: '+2'}
       - say: 'Negative 8 plus 2 is negative 6, and negative 6 plus 3 is negative 3.'
         write: '$= -6 + 3 = -3$'
-      - say: 'So the missing value is negative 3, which is answer choice A.'
+      - say: 'Out of the machine comes the missing value. So the missing value is negative 3, which is answer choice A.'
+        doodle_do: [{id: machine, op: label, part: output, text: '−3'}]
         write: 'Missing value: $y = -3$'
         answer: true
     traps:
@@ -1159,21 +1236,26 @@ lessons:
     moments:
       - say: 'We have 16 test scores, and we want the median plus the mode.'
         write: 'Scores: $65, 65, 55, 60, 60, 65, 60, 70, 75, 70, 65, 70, 60, 65, 65, 70$'
-      - say: 'With so many repeats, it''s easiest to tally each score first. 55 appears once, 60 four times, 65 six times, 70 four times and 75 once.'
+      - say: 'With so many repeats, it''s easiest to tally each score first. 55 appears once, 60 four times, 65 six times, 70 four times and 75 once. Picture each score as a pile of counters.'
+        doodle: {name: 'custom:1983_q28_a', id: piles, caption: 'one counter per student'}
         write: 'Tally: $55 \to 1,\ \ 60 \to 4,\ \ 65 \to 6,\ \ 70 \to 4,\ \ 75 \to 1$'
       - say: 'Check the count: 1 plus 4 plus 6 plus 4 plus 1 is 16. Good.'
         write: 'Total: $1 + 4 + 6 + 4 + 1 = 16$'
-      - say: 'The mode is the score that appears most often. From the tally, 65 appears six times, more than any other.'
+      - say: 'Look at the tallest pile. The mode is the score that appears most often. From the tally, 65 appears six times, more than any other.'
+        doodle_do: [{id: piles, op: circle, part: s65}]
         write: 'Mode $= 65$, which appears 6 times'
         point:
           - {line: 1, kind: circle, at: '65→6', text: 'most often'}
+          - {line: 3, kind: highlight, at: 'Mode=65', to: {doodle: piles, part: s65}}
       - say: 'Now the median. With 16 scores, an even number, it''s the average of the 8th and 9th scores in order.'
         write: 'Median $= \dfrac{8\text{th} + 9\text{th}}{2}$'
       - say: 'Use the tally to place the scores in order. 55 is 1st, and the four 60s are the 2nd to the 5th.'
         write: '1st: $55$; 2nd to 5th: $60$'
       - say: 'The six 65s come next. They fill the 6th to the 11th places, since 5 plus 6 is 11.'
+        doodle_do: [{id: piles, op: label, part: s65, text: '6th to 11th'}]
         write: '6th to 11th: $65$, since $5 + 6 = 11$'
-      - say: 'So the 8th and 9th scores both sit in the 65s.'
+      - say: 'Both land in the tallest pile. So the 8th and 9th scores both sit in the 65s.'
+        doodle_do: [{id: piles, op: pulse, part: s65}]
         write: '8th $= 65$, 9th $= 65$'
       - say: 'Put them into the median formula: 65 plus 65, over 2, is 65.'
         write: 'Median $= \dfrac{65 + 65}{2} = 65$'
@@ -1192,24 +1274,27 @@ lessons:
       E: 'You went for 137.5. That takes the 8th and 9th entries from the unsorted list, 70 and 75. The scores must be put in order first, and then the 8th and 9th are both 65.'
   29:
     moments:
-      - say: 'The letters of MATRICULATION are cut out and put in a box. We draw one at random and want the probability that it''s a vowel.'
-        doodle: {name: 'custom:1983_q29_a', caption: 'MATRICULATION: 13 letters in a box'}
+      - say: 'The letters of MATRICULATION are cut out and put in a box. We draw one at random and want the probability that it''s a vowel. Picture the slips in the box.'
+        doodle: {name: 'custom:1983_q29_a', id: box, caption: 'MATRICULATION: 13 letters in a box'}
         write: 'MATRICULATION'
       - say: 'Probability is the number of ways we can succeed, over the total number of possibilities. Here, that''s the number of vowels over the number of letters.'
         write: '$P(\text{vowel}) = \dfrac{\text{number of vowels}}{\text{number of letters}}$'
       - say: 'Let''s spell it out letter by letter: M, A, T, R, I, C, U, L, A, T, I, O, N.'
         write: 'Letters: M, A, T, R, I, C, U, L, A, T, I, O, N'
       - say: 'Counting them, there are 13 letters, and each one is a separate piece of paper in the box.'
+        doodle_do: [{id: box, op: label, part: box, text: '13 slips'}]
         write: 'Number of letters $= 13$'
       - say: 'The vowels are A, E, I, O and U. Picking out every vowel as it appears, we get A, I, U, A, I and O.'
         write: 'Vowels: A, I, U, A, I, O'
       - say: 'A and I each appear twice, and each copy is its own piece of paper, so each copy counts.'
         write: 'A twice, I twice, U once, O once'
       - say: '2 plus 2 plus 1 plus 1 is 6 vowels.'
+        doodle_do: [{id: box, op: label, part: slips, text: '6 vowels'}]
         write: 'Number of vowels $= 2 + 2 + 1 + 1 = 6$'
       - say: 'Quick check: the other 13 minus 6, which is 7 letters, are consonants: M, T, R, C, L, T and N. That''s 7.'
         write: 'Consonants: $13 - 6 = 7$ (M, T, R, C, L, T, N)'
-      - say: 'Now put the two counts into the probability: 6 vowels over 13 letters. That''s 6 over 13, which is answer choice C.'
+      - say: 'For the slip we draw, put the two counts into the probability: 6 vowels over 13 letters. That''s 6 over 13, which is answer choice C.'
+        doodle_do: [{id: box, op: circle, part: drawn}]
         write: '$P(\text{vowel}) = \dfrac{6}{13}$'
         point:
           - {line: 8, kind: move, from: {line: 6, at: '=6'}, at: '13[[6]]', text: 'vowels'}
@@ -1222,13 +1307,16 @@ lessons:
       E: 'You went for 4 over 13. That counts each kind of vowel once: A, I, U and O. But every letter is cut out separately, so the second A and the second I count too, making 6.'
   30:
     moments:
-      - say: 'We correct 59.81789 and 0.0746829 to three significant figures, multiply them, and give the answer to three significant figures.'
+      - say: 'We correct 59.81789 and 0.0746829 to three significant figures, multiply them, and give the answer to three significant figures. Picture the first three figures of each boxed.'
+        doodle: {name: 'custom:1983_q30_a', id: figs, caption: 'keep three figures'}
         write: 'Numbers: $59.81789$ and $0.0746829$'
       - say: 'The order matters: round each number first, then multiply, then round the product.'
         write: 'Order: round, multiply, round again'
-      - say: 'In 59.81789, the first three significant figures are 5, 9 and 8. The next digit is 1, which is less than 5, so we round down.'
+      - say: 'Look at the first box. In 59.81789, the first three significant figures are 5, 9 and 8. The next digit is 1, which is less than 5, so we round down.'
+        doodle_do: [{id: figs, op: label, part: cut1, text: 'next is 1: down'}]
         write: '$59.81789 \approx 59.8$ (next digit 1, round down)'
-      - say: 'In 0.0746829, the zeros at the front don''t count. The first three significant figures are 7, 4 and 6. The next digit is 8, so the 6 goes up to 7.'
+      - say: 'Now the second box. In 0.0746829, the zeros at the front don''t count. The first three significant figures are 7, 4 and 6. The next digit is 8, so the 6 goes up to 7.'
+        doodle_do: [{id: figs, op: label, part: cut2, text: 'next is 8: up'}]
         write: '$0.0746829 \approx 0.0747$ (next digit 8, round up)'
       - say: 'Now multiply the two rounded numbers we just found.'
         write: 'Product $= 59.8 \times 0.0747$'
@@ -1253,14 +1341,16 @@ lessons:
       E: 'You went for 4.50. That''s rounding too far. 59.8 times 0.0747 is 4.46706, and to three significant figures that''s 4.47.'
   31:
     moments:
-      - say: 'A rod that is really 250 cm long is measured as 255 cm by mistake. We want the percentage error.'
-        doodle: {name: 'custom:1983_q31_a', caption: 'Really 250 cm, measured as 255 cm'}
+      - say: 'A rod that is really 250 cm long is measured as 255 cm by mistake. We want the percentage error. Picture the rod under the tape.'
+        doodle: {name: 'custom:1983_q31_a', id: rod, caption: 'Really 250 cm, measured as 255 cm'}
         write: 'True length $= 250$ cm, measured $= 255$ cm'
       - say: 'Percentage error compares the size of the mistake with the true value.'
         write: 'Percentage error $= \dfrac{\text{error}}{\text{true value}} \times 100\%$'
-      - say: 'First, the error. The measurement was 255 instead of 250, so the error is 255 minus 250, which is 5 cm.'
+      - say: 'First, the error: the tape reads too much. The measurement was 255 instead of 250, so the error is 255 minus 250, which is 5 cm.'
+        doodle_do: [{id: rod, op: label, part: tape, text: '5 cm too many'}]
         write: 'Error $= 255 - 250 = 5$ cm'
       - say: 'Now put the numbers into the formula. The error, 5, goes on top, and the true value, 250, goes on the bottom.'
+        doodle_do: [{id: rod, op: circle, part: 'true'}]
         write: 'Percentage error $= \dfrac{5}{250} \times 100\%$'
         point:
           - {line: 1, kind: box, text: 'the rule'}
@@ -1270,7 +1360,8 @@ lessons:
         write: '$= \dfrac{1}{50} \times 100\%$'
       - say: '1 over 50, times 100, is 100 divided by 50, which is 2.'
         write: '$= \dfrac{100}{50}\% = 2\%$'
-      - say: 'One detail matters here. We compare with the true value, 250, not the measured 255. Dividing by 255 would give about 1.96 percent instead.'
+      - say: 'Look at the tape again. One detail matters here. We compare with the true value, 250, not the measured 255. Dividing by 255 would give about 1.96 percent instead.'
+        doodle_do: [{id: rod, op: cross, part: tape}]
         write: 'Not $\dfrac{5}{255} \times 100\% \approx 1.96\%$'
         point:
           - {line: 6, kind: strike, text: 'not this'}
@@ -1296,18 +1387,22 @@ lessons:
         write: '$\left(\tfrac{3}{4}\right)^{n} = \dfrac{3^{n}}{4^{n}} = \dfrac{3^{n}}{2^{2n}}$'
       - say: 'Multiply them. For the 2s, $2^m$ on top and $2^{2n}$ below give 2 to the $m - 2n$. For the 3s, $3^n$ on top and $3^m$ below give 3 to the $n - m$.'
         write: 'Left side $= \dfrac{2^{m}}{3^{m}} \times \dfrac{3^{n}}{2^{2n}} = 2^{m - 2n} \times 3^{n - m}$'
-      - say: 'Now the right side. Doubling from 2: 2, 4, 8, 16, 32, 64, 128, 256. That''s eight 2s, so 256 is 2 to the 8.'
+      - say: 'Now the right side. Picture 256 as a tower of 2s. Doubling from 2: 2, 4, 8, 16, 32, 64, 128, 256. That''s eight 2s, so 256 is 2 to the 8.'
+        doodle: {name: 'custom:1983_q32_a', id: towers, caption: 'how many 2s? how many 3s?'}
         write: '$256 = 2^{8}$'
-      - say: 'And tripling from 3: 3, 9, 27, 81, 243, 729. That''s six 3s, so 729 is 3 to the 6.'
+      - say: 'And 729 as a tower of 3s. And tripling from 3: 3, 9, 27, 81, 243, 729. That''s six 3s, so 729 is 3 to the 6.'
+        doodle_do: [{id: towers, op: highlight, part: threes}]
         write: '$729 = 3^{6}$'
       - say: 'Dividing by 3 to the 6 is the same as multiplying by 3 to the negative 6.'
         write: 'Right side $= \dfrac{2^{8}}{3^{6}} = 2^{8} \times 3^{-6}$'
       - say: 'Now match the powers of 2 on both sides: $m$ minus $2n$ equals 8.'
+        doodle_do: [{id: towers, op: label, part: twos, text: '8 twos'}]
         write: 'Powers of 2: $m - 2n = 8 \quad (1)$'
         point:
           - {line: 4, kind: circle, at: '2m−2n'}
           - {line: 7, kind: circle, at: '28×'}
       - say: 'And match the powers of 3: $n$ minus $m$ equals negative 6.'
+        doodle_do: [{id: towers, op: label, part: threes, text: '6 threes'}]
         write: 'Powers of 3: $n - m = -6 \quad (2)$'
         point:
           - {line: 4, kind: circle, at: '3n−m'}
@@ -1334,15 +1429,18 @@ lessons:
     moments:
       - say: 'Without tables, we want log base 7 of 49, plus log base 7 of 1 over 7.'
         write: '$\log_{7}49 + \log_{7}\tfrac{1}{7}$'
-      - say: 'A logarithm answers a question: what power of the base gives this number? So log base 7 of $N$ is the power we raise 7 to, to get $N$.'
+      - say: 'A logarithm answers a question: what power of the base gives this number? So log base 7 of $N$ is the power we raise 7 to, to get $N$. Picture a staircase where each step up multiplies by 7.'
+        doodle: {name: 'custom:1983_q33_a', id: steps, caption: 'each step up is ×7'}
         write: '$\log_{7}N = p$ means $7^{p} = N$'
       - say: 'For log base 7 of 49: 7 to what power is 49? 7 times 7 is 49, so 7 squared is 49.'
         write: '$7^{2} = 7 \times 7 = 49$'
-      - say: 'So log base 7 of 49 is 2.'
+      - say: 'From 1, two steps up reach 49. So log base 7 of 49 is 2.'
+        doodle_do: [{id: steps, op: circle, part: st3}]
         write: '$\log_{7}49 = 2$'
       - say: 'For log base 7 of 1 over 7: 1 over a number is that number to the power negative 1. So 7 to the negative 1 is 1 over 7.'
         write: '$7^{-1} = \tfrac{1}{7}$'
-      - say: 'So log base 7 of 1 over 7 is negative 1.'
+      - say: 'From 1, one step down reaches 1 over 7. So log base 7 of 1 over 7 is negative 1.'
+        doodle_do: [{id: steps, op: circle, part: st0}]
         write: '$\log_{7}\tfrac{1}{7} = -1$'
       - say: 'Now put the two values back into the sum: 2 plus negative 1 is 1.'
         write: '$\log_{7}49 + \log_{7}\tfrac{1}{7} = 2 + (-1) = 1$'
@@ -1353,7 +1451,8 @@ lessons:
         write: 'Product law: $\log_{a}m + \log_{a}n = \log_{a}(mn)$'
       - say: 'Let''s check with the rule: log $a$ plus log $b$ equals the log of $a$ times $b$.'
         write: 'Check: $\log_{7}49 + \log_{7}\tfrac{1}{7} = \log_{7}\left(49 \times \tfrac{1}{7}\right)$'
-      - say: '49 times 1 over 7 is 7, and log base 7 of 7 is 1, because 7 to the power 1 is 7. It agrees.'
+      - say: 'On the stairs, 7 is one step up from 1. 49 times 1 over 7 is 7, and log base 7 of 7 is 1, because 7 to the power 1 is 7. It agrees.'
+        doodle_do: [{id: steps, op: pulse, part: st2}]
         write: '$= \log_{7}7 = 1$'
       - say: 'So the value is 1, which is answer choice A.'
         write: 'Value $= 1$'
@@ -1371,14 +1470,16 @@ lessons:
         write: '$81a^{4} = (9a^{2})^{2}$'
       - say: 'In the same way, 16 is 4 squared and $b^4$ is $b^2$ squared, so $16b^4$ is $4b^2$ squared.'
         write: '$16b^{4} = (4b^{2})^{2}$'
-      - say: 'So our expression is one square minus another square.'
+      - say: 'So our expression is one square minus another square. Picture a big square with a small square taken out.'
+        doodle: {name: 'custom:1983_q34_a', id: squares, caption: 'square minus square'}
         write: '$81a^{4} - 16b^{4} = (9a^{2})^{2} - (4b^{2})^{2}$'
         point:
           - {line: 3, kind: move, from: {line: 1, at: '(9a2)2'}, at: '(9a2)2'}
           - {line: 3, kind: move, from: {line: 2, at: '(4b2)2'}, at: '(4b2)2'}
       - say: 'A difference of two squares always factorises as the difference times the sum.'
         write: 'Difference of squares: $p^{2} - q^{2} = (p - q)(p + q)$'
-      - say: 'Here $p$ is $9a^2$ and $q$ is $4b^2$.'
+      - say: 'Label the two squares. Here $p$ is $9a^2$ and $q$ is $4b^2$.'
+        doodle_do: [{id: squares, op: label, part: big, text: 'p = 9a²'}, {id: squares, op: label, part: small, text: 'q = 4b²'}]
         write: '$= (9a^{2} - 4b^{2})(9a^{2} + 4b^{2})$'
         point:
           - {line: 4, kind: box, text: 'the rule'}
@@ -1561,10 +1662,11 @@ lessons:
       E: 'You went for 240 degrees. That''s in the right quarter but not exact. Tan $\theta$ is 60 over 30, which is 2, so $\theta$ is 63 degrees 26 minutes, and the bearing is 243 degrees 26 minutes.'
   38:
     moments:
-      - say: 'The table shows 100 households by the number of members. We want the median number of members per household.'
-        doodle: {name: 'custom:1983_q38_a', caption: 'Households in order of size'}
+      - say: 'The table shows 100 households by the number of members. We want the median number of members per household. Picture them lined up from smallest to largest.'
+        doodle: {name: 'custom:1983_q38_a', id: houses, caption: 'Households in order of size'}
         write: 'Total $= 100$ households'
       - say: 'With 100 households listed in order of size, the middle falls between the 50th and the 51st. The median is the average of those two.'
+        doodle_do: [{id: houses, op: highlight, part: mid}]
         write: 'Median $= \dfrac{50\text{th} + 51\text{st}}{2}$'
       - say: 'To find them, we keep a running total. There are 3 households with 1 member.'
         write: '1 member: running total $= 3$'
@@ -1576,7 +1678,8 @@ lessons:
         write: '4 members: $30 + 28 = 58$'
       - say: 'So after the 30th household, the next ones, from the 31st up to the 58th, all have 4 members.'
         write: '31st to 58th: 4 members each'
-      - say: 'The 50th and 51st are both in that stretch, so both have 4 members.'
+      - say: 'Back to the row of houses. The 50th and 51st are both in that stretch, so both have 4 members.'
+        doodle_do: [{id: houses, op: label, part: mid, text: '4 members each'}]
         write: '50th $= 4$, 51st $= 4$'
         point:
           - {line: 6, kind: circle, at: '31st to 58th', text: 'in here'}
@@ -1655,7 +1758,8 @@ lessons:
           - {line: 2, kind: strike, at: '[[x−1]]=x'}
       - say: 'So $f(x)$ is 1 over $x - 1$, plus 1 over $x + 1$.'
         write: '$f(x) = \dfrac{1}{x - 1} + \dfrac{1}{x + 1}$'
-      - say: 'Now replace every $x$ with $1 - x$, in brackets so we don''t lose any signs.'
+      - say: 'Picture $f$ as a machine, and feed it $1 - x$. Now replace every $x$ with $1 - x$, in brackets so we don''t lose any signs.'
+        doodle: {name: 'custom:1983_q40_a', id: f, caption: 'feed 1 − x into f'}
         write: '$f(1 - x) = \dfrac{1}{(1 - x) - 1} + \dfrac{1}{(1 - x) + 1}$'
         point:
           - {line: 3, kind: arrow, text: 'tidied f'}
@@ -1667,7 +1771,8 @@ lessons:
         write: 'Second bottom: $(1 - x) + 1 = 2 - x$'
       - say: '2 minus $x$ is the negative of $x$ minus 2. So the second fraction is negative 1 over $x - 2$.'
         write: 'Second term $= \dfrac{1}{2 - x} = \dfrac{1}{-(x - 2)} = -\dfrac{1}{x - 2}$'
-      - say: 'Put the two terms back together. $f(1 - x)$ is negative 1 over $x$, minus 1 over $x - 2$, which is answer choice C.'
+      - say: 'Put the two terms back together. $f(1 - x)$ is negative 1 over $x$, minus 1 over $x - 2$, which is answer choice C. That is what comes out of the machine.'
+        doodle_do: [{id: f, op: circle, part: output}]
         write: '$f(1 - x) = -\dfrac{1}{x} - \dfrac{1}{x - 2}$'
         answer: true
     traps:
@@ -1735,15 +1840,19 @@ lessons:
         write: '$\sqrt[3]{\dfrac{27a^{9}}{8}}$'
       - say: 'The cube root of a fraction is the cube root of the top over the cube root of the bottom.'
         write: '$= \dfrac{\sqrt[3]{27a^{9}}}{\sqrt[3]{8}}$'
-      - say: 'And the cube root of a product is the product of the cube roots. So the top splits into two pieces, and we can take each piece separately.'
+      - say: 'And the cube root of a product is the product of the cube roots. So the top splits into two pieces, and we can take each piece separately. Picture 27 as a block of little cubes, over 8 as a smaller block.'
+        doodle: {name: 'custom:1983_q42_a', id: blocks, caption: '27 over 8, as cubes'}
         write: '$= \dfrac{\sqrt[3]{27} \times \sqrt[3]{a^{9}}}{\sqrt[3]{8}}$'
-      - say: 'The cube root of 27 is 3, because 3 times 3 times 3 is 27.'
+      - say: 'The cube root of 27 is 3, because 3 times 3 times 3 is 27. Look: the big block is 3 cubes along each edge.'
+        doodle_do: [{id: blocks, op: label, part: top, text: 'edge 3'}]
         write: '$\sqrt[3]{27} = 3$, since $3 \times 3 \times 3 = 27$'
-      - say: 'The cube root of 8 is 2, because 2 times 2 times 2 is 8.'
+      - say: 'The cube root of 8 is 2, because 2 times 2 times 2 is 8. The small block is 2 along each edge.'
+        doodle_do: [{id: blocks, op: label, part: bottom, text: 'edge 2'}]
         write: '$\sqrt[3]{8} = 2$, since $2 \times 2 \times 2 = 8$'
       - say: 'For $a^9$, a cube root divides the power by 3. 9 divided by 3 is 3.'
         write: '$\sqrt[3]{a^{9}} = a^{9 \div 3} = a^{3}$'
       - say: 'Now put the three pieces back into the fraction: 3 times $a^3$, over 2.'
+        doodle_do: [{id: blocks, op: pulse}]
         write: '$\sqrt[3]{\dfrac{27a^{9}}{8}} = \dfrac{3 \times a^{3}}{2} = \dfrac{3a^{3}}{2}$'
         point:
           - {line: 6, kind: move, from: {line: 3, at: '=3'}, at: '[[3]]×'}
@@ -1763,8 +1872,8 @@ lessons:
       D: 'You went for 2 over $3a^3$. That''s the right answer turned upside down. The 27 and $a^9$ are on the top, so the answer is $3a^3$ over 2.'
   43:
     moments:
-      - say: 'The pie chart shows four crops: beans 14.5 kg, okro 14.5 kg, rice 56.5 kg and yams 184.5 kg. We want the angle of the okro sector.'
-        doodle: {name: 'custom:1983_q43_a', caption: 'Farm yields in kg, Ondo'}
+      - say: 'The pie chart shows four crops: beans 14.5 kg, okro 14.5 kg, rice 56.5 kg and yams 184.5 kg. We want the angle of the okro sector. Picture the four harvests side by side.'
+        doodle: {name: 'custom:1983_q43_a', id: crops, caption: 'Farm yields in kg, Ondo'}
         write: 'Beans $14.5$, okro $14.5$, rice $56.5$, yams $184.5$ (kg)'
         point:
           - {figure: 0, kind: circle, target: Okro}
@@ -1774,9 +1883,11 @@ lessons:
         write: 'Total $= 14.5 + 14.5 + 56.5 + 184.5$'
       - say: '14.5 plus 14.5 is 29, and 29 plus 56.5 is 85.5.'
         write: '$= 29 + 56.5 + 184.5 = 85.5 + 184.5$'
-      - say: 'And 85.5 plus 184.5 is 270.'
+      - say: 'All four harvests together: 85.5 plus 184.5 is 270.'
+        doodle_do: [{id: crops, op: pulse}]
         write: '$= 270$ kg'
       - say: 'So okro''s angle is 14.5 out of 270, times 360 degrees.'
+        doodle_do: [{id: crops, op: circle, part: okro}]
         write: 'Okro $= \dfrac{14.5}{270} \times 360^{\circ}$'
         point:
           - {line: 5, kind: move, from: {line: 4, at: '270'}, at: '270', text: 'total'}
@@ -1786,10 +1897,12 @@ lessons:
       - say: 'So okro''s angle is 14.5 times 4 over 3. 14.5 times 4 is 58, so we have 58 over 3.'
         write: 'Okro $= 14.5 \times \dfrac{4}{3} = \dfrac{58}{3}$'
       - say: '58 divided by 3 is 19, with 1 left over. So it''s 19 and a third degrees.'
+        doodle_do: [{id: crops, op: label, part: okro, text: '19⅓°'}]
         write: '$= 19\tfrac{1}{3}^{\circ}$'
         point:
           - {figure: 0, kind: label, target: Okro, text: '19⅓°'}
-      - say: 'Let''s check the whole chart. Beans is also 19 and a third. Rice is 56.5 times 4 over 3, which is 75 and a third. Yams is 184.5 times 4 over 3, which is 246.'
+      - say: 'Let''s check the whole chart. Beans weighs the same as okro, so beans is also 19 and a third. Rice is 56.5 times 4 over 3, which is 75 and a third. Yams is 184.5 times 4 over 3, which is 246.'
+        doodle_do: [{id: crops, op: label, part: beans, text: '19⅓° too'}]
         write: 'Beans $= 19\tfrac{1}{3}$, rice $= 75\tfrac{1}{3}$, yams $= 246$'
       - say: 'Together: 19 and a third, plus 19 and a third, plus 75 and a third, plus 246, makes 360. Good.'
         write: '$19\tfrac{1}{3} + 19\tfrac{1}{3} + 75\tfrac{1}{3} + 246 = 360$'
@@ -2050,7 +2163,8 @@ lessons:
       E: 'You went for 75 degrees. The angle at $P$ in triangle $PRQ$ is 25, by alternate angles, and the angle at $R$ is 100. That leaves 180 minus 125, which is 55.'
   48:
     moments:
-      - say: 'We want the mean of 24.57, 25.63, 25.32, 26.01 and 25.77.'
+      - say: 'We want the mean of 24.57, 25.63, 25.32, 26.01 and 25.77. Picture them as five bars.'
+        doodle: {name: 'custom:1983_q48_a', id: bars, caption: 'five measurements as bars', size: scene}
         write: 'Values: $24.57,\ 25.63,\ 25.32,\ 26.01,\ 25.77$'
       - say: 'The mean is the total divided by how many values there are. So first, let''s add them carefully, one at a time.'
         write: 'Mean $= \dfrac{\text{total}}{\text{number of values}}$'
@@ -2062,12 +2176,16 @@ lessons:
         write: '$75.52 + 26.01 = 101.53$'
       - say: 'And finally 101.53 plus 25.77 is 127.30.'
         write: 'Total: $101.53 + 25.77 = 127.30$'
-      - say: 'There are 5 values, so put the total of 127.30 over 5.'
+      - say: 'The mean is the height all five bars would have if we levelled them off. There are 5 values, so put the total of 127.30 over 5.'
+        doodle_do: [{id: bars, op: stage, stage: 'custom:1983_q48_a2'}]
         write: 'Mean $= \dfrac{127.30}{5}$'
         point:
           - {line: 6, kind: move, from: {line: 5, at: '=127.30'}, at: '127.30', text: 'total'}
-      - say: '127.30 divided by 5 is 25.46.'
+      - say: '127.30 divided by 5 is 25.46. That is the level line.'
+        doodle_do: [{id: bars, op: label, part: level, text: '25.46'}]
         write: '$= 25.46$'
+        point:
+          - {line: 7, kind: highlight, at: '25.46', to: {doodle: bars, part: level}}
       - say: 'A quick check: measure each value from 25. That gives negative 0.43, then 0.63, 0.32, 1.01 and 0.77.'
         write: 'From 25: $-0.43,\ +0.63,\ +0.32,\ +1.01,\ +0.77$'
       - say: 'These add to 2.30, and 2.30 divided by 5 is 0.46. So the mean is 25 plus 0.46, which is 25.46 again.'
@@ -2139,18 +2257,21 @@ lessons:
       E: 'You went for 60 degrees. That''s $4x$, not $2x$. From $4x = 60$, $x$ is 15, and angle $PTO$ is 2 times 15, which is 30.'
   50:
     moments:
-      - say: 'A man drove for 4 hours at some speed, then doubled his speed for 3 more hours. He covered 600 km in all. We want his speed in the last 3 hours.'
-        doodle: {name: 'custom:1983_q50_a', caption: '4 h, then 3 h at double the speed'}
+      - say: 'A man drove for 4 hours at some speed, then doubled his speed for 3 more hours. He covered 600 km in all. We want his speed in the last 3 hours. Picture the car on the road.'
+        doodle: {name: 'custom:1983_q50_a', id: trip, caption: '4 h, then 3 h at double the speed', size: scene}
         write: '4 h at the first speed, 3 h at double speed, 600 km in all'
       - say: 'Let''s call his first speed $v$ km per hour. He doubled it, so his second speed is $2v$.'
         write: 'First speed $= v$, second speed $= 2v$'
       - say: 'For each part of the journey, distance is speed times time.'
         write: 'Distance $=$ speed $\times$ time'
-      - say: 'In the first part, he went at $v$ for 4 hours, so he covered $4v$ km.'
+      - say: 'Watch the car do the first part. In the first part, he went at $v$ for 4 hours, so he covered $4v$ km.'
+        doodle_do: [{id: trip, op: move, part: car, path: first}]
         write: 'First part: $4 \times v = 4v$ km'
-      - say: 'In the second part, he went at $2v$ for 3 hours. 3 times $2v$ is $6v$ km.'
+      - say: 'Now the second part, twice as fast. In the second part, he went at $2v$ for 3 hours. 3 times $2v$ is $6v$ km.'
+        doodle_do: [{id: trip, op: move, part: car, path: second}]
         write: 'Second part: $3 \times 2v = 6v$ km'
       - say: 'The two parts add up to 600 km.'
+        doodle_do: [{id: trip, op: highlight, part: total}]
         write: 'Total: $4v + 6v = 600$'
         point:
           - {line: 5, kind: move, from: {line: 3, at: '=4v'}, at: '4v'}
@@ -2160,6 +2281,7 @@ lessons:
       - say: 'Divide both sides by 10. 600 divided by 10 is 60.'
         write: '$v = \dfrac{600}{10} = 60$'
       - say: 'Careful: 60 is his first speed. In the last 3 hours he drove at $2v$, which is 2 times 60, or 120 km per hour.'
+        doodle_do: [{id: trip, op: label, part: leg2, text: '120 km/h'}]
         write: 'Last 3 hours: $2v = 2 \times 60 = 120$ km/h'
         point:
           - {line: 1, kind: circle, at: '2v', text: 'last part'}

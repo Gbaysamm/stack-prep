@@ -11,15 +11,25 @@ lessons:
     moments:
       - say: 'We have a subtraction done in base 5, with two missing digits, $x$ and $y$. We want to find them, $x$ first and then $y$.'
         write: '$4243_5 - 13x4_5 = y344_5$'
-      - say: 'Subtraction in base 5 works just like ordinary subtraction, column by column from the right. The one new idea is the borrow: borrowing 1 from the next column gives you 5, not 10.'
+      - say: 'Subtraction in base 5 works just like ordinary subtraction, column by column from the right. The one new idea is the borrow: borrowing 1 from the next column gives you 5, not 10. Picture it as untying one bundle of 5 sticks.'
+        doodle: {name: 'custom:2004_q01_a', id: sticks, caption: 'base 5: bundles of 5 sticks'}
         write: 'In base 5: a borrow $= 5$ units'
-      - say: 'Start with the units column. The top digit is 3 and we take away 4. 3 is smaller than 4, so we must borrow.'
+      - say: 'Start with the units column. The top digit is 3 and we take away 4. 3 is smaller than 4: look at the 3 loose sticks. We can''t take 4 of them, so we must borrow.'
+        doodle_do:
+          - {id: sticks, op: circle, part: ones}
         write: 'Units column: $3 - 4$ needs a borrow'
-      - say: 'The borrow adds 5 to the 3, so 3 plus 5 is 8. Then 8 minus 4 is 4, which matches the 4 in the answer row.'
+      - say: 'Watch the bundle come untied: the borrow adds 5 to the 3, so 3 plus 5 is 8. Then 8 minus 4 is 4, which matches the 4 in the answer row.'
+        doodle_do:
+          - {id: sticks, op: stage, stage: 'custom:2004_q01_a2'}
+          - {id: sticks, op: circle, part: left}
         write: '$3 + 5 - 4 = 8 - 4 = 4$'
+        point:
+          - {line: 3, kind: highlight, at: '= 4', to: {doodle: sticks, part: left}}
       - say: 'Now the fives column. The top digit was 4, but we just borrowed 1 from it, so it is now 3.'
         write: 'Fives column: top digit $= 4 - 1 = 3$'
-      - say: 'We need 3 minus $x$ to give 4. A base 5 digit is at most 4, so that can''t happen without another borrow. The borrow adds 5 again, so the top becomes 3 plus 5.'
+      - say: 'We need 3 minus $x$ to give 4. A base 5 digit is at most 4, so that can''t happen without another borrow. Another bundle is untied: the borrow adds 5 again, so the top becomes 3 plus 5.'
+        doodle_do:
+          - {id: sticks, op: pulse, part: bundle}
         write: '$3 + 5 - x = 4$'
         point:
           - {line: 5, kind: move, from: {line: 4, at: '= 3'}, at: '[[3]] + 5', text: 'after borrow'}
@@ -55,12 +65,19 @@ lessons:
         write: '$451_6 - p_7 = 305_6$'
       - say: 'Two different bases are mixed here, so we can''t just subtract the digits. The safe plan: change everything into base ten, subtract there, then change the answer into base 7.'
         write: 'Plan: base 6 $\to$ base 10 $\to$ base 7'
-      - say: 'First, $451_6$. In base 6 the place values, from the right, are 1, 6, and 6 squared, which is 36. So it is 4 times 36, plus 5 times 6, plus 1.'
+      - say: 'First, $451_6$. In base 6 the place values, from the right, are 1, 6, and 6 squared, which is 36. Picture it as blocks: 4 squares of 36, 5 rods of 6 and 1 single. So it is 4 times 36, plus 5 times 6, plus 1.'
+        doodle: {name: 'custom:2004_q02_a', id: blocks, caption: 'blocks of 36, rods of 6'}
         write: '$451_6 = 4 \times 36 + 5 \times 6 + 1 \times 1$'
-      - say: '4 times 36 is 144, 5 times 6 is 30, and 1 times 1 is 1.'
+      - say: 'The 4 squares: 4 times 36 is 144, 5 times 6 is 30, and 1 times 1 is 1.'
+        doodle_do:
+          - {id: blocks, op: circle, part: squares}
         write: '$= 144 + 30 + 1$'
-      - say: '144 plus 30 is 174, and plus 1 is 175.'
+      - say: 'Add up all the blocks: 144 plus 30 is 174, and plus 1 is 175.'
+        doodle_do:
+          - {id: blocks, op: label, part: total, text: '= 175 in base ten'}
         write: '$= 174 + 1 = 175$'
+        point:
+          - {line: 4, kind: highlight, at: '175', to: {doodle: blocks, part: total}}
       - say: 'Now $305_6$ the same way: 3 times 36, plus 0 times 6, plus 5.'
         write: '$305_6 = 3 \times 36 + 0 \times 6 + 5 \times 1$'
       - say: '3 times 36 is 108, 0 times 6 is 0, and 5 times 1 is 5. Altogether that is 113.'
@@ -77,13 +94,20 @@ lessons:
           - {line: 8, kind: move, from: {line: 7, at: '113'}, at: '− 113', text: 'across'}
       - say: 'That is 62 in base ten, but the options are in base 7. The base 7 place values are 1, 7, and 7 squared, which is 49.'
         write: 'Base 7 place values: $1,\ 7,\ 49$'
-      - say: 'How many 49s fit into 62? Just 1, with 62 minus 49, which is 13, left over.'
+      - say: 'Picture a big square of 49. How many 49s fit into 62? Just 1, with 62 minus 49, which is 13, left over.'
+        doodle: {name: 'custom:2004_q02_b', id: base7, caption: '62 as base 7 blocks'}
         write: '$62 = 1 \times 49 + 13$'
         point:
           - {line: 10, kind: move, from: {line: 8, at: '= 62'}, at: '62', text: 'p in base ten'}
-      - say: 'How many 7s fit into that 13? 1, with 6 left over.'
+          - {line: 10, kind: highlight, at: '1 × 49', to: {doodle: base7, part: square}}
+      - say: 'Now a rod of 7. How many 7s fit into that 13? 1, with 6 left over.'
+        doodle_do:
+          - {id: base7, op: stage, stage: 'custom:2004_q02_b2'}
         write: '$13 = 1 \times 7 + 6$'
-      - say: 'So 62 is one 49, one 7 and six 1s. Reading the digits from the 49s down gives 1, 1, 6.'
+      - say: 'Look at the blocks: 62 is one 49, one 7 and six 1s. Reading the digits from the 49s down gives 1, 1, 6.'
+        doodle_do:
+          - {id: base7, op: stage, stage: 'custom:2004_q02_b3'}
+          - {id: base7, op: circle, part: answer}
         write: '$62 = 1 \times 49 + 1 \times 7 + 6 \times 1 = 116_7$'
         point:
           - {line: 12, kind: move, from: {line: 10, at: '1 × 49'}, at: '1 × 49'}
@@ -108,9 +132,12 @@ lessons:
         write: 'Top $= \tfrac{1}{15} + \tfrac{1}{4}$'
         point:
           - {line: 3, kind: move, from: {line: 2, at: '= 151'}, at: '151', text: 'carried down'}
-      - say: 'To add, we need a common denominator. 15 times 4 is 60. 1 over 15 is 4 over 60, and 1 over 4 is 15 over 60.'
+      - say: 'To add, we need a common denominator. 15 times 4 is 60, so picture 60 little squares. 1 over 15 is 4 over 60, and 1 over 4 is 15 over 60.'
+        doodle: {name: 'custom:2004_q03_a', id: sixty, caption: '60 squares'}
         write: '$= \tfrac{4}{60} + \tfrac{15}{60}$'
-      - say: '4 plus 15 is 19, so the top is 19 over 60.'
+      - say: 'In the squares, 4 plus 15 is 19, so the top is 19 over 60.'
+        doodle_do:
+          - {id: sixty, op: stage, stage: 'custom:2004_q03_a2'}
         write: '$= \tfrac{19}{60}$'
       - say: 'Now the bottom. It begins with a half divided by 3 over 5. Dividing by a fraction means multiplying by it turned upside down, so we multiply by 5 over 3.'
         write: 'Bottom: $\tfrac{1}{2} \div \tfrac{3}{5} = \tfrac{1}{2} \times \tfrac{5}{3}$'
@@ -120,11 +147,18 @@ lessons:
         write: 'Bottom $= \tfrac{5}{6} - \tfrac{1}{4}$'
         point:
           - {line: 8, kind: move, from: {line: 7, at: '= 65'}, at: '65', text: 'carried down'}
-      - say: 'The common denominator of 6 and 4 is 12. 5 over 6 is 10 over 12, and 1 over 4 is 3 over 12.'
+      - say: 'The common denominator of 6 and 4 is 12, so picture 12 squares. 5 over 6 is 10 over 12, and 1 over 4 is 3 over 12.'
+        doodle: {name: 'custom:2004_q03_b', id: twelve, caption: '12 squares'}
         write: '$= \tfrac{10}{12} - \tfrac{3}{12}$'
-      - say: '10 minus 3 is 7, so the bottom is 7 over 12.'
+      - say: 'Cross 3 out of the 10 blue squares: 10 minus 3 is 7, so the bottom is 7 over 12.'
+        doodle_do:
+          - {id: twelve, op: stage, stage: 'custom:2004_q03_b2'}
+          - {id: twelve, op: circle, part: left}
         write: '$= \tfrac{7}{12}$'
-      - say: 'Now put the two results together: the top, 19 over 60, divided by the bottom, 7 over 12. Again, dividing means multiplying by the upside-down fraction, 12 over 7.'
+      - say: 'Now put the two pictures together: the top, 19 over 60, divided by the bottom, 7 over 12. Again, dividing means multiplying by the upside-down fraction, 12 over 7.'
+        doodle_do:
+          - {id: sixty, op: pulse}
+          - {id: twelve, op: pulse}
         write: 'Whole fraction $= \tfrac{19}{60} \div \tfrac{7}{12} = \tfrac{19}{60} \times \tfrac{12}{7}$'
         point:
           - {line: 11, kind: move, from: {line: 5, at: '= 6019'}, at: '= [[6019]] ÷', text: 'top'}
@@ -140,19 +174,25 @@ lessons:
       C: 'You went for 7 over 12. That is the bottom of the fraction on its own. The whole thing is the top, 19 over 60, divided by it.'
   4:
     moments:
-      - say: 'A farmer sowed 5000 grains of maize and harvested 5000 cobs, each carrying 500 grains. We want the ratio of grains sowed to grains harvested.'
-        doodle: {name: 'custom:2004_q04_a', caption: 'Count both sides in grains'}
+      - say: 'Picture the farm. A farmer sowed 5000 grains of maize and harvested 5000 cobs, each carrying 500 grains. We want the ratio of grains sowed to grains harvested.'
+        doodle: {name: 'custom:2004_q04_a', id: maize, caption: 'Count both sides in grains'}
         write: 'Sowed: 5000 grains; harvested: 5000 cobs of 500 grains'
       - say: 'A ratio compares two amounts of the same kind of thing. So both sides must be counted in grains, not one in grains and the other in cobs.'
-      - say: 'The grains sowed are given directly: 5000.'
+      - say: 'Look at the left of the picture: the grains sowed are given directly, 5000.'
+        doodle_do:
+          - {id: maize, op: circle, part: grains}
         write: 'Grains sowed $= 5000$'
       - say: 'The grains harvested are not given directly. There are 5000 cobs and each carries 500 grains, so we multiply.'
         write: 'Grains harvested $= 5000 \times 500$'
         point:
           - {line: 3, kind: move, from: {line: 0, at: '[[5000]] cobs'}, at: '5000 ×', text: 'cobs'}
           - {line: 3, kind: move, from: {line: 0, at: 'of [[500]]'}, at: '× 500', text: 'grains each'}
-      - say: 'Multiply 5 by 5 to get 25, then put back all the zeros: 3 from the 5000 and 2 from the 500. So 5000 times 500 is 2,500,000.'
+      - say: 'Multiply 5 by 5 to get 25, then put back all the zeros: 3 from the 5000 and 2 from the 500. So 5000 times 500 is 2,500,000 grains on all the cobs.'
+        doodle_do:
+          - {id: maize, op: label, part: cob, text: '2,500,000 grains'}
         write: '$= 2{,}500{,}000$'
+        point:
+          - {line: 4, kind: highlight, at: '2,500,000', to: {doodle: maize, part: cob}}
       - say: 'Now write the ratio, sowed first and harvested second, just as the question asks.'
         write: 'Sowed : harvested $= 5000 : 2{,}500{,}000$'
         point:
@@ -162,7 +202,10 @@ lessons:
         write: '$= \dfrac{5000}{5000} : \dfrac{2{,}500{,}000}{5000}$'
       - say: '5000 divided by 5000 is 1. For 2,500,000 divided by 5000, cancel three zeros from each: 2500 divided by 5, which is 500.'
         write: '$= 1 : 500$'
-      - say: 'That makes sense: 5000 grains became 5000 cobs, so each grain sowed grew into one cob of 500 grains. The ratio is 1 to 500, which is answer choice A.'
+      - say: 'Look at the picture again, and it makes sense: 5000 grains became 5000 cobs, so each grain sowed grew into one cob of 500 grains. The ratio is 1 to 500, which is answer choice A.'
+        doodle_do:
+          - {id: maize, op: stage, stage: 'custom:2004_q04_a2'}
+          - {id: maize, op: circle, part: ratio}
         write: 'Ratio $= 1 : 500$'
         answer: true
     traps:
@@ -171,8 +214,8 @@ lessons:
       D: 'You went for 1 to 250000. Too many zeros have crept in. 5000 grains against 2,500,000 grains simplifies to 1 to 500.'
   5:
     moments:
-      - say: 'Three teachers share a packet of chalk. The first gets 2 over 5 of it, and the second gets 2 over 15 of the remainder. We want the third teacher''s share.'
-        doodle: {name: 'custom:2004_q05_a', caption: 'The 2nd gets 2/15 of the rest'}
+      - say: 'Three teachers share a packet of chalk. Picture it cut into 25 equal bits. The first gets 2 over 5 of it, and the second gets 2 over 15 of the remainder. We want the third teacher''s share.'
+        doodle: {name: 'custom:2004_q05_a', id: chalk, caption: 'the packet as 25 equal bits'}
         write: 'First: $\tfrac{2}{5}$ of the packet; second: $\tfrac{2}{15}$ of the remainder'
       - say: 'Let''s call the whole packet 1. The key words are "of the remainder": the second share is a fraction of what the first teacher left, not of the whole packet.'
         write: 'Whole packet $= 1$'
@@ -182,7 +225,9 @@ lessons:
         write: 'Remainder $= 1 - \tfrac{2}{5}$'
         point:
           - {line: 2, kind: move, from: {line: 0, at: 'First: [[52]]'}, at: '− 52', text: 'first share'}
-      - say: 'Write 1 as 5 over 5. Then 5 over 5 minus 2 over 5 is 3 over 5.'
+      - say: 'Write 1 as 5 over 5. Then 5 over 5 minus 2 over 5 is 3 over 5: the three columns still in the packet.'
+        doodle_do:
+          - {id: chalk, op: circle, part: rest}
         write: '$= \tfrac{5}{5} - \tfrac{2}{5} = \tfrac{3}{5}$'
       - say: 'The second teacher gets 2 over 15 of that remainder. "Of" means multiply, so it is 2 over 15 times 3 over 5.'
         write: 'Second share $= \tfrac{2}{15} \times \tfrac{3}{5}$'
@@ -190,7 +235,10 @@ lessons:
           - {line: 4, kind: move, from: {line: 3, at: '= 53'}, at: '× 53', text: 'remainder'}
       - say: 'Multiply the tops: 2 times 3 is 6. Multiply the bottoms: 15 times 5 is 75.'
         write: '$= \tfrac{6}{75}$'
-      - say: 'Divide the top and bottom by 3. 6 divided by 3 is 2, and 75 divided by 3 is 25.'
+      - say: 'Watch the second teacher take 2 of the 15 bits left. Divide the top and bottom by 3. 6 divided by 3 is 2, and 75 divided by 3 is 25.'
+        doodle_do:
+          - {id: chalk, op: stage, stage: 'custom:2004_q05_a2'}
+          - {id: chalk, op: label, part: second, text: '2 of 25'}
         write: '$= \tfrac{2}{25}$'
       - say: 'The third teacher gets what is left of the whole packet after both shares: 1, minus the first share 2 over 5, minus the second share 2 over 25 that we just found.'
         write: 'Third share $= 1 - \tfrac{2}{5} - \tfrac{2}{25}$'
@@ -199,11 +247,16 @@ lessons:
           - {line: 7, kind: move, from: {line: 6, at: '252'}, at: '− 252', text: 'second share'}
       - say: 'Put everything over 25. 1 is 25 over 25, and 2 over 5 is 10 over 25, because 2 times 5 is 10.'
         write: '$= \tfrac{25}{25} - \tfrac{10}{25} - \tfrac{2}{25}$'
-      - say: 'Now subtract the tops: 25 minus 10 minus 2. 25 minus 10 is 15, and 15 minus 2 is 13.'
+      - say: 'Now subtract the tops, and see what is left in the picture: 25 minus 10 minus 2. 25 minus 10 is 15, and 15 minus 2 is 13.'
+        doodle_do:
+          - {id: chalk, op: stage, stage: 'custom:2004_q05_a3'}
+          - {id: chalk, op: circle, part: third}
         write: '$= \tfrac{25 - 10 - 2}{25} = \tfrac{13}{25}$'
       - say: 'Check: the three shares, 10 over 25, 2 over 25 and 13 over 25, add up to 25 over 25, the whole packet.'
         write: 'Check: $\tfrac{10}{25} + \tfrac{2}{25} + \tfrac{13}{25} = \tfrac{25}{25} = 1$'
-      - say: 'So the third teacher gets 13 over 25 of the chalk, which is answer choice C.'
+      - say: 'So the third teacher, the blue part, gets 13 over 25 of the chalk, which is answer choice C.'
+        doodle_do:
+          - {id: chalk, op: pulse, part: third}
         write: 'Third share $= \tfrac{13}{25}$'
         answer: true
     traps:
@@ -224,14 +277,19 @@ lessons:
         write: 'Law of indices: $(a^{m})^{n} = a^{mn}$'
       - say: 'A power of a power multiplies the indices. $2x$ times a third is $2x$ over 3.'
         write: '$= 4^{\frac{2x}{3}}$'
-      - say: 'Now the right side. 16 is 4 times 4, which is 4 squared.'
+      - say: 'Now the right side. Picture two 4s multiplied: 16 is 4 times 4, which is 4 squared.'
+        doodle: {name: 'custom:2004_q06_a', id: fours, caption: '16 = 4 × 4'}
         write: '$16 = 4 \times 4 = 4^{2}$'
+        point:
+          - {line: 6, kind: highlight, at: '16', to: {doodle: fours, part: sixteen}}
       - say: 'Put both back into the equation. The left side is 4 to the power $2x$ over 3, and the right side is 4 squared.'
         write: 'So $4^{\frac{2x}{3}} = 4^{2}$'
         point:
           - {line: 7, kind: move, from: {line: 5, at: '432x'}, at: '432x', text: 'left'}
           - {line: 7, kind: move, from: {line: 6, at: '= 42'}, at: '= [[42]]', text: 'right'}
-      - say: 'Both bases are 4, so the indices must be equal: $2x$ over 3 equals 2.'
+      - say: 'Both bases are 4, like the blocks, so the indices must be equal: $2x$ over 3 equals 2.'
+        doodle_do:
+          - {id: fours, op: pulse, part: sixteen}
         write: '$\dfrac{2x}{3} = 2$'
         point:
           - {line: 1, kind: box, text: 'the rule'}
@@ -241,7 +299,10 @@ lessons:
         write: '$2x = 6$'
       - say: 'Divide both sides by 2. 6 divided by 2 is 3.'
         write: '$x = 3$'
-      - say: 'Let''s check. With $x = 3$, $2x$ is 6, and 4 to the power 6 is 4096. The cube root of 4096 is 16, because 16 times 16 times 16 is 4096.'
+      - say: 'Let''s check. With $x = 3$, $2x$ is 6, and 4 to the power 6 is 4096. Picture the six 4s split into three equal groups: the cube root of 4096 is one group, 16, because 16 times 16 times 16 is 4096.'
+        doodle_do:
+          - {id: fours, op: stage, stage: 'custom:2004_q06_a2'}
+          - {id: fours, op: circle, part: group}
         write: 'Check: $\sqrt[3]{4^{6}} = \sqrt[3]{4096} = 16$'
       - say: 'So $x$ is 3, which is answer choice B.'
         write: '$x = 3$'
@@ -258,7 +319,8 @@ lessons:
         write: '$= \dfrac{1}{2 + \sqrt{3}}$'
       - say: 'The tool is the conjugate: the same two terms with the middle sign flipped. The conjugate of 2 plus root 3 is 2 minus root 3.'
         write: 'Conjugate of $2 + \sqrt{3}$: $2 - \sqrt{3}$'
-      - say: 'Why does it help? Because of the difference of two squares: $a$ plus $b$, times $a$ minus $b$, is $a$ squared minus $b$ squared. Squaring root 3 gets rid of the root.'
+      - say: 'Why does it help? Because of the difference of two squares: $a$ plus $b$, times $a$ minus $b$, is $a$ squared minus $b$ squared. Squaring root 3 gets rid of the root. Picture squares: a square of side 2 has area 4.'
+        doodle: {name: 'custom:2004_q07_a', id: squares, caption: 'a square of side 2 has area 4'}
         write: '$(a + b)(a - b) = a^{2} - b^{2}$'
       - say: 'Multiply the top and the bottom by 2 minus root 3. That is multiplying by 1, so the value doesn''t change.'
         write: '$\dfrac{1}{2 + \sqrt{3}} = \dfrac{1}{2 + \sqrt{3}} \times \dfrac{2 - \sqrt{3}}{2 - \sqrt{3}}$'
@@ -266,13 +328,21 @@ lessons:
           - {line: 2, kind: arrow, text: 'conjugate'}
       - say: 'On top, 1 times 2 minus root 3 is just 2 minus root 3. On the bottom we have 2 plus root 3, times 2 minus root 3.'
         write: '$= \dfrac{2 - \sqrt{3}}{(2 + \sqrt{3})(2 - \sqrt{3})}$'
-      - say: 'Using the difference of two squares we just wrote, the bottom is 2 squared minus root 3 squared.'
+      - say: 'Using the difference of two squares we just wrote, the bottom is 2 squared minus root 3 squared: the big square take away the blue one.'
+        doodle_do:
+          - {id: squares, op: stage, stage: 'custom:2004_q07_a2'}
         write: '$= \dfrac{2 - \sqrt{3}}{2^{2} - (\sqrt{3})^{2}}$'
         point:
           - {line: 3, kind: box, text: 'the rule'}
-      - say: '2 squared is 4, and root 3 squared is 3. So the bottom is 4 minus 3.'
+      - say: '2 squared is 4, and root 3 squared is 3, the blue square''s area. So the bottom is 4 minus 3.'
+        doodle_do:
+          - {id: squares, op: circle, part: small}
         write: '$= \dfrac{2 - \sqrt{3}}{4 - 3}$'
-      - say: '4 minus 3 is 1, and anything over 1 is just itself.'
+        point:
+          - {line: 7, kind: highlight, at: '4 − 3', to: {doodle: squares, part: leftover}}
+      - say: '4 minus 3 is 1, the pink strip, and anything over 1 is just itself.'
+        doodle_do:
+          - {id: squares, op: highlight, part: leftover}
         write: '$= \dfrac{2 - \sqrt{3}}{1} = 2 - \sqrt{3}$'
       - say: 'In the form $a + b\sqrt{3}$, that is $a$ equals 2 and $b$ equals negative 1.'
         write: '$2 - \sqrt{3} = 2 + (-1)\sqrt{3}$'
@@ -290,13 +360,20 @@ lessons:
       - say: 'The plan: combine the left side into a single log, then turn the log equation into a power.'
       - say: 'The power law of logs: $n$ times log $a$ is log of $a$ to the $n$.'
         write: 'Law of logs: $n\log a = \log a^{n}$'
-      - say: 'First, the power law: a number in front of a log can move up to become a power. So 6 log 2 becomes log of 2 to the power 6.'
+      - say: 'First, the power law: a number in front of a log can move up to become a power. Picture six 2s multiplied together. So 6 log 2 becomes log of 2 to the power 6.'
+        doodle: {name: 'custom:2004_q08_a', id: powers, caption: 'how many 2s make 64?'}
         write: '$6\log_x 2 = \log_x 2^{6}$'
         point:
           - {line: 3, kind: move, from: {line: 3, at: '[[6]]log'}, at: '2[[6]]', text: 'up as the power'}
-      - say: '2 to the power 6 is 2 times 2 times 2 times 2 times 2 times 2, which is 64.'
+      - say: '2 to the power 6 is 2 times 2 times 2 times 2 times 2 times 2, which is 64, all six blocks.'
+        doodle_do:
+          - {id: powers, op: circle, part: twos}
         write: '$= \log_x 64$'
-      - say: 'In the same way, 3 log 3 becomes log of 3 cubed, and 3 cubed is 27.'
+        point:
+          - {line: 4, kind: highlight, at: '64', to: {doodle: powers, part: twos}}
+      - say: 'In the same way, add three 3s to the picture: 3 log 3 becomes log of 3 cubed, and 3 cubed is 27.'
+        doodle_do:
+          - {id: powers, op: stage, stage: 'custom:2004_q08_a2'}
         write: '$3\log_x 3 = \log_x 3^{3} = \log_x 27$'
         point:
           - {line: 5, kind: move, from: {line: 5, at: '[[3]]log'}, at: 'x3[[3]] =', text: 'up as the power'}
@@ -314,13 +391,17 @@ lessons:
           - {line: 8, kind: move, from: {line: 6, at: '27'}, at: '[[27]]64', text: 'divide'}
       - say: 'So the whole equation is now: log to base $x$ of 64 over 27 equals 3.'
         write: '$\log_x \dfrac{64}{27} = 3$'
-      - say: 'What does a log mean? Log to base $x$ of a number equals 3 means $x$ to the power 3 gives that number. So $x$ cubed equals 64 over 27.'
+      - say: 'What does a log mean? Log to base $x$ of a number equals 3 means $x$ to the power 3 gives that number. So $x$ cubed equals 64 over 27: three $x$ blocks multiplied.'
+        doodle_do:
+          - {id: powers, op: stage, stage: 'custom:2004_q08_a3'}
         write: '$x^{3} = \dfrac{64}{27}$'
         point:
           - {line: 10, kind: move, from: {line: 9, at: '= 3'}, at: 'x[[3]]', text: 'the power'}
       - say: 'To undo a cube, take the cube root of both sides. For a fraction, take the cube root of the top and of the bottom.'
         write: '$x = \dfrac{\sqrt[3]{64}}{\sqrt[3]{27}}$'
-      - say: 'The cube root of 64 is 4, because 4 times 4 times 4 is 64. The cube root of 27 is 3, because 3 times 3 times 3 is 27.'
+      - say: 'So each $x$ block is a cube root. The cube root of 64 is 4, because 4 times 4 times 4 is 64. The cube root of 27 is 3, because 3 times 3 times 3 is 27.'
+        doodle_do:
+          - {id: powers, op: label, part: xs, text: 'each x = 4/3'}
         write: '$= \dfrac{4}{3}$'
       - say: 'So $x$ is 4 over 3, which is answer choice C.'
         write: '$x = \dfrac{4}{3}$'
@@ -376,7 +457,8 @@ lessons:
       D: 'You went for $Q$ union $R$ inside the bracket. That would shade everything in $Q$ or in $R$ outside $P$, which is far more. The shading is only where $Q$ and $R$ overlap.'
   10:
     moments:
-      - say: 'There are 40 students, and each takes at least one of Physics and Chemistry. We want the number who take Physics only.'
+      - say: 'Picture the 40 students, and each takes at least one of Physics and Chemistry. We want the number who take Physics only.'
+        doodle: {name: person-small, id: class, repeat: 40, layout: grid, caption: '40 students'}
         write: 'Class $= 40$, everyone takes at least one subject'
       - say: 'Let me draw a Venn diagram, so we can see where everything belongs.'
         show_sketch: true
@@ -406,9 +488,15 @@ lessons:
           - {line: 7, kind: move, from: {line: 4, at: '= 6b'}, at: '+ 6b', text: 'C'}
       - say: '$3b$ plus $6b$ is $9b$, and $9b$ minus $b$ is $8b$.'
         write: '$8b = 40$'
-      - say: 'Divide both sides by 8. 40 divided by 8 is 5, so 5 students take both.'
+      - say: 'Divide both sides by 8. 40 divided by 8 is 5, so 5 students take both. Let''s ring them in the class.'
+        doodle_do:
+          - {id: class, op: group, n: 5, text: '5 take both'}
         write: '$b = 5$'
-      - say: 'Now go back to Physics: $P$ is $3b$, so it is 3 times 5, which is 15.'
+        point:
+          - {line: 9, kind: highlight, at: 'b = 5', to: {doodle: class}}
+      - say: 'Now go back to Physics: $P$ is $3b$, so it is 3 times 5, which is 15, those 5 and 10 more.'
+        doodle_do:
+          - {id: class, op: group, n: 15, text: '15 take Physics'}
         write: '$P = 3 \times 5 = 15$'
         point:
           - {line: 10, kind: move, from: {line: 9, at: '5'}, at: '× 5', text: 'b'}
@@ -420,7 +508,9 @@ lessons:
           - {line: 12, kind: move, from: {line: 10, at: '= 15'}, at: '15', text: 'all Physics'}
           - {line: 12, kind: move, from: {line: 9, at: '5'}, at: '− 5', text: 'both'}
           - {figure: sketch, kind: label, target: '?', text: '10'}
-      - say: 'Check: Chemistry is $6b$, which is 30, so Chemistry only is 30 minus 5, which is 25. Then 10 plus 5 plus 25 is 40, the whole class.'
+      - say: 'Check: Chemistry is $6b$, which is 30, so Chemistry only is 30 minus 5, which is 25. Split the class: 10 plus 5 plus 25 is 40, the whole class.'
+        doodle_do:
+          - {id: class, op: split, n: 15, text: 'Physics 15 | Chemistry only 25'}
         write: 'Check: Chemistry only $= 30 - 5 = 25$, and $10 + 5 + 25 = 40$'
       - say: 'So 10 students take Physics only, which is answer choice C.'
         write: 'Physics only $= 10$'
@@ -484,13 +574,20 @@ lessons:
     moments:
       - say: 'We want the remainder when this cubic is divided by $x + 3$.'
         write: '$f(x) = 3x^{3} + 5x^{2} - 11x + 4$'
-      - say: 'We don''t need long division. The remainder theorem says: when $f(x)$ is divided by $x - a$, the remainder is $f(a)$, the value of the polynomial at $a$.'
+      - say: 'We don''t need long division. Picture $f$ as a machine: a number goes in, a value comes out. The remainder theorem says: when $f(x)$ is divided by $x - a$, the remainder is $f(a)$, the value of the polynomial at $a$.'
+        doodle: {name: 'custom:2004_q12_a', id: machine, caption: 'f as a machine'}
         write: 'Remainder theorem: $f(x) \div (x - a)$ leaves remainder $f(a)$'
       - say: 'Why? Write $f(x)$ as $x - a$ times a quotient, plus a remainder $R$. Put $x = a$, and the first part becomes zero, leaving just $R$.'
         write: '$f(a) = 0 \times \text{quotient} + R = R$'
-      - say: 'Which value of $x$ makes the divisor $x + 3$ zero? $x$ equals negative 3. So $a$ is negative 3.'
+      - say: 'Which value of $x$ makes the divisor $x + 3$ zero? $x$ equals negative 3. So $a$ is negative 3, the number we feed in.'
+        doodle_do:
+          - {id: machine, op: circle, part: input}
         write: '$x + 3 = 0 \Rightarrow x = -3$'
-      - say: 'So the remainder is $f$ of negative 3. Substitute negative 3 for every $x$, in brackets.'
+        point:
+          - {line: 3, kind: highlight, at: 'x = −3', to: {doodle: machine, part: input}}
+      - say: 'So the remainder is $f$ of negative 3. Feed it into the machine: substitute negative 3 for every $x$, in brackets.'
+        doodle_do:
+          - {id: machine, op: move, part: input, path: in}
         write: 'Remainder $= f(-3) = 3(-3)^{3} + 5(-3)^{2} - 11(-3) + 4$'
         point:
           - {line: 1, kind: box, text: 'the rule'}
@@ -501,8 +598,12 @@ lessons:
         write: '$= -81 + 45 + 33 + 4$'
       - say: 'Add the positive numbers first: 45 plus 33 is 78, and 78 plus 4 is 82.'
         write: '$= -81 + 82$'
-      - say: 'Negative 81 plus 82 is 1.'
+      - say: 'Negative 81 plus 82 is 1, and that is what comes out of the machine.'
+        doodle_do:
+          - {id: machine, op: label, part: out, text: 'R = 1'}
         write: '$= 1$'
+        point:
+          - {line: 8, kind: highlight, at: '1', to: {doodle: machine, part: out}}
       - say: 'So the remainder is 1, which is answer choice B.'
         write: 'Remainder $= 1$'
         answer: true
@@ -520,18 +621,25 @@ lessons:
         write: 'First pair: $ac - 2bc = c(a - 2b)$'
       - say: 'In the second pair, take out a minus sign first. Negative $a^{2}$ plus $4b^{2}$ becomes minus, bracket, $a^{2} - 4b^{2}$.'
         write: 'Second pair: $-a^{2} + 4b^{2} = -(a^{2} - 4b^{2})$'
-      - say: 'Inside that bracket is a difference of two squares. $a^{2}$ is $a$ squared, and $4b^{2}$ is $2b$ squared.'
+      - say: 'Inside that bracket is a difference of two squares: picture a square of side $a$ with a square of side $2b$ cut out. $a^{2}$ is $a$ squared, and $4b^{2}$ is $2b$ squared.'
+        doodle: {name: 'custom:2004_q13_a', id: square, caption: 'a² take away (2b)²'}
         write: '$= -\left(a^{2} - (2b)^{2}\right)$'
       - say: 'The difference of two squares: the first thing squared minus the second thing squared is their difference times their sum.'
         write: 'Difference of two squares: $\text{first}^{2} - \text{second}^{2} = (\text{first} - \text{second})(\text{first} + \text{second})$'
-      - say: 'A difference of two squares factorises as the difference times the sum. So this is minus $(a - 2b)(a + 2b)$.'
+      - say: 'Slide the strip round, and the L-shape becomes a rectangle: the difference times the sum. So this is minus $(a - 2b)(a + 2b)$.'
+        doodle_do:
+          - {id: square, op: stage, stage: 'custom:2004_q13_a2'}
         write: '$= -(a - 2b)(a + 2b)$'
+        point:
+          - {line: 6, kind: highlight, at: '(a + 2b)', to: {doodle: square, part: rect}}
       - say: 'Now put the two pairs back together, using the results we just found.'
         write: 'So the expression $= c(a - 2b) - (a - 2b)(a + 2b)$'
         point:
           - {line: 7, kind: move, from: {line: 2, at: '= [[c(a − 2b)]]'}, at: 'c(a − 2b)', text: 'first pair'}
           - {line: 7, kind: move, from: {line: 6, at: '−(a − 2b)(a + 2b)'}, at: '−(a − 2b)(a + 2b)', text: 'second pair'}
-      - say: 'Both parts contain the bracket $a - 2b$. That is the common factor we hoped for, so we take it out.'
+      - say: 'Both parts contain the bracket $a - 2b$, the rectangle''s width. That is the common factor we hoped for, so we take it out.'
+        doodle_do:
+          - {id: square, op: circle, part: side}
         write: '$= (a - 2b)\left[c - (a + 2b)\right]$'
         point:
           - {line: 8, kind: move, from: {line: 7, at: 'c[[(a − 2b)]]'}, at: '(a − 2b)', text: 'common'}
@@ -554,7 +662,8 @@ lessons:
         write: '$y = 4$ when $x = \tfrac{1}{2}$; find $x$ when $y = 10$'
       - say: 'Inversely proportional means $y$ equals a constant $k$ divided by $x$. As one goes up, the other comes down.'
         write: '$y = \dfrac{k}{x}$'
-      - say: 'Multiply both sides by $x$, and we see what stays fixed: $x$ times $y$ is always the same number, $k$.'
+      - say: 'Picture $x$ times $y$ as the area of a rectangle. Multiply both sides by $x$, and we see what stays fixed: $x$ times $y$ is always the same number, $k$.'
+        doodle: {name: 'custom:2004_q14_a', id: area, caption: 'x × y as a rectangle''s area'}
         write: '$xy = k$'
       - say: 'Let''s find $k$ from the pair we are given: $x$ is a half and $y$ is 4.'
         write: '$k = \tfrac{1}{2} \times 4$'
@@ -562,11 +671,17 @@ lessons:
           - {line: 2, kind: box, text: 'fixed'}
           - {line: 3, kind: move, from: {line: 0, at: 'x = [[21]]'}, at: '21', text: 'x'}
           - {line: 3, kind: move, from: {line: 0, at: 'y = [[4]]'}, at: '× 4', text: 'y'}
-      - say: 'Half of 4 is 2. So $k$ is 2.'
+      - say: 'Half of 4 is 2. So $k$ is 2, the rectangle''s area.'
+        doodle_do:
+          - {id: area, op: label, part: first, text: 'area 2'}
         write: '$= 2$'
+        point:
+          - {line: 4, kind: highlight, at: '2', to: {doodle: area, part: first}}
       - say: 'So for every pair of values, $x$ times $y$ is 2.'
         write: 'So $xy = 2$'
-      - say: 'Now use this with $y = 10$. Put 10 in place of $y$.'
+      - say: 'Now use this with $y = 10$: a much taller rectangle with the same area. Put 10 in place of $y$.'
+        doodle_do:
+          - {id: area, op: stage, stage: 'custom:2004_q14_a2'}
         write: '$x \times 10 = 2$'
         point:
           - {line: 6, kind: move, from: {line: 0, at: 'y = [[10]]'}, at: '× 10', text: 'y'}
@@ -575,7 +690,9 @@ lessons:
         write: '$x = \dfrac{2}{10}$'
         point:
           - {line: 7, kind: move, from: {line: 6, at: '× 10'}, at: '[[10]]2', text: 'divide across'}
-      - say: 'Divide the top and bottom by 2: 2 over 10 is 1 over 5.'
+      - say: 'Divide the top and bottom by 2: 2 over 10 is 1 over 5, a very thin rectangle.'
+        doodle_do:
+          - {id: area, op: label, part: second, text: 'x = 1/5'}
         write: '$= \dfrac{1}{5}$'
       - say: 'Does that make sense? $y$ went up from 4 to 10, so $x$ should come down, and it did, from a half to 1 over 5. Check: 1 over 5 times 10 is 2.'
         write: 'Check: $\tfrac{1}{5} \times 10 = 2$'
@@ -588,12 +705,14 @@ lessons:
       D: 'You went for 10. That treats the relationship as direct, so $x$ grows with $y$. In inverse proportion, when $y$ goes up, $x$ comes down.'
   15:
     moments:
-      - say: 'The length $L$ of a pendulum varies directly as the square of its period $T$. A period of 4 seconds gives a length of 64 centimetres. We want the length when the period is 9 seconds.'
-        doodle: {name: 'custom:2004_q15_a', caption: 'Longer pendulum, slower swing'}
+      - say: 'Picture two pendulums. The length $L$ of a pendulum varies directly as the square of its period $T$. A period of 4 seconds gives a length of 64 centimetres. We want the length when the period is 9 seconds.'
+        doodle: {name: 'custom:2004_q15_a', id: pendulum, caption: 'Longer pendulum, slower swing'}
         write: '$L = 64$ when $T = 4$; find $L$ when $T = 9$'
       - say: '"Varies directly as the square of $T$" means $L$ equals a constant $k$ times $T$ squared. The square belongs in the formula from the start.'
         write: '$L = kT^{2}$'
-      - say: 'Find $k$ from the pendulum we know about. Put $L = 64$ and $T = 4$ into the formula.'
+      - say: 'Find $k$ from the pendulum we know about, the short one. Put $L = 64$ and $T = 4$ into the formula.'
+        doodle_do:
+          - {id: pendulum, op: circle, part: short}
         write: '$64 = k \times 4^{2}$'
         point:
           - {line: 1, kind: box, text: 'the rule'}
@@ -609,14 +728,20 @@ lessons:
         write: 'So $L = 4T^{2}$'
         point:
           - {line: 5, kind: move, from: {line: 4, at: '= 4'}, at: '[[4]]T2', text: 'k'}
-      - say: 'Now use it for the new pendulum. Put $T = 9$.'
+      - say: 'Now use it for the new, slower pendulum. Put $T = 9$.'
+        doodle_do:
+          - {id: pendulum, op: circle, part: long}
         write: '$L = 4 \times 9^{2}$'
         point:
           - {line: 6, kind: move, from: {line: 0, at: 'T = [[9]]'}, at: '[[9]]2', text: 'T'}
       - say: '9 squared is 81.'
         write: '$= 4 \times 81$'
-      - say: '4 times 80 is 320, and 4 times 1 is 4. 320 plus 4 is 324.'
+      - say: '4 times 80 is 320, and 4 times 1 is 4. 320 plus 4 is 324: the long pendulum is 324 centimetres.'
+        doodle_do:
+          - {id: pendulum, op: label, part: len, text: 'L = 324 cm'}
         write: '$= 320 + 4 = 324$'
+        point:
+          - {line: 8, kind: highlight, at: '324', to: {doodle: pendulum, part: len}}
       - say: 'Check with ratios: the period went from 4 to 9, so the length is multiplied by 9 squared over 4 squared, which is 81 over 16. 64 times 81 over 16 is 4 times 81, which is 324 again.'
         write: 'Check: $64 \times \dfrac{81}{16} = 4 \times 81 = 324$'
       - say: 'So the pendulum is 324 centimetres long, which is answer choice D.'
@@ -733,19 +858,26 @@ lessons:
           - {line: 2, kind: move, from: {line: 1, at: 'n = [[2]]'}, at: '2[[2]] − 2', text: 'n = 2'}
       - say: 'Work out the index first: 2 minus 2 is zero.'
         write: '$= 3 \cdot 2^{0}$'
-      - say: 'A law of indices: any nonzero number to the power zero is 1.'
+      - say: 'A law of indices: any nonzero number to the power zero is 1. Picture towers of 2s: each step down the power halves the tower.'
+        doodle: {name: 'custom:2004_q18_a', id: towers, caption: 'each step down halves'}
         write: 'Law of indices: $a^{0} = 1\ \ (a \neq 0)$'
-      - say: 'Any nonzero number to the power zero is 1, not zero. So 2 to the power zero is 1, and 3 times 1 is 3.'
+      - say: 'Any nonzero number to the power zero is 1, not zero. Half of 2 is 1, so 2 to the power zero is 1, and 3 times 1 is 3.'
+        doodle_do:
+          - {id: towers, op: circle, part: zero}
+          - {id: towers, op: label, part: zero, text: '1, not 0'}
         write: '$= 3 \times 1 = 3$'
         point:
           - {line: 3, kind: circle, at: '20', text: 'is 1'}
+          - {line: 5, kind: highlight, at: '3 × 1', to: {doodle: towers, part: zero}}
       - say: 'Now $U_2$. Replace $n$ with 2 in the formula for $U_n$.'
         write: '$U_2 = 3 \cdot 2^{2(2)-3}$'
         point:
           - {line: 6, kind: move, from: {line: 1, at: 'n = [[2]]'}, at: '(2)', text: 'n = 2'}
       - say: 'Index first again: 2 times 2 is 4, and 4 minus 3 is 1.'
         write: '$= 3 \cdot 2^{4-3} = 3 \cdot 2^{1}$'
-      - say: '2 to the power 1 is just 2, so 3 times 2 is 6.'
+      - say: '2 to the power 1 is just 2, the middle tower, so 3 times 2 is 6.'
+        doodle_do:
+          - {id: towers, op: circle, part: one}
         write: '$= 3 \times 2 = 6$'
       - say: 'The question wants the product, so multiply the two terms we found: $Q_2$, which is 3, times $U_2$, which is 6.'
         write: '$Q_2 \times U_2 = 3 \times 6$'
@@ -763,11 +895,14 @@ lessons:
     moments:
       - say: 'The first term of a G.P. is 6 and the fourth term is 162. We want the sum of the first three terms.'
         write: 'G.P.: $T_1 = 6,\ T_4 = 162$'
-      - say: 'In a geometric progression, each term is the one before multiplied by the same number, the common ratio $r$. So the $n$th term is $a$ times $r$ to the power $n - 1$.'
+      - say: 'In a geometric progression, each term is the one before multiplied by the same number, like steps, the common ratio $r$. So the $n$th term is $a$ times $r$ to the power $n - 1$.'
+        doodle: {name: 'custom:2004_q19_a', id: steps, caption: 'each step × r'}
         write: '$T_n = ar^{n-1}$'
       - say: 'For the fourth term, $n$ is 4, so the power is 4 minus 1, which is 3.'
         write: '$T_4 = ar^{4-1} = ar^{3}$'
-      - say: 'The first term $a$ is 6, and the fourth term is 162. Substitute both.'
+      - say: 'The first term $a$ is 6, and the fourth step is 162. Substitute both.'
+        doodle_do:
+          - {id: steps, op: circle, part: fourth}
         write: '$6r^{3} = 162$'
         point:
           - {line: 2, kind: arrow, at: 'ar3', text: 'T4'}
@@ -777,7 +912,9 @@ lessons:
         write: '$r^{3} = \dfrac{162}{6} = 27$'
         point:
           - {line: 4, kind: move, from: {line: 3, at: '[[6]]r3'}, at: '[[6]]162', text: 'divide across'}
-      - say: 'Which number cubed gives 27? 3, because 3 times 3 times 3 is 27.'
+      - say: 'Three steps of × r take 6 to 162. Which number cubed gives 27? 3, because 3 times 3 times 3 is 27.'
+        doodle_do:
+          - {id: steps, op: stage, stage: 'custom:2004_q19_a2'}
         write: '$r = \sqrt[3]{27} = 3$'
       - say: 'Now build the first three terms. The first is 6.'
         write: '$T_1 = 6$'
@@ -785,10 +922,13 @@ lessons:
         write: '$T_2 = 6 \times 3 = 18$'
         point:
           - {line: 7, kind: move, from: {line: 5, at: '27 = [[3]]'}, at: '× 3', text: 'ratio'}
-      - say: 'And again: 18 times 3 is 54.'
+      - say: 'And again, up the steps: 18 times 3 is 54.'
+        doodle_do:
+          - {id: steps, op: stage, stage: 'custom:2004_q19_a3'}
         write: '$T_3 = 18 \times 3 = 54$'
         point:
           - {line: 8, kind: move, from: {line: 7, at: '= 18'}, at: '18 ×', text: 'carried down'}
+          - {line: 8, kind: highlight, at: '54', to: {doodle: steps, part: mid}}
       - say: 'Check: one more step should give the fourth term. 54 times 3 is 162. It does.'
         write: 'Check: $T_4 = 54 \times 3 = 162$'
       - say: 'Now add the first three terms: 6 plus 18 plus 54.'
@@ -797,7 +937,9 @@ lessons:
           - {line: 10, kind: move, from: {line: 6, at: '6'}, at: '= [[6]] +', text: 'T1'}
           - {line: 10, kind: move, from: {line: 7, at: '= 18'}, at: '+ 18', text: 'T2'}
           - {line: 10, kind: move, from: {line: 8, at: '= 54'}, at: '+ 54', text: 'T3'}
-      - say: '6 plus 18 is 24, and 24 plus 54 is 78. So the sum is 78, which is answer choice D.'
+      - say: 'Add the first three steps: 6 plus 18 is 24, and 24 plus 54 is 78. So the sum is 78, which is answer choice D.'
+        doodle_do:
+          - {id: steps, op: label, part: first3, text: '6 + 18 + 54 = 78'}
         write: '$= 24 + 54 = 78$'
         answer: true
     traps:
@@ -806,15 +948,23 @@ lessons:
       C: 'You went for 48. The terms must go 6, 18, 54, each three times the last, since $r$ cubed is 27 and $r$ is 3. Their sum is 78.'
   20:
     moments:
-      - say: 'We want the sum to infinity of a half, 1 over 6, 1 over 18, and so on.'
+      - say: 'Picture pouring the terms into a tube that holds 1: first a half. We want the sum to infinity of a half, 1 over 6, 1 over 18, and so on.'
+        doodle: {name: 'custom:2004_q20_a', id: tube, caption: 'pour in 1/2, 1/6, 1/18, …'}
+        doodle_do:
+          - {id: tube, op: fill, to: 0.5}
         write: '$\tfrac{1}{2} + \tfrac{1}{6} + \tfrac{1}{18} + \ldots$'
-      - say: 'The terms shrink towards zero, so the total settles on a fixed number. That only happens for a geometric series whose ratio is between negative 1 and 1. So first, find the ratio.'
+      - say: 'Watch the tube as 1 over 6 and then 1 over 18 go in. The terms shrink towards zero, so the total settles on a fixed number. That only happens for a geometric series whose ratio is between negative 1 and 1. So first, find the ratio.'
+        doodle_do:
+          - {id: tube, op: fill, to: 0.667}
+          - {id: tube, op: fill, to: 0.722}
         write: 'Need: $-1 < r < 1$'
       - say: 'The ratio is any term divided by the one before it. Take the second term over the first: 1 over 6 divided by a half.'
         write: '$r = \tfrac{1}{6} \div \tfrac{1}{2}$'
       - say: 'Dividing by a half is the same as multiplying by 2 over 1.'
         write: '$= \tfrac{1}{6} \times \tfrac{2}{1}$'
-      - say: '1 times 2 is 2, and 6 times 1 is 6. Then 2 over 6 simplifies to a third.'
+      - say: '1 times 2 is 2, and 6 times 1 is 6. Then 2 over 6 simplifies to a third: each pour is a third of the one before.'
+        doodle_do:
+          - {id: tube, op: pulse, part: target}
         write: '$= \tfrac{2}{6} = \tfrac{1}{3}$'
       - say: 'Check with the next pair: 1 over 18 divided by 1 over 6 is 1 over 18 times 6, which is 6 over 18, also a third.'
         write: 'Check: $\tfrac{1}{18} \div \tfrac{1}{6} = \tfrac{6}{18} = \tfrac{1}{3}$'
@@ -832,7 +982,10 @@ lessons:
         write: '$= \tfrac{1}{2} \times \tfrac{3}{2}$'
       - say: 'Tops: 1 times 3 is 3. Bottoms: 2 times 2 is 4.'
         write: '$= \tfrac{1 \times 3}{2 \times 2} = \tfrac{3}{4}$'
-      - say: 'So the sum to infinity is 3 over 4, which is answer choice B.'
+      - say: 'So the tube never fills past 3 over 4: the sum to infinity is 3 over 4, which is answer choice B.'
+        doodle_do:
+          - {id: tube, op: fill, to: 0.75}
+          - {id: tube, op: label, part: target, text: '3/4'}
         write: '$S_\infty = \tfrac{3}{4}$'
         answer: true
     traps:
@@ -843,17 +996,26 @@ lessons:
     moments:
       - say: 'The operation star is defined by $p * q$ equals the square root of $p$ times $q$. We want $4 * (8 * 32)$.'
         write: '$p * q = \sqrt{pq}$'
-      - say: 'The star is a made-up operation, and that''s fine. It just tells us what to do: multiply the two numbers, then take the square root.'
+      - say: 'The star is a made-up operation, and that''s fine. Picture a machine with two inputs. It just tells us what to do: multiply the two numbers, then take the square root.'
+        doodle: {name: 'custom:2004_q21_a', id: star, caption: 'a machine with two inputs'}
         write: 'Find $4 * (8 * 32)$'
-      - say: 'As always, brackets first. We work out $8 * 32$ before touching the 4. Using the rule with $p$ as 8 and $q$ as 32:'
+      - say: 'As always, brackets first: 8 and 32 go into the first machine. We work out $8 * 32$ before touching the 4. Using the rule with $p$ as 8 and $q$ as 32:'
+        doodle_do:
+          - {id: star, op: circle, part: m1}
         write: '$8 * 32 = \sqrt{8 \times 32}$'
         point:
           - {line: 0, kind: box, text: 'the rule'}
       - say: '8 times 32 is 256.'
         write: '$= \sqrt{256}$'
-      - say: 'The square root of 256 is 16, because 16 times 16 is 256.'
+      - say: 'Out comes 16: the square root of 256 is 16, because 16 times 16 is 256.'
+        doodle_do:
+          - {id: star, op: label, part: out1, text: '16'}
         write: '$= 16$'
-      - say: 'Now put that 16 back in place of the bracket.'
+        point:
+          - {line: 4, kind: highlight, at: '16', to: {doodle: star, part: out1}}
+      - say: 'Now put that 16 back in place of the bracket: it goes into a second machine with the 4.'
+        doodle_do:
+          - {id: star, op: stage, stage: 'custom:2004_q21_a2'}
         write: '$4 * (8 * 32) = 4 * 16$'
         point:
           - {line: 5, kind: move, from: {line: 4, at: '16'}, at: '16', text: 'from here'}
@@ -861,8 +1023,12 @@ lessons:
         write: '$4 * 16 = \sqrt{4 \times 16}$'
       - say: '4 times 16 is 64.'
         write: '$= \sqrt{64}$'
-      - say: 'The square root of 64 is 8, because 8 times 8 is 64.'
+      - say: 'Out of the second machine: the square root of 64 is 8, because 8 times 8 is 64.'
+        doodle_do:
+          - {id: star, op: label, part: out2, text: '8'}
         write: '$= 8$'
+        point:
+          - {line: 8, kind: highlight, at: '8', to: {doodle: star, part: out2}}
       - say: 'So $4 * (8 * 32)$ is 8, which is answer choice B.'
         write: '$4 * (8 * 32) = 8$'
         answer: true
@@ -876,13 +1042,22 @@ lessons:
         write: '$A = \begin{pmatrix} 2 & 1 \\ 1 & 1 \end{pmatrix}$'
       - say: 'For any 2 by 2 matrix $a$, $b$, $c$, $d$ there is a recipe for the inverse: swap $a$ and $d$, change the signs of $b$ and $c$, and divide by the determinant.'
         write: 'Inverse of $\begin{pmatrix} a & b \\ c & d \end{pmatrix} = \dfrac{1}{ad - bc}\begin{pmatrix} d & -b \\ -c & a \end{pmatrix}$'
-      - say: 'Read off our entries: $a$ is 2, $b$ is 1, $c$ is 1, and $d$ is 1.'
+      - say: 'Picture the matrix as four seats in two rows. Read off our entries: $a$ is 2, $b$ is 1, $c$ is 1, and $d$ is 1.'
+        doodle: {name: 'custom:2004_q22_a', id: seats, caption: 'a matrix as seats'}
         write: 'Here $a = 2,\ b = 1,\ c = 1,\ d = 1$'
-      - say: 'First the determinant, $ad$ minus $bc$. That is 2 times 1, minus 1 times 1.'
+      - say: 'First the determinant, $ad$ minus $bc$: the two crossing diagonals. That is 2 times 1, minus 1 times 1.'
+        doodle_do:
+          - {id: seats, op: stage, stage: 'custom:2004_q22_a2'}
         write: '$ad - bc = (2)(1) - (1)(1)$'
-      - say: '2 minus 1 is 1. A determinant of 1 is handy, because dividing by 1 changes nothing.'
+      - say: 'Along the diagonals, 2 minus 1 is 1. A determinant of 1 is handy, because dividing by 1 changes nothing.'
+        doodle_do:
+          - {id: seats, op: label, part: ad, text: '2 − 1 = 1'}
         write: '$= 2 - 1 = 1$'
-      - say: 'Now put our numbers into the recipe. The top left becomes $d$, which is 1, and the bottom right becomes $a$, which is 2. The other two become negative 1 each.'
+        point:
+          - {line: 4, kind: highlight, at: '= 1', to: {doodle: seats, part: ad}}
+      - say: 'Now put our numbers into the recipe, and watch the seats. The top left becomes $d$, which is 1, and the bottom right becomes $a$, which is 2. The other two become negative 1 each.'
+        doodle_do:
+          - {id: seats, op: stage, stage: 'custom:2004_q22_a3'}
         write: '$A^{-1} = \dfrac{1}{1}\begin{pmatrix} 1 & -1 \\ -1 & 2 \end{pmatrix}$'
         point:
           - {line: 1, kind: box, text: 'the recipe'}
@@ -907,11 +1082,19 @@ lessons:
       - say: 'We want the determinant of the 3 by 3 matrix $P$.'
         write: '$|P| = \begin{vmatrix} 1 & 0 & -1 \\ 3 & 4 & 5 \\ -1 & 0 & 1 \end{vmatrix}$'
       - say: 'We can expand a 3 by 3 determinant along any row or column. It is quickest along one with lots of zeros, because each zero wipes out a whole term.'
-      - say: 'The middle column is 0, 4, 0. Two zeros, so we expand along it, and only the 4 in the centre survives.'
+      - say: 'Picture the matrix as nine seats. The middle column is 0, 4, 0. Two zeros, so we expand along it, and only the 4 in the centre survives.'
+        doodle: {name: 'custom:2004_q23_a', id: seats, caption: 'nine seats, middle column 0, 4, 0'}
+        doodle_do:
+          - {id: seats, op: circle, part: midcol}
         write: 'Middle column: $0,\ 4,\ 0$'
+        point:
+          - {line: 2, kind: highlight, at: '4', to: {doodle: seats, part: midcol}}
       - say: 'Each position carries a sign from the pattern plus, minus, plus. The centre position is a plus. So the determinant is plus 4 times the minor of that 4.'
         write: '$|P| = +4 \times (\text{minor of } 4)$'
-      - say: 'The minor is the small determinant left when we cross out the row and the column of the 4, that is, the middle row and the middle column.'
+      - say: 'Watch the seats: the minor is the small determinant left when we cross out the row and the column of the 4, that is, the middle row and the middle column.'
+        doodle_do:
+          - {id: seats, op: stage, stage: 'custom:2004_q23_a2'}
+          - {id: seats, op: circle, part: minor}
         write: 'Minor of $4 = \begin{vmatrix} 1 & -1 \\ -1 & 1 \end{vmatrix}$'
       - say: 'The rule for a 2 by 2 determinant: $a d$ minus $b c$.'
         write: 'Rule: $\begin{vmatrix} a & b \\ c & d \end{vmatrix} = ad - bc$'
@@ -919,14 +1102,19 @@ lessons:
         write: '$= (1)(1) - (-1)(-1)$'
       - say: '1 times 1 is 1. Negative 1 times negative 1 is positive 1. So it is 1 minus 1.'
         write: '$= 1 - 1$'
-      - say: '1 minus 1 is zero.'
+      - say: '1 minus 1 is zero, so the four corner seats give nothing.'
+        doodle_do:
+          - {id: seats, op: label, part: minor, text: '= 0'}
         write: '$= 0$'
       - say: 'Now go back to the expansion: the determinant is 4 times this minor, and 4 times zero is zero.'
         write: '$|P| = 4 \times 0 = 0$'
         point:
           - {line: 3, kind: arrow, text: 'expansion'}
           - {line: 9, kind: move, from: {line: 8, at: '= 0'}, at: '4 × [[0]]', text: 'minor'}
-      - say: 'There''s a quicker way to see it. Row 1 is 1, 0, negative 1, and row 3 is negative 1, 0, 1. Row 3 is exactly negative row 1, and when one row is a multiple of another, the determinant is zero.'
+      - say: 'There''s a quicker way to see it. Look at the top and bottom rows of seats. Row 1 is 1, 0, negative 1, and row 3 is negative 1, 0, 1. Row 3 is exactly negative row 1, and when one row is a multiple of another, the determinant is zero.'
+        doodle_do:
+          - {id: seats, op: stage, stage: 'custom:2004_q23_a3'}
+          - {id: seats, op: label, part: rows, text: 'row 3 = −row 1'}
         write: 'Row 3 $= -1 \times$ Row 1, so $|P| = 0$'
       - say: 'So the determinant of $P$ is 0, which is answer choice B.'
         write: '$|P| = 0$'
@@ -1514,17 +1702,28 @@ lessons:
     moments:
       - say: 'We want the derivative of 2 plus 3 $x$, times 1 minus $x$.'
         write: '$y = (2 + 3x)(1 - x)$'
-      - say: 'With two simple brackets, the calm way is to expand first, then differentiate each term.'
-      - say: 'Multiply out the 2 first. 2 times 1 is 2, and 2 times negative $x$ is negative 2 $x$.'
+      - say: 'With two simple brackets, the calm way is to expand first, using a multiplication box, then differentiate each term.'
+        doodle: {name: 'custom:2004_q35_a', id: box, caption: 'a multiplication box'}
+      - say: 'Fill the top row: multiply out the 2 first. 2 times 1 is 2, and 2 times negative $x$ is negative 2 $x$.'
+        doodle_do:
+          - {id: box, op: stage, stage: 'custom:2004_q35_a2'}
         write: '$2 \times 1 = 2,\quad 2 \times (-x) = -2x$'
-      - say: 'Now the 3 $x$. 3 $x$ times 1 is 3 $x$, and 3 $x$ times negative $x$ is negative 3 $x$ squared.'
+      - say: 'Now the bottom row, the 3 $x$. 3 $x$ times 1 is 3 $x$, and 3 $x$ times negative $x$ is negative 3 $x$ squared.'
+        doodle_do:
+          - {id: box, op: stage, stage: 'custom:2004_q35_a3'}
         write: '$3x \times 1 = 3x,\quad 3x \times (-x) = -3x^{2}$'
+        point:
+          - {line: 3, kind: highlight, at: '−3x', to: {doodle: box, part: c22}}
       - say: 'Put the four pieces together.'
         write: '$y = 2 - 2x + 3x - 3x^{2}$'
         point:
           - {line: 2, kind: arrow, text: 'from the 2'}
           - {line: 3, kind: arrow, text: 'from the 3x'}
-      - say: 'Negative 2 $x$ plus 3 $x$ is just $x$.'
+      - say: 'The two $x$ boxes combine: negative 2 $x$ plus 3 $x$ is just $x$.'
+        doodle_do:
+          - {id: box, op: circle, part: c12}
+          - {id: box, op: circle, part: c21}
+          - {id: box, op: stage, stage: 'custom:2004_q35_a4'}
         write: '$= 2 + x - 3x^{2}$'
         point:
           - {line: 4, kind: circle, at: '− 2x + 3x', text: 'just x'}
@@ -1550,7 +1749,8 @@ lessons:
     moments:
       - say: 'We want the derivative of $y$ equals 2 $x$ squared, times 2 $x$ minus 1, at the point where $x$ is negative 1.'
         write: '$y = 2x^{2}(2x - 1)$'
-      - say: 'Expanding first saves us the product rule. Then we''ll take care putting in a negative number.'
+      - say: 'Picture the curve: the derivative tells us how steep it is. Expanding first saves us the product rule. Then we''ll take care putting in a negative number.'
+        doodle: {name: 'custom:2004_q36_a', id: curve, caption: 'how steep at x = −1?'}
       - say: 'Multiply the bracket by 2 $x$ squared: 2 $x$ squared times 2 $x$, minus 2 $x$ squared times 1.'
         write: '$y = 2x^{2} \times 2x - 2x^{2} \times 1$'
       - say: '2 $x$ squared times 2 $x$ is 4 $x$ cubed.'
@@ -1566,14 +1766,20 @@ lessons:
         point:
           - {line: 7, kind: move, from: {line: 5, at: '12x2'}, at: '12x2'}
           - {line: 7, kind: move, from: {line: 6, at: '−4x'}, at: '− 4x'}
-      - say: 'Now put in $x$ equals negative 1. Put the negative 1 in brackets so no sign gets lost.'
+      - say: 'Now put in $x$ equals negative 1, the marked point on the curve. Put the negative 1 in brackets so no sign gets lost.'
+        doodle_do:
+          - {id: curve, op: circle, part: point}
         write: '$= 12(-1)^{2} - 4(-1)$'
       - say: 'Negative 1 squared is 1, so the first term is 12. Negative 4 times negative 1 is plus 4.'
         write: '$= 12(1) + 4$'
         point:
           - {line: 8, kind: circle, at: '− 4(−1)', text: 'plus 4'}
-      - say: '12 plus 4 is 16.'
+      - say: '12 plus 4 is 16: the curve climbs steeply there.'
+        doodle_do:
+          - {id: curve, op: label, part: tangent, text: 'slope 16'}
         write: '$= 16$'
+        point:
+          - {line: 10, kind: highlight, at: '16', to: {doodle: curve, part: tangent}}
       - say: 'So the derivative at $x$ equals negative 1 is 16, which is answer choice C.'
         write: '$\dfrac{dy}{dx}\Big|_{x = -1} = 16$'
         answer: true
@@ -1584,7 +1790,8 @@ lessons:
 
   37:
     moments:
-      - say: '$y$ equals 3 cos, $x$ over 3. We want $d y$ by $d x$ when $x$ is 3 pi over 2.'
+      - say: '$y$ equals 3 cos, $x$ over 3. Picture its wave. We want $d y$ by $d x$, the slope, when $x$ is 3 pi over 2.'
+        doodle: {name: 'custom:2004_q37_a', id: wave, caption: 'y = 3cos(x/3)'}
         write: '$y = 3\cos\left(\dfrac{x}{3}\right)$'
       - say: 'The angle inside the cosine is $x$ over 3, not just $x$. So we use the chain rule: differentiate the outside, then multiply by the derivative of the inside.'
         write: 'Chain rule: $\ \dfrac{dy}{dx} = (\text{outside})^{\prime} \times (\text{inside})^{\prime}$'
@@ -1599,7 +1806,9 @@ lessons:
           - {line: 4, kind: move, from: {line: 3, at: '= 31'}, at: '× 31', text: 'inside'}
       - say: '3 times a third is 1, so we are left with negative sin, $x$ over 3.'
         write: '$= -\sin\left(\dfrac{x}{3}\right)$'
-      - say: 'Now put in $x$ equals 3 pi over 2. The angle becomes 3 pi over 2, divided by 3.'
+      - say: 'Now put in $x$ equals 3 pi over 2, where the wave crosses the axis. The angle becomes 3 pi over 2, divided by 3.'
+        doodle_do:
+          - {id: wave, op: circle, part: point}
         write: '$\dfrac{x}{3} = \dfrac{3\pi}{2} \div 3 = \dfrac{\pi}{2}$'
       - say: 'So the derivative is negative sin of pi over 2.'
         write: '$\dfrac{dy}{dx} = -\sin\left(\dfrac{\pi}{2}\right)$'
@@ -1607,8 +1816,12 @@ lessons:
           - {line: 7, kind: move, from: {line: 6, at: '= 2π'}, at: '(2π)', text: 'the angle'}
       - say: 'Pi over 2 is 90 degrees, and sin 90 degrees is 1.'
         write: '$\sin\dfrac{\pi}{2} = 1$'
-      - say: 'So the derivative is negative 1.'
+      - say: 'So the derivative is negative 1: the wave is going down there.'
+        doodle_do:
+          - {id: wave, op: label, part: tangent, text: 'slope −1'}
         write: '$\dfrac{dy}{dx} = -1$'
+        point:
+          - {line: 9, kind: highlight, at: '−1', to: {doodle: wave, part: tangent}}
       - say: 'So $d y$ by $d x$ is negative 1, which is answer choice C.'
         write: '$\dfrac{dy}{dx} = -1$'
         answer: true
@@ -1763,16 +1976,27 @@ lessons:
 
   41:
     moments:
-      - say: 'Three statements describe a histogram, and we must decide which of them are true.'
+      - say: 'Here is a histogram. Three statements describe a histogram, and we must decide which of them are true.'
+        doodle: {name: 'custom:2004_q41_a', id: hist, caption: 'a histogram'}
         write: 'Which of I, II, III describe a histogram?'
       - say: 'Remember what a histogram is: it shows grouped, continuous data, with a bar for each class interval.'
-      - say: 'Statement I says the bars have equal width. In a standard histogram the class intervals are the same size, so the bars are the same width. True.'
+      - say: 'Statement I says the bars have equal width: look at the marks along the bottom. In a standard histogram the class intervals are the same size, so the bars are the same width. True.'
+        doodle_do:
+          - {id: hist, op: underline, part: widths}
         write: 'I. Equal widths $\checkmark$'
-      - say: 'Statement II says the height of each bar is proportional to the frequency of its class. That is exactly what lets us read the frequencies off the bars. True.'
+      - say: 'Statement II says the height of each bar is proportional to the frequency of its class. The tallest bar is the most common class. That is exactly what lets us read the frequencies off the bars. True.'
+        doodle_do:
+          - {id: hist, op: circle, part: tallest}
+          - {id: hist, op: label, part: tallest, text: 'tallest = most often'}
         write: 'II. Height $\propto$ frequency $\checkmark$'
-      - say: 'Statement III says the bars share sides, with no gaps. Because the data is continuous, one class runs straight into the next, so the bars touch. True.'
+      - say: 'Statement III says the bars share sides, with no gaps. Because the data is continuous, one class runs straight into the next, so the bars touch, sharing their sides. True.'
+        doodle_do:
+          - {id: hist, op: highlight, part: joins}
         write: 'III. No gaps between bars $\checkmark$'
-      - say: 'Compare that with a bar chart. A bar chart is for separate categories, like favourite colours, so its bars have gaps. The touching bars are what make a histogram different.'
+      - say: 'Compare that with a bar chart, drawn underneath. A bar chart is for separate categories, like favourite colours, so its bars have gaps. The touching bars are what make a histogram different.'
+        doodle_do:
+          - {id: hist, op: stage, stage: 'custom:2004_q41_a2'}
+          - {id: hist, op: circle, part: barchart}
         write: 'Bar chart: gaps; histogram: no gaps'
       - say: 'So all three statements are true.'
         write: 'So I, II and III are all true'
@@ -1835,16 +2059,22 @@ lessons:
 
   43:
     moments:
-      - say: 'The mean age of some students is 15. When a 45-year-old teacher joins them, the mean becomes 18. We want the number of students.'
-        doodle: {name: 'custom:2004_q43_a', caption: 'A 45-year-old teacher joins'}
+      - say: 'Picture the group. The mean age of some students is 15. When a 45-year-old teacher joins them, the mean becomes 18. We want the number of students.'
+        doodle: {name: 'custom:2004_q43_a', id: group, caption: 'A 45-year-old teacher joins'}
         write: 'Students'' mean $= 15$; with teacher, mean $= 18$'
       - say: 'Here is the idea: mean is total divided by count. When the teacher joins, both the total and the count change, so let''s write both down.'
       - say: 'The mean is the sum of the values divided by how many values there are.'
         write: 'Mean $= \dfrac{\text{sum of the values}}{\text{number of values}}$'
-      - say: 'Let $n$ be the number of students. The mean age is 15, so their ages add up to 15 times $n$.'
+      - say: 'Let $n$ be the number of students. The mean age is 15, so the students'' ages add up to 15 times $n$.'
+        doodle_do:
+          - {id: group, op: label, part: students, text: 'total 15n'}
         write: 'Students'' total $= 15n$'
-      - say: 'The teacher adds 45 years to the total.'
+      - say: 'Now the teacher steps in: he adds 45 years to the total.'
+        doodle_do:
+          - {id: group, op: circle, part: teacher}
         write: 'New total $= 15n + 45$'
+        point:
+          - {line: 4, kind: highlight, at: '45', to: {doodle: group, part: teacher}}
       - say: 'And the teacher is one more person, so the count becomes $n$ plus 1.'
         write: 'New count $= n + 1$'
       - say: 'The new mean is the new total over the new count, and that is 18.'
@@ -1865,9 +2095,14 @@ lessons:
           - {line: 9, kind: move, from: {line: 8, at: '+ 18'}, at: '45 [[− 18]]', text: 'across'}
       - say: 'Divide both sides by 3. 27 divided by 3 is 9.'
         write: '$n = 9$'
-      - say: 'Check: 9 students total 9 times 15, which is 135 years. Add the teacher''s 45 to get 180, over 10 people. 180 over 10 is 18.'
+      - say: 'Check, and count them: 9 students total 9 times 15, which is 135 years. Add the teacher''s 45 to get 180, over 10 people. 180 over 10 is 18.'
+        doodle: {name: student-small, id: nine, repeat: 9, layout: row, caption: '9 students, 15 each'}
+        doodle_do:
+          - {id: nine, op: count}
         write: 'Check: $\ \dfrac{135 + 45}{10} = \dfrac{180}{10} = 18 \;\checkmark$'
-      - say: 'So there are 9 students in the group, which is answer choice B.'
+      - say: 'So the teacher joined 9 students, which is answer choice B.'
+        doodle_do:
+          - {id: group, op: label, part: students, text: 'n = 9'}
         write: '$n = 9$ students'
         answer: true
     traps:
@@ -1877,23 +2112,32 @@ lessons:
 
   44:
     moments:
-      - say: 'We have the weights of 10 pupils, and we want the range.'
+      - say: 'Picture the 10 pupils in a line, the heavier ones taller. We have their weights, and we want the range.'
+        doodle: {name: 'custom:2004_q44_a', id: lineup, size: scene, caption: '10 pupils, taller means heavier'}
         write: '$15,\ 16,\ 17,\ 18,\ 16,\ 17,\ 17,\ 17,\ 18,\ 16$ kg'
       - say: 'The range is the largest value minus the smallest. Only the two extremes matter.'
         write: 'Range $=$ largest $-$ smallest'
       - say: 'Let''s put the weights in order, so the extremes are easy to see.'
         write: 'In order: $15,\ 16,\ 16,\ 16,\ 17,\ 17,\ 17,\ 17,\ 18,\ 18$'
-      - say: 'The largest weight is 18 kilograms, at the end of the list.'
+      - say: 'The largest weight is 18 kilograms, the two tallest in the line, at the end of the list.'
+        doodle_do:
+          - {id: lineup, op: circle, part: heavy}
         write: 'Largest $= 18$ kg'
-      - say: 'The smallest weight is 15 kilograms, at the start. It appears only once, but once is enough.'
+      - say: 'The smallest weight is 15 kilograms, the shortest pupil, at the start. It appears only once, but once is enough.'
+        doodle_do:
+          - {id: lineup, op: circle, part: light}
         write: 'Smallest $= 15$ kg'
       - say: 'Now subtract: 18 minus 15.'
         write: 'Range $= 18 - 15$'
         point:
           - {line: 5, kind: move, from: {line: 3, at: '18'}, at: '18', text: 'largest'}
           - {line: 5, kind: move, from: {line: 4, at: '15'}, at: '− 15', text: 'smallest'}
-      - say: '18 minus 15 is 3.'
+      - say: '18 minus 15 is 3: the gap between the tallest and the shortest.'
+        doodle_do:
+          - {id: lineup, op: stage, stage: 'custom:2004_q44_a2'}
         write: '$= 3$ kg'
+        point:
+          - {line: 6, kind: highlight, at: '3', to: {doodle: lineup, part: gap}}
       - say: 'Notice that 17 appears four times, but repeats don''t change the range. They matter for the mode and the mean, not here.'
       - say: 'So the range is 3, which is answer choice C.'
         write: 'Range $= 3$'
@@ -1910,25 +2154,38 @@ lessons:
       - say: 'Mean deviation is the average distance of the values from their mean. So we find the mean first, then each distance, then average the distances.'
       - say: 'The mean is the sum of the values divided by how many values there are.'
         write: 'Mean $= \dfrac{\text{sum of the values}}{\text{number of values}}$'
-      - say: 'The mean is the total over how many there are: 1 plus 2 plus 3 plus 4, over 4.'
+      - say: 'Picture the four values on a number line. The mean is the total over how many there are: 1 plus 2 plus 3 plus 4, over 4.'
+        doodle: {name: 'custom:2004_q45_a', id: line, caption: 'where is the middle?'}
         write: 'Mean $= \dfrac{1 + 2 + 3 + 4}{4}$'
-      - say: '1 plus 2 plus 3 plus 4 is 10, and 10 over 4 is 2.5.'
+      - say: '1 plus 2 plus 3 plus 4 is 10, and 10 over 4 is 2.5, right between 2 and 3.'
+        doodle_do:
+          - {id: line, op: label, part: mean, text: 'mean 2.5'}
         write: '$= \dfrac{10}{4} = 2.5$'
-      - say: 'Now each distance from 2.5, always counted as positive. 1 is 1.5 away, and 2 is 0.5 away.'
+        point:
+          - {line: 4, kind: highlight, at: '2.5', to: {doodle: line, part: mean}}
+      - say: 'Now each distance from the flag at 2.5, always counted as positive. 1 is 1.5 away, and 2 is 0.5 away.'
+        doodle_do:
+          - {id: line, op: stage, stage: 'custom:2004_q45_a2'}
         write: '$|1 - 2.5| = 1.5,\quad |2 - 2.5| = 0.5$'
         point:
           - {line: 4, kind: circle, at: '2.5', text: 'the mean'}
       - say: '3 is 0.5 away, and 4 is 1.5 away.'
         write: '$|3 - 2.5| = 0.5,\quad |4 - 2.5| = 1.5$'
-      - say: 'Add up the four distances: 1.5 plus 0.5 plus 0.5 plus 1.5 is 4.'
+      - say: 'Add up the four arcs: 1.5 plus 0.5 plus 0.5 plus 1.5 is 4.'
+        doodle_do:
+          - {id: line, op: label, part: dist, text: 'total 4'}
         write: 'Sum of distances $= 1.5 + 0.5 + 0.5 + 1.5 = 4$'
+        point:
+          - {line: 7, kind: highlight, at: '= 4', to: {doodle: line, part: dist}}
       - say: 'The mean deviation is the sum of the distances from the mean, over the number of values.'
         write: 'Mean deviation $= \dfrac{\sum |x - \bar{x}|}{n}$'
       - say: 'Average them by dividing by 4, the number of values. 4 over 4 is 1.'
         write: 'Mean deviation $= \dfrac{4}{4} = 1.0$'
         point:
           - {line: 9, kind: move, from: {line: 7, at: '= 4'}, at: '4[[4]]', text: 'total distance'}
-      - say: 'Why count distances as positive? With signs, the deviations would be negative 1.5, negative 0.5, 0.5 and 1.5, which cancel to zero every time.'
+      - say: 'Look at the arcs again. Why count distances as positive? With signs, the deviations would be negative 1.5, negative 0.5, 0.5 and 1.5, which cancel to zero every time.'
+        doodle_do:
+          - {id: line, op: pulse, part: dist}
         write: 'With signs: $\ -1.5 - 0.5 + 0.5 + 1.5 = 0$'
       - say: 'So the mean deviation is 1.0, which is answer choice A.'
         write: 'Mean deviation $= 1.0$'
@@ -1940,10 +2197,13 @@ lessons:
 
   46:
     moments:
-      - say: 'We want the number of ways to select 2 students from a group of 5 debaters.'
-        doodle: {name: 'custom:2004_q46_a', caption: 'Choose 2 of the 5 debaters'}
+      - say: 'Picture the 5 debaters in a ring. We want the number of ways to select 2 students from a group of 5 debaters.'
+        doodle: {name: 'custom:2004_q46_a', id: ring, caption: 'Choose 2 of the 5 debaters'}
         write: 'Choose $2$ from $5$'
-      - say: 'Selecting is about who is chosen, not the order. Picking Ada then Bola is the same pair as Bola then Ada. So this is a combination.'
+      - say: 'Selecting is about who is chosen, not the order. Picking Ada then Bola is the same pair as Bola then Ada. One line joins a pair, whichever end you start from. So this is a combination.'
+        doodle_do:
+          - {id: ring, op: stage, stage: 'custom:2004_q46_a2'}
+          - {id: ring, op: label, part: pair, text: 'AB is the same as BA'}
       - say: 'The number of ways to choose $r$ from $n$ is $n$ C $r$: $n$ factorial over, $r$ factorial times $n$ minus $r$ factorial.'
         write: '$^{n}C_{r} = \dfrac{n!}{r!\,(n - r)!}$'
       - say: 'Here $n$ is 5 and $r$ is 2, so 5 minus 2 is 3.'
@@ -1956,9 +2216,15 @@ lessons:
         write: '$= \dfrac{5 \times 4}{2 \times 1}$'
       - say: '5 times 4 is 20, and 20 over 2 is 10.'
         write: '$= \dfrac{20}{2} = 10$'
-      - say: 'Let''s check by counting. The first student can pair with 4 others, the second with 3 new ones, then 2, then 1.'
+      - say: 'Let''s check by drawing every line in the ring. The first student can pair with 4 others, the second with 3 new ones, then 2, then 1.'
+        doodle_do:
+          - {id: ring, op: stage, stage: 'custom:2004_q46_a3'}
         write: 'Check: $\ 4 + 3 + 2 + 1 = 10 \;\checkmark$'
-      - say: 'So there are 10 ways, which is answer choice A.'
+        point:
+          - {line: 7, kind: highlight, at: '= 10', to: {doodle: ring, part: all}}
+      - say: 'So there are 10 ways, one for each line, which is answer choice A.'
+        doodle_do:
+          - {id: ring, op: label, part: all, text: '10 lines, 10 pairs'}
         write: '$10$ ways'
         answer: true
     traps:
@@ -1968,18 +2234,22 @@ lessons:
 
   47:
     moments:
-      - say: 'A committee of 6 is chosen from 9 commissioners and 3 members of the house of assembly, and it must include a member of the house of assembly. We want the number of ways.'
-        doodle: {name: 'custom:2004_q47_a', caption: 'At least 1 assembly member'}
+      - say: 'Picture the 12 people. A committee of 6 is chosen from 9 commissioners and 3 members of the house of assembly, and it must include a member of the house of assembly. We want the number of ways.'
+        doodle: {id: people, repeat: [{name: person-small, n: 9}, {name: student-small, n: 3}], layout: grid, caption: '9 commissioners, 3 assembly'}
         write: '$9$ commissioners $+\ 3$ assembly $= 12$ people; choose $6$'
       - say: 'The neat way is to count every committee, then take away the ones that break the rule, the committees with no assembly member at all.'
         write: 'Wanted $=$ all $-$ (no assembly member)'
       - say: 'The number of ways to choose $r$ things from $n$ is $n$ C $r$: $n$ factorial over $r$ factorial times $n$ minus $r$ factorial.'
         write: 'Combinations: $^{n}C_{r} = \dfrac{n!}{r!\,(n - r)!}$'
-      - say: 'All committees: choose 6 from 12.'
+      - say: 'All committees: choose 6 from all 12.'
+        doodle_do:
+          - {id: people, op: count}
         write: 'All $= {}^{12}C_{6} = \dfrac{12 \times 11 \times 10 \times 9 \times 8 \times 7}{6 \times 5 \times 4 \times 3 \times 2 \times 1}$'
       - say: 'The top is 665,280 and the bottom is 720, and 665,280 over 720 is 924.'
         write: '$= \dfrac{665280}{720} = 924$'
-      - say: 'Committees with no assembly member are chosen only from the 9 commissioners. Choosing 6 from 9 is the same as choosing the 3 to leave out.'
+      - say: 'Committees with no assembly member are chosen only from the 9 commissioners, ringed here. Choosing 6 from 9 is the same as choosing the 3 to leave out.'
+        doodle_do:
+          - {id: people, op: group, n: 9, text: 'commissioners only'}
         write: 'None $= {}^{9}C_{6} = {}^{9}C_{3} = \dfrac{9 \times 8 \times 7}{3 \times 2 \times 1}$'
       - say: '9 times 8 times 7 is 504, and 504 over 6 is 84.'
         write: '$= \dfrac{504}{6} = 84$'
@@ -1988,12 +2258,23 @@ lessons:
         point:
           - {line: 7, kind: move, from: {line: 4, at: '= 924'}, at: '924', text: 'all'}
           - {line: 7, kind: move, from: {line: 6, at: '= 84'}, at: '− 84', text: 'none'}
-      - say: 'Let''s check by counting directly. Exactly one assembly member: 3 ways to pick them, times 9 C 5, which is 126, for the commissioners. 3 times 126 is 378.'
+      - say: 'Let''s check by counting directly. Picture the committee seats. Exactly one assembly member: 3 ways to pick them, times 9 C 5, which is 126, for the commissioners. 3 times 126 is 378.'
+        doodle: {name: 'custom:2004_q47_a', id: tables, caption: 'orange: assembly, blue: commissioners'}
         write: 'One: $\ {}^{3}C_{1} \times {}^{9}C_{5} = 3 \times 126 = 378$'
-      - say: 'Exactly two: 3 C 2, which is 3, times 9 C 4, which is 126. That is 378 again.'
+        point:
+          - {line: 8, kind: highlight, at: '378', to: {doodle: tables, part: one}}
+      - say: 'Next row of seats, exactly two: 3 C 2, which is 3, times 9 C 4, which is 126. That is 378 again.'
+        doodle_do:
+          - {id: tables, op: stage, stage: 'custom:2004_q47_a2'}
         write: 'Two: $\ {}^{3}C_{2} \times {}^{9}C_{4} = 3 \times 126 = 378$'
-      - say: 'All three: 1 way, times 9 C 3, which is 84.'
+        point:
+          - {line: 9, kind: highlight, at: '378', to: {doodle: tables, part: two}}
+      - say: 'Last row, all three: 1 way, times 9 C 3, which is 84.'
+        doodle_do:
+          - {id: tables, op: stage, stage: 'custom:2004_q47_a3'}
         write: 'Three: $\ {}^{3}C_{3} \times {}^{9}C_{3} = 1 \times 84 = 84$'
+        point:
+          - {line: 10, kind: highlight, at: '1 × 84', to: {doodle: tables, part: three}}
       - say: 'Add them: 378 plus 378 plus 84 is 840. The same answer.'
         write: 'Check: $\ 378 + 378 + 84 = 840 \;\checkmark$'
         point:
@@ -2010,14 +2291,18 @@ lessons:
 
   48:
     moments:
-      - say: 'Some white balls were added to a basket with 12 red and 16 black balls. Now the chance of picking white is 3 over 7. How many white balls were added?'
-        doodle: {name: 'custom:2004_q48_a', caption: 'White balls added to 28'}
+      - say: 'Picture the basket. Some white balls were added to a basket with 12 red and 16 black balls. Now the chance of picking white is 3 over 7. How many white balls were added?'
+        doodle: {id: basket, repeat: [{name: ball-red, n: 12}, {name: ball-black, n: 16}], layout: cluster, caption: '12 red and 16 black'}
         write: 'Red $= 12$; black $= 16$; $P(\text{white}) = \dfrac{3}{7}$'
       - say: 'Let''s call the number of white balls $w$.'
         write: 'White $= w$'
-      - say: 'Before the white ones, the basket holds 12 plus 16, which is 28 balls.'
+      - say: 'Count them: before the white ones, the basket holds 12 plus 16, which is 28 balls.'
+        doodle_do:
+          - {id: basket, op: count}
         write: 'Red $+$ black $= 12 + 16 = 28$'
-      - say: 'Here is the key idea. Adding white balls changes the total too. After adding them, there are 28 plus $w$ balls.'
+      - say: 'Here is the key idea. Adding white balls to this basket changes the total too. After adding them, there are 28 plus $w$ balls.'
+        doodle_do:
+          - {id: basket, op: label, text: '+ w white balls'}
         write: 'New total $= 28 + w$'
         point:
           - {line: 3, kind: move, from: {line: 2, at: '= 28'}, at: '28', text: 'red + black'}
@@ -2044,7 +2329,10 @@ lessons:
         write: '$w = \dfrac{84}{4} = 21$'
         point:
           - {line: 9, kind: move, from: {line: 8, at: '⇒ [[4]]w'}, at: '[[4]]84', text: 'divide across'}
-      - say: 'Check: with 21 white balls, the total is 28 plus 21, which is 49. And 21 over 49 is 3 over 7, because both divide by 7.'
+      - say: 'Check: here is the basket with 21 white balls, the total is 28 plus 21, which is 49. And 21 over 49 is 3 over 7, because both divide by 7.'
+        doodle: {id: full, repeat: [{name: ball-white, n: 21}, {name: ball-red, n: 12}, {name: ball-black, n: 16}], layout: cluster, caption: 'with 21 white: 49 balls'}
+        doodle_do:
+          - {id: full, op: split, n: 21, text: '21 white | 28 red and black'}
         write: 'Check: $\ \dfrac{21}{28 + 21} = \dfrac{21}{49} = \dfrac{3}{7} \;\checkmark$'
       - say: 'So 21 white balls were added, which is answer choice C.'
         write: '$w = 21$'
@@ -2056,10 +2344,12 @@ lessons:
 
   49:
     moments:
-      - say: 'A die is rolled 100 times, and the table shows how often each number came up. We want the probability of getting a 5.'
-        doodle: {name: 'custom:2004_q49_a', caption: 'An unbiased die, 100 rolls'}
+      - say: 'Picture the table as bars. A die is rolled 100 times, and the table shows how often each number came up. We want the probability of getting a 5.'
+        doodle: {name: 'custom:2004_q49_a', id: rolls, caption: '100 rolls of a die'}
         write: 'Frequencies: $20,\ x,\ 15,\ 15,\ 2x,\ 20$; total $= 100$'
-      - say: 'We don''t know $x$ yet. But all the frequencies must add up to the number of rolls, 100. That gives us an equation for $x$.'
+      - say: 'We don''t know $x$ yet. But all the bars must add up to the number of rolls, 100. That gives us an equation for $x$.'
+        doodle_do:
+          - {id: rolls, op: label, part: bars, text: 'all bars add to 100'}
         write: '$20 + x + 15 + 15 + 2x + 20 = 100$'
         point:
           - {line: 0, kind: highlight, at: '100', text: 'total'}
@@ -2071,14 +2361,20 @@ lessons:
           - {line: 3, kind: move, from: {line: 2, at: '70 +'}, at: '− 70', text: 'across the ='}
       - say: 'Divide both sides by 3. 30 over 3 is 10.'
         write: '$x = 10$'
-      - say: 'The frequency for 5 is 2 $x$, so 2 times 10, which is 20.'
+      - say: 'Now the missing bars go up. The frequency for 5 is 2 $x$, so 2 times 10, which is 20.'
+        doodle_do:
+          - {id: rolls, op: stage, stage: 'custom:2004_q49_a2'}
+          - {id: rolls, op: circle, part: bar5}
         write: 'Frequency of $5 = 2x = 2 \times 10 = 20$'
         point:
           - {line: 0, kind: circle, at: '2x', text: 'for 5'}
           - {line: 5, kind: move, from: {line: 4, at: '10'}, at: '× 10', text: 'x'}
+          - {line: 5, kind: highlight, at: '= 20', to: {doodle: rolls, part: bar5}}
       - say: 'The probability of an event is the number of favourable outcomes over the total number of outcomes.'
         write: 'Probability $= \dfrac{\text{number of favourable outcomes}}{\text{total number of outcomes}}$'
-      - say: 'The probability from the results is how often 5 came up, over the total number of rolls.'
+      - say: 'The probability from the results is how often 5 came up, the pink bar, over the total number of rolls.'
+        doodle_do:
+          - {id: rolls, op: pulse, part: bar5}
         write: '$P(5) = \dfrac{20}{100}$'
         point:
           - {line: 7, kind: move, from: {line: 5, at: '= 20'}, at: '100[[20]]', text: 'how often'}
@@ -2097,13 +2393,18 @@ lessons:
 
   50:
     moments:
-      - say: 'A container has 30 gold, 22 silver and 18 bronze medals. One is picked at random. We want the probability that it is not gold.'
-        doodle: {name: 'custom:2004_q50_a', caption: 'Not gold: silver or bronze'}
+      - say: 'Picture a container that has 30 gold, 22 silver and 18 bronze medals. One is picked at random. We want the probability that it is not gold.'
+        doodle: {name: 'custom:2004_q50_a', id: medals, caption: 'Not gold: silver or bronze'}
         write: 'Gold $= 30$; silver $= 22$; bronze $= 18$'
       - say: 'First, the total number of medals: 30 plus 22 plus 18.'
         write: 'Total $= 30 + 22 + 18 = 70$'
-      - say: 'Not gold means silver or bronze. Let''s count those: 22 plus 18 is 40.'
+      - say: 'Not gold means silver or bronze. Ring them together and count: 22 plus 18 is 40.'
+        doodle_do:
+          - {id: medals, op: stage, stage: 'custom:2004_q50_a2'}
+          - {id: medals, op: cross, part: gold}
         write: 'Not gold $= 22 + 18 = 40$'
+        point:
+          - {line: 2, kind: highlight, at: '= 40', to: {doodle: medals, part: others}}
       - say: 'The probability of an event is the number of favourable outcomes over the total number of outcomes.'
         write: 'Probability $= \dfrac{\text{number of favourable outcomes}}{\text{total number of outcomes}}$'
       - say: 'The probability is the number of medals we want over the total.'
@@ -2111,9 +2412,13 @@ lessons:
         point:
           - {line: 4, kind: move, from: {line: 2, at: '= 40'}, at: '70[[40]]', text: 'not gold'}
           - {line: 4, kind: move, from: {line: 1, at: '= 70'}, at: '[[70]]40', text: 'total'}
-      - say: 'Divide top and bottom by 10, and we get 4 over 7.'
+      - say: 'Divide top and bottom by 10, and we get 4 over 7 of the container.'
+        doodle_do:
+          - {id: medals, op: label, part: others, text: '4/7'}
         write: '$= \dfrac{4}{7}$'
-      - say: 'Let''s check another way. Not gold is 1 minus the probability of gold. The probability of gold is 30 over 70.'
+      - say: 'Let''s check another way. Not gold is 1 minus the probability of gold. Look at the gold medals: the probability of gold is 30 over 70.'
+        doodle_do:
+          - {id: medals, op: circle, part: gold}
         write: '$P(\text{gold}) = \dfrac{30}{70} = \dfrac{3}{7}$'
         point:
           - {line: 6, kind: move, from: {line: 0, at: '30'}, at: '70[[30]]', text: 'gold'}
