@@ -1277,7 +1277,6 @@ lessons:
         point:
           - {figure: sketch, kind: circle, target: '50 m', text: 'height'}
           - {figure: sketch, kind: arc, target: 'AXB', text: '30°'}
-          - {figure: sketch, kind: arc, target: 'AYB', text: '60°'}
       - say: 'Picture it: the tower stands between $X$ and $Y$. Each point makes a right-angled triangle with the tower. The height is opposite the angle, and the ground distance is adjacent.'
         show_sketch: true
         point:
@@ -1301,23 +1300,28 @@ lessons:
         write: '$\approx 86.60 \text{ m}$'
         point:
           - {figure: sketch, kind: label, target: XB, text: '86.60 m'}
+      - say: 'Now let me draw the second triangle, from $Y$ on the other side of the tower.'
+        show_sketch: sketch_b
+        point:
+          - {figure: sketch_b, kind: arc, target: AYB, text: '60°'}
+          - {figure: sketch_b, kind: circle, target: '?', text: 'XY'}
       - say: 'From $Y$, the distance is 50 over tan 60 degrees. Tan 60 is root 3.'
         write: '$\text{from } Y = \dfrac{50}{\tan 60^{\circ}} = \dfrac{50}{\sqrt{3}}$'
         point:
-          - {figure: sketch, kind: circle, target: '60°'}
+          - {figure: sketch_b, kind: circle, target: '60°'}
       - say: '50 divided by 1.7321 is about 28.87 metres.'
         write: '$\approx 28.87 \text{ m}$'
         point:
-          - {figure: sketch, kind: label, target: YB, text: '28.87 m'}
+          - {figure: sketch_b, kind: label, target: YB, text: '28.87 m'}
       - say: '$X$ and $Y$ are on opposite sides of the tower, so $XY$ is the distance from $X$ to the tower, plus the distance from the tower to $Y$.'
         write: '$XY = 86.60 + 28.87$'
         point:
-          - {line: 9, kind: move, from: {line: 6, at: '86.60'}, at: '86.60', text: 'from X'}
-          - {line: 9, kind: move, from: {line: 8, at: '28.87'}, at: '28.87', text: 'from Y'}
+          - {line: 10, kind: move, from: {line: 6, at: '86.60'}, at: '86.60', text: 'from X'}
+          - {line: 10, kind: move, from: {line: 9, at: '28.87'}, at: '28.87', text: 'from Y'}
       - say: '86.60 plus 28.87 is 115.47.'
         write: '$= 115.47 \text{ m}$'
         point:
-          - {figure: sketch, kind: circle, target: '?', text: '115.47 m'}
+          - {figure: sketch_b, kind: circle, target: '?', text: '115.47 m'}
       - say: 'We can confirm it exactly. 50 root 3 is 150 over root 3, and adding 50 over root 3 gives 200 over root 3, which is about 115.47.'
         write: 'Exactly: $\ 50\sqrt{3} + \dfrac{50}{\sqrt{3}} = \dfrac{150}{\sqrt{3}} + \dfrac{50}{\sqrt{3}} = \dfrac{200}{\sqrt{3}} \approx 115.47$'
       - say: 'So $X$ and $Y$ are 115.47 metres apart, which is answer choice D.'
@@ -1350,11 +1354,15 @@ lessons:
           - {figure: sketch, kind: arc, target: QXY, text: '90°'}
       - say: 'Pythagoras: the hypotenuse squared equals the opposite squared plus the adjacent squared.'
         write: 'Pythagoras: $\text{hypotenuse}^{2} = \text{opposite}^{2} + \text{adjacent}^{2}$'
+      - say: 'Now let me join $Q$ to $Y$ on the diagram. That line is the distance we want.'
+        show_sketch: sketch_b
+        point:
+          - {figure: sketch_b, kind: circle, target: '?', text: 'distance QY'}
       - say: 'That makes $QXY$ a right-angled triangle, with legs 45 and 24. The distance $QY$ is the hypotenuse, so we use Pythagoras.'
         write: '$QY^{2} = 45^{2} + 24^{2}$'
         point:
           - {line: 4, kind: arrow, at: '90∘', text: 'right angle'}
-          - {figure: sketch, kind: underline, target: QY, text: 'hypotenuse'}
+          - {figure: sketch_b, kind: underline, target: QY, text: 'hypotenuse'}
       - say: '45 squared is 2025. 24 squared is 576.'
         write: '$QY^{2} = 2025 + 576$'
       - say: '2025 plus 576 is 2601.'
@@ -1365,7 +1373,7 @@ lessons:
         write: '$QY = 51 \text{ m}$'
         answer: true
         point:
-          - {figure: sketch, kind: circle, target: '?', text: '51 m'}
+          - {figure: sketch_b, kind: circle, target: '?', text: '51 m'}
     traps:
       A: 'You went for 69 m. That''s 45 plus 24, the distance she walked. The question asks how far she is from $Q$ in a straight line, which is the hypotenuse: 51 m.'
       B: 'You went for 57 m. The triangle is right-angled at $X$, so use Pythagoras: 45 squared plus 24 squared is 2601, and its square root is 51.'

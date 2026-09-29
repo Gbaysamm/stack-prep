@@ -980,44 +980,48 @@ lessons:
           - { figure: sketch, kind: circle, target: '6 m' }
       - say: 'Let me draw the shape, so we can see its measurements.'
         show_sketch: true
+      - say: 'Now let me finish the pyramid the frustum was cut from, carrying its edges up to the apex $V$.'
+        show_sketch: sketch_b
+        point:
+          - { figure: sketch_b, kind: circle, target: V, text: 'apex' }
       - say: 'Here is the idea. A frustum is a big pyramid with a small pyramid cut off the top. The small pyramid has the same shape as the big one, so their sizes are in proportion.'
       - say: 'Let''s call the height of the full pyramid $h$.'
         write: 'Full pyramid height $= h$'
         point:
-          - { figure: sketch, kind: circle, target: 'h = ?', text: 'full height' }
+          - { figure: sketch_b, kind: circle, target: 'h = ?', text: 'full height' }
       - say: 'The small pyramid sits on top of the frustum. The frustum is 6 metres deep, so the small pyramid''s height is $h$ minus 6.'
         write: 'Small pyramid height $= h - 6$'
         point:
-          - { figure: sketch, kind: circle, target: 'h − 6', text: 'small pyramid' }
+          - { figure: sketch_b, kind: circle, target: 'h − 6', text: 'small pyramid' }
       - say: 'For similar shapes, the sides are in the same ratio as the heights. The small pyramid''s base is the 2 metre square, and the full pyramid''s base is the 5 metre square.'
         write: '$\dfrac{\text{small side}}{\text{big side}} = \dfrac{\text{small height}}{\text{big height}}$'
       - say: 'Put in the numbers: 2 over 5 equals $h$ minus 6, over $h$.'
         write: '$\dfrac{2}{5} = \dfrac{h - 6}{h}$'
         point:
-          - { line: 5, kind: box, text: 'the rule' }
-          - { line: 6, kind: move, from: { line: 4, at: '= [[h − 6]]' }, at: '= h[[h − 6]]', text: 'small height' }
+          - { line: 6, kind: box, text: 'the rule' }
+          - { line: 7, kind: move, from: { line: 5, at: '= [[h − 6]]' }, at: '= h[[h − 6]]', text: 'small height' }
       - say: 'Cross-multiply: 2 times $h$ equals 5 times, $h$ minus 6.'
         write: '$2h = 5(h - 6)$'
         point:
-          - { line: 7, kind: move, from: { line: 6, at: '[[5]]2' }, at: '= [[5]](', text: 'cross' }
-          - { line: 7, kind: move, from: { line: 6, at: '= [[h]]h' }, at: '2[[h]] =', text: 'cross' }
+          - { line: 8, kind: move, from: { line: 7, at: '[[5]]2' }, at: '= [[5]](', text: 'cross' }
+          - { line: 8, kind: move, from: { line: 7, at: '= [[h]]h' }, at: '2[[h]] =', text: 'cross' }
       - say: 'Expand the bracket: 5 times $h$ is $5h$, and 5 times 6 is 30.'
         write: '$2h = 5h - 30$'
       - say: 'Move the $h$ terms together. Add 30 to both sides and take $2h$ from both sides. 30 equals $3h$.'
         write: '$30 = 5h - 2h = 3h$'
         point:
-          - { line: 9, kind: move, from: { line: 8, at: '[[2h]] =' }, at: '− 2h', text: 'across' }
-          - { line: 9, kind: move, from: { line: 8, at: '[[− 30]]' }, at: '[[30]] =', text: 'across' }
+          - { line: 10, kind: move, from: { line: 9, at: '[[2h]] =' }, at: '− 2h', text: 'across' }
+          - { line: 10, kind: move, from: { line: 9, at: '[[− 30]]' }, at: '[[30]] =', text: 'across' }
       - say: 'Divide both sides by 3. 30 divided by 3 is 10.'
         write: '$h = \dfrac{30}{3} = 10$'
         point:
-          - { line: 10, kind: move, from: { line: 9, at: '= [[3]]h' }, at: 'h = [[3]]30', text: 'divide' }
+          - { line: 11, kind: move, from: { line: 10, at: '= [[3]]h' }, at: 'h = [[3]]30', text: 'divide' }
       - say: 'Let''s check. The small pyramid is then 10 minus 6, which is 4 metres tall, and 4 over 10 is 2 over 5, the same as the sides. It works.'
         write: 'Check: $\ \dfrac{10 - 6}{10} = \dfrac{4}{10} = \dfrac{2}{5} \;\checkmark$'
       - say: 'So the pyramid was 10 metres high, which is answer choice D.'
         write: '$h = 10.0$ m'
         point:
-          - { figure: sketch, kind: label, target: 'h = ?', text: '10 m' }
+          - { figure: sketch_b, kind: label, target: 'h = ?', text: '10 m' }
         answer: true
     traps:
       A: 'You went for 8.0 metres. That is not in the right ratio: with a full height of 8, the small pyramid is 2 metres tall, and 2 over 8 is not 2 over 5. Set $\dfrac{2}{5} = \dfrac{h - 6}{h}$ and solve.'
@@ -1116,26 +1120,30 @@ lessons:
           - { line: 9, kind: move, from: { line: 5, at: '≈ [[−32.1]]' }, at: '= [[−32.1]]', text: 'leg 1' }
           - { line: 9, kind: move, from: { line: 7, at: '≈ [[38.3]]' }, at: '+ [[38.3]]', text: 'leg 2' }
           - { figure: sketch, kind: label, target: 'C', text: '70.4 E, 6.2 N' }
+      - say: 'Now let me join $A$ to $C$ on the diagram. The direction of that line is the bearing we want.'
+        show_sketch: sketch_b
+        point:
+          - {figure: sketch_b, kind: circle, target: '?', text: 'bearing of C from A'}
       - say: 'SOH CAH TOA: the tangent of an angle is the opposite side over the adjacent side.'
         write: 'TOA: $\tan\theta = \dfrac{\text{opposite}}{\text{adjacent}}$'
       - say: 'The angle north of due east has tan equal to north over east, 6.2 over 70.4.'
         write: '$\tan\alpha = \dfrac{6.2}{70.4} \approx 0.088$'
         point:
-          - { line: 11, kind: move, from: { line: 9, at: '= [[6.2]]' }, at: '70.4[[6.2]]', text: 'north' }
-          - { line: 11, kind: move, from: { line: 8, at: '= [[70.4]]' }, at: '= [[70.4]]6.2', text: 'east' }
-          - { figure: sketch, kind: highlight, target: 'AC', text: 'tan = 6.2/70.4' }
+          - { line: 12, kind: move, from: { line: 9, at: '= [[6.2]]' }, at: '70.4[[6.2]]', text: 'north' }
+          - { line: 12, kind: move, from: { line: 8, at: '= [[70.4]]' }, at: '= [[70.4]]6.2', text: 'east' }
+          - { figure: sketch_b, kind: highlight, target: 'AC', text: 'tan = 6.2/70.4' }
       - say: 'The angle whose tan is 0.088 is about 5 degrees. So the ship is 5 degrees north of due east.'
         write: '$\alpha \approx 5^{\circ}$'
         point:
-          - { figure: sketch, kind: label, target: 'A', text: '5° north of east' }
+          - { figure: sketch_b, kind: label, target: 'A', text: '5° north of east' }
       - say: 'Bearings like this are measured from north. Due east is 90 degrees from north, and we are 5 degrees back towards north, so 90 minus 5 is 85 degrees.'
         write: 'From north: $\ 90^{\circ} - 5^{\circ} = 85^{\circ}$'
         point:
-          - { figure: sketch, kind: circle, target: '?', text: '90° − 5° = 85°' }
+          - { figure: sketch_b, kind: circle, target: '?', text: '90° − 5° = 85°' }
       - say: 'So the bearing is N 85 degrees E, which is answer choice D.'
         write: 'Bearing $= N85^{\circ}E$'
         point:
-          - { figure: sketch, kind: label, target: '?', text: 'N85°E' }
+          - { figure: sketch_b, kind: label, target: '?', text: 'N85°E' }
         answer: true
     traps:
       A: 'You went for S 90 degrees E, which is due east. That assumes the south part and the north part cancel. They don''t: the ship goes 32.1 kilometres south and 38.3 north, so it ends up 6.2 kilometres north.'
@@ -1150,14 +1158,18 @@ lessons:
           - { figure: sketch, kind: circle, target: '√3 cm', text: 'a' }
       - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
         show_sketch: true
-      - say: 'Here is the idea. Join the centre of the circle to two corners of the triangle. Both lines are radii, so we get a triangle with two sides equal to $R$ and the third side equal to $a$.'
+      - say: 'Let me join the centre $O$ to two corners of the triangle, $B$ and $C$.'
+        show_sketch: sketch_b
         point:
-          - { figure: sketch, kind: highlight, target: OB, text: 'R' }
-          - { figure: sketch, kind: highlight, target: OC, text: 'R' }
+          - { figure: sketch_b, kind: circle, target: O, text: 'centre' }
+      - say: 'Here is the idea. Both lines from the centre are radii, so we get a triangle with two sides equal to $R$ and the third side equal to $a$.'
+        point:
+          - { figure: sketch_b, kind: highlight, target: OB, text: 'R' }
+          - { figure: sketch_b, kind: highlight, target: OC, text: 'R' }
       - say: 'The three corners share the full turn at the centre equally, so the angle between those two radii is 360 over 3, which is 120 degrees.'
         write: 'Angle at centre $= \dfrac{360^{\circ}}{3} = 120^{\circ}$'
         point:
-          - { figure: sketch, kind: arc, target: BOC, text: '120°' }
+          - { figure: sketch_b, kind: arc, target: BOC, text: '120°' }
       - say: 'The cosine rule: $a$ squared equals $b$ squared plus $c$ squared, minus $2bc$ cos $A$, where $A$ is the angle opposite the side $a$.'
         write: 'Cosine rule: $a^{2} = b^{2} + c^{2} - 2bc\cos A$'
       - say: 'Here the side opposite the 120 degree angle is the triangle''s side $a$, and the other two sides are both radii, $R$.'
@@ -1165,21 +1177,21 @@ lessons:
       - say: 'Now use the cosine rule on that triangle. $a$ squared equals $R$ squared plus $R$ squared, minus 2 times $R$ times $R$ times cos 120 degrees.'
         write: '$a^{2} = R^{2} + R^{2} - 2 \cdot R \cdot R\cos 120^{\circ}$'
         point:
-          - { line: 6, kind: move, from: { line: 3, at: '= [[120∘]]' }, at: 'cos[[120∘]]', text: 'angle at O' }
-          - { figure: sketch, kind: highlight, target: 'BC', text: 'a' }
+          - { line: 7, kind: move, from: { line: 4, at: '= [[120∘]]' }, at: 'cos[[120∘]]', text: 'angle at O' }
+          - { figure: sketch_b, kind: highlight, target: 'BC', text: 'a' }
       - say: 'Cos 120 degrees is negative a half.'
         write: '$\cos 120^{\circ} = -\dfrac{1}{2}$'
       - say: 'So the last term is minus 2 $R$ squared times negative a half, which is plus $R$ squared.'
         write: '$a^{2} = 2R^{2} - 2R^{2}\left(-\dfrac{1}{2}\right) = 2R^{2} + R^{2}$'
         point:
-          - { line: 8, kind: move, from: { line: 7, at: '= [[−21]]' }, at: '([[−21]])', text: 'cos 120°' }
+          - { line: 9, kind: move, from: { line: 8, at: '= [[−21]]' }, at: '([[−21]])', text: 'cos 120°' }
       - say: '2 $R$ squared plus $R$ squared is 3 $R$ squared.'
         write: '$a^{2} = 3R^{2}$'
       - say: 'Now put in our side, root 3.'
         write: '$(\sqrt{3})^{2} = 3R^{2}$'
         point:
-          - { line: 10, kind: move, from: { line: 0, at: 'a = [[3]]' }, at: '([[3]])', text: 'side' }
-          - { figure: sketch, kind: circle, target: '√3 cm', text: 'our side' }
+          - { line: 11, kind: move, from: { line: 0, at: 'a = [[3]]' }, at: '([[3]])', text: 'side' }
+          - { figure: sketch_b, kind: circle, target: '√3 cm', text: 'our side' }
       - say: 'Root 3 squared is 3, so 3 equals 3 $R$ squared.'
         write: '$3 = 3R^{2}$'
       - say: 'Divide both sides by 3. $R$ squared is 1.'
@@ -1187,11 +1199,11 @@ lessons:
       - say: 'A radius is positive, so $R$ is the square root of 1, which is 1.'
         write: '$R = \sqrt{1} = 1$'
         point:
-          - { figure: sketch, kind: highlight, target: 'OB', text: 'R = 1' }
+          - { figure: sketch_b, kind: highlight, target: 'OB', text: 'R = 1' }
       - say: 'So the radius of the circle is 1 centimetre, which is answer choice C.'
         write: '$R = 1$ cm'
         point:
-          - { figure: sketch, kind: label, target: 'R = ?', text: '1 cm' }
+          - { figure: sketch_b, kind: label, target: 'R = ?', text: '1 cm' }
         answer: true
     traps:
       A: 'You went for 2 over 3 centimetres. The two thirds belongs to a different fact: the centre is two thirds of the way down the triangle''s height. The height here is 3 over 2, and two thirds of that is 1.'

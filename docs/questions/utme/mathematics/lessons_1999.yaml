@@ -1353,46 +1353,50 @@ lessons:
           - { line: 3, kind: move, from: { line: 0, at: 'N[[67∘]]W' }, at: '= [[67∘]]', text: 'west of north' }
           - { line: 3, kind: move, from: { line: 0, at: 'N[[23∘]]E' }, at: '+ [[23∘]]', text: 'east of north' }
           - { figure: sketch, kind: arc, target: QPR, text: '90°' }
+      - say: 'Now let me put a North line at $Q$, and draw the line from $Q$ to $R$ on its bearing of N68°E.'
+        show_sketch: sketch_b
+        point:
+          - { figure: sketch_b, kind: highlight, target: QR, text: 'N68°E' }
       - say: 'So the triangle has a right angle at $P$. Now go to $Q$. $P$ sees $Q$ at N67°W, so $Q$ sees $P$ in exactly the opposite direction: S67°E.'
         write: 'From $Q$: $P$ is $S67^{\circ}E$'
         point:
-          - { figure: sketch, kind: circle, target: 'Q', text: 'now at Q' }
+          - { figure: sketch_b, kind: circle, target: 'Q', text: 'now at Q' }
       - say: 'Measured round from north at $Q$, S67°E is 180 minus 67, which is 113 degrees.'
         write: 'From north: $180^{\circ} - 67^{\circ} = 113^{\circ}$'
         point:
-          - { figure: sketch, kind: label, target: 'Q', text: 'P is 113° from north' }
+          - { figure: sketch_b, kind: label, target: 'Q', text: 'P is 113° from north' }
       - say: 'And $R$ is N68°E from $Q$, which is 68 degrees round from north.'
         write: 'From $Q$: $R$ is $N68^{\circ}E$, which is $68^{\circ}$ from north'
         point:
-          - { figure: sketch, kind: circle, target: '68°', text: 'N68°E' }
+          - { figure: sketch_b, kind: circle, target: '68°', text: 'N68°E' }
       - say: 'So the angle between $P$ and $R$ at $Q$ is the 113 minus the 68, which is 45 degrees.'
         write: 'At $Q$: $\angle PQR = 113^{\circ} - 68^{\circ} = 45^{\circ}$'
         point:
-          - { line: 7, kind: move, from: { line: 5, at: '= [[113∘]]' }, at: '= [[113∘]]', text: 'P from north' }
-          - { line: 7, kind: move, from: { line: 6, at: 'which is [[68∘]]' }, at: '− [[68∘]]', text: 'R from north' }
-          - { figure: sketch, kind: arc, target: PQR, text: '45°' }
+          - { line: 8, kind: move, from: { line: 6, at: '= [[113∘]]' }, at: '= [[113∘]]', text: 'P from north' }
+          - { line: 8, kind: move, from: { line: 7, at: 'which is [[68∘]]' }, at: '− [[68∘]]', text: 'R from north' }
+          - { figure: sketch_b, kind: arc, target: PQR, text: '45°' }
       - say: 'The angles in any triangle add up to 180 degrees.'
         write: 'Angle sum of a triangle: $\text{sum of the three angles} = 180^{\circ}$'
       - say: 'The angles of a triangle add to 180. So the angle at $R$ is 180 minus 90 minus 45, which is 45 degrees.'
         write: 'At $R$: $\angle PRQ = 180^{\circ} - 90^{\circ} - 45^{\circ} = 45^{\circ}$'
         point:
-          - { figure: sketch, kind: arc, target: PRQ, text: '45°' }
+          - { figure: sketch_b, kind: arc, target: PRQ, text: '45°' }
       - say: 'Two equal angles make the triangle isosceles, and the sides opposite equal angles are equal. $PR$ faces the angle at $Q$, and $PQ$ faces the angle at $R$.'
         write: '$\angle Q = \angle R = 45^{\circ} \Rightarrow PR = PQ$'
         point:
-          - { figure: sketch, kind: highlight, target: PR, text: 'faces Q' }
-          - { figure: sketch, kind: highlight, target: PQ, text: 'faces R' }
+          - { figure: sketch_b, kind: highlight, target: PR, text: 'faces Q' }
+          - { figure: sketch_b, kind: highlight, target: PQ, text: 'faces R' }
       - say: 'SOH CAH TOA: the tangent of an angle is the opposite side over the adjacent side.'
         write: 'TOA: $\tan\theta = \dfrac{\text{opposite}}{\text{adjacent}}$'
       - say: 'We can also check with trigonometry. The right angle is at $P$, so at $Q$, $PR$ is opposite and $PQ$ is adjacent. Tan 45 degrees is 1.'
         write: 'Check: $\tan 45^{\circ} = \dfrac{PR}{PQ} \Rightarrow PR = 150 \times 1 = 150$'
         point:
-          - { figure: sketch, kind: highlight, target: 'PR', text: 'opposite' }
-          - { figure: sketch, kind: underline, target: 'PQ', text: 'adjacent' }
+          - { figure: sketch_b, kind: highlight, target: 'PR', text: 'opposite' }
+          - { figure: sketch_b, kind: underline, target: 'PQ', text: 'adjacent' }
       - say: 'So $PR$ is 150 m, which is answer choice C.'
         write: '$PR = 150$ m'
         point:
-          - { figure: sketch, kind: label, target: '?', text: '150 m' }
+          - { figure: sketch_b, kind: label, target: '?', text: '150 m' }
         answer: true
     traps:
       A: 'You went for 120 m. The triangle turns out to be a right-angled isosceles triangle: the angles are 90, 45 and 45. So $PR$ equals $PQ$, 150 m.'

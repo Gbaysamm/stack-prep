@@ -987,20 +987,24 @@ lessons:
         write: 'Angle at circumference $= 64^{\circ}$'
         point:
           - {figure: sketch, kind: circle, target: 'A', text: 'on the circle'}
+      - say: 'Now let me join the centre $O$ to $B$ and $C$. The angle between those two lines, at the centre, is the one we want.'
+        show_sketch: sketch_b
+        point:
+          - {figure: sketch_b, kind: circle, target: '?', text: 'angle at centre'}
       - say: 'Here''s the circle theorem: the angle at the centre is twice the angle at the circumference, when both stand on the same arc.'
         write: 'Angle at centre $= 2 \times$ angle at circumference'
         point:
-          - {figure: sketch, kind: circle, target: 'O', text: 'centre'}
-          - {figure: sketch, kind: circle, target: 'A', text: 'circumference'}
+          - {figure: sketch_b, kind: circle, target: 'O', text: 'centre'}
+          - {figure: sketch_b, kind: circle, target: 'A', text: 'circumference'}
       - say: 'Put in the 64 degrees we just found.'
         write: '$= 2 \times 64^{\circ}$'
         point:
-          - {line: 7, kind: box, text: 'the rule'}
-          - {line: 8, kind: move, from: {line: 6, at: '64'}, at: '64', text: 'found here'}
+          - {line: 8, kind: box, text: 'the rule'}
+          - {line: 9, kind: move, from: {line: 6, at: '64'}, at: '64', text: 'found here'}
       - say: '2 times 64 is 128 degrees.'
         write: '$= 128^{\circ}$'
         point:
-          - {figure: sketch, kind: arc, target: BOC, text: '128°'}
+          - {figure: sketch_b, kind: arc, target: BOC, text: '128°'}
       - say: 'A quick check: the apex angle is less than 90 degrees, so the angle at the centre must be less than 180. And 128 is.'
         write: 'Check: $64^{\circ} < 90^{\circ}$, so centre angle $< 180^{\circ}$'
       - say: 'So the base subtends 128 degrees at the centre, which is answer choice A.'
@@ -1129,20 +1133,24 @@ lessons:
         show_sketch: true
         point:
           - {figure: sketch, kind: underline, target: 'diameter 42 cm'}
-          - {figure: sketch, kind: arc, target: AOB, text: '60°'}
+      - say: 'Now let me join the centre $O$ to both ends of the chord. The angle between those two radii is 60 degrees, and the minor arc is the bit of the circle they cut off.'
+        show_sketch: sketch_b
+        point:
+          - {figure: sketch_b, kind: arc, target: AOB, text: '60°'}
+          - {figure: sketch_b, kind: circle, target: 'arc = ?', text: 'minor arc'}
       - say: 'An arc is a fraction of the whole circumference, and that fraction is the angle at the centre over 360.'
         write: 'Arc length $= \dfrac{\theta}{360^{\circ}} \times 2\pi r$'
         point:
-          - {figure: sketch, kind: arc, target: 'AB', text: 'the arc'}
+          - {figure: sketch_b, kind: arc, target: 'AB', text: 'the arc'}
       - say: 'The formula needs the radius, not the diameter. Half of 42 is 21.'
         write: '$r = \dfrac{42}{2} = 21$ cm'
         point:
-          - {figure: sketch, kind: circle, target: 'r = 21 cm'}
+          - {figure: sketch_b, kind: circle, target: 'r = 21 cm'}
       - say: 'First the full circumference, $2\pi r$, using the radius 21 and $\pi$ as 22 over 7.'
         write: '$2\pi r = 2 \times \dfrac{22}{7} \times 21$'
         point:
-          - {line: 4, kind: move, from: {line: 3, at: '= 21'}, at: '× 21', text: 'radius'}
-          - {figure: sketch, kind: circle, target: 'r = 21 cm', text: 'r'}
+          - {line: 5, kind: move, from: {line: 4, at: '= 21'}, at: '× 21', text: 'radius'}
+          - {figure: sketch_b, kind: circle, target: 'r = 21 cm', text: 'r'}
       - say: '7 goes into 21 three times, so the 7 and the 21 become a 3.'
         write: '$= 2 \times 22 \times 3$'
       - say: '2 times 22 is 44, and 44 times 3 is 132.'
@@ -1152,16 +1160,16 @@ lessons:
       - say: 'So the arc is 1 over 6 of the circumference we found, 132 cm.'
         write: 'Arc length $= \dfrac{1}{6} \times 132$'
         point:
-          - {line: 8, kind: move, from: {line: 7, at: '= 61'}, at: '61', text: 'fraction'}
-          - {line: 8, kind: move, from: {line: 6, at: '132'}, at: '132', text: 'circumference'}
-          - {figure: sketch, kind: arc, target: 'AB', text: '1/6 of 132'}
+          - {line: 9, kind: move, from: {line: 8, at: '= 61'}, at: '61', text: 'fraction'}
+          - {line: 9, kind: move, from: {line: 7, at: '132'}, at: '132', text: 'circumference'}
+          - {figure: sketch_b, kind: arc, target: 'AB', text: '1/6 of 132'}
       - say: '132 divided by 6 is 22.'
         write: '$= 22$ cm'
       - say: 'So the minor arc is 22 cm, which is answer choice A.'
         write: 'Minor arc $= 22$ cm'
         answer: true
         point:
-          - {figure: sketch, kind: label, target: 'arc = ?', text: '22 cm'}
+          - {figure: sketch_b, kind: label, target: 'arc = ?', text: '22 cm'}
     traps:
       B: 'You went for 44 cm. That uses 42 as the radius, which doubles the answer. The diameter is 42, so the radius is 21.'
       C: 'You went for 110 cm. The arc is only 1 over 6 of the circumference, and the whole circumference is 132 cm. 132 divided by 6 is 22.'
@@ -1253,21 +1261,25 @@ lessons:
     moments:
       - say: 'A sector with angle 45 degrees is cut from a circle of radius $r$ and rolled into a cone. We want the base radius of the cone.'
         write: 'Sector angle $45^{\circ}$, sector radius $r$'
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - say: 'Let me draw the sector first, cut from its circle, so we can see what we are working with.'
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: '45°'}
+      - say: 'Now let me roll the sector up and draw the cone it makes.'
+        show_sketch: sketch_b
+        point:
+          - {figure: sketch_b, kind: circle, target: 'R = ?', text: 'base radius'}
       - say: 'Here''s the key idea. When the sector is rolled up, its curved edge, the arc, becomes the circle around the base of the cone. Nothing is stretched or lost.'
         write: 'Arc length of sector $=$ circumference of base'
         point:
-          - {figure: sketch, kind: circle, target: {x: 95, y: 56}, text: 'arc'}
-          - {figure: sketch, kind: circle, target: {x: 290, y: 212}, text: 'base circle'}
+          - {figure: sketch_b, kind: circle, target: {x: 95, y: 56}, text: 'arc'}
+          - {figure: sketch_b, kind: circle, target: {x: 290, y: 212}, text: 'base circle'}
       - say: 'Arc length is the angle over 360 degrees, times the circumference, $2\pi r$.'
         write: 'Arc length $= \dfrac{\theta}{360^{\circ}} \times 2\pi r$'
       - say: 'First the arc. It''s 45 over 360 of the full circumference of the circle, $2\pi r$.'
         write: 'Arc $= \dfrac{45}{360} \times 2\pi r$'
         point:
-          - {figure: sketch, kind: label, target: {x: 95, y: 56}, text: '45/360 × 2πr'}
+          - {figure: sketch_b, kind: label, target: {x: 95, y: 56}, text: '45/360 × 2πr'}
       - say: '45 goes into 360 eight times, so 45 over 360 simplifies to 1 over 8.'
         write: '$= \dfrac{1}{8} \times 2\pi r$'
       - say: '$2\pi r$ over 8 simplifies to $\pi r$ over 4, since 2 over 8 is 1 over 4.'
@@ -1275,13 +1287,13 @@ lessons:
       - say: 'Now the cone. Call its base radius $R$. The base is a circle, so its circumference is $2\pi R$.'
         write: 'Base circumference $= 2\pi R$'
         point:
-          - {figure: sketch, kind: circle, target: 'R = ?'}
+          - {figure: sketch_b, kind: circle, target: 'R = ?'}
       - say: 'The arc becomes the base, so set the two equal: $2\pi R$ equals $\pi r$ over 4.'
         write: '$2\pi R = \dfrac{\pi r}{4}$'
         point:
-          - {line: 8, kind: move, from: {line: 6, at: '= 4πr'}, at: '4πr', text: 'arc'}
-          - {line: 8, kind: move, from: {line: 7, at: '2πR'}, at: '2πR', text: 'base'}
-          - {figure: sketch, kind: arrow, target: {x: 290, y: 213}, text: 'arc = base'}
+          - {line: 9, kind: move, from: {line: 7, at: '= 4πr'}, at: '4πr', text: 'arc'}
+          - {line: 9, kind: move, from: {line: 8, at: '2πR'}, at: '2πR', text: 'base'}
+          - {figure: sketch_b, kind: arrow, target: {x: 290, y: 213}, text: 'arc = base'}
       - say: 'Divide both sides by $\pi$.'
         write: '$2R = \dfrac{r}{4}$'
       - say: 'Divide both sides by 2. $r$ over 4, divided by 2, is $r$ over 8.'
@@ -1289,13 +1301,13 @@ lessons:
       - say: 'Notice the two radii play different roles. The sector''s radius $r$ becomes the slant height of the cone; the base radius is the new, smaller $R$.'
         write: 'Slant height $= r$, base radius $= R$'
         point:
-          - {figure: sketch, kind: circle, target: {x: 270, y: 128}, text: 'slant height'}
-          - {figure: sketch, kind: circle, target: 'R = ?', text: 'base radius'}
+          - {figure: sketch_b, kind: circle, target: {x: 270, y: 128}, text: 'slant height'}
+          - {figure: sketch_b, kind: circle, target: 'R = ?', text: 'base radius'}
       - say: 'So the base radius is $r$ over 8 cm, which is answer choice B.'
         write: '$R = \dfrac{r}{8}\ \text{cm}$'
         answer: true
         point:
-          - {figure: sketch, kind: label, target: 'R = ?', text: 'r/8'}
+          - {figure: sketch_b, kind: label, target: 'R = ?', text: 'r/8'}
     traps:
       A: 'You went for $r$ over 16. That divides by 2 once too often. From $2R = \tfrac{r}{4}$, dividing by 2 gives $\tfrac{r}{8}$.'
       C: 'You went for $r$ over 4. That forgets the 2 in the base circumference $2\pi R$. Setting $2\pi R = \tfrac{\pi r}{4}$ gives $R = \tfrac{r}{8}$.'

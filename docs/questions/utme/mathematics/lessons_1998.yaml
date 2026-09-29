@@ -1231,28 +1231,32 @@ lessons:
         point:
           - {figure: sketch, kind: underline, target: 'radius √3 cm'}
           - {figure: sketch, kind: arc, target: ACB, text: '60°'}
+      - say: 'Now let me join the centre $O$ to both ends of the chord, $A$ and $B$.'
+        show_sketch: sketch_b
+        point:
+          - {figure: sketch_b, kind: arc, target: AOB, text: 'angle at centre'}
       - say: 'The angle at the centre is twice the angle at the circumference standing on the same arc.'
         write: 'Angle at centre $= 2 \times$ angle at circumference'
       - say: 'The chord''s length depends on the angle at the centre. The angle at the centre is twice the angle at the circumference on the same chord.'
         write: '$\text{angle at centre} = 2 \times 60^{\circ} = 120^{\circ}$'
         point:
-          - {line: 3, kind: move, from: {line: 0, at: '60'}, at: '× 60', text: 'double it'}
-          - {figure: sketch, kind: arc, target: AOB, text: '120°'}
-      - say: 'Join the centre to both ends of the chord. That makes a triangle with two sides of $\sqrt{3}$, the radii, and the 120 degrees we just found between them.'
+          - {line: 4, kind: move, from: {line: 0, at: '60'}, at: '× 60', text: 'double it'}
+          - {figure: sketch_b, kind: arc, target: AOB, text: '120°'}
+      - say: 'The two radii we drew make a triangle with two sides of $\sqrt{3}$, the radii, and the 120 degrees we just found between them.'
         write: 'Triangle: two radii of $\sqrt{3}$, angle $120^{\circ}$ between them'
         point:
-          - {figure: sketch, kind: highlight, target: OA}
-          - {figure: sketch, kind: highlight, target: OB}
+          - {figure: sketch_b, kind: highlight, target: OA}
+          - {figure: sketch_b, kind: highlight, target: OB}
       - say: 'Two sides and the angle between them: that is the cosine rule. The side opposite the 120 degrees is the chord. Call it $c$.'
         write: 'Cosine rule: $c^{2} = a^{2} + b^{2} - 2ab\cos C$'
         point:
-          - {figure: sketch, kind: highlight, target: 'AB', text: 'c'}
+          - {figure: sketch_b, kind: highlight, target: 'AB', text: 'c'}
       - say: 'Put in $\sqrt{3}$ for both $a$ and $b$, and 120 degrees for the angle.'
         write: '$c^{2} = (\sqrt{3})^{2} + (\sqrt{3})^{2} - 2(\sqrt{3})(\sqrt{3})\cos 120^{\circ}$'
         point:
-          - {line: 6, kind: move, from: {line: 3, at: '120'}, at: '120', text: 'angle at centre'}
-          - {figure: sketch, kind: label, target: 'OA', text: '√3'}
-          - {figure: sketch, kind: label, target: 'OB', text: '√3'}
+          - {line: 7, kind: move, from: {line: 4, at: '120'}, at: '120', text: 'angle at centre'}
+          - {figure: sketch_b, kind: label, target: 'OA', text: '√3'}
+          - {figure: sketch_b, kind: label, target: 'OB', text: '√3'}
       - say: '$\sqrt{3}$ squared is 3. And 2 times $\sqrt{3}$ times $\sqrt{3}$ is 2 times 3, which is 6.'
         write: '$c^{2} = 3 + 3 - 6\cos 120^{\circ}$'
       - say: '3 plus 3 is 6, and cos 120 degrees is negative a half.'
@@ -1264,12 +1268,12 @@ lessons:
       - say: 'A quick check: a chord equals $2r$ times the sine of the angle at the circumference. 2 times $\sqrt{3}$ times $\sqrt{3}$ over 2 is 3.'
         write: '$2\sqrt{3} \times \sin 60^{\circ} = 2\sqrt{3} \times \dfrac{\sqrt{3}}{2} = 3 \ \checkmark$'
         point:
-          - {figure: sketch, kind: circle, target: 'C', text: 'circumference'}
+          - {figure: sketch_b, kind: circle, target: 'C', text: 'circumference'}
       - say: 'So the chord is 3 cm long, which is answer choice D.'
         write: 'Chord $= 3$ cm'
         answer: true
         point:
-          - {figure: sketch, kind: label, target: '?', text: '3 cm'}
+          - {figure: sketch_b, kind: label, target: '?', text: '3 cm'}
     traps:
       A: 'You went for $\tfrac{\sqrt{3}}{2}$ cm. That is $\sin 60^{\circ}$, not a length. The chord is $2r\sin 60^{\circ}$, which is $2\sqrt{3}$ times $\tfrac{\sqrt{3}}{2}$, or 3 cm.'
       B: 'You went for 3 over 2 cm. That is half the answer, as if the 2 in $2r\sin 60^{\circ}$ were left out. With the cosine rule, the chord squared is 9, so the chord is 3 cm.'
@@ -1614,20 +1618,24 @@ lessons:
         show_sketch: true
         point:
           - {figure: sketch, kind: highlight, target: TF, text: '150 m'}
-          - {figure: sketch, kind: circle, target: '60°'}
           - {figure: sketch, kind: circle, target: '45°'}
+      - say: 'Now let me draw the east hut as well, on the other side of the mast, seen at 60 degrees.'
+        show_sketch: sketch_b
+        point:
+          - {figure: sketch_b, kind: circle, target: '60°', text: 'east hut'}
+          - {figure: sketch_b, kind: circle, target: '?', text: 'WE'}
       - say: 'Each hut makes a right-angled triangle with the mast. The angle of depression from the top equals the angle of elevation from the hut, because the horizontal at the top is parallel to the ground.'
         point:
-          - {figure: sketch, kind: circle, target: 'F', text: 'right angle'}
-          - {figure: sketch, kind: arc, target: 'TWF', text: '45°'}
-          - {figure: sketch, kind: arc, target: 'TEF', text: '60°'}
+          - {figure: sketch_b, kind: circle, target: 'F', text: 'right angle'}
+          - {figure: sketch_b, kind: arc, target: 'TWF', text: '45°'}
+          - {figure: sketch_b, kind: arc, target: 'TEF', text: '60°'}
       - say: 'TOA: the tangent of an angle is the opposite side over the adjacent side.'
         write: 'TOA: $\tan\theta = \dfrac{\text{opposite}}{\text{adjacent}}$'
       - say: 'In each triangle, the 150 m mast is opposite the angle at the hut, and the ground distance is adjacent. Tan is opposite over adjacent.'
         write: '$\tan\theta = \dfrac{150}{\text{distance}}$'
         point:
-          - {figure: sketch, kind: underline, target: 'WF', text: 'adjacent'}
-          - {figure: sketch, kind: underline, target: 'FE', text: 'adjacent'}
+          - {figure: sketch_b, kind: underline, target: 'WF', text: 'adjacent'}
+          - {figure: sketch_b, kind: underline, target: 'FE', text: 'adjacent'}
       - say: 'Rearrange: multiply both sides by the distance, then divide by $\tan\theta$.'
         write: '$\text{distance} = \dfrac{150}{\tan\theta}$'
       - say: 'East hut, 60 degrees. $\tan 60^{\circ}$ is $\sqrt{3}$.'
@@ -1635,16 +1643,16 @@ lessons:
       - say: 'Rationalise: multiply the top and bottom by $\sqrt{3}$. That gives $150\sqrt{3}$ over 3, and 150 over 3 is 50.'
         write: '$= \dfrac{150\sqrt{3}}{3} = 50\sqrt{3}$'
         point:
-          - {figure: sketch, kind: label, target: 'east hut', text: '50√3 m'}
+          - {figure: sketch_b, kind: label, target: 'east hut', text: '50√3 m'}
       - say: 'West hut, 45 degrees. $\tan 45^{\circ}$ is 1, so the distance is 150 over 1, which is 150.'
         write: '$\text{west} = \dfrac{150}{\tan 45^{\circ}} = \dfrac{150}{1} = 150$'
         point:
-          - {figure: sketch, kind: label, target: 'west hut', text: '150 m'}
+          - {figure: sketch_b, kind: label, target: 'west hut', text: '150 m'}
       - say: 'One hut is east of the mast and the other is west, so they are on opposite sides. The distance between them is the sum of the two distances we just found.'
         write: 'Distance between huts $= 150 + 50\sqrt{3}$'
         point:
-          - {line: 9, kind: move, from: {line: 8, at: '= 150'}, at: '150 +', text: 'west'}
-          - {line: 9, kind: move, from: {line: 7, at: '= 503'}, at: '+ 503', text: 'east'}
+          - {line: 10, kind: move, from: {line: 9, at: '= 150'}, at: '150 +', text: 'west'}
+          - {line: 10, kind: move, from: {line: 8, at: '= 503'}, at: '+ 503', text: 'east'}
       - say: '150 is 50 times 3, so take out 50 as a common factor.'
         write: '$= 50 \times 3 + 50\sqrt{3} = 50(3 + \sqrt{3})$'
       - say: 'Sense check: the steeper 60 degrees should give the closer hut. $50\sqrt{3}$ is about 86.6 m, which is less than 150 m. Good.'
@@ -1653,7 +1661,7 @@ lessons:
         write: 'Distance $= 50(3 + \sqrt{3})$ m'
         answer: true
         point:
-          - {figure: sketch, kind: label, target: '?', text: '50(3 + √3) m'}
+          - {figure: sketch_b, kind: label, target: '?', text: '50(3 + √3) m'}
     traps:
       A: 'You went for $150(1 + \sqrt{3})$. That uses 150 times $\tan 60^{\circ}$ for the east hut instead of 150 divided by $\tan 60^{\circ}$. A steeper angle means a closer hut, so that distance must be less than 150: it is $50\sqrt{3}$.'
       C: 'You went for $150\sqrt{3}$. That is only one hut''s distance, and worked out by multiplying by tan rather than dividing. Add both distances: 150 plus $50\sqrt{3}$, which is $50(3 + \sqrt{3})$.'

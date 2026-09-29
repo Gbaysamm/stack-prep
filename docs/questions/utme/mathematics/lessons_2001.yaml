@@ -975,47 +975,51 @@ lessons:
         write: 'Sector: radius $7.2$ cm, angle $300^{\circ}$'
         point:
           - { figure: sketch, kind: circle, target: '300°' }
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - say: 'Let me draw the sector first, so we can see what we are working with.'
         show_sketch: true
+      - say: 'Now let me roll the sector up and draw the cone it makes.'
+        show_sketch: sketch_b
+        point:
+          - { figure: sketch_b, kind: circle, target: 'r = ?', text: 'base radius' }
       - say: 'Picture rolling it up. The two straight edges of the sector meet, and the curved arc goes all the way round the bottom of the cone. So the arc becomes the circumference of the base.'
         write: 'Arc of sector $=$ circumference of base'
         point:
-          - { figure: sketch, kind: circle, target: 'arc of sector = circumference of base' }
+          - { figure: sketch_b, kind: circle, target: 'arc of sector = circumference of base' }
       - say: 'And the sector''s own radius, 7.2, becomes the slant height of the cone, not its base radius.'
         write: 'Slant height $= 7.2$ cm'
         point:
-          - { figure: sketch, kind: circle, target: { x: 150, y: 124 }, text: 'radius' }
-          - { figure: sketch, kind: circle, target: { x: 262, y: 116 }, text: 'slant height' }
+          - { figure: sketch_b, kind: circle, target: { x: 150, y: 124 }, text: 'radius' }
+          - { figure: sketch_b, kind: circle, target: { x: 262, y: 116 }, text: 'slant height' }
       - say: 'Now the arc length. The arc is the fraction of the whole circle, angle over 360, times the full circumference, 2 pi $r$.'
         write: 'Arc $= \dfrac{\theta}{360^{\circ}} \times 2\pi r$'
         point:
-          - { figure: sketch, kind: arrow, target: { x: 49, y: 79 }, text: 'the arc' }
+          - { figure: sketch_b, kind: arrow, target: { x: 49, y: 79 }, text: 'the arc' }
       - say: 'Put in the angle, 300 degrees, and the radius, 7.2.'
         write: '$= \dfrac{300}{360} \times 2\pi \times 7.2$'
         point:
-          - { line: 5, kind: move, from: { line: 0, at: 'angle [[300]]' }, at: '360[[300]]', text: 'angle' }
-          - { line: 5, kind: move, from: { line: 0, at: 'radius [[7.2]]' }, at: '× [[7.2]]', text: 'radius' }
-          - { figure: sketch, kind: circle, target: '300°', text: 'angle' }
+          - { line: 6, kind: move, from: { line: 0, at: 'angle [[300]]' }, at: '360[[300]]', text: 'angle' }
+          - { line: 6, kind: move, from: { line: 0, at: 'radius [[7.2]]' }, at: '× [[7.2]]', text: 'radius' }
+          - { figure: sketch_b, kind: circle, target: '300°', text: 'angle' }
       - say: '300 over 360: divide top and bottom by 60, and it is 5 over 6. And 2 times 7.2 is 14.4.'
         write: '$= \dfrac{5}{6} \times 14.4\pi$'
       - say: '14.4 divided by 6 is 2.4, and 5 times 2.4 is 12. So the arc is 12 pi centimetres.'
         write: '$= 5 \times 2.4\pi = 12\pi$ cm'
         point:
-          - { figure: sketch, kind: label, target: { x: 49, y: 79 }, text: '12π' }
+          - { figure: sketch_b, kind: label, target: { x: 49, y: 79 }, text: '12π' }
       - say: 'Now use the key fact. The arc, 12 pi, is the circumference of the base, $2\pi R$, where $R$ is the base radius.'
         write: '$2\pi R = 12\pi$'
         point:
-          - { line: 2, kind: box, text: 'key fact' }
-          - { line: 8, kind: move, from: { line: 7, at: '= [[12π]]' }, at: '= [[12π]]', text: 'the arc' }
-          - { figure: sketch, kind: arrow, target: { x: 305, y: 211 }, text: '2πR' }
+          - { line: 3, kind: box, text: 'key fact' }
+          - { line: 9, kind: move, from: { line: 8, at: '= [[12π]]' }, at: '= [[12π]]', text: 'the arc' }
+          - { figure: sketch_b, kind: arrow, target: { x: 305, y: 211 }, text: '2πR' }
       - say: 'Divide both sides by 2 pi. 12 divided by 2 is 6.'
         write: '$R = \dfrac{12\pi}{2\pi} = 6$'
         point:
-          - { line: 9, kind: move, from: { line: 8, at: '[[2π]]R' }, at: 'R = [[2π]]', text: 'divide' }
+          - { line: 10, kind: move, from: { line: 9, at: '[[2π]]R' }, at: 'R = [[2π]]', text: 'divide' }
       - say: 'So the base radius is 6 centimetres, which is answer choice A.'
         write: 'Base radius $R = 6$ cm'
         point:
-          - { figure: sketch, kind: label, target: 'r = ?', text: '6 cm' }
+          - { figure: sketch_b, kind: label, target: 'r = ?', text: '6 cm' }
         answer: true
     traps:
       B: 'You went for 7 cm. That''s close to the sector''s radius, 7.2, but the sector''s radius becomes the slant height of the cone, not its base radius.'
@@ -1030,30 +1034,34 @@ lessons:
           - { figure: sketch, kind: highlight, target: ST, text: 'r' }
       - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
         show_sketch: true
+      - say: 'Let me join $S$ and $T$ to the centre $O$ on the diagram.'
+        show_sketch: sketch_b
+        point:
+          - { figure: sketch_b, kind: circle, target: O, text: 'centre' }
       - say: 'To find an arc, we need the angle it makes at the centre. So join $S$ and $T$ to the centre, $O$. Those two lines are radii, so each has length $r$.'
         write: '$OS = OT = r$'
         point:
-          - { figure: sketch, kind: highlight, target: OS }
-          - { figure: sketch, kind: highlight, target: OT }
+          - { figure: sketch_b, kind: highlight, target: OS }
+          - { figure: sketch_b, kind: highlight, target: OT }
       - say: 'Now look at triangle $OST$. Two sides are radii, and the third side is the chord, which is also $r$. All three sides are equal.'
         write: 'Triangle $OST$: $OS = OT = ST = r$'
         point:
-          - { figure: sketch, kind: highlight, target: 'OS', text: 'r' }
-          - { figure: sketch, kind: highlight, target: 'OT', text: 'r' }
-          - { figure: sketch, kind: highlight, target: 'ST', text: 'r' }
+          - { figure: sketch_b, kind: highlight, target: 'OS', text: 'r' }
+          - { figure: sketch_b, kind: highlight, target: 'OT', text: 'r' }
+          - { figure: sketch_b, kind: highlight, target: 'ST', text: 'r' }
       - say: 'A triangle with three equal sides is equilateral, and each of its angles is 180 over 3, which is 60 degrees.'
         write: '$\angle SOT = \dfrac{180^{\circ}}{3} = 60^{\circ}$'
         point:
-          - { figure: sketch, kind: arc, target: SOT, text: '60°' }
+          - { figure: sketch_b, kind: arc, target: SOT, text: '60°' }
       - say: 'Now the arc. An arc is a fraction of the whole circumference: the angle over 360, times 2 pi $r$.'
         write: 'Arc $= \dfrac{\theta}{360^{\circ}} \times 2\pi r$'
         point:
-          - { figure: sketch, kind: arc, target: 'ST', text: 'the arc' }
+          - { figure: sketch_b, kind: arc, target: 'ST', text: 'the arc' }
       - say: 'Put in the 60 degrees we just found.'
         write: '$= \dfrac{60}{360} \times 2\pi r$'
         point:
-          - { line: 5, kind: box, text: 'the rule' }
-          - { line: 6, kind: move, from: { line: 4, at: '= [[60]]∘' }, at: '360[[60]]', text: 'the angle' }
+          - { line: 6, kind: box, text: 'the rule' }
+          - { line: 7, kind: move, from: { line: 5, at: '= [[60]]∘' }, at: '360[[60]]', text: 'the angle' }
       - say: '60 goes into 360 six times, so 60 over 360 is 1 over 6.'
         write: '$= \dfrac{1}{6} \times 2\pi r$'
       - say: '1 over 6, times 2 pi $r$, is 2 pi $r$ over 6.'
@@ -1061,7 +1069,7 @@ lessons:
       - say: 'Divide the top and the bottom by 2. So the arc is pi $r$ over 3, which is answer choice B.'
         write: '$= \dfrac{\pi r}{3}$'
         point:
-          - { figure: sketch, kind: label, target: 'arc ST = ?', text: 'πr/3' }
+          - { figure: sketch_b, kind: label, target: 'arc ST = ?', text: 'πr/3' }
         answer: true
     traps:
       A: 'You went for pi $r$ over 2. That''s the arc for a 90 degree angle. A chord equal to the radius makes an equilateral triangle, so the angle is 60 degrees.'
@@ -1339,35 +1347,39 @@ lessons:
         write: '$= 60^{\circ} + 20^{\circ} = 80^{\circ}$'
         point:
           - { figure: sketch, kind: arc, target: QNP, text: '80°' }
+      - say: 'Now let me join $P$ to $Q$ to close the triangle $NPQ$, and put a North line at $Q$ for later.'
+        show_sketch: sketch_b
+        point:
+          - { figure: sketch_b, kind: highlight, target: PQ, text: 'third side' }
       - say: 'The angles in any triangle add up to 180 degrees.'
         write: 'Angle sum of a triangle: $\text{sum of the three angles} = 180^{\circ}$'
       - say: '$NP$ equals $NQ$, so triangle $NPQ$ is isosceles. Its two base angles, at $P$ and at $Q$, are equal, and together with the 80 they make 180.'
         write: '$\angle NQP = \angle NPQ = \dfrac{180^{\circ} - 80^{\circ}}{2}$'
         point:
-          - { line: 6, kind: move, from: { line: 4, at: '= [[80∘]]' }, at: '− [[80∘]]', text: 'angle at N' }
-          - { figure: sketch, kind: highlight, target: 'NP', text: 'equal' }
-          - { figure: sketch, kind: highlight, target: 'NQ', text: 'equal' }
+          - { line: 7, kind: move, from: { line: 4, at: '= [[80∘]]' }, at: '− [[80∘]]', text: 'angle at N' }
+          - { figure: sketch_b, kind: highlight, target: 'NP', text: 'equal' }
+          - { figure: sketch_b, kind: highlight, target: 'NQ', text: 'equal' }
       - say: '180 minus 80 is 100, and half of 100 is 50 degrees.'
         write: '$= \dfrac{100^{\circ}}{2} = 50^{\circ}$'
         point:
-          - { figure: sketch, kind: arc, target: NQP, text: '50°' }
+          - { figure: sketch_b, kind: arc, target: NQP, text: '50°' }
       - say: 'Now stand at $Q$. Which way is $N$? It is the reverse of the direction from $N$ to $Q$. A back bearing differs by 180 degrees, so 300 minus 180.'
         write: 'Bearing of $N$ from $Q = 300^{\circ} - 180^{\circ} = 120^{\circ}$'
         point:
-          - { line: 8, kind: move, from: { line: 0, at: 'Q on [[300∘]]' }, at: '= [[300∘]] −', text: 'N to Q' }
-          - { figure: sketch, kind: circle, target: 'Q', text: 'stand here' }
+          - { line: 9, kind: move, from: { line: 0, at: 'Q on [[300∘]]' }, at: '= [[300∘]] −', text: 'N to Q' }
+          - { figure: sketch_b, kind: circle, target: 'Q', text: 'stand here' }
       - say: 'From $Q$, the direction to $P$ is 50 degrees round from the direction to $N$, on the north side. Turning towards north is anticlockwise, which takes 50 off the bearing.'
         write: 'Bearing of $P$ from $Q = 120^{\circ} - 50^{\circ}$'
         point:
-          - { line: 9, kind: move, from: { line: 8, at: '= [[120∘]]' }, at: '= [[120∘]] −', text: 'back bearing' }
-          - { line: 9, kind: move, from: { line: 7, at: '= [[50∘]]' }, at: '− [[50∘]]', text: 'base angle' }
-          - { figure: sketch, kind: circle, target: '?', text: 'bearing of P' }
+          - { line: 10, kind: move, from: { line: 9, at: '= [[120∘]]' }, at: '= [[120∘]] −', text: 'back bearing' }
+          - { line: 10, kind: move, from: { line: 8, at: '= [[50∘]]' }, at: '− [[50∘]]', text: 'base angle' }
+          - { figure: sketch_b, kind: circle, target: '?', text: 'bearing of P' }
       - say: '120 minus 50 is 70. Bearings are written with three figures, so that is 070.'
         write: '$= 70^{\circ} = 070^{\circ}$'
       - say: 'Does it make sense? $P$ is east of $Q$ and a little north, and 070 points east-north-east. So the bearing of $P$ from $Q$ is 070 degrees, which is answer choice C.'
         write: 'Answer: $070^{\circ}$'
         point:
-          - { figure: sketch, kind: label, target: '?', text: '070°' }
+          - { figure: sketch_b, kind: label, target: '?', text: '070°' }
         answer: true
     traps:
       A: 'You went for 320 degrees. That points north-west from $Q$, away from $P$. $P$ lies to the east of $Q$, so its bearing from $Q$ is between 0 and 180 degrees: 070.'

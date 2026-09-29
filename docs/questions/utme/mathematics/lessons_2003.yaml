@@ -950,7 +950,6 @@ lessons:
         point:
           - {figure: sketch, kind: highlight, target: PQ}
           - {figure: sketch, kind: highlight, target: QR, text: 'equal'}
-          - {figure: sketch, kind: circle, target: '?', text: 'wanted'}
       - say: 'Bearings are much easier with a sketch. Put $P$ at the bottom. The plane flies due north, so $Q$ is straight above $P$. Then it flies due east, so $R$ is straight to the right of $Q$.'
         show_sketch: true
         point:
@@ -973,25 +972,29 @@ lessons:
         write: '$\angle QRP = \dfrac{180^{\circ} - 90^{\circ}}{2} = 45^{\circ}$'
         point:
           - {figure: sketch, kind: arc, target: QRP, text: '45°'}
+      - say: 'Now let me join $R$ back to $P$, and put a North line at $R$, since that is where we stand.'
+        show_sketch: sketch_b
+        point:
+          - {figure: sketch_b, kind: circle, target: N, text: 'north at R'}
       - say: 'We want the bearing of $P$ from $R$. So we stand at $R$ and look towards $P$.'
         write: 'Stand at $R$, face $P$'
         point:
-          - {figure: sketch, kind: circle, target: R, text: 'stand here'}
-          - {figure: sketch, kind: highlight, target: RP, text: 'look to P'}
+          - {figure: sketch_b, kind: circle, target: R, text: 'stand here'}
+          - {figure: sketch_b, kind: highlight, target: RP, text: 'look to P'}
       - say: 'From $R$, the line back to $Q$ points due west, and $P$ is below that line. The angle between them is the 45 degrees we just found. So $P$ is exactly south-west of $R$.'
         write: 'From $R$: $45^{\circ}$ south of west $=$ south-west'
         point:
-          - {figure: sketch, kind: highlight, target: QR, text: 'due west'}
-          - {line: 8, kind: move, from: {line: 6, at: '= 45'}, at: '45∘', text: 'we found'}
+          - {figure: sketch_b, kind: highlight, target: QR, text: 'due west'}
+          - {line: 9, kind: move, from: {line: 6, at: '= 45'}, at: '45∘', text: 'we found'}
       - say: 'Bearings are measured clockwise from north. Due south is 180 degrees, and south-west is a further 45 degrees round.'
         write: 'Bearing $= 180^{\circ} + 45^{\circ}$'
         point:
-          - {figure: sketch, kind: circle, target: N, text: 'north'}
-          - {line: 9, kind: move, from: {line: 8, at: '45∘'}, at: '+ 45∘', text: 'past south'}
+          - {figure: sketch_b, kind: circle, target: N, text: 'north'}
+          - {line: 10, kind: move, from: {line: 9, at: '45∘'}, at: '+ 45∘', text: 'past south'}
       - say: '180 plus 45 is 225.'
         write: '$= 225^{\circ}$'
         point:
-          - {figure: sketch, kind: label, target: '?', text: '225°'}
+          - {figure: sketch_b, kind: label, target: '?', text: '225°'}
       - say: 'So the bearing of $P$ from $R$ is 225 degrees, which is answer choice D.'
         write: 'Bearing of $P$ from $R = 225^{\circ}$'
         answer: true

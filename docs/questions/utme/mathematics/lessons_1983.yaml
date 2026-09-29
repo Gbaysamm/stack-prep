@@ -1511,41 +1511,45 @@ lessons:
           - {figure: sketch, kind: circle, target: P, text: 'port'}
           - {figure: sketch, kind: circle, target: '30 km', text: 'south'}
           - {figure: sketch, kind: circle, target: '60 km', text: 'west'}
+      - say: 'Now let me join $P$ to $H$ on the diagram, and mark the bearing we want: it turns clockwise from north round to the line $PH$.'
+        show_sketch: sketch_b
+        point:
+          - {figure: sketch_b, kind: highlight, target: PH, text: 'P to H'}
       - say: 'A bearing is measured from north, turning clockwise, and it''s written with three figures.'
         write: 'Bearing: clockwise from north'
         point:
-          - {figure: sketch, kind: circle, target: N, text: 'north'}
-          - {figure: sketch, kind: circle, target: '?', text: 'clockwise'}
+          - {figure: sketch_b, kind: circle, target: N, text: 'north'}
+          - {figure: sketch_b, kind: circle, target: '?', text: 'clockwise'}
       - say: 'The ship ends up south and west of the port, so it''s in the south-west quarter. Its bearing must be between 180 and 270 degrees.'
         write: '$180^{\circ} < \text{bearing} < 270^{\circ}$'
         point:
-          - {figure: sketch, kind: circle, target: H, text: 'south-west'}
+          - {figure: sketch_b, kind: circle, target: H, text: 'south-west'}
       - say: 'Draw the right-angled triangle: 30 km down from $P$, then 60 km across to $H$. Let theta be the angle at $P$ between due south and the line $PH$.'
         write: 'Angle $\theta$ at $P$: from due south, towards $H$'
         point:
-          - {figure: sketch, kind: circle, target: θ}
+          - {figure: sketch_b, kind: circle, target: θ}
       - say: 'From that angle, the 60 km side is opposite and the 30 km side is adjacent. So tan theta is 60 over 30.'
         write: '$\tan\theta = \dfrac{\text{opposite}}{\text{adjacent}} = \dfrac{60}{30}$'
         point:
-          - {figure: sketch, kind: underline, target: '60 km', text: 'opposite'}
-          - {figure: sketch, kind: underline, target: '30 km', text: 'adjacent'}
+          - {figure: sketch_b, kind: underline, target: '60 km', text: 'opposite'}
+          - {figure: sketch_b, kind: underline, target: '30 km', text: 'adjacent'}
       - say: '60 divided by 30 is 2.'
         write: '$= 2$'
       - say: 'From the tables, the angle whose tangent is 2 is about 63.435 degrees.'
         write: '$\theta \approx 63.435^{\circ}$'
         point:
-          - {figure: sketch, kind: circle, target: θ, text: '63.435°'}
+          - {figure: sketch_b, kind: circle, target: θ, text: '63.435°'}
       - say: 'Change the decimal part to minutes: 0.435 times 60 is about 26. So theta is 63 degrees 26 minutes.'
         write: '$0.435 \times 60 \approx 26$, so $\theta = 63^{\circ}26''$'
       - say: 'Now turn from north. 180 degrees turns us to face due south, and then we turn a further 63 degrees 26 minutes towards the west.'
         write: 'Bearing $= 180^{\circ} + 63^{\circ}26''$'
         point:
-          - {line: 9, kind: move, from: {line: 8, at: '63∘26′'}, at: '63∘26′', text: 'from here'}
-          - {figure: sketch, kind: circle, target: '?', text: '180° + 63°26′'}
+          - {line: 10, kind: move, from: {line: 9, at: '63∘26′'}, at: '63∘26′', text: 'from here'}
+          - {figure: sketch_b, kind: circle, target: '?', text: '180° + 63°26′'}
       - say: '180 plus 63 is 243. So the bearing of $H$ from $P$ is 243 degrees 26 minutes, which is answer choice B.'
         write: '$= 243^{\circ}26''$'
         point:
-          - {figure: sketch, kind: label, target: '?', text: '243°26′'}
+          - {figure: sketch_b, kind: label, target: '?', text: '243°26′'}
         answer: true
     traps:
       A: 'You went for 026 degrees 34 minutes. That''s the other angle in the triangle, and it points north-east. The ship is south-west of the port, so the bearing must be between 180 and 270.'

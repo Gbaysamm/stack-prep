@@ -1660,21 +1660,23 @@ lessons:
         point:
           - {figure: sketch, kind: highlight, target: XZ, text: 'north'}
           - {figure: sketch, kind: highlight, target: ZY, text: 'east'}
+      - say: 'Now let me put a North line on the diagram and join $X$ straight to $Y$. The bearing is the angle between them at $X$.'
+        show_sketch: sketch_b
       - say: 'Remember, a bearing is measured clockwise from north. So we want the angle between north and the line $X Y$, measured at $X$.'
         point:
-          - {figure: sketch, kind: circle, target: N, text: 'north'}
-          - {figure: sketch, kind: highlight, target: XY}
+          - {figure: sketch_b, kind: circle, target: N, text: 'north'}
+          - {figure: sketch_b, kind: highlight, target: XY}
       - say: 'North and east are at right angles, so $X$, $Z$ and $Y$ make a right-angled triangle with the right angle at $Z$.'
         write: '$\angle XZY = 90^{\circ}$'
         point:
-          - {figure: sketch, kind: arc, target: XZY, text: '90°'}
+          - {figure: sketch_b, kind: arc, target: XZY, text: '90°'}
       - say: 'In a right-angled triangle, the tan of an angle is the opposite side over the adjacent side.'
         write: 'SOH CAH TOA: $\tan\theta = \dfrac{\text{opposite}}{\text{adjacent}}$'
       - say: 'Call the angle at $X$ theta. The east distance $Z Y$ is opposite theta, and the north distance $X Z$ is adjacent. Opposite over adjacent is tangent.'
         write: '$\tan\theta = \dfrac{ZY}{XZ}$'
         point:
-          - {figure: sketch, kind: underline, target: ZY, text: 'opposite'}
-          - {figure: sketch, kind: underline, target: XZ, text: 'adjacent'}
+          - {figure: sketch_b, kind: underline, target: ZY, text: 'opposite'}
+          - {figure: sketch_b, kind: underline, target: XZ, text: 'adjacent'}
       - say: 'Put in the lengths.'
         write: '$\tan\theta = \dfrac{60\sqrt{3}}{60}$'
         point:
@@ -1685,12 +1687,12 @@ lessons:
       - say: 'Which angle has tangent root 3? Tan 60 degrees is root 3. So theta is 60 degrees.'
         write: '$\theta = 60^{\circ}$'
         point:
-          - {figure: sketch, kind: label, target: 'θ', text: '60°'}
+          - {figure: sketch_b, kind: label, target: 'θ', text: '60°'}
       - say: 'Theta is measured clockwise from north, so it is the bearing. Bearings are written with three figures: 060 degrees. That is answer choice C.'
         write: '$\text{bearing} = 060^{\circ}$'
         answer: true
         point:
-          - {figure: sketch, kind: circle, target: θ, text: 'bearing 060°'}
+          - {figure: sketch_b, kind: circle, target: θ, text: 'bearing 060°'}
     traps:
       A: 'You went for 030 degrees. That measures the angle from the east direction instead of from north. Bearings always start from north: tan theta is 60 root 3 over 60, which is root 3, so theta is 60.'
       B: 'You went for 045 degrees. That would need the north and east distances to be equal. Here east is 60 root 3, which is bigger than 60, so tan theta is root 3 and the bearing is 060.'

@@ -985,34 +985,39 @@ lessons:
           - {figure: sketch, kind: underline, target: '7 cm', text: 'side'}
       - say: 'Count the letters: P, Q, R, S, T, V. Six corners, so it is a regular hexagon.'
         write: 'Number of sides $= 6$: a regular hexagon'
-      - say: 'Join the centre of the circle to two neighbouring corners. That makes a triangle. The full turn at the centre, 360 degrees, is shared equally by 6 such triangles.'
+      - say: 'Now let me join the centre $O$ to two neighbouring corners, $P$ and $Q$.'
+        show_sketch: sketch_b
+        point:
+          - {figure: sketch_b, kind: highlight, target: OP}
+          - {figure: sketch_b, kind: highlight, target: OQ}
+      - say: 'That makes a triangle, $OPQ$. The full turn at the centre, 360 degrees, is shared equally by 6 such triangles.'
         write: 'Angle at centre $= \dfrac{360^{\circ}}{6} = 60^{\circ}$'
         point:
-          - {line: 3, kind: move, from: {line: 2, at: '= 6'}, at: '[[6]]360', text: '6 sides'}
-          - {figure: sketch, kind: arc, target: POQ, text: '60°'}
+          - {line: 4, kind: move, from: {line: 2, at: '= 6'}, at: '[[6]]360', text: '6 sides'}
+          - {figure: sketch_b, kind: arc, target: POQ, text: '60°'}
       - say: 'Angles in a triangle always add up to 180 degrees.'
         write: 'Angle sum of a triangle: $\text{sum of the three angles} = 180^{\circ}$'
       - say: 'Two sides of that triangle are radii, so they are equal, and so are its base angles. They share 180 minus 60, which is 120, so each is 60.'
         write: 'Each base angle $= \dfrac{180^{\circ} - 60^{\circ}}{2} = \dfrac{120^{\circ}}{2} = 60^{\circ}$'
         point:
-          - {figure: sketch, kind: highlight, target: OP}
-          - {figure: sketch, kind: highlight, target: OQ, text: 'radii'}
+          - {figure: sketch_b, kind: highlight, target: OP}
+          - {figure: sketch_b, kind: highlight, target: OQ, text: 'radii'}
       - say: 'All three angles are 60 degrees, so the triangle is equilateral. Its third side is a side of the hexagon, so the radius equals the side.'
         write: 'Equilateral, so radius $=$ side'
         point:
-          - {figure: sketch, kind: highlight, target: PQ, text: 'side = radius'}
+          - {figure: sketch_b, kind: highlight, target: PQ, text: 'side = radius'}
       - say: 'The side is 7 centimetres, so the radius is 7 centimetres.'
         write: '$r = 7\ \text{cm}$'
         point:
-          - {line: 7, kind: move, from: {line: 0, at: '7'}, at: '7', text: 'the side'}
-          - {figure: sketch, kind: label, target: OP, text: 'r = 7 cm'}
+          - {line: 8, kind: move, from: {line: 0, at: '7'}, at: '7', text: 'the side'}
+          - {figure: sketch_b, kind: label, target: OP, text: 'r = 7 cm'}
       - say: 'The circumference of a circle is 2 pi $r$. We''ll use 22 over 7 for pi.'
         write: '$C = 2\pi r$'
       - say: 'Put in pi as 22 over 7, and $r$ as 7.'
         write: '$= 2 \times \dfrac{22}{7} \times 7$'
         point:
-          - {line: 8, kind: box, text: 'the formula'}
-          - {line: 9, kind: move, from: {line: 7, at: '7'}, at: '722 × [[7]]', text: 'r'}
+          - {line: 9, kind: box, text: 'the formula'}
+          - {line: 10, kind: move, from: {line: 8, at: '7'}, at: '722 × [[7]]', text: 'r'}
       - say: 'The 7 on the bottom cancels with the 7 we multiply by, leaving 2 times 22.'
         write: '$= 2 \times 22$'
       - say: '2 times 22 is 44.'

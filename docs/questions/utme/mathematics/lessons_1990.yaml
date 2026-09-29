@@ -1693,37 +1693,40 @@ lessons:
     moments:
       - say: 'A metal pipe is 3 centimetres thick, with an internal radius of 10 centimetres. We want the volume of metal in 3 metres of pipe.'
         write: '$r = 10,\quad \text{thickness} = 3,\quad \text{length} = 3\ \text{m}$'
-      - say: 'Let me draw the shape, so we can see its measurements.'
+      - say: 'Let me draw the outside of the pipe first: a cylinder 3 metres long.'
         show_sketch: true
         point:
-          - {figure: sketch, kind: underline, target: '10 cm'}
-          - {figure: sketch, kind: underline, target: '3 cm'}
           - {figure: sketch, kind: underline, target: '3 m'}
+      - say: 'Now let me draw the hole through the middle, with its radius of 10 centimetres, and the wall 3 centimetres thick around it.'
+        show_sketch: sketch_b
+        point:
+          - {figure: sketch_b, kind: underline, target: '10 cm', text: 'inner radius'}
+          - {figure: sketch_b, kind: underline, target: '3 cm', text: 'wall'}
       - say: 'The metal is a hollow cylinder. Its cross-section is a ring between two circles, and its volume is the ring''s area times the length.'
         write: 'Volume of metal $=$ ring area $\times$ length'
         point:
-          - {figure: sketch, kind: circle, target: {x: 50, y: 34}, text: 'ring of metal'}
+          - {figure: sketch_b, kind: circle, target: {x: 50, y: 34}, text: 'ring of metal'}
       - say: 'The metal wraps around the inside, so the outer radius is the inner radius 10 plus the thickness 3, which is 13.'
         write: 'Outer radius: $R = 10 + 3 = 13$'
         point:
-          - {figure: sketch, kind: circle, target: '10 cm', text: 'inner'}
-          - {figure: sketch, kind: circle, target: '3 cm', text: 'thickness'}
+          - {figure: sketch_b, kind: circle, target: '10 cm', text: 'inner'}
+          - {figure: sketch_b, kind: circle, target: '3 cm', text: 'thickness'}
       - say: 'The area of a circle is pi r squared.'
         write: 'Area of a circle $= \pi r^{2}$'
       - say: 'Part one, the whole outer circle, radius 13: pi times 13 squared is 169 pi.'
         write: 'Outer circle: $\pi \times 13^{2} = 169\pi$'
         point:
-          - {figure: sketch, kind: circle, target: '3 cm', text: 'outer edge, R = 13'}
+          - {figure: sketch_b, kind: circle, target: '3 cm', text: 'outer edge, R = 13'}
       - say: 'Part two, the hole, radius 10: pi times 10 squared is 100 pi.'
         write: 'Hole: $\pi \times 10^{2} = 100\pi$'
         point:
-          - {figure: sketch, kind: circle, target: '10 cm', text: 'hole, r = 10'}
+          - {figure: sketch_b, kind: circle, target: '10 cm', text: 'hole, r = 10'}
       - say: 'The ring is the outer circle minus the hole: 169 pi minus 100 pi is 69 pi.'
         write: 'Ring $= 169\pi - 100\pi = 69\pi$'
       - say: 'The ring''s area is the big circle minus the small circle: pi times 13 squared, minus pi times 10 squared.'
         write: 'Ring area $= \pi R^{2} - \pi r^{2} = \pi(13^{2} - 10^{2})$'
         point:
-          - {line: 8, kind: move, from: {line: 3, at: '= 13'}, at: '[[13]]2', text: 'R'}
+          - {line: 9, kind: move, from: {line: 4, at: '= 13'}, at: '[[13]]2', text: 'R'}
       - say: '13 squared is 169, and 10 squared is 100.'
         write: '$= \pi(169 - 100)$'
       - say: '169 minus 100 is 69.'
@@ -1731,12 +1734,12 @@ lessons:
       - say: 'The length must be in centimetres too. 1 metre is 100 centimetres, so 3 metres is 3 times 100, which is 300 centimetres.'
         write: 'Length: $3\ \text{m} = 3 \times 100 = 300\ \text{cm}$'
         point:
-          - {figure: sketch, kind: circle, target: '3 m', text: 'length'}
+          - {figure: sketch_b, kind: circle, target: '3 m', text: 'length'}
       - say: 'Now go back to the first line: multiply the ring area, 69 pi, by the length, 300.'
         write: '$V = 69\pi \times 300$'
         point:
-          - {line: 12, kind: move, from: {line: 10, at: '69π'}, at: '69π', text: 'ring'}
-          - {line: 12, kind: move, from: {line: 11, at: '= 300'}, at: '300', text: 'length'}
+          - {line: 13, kind: move, from: {line: 11, at: '69π'}, at: '69π', text: 'ring'}
+          - {line: 13, kind: move, from: {line: 12, at: '= 300'}, at: '300', text: 'length'}
       - say: '69 times 3 is 207, and times 100 more makes 20,700.'
         write: '$= 207 \times 100 \times \pi = 20{,}700\pi$'
       - say: 'So the volume of metal is 20,700 pi cubic centimetres, which is answer choice D.'

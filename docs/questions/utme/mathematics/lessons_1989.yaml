@@ -1664,8 +1664,6 @@ lessons:
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: A, text: 'first look'}
-          - {figure: sketch, kind: circle, target: B, text: 'later'}
-          - {figure: sketch, kind: circle, target: '?', text: 'distance'}
       - say: 'An angle of depression is measured down from the horizontal. It equals the angle of elevation from the landmark up to the plane, because they are alternate angles between two horizontal lines.'
         write: 'Angle of depression $=$ angle of elevation (alternate angles)'
         point:
@@ -1683,16 +1681,21 @@ lessons:
         point:
           - {line: 5, kind: box, text: 'the rule'}
           - {figure: sketch, kind: circle, target: '35°', text: 'from A'}
+      - say: 'Now let me draw the second sighting, from $B$, closer to the landmark.'
+        show_sketch: sketch_b
+        point:
+          - {figure: sketch_b, kind: circle, target: B, text: 'later'}
+          - {figure: sketch_b, kind: circle, target: '?', text: 'distance'}
       - say: 'At the second sighting the angle is steeper, 55 degrees, so the plane is closer.'
         write: 'Second: $d_{2} = 10\cot 55^{\circ}$'
         point:
-          - {figure: sketch, kind: circle, target: '55°', text: 'from B'}
+          - {figure: sketch_b, kind: circle, target: '55°', text: 'from B'}
       - say: 'The distance flown between the two points is the far distance minus the near distance.'
         write: '$d_{1} - d_{2} = 10\cot 35^{\circ} - 10\cot 55^{\circ}$'
         point:
-          - {line: 8, kind: move, from: {line: 6, at: '10cot35∘'}, at: '10cot35∘', text: 'far'}
-          - {line: 8, kind: move, from: {line: 7, at: '10cot55∘'}, at: '10cot55∘', text: 'near'}
-          - {figure: sketch, kind: highlight, target: AB, text: 'd₁ − d₂'}
+          - {line: 9, kind: move, from: {line: 6, at: '10cot35∘'}, at: '10cot35∘', text: 'far'}
+          - {line: 9, kind: move, from: {line: 8, at: '10cot55∘'}, at: '10cot55∘', text: 'near'}
+          - {figure: sketch_b, kind: highlight, target: AB, text: 'd₁ − d₂'}
       - say: 'Both terms have a 10, so take out the common factor 10.'
         write: '$= 10(\cot 35^{\circ} - \cot 55^{\circ})$'
       - say: 'As a rough check, cot 35 is about 1.428 and cot 55 is about 0.700. 1.428 minus 0.700 is 0.728, and 10 times that is about 7.3 km, a sensible distance.'
@@ -1788,44 +1791,47 @@ lessons:
     moments:
       - say: 'A metal pipe 1 m long has an outer diameter of 7.2 cm and an inner diameter of 2.8 cm. We want the volume of the metal.'
         write: 'Length $1$ m; outer diameter $7.2$ cm, inner diameter $2.8$ cm'
-      - say: 'Let me draw the shape, so we can see its measurements.'
+      - say: 'Let me draw the outside of the pipe first: a cylinder 1 metre long and 7.2 centimetres across.'
         show_sketch: true
         point:
           - {figure: sketch, kind: underline, target: '7.2 cm'}
-          - {figure: sketch, kind: underline, target: '2.8 cm'}
           - {figure: sketch, kind: underline, target: '1 m'}
+      - say: 'Now let me draw the hole through the middle of the pipe. Its diameter is 2.8 cm.'
+        show_sketch: sketch_b
+        point:
+          - {figure: sketch_b, kind: underline, target: '2.8 cm', text: 'the hole'}
       - say: 'The volume of a cylinder is pi r squared h: the area of its circular end times its length. The metal is the whole outer cylinder with the hole taken out, so we find each one, then subtract.'
         write: 'Volume of a cylinder $= \pi r^{2}h$'
       - say: 'We''re given diameters, and the radius is half the diameter. Half of 7.2 is 3.6.'
         write: 'Outer radius $= \dfrac{7.2}{2} = 3.6$ cm'
         point:
-          - {figure: sketch, kind: circle, target: '7.2 cm', text: 'outer'}
+          - {figure: sketch_b, kind: circle, target: '7.2 cm', text: 'outer'}
       - say: 'Half of 2.8 is 1.4.'
         write: 'Inner radius $= \dfrac{2.8}{2} = 1.4$ cm'
         point:
-          - {figure: sketch, kind: circle, target: '2.8 cm', text: 'inner'}
+          - {figure: sketch_b, kind: circle, target: '2.8 cm', text: 'inner'}
       - say: 'The length must be in centimetres too. 1 m is 100 cm.'
         write: 'Length $h = 1\ \text{m} = 100\ \text{cm}$'
         point:
-          - {figure: sketch, kind: circle, target: '1 m', text: 'length'}
+          - {figure: sketch_b, kind: circle, target: '1 m', text: 'length'}
       - say: 'Part one, the whole outer cylinder: radius 3.6 and length 100. Pi times 3.6 squared times 100 is 1,296 pi.'
         write: 'Outer cylinder: $V_{1} = \pi \times 3.6^{2} \times 100 = 1296\pi$'
         point:
-          - {line: 6, kind: move, from: {line: 3, at: '= 3.6'}, at: '3.6', text: 'outer radius'}
-          - {line: 6, kind: move, from: {line: 5, at: '= 100'}, at: '100', text: 'length'}
-          - {figure: sketch, kind: highlight, target: '7.2 cm', text: 'outer cylinder'}
+          - {line: 7, kind: move, from: {line: 4, at: '= 3.6'}, at: '3.6', text: 'outer radius'}
+          - {line: 7, kind: move, from: {line: 6, at: '= 100'}, at: '100', text: 'length'}
+          - {figure: sketch_b, kind: highlight, target: '7.2 cm', text: 'outer cylinder'}
       - say: 'Part two, the hole: radius 1.4 and length 100. Pi times 1.4 squared times 100 is 196 pi.'
         write: 'Hole: $V_{2} = \pi \times 1.4^{2} \times 100 = 196\pi$'
         point:
-          - {line: 7, kind: move, from: {line: 4, at: '= 1.4'}, at: '1.4', text: 'inner radius'}
-          - {line: 7, kind: move, from: {line: 5, at: '= 100'}, at: '100', text: 'length'}
-          - {figure: sketch, kind: highlight, target: '2.8 cm', text: 'hole'}
+          - {line: 8, kind: move, from: {line: 5, at: '= 1.4'}, at: '1.4', text: 'inner radius'}
+          - {line: 8, kind: move, from: {line: 6, at: '= 100'}, at: '100', text: 'length'}
+          - {figure: sketch_b, kind: highlight, target: '2.8 cm', text: 'hole'}
       - say: 'The metal is the outer cylinder minus the hole. 1,296 pi minus 196 pi is 1,100 pi.'
         write: 'Metal $= V_{1} - V_{2} = 1296\pi - 196\pi = 1100\pi$'
         point:
-          - {line: 8, kind: move, from: {line: 6, at: '= 1296π'}, at: '1296π', text: 'V₁'}
-          - {line: 8, kind: move, from: {line: 7, at: '= 196π'}, at: '− 196π', text: 'V₂'}
-      - say: 'A quick check in one line: 4.6 squared minus 1.4 squared is 12.96 minus 1.96, which is 11, and pi times 11 times 100 is 1,100 pi. The same.'
+          - {line: 9, kind: move, from: {line: 7, at: '= 1296π'}, at: '1296π', text: 'V₁'}
+          - {line: 9, kind: move, from: {line: 8, at: '= 196π'}, at: '− 196π', text: 'V₂'}
+      - say: 'A quick check in one line: 5.6 squared minus 1.4 squared is 12.96 minus 1.96, which is 11, and pi times 11 times 100 is 1,100 pi. The same.'
         write: 'Check: $\pi(3.6^{2} - 1.4^{2}) \times 100 = \pi \times 11 \times 100 = 1100\pi$'
       - say: 'So the volume of metal is 1,100 pi cubic centimetres, which is answer choice B.'
         write: 'Volume of metal $= 1{,}100\pi\ \text{cm}^{3}$'

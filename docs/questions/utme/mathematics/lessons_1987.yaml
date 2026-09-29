@@ -1660,8 +1660,6 @@ lessons:
       - say: 'From two points $X$ and $Y$, 8 metres apart in line with a pole, the angles of elevation of the top are 30 degrees and 60 degrees. We want the height of the pole.'
         write: '$XY = 8$ m, elevations $30^{\circ}$ and $60^{\circ}$'
         point:
-          - {figure: sketch, kind: circle, target: '8 m', text: 'XY'}
-          - {figure: sketch, kind: circle, target: '30°'}
           - {figure: sketch, kind: circle, target: '60°'}
       - say: 'Let me draw a diagram of this, to make it simpler to see.'
         show_sketch: true
@@ -1679,37 +1677,42 @@ lessons:
           - {figure: sketch, kind: underline, target: YB, text: 'adjacent'}
       - say: 'Tan 60 degrees is root 3, so $h$ over $d$ is root 3. Multiply both sides by $d$.'
         write: '$\sqrt{3} = \dfrac{h}{d} \Rightarrow h = d\sqrt{3}$'
+      - say: 'Now let me draw the second triangle, from $X$, 8 metres farther back from the pole.'
+        show_sketch: sketch_b
+        point:
+          - {figure: sketch_b, kind: circle, target: '8 m', text: 'XY'}
+          - {figure: sketch_b, kind: arc, target: AXB, text: '30°'}
       - say: 'From $X$, the distance to the foot of the pole is $d$ plus 8. So tan 30 degrees is $h$ over, $d$ plus 8.'
         write: 'From $X$: $\tan 30^{\circ} = \dfrac{h}{d + 8}$'
         point:
-          - {figure: sketch, kind: underline, target: XB, text: 'd + 8'}
+          - {figure: sketch_b, kind: underline, target: XB, text: 'd + 8'}
       - say: 'Tan 30 degrees is 1 over root 3. Multiply both sides by $d$ plus 8.'
         write: '$\dfrac{1}{\sqrt{3}} = \dfrac{h}{d + 8} \Rightarrow h = \dfrac{d + 8}{\sqrt{3}}$'
       - say: 'Both expressions equal the same height $h$, so we set them equal to each other.'
         write: '$d\sqrt{3} = \dfrac{d + 8}{\sqrt{3}}$'
         point:
-          - {line: 8, kind: move, from: {line: 5, at: 'h = d3'}, at: '[[d3]] =', text: 'h from Y'}
-          - {line: 8, kind: move, from: {line: 7, at: 'h = 3d + 8'}, at: '= [[3d + 8]]', text: 'h from X'}
-          - {figure: sketch, kind: circle, target: 'h', text: 'the same h'}
+          - {line: 9, kind: move, from: {line: 5, at: 'h = d3'}, at: '[[d3]] =', text: 'h from Y'}
+          - {line: 9, kind: move, from: {line: 8, at: 'h = 3d + 8'}, at: '= [[3d + 8]]', text: 'h from X'}
+          - {figure: sketch_b, kind: circle, target: 'h', text: 'the same h'}
       - say: 'Multiply both sides by root 3. Root 3 times root 3 is 3.'
         write: '$d\sqrt{3} \times \sqrt{3} = d + 8 \Rightarrow 3d = d + 8$'
       - say: 'Subtract $d$ from both sides. 3 $d$ minus $d$ is 2 $d$.'
         write: '$2d = 8$'
         point:
-          - {line: 10, kind: move, from: {line: 9, at: '3d = [[d]] + 8'}, at: '2d', text: '3d − d'}
+          - {line: 11, kind: move, from: {line: 10, at: '3d = [[d]] + 8'}, at: '2d', text: '3d − d'}
       - say: 'Divide both sides by 2. 8 divided by 2 is 4, so $d$ is 4 metres.'
         write: '$d = 4$'
       - say: 'Now go back to $h$ equals $d$ root 3, and put in $d$ equals 4.'
         write: '$h = d\sqrt{3} = 4\sqrt{3}$'
         point:
-          - {line: 12, kind: move, from: {line: 11, at: 'd = [[4]]'}, at: '= [[4]]3', text: 'd = 4'}
+          - {line: 13, kind: move, from: {line: 12, at: 'd = [[4]]'}, at: '= [[4]]3', text: 'd = 4'}
       - say: 'Check with the other equation. $d$ plus 8 is 12, and 12 over root 3 is 12 root 3 over 3, which is 4 root 3. Both agree.'
         write: 'Check: $\dfrac{4 + 8}{\sqrt{3}} = \dfrac{12\sqrt{3}}{3} = 4\sqrt{3}$'
       - say: 'So the pole is 4 root 3 metres tall, about 6.9 metres, which is answer choice C.'
         write: 'Height $= 4\sqrt{3}$ m'
         answer: true
         point:
-          - {figure: sketch, kind: label, target: AB, text: '4√3 m'}
+          - {figure: sketch_b, kind: label, target: AB, text: '4√3 m'}
     traps:
       A: 'You went for 4 m. That''s $d$, the distance from $Y$ to the foot of the pole. The height is $d$ times root 3, which is 4 root 3 metres.'
       B: 'You went for 8 root 3 over 3 m. That is 8 times tan 30 degrees, which treats the 8 metres as the distance from $X$ to the foot of the pole. But $X$ is 8 metres from $Y$, and $Y$ is another 4 metres from the pole, so $X$ is 12 metres away, and 12 times tan 30 degrees is 4 root 3.'
@@ -1724,18 +1727,22 @@ lessons:
           - {figure: sketch, kind: circle, target: '8 m', text: 'high'}
       - say: 'Let me draw the shape, so we can see its measurements.'
         show_sketch: true
+      - say: 'Now let me draw in the two diagonals: the floor diagonal $BD$, and the room diagonal $BH$ rising above it.'
+        show_sketch: sketch_b
+        point:
+          - {figure: sketch_b, kind: circle, target: θ, text: 'the angle'}
       - say: 'The room''s diagonal runs from a bottom corner to the opposite top corner. Its angle with the floor is measured against the floor diagonal directly underneath it.'
         write: 'Angle between room diagonal and floor diagonal'
         point:
-          - {figure: sketch, kind: highlight, target: BH, text: 'room diagonal'}
-          - {figure: sketch, kind: underline, target: BD, text: 'floor diagonal'}
+          - {figure: sketch_b, kind: highlight, target: BH, text: 'room diagonal'}
+          - {figure: sketch_b, kind: underline, target: BD, text: 'floor diagonal'}
       - say: 'Pythagoras: the hypotenuse squared equals the opposite squared plus the adjacent squared.'
         write: 'Pythagoras: $\text{hypotenuse}^{2} = \text{opposite}^{2} + \text{adjacent}^{2}$'
       - say: 'So first we need the floor diagonal. The floor is a 12 by 9 rectangle, and its diagonal is the hypotenuse of a right-angled triangle, so we use Pythagoras.'
         write: 'Floor diagonal $= \sqrt{12^{2} + 9^{2}}$'
         point:
-          - {figure: sketch, kind: highlight, target: BC, text: '9'}
-          - {figure: sketch, kind: highlight, target: CD, text: '12'}
+          - {figure: sketch_b, kind: highlight, target: BC, text: '9'}
+          - {figure: sketch_b, kind: highlight, target: CD, text: '12'}
       - say: '12 squared is 144, and 9 squared is 81.'
         write: '$= \sqrt{144 + 81}$'
       - say: '144 plus 81 is 225.'
@@ -1743,24 +1750,28 @@ lessons:
       - say: '15 times 15 is 225, so the floor diagonal is 15 metres.'
         write: '$= 15$'
         point:
-          - {figure: sketch, kind: label, target: BD, text: '15 m'}
+          - {figure: sketch_b, kind: label, target: BD, text: '15 m'}
+      - say: 'Let me draw that triangle on its own, flat on the page, so we can see it clearly.'
+        show_sketch: sketch_c
+        point:
+          - {figure: sketch_c, kind: arc, target: BDH, text: '90°'}
       - say: 'Now the floor diagonal, the 8 metre height and the room diagonal make a right-angled triangle, with the right angle at the bottom corner.'
         write: 'Room diagonal $= \sqrt{15^{2} + 8^{2}}$'
         point:
-          - {line: 8, kind: move, from: {line: 7, at: '= 15'}, at: '[[15]]2', text: 'floor diagonal'}
-          - {figure: sketch, kind: highlight, target: DH, text: '8'}
+          - {line: 10, kind: move, from: {line: 8, at: '= 15'}, at: '[[15]]2', text: 'floor diagonal'}
+          - {figure: sketch_c, kind: highlight, target: DH, text: '8'}
       - say: '15 squared is 225, and 8 squared is 64.'
         write: '$= \sqrt{225 + 64}$'
       - say: '225 plus 64 is 289, and 17 times 17 is 289. So the room diagonal is 17 metres.'
         write: '$= \sqrt{289} = 17$'
         point:
-          - {figure: sketch, kind: label, target: BH, text: '17 m'}
+          - {figure: sketch_c, kind: label, target: BH, text: '17 m'}
       - say: 'In this triangle, the side next to the angle, lying along the floor, is the 15, and the hypotenuse is the 17. Cosine is adjacent over hypotenuse.'
         write: '$\cos\theta = \dfrac{\text{adj}}{\text{hyp}} = \dfrac{15}{17}$'
         point:
-          - {line: 11, kind: move, from: {line: 7, at: '= 15'}, at: '17[[15]]', text: 'adjacent'}
-          - {line: 11, kind: move, from: {line: 10, at: '= 17'}, at: '= [[17]]15', text: 'hypotenuse'}
-          - {figure: sketch, kind: arc, target: HBD, text: 'θ'}
+          - {line: 13, kind: move, from: {line: 8, at: '= 15'}, at: '17[[15]]', text: 'adjacent'}
+          - {line: 13, kind: move, from: {line: 12, at: '= 17'}, at: '= [[17]]15', text: 'hypotenuse'}
+          - {figure: sketch_c, kind: arc, target: HBD, text: 'θ'}
       - say: 'So the cosine is 15 over 17, which is answer choice A.'
         write: 'Therefore $\cos\theta = \dfrac{15}{17}$'
         answer: true
@@ -1828,15 +1839,19 @@ lessons:
           - {figure: sketch, kind: highlight, target: VC, text: 'slant edge'}
       - say: 'Pythagoras: the hypotenuse squared equals the opposite squared plus the adjacent squared.'
         write: 'Pythagoras: $\text{hypotenuse}^{2} = \text{opposite}^{2} + \text{adjacent}^{2}$'
+      - say: 'Now let me draw the height $VO$, straight down to the centre $O$ of the base, and join $O$ to the corner $C$.'
+        show_sketch: sketch_b
+        point:
+          - {figure: sketch_b, kind: circle, target: O, text: 'centre'}
       - say: 'The height drops from the vertex straight down to the centre of the base. A slant edge goes from the vertex to a corner. With the line from the centre to that corner, they make a right-angled triangle.'
         write: '$\text{edge}^{2} = h^{2} + (\text{centre to corner})^{2}$'
         point:
-          - {figure: sketch, kind: underline, target: VO, text: 'h'}
-          - {figure: sketch, kind: highlight, target: OC, text: 'centre to corner'}
+          - {figure: sketch_b, kind: underline, target: VO, text: 'h'}
+          - {figure: sketch_b, kind: highlight, target: OC, text: 'centre to corner'}
       - say: 'The centre to a corner is half the diagonal of the square. The diagonal cuts the square into two right-angled triangles with sides 8 and 8.'
         write: 'Diagonal $= \sqrt{8^{2} + 8^{2}}$'
         point:
-          - {figure: sketch, kind: underline, target: AC, text: 'diagonal'}
+          - {figure: sketch_b, kind: underline, target: AC, text: 'diagonal'}
       - say: '8 squared plus 8 squared is 64 plus 64, which is 128. And 128 is 64 times 2, so its square root is 8 root 2.'
         write: '$= \sqrt{128} = \sqrt{64 \times 2} = 8\sqrt{2}$'
       - say: 'Half of 8 root 2 is 4 root 2.'
@@ -1844,8 +1859,8 @@ lessons:
       - say: 'Now Pythagoras. The slant edge is the hypotenuse, so $h$ squared is the edge squared minus the 4 root 2 squared.'
         write: '$h^{2} = (4\sqrt{3})^{2} - (4\sqrt{2})^{2}$'
         point:
-          - {line: 7, kind: move, from: {line: 0, at: '= 43'}, at: '(43)', text: 'edge'}
-          - {line: 7, kind: move, from: {line: 6, at: '= 42'}, at: '(42)', text: 'half diagonal'}
+          - {line: 8, kind: move, from: {line: 0, at: '= 43'}, at: '(43)', text: 'edge'}
+          - {line: 8, kind: move, from: {line: 7, at: '= 42'}, at: '(42)', text: 'half diagonal'}
       - say: '4 root 3, all squared, is 4 squared times 3, which is 16 times 3, or 48.'
         write: '$(4\sqrt{3})^{2} = 16 \times 3 = 48$'
       - say: '4 root 2, all squared, is 16 times 2, which is 32.'
@@ -1855,12 +1870,12 @@ lessons:
       - say: 'The square root of 16 is 4.'
         write: '$h = \sqrt{16} = 4$'
         point:
-          - {figure: sketch, kind: label, target: VO, text: '4 cm'}
+          - {figure: sketch_b, kind: label, target: VO, text: '4 cm'}
       - say: 'So the height is 4 centimetres, which is answer choice C.'
         write: 'Height $= 4$ cm'
         answer: true
         point:
-          - {figure: sketch, kind: circle, target: 'h', text: '4 cm'}
+          - {figure: sketch_b, kind: circle, target: 'h', text: '4 cm'}
     traps:
       A: 'You went for 6 cm. Then the slant edge would be the square root of 36 plus 32, which is about 8.2, not 4 root 3. Use $h$ squared equals 48 minus 32, which gives 4.'
       B: 'You went for 5 cm. That would need $h$ squared to be 25, but 48 minus 32 is 16. The height is 4 cm.'
@@ -1926,46 +1941,54 @@ lessons:
           - {figure: sketch, kind: circle, target: 'O', text: 'centre'}
           - {figure: sketch, kind: circle, target: '5 cm', text: 'radius'}
           - {figure: sketch, kind: highlight, target: 'AB', text: 'chord 6 cm'}
+      - say: 'Now let me mark the midpoint $M$ of the chord, and join the centre $O$ to it.'
+        show_sketch: sketch_b
+        point:
+          - {figure: sketch_b, kind: circle, target: M, text: 'midpoint'}
       - say: 'The key fact: the line from the centre to the midpoint of a chord is perpendicular to the chord.'
         write: 'Centre-to-midpoint line $\perp$ chord'
         point:
-          - {figure: sketch, kind: arc, target: OMB, text: '90°'}
+          - {figure: sketch_b, kind: arc, target: OMB, text: '90°'}
       - say: 'So take one chord. Its midpoint cuts it in two, and half of 6 is 3 centimetres.'
         write: 'Half-chord $= 6 \div 2 = 3$'
         point:
-          - {figure: sketch, kind: highlight, target: MB, text: '3'}
+          - {figure: sketch_b, kind: highlight, target: MB, text: '3'}
       - say: 'Pythagoras: the hypotenuse squared equals the opposite squared plus the adjacent squared.'
         write: 'Pythagoras: $\text{hypotenuse}^{2} = \text{opposite}^{2} + \text{adjacent}^{2}$'
       - say: 'The radius to the end of the chord is 5. The centre, the midpoint and the end of the chord make a right-angled triangle, with the radius as the hypotenuse. Let $d$ be the distance from $O$ to the midpoint.'
         write: '$d^{2} + 3^{2} = 5^{2}$'
         point:
-          - {line: 5, kind: move, from: {line: 3, at: '= 3'}, at: '32', text: 'half chord'}
-          - {line: 5, kind: move, from: {line: 0, at: 'radius [[5]]'}, at: '52', text: 'radius'}
-          - {figure: sketch, kind: highlight, target: OB, text: 'radius 5'}
+          - {line: 6, kind: move, from: {line: 4, at: '= 3'}, at: '32', text: 'half chord'}
+          - {line: 6, kind: move, from: {line: 0, at: 'radius [[5]]'}, at: '52', text: 'radius'}
+          - {figure: sketch_b, kind: highlight, target: OB, text: 'radius 5'}
       - say: '3 squared is 9, and 5 squared is 25.'
         write: '$d^{2} + 9 = 25$'
       - say: 'Subtract 9 from both sides. 25 minus 9 is 16.'
         write: '$d^{2} = 25 - 9 = 16$'
         point:
-          - {line: 7, kind: move, from: {line: 6, at: '+ 9'}, at: '− 9', text: 'across the ='}
+          - {line: 8, kind: move, from: {line: 7, at: '+ 9'}, at: '− 9', text: 'across the ='}
       - say: 'The square root of 16 is 4. So the midpoint is 4 centimetres from the centre.'
         write: '$d = \sqrt{16} = 4$'
         point:
-          - {figure: sketch, kind: label, target: OM, text: 'd = 4'}
+          - {figure: sketch_b, kind: label, target: OM, text: 'd = 4'}
       - say: 'That is true for every chord of length 6, however it is turned. Every such midpoint is exactly 4 centimetres from $O$.'
         write: 'Every midpoint is $4$ cm from $O$'
         point:
-          - {line: 8, kind: circle, at: '= 4', text: 'always 4'}
-          - {figure: sketch, kind: circle, target: '4 cm', text: 'always 4'}
+          - {line: 9, kind: circle, at: '= 4', text: 'always 4'}
+          - {figure: sketch_b, kind: circle, target: '4 cm', text: 'always 4'}
+      - say: 'Now let me draw where all those midpoints lie: a circle round $O$, 4 centimetres out.'
+        show_sketch: sketch_c
+        point:
+          - {figure: sketch_c, kind: circle, target: 'locus of M', text: 'every midpoint'}
       - say: 'Points that are all the same distance from a fixed point make a circle round that point.'
         write: 'Locus $=$ circle, centre $O$, radius $4$ cm'
         point:
-          - {figure: sketch, kind: underline, target: 'locus of M'}
+          - {figure: sketch_c, kind: underline, target: 'locus of M'}
       - say: 'So the locus is a circle of radius 4 centimetres with centre $O$, which is answer choice A.'
         write: 'Therefore: circle of radius $4$ cm, centre $O$'
         answer: true
         point:
-          - {figure: sketch, kind: circle, target: 'locus of M', text: 'radius 4, centre O'}
+          - {figure: sketch_c, kind: circle, target: 'locus of M', text: 'radius 4, centre O'}
     traps:
       B: 'You went for the perpendicular bisector of the chords. Each chord has its own perpendicular bisector through $O$, but the midpoints of all the chords are 4 cm from $O$, so they make a circle.'
       C: 'You went for a straight line through $O$. That''s where the midpoints of parallel chords would lie. Here the chords point every way, and their midpoints are all 4 cm from $O$: a circle.'

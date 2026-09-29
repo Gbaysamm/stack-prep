@@ -1699,34 +1699,38 @@ lessons:
         point:
           - {line: 2, kind: arrow, at: '90∘', text: 'right angle'}
           - {figure: sketch, kind: arc, target: PRQ, text: '90°'}
+      - say: 'Now let me join $P$ straight to $Q$ on the diagram: that is the line whose bearing we want.'
+        show_sketch: sketch_b
+        point:
+          - {figure: sketch_b, kind: highlight, target: PQ, text: 'P to Q'}
       - say: 'Let''s call the angle at P, between the first leg and the line PQ, theta. The 4 kilometre leg is opposite it, and the 3 kilometre leg is adjacent.'
         write: '$\tan\theta = \dfrac{\text{opposite}}{\text{adjacent}} = \dfrac{4}{3}$'
         point:
-          - {line: 4, kind: move, from: {line: 0, at: '4 km'}, at: '= 3[[4]]', text: 'opposite'}
-          - {line: 4, kind: move, from: {line: 0, at: '3 km'}, at: '= [[3]]4', text: 'adjacent'}
-          - {figure: sketch, kind: arc, target: RPQ, text: 'θ'}
+          - {line: 5, kind: move, from: {line: 0, at: '4 km'}, at: '= 3[[4]]', text: 'opposite'}
+          - {line: 5, kind: move, from: {line: 0, at: '3 km'}, at: '= [[3]]4', text: 'adjacent'}
+          - {figure: sketch_b, kind: arc, target: RPQ, text: 'θ'}
       - say: '4 over 3 is about 1.3333. The angle whose tangent is 1.3333 is about 53.13 degrees.'
         write: '$\theta = \tan^{-1}(1.3333) = 53.13^{\circ}$'
         point:
-          - {figure: sketch, kind: arc, target: 'RPQ', text: 'θ ≈ 53.13°'}
+          - {figure: sketch_b, kind: arc, target: 'RPQ', text: 'θ ≈ 53.13°'}
       - say: 'Change the decimal part into minutes. There are 60 minutes in a degree, and 0.13 times 60 is 7.8, which is about 8.'
         write: '$0.13 \times 60 = 7.8 \approx 8$, so $\theta = 53^{\circ}8''$'
       - say: 'She turned clockwise, from 23 round to 113 degrees, so Q lies clockwise of her first direction by the angle theta. So we add theta to her first bearing.'
         write: 'Bearing of $Q$ from $P = 23^{\circ} + \theta$'
         point:
-          - {figure: sketch, kind: circle, target: '23°', text: 'first bearing'}
-          - {figure: sketch, kind: arc, target: 'RPQ', text: '+ θ'}
+          - {figure: sketch_b, kind: circle, target: '23°', text: 'first bearing'}
+          - {figure: sketch_b, kind: arc, target: 'RPQ', text: '+ θ'}
       - say: 'Put in the theta we found.'
         write: '$= 23^{\circ} + 53^{\circ}8''$'
         point:
-          - {line: 8, kind: move, from: {line: 6, at: 'θ = 53∘8′'}, at: '53∘8′', text: 'theta'}
+          - {line: 9, kind: move, from: {line: 7, at: 'θ = 53∘8′'}, at: '53∘8′', text: 'theta'}
       - say: '23 plus 53 is 76, so that''s 76 degrees 8 minutes.'
         write: '$= 76^{\circ}8''$'
       - say: 'So the bearing of Q from P is 76 degrees 8 minutes, which is answer choice C.'
         write: 'Answer: $76^{\circ}8''$'
         answer: true
         point:
-          - {figure: sketch, kind: circle, target: '?', text: '076°8′'}
+          - {figure: sketch_b, kind: circle, target: '?', text: '076°8′'}
     traps:
       A: 'You went for 26 degrees 52 minutes. That isn''t the angle at P. With 4 kilometres opposite and 3 adjacent, tan theta is 4 over 3, so theta is 53 degrees 8 minutes, and the bearing is 23 degrees more.'
       B: 'You went for 52 degrees 8 minutes. That''s roughly the angle at P alone, without the 23 degrees she started on. A bearing is measured from north, so add 23 to 53 degrees 8 minutes.'
@@ -1833,12 +1837,16 @@ lessons:
     moments:
       - say: 'A metal pipe is 10 centimetres long, with an external diameter of 12 centimetres and a thickness of 1 centimetre. We want the volume of metal.'
         write: '$h = 10, \quad \text{external diameter} = 12, \quad \text{thickness} = 1$'
-      - say: 'Let me draw the shape, so we can see its measurements.'
+      - say: 'Let me draw the outside of the pipe first: a cylinder 10 centimetres long and 12 centimetres across.'
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: '10 cm', text: 'h'}
       - say: 'The volume of a cylinder is pi r squared h: the area of its circular end times its length.'
         write: 'Volume of a cylinder: $V = \pi r^{2}h$'
+      - say: 'Now let me draw the hole down the middle of the pipe. The wall around it is 1 centimetre thick.'
+        show_sketch: sketch_b
+        point:
+          - {figure: sketch_b, kind: circle, target: '1 cm', text: 'wall'}
       - say: 'A pipe is a cylinder with a smaller cylinder missing from the middle. The metal is what''s left: the outer cylinder minus the inner one.'
         write: 'Metal $= \pi R^{2}h - \pi r^{2}h$'
       - say: 'Both cylinders have the same length $h$, so take out pi $h$ as a common factor.'
@@ -1846,35 +1854,35 @@ lessons:
       - say: 'The external diameter is 12, so the outer radius is half of that, 6.'
         write: 'Outer radius: $R = 12 \div 2 = 6$ cm'
         point:
-          - {figure: sketch, kind: circle, target: '12 cm', text: 'diameter'}
+          - {figure: sketch_b, kind: circle, target: '12 cm', text: 'diameter'}
       - say: 'The wall is 1 centimetre thick, so the inner radius is 1 less than the outer: 5.'
         write: 'Inner radius: $r = 6 - 1 = 5$ cm'
         point:
-          - {figure: sketch, kind: circle, target: '1 cm', text: 'wall'}
+          - {figure: sketch_b, kind: circle, target: '1 cm', text: 'wall'}
       - say: 'Build it one part at a time. First, the outer cylinder: radius 6, length 10.'
         write: 'Outer cylinder: $V_{1} = \pi \times 6^{2} \times 10$'
         point:
-          - {figure: sketch, kind: circle, target: '12 cm', text: 'outer radius 6'}
-          - {line: 7, kind: move, from: {line: 5, at: '= 6 cm'}, at: '62', text: 'R'}
-          - {figure: sketch, kind: circle, target: '10 cm', text: 'length'}
+          - {figure: sketch_b, kind: circle, target: '12 cm', text: 'outer radius 6'}
+          - {line: 8, kind: move, from: {line: 6, at: '= 6 cm'}, at: '62', text: 'R'}
+          - {figure: sketch_b, kind: circle, target: '10 cm', text: 'length'}
       - say: 'Next, the hole in the middle: a cylinder with the inner radius, 5, and the same length, 10.'
         write: 'Inner hole: $V_{2} = \pi \times 5^{2} \times 10$'
         point:
-          - {figure: sketch, kind: circle, target: '1 cm', text: 'inner radius 5'}
-          - {line: 8, kind: move, from: {line: 6, at: '= 5 cm'}, at: '52', text: 'r'}
+          - {figure: sketch_b, kind: circle, target: '1 cm', text: 'inner radius 5'}
+          - {line: 9, kind: move, from: {line: 7, at: '= 5 cm'}, at: '52', text: 'r'}
       - say: 'The metal is the outer cylinder minus the hole.'
         write: 'Metal $= V_{1} - V_{2}$'
         point:
-          - {line: 9, kind: move, from: {line: 7, at: 'V1'}, at: 'V1', text: 'outer'}
-          - {line: 9, kind: move, from: {line: 8, at: 'V2'}, at: 'V2', text: 'hole'}
+          - {line: 10, kind: move, from: {line: 8, at: 'V1'}, at: 'V1', text: 'outer'}
+          - {line: 10, kind: move, from: {line: 9, at: 'V2'}, at: 'V2', text: 'hole'}
       - say: '6 squared is 36, and 36 times 10 is 360. 5 squared is 25, and 25 times 10 is 250. 360 pi minus 250 pi is 110 pi.'
         write: '$= 360\pi - 250\pi = 110\pi$'
       - say: 'Now put the two radii, and the length of 10, into the formula.'
         write: '$V = \pi(6^{2} - 5^{2}) \times 10$'
         point:
-          - {line: 11, kind: move, from: {line: 5, at: '= 6 cm'}, at: '62', text: 'R'}
-          - {line: 11, kind: move, from: {line: 6, at: '= 5 cm'}, at: '52', text: 'r'}
-          - {line: 11, kind: move, from: {line: 0, at: 'h = 10'}, at: '× 10', text: 'h'}
+          - {line: 12, kind: move, from: {line: 6, at: '= 6 cm'}, at: '62', text: 'R'}
+          - {line: 12, kind: move, from: {line: 7, at: '= 5 cm'}, at: '52', text: 'r'}
+          - {line: 12, kind: move, from: {line: 0, at: 'h = 10'}, at: '× 10', text: 'h'}
       - say: '6 squared is 36, and 5 squared is 25. 36 minus 25 is 11.'
         write: '$= \pi(36 - 25) \times 10 = \pi \times 11 \times 10$'
       - say: '11 times 10 is 110.'
@@ -1939,45 +1947,51 @@ lessons:
     moments:
       - say: 'In triangle PQR, PQ is 10 centimetres and angle QPR is 60 degrees. S is equally far from P and Q, and equally far from the lines PQ and PR. U is the foot of the perpendicular from S to PR. We want SU.'
         write: '$PQ = 10, \quad \angle QPR = 60^{\circ}$'
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - say: 'Let me draw the triangle first, so we can see what we are working with.'
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: '10 cm', text: 'PQ'}
           - {figure: sketch, kind: circle, target: '60°'}
-          - {figure: sketch, kind: circle, target: '?', text: 'SU'}
+      - say: 'Let me draw the perpendicular bisector of $PQ$ on the diagram. It crosses $PQ$ at right angles, at its midpoint $M$.'
+        show_sketch: sketch_b
+        point:
+          - {figure: sketch_b, kind: circle, target: M, text: 'midpoint'}
       - say: 'This is a locus question with two conditions. Equally far from the points P and Q means S lies on the perpendicular bisector of PQ.'
         write: 'Condition 1: $S$ on the perpendicular bisector of $PQ$'
+      - say: 'Now let me draw the bisector of angle $QPR$. Where it crosses the perpendicular bisector is the point $S$, and $U$ is the foot of the perpendicular from $S$ to $PR$.'
+        show_sketch: sketch_c
         point:
-          - {figure: sketch, kind: underline, target: MS, text: 'perpendicular bisector'}
+          - {figure: sketch_c, kind: circle, target: S, text: 'both conditions'}
+          - {figure: sketch_c, kind: circle, target: '?', text: 'SU'}
       - say: 'Equally far from the lines PQ and PR means S lies on the bisector of angle QPR.'
         write: 'Condition 2: $S$ on the bisector of $\angle QPR$'
         point:
-          - {figure: sketch, kind: underline, target: PS, text: 'angle bisector'}
+          - {figure: sketch_c, kind: underline, target: PS, text: 'angle bisector'}
       - say: 'The perpendicular bisector crosses PQ at its midpoint, call it M, at a right angle. M is half of 10 from P.'
         write: 'Midpoint $M$: $PM = 10 \div 2 = 5$ cm'
         point:
-          - {figure: sketch, kind: circle, target: M, text: 'midpoint'}
-          - {figure: sketch, kind: label, target: PM, text: '5 cm'}
+          - {figure: sketch_c, kind: circle, target: M, text: 'midpoint'}
+          - {figure: sketch_c, kind: label, target: PM, text: '5 cm'}
       - say: 'The angle bisector cuts the 60 degrees in half, so it makes 30 degrees with PQ.'
         write: '$\angle SPM = 60^{\circ} \div 2 = 30^{\circ}$'
         point:
-          - {figure: sketch, kind: arc, target: SPM, text: '30°'}
+          - {figure: sketch_c, kind: arc, target: SPM, text: '30°'}
       - say: 'SOH CAH TOA: the tangent of an angle is the opposite side over the adjacent side.'
         write: 'SOH CAH TOA: $\tan\theta = \dfrac{\text{opposite}}{\text{adjacent}}$'
       - say: 'Now look at the right-angled triangle PMS. PM is 5, the angle at P is 30, and SM, the height of S above PQ, is opposite that angle.'
         write: 'In $\triangle PMS$: $\tan 30^{\circ} = \dfrac{SM}{PM} = \dfrac{SM}{5}$'
         point:
-          - {line: 7, kind: move, from: {line: 4, at: '= 5 cm'}, at: '= [[5]]SM', text: 'PM'}
-          - {line: 7, kind: move, from: {line: 5, at: '= 30∘'}, at: 'tan30∘', text: 'angle P'}
-          - {figure: sketch, kind: highlight, target: SM, text: 'opposite'}
+          - {line: 9, kind: move, from: {line: 6, at: '= 5 cm'}, at: '= [[5]]SM', text: 'PM'}
+          - {line: 9, kind: move, from: {line: 7, at: '= 30∘'}, at: 'tan30∘', text: 'angle P'}
+          - {figure: sketch_c, kind: highlight, target: SM, text: 'opposite'}
       - say: 'Multiply both sides by 5. Tan 30 degrees is 1 over root 3, so SM is 5 over root 3.'
         write: '$SM = 5\tan 30^{\circ} = \dfrac{5}{\sqrt{3}}$'
         point:
-          - {line: 8, kind: move, from: {line: 7, at: '= [[5]]SM'}, at: '5tan30∘', text: 'times 5'}
+          - {line: 10, kind: move, from: {line: 9, at: '= [[5]]SM'}, at: '5tan30∘', text: 'times 5'}
       - say: 'SM is the distance from S to the line PQ. Because S is on the angle bisector, its distance to PR is exactly the same. And that distance is SU.'
         write: 'So $SU = SM = \dfrac{5}{\sqrt{3}}$'
         point:
-          - {figure: sketch, kind: highlight, target: SU, text: '= SM'}
+          - {figure: sketch_c, kind: highlight, target: SU, text: '= SM'}
       - say: 'Root 3 is about 1.732. 5 divided by 1.732 is about 2.887.'
         write: '$SU \approx \dfrac{5}{1.732} \approx 2.887$'
       - say: 'To one decimal place, look at the second decimal digit. It''s 8, so 2.8 rounds up to 2.9.'
@@ -1986,7 +2000,7 @@ lessons:
         write: 'Answer: $SU = 2.9$ cm'
         answer: true
         point:
-          - {figure: sketch, kind: label, target: SU, text: '2.9 cm'}
+          - {figure: sketch_c, kind: label, target: SU, text: '2.9 cm'}
     traps:
       A: 'You went for 2.7. Check the arithmetic: 5 over root 3 is about 2.887, which is 2.9 to one decimal place.'
       C: 'You went for 3.1. SU is 5 times tan 30, which is 5 over root 3, about 2.887. That rounds to 2.9.'
