@@ -1654,6 +1654,15 @@ class FigureSpot(BaseModel):
     y: float
 
 
+class PointTo(BaseModel):
+    #: Where an arrow across lands: a place on a diagram (`figure` and `target`, as a diagram
+    #: mark names them), or a piece of the working (`line`, counted as `line` is, and `at`).
+    figure: int | Literal["sketch", "sketch_b", "sketch_c"] | None = None
+    target: str | list[str] | FigureSpot | None = None
+    line: int | None = None
+    at: str | None = None
+
+
 class LessonPoint(BaseModel):
     model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)
 
@@ -1670,8 +1679,40 @@ class LessonPoint(BaseModel):
     #: A mark on a diagram: which one — a question's figure by its number (from 0), or the
     #: lesson's own sketch, "sketch" (a second, "sketch_b") — and what in it: a point's label,
     #: two labels for a side, three for an angle, or a place in the drawing's units.
-    figure: int | Literal["sketch", "sketch_b"] | None = None
+    figure: int | Literal["sketch", "sketch_b", "sketch_c"] | None = None
     target: str | list[str] | FigureSpot | None = None
+    #: An arrow across between the working and a diagram: where it lands.
+    to: PointTo | None = None
+
+
+def _drawing(value: object) -> int | Literal["sketch", "sketch_b", "sketch_c"] | None:
+    """A diagram as a mark names it: a figure's number from 0, or the lesson's sketch."""
+    if value == "sketch":
+        return "sketch"
+    if value in ("sketch_b", "sketch_c"):
+        return value
+    number = _whole(value)
+    return number if number is not None and number >= 0 else None
+
+
+def _across(raw: object, to_figure: bool) -> PointTo | None:
+    """An arrow's `to`, kept only where it names somewhere the board can find."""
+    if not isinstance(raw, dict):
+        return None
+    if to_figure:
+        drawing, target = _drawing(raw.get("figure")), _target(raw.get("target"))
+        return PointTo(figure=drawing, target=target) if drawing is not None and target else None
+    line = _whole(raw.get("line"))
+    return PointTo(line=line, at=_words(raw.get("at"))) if line is not None else None
+
+
+def _show_sketch(value: object) -> bool | Literal["sketch_b", "sketch_c"]:
+    """A moment's `show_sketch`: true for the lesson's first sketch, or a later one's name."""
+    if value == "sketch_b":
+        return "sketch_b"
+    if value == "sketch_c":
+        return "sketch_c"
+    return value is True or value == "sketch"
 
 
 def _words(value: object) -> str | None:
@@ -1715,17 +1756,18 @@ def _points(raw: object) -> list[LessonPoint] | None:
         if kind not in _POINT_KINDS:
             continue
         line, figure = _whole(item.get("line")), _whole(item.get("figure"))
-        drawing: int | Literal["sketch", "sketch_b"] | None = figure
-        if item.get("figure") == "sketch":
-            drawing = "sketch"
-        elif item.get("figure") == "sketch_b":
-            drawing = "sketch_b"
+        drawing: int | Literal["sketch", "sketch_b", "sketch_c"] | None = figure
+        if item.get("figure") in ("sketch", "sketch_b", "sketch_c"):
+            drawing = _drawing(item.get("figure"))
         label = _words(item.get("text"))
         if drawing is not None and (not isinstance(drawing, int) or drawing >= 0):
             target = _target(item.get("target"))
             if kind not in _FIGURE_KINDS or target is None:
                 continue
-            kept.append(LessonPoint(kind=kind, text=label, figure=drawing, target=target))
+            mark = LessonPoint(kind=kind, text=label, figure=drawing, target=target)
+            if kind == "arrow":
+                mark.to = _across(item.get("to"), to_figure=False)
+            kept.append(mark)
             continue
         if line is None or kind not in _LINE_KINDS:
             continue
@@ -1738,6 +1780,8 @@ def _points(raw: object) -> list[LessonPoint] | None:
         point = LessonPoint(line=line, kind=kind, text=label, at=_words(item.get("at")))
         if kind in ("arrow", "move"):
             point.from_ = begin
+        if kind == "arrow" and begin is None:
+            point.to = _across(item.get("to"), to_figure=True)
         kept.append(point)
     return kept or None
 
@@ -1758,8 +1802,9 @@ class LessonBeat(BaseModel):
     answer: bool = False
     #: Marks drawn over earlier lines while this beat is said: circles, underlines, arrows.
     point: list[LessonPoint] | None = None
-    #: The beat at which the lesson's sketch is brought onto the board (the first, if none is).
-    show_sketch: bool = False
+    #: The sketch this beat brings onto the board: true for the first ("sketch"), or the name of
+    #: a later one. A sketch no beat brings in comes with the first.
+    show_sketch: bool | Literal["sketch_b", "sketch_c"] = False
 
 
 class LessonSketch(BaseModel):
@@ -1771,7 +1816,7 @@ class LessonSketch(BaseModel):
     """
 
     #: What the lesson's marks call it: "sketch", or "sketch_b" for a second.
-    name: Literal["sketch", "sketch_b"]
+    name: Literal["sketch", "sketch_b", "sketch_c"]
     svg: str
     alt_text: str | None = None
     width: int | None = None
@@ -1796,7 +1841,7 @@ class _Beat:
     say: str
     answer: bool = False
     point: list[LessonPoint] | None = None
-    show_sketch: bool = False
+    show_sketch: bool | Literal["sketch_b", "sketch_c"] = False
 
 
 async def _must_have_missed(conn: AsyncConnection, session_id: UUID, version_id: UUID) -> None:
@@ -2050,7 +2095,7 @@ async def _lesson_beats(
                 say=str(moment["say"]),
                 answer=bool(moment.get("answer")),
                 point=_points(moment.get("point")),
-                show_sketch=bool(moment.get("show_sketch")),
+                show_sketch=_show_sketch(moment.get("show_sketch")),
             )
             for moment in moments
         ]

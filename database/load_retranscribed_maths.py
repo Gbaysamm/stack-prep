@@ -55,7 +55,13 @@ import asyncpg
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from lesson_marks import SKETCH_NAMES, check_sketch, clean_points
+from lesson_marks import (
+    SKETCH_NAMES,
+    SKETCH_SUFFIXES,
+    check_sketch,
+    clean_points,
+    clean_show_sketch,
+)
 from load_questions import content_hash, normalise, uuid_for
 from propose_levels_maths import propose
 from reclassify_maths import FALLBACK, classify
@@ -64,7 +70,7 @@ ROOT = Path(__file__).resolve().parent.parent
 MATHS = ROOT / "docs" / "questions" / "utme" / "mathematics"
 SVG_DIR = MATHS / "figures" / "svg"
 #: Diagrams drawn for a lesson, for a question that describes its figure in words:
-#: YYYY_qNN.svg, and YYYY_qNN_b.svg for a second (see lesson_marks.py).
+#: YYYY_qNN.svg, YYYY_qNN_b.svg for a second, YYYY_qNN_c.svg for a third (lesson_marks.py).
 SKETCH_DIR = MATHS / "sketches"
 SUBJECT = "MATH"
 EXAMINATION = "UTME"
@@ -236,9 +242,9 @@ def read_lessons(
             if not isinstance(moments, list) or not moments:
                 raise SystemExit(f"{where}: a lesson needs moments")
             # The lesson's own sketches, found by the question's number, checked, and stored
-            # with it. Marks call them `figure: sketch` / `figure: sketch_b`.
+            # with it. Marks call them `figure: sketch` / `sketch_b` / `sketch_c`.
             sketches: list[dict[str, object]] = []
-            for name, suffix in zip(SKETCH_NAMES, ("", "_b"), strict=True):
+            for name, suffix in zip(SKETCH_NAMES, SKETCH_SUFFIXES, strict=True):
                 file = SKETCH_DIR / f"{year}_q{int(number):02d}{suffix}.svg"
                 if file.is_file():
                     checked = check_sketch(file.read_text(encoding="utf-8"), file.name)
@@ -246,7 +252,10 @@ def read_lessons(
             drawn = {str(sketch["name"]): str(sketch["svg"]) for sketch in sketches}
             if "sketch_b" in drawn and "sketch" not in drawn:
                 raise SystemExit(f"{where}: a _b sketch with no first sketch")
+            if "sketch_c" in drawn and "sketch_b" not in drawn:
+                raise SystemExit(f"{where}: a _c sketch with no _b sketch")
             clean = []
+            brought: list[str] = []
             for moment in moments:
                 say = moment.get("say") if isinstance(moment, dict) else None
                 if not isinstance(say, str) or not say.strip():
@@ -260,12 +269,13 @@ def read_lessons(
                 if moment.get("answer"):
                     entry["answer"] = True
                 if moment.get("show_sketch"):
-                    # The moment the voice first turns to the sketch; the first moment otherwise.
-                    if not sketches:
-                        raise SystemExit(f"{where}: show_sketch, but the lesson has no sketch")
-                    if any(m.get("show_sketch") for m in clean):
-                        raise SystemExit(f"{where}: the sketch is brought in once")
-                    entry["show_sketch"] = True
+                    # The moment the voice first turns to a sketch; a sketch no moment brings
+                    # in comes with the first. Stored as true for the first, else its name.
+                    name = clean_show_sketch(
+                        moment["show_sketch"], drawn, brought, f"{where} moment {len(clean)}"
+                    )
+                    brought.append(name)
+                    entry["show_sketch"] = True if name == "sketch" else name
                 point = moment.get("point")
                 if point is not None:
                     entry["point"] = clean_points(
@@ -286,9 +296,11 @@ def read_lessons(
                 "file": path.relative_to(ROOT).as_posix(),
             }
     for file in sorted(SKETCH_DIR.glob("*.svg")) if SKETCH_DIR.is_dir() else []:
-        named = re.fullmatch(r"(\d{4})_q(\d{2})(_b)?\.svg", file.name)
+        named = re.fullmatch(r"(\d{4})_q(\d{2})(_b|_c)?\.svg", file.name)
         if not named:
-            raise SystemExit(f"sketches/{file.name}: named YYYY_qNN.svg or YYYY_qNN_b.svg")
+            raise SystemExit(
+                f"sketches/{file.name}: named YYYY_qNN.svg, YYYY_qNN_b.svg or YYYY_qNN_c.svg"
+            )
         if (int(named.group(1)), int(named.group(2))) not in found:
             raise SystemExit(f"sketches/{file.name}: there is no written lesson for it to go with")
     return found

@@ -317,15 +317,56 @@ export const MARK_STAGGER_S = 0.55;
 const MOVE_TURN_S = 1.7;
 
 /**
+ * A FLIGHT: a piece brought from further up the board than the line just above. The board
+ * scrolls up to where it was written if it is out of sight (`FLIGHT_SCROLL_MS`), lights it up
+ * and lifts it (`FLIGHT_HOLD_MS`), carries it down to where it goes with the board following
+ * (`FLIGHT_TRAVEL_MS`) and sets it down (`FLIGHT_LAND_MS`). Board.tsx plays it.
+ */
+export const FLIGHT_SCROLL_MS = 520;
+export const FLIGHT_HOLD_MS = 520;
+export const FLIGHT_TRAVEL_MS = 1300;
+export const FLIGHT_LAND_MS = 520;
+const FLIGHT_TURN_S =
+  (FLIGHT_SCROLL_MS + FLIGHT_HOLD_MS + FLIGHT_TRAVEL_MS + FLIGHT_LAND_MS) / 1000 + 0.3;
+
+/** The mark's moment, and where it comes from, as moments counted from 0. */
+function resolved(line: number, index: number): number {
+  return line < 0 ? index + line : line;
+}
+
+/**
+ * Whether a piece-to-piece mark comes from further up than the moment just before: judged
+ * from the lesson's moments alone, so the working and the figure agree on how long a moment's
+ * marks take. (Board.tsx decides how to draw it from the lines actually on the board.)
+ */
+export function fromFar(
+  point: { line?: number | null; from?: { line: number } | null },
+  index: number,
+): boolean {
+  if (point.line == null || !point.from) return false;
+  return Math.abs(resolved(point.line, index) - resolved(point.from.line, index)) >= 2;
+}
+
+/**
  * When each of a moment's marks starts, in seconds: in the order the lesson lists them, each
  * after the one before — and after a moving piece has landed — whether it is drawn over the
- * working or over the figure, so the two stay in the one order the teacher points in.
+ * working or over the figure, so the two stay in the one order the teacher points in. `index`
+ * is the moment's own: a move from far up the board (a flight) takes longer.
  */
-export function markDelays(points: { kind: string }[]): number[] {
+export function markDelays(
+  points: { kind: string; line?: number | null; from?: { line: number } | null }[],
+  index = -1,
+): number[] {
   const delays: number[] = [];
   points.reduce((wait, point) => {
     delays.push(wait);
-    return wait + (point.kind === "move" ? MOVE_TURN_S : MARK_STAGGER_S);
+    const turn =
+      point.kind === "move"
+        ? index >= 0 && fromFar(point, index)
+          ? FLIGHT_TURN_S
+          : MOVE_TURN_S
+        : MARK_STAGGER_S;
+    return wait + turn;
   }, 0);
   return delays;
 }
@@ -400,6 +441,30 @@ export class ChipLayout {
         bottom: Math.max(box.bottom, y),
       };
     this.trails.push({ box, points });
+  }
+
+  /** Every trace drawn so far, as its points. */
+  trailPoints(): Pt[][] {
+    return this.trails.map((trail) => trail.points);
+  }
+
+  /**
+   * Place a small box (a pair's dot): the first free spot of `options` (each the middle of
+   * its left edge), else along the row from `anchor` and a little up or down from it.
+   */
+  placeBox(w: number, h: number, options: Pt[], anchor: Pt | null): Box | null {
+    const tries: Pt[] = [...options];
+    if (anchor)
+      for (const dy of [0, -8, 8, -16, 16, -26, 26])
+        for (let x = anchor[0]; x + w <= this.bounds.right; x += 8) tries.push([x, anchor[1] + dy]);
+    for (const [x, y] of tries) {
+      const box = { left: x, top: y - h / 2, right: x + w, bottom: y + h / 2 };
+      if (this.cost(box) === 0) {
+        this.chips.push(box);
+        return box;
+      }
+    }
+    return null;
   }
 
   /** Whether a trace already drawn passes through the box. */

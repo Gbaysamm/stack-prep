@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import uuid
 from collections.abc import AsyncIterator, Iterator
+from typing import Any
 
 import httpx
 import pytest
@@ -264,18 +265,23 @@ async def client() -> AsyncIterator[httpx.AsyncClient]:
         yield client
 
 
-async def start(client: httpx.AsyncClient, ids: dict[str, str], length: int = 3) -> dict:
+async def start(client: httpx.AsyncClient, ids: dict[str, str], length: int = 3) -> dict[str, Any]:
     response = await client.post(
         "/v1/practice/start",
         json={"student_id": ids["student"], "subject_id": ids["subject_id"], "length": length},
     )
     assert response.status_code == 200, response.text
-    return response.json()
+    body: dict[str, Any] = response.json()
+    return body
 
 
 async def answer(
-    client: httpx.AsyncClient, session: str, state: dict, key: str, confidence: str | None = None
-) -> dict:
+    client: httpx.AsyncClient,
+    session: str,
+    state: dict[str, Any],
+    key: str,
+    confidence: str | None = None,
+) -> dict[str, Any]:
     response = await client.post(
         f"/v1/practice/{session}/answer",
         json={
@@ -286,7 +292,8 @@ async def answer(
         },
     )
     assert response.status_code == 200, response.text
-    return response.json()
+    body: dict[str, Any] = response.json()
+    return body
 
 
 async def test_a_miss_brings_a_hint_and_the_same_question_back(
@@ -582,7 +589,7 @@ def tutor_settings() -> Iterator[None]:
     app.dependency_overrides.pop(get_settings, None)
 
 
-async def ask(client: httpx.AsyncClient, session: str, version: str, asked: str) -> dict:
+async def ask(client: httpx.AsyncClient, session: str, version: str, asked: str) -> dict[str, Any]:
     response = await client.post(
         f"/v1/practice/{session}/ask",
         json={"question_version_id": version, "step_index": 0, "asked": asked},
@@ -590,7 +597,7 @@ async def ask(client: httpx.AsyncClient, session: str, version: str, asked: str)
     return {"status": response.status_code, **(response.json() if response.content else {})}
 
 
-async def turns_for(student: str) -> list[dict]:
+async def turns_for(student: str) -> list[dict[str, Any]]:
     async with get_engine().connect() as conn:
         rows = await conn.execute(
             text(
@@ -1005,9 +1012,9 @@ async def test_the_conversation_is_this_question_in_this_sitting(
 
 async def ask_streaming(
     client: httpx.AsyncClient, session: str, version: str, asked: str
-) -> tuple[int, list[tuple[str, dict]]]:
+) -> tuple[int, list[tuple[str, dict[str, Any]]]]:
     """Post to the streaming endpoint and read the frames back."""
-    events: list[tuple[str, dict]] = []
+    events: list[tuple[str, dict[str, Any]]] = []
     async with client.stream(
         "POST",
         f"/v1/practice/{session}/ask/stream",
@@ -1218,7 +1225,7 @@ def test_a_lessons_marks_pass_through_and_a_bad_one_is_dropped() -> None:
         ]
     )
     assert points is not None
-    blank = {"from": None, "figure": None, "target": None}
+    blank = {"from": None, "figure": None, "target": None, "to": None}
     assert [point.model_dump() for point in points] == [
         {"line": 0, "kind": "circle", "text": "the limits", "at": "0 <= y <= 3", **blank},
         {"line": -1, "kind": "arrow", "text": None, "at": None, **blank},
@@ -1242,7 +1249,7 @@ def test_piece_to_piece_and_diagram_marks_pass_through() -> None:
             {"figure": 0, "kind": "highlight", "target": ["P", "Q"]},
             {"figure": 0, "kind": "label", "target": {"x": 40, "y": 12.5}, "text": "O"},
             {"figure": "sketch", "kind": "label", "target": "A", "text": "40 m"},
-            {"figure": "sketch_c", "kind": "circle", "target": "A"},
+            {"figure": "sketch_d", "kind": "circle", "target": "A"},
             {"figure": 0, "kind": "box", "target": "B"},
             {"figure": 0, "kind": "circle"},
             {"line": 0, "kind": "arc"},
@@ -1258,3 +1265,51 @@ def test_piece_to_piece_and_diagram_marks_pass_through() -> None:
         {"kind": "label", "text": "O", "figure": 0, "target": {"x": 40.0, "y": 12.5}},
         {"kind": "label", "text": "40 m", "figure": "sketch", "target": "A"},
     ]
+
+
+def test_arrows_across_between_the_working_and_a_diagram() -> None:
+    """An arrow may go across: from a piece of the working to a point on a diagram, or from a
+    diagram mark to a piece of the working. A `to` that names nowhere is left off, and only an
+    arrow keeps one."""
+    points = _points(
+        [
+            {
+                "line": 6,
+                "kind": "arrow",
+                "at": "(2, 0)",
+                "to": {"figure": "sketch", "target": "A"},
+                "text": "here",
+            },
+            {"figure": "sketch", "kind": "arrow", "target": "A", "to": {"line": 6, "at": "(2, 0)"}},
+            {"line": 6, "kind": "arrow", "to": {"figure": "sketch_d", "target": "A"}},
+            {"figure": 0, "kind": "circle", "target": "B", "to": {"line": 2}},
+            {"line": 3, "kind": "circle", "to": {"figure": 0, "target": "B"}},
+        ]
+    )
+    assert points is not None
+    dumped = [point.model_dump(exclude_none=True) for point in points]
+    assert dumped == [
+        {
+            "line": 6,
+            "kind": "arrow",
+            "text": "here",
+            "at": "(2, 0)",
+            "to": {"figure": "sketch", "target": "A"},
+        },
+        {"kind": "arrow", "figure": "sketch", "target": "A", "to": {"line": 6, "at": "(2, 0)"}},
+        {"line": 6, "kind": "arrow"},
+        {"kind": "circle", "figure": 0, "target": "B"},
+        {"line": 3, "kind": "circle"},
+    ]
+
+
+def test_a_moment_brings_in_the_sketch_it_names() -> None:
+    """`show_sketch` is true for the first sketch, or the name of a later one."""
+    from app.routers.practice import _show_sketch
+
+    assert _show_sketch(True) is True
+    assert _show_sketch("sketch") is True
+    assert _show_sketch("sketch_b") == "sketch_b"
+    assert _show_sketch("sketch_c") == "sketch_c"
+    assert _show_sketch(None) is False
+    assert _show_sketch("sketch_z") is False

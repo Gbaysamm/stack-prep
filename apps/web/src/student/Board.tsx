@@ -41,14 +41,18 @@ import {
   useRef,
   useState,
 } from "react";
-import type { CSSProperties, ReactNode, RefObject } from "react";
+import type { CSSProperties, MutableRefObject, ReactNode, RefObject } from "react";
 
 import type { LessonPoint, NarratedLesson, TutorReply } from "./api.js";
 import { Coach } from "./Coach.js";
-import { FigurePanel, type Drawing } from "./FigureBoard.js";
+import { FigurePanel, type Drawing, type DrawingKey } from "./FigureBoard.js";
 import {
   CHIP_HEIGHT,
   ChipLayout,
+  FLIGHT_HOLD_MS,
+  FLIGHT_LAND_MS,
+  FLIGHT_SCROLL_MS,
+  FLIGHT_TRAVEL_MS,
   arrowAlong,
   arrowHead,
   bezierAt,
@@ -101,8 +105,8 @@ interface Entry {
   answer: boolean;
   /** Marks drawn back over earlier lines while this is said: circles, underlines, arrows. */
   point: LessonPoint[];
-  /** This is where the lesson's sketch comes onto the board. */
-  showSketch?: boolean;
+  /** The sketch this moment brings onto the board ('sketch', 'sketch_b', 'sketch_c'), if any. */
+  showSketch?: string | null;
 }
 
 /**
@@ -376,7 +380,12 @@ export function Board({
           step: beat.board_index !== null && !answer ? beat.board_index : null,
           answer,
           point: beat.point ?? [],
-          showSketch: Boolean(beat.show_sketch),
+          showSketch:
+            beat.show_sketch === true
+              ? "sketch"
+              : typeof beat.show_sketch === "string"
+                ? beat.show_sketch
+                : null,
         };
       });
     }
@@ -1118,6 +1127,49 @@ export function Board({
     return () => window.clearTimeout(timer);
   }, [wantPoint, pointing, writtenTick, itemsShown, lines]);
 
+  // THE DIAGRAMS COME IN DRAWN. Each is brought in at a moment — a printed figure with the
+  // first, a sketch at the moment that says `show_sketch` (a sketch no moment names comes in
+  // with the first sketch) — and drawn stroke by stroke over the time that moment's words take
+  // (FigureBoard.tsx, `useDrawIn`). The marks of that moment and later wait until it is drawn.
+  const drawStarts = useMemo(() => {
+    const starts = new Map<string, number>();
+    (figures ?? []).forEach((_, index) => starts.set(String(index), 0));
+    const names = (lesson?.sketches ?? []).map((sketch) => sketch.name);
+    const first = Math.max(0, lines.findIndex((line) => Boolean(line.showSketch)));
+    for (const name of names) {
+      const at = lines.findIndex((line) => line.showSketch === name);
+      starts.set(name, at >= 0 ? at : first);
+    }
+    return starts;
+  }, [figures, lesson, lines]);
+  const [drawnKeys, setDrawnKeys] = useState<ReadonlySet<string>>(() => new Set());
+  const markDrawn = useCallback((key: string | number) => {
+    setDrawnKeys((was) => (was.has(String(key)) ? was : new Set([...was, String(key)])));
+  }, []);
+  /** Drawing one in takes about as long as the words of the moment that brings it in. */
+  const drawMsAt = useCallback(
+    (index: number) => Math.min(10000, Math.max(2600, (lines[index]?.say.length ?? 60) * 62)),
+    [lines],
+  );
+  // Marks wait from the first moment whose diagram is on the board but not yet drawn.
+  const drawGate = useMemo(() => {
+    const waiting = Array.from(drawStarts)
+      .filter(([key, at]) => at <= shown - 1 && !drawnKeys.has(key))
+      .map(([, at]) => at);
+    return waiting.length ? Math.min(...waiting) : null;
+  }, [drawStarts, drawnKeys, shown]);
+  // Never held for good: a diagram that cannot be drawn lets its marks go all the same.
+  const drawTimers = useRef(new Map<string, number>());
+  useEffect(() => {
+    for (const [key, at] of drawStarts)
+      if (at <= shown - 1 && !drawnKeys.has(key) && !drawTimers.current.has(key))
+        drawTimers.current.set(key, window.setTimeout(() => markDrawn(key), drawMsAt(at) + 8000));
+  }, [drawMsAt, drawStarts, drawnKeys, markDrawn, shown]);
+  useEffect(() => {
+    const timers = drawTimers.current;
+    return () => timers.forEach((timer) => window.clearTimeout(timer));
+  }, []);
+
   // THE MARKS. A beat may point back at a line already written — circle a term, underline
   // it, draw an arrow to where a line came from — the way a teacher turns to the board and
   // points. Once drawn, a mark stays, as solid as when it went up: a teacher does not rub out
@@ -1130,10 +1182,42 @@ export function Board({
     lines.forEach((line, index) => {
       if (!line.point.length || index > current) return;
       if (index === current && pointing !== index) return;
+      if (drawGate !== null && index >= drawGate) return;
       sets.push({ index, points: line.point, state: "live" });
     });
     return sets;
-  }, [lines, pointing, shown]);
+  }, [drawGate, lines, pointing, shown]);
+
+  // THE WORKING AND THE PICTURE, PAIRED. Every mark on a diagram belongs with a line of the
+  // working (see `pairLinks`); the figure's copy of the marks draws an arrow across (`to`) as a
+  // circle round the point it lands on.
+  const links = useMemo(
+    () => pairLinks(markSets, (index) => (lines[index]?.items.length ?? 0) > 0),
+    [lines, markSets],
+  );
+  const figureSets = useMemo(() => figureCopy(markSets), [markSets]);
+  //: The pair lit by a hover or a tap, both its ends and the line between.
+  const [litPair, setLitPair] = useState<number | null>(null);
+  //: The pairs whose line across runs clear of everything, so their numbered dots stand down.
+  const [joined, setJoined] = useState<ReadonlySet<string>>(() => new Set());
+  const deskRef = useRef<HTMLDivElement>(null);
+  const layoutRef = useRef<BoardLayout | null>(null);
+  const litTimer = useRef(0);
+  const lightPair = useCallback((number: number | null, tapped = false) => {
+    window.clearTimeout(litTimer.current);
+    setLitPair(number);
+    if (tapped && number !== null)
+      litTimer.current = window.setTimeout(() => setLitPair(null), 2600);
+  }, []);
+  /** The pair a line of the working belongs to, for a hover or a tap on the line itself. */
+  const pairOfLine = useCallback(
+    (target: EventTarget | null): number | null => {
+      const row = target instanceof Element ? target.closest<HTMLElement>("[data-line]") : null;
+      const index = row ? Number(row.dataset.line) : NaN;
+      return links.find((link) => link.line === index)?.number ?? null;
+    },
+    [links],
+  );
 
   // FOLLOWING THE HAND. The line being written is always in view, above the coach card that
   // floats over the bottom of the board. The board used to scroll to its bottom once a step
@@ -1185,6 +1269,14 @@ export function Board({
       box.bottom <= view.bottom - coachRoom.current + 2 &&
       box.top >= pinnedEdge(ink, view)
     );
+  }, []);
+
+  /** The part of the board in sight, for a piece flying down it to stay in view. */
+  const viewBand = useCallback((): ViewBand | null => {
+    const ink = inkRef.current;
+    if (!ink) return null;
+    const view = ink.getBoundingClientRect();
+    return { ink, top: pinnedEdge(ink, view), bottom: view.bottom - coachRoom.current };
   }, []);
 
   /** The marker writes only where the board is following, or the line is in sight anyway. */
@@ -1282,10 +1374,14 @@ export function Board({
   // THE DESK'S DIAGRAMS: the question's printed figures, up with the question, and the
   // sketches the lesson draws from the question's words, each brought in at the moment the
   // lesson first turns to it (`show_sketch`), or with the first moment where none says.
-  const sketchAt = Math.max(0, lines.findIndex((line) => line.showSketch));
   const drawings: Drawing[] = useMemo(
     () => [
-      ...(figures ?? []).map((figure, index) => ({ key: index, figure, shown: questionUp })),
+      ...(figures ?? []).map((figure, index) => ({
+        key: index,
+        figure,
+        shown: questionUp,
+        drawMs: drawMsAt(0),
+      })),
       ...(lesson?.sketches ?? []).map((sketch) => ({
         key: sketch.name,
         figure: {
@@ -1295,10 +1391,11 @@ export function Board({
           height: sketch.height ?? null,
         },
         markup: sketch.svg,
-        shown: shown - 1 >= sketchAt,
+        shown: shown - 1 >= (drawStarts.get(sketch.name) ?? 0),
+        drawMs: drawMsAt(drawStarts.get(sketch.name) ?? 0),
       })),
     ],
-    [figures, lesson, questionUp, shown, sketchAt],
+    [drawMsAt, drawStarts, figures, lesson, questionUp, shown],
   );
   const hasFigure = drawings.length > 0;
   // The marker puts itself down for each line and lifts off when it is done, so it is only
@@ -1387,11 +1484,39 @@ export function Board({
             are written on, and every mark and the pen measured against it, is the same either
             way.
           */}
-          <div className={hasFigure ? "pb-col pb-desk" : "pb-plain"}>
-          {hasFigure ? <FigurePanel drawings={drawings} sets={markSets} /> : null}
+          <div className={hasFigure ? "pb-col pb-desk" : "pb-plain"} ref={deskRef}>
+          {hasFigure ? (
+            <FigurePanel
+              drawings={drawings}
+              sets={figureSets}
+              links={links}
+              lit={litPair}
+              joined={joined}
+              onLit={lightPair}
+              paused={paused}
+              onDrawn={markDrawn}
+            />
+          ) : null}
           <div
             className={`${hasFigure ? "" : "pb-col "}pb-sheet sp-textbook ${dim ? "dim" : ""}`}
             ref={sheetRef}
+            onMouseOver={
+              links.length
+                ? (event) => {
+                    const number = pairOfLine(event.target);
+                    if (number !== litPair) lightPair(number);
+                  }
+                : undefined
+            }
+            onMouseLeave={links.length ? () => lightPair(null) : undefined}
+            onClick={
+              links.length
+                ? (event) => {
+                    const number = pairOfLine(event.target);
+                    if (number !== null) lightPair(number, true);
+                  }
+                : undefined
+            }
           >
             {questionUp ? (
               <section className="pb-question" aria-label="The question">
@@ -1527,7 +1652,17 @@ export function Board({
               ),
             )}
 
-            <Marks sheetRef={sheetRef} sets={markSets} />
+            <Marks
+              sheetRef={sheetRef}
+              sets={markSets}
+              paused={paused}
+              band={viewBand}
+              links={links}
+              lit={litPair}
+              joined={joined}
+              onLit={lightPair}
+              layoutRef={layoutRef}
+            />
             <Pen
               sheetRef={sheetRef}
               active={penActive}
@@ -1535,6 +1670,18 @@ export function Board({
               canSee={penCanSee}
             />
           </div>
+          {hasFigure && links.length ? (
+            <Links
+              deskRef={deskRef}
+              sheetRef={sheetRef}
+              links={links}
+              lit={litPair}
+              layoutRef={layoutRef}
+              onLit={lightPair}
+              onJoined={setJoined}
+              band={viewBand}
+            />
+          ) : null}
           </div>
         </div>
 
@@ -1755,6 +1902,18 @@ interface Shape {
   older?: boolean;
   /** For a piece brought from far above: a highlighter flash over where it came from. */
   flash?: { d: string; width: number };
+  /** For a piece carried from far above: its flight, played once (see `useFlights`). */
+  flight?: Flight;
+}
+
+/** A piece carried from far up the board: what flies, from where, to where, and how. */
+interface Flight {
+  glyphs: Glyph[];
+  from: Box;
+  to: Box;
+  route: Route;
+  /** The highlighter over the piece where it was written, lit as it lifts off. */
+  flash?: { d: string; width: number };
 }
 
 /**
@@ -1765,17 +1924,23 @@ interface Shape {
  */
 const FAR_ROWS = 0;
 
-/** How many rows of writing lie between two pieces. */
-function rowsBetween(writing: Box[], from: Box, to: Box): number {
-  const top = Math.min(from.bottom, to.bottom);
-  const bottom = Math.max(from.top, to.top);
-  return bands(
-    writing.filter((o) => {
-      const m = (o.top + o.bottom) / 2;
-      return m > top && m < bottom;
-    }),
-    true,
-  ).length;
+/** How many lines of the working are on the board between two moments' lines. */
+function linesBetween(sheet: HTMLElement, a: number, b: number): number {
+  let count = 0;
+  for (let at = Math.min(a, b) + 1; at < Math.max(a, b); at += 1) if (lineAt(sheet, at)) count += 1;
+  return count;
+}
+
+/**
+ * The way a piece flies from far up the board down to where it goes: out to the right of the
+ * two pieces and down, so it is not dragged through the writing between. Drawn only while it
+ * flies; what stays is the short hook into the piece.
+ */
+function flightRoute(from: Box, to: Box, maxX: number): Route {
+  const a: Pt = [(from.left + from.right) / 2, (from.top + from.bottom) / 2];
+  const b: Pt = [(to.left + to.right) / 2, (to.top + to.bottom) / 2];
+  const bow = Math.min(maxX - 8, Math.max(from.right, to.right) + 70);
+  return cubicRoute(a, [bow, a[1] + (b[1] - a[1]) * 0.15], [bow, b[1] - (b[1] - a[1]) * 0.3], b);
 }
 
 /**
@@ -2252,7 +2417,7 @@ function pieceRoute(
   return { route: unsteady(route, rnd, 0.9), lane: best.lane, middle: best.middle };
 }
 
-function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
+function measureMarks(sheet: HTMLElement, sets: MarkSet[], links: LinkPair[] = []): Measured {
   const base = sheet.getBoundingClientRect();
   const width = sheet.clientWidth;
   // The sheet's own side gutters are usable: arrows may bow into them but not past them.
@@ -2277,6 +2442,10 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
   // The newest beat's marks are drawn at full weight; the traces of moves before it a little
   // thinner, still whole, so the latest step stands out on a busy board.
   const newest = Math.max(-1, ...sets.map((set) => set.index));
+  const dots: PairDot[] = [];
+  const anchors = new Map<string, Pt>();
+  const dotted = new Map<number, Pt>();
+  const dotBoxes = new Map<number, Box>();
   let stagger = 0;
   const push = (shape: Shape) => {
     shapes.push({ ...shape, delay: stagger });
@@ -2285,12 +2454,43 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
   // marks join it, and every later chip and route finds its way round the ones before.
   for (const set of [...sets].sort((a, b) => a.index - b.index)) {
     // Each mark in a moment waits for the ones before it; a move, for its piece to land.
-    const delays = markDelays(set.points);
+    const delays = markDelays(set.points, set.index);
     const older = set.index !== newest;
+    // This moment's pairs with a diagram: a numbered dot after the end of the line each pairs
+    // with (one to a line, placed before the moment's words take the room), and where the
+    // line across starts — the piece named, else the dot.
+    for (const link of links.filter((pair) => pair.set === set.index)) {
+      const line = lineAt(sheet, link.line);
+      if (!line) continue;
+      if (!dotted.has(link.number)) {
+        const rows = inkRows(line).map((row) => relative(row, base));
+        const last = rows[rows.length - 1];
+        if (!last) continue;
+        const spot = layout.placeBox(
+          DOT_SIZE,
+          DOT_SIZE,
+          [[last.right + 10, (last.top + last.bottom) / 2]],
+          [last.right + 10, (last.top + last.bottom) / 2],
+        );
+        const centre: Pt = spot ? [spot.left + DOT_SIZE / 2, spot.top + DOT_SIZE / 2] : [last.right + 10 + DOT_SIZE / 2, (last.top + last.bottom) / 2];
+        dotted.set(link.number, centre);
+        if (spot) dotBoxes.set(link.number, spot);
+        dots.push({ number: link.number, line: link.line, x: centre[0], y: centre[1], keys: [] });
+      }
+      const dot = dots.find((one) => one.number === link.number);
+      dot?.keys.push(link.key);
+      const found = link.piece && (!link.hint || pieceIn(line, link.piece)) ? inkBox(line, link.piece) : null;
+      const piece = found ? relative(found, base) : null;
+      anchors.set(
+        link.key,
+        piece ? [piece.right + 3, (piece.top + piece.bottom) / 2] : dotted.get(link.number)!,
+      );
+    }
     set.points.forEach((point, k) => {
       stagger = delays[k] ?? 0;
       // A mark on the diagram is drawn over the figure (FigureBoard.tsx), not here.
       if (point.figure != null || point.line == null) return;
+      const across = point.to?.figure != null;
       const target = point.line < 0 ? set.index + point.line : point.line;
       if (target < 0 || target > set.index) return;
       const line = lineAt(sheet, target);
@@ -2373,16 +2573,17 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
         }
         return;
       }
-      if (point.kind === "underline") {
+      if (point.kind === "underline" || across) {
         const d = drawUnderline(box, rnd);
         layout.text.push({ left: box.left - 4, top: box.bottom, right: box.right + 7, bottom: box.bottom + 6 });
         push({
           key,
-          kind: "underline",
+          kind: across ? "arrow" : "underline",
           state: set.state,
           d,
           head: null,
-          label: inline(inkRows(line, point.at).map((row) => relative(row, base))),
+          // An arrow across has its words on the diagram, by the point it lands on.
+          label: across ? null : inline(inkRows(line, point.at).map((row) => relative(row, base))),
         });
         return;
       }
@@ -2402,36 +2603,30 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
           // carried the whole way — a route that long runs down the page past everything in
           // between. Its source flashes, a short hooked arrow comes into the piece from the gap
           // above it, and the words say where it came from.
-          if (rowsBetween(writing, from, box) > FAR_ROWS) {
+          if (linesBetween(sheet, fromIndex, target) > FAR_ROWS) {
             const stub = stubRoute(box, writing, layout, minX, maxX, rnd);
             layout.addTrail(stub.route);
             const { d, head } = arrowAlong(stub.route, moving ? 8 : 9);
-            const first = stub.route[0]!;
-            const h = from.bottom - from.top;
-            const w = from.right - from.left;
-            // The piece rises from the start of the arrow rather than from where it was written.
-            const dx = first[0] - (from.left + from.right) / 2;
-            const dy = first[1] - h / 2 - 3 - (from.top + from.bottom) / 2;
-            const ghost: Ghost | undefined =
-              moving && !stillMotion()
-                ? {
-                    glyphs: inkGlyphs(fromLine, start.at, base).map((g) => ({
-                      ...g,
-                      left: g.left + dx,
-                      top: g.top + dy,
-                    })),
-                    from: { left: from.left + dx, top: from.top + dy, right: from.left + dx + w, bottom: from.top + dy + h },
-                    to: box,
-                    route: stub.route,
-                    ...moveTimes(stub.route),
-                  }
-                : undefined;
             const end = rowEnd([box]);
             const words = fromWords(text, start.at);
             const label = chip([at(end), at([stub.route[0]![0] + 6, stub.route[0]![1]])], end, words);
             const rows = inkRows(fromLine, start.at).map((row) => relative(row, base));
-            const flash = set.index === newest && rows.length ? drawHighlight(rows, rnd) : undefined;
-            push({ key, kind: point.kind, state: set.state, d, head, label, ghost, older: moving && older, flash });
+            const lit = rows.length ? drawHighlight(rows, rnd) : undefined;
+            // A move plays its flight (see `useFlights`): the piece lifted off where it was
+            // written and carried down, the board following it. Where the student has asked
+            // for less movement, and for an arrow, the source only lights up.
+            const flight: Flight | undefined =
+              moving && set.index === newest && !stillMotion()
+                ? {
+                    glyphs: inkGlyphs(fromLine, start.at, base),
+                    from,
+                    to: box,
+                    route: flightRoute(from, box, maxX),
+                    flash: lit,
+                  }
+                : undefined;
+            const flash = !flight && set.index === newest ? lit : undefined;
+            push({ key, kind: point.kind, state: set.state, d, head, label, older: moving && older, flash, flight });
             return;
           }
           const way = pieceRoute(from, box, obstacles(), minX, maxX, rnd, (b) => layout.trailWithin(b));
@@ -2470,6 +2665,12 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
       if (!fromInk) return;
       const from = relative(fromInk, base);
       const fromY = (from.top + from.bottom) / 2;
+      // The writing between the two lines: an arrow bowing out to the right goes round all of
+      // it, not through the ends of the longer lines in between.
+      const between = writing.filter((o) => {
+        const m = (o.top + o.bottom) / 2;
+        return m > Math.min(box.bottom, from.bottom) && m < Math.max(box.top, from.top);
+      });
       // A whole line, or the end of one, is reached from the right-hand side, where the board
       // is clear; the start of a line from the left margin; a piece in the middle of a line
       // from underneath.
@@ -2507,6 +2708,22 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
         c1 = [Math.min(maxX, Math.max(start[0], box.right) + 36), start[1]];
         c2 = [Math.min(maxX, tip[0] + 22), tip[1] + 40];
       }
+      // Bowed out to the right, it is widened until it runs clear of the writing between, as
+      // far as the gutter allows.
+      if (!atStart && c1[0] >= start[0]) {
+        const crosses = () => {
+          for (let i = 2; i <= 30; i += 1) {
+            const [x, y] = bezierAt(start, c1, c2, tip, i / 32);
+            if (between.some((o) => x > o.left - 3 && x < o.right + 3 && y > o.top - 3 && y < o.bottom + 3))
+              return true;
+          }
+          return false;
+        };
+        for (let n = 0; n < 40 && crosses() && Math.max(c1[0], c2[0]) < maxX; n += 1) {
+          c1 = [Math.min(maxX, c1[0] + 12), c1[1]];
+          c2 = [Math.min(maxX, c2[0] + 12), c2[1]];
+        }
+      }
       const wob = (p: Pt): Pt => [p[0] + (rnd() - 0.5) * 6, p[1] + (rnd() - 0.5) * 6];
       c1 = wob(c1);
       c2 = wob(c2);
@@ -2531,7 +2748,7 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
       });
     });
   }
-  return shapes;
+  return { shapes, dots, anchors, layout: { boxes: [...layout.text, ...layout.chips], trails: layout.trailPoints(), dots: dotBoxes } };
 }
 
 /**
@@ -2646,6 +2863,543 @@ function Carried({ shape, ghost }: { shape: Shape; ghost: Ghost }) {
   );
 }
 
+/* ---- The working and the picture, paired ------------------------------------------------ */
+
+/**
+ * A MARK ON A DIAGRAM AND THE LINE IT GOES WITH. Every mark on a figure or sketch belongs with
+ * a line of the working: the line written at its moment (the nearest earlier one where its
+ * moment writes nothing), or the piece its `to` names; and an arrow across from the working
+ * (`to: {figure, target}`) belongs with the piece it starts from. Each such line gets a number,
+ * in the order the lesson reaches it, and the pair is shown by a line drawn across from the
+ * working to the mark — kept where it runs clear of everything, and where it cannot, drawn as
+ * the mark goes up and then let go, leaving the same numbered dot at both ends. A hover or a
+ * tap on either dot, the line or the mark lights both ends and draws the line again.
+ */
+interface LinkPair {
+  /** The mark's key (`<moment>-<place in its list>`), the same on the working and the diagram. */
+  key: string;
+  /** The line's number, from 1: every mark paired with the same line shares it. */
+  number: number;
+  /** The moment whose marks these are. */
+  set: number;
+  /** The line of the working it goes with. */
+  line: number;
+  /** A piece of that line: the one named, or the mark's own words if the line has them. */
+  piece: string | null;
+  /** Whether `piece` is only the mark's words, to be used only if the line has them. */
+  hint: boolean;
+  figure: DrawingKey;
+  /** An arrowhead at the diagram's end (an arrow across from the working)… */
+  toFigure: boolean;
+  /** …or at the working's end (an arrow across from the diagram). */
+  toWork: boolean;
+  /** When in its moment the mark goes up, in seconds. */
+  delay: number;
+}
+
+/** The numbered dot at the working's end of a pair. */
+interface PairDot {
+  number: number;
+  line: number;
+  x: number;
+  y: number;
+  /** The marks that share it. */
+  keys: string[];
+}
+
+/** Where everything on the working is (the sheet's coordinates), for a line across to keep off. */
+interface BoardLayout {
+  boxes: Box[];
+  trails: Pt[][];
+  /** Each pair's dot, which its own line across may start from. */
+  dots: Map<number, Box>;
+}
+
+interface Measured {
+  shapes: Shape[];
+  dots: PairDot[];
+  /** Where each pair's line across starts on the working. */
+  anchors: Map<string, Pt>;
+  layout: BoardLayout;
+}
+
+/** A pair's dot: small, round, its number in it. */
+const DOT_SIZE = 18;
+/** How many colours the pairs cycle through (board.css, `.pair-N`). */
+const PAIR_COLOURS = 5;
+
+function pairLinks(sets: MarkSet[], writes: (index: number) => boolean): LinkPair[] {
+  const out: LinkPair[] = [];
+  const numbers = new Map<number, number>();
+  const back = (index: number) => {
+    for (let at = index; at >= 0; at -= 1) if (writes(at)) return at;
+    return -1;
+  };
+  for (const set of [...sets].sort((a, b) => a.index - b.index)) {
+    const delays = markDelays(set.points, set.index);
+    const moment = (line: number) => (line < 0 ? set.index + line : line);
+    set.points.forEach((point, k) => {
+      let figure: DrawingKey;
+      let line: number;
+      let piece: string | null = null;
+      let hint = false;
+      let toFigure = false;
+      let toWork = false;
+      if (point.figure != null) {
+        figure = point.figure;
+        if (point.to?.line != null) {
+          line = back(moment(point.to.line));
+          piece = point.to.at?.trim() || null;
+          toWork = true;
+        } else {
+          line = back(set.index);
+          piece = point.text?.trim() || null;
+          hint = true;
+        }
+      } else if (point.to?.figure != null && point.line != null) {
+        figure = point.to.figure;
+        line = back(moment(point.line));
+        piece = point.at?.trim() || null;
+        toFigure = true;
+      } else return;
+      if (line < 0) return;
+      if (!numbers.has(line)) numbers.set(line, numbers.size + 1);
+      out.push({
+        key: `${set.index}-${k}`,
+        number: numbers.get(line)!,
+        set: set.index,
+        line,
+        piece,
+        hint,
+        figure,
+        toFigure,
+        toWork,
+        delay: delays[k] ?? 0,
+      });
+    });
+  }
+  return out;
+}
+
+/**
+ * The marks as the diagram draws them: an arrow across from the working becomes, on the
+ * diagram, a circle round the point it lands on, with the arrow's words beside it.
+ */
+function figureCopy(sets: MarkSet[]): MarkSet[] {
+  return sets.map((set) =>
+    set.points.some((point) => point.figure == null && point.to?.figure != null)
+      ? {
+          ...set,
+          points: set.points.map((point) =>
+            point.figure == null && point.to?.figure != null
+              ? { kind: "circle" as const, figure: point.to.figure, target: point.to.target, text: point.text }
+              : point,
+          ),
+        }
+      : set,
+  );
+}
+
+/** Whether a line has the piece in it (a mark's words are only a guess at one). */
+function pieceIn(root: Element, at: string): boolean {
+  const wanted = piece(at).needle;
+  if (!wanted) return false;
+  return textNodes(root)
+    .map((node) => Array.from(node.data).map(fold).join(""))
+    .join("")
+    .includes(wanted);
+}
+
+/** One line across, as drawn over the desk. */
+interface Across {
+  key: string;
+  number: number;
+  d: string;
+  head: string | null;
+  /** It runs clear of the writing, the words and the other traces, so it stays. */
+  clean: boolean;
+  /** Its mark has just gone up: it is drawn now (and let go again unless it is clean). */
+  fresh: boolean;
+  delay: number;
+}
+
+/** How long a line across that cannot stay is held once drawn, before it is let go. */
+const ACROSS_HOLD_MS = 2800;
+
+/**
+ * THE LINES ACROSS, from the working to the diagram, over both. On a wide screen the figure
+ * stands beside the lines, and each line goes from its piece (or its dot) across the gap to
+ * the mark; on a phone the figure is pinned over the working, and it goes up to the panel's
+ * bottom edge under the mark. Measured again as the board scrolls (the figure stays put while
+ * the lines move), and each checked against everything on the working: one that would cross
+ * writing, words or another trace is only drawn when its mark goes up, or while the pair is
+ * lit, and its numbered dots say what goes with what the rest of the time.
+ */
+function Links({
+  deskRef,
+  sheetRef,
+  links,
+  lit,
+  layoutRef,
+  onLit,
+  onJoined,
+  band,
+}: {
+  deskRef: RefObject<HTMLDivElement>;
+  sheetRef: RefObject<HTMLDivElement>;
+  links: LinkPair[];
+  lit: number | null;
+  layoutRef: MutableRefObject<BoardLayout | null>;
+  onLit: (number: number | null, tapped?: boolean) => void;
+  onJoined: (keys: ReadonlySet<string>) => void;
+  /** The part of the board in sight: a line across is only drawn from a line the student sees. */
+  band: () => ViewBand | null;
+}) {
+  const [across, setAcross] = useState<Across[]>([]);
+  const seen = useRef(new Map<string, number>());
+  const joinedNow = useRef<ReadonlySet<string>>(new Set());
+  useEffect(() => {
+    const now = performance.now();
+    for (const link of links) if (!seen.current.has(link.key)) seen.current.set(link.key, now);
+  }, [links]);
+
+  const measure = useCallback(() => {
+    const desk = deskRef.current;
+    const sheet = sheetRef.current;
+    if (!desk || !sheet) return;
+    const base = desk.getBoundingClientRect();
+    const paper = sheet.getBoundingClientRect();
+    const panel = desk.querySelector<HTMLElement>(".pb-figpanel");
+    const shelf = panel?.getBoundingClientRect();
+    if (!panel || !shelf) return;
+    const beside = shelf.left >= paper.right - 4;
+    const shut = panel.classList.contains("shut");
+    const ox = paper.left - base.left;
+    const oy = paper.top - base.top;
+    const layout = layoutRef.current;
+    const shift = (b: Box): Box => ({ left: b.left + ox, top: b.top + oy, right: b.right + ox, bottom: b.bottom + oy });
+    const boxes = (layout?.boxes ?? []).map(shift);
+    const trails = (layout?.trails ?? []).map((trail) => trail.map(([x, y]) => [x + ox, y + oy] as Pt));
+    const figureBox: Box = {
+      left: shelf.left - base.left,
+      top: shelf.top - base.top,
+      right: shelf.right - base.left,
+      bottom: shelf.bottom - base.top,
+    };
+    const now = performance.now();
+    const drawn: Pt[][] = [];
+    const sight = band();
+    // The drawings themselves: a line across may reach into one only for its last stretch, to
+    // point at its mark; running across a drawing's lines and labels would read as part of it.
+    const pictures = Array.from(desk.querySelectorAll(".pb-figure img")).map((image) => {
+      const r = image.getBoundingClientRect();
+      return { left: r.left - base.left, top: r.top - base.top, right: r.right - base.left, bottom: r.bottom - base.top };
+    });
+    const out: Across[] = [];
+    const still = stillMotion();
+    for (const link of links) {
+      const start = sheet.querySelector(`[data-link-work="${link.key}"]`)?.getBoundingClientRect();
+      const end = desk.querySelector<HTMLElement>(`[data-link-fig="${link.key}"]`);
+      if (!start) continue;
+      if (sight && (start.top < sight.top || start.top > sight.bottom)) continue;
+      const a: Pt = [start.left - base.left, start.top - base.top];
+      let b: Pt;
+      let route: Route;
+      const shown = end && !shut && end.offsetParent !== null ? end.getBoundingClientRect() : null;
+      if (beside) {
+        if (!shown) continue;
+        const point: Pt = [shown.left - base.left, shown.top - base.top];
+        // Stop just short of the mark, so the line points at it rather than covering it.
+        const dx = point[0] - a[0];
+        const dy = point[1] - a[1];
+        const length = Math.hypot(dx, dy) || 1;
+        b = [point[0] - (dx / length) * 10, point[1] - (dy / length) * 10];
+        const reach = Math.max(40, (b[0] - a[0]) * 0.45);
+        route = cubicRoute(a, [a[0] + reach, a[1]], [b[0] - reach * 0.7, b[1]], b);
+      } else {
+        // Up to the bottom edge of the pinned panel, under the mark (or its middle, folded).
+        const x = shown ? shown.left - base.left : (figureBox.left + figureBox.right) / 2;
+        b = [Math.min(figureBox.right - 18, Math.max(figureBox.left + 18, x)), figureBox.bottom + 3];
+        if (a[1] < b[1] + 24) continue;
+        route = cubicRoute(a, [a[0] + 36, a[1] - 8], [b[0], b[1] + Math.max(40, (a[1] - b[1]) * 0.5)], b);
+      }
+      const own = layout?.dots.get(link.number);
+      const ownBox = own ? shift(own) : null;
+      const clear = (p: Pt) => {
+        if (Math.hypot(p[0] - a[0], p[1] - a[1]) < 12) return true;
+        if (p[0] > figureBox.left && p[0] < figureBox.right && p[1] > figureBox.top && p[1] < figureBox.bottom) return true;
+        const inside = (o: Box, pad: number) =>
+          p[0] > o.left - pad && p[0] < o.right + pad && p[1] > o.top - pad && p[1] < o.bottom + pad;
+        if (boxes.some((o) => o !== ownBox && !(ownBox && o.left === ownBox.left && o.top === ownBox.top) && inside(o, 2)))
+          return false;
+        const near = (q: Pt, r: number) => Math.hypot(p[0] - q[0], p[1] - q[1]) < r;
+        if (trails.some((trail) => trail.some((q) => near(q, 3)))) return false;
+        if (drawn.some((trail) => trail.some((q) => near(q, 4)))) return false;
+        return true;
+      };
+      const lengths = distances(route);
+      const total = lengths[lengths.length - 1] ?? 0;
+      const inPicture = (p: Pt) =>
+        pictures.some((o) => p[0] > o.left && p[0] < o.right && p[1] > o.top && p[1] < o.bottom);
+      const clean =
+        route.every(clear) && route.every((p, i) => total - (lengths[i] ?? 0) < 34 || !inPicture(p));
+      if (clean) drawn.push(route);
+      const first = seen.current.get(link.key) ?? 0;
+      const fresh = !still && now - first < link.delay * 1000 + ACROSS_HOLD_MS;
+      // One that would cross writing, words, a trace or the picture is not drawn at all (its
+      // numbered dots say what goes with what), unless the student lights the pair.
+      if (!clean && lit !== link.number) continue;
+      const sparse = route.filter((_, i) => i % 3 === 0 || i === route.length - 1);
+      const tip = link.toWork ? route[0]! : route[route.length - 1]!;
+      const back = link.toWork ? route[Math.min(4, route.length - 1)]! : route[Math.max(0, route.length - 5)]!;
+      out.push({
+        key: link.key,
+        number: link.number,
+        d: through(sparse),
+        head: link.toFigure || link.toWork ? arrowHead(tip, back, 8) : null,
+        clean,
+        fresh,
+        delay: link.delay,
+      });
+    }
+    setAcross(out);
+    const keys = new Set(out.filter((line) => line.clean).map((line) => line.key));
+    const was = joinedNow.current;
+    if (keys.size !== was.size || Array.from(keys).some((key) => !was.has(key))) {
+      joinedNow.current = keys;
+      onJoined(keys);
+    }
+  }, [band, deskRef, layoutRef, links, lit, onJoined, sheetRef]);
+
+  useEffect(() => {
+    const desk = deskRef.current;
+    const ink = desk?.closest<HTMLElement>(".pb-ink");
+    let frame = 0;
+    const again = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(measure);
+    };
+    again();
+    // The figure loads, the marks settle, a fresh line's hold runs out: looked at again often.
+    const timer = window.setInterval(again, 400);
+    ink?.addEventListener("scroll", again, { passive: true });
+    window.addEventListener("resize", again);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearInterval(timer);
+      ink?.removeEventListener("scroll", again);
+      window.removeEventListener("resize", again);
+    };
+  }, [deskRef, measure]);
+
+  if (across.length === 0) return null;
+  return (
+    <svg className="pb-links" aria-hidden="true">
+      {across.map((line) => {
+        const state =
+          lit === line.number ? "lit" : line.clean ? (line.fresh ? "draw" : "kept") : "pass";
+        return (
+          <g
+            key={line.key}
+            className={`pb-link pair-${(line.number - 1) % PAIR_COLOURS} ${state}`}
+            style={{ "--delay": `${line.delay}s` } as CSSProperties}
+            onMouseEnter={() => onLit(line.number)}
+            onMouseLeave={() => onLit(null)}
+            onClick={() => onLit(line.number, true)}
+          >
+            <path className="pb-link-hit" d={line.d} />
+            <path className="pb-link-line" d={line.d} pathLength={1} />
+            {line.head ? <path className="pb-link-head" d={line.head} pathLength={1} /> : null}
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+/** The part of the board in view: its scroller, and the band between whatever is pinned over
+ * the top of it and the coach card over the bottom, in screen pixels. */
+interface ViewBand {
+  ink: HTMLElement;
+  top: number;
+  bottom: number;
+}
+
+/** One frame of a flight, as it is drawn. */
+interface FlightFrame {
+  /** The source lit up. */
+  lit: boolean;
+  /** The piece, moved from where it was written; null before it lifts. */
+  ghost: { x: number; y: number; scale: number; opacity: number } | null;
+  /** How much of the way it has gone has been drawn behind it (0 to 1), and how solidly. */
+  trail: number;
+  fade: number;
+}
+
+
+/** Add keys to a set kept in state, leaving it alone (the same object) if they are all in. */
+function adding(keys: string[]) {
+  return (was: Set<string>) => {
+    if (keys.every((key) => was.has(key))) return was;
+    const now = new Set(was);
+    for (const key of keys) now.add(key);
+    return now;
+  };
+}
+
+/**
+ * FLIGHTS: a piece carried from far up the board (see `FLIGHT_SCROLL_MS` in ink.ts), played
+ * once, when its mark goes up. In turn with the moment's other marks (each waits its delay),
+ * on a clock that stops while the lesson is paused — the piece stops mid-air and the board
+ * where it is. The board scrolls up just far enough to show where the piece was written (not
+ * at all if it is in view), lights it, lifts a copy off, and carries it down to where it goes,
+ * the board following it back to where it was. Its trail is drawn behind it and gone once it
+ * lands; what stays is the short hook into the piece and the words saying where it came from.
+ *
+ * Returns the frame of each flight under way, and which have landed (their hook and words are
+ * drawn from then on).
+ */
+function useFlights(
+  shapes: Shape[],
+  paused: boolean,
+  sheetRef: RefObject<HTMLDivElement>,
+  band: () => ViewBand | null,
+): { frames: Map<string, FlightFrame>; landed: Set<string> } {
+  const [frames, setFrames] = useState<Map<string, FlightFrame>>(() => new Map());
+  const [landed, setLanded] = useState<Set<string>>(() => new Set());
+  const clock = useRef(0);
+  const flights = useRef(
+    new Map<string, { seen: number; delay: number; done: boolean; from?: number; up?: number }>(),
+  );
+  const live = useRef({ shapes, paused, band });
+  live.current = { shapes, paused, band };
+
+  // Each new flight is noted with the time it was first seen; one no longer on the board (a
+  // replay, a newer beat) is forgotten, so it plays again if it comes back.
+  useEffect(() => {
+    const now = new Set(shapes.filter((shape) => shape.flight).map((shape) => shape.key));
+    let changed = false;
+    for (const key of Array.from(flights.current.keys()))
+      if (!now.has(key)) {
+        flights.current.delete(key);
+        changed = true;
+      }
+    for (const shape of shapes)
+      if (shape.flight && !flights.current.has(shape.key))
+        flights.current.set(shape.key, {
+          seen: clock.current,
+          delay: (shape.delay ?? 0) * 1000,
+          done: false,
+        });
+    if (changed)
+      setLanded((was) => {
+        const kept = new Set(Array.from(was).filter((key) => now.has(key)));
+        return kept.size === was.size ? was : kept;
+      });
+  }, [shapes]);
+
+  useEffect(() => {
+    let raf = 0;
+    let last = performance.now();
+    let drawn = false;
+    const tick = (now: number) => {
+      const { shapes: current, paused: held, band: view } = live.current;
+      const step = Math.min(100, now - last);
+      last = now;
+      if (!held) clock.current += step;
+      const next = new Map<string, FlightFrame>();
+      const down: string[] = [];
+      const sheet = sheetRef.current;
+      for (const shape of current) {
+        const flight = shape.flight;
+        const state = flights.current.get(shape.key);
+        if (!flight || !state || !sheet) continue;
+        if (state.done) {
+          down.push(shape.key);
+          continue;
+        }
+        const t = clock.current - state.seen - state.delay;
+        if (t < 0) continue;
+        const seen = view();
+        // Where the board was, and how far up it must go to show where the piece was written.
+        if (state.from === undefined) {
+          state.from = seen ? seen.ink.scrollTop : 0;
+          state.up = state.from;
+          if (seen) {
+            const top = sheet.getBoundingClientRect().top + flight.from.top;
+            if (top < seen.top + 12) state.up = Math.max(0, state.from - (seen.top + 28 - top));
+          }
+        }
+        const from = state.from;
+        const up = state.up ?? from;
+        const scrolling = up !== from ? FLIGHT_SCROLL_MS : 0;
+        const lift = scrolling + FLIGHT_HOLD_MS;
+        const arrive = lift + FLIGHT_TRAVEL_MS;
+        const end = arrive + FLIGHT_LAND_MS;
+        if (t >= arrive) down.push(shape.key);
+        if (t >= end) {
+          state.done = true;
+          if (seen && Math.abs(seen.ink.scrollTop - from) > 1) seen.ink.scrollTop = from;
+          continue;
+        }
+        // The board: up to the source, held there, then down with the piece.
+        const scroll =
+          t < scrolling
+            ? from + (up - from) * ease(t / scrolling)
+            : t < lift
+              ? up
+              : t < arrive
+                ? up + (from - up) * ease((t - lift) / FLIGHT_TRAVEL_MS)
+                : from;
+        if (seen && Math.abs(seen.ink.scrollTop - scroll) > 0.5) seen.ink.scrollTop = scroll;
+        // The piece: lifted off, carried, set down.
+        const { route } = flight;
+        const lengths = distances(route);
+        const total = lengths[lengths.length - 1] ?? 0;
+        const a = route[0]!;
+        const h0 = Math.max(1, flight.from.bottom - flight.from.top);
+        const grow = Math.max(0.45, Math.min(2.2, (flight.to.bottom - flight.to.top) / h0));
+        let ghost: FlightFrame["ghost"] = null;
+        let trail = 0;
+        let fade = 1;
+        if (t >= scrolling) {
+          if (t < lift) {
+            const held2 = (t - scrolling) / FLIGHT_HOLD_MS;
+            ghost = { x: 0, y: -5 * held2, scale: 1 + 0.08 * held2, opacity: Math.min(1, held2 * 2) };
+          } else if (t < arrive) {
+            const e = ease((t - lift) / FLIGHT_TRAVEL_MS);
+            const at = along(route, lengths, e * total);
+            trail = e;
+            ghost = {
+              x: at[0] - a[0],
+              y: at[1] - a[1] - 5 * (1 - e),
+              scale: (1 + (grow - 1) * e) * (1 + 0.08 * (1 - e)),
+              opacity: 1,
+            };
+          } else {
+            const e = (t - arrive) / FLIGHT_LAND_MS;
+            const b = route[route.length - 1]!;
+            trail = 1;
+            fade = 1 - e;
+            ghost = { x: b[0] - a[0], y: b[1] - a[1], scale: grow, opacity: Math.max(0, 1 - e * 1.6) };
+          }
+        }
+        next.set(shape.key, { lit: t >= scrolling, ghost, trail, fade });
+      }
+      if (down.length) setLanded(adding(down));
+      if (next.size || drawn) {
+        setFrames(next);
+        drawn = next.size > 0;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [sheetRef]);
+
+  return { frames, landed };
+}
+
 /**
  * The teacher's marks over the board, drawn by hand.
  *
@@ -2657,19 +3411,47 @@ function Carried({ shape, ghost }: { shape: Shape; ghost: Ghost }) {
 function Marks({
   sheetRef,
   sets,
+  paused,
+  band,
+  links,
+  lit,
+  joined,
+  onLit,
+  layoutRef,
 }: {
   sheetRef: RefObject<HTMLDivElement>;
   sets: MarkSet[];
+  /** The lesson is paused: a piece in flight stops where it is. */
+  paused: boolean;
+  /** The part of the board the student can see, for a flight to keep its piece in view. */
+  band: () => ViewBand | null;
+  /** The working's pairs with the diagram (see `pairLinks`). */
+  links: LinkPair[];
+  /** The pair lit by a hover or a tap. */
+  lit: number | null;
+  /** The marks whose line across is drawn, so their dot stands down. */
+  joined: ReadonlySet<string>;
+  onLit: (number: number | null, tapped?: boolean) => void;
+  /** Where everything on the working is, for the lines across to keep off. */
+  layoutRef: MutableRefObject<BoardLayout | null>;
 }) {
   const [shapes, setShapes] = useState<Shape[]>([]);
+  const [dots, setDots] = useState<PairDot[]>([]);
+  const [anchors, setAnchors] = useState<Map<string, Pt>>(() => new Map());
   const measure = useCallback(() => {
     const sheet = sheetRef.current;
     if (!sheet || sets.length === 0) {
       setShapes((now) => (now.length ? [] : now));
+      setDots((now) => (now.length ? [] : now));
+      layoutRef.current = null;
       return;
     }
-    setShapes(measureMarks(sheet, sets));
-  }, [sets, sheetRef]);
+    const measured = measureMarks(sheet, sets, links);
+    setShapes(measured.shapes);
+    setDots(measured.dots);
+    setAnchors(measured.anchors);
+    layoutRef.current = measured.layout;
+  }, [layoutRef, links, sets, sheetRef]);
 
   useLayoutEffect(measure, [measure]);
   useEffect(() => {
@@ -2695,17 +3477,30 @@ function Marks({
     };
   }, [measure, sheetRef]);
 
-  if (shapes.length === 0) return null;
+  const { frames, landed } = useFlights(shapes, paused, sheetRef, band);
+  if (shapes.length === 0 && dots.length === 0) return null;
+  // A piece still on its way: the hook it will land on, and its words, wait for it.
+  const waiting = (shape: Shape) => Boolean(shape.flight) && !landed.has(shape.key);
+  const timing = (shape: Shape): CSSProperties =>
+    shape.flight ? ({ "--delay": "0s" } as CSSProperties) : markTiming(shape);
   const highlights = shapes.filter((shape) => shape.kind === "highlight");
   const flashes = shapes.filter((shape) => shape.flash);
+  const flying = shapes.filter((shape) => shape.flight && frames.has(shape.key));
   return (
     <div className="pb-marks" aria-hidden="true">
       {/*
         Highlights on a layer of their own, multiplied into the board: the yellow goes behind
         the words, which stay black, the way a highlighter pen works on paper.
       */}
-      {highlights.length || flashes.length ? (
+      {highlights.length || flashes.length || flying.length ? (
         <svg className="pb-marks-svg under">
+          {flying.map((shape) =>
+            frames.get(shape.key)!.lit && shape.flight!.flash ? (
+              <g key={`lit-${shape.key}`} className="pb-flash">
+                <path d={shape.flight!.flash.d} style={{ strokeWidth: shape.flight!.flash.width }} />
+              </g>
+            ) : null,
+          )}
           {/* Where a piece brought from far above came from, lit up briefly as it goes. */}
           {flashes.map((shape) => (
             <g key={`flash-${shape.key}`} className="pb-flash" style={markTiming(shape)}>
@@ -2729,11 +3524,23 @@ function Marks({
         </svg>
       ) : null}
       <svg className="pb-marks-svg">
-        {shapes.filter((shape) => shape.kind !== "highlight").map((shape) => (
+        {flying.map((shape) => {
+          const frame = frames.get(shape.key)!;
+          return frame.trail > 0 ? (
+            <path
+              key={`trail-${shape.key}`}
+              className="pb-flight-trail"
+              d={through(shape.flight!.route.filter((_, i, all) => i % 3 === 0 || i === all.length - 1))}
+              pathLength={1}
+              style={{ strokeDashoffset: 1 - frame.trail, opacity: frame.fade }}
+            />
+          ) : null;
+        })}
+        {shapes.filter((shape) => shape.kind !== "highlight" && !waiting(shape)).map((shape) => (
           <g
             key={shape.key}
             className={`pb-mark ${shape.kind} ${shape.state}${shape.older ? " older" : ""}`}
-            style={markTiming(shape)}
+            style={timing(shape)}
           >
             <path className="pb-mark-line" d={shape.d} pathLength={1} />
             {shape.head ? (
@@ -2745,12 +3552,65 @@ function Marks({
       {shapes.map((shape) =>
         shape.ghost ? <Carried key={`ghost-${shape.key}`} shape={shape} ghost={shape.ghost} /> : null,
       )}
+      {flying.map((shape) => {
+        const frame = frames.get(shape.key)!;
+        const { from, glyphs } = shape.flight!;
+        return frame.ghost ? (
+          <div
+            key={`flight-${shape.key}`}
+            className="pb-carried flying"
+            style={{
+              left: from.left,
+              top: from.top,
+              width: from.right - from.left,
+              height: from.bottom - from.top,
+              opacity: frame.ghost.opacity,
+              transform: `translate(${frame.ghost.x.toFixed(1)}px, ${frame.ghost.y.toFixed(1)}px) scale(${frame.ghost.scale.toFixed(3)})`,
+            }}
+          >
+            {glyphs.map((glyph, i) => (
+              <span
+                key={i}
+                style={{
+                  left: glyph.left - from.left,
+                  top: glyph.top - from.top,
+                  height: glyph.height,
+                  font: glyph.font,
+                  lineHeight: `${glyph.height}px`,
+                }}
+              >
+                {glyph.text}
+              </span>
+            ))}
+          </div>
+        ) : null;
+      })}
+      {Array.from(anchors).map(([key, [x, y]]) => (
+        <span key={`anchor-${key}`} className="pb-link-anchor" data-link-work={key} style={{ left: x, top: y }} />
+      ))}
+      {dots.map((dot) => (
+        <span
+          key={`dot-${dot.number}`}
+          className={`pb-pairdot pair-${(dot.number - 1) % PAIR_COLOURS}${lit === dot.number ? " lit" : ""}${
+            dot.keys.every((key) => joined.has(key)) ? " joined" : ""
+          }`}
+          style={{ left: dot.x, top: dot.y }}
+          onMouseEnter={() => onLit(dot.number)}
+          onMouseLeave={() => onLit(null)}
+          onClick={(event) => {
+            event.stopPropagation();
+            onLit(dot.number, true);
+          }}
+        >
+          {dot.number}
+        </span>
+      ))}
       {shapes.map((shape) =>
-        shape.label ? (
+        shape.label && !waiting(shape) ? (
           <span
             key={`label-${shape.key}`}
             className={`pb-mark-label ${shape.kind} ${shape.state} ${shape.label.side}`}
-            style={{ left: shape.label.x, top: shape.label.y, ...markTiming(shape) }}
+            style={{ left: shape.label.x, top: shape.label.y, ...timing(shape) }}
           >
             {shape.label.text}
           </span>
@@ -2875,6 +3735,9 @@ function Pen({
       shadow.style.opacity = (0.85 - lift * 0.45).toFixed(2);
       const flag = show === true ? "1" : show === false ? "0" : show;
       if (rig.dataset.show !== flag) rig.dataset.show = flag;
+      // Whether it is writing a line: a diagram being drawn waits for the hand (FigureBoard.tsx).
+      const writing = state.job ? "1" : "0";
+      if (rig.dataset.writing !== writing) rig.dataset.writing = writing;
     };
 
     // Timed by the page's clock rather than the frame's stamp: the two agree in a browser, but

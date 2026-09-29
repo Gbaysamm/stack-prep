@@ -39,9 +39,26 @@ the circle between them) and label (a few words at a point, a side or an angle).
 A LESSON'S OWN SKETCH. A question with no printed figure may still describe one (a bearing,
 a ladder against a wall, a triangle given by its sides), and its lesson may carry a sketch
 drawn from the question's numbers: docs/questions/utme/mathematics/sketches/YYYY_qNN.svg (a
-second one YYYY_qNN_b.svg), attached to that question's lesson by the loader. Marks address it
-as `figure: sketch` (or `figure: sketch_b`), with a target found in it exactly as in a printed
-figure. See check_sketch for what a sketch may contain.
+second one YYYY_qNN_b.svg, a third YYYY_qNN_c.svg), attached to that question's lesson by the
+loader. Marks address them as `figure: sketch`, `sketch_b`, `sketch_c`, with a target found in
+it exactly as in a printed figure. See check_sketch for what a sketch may contain.
+
+A moment brings one in with `show_sketch: true` (the first sketch; `show_sketch: sketch` says
+the same) or `show_sketch: sketch_b` / `sketch_c`: each sketch once, in order (sketch before
+_b before _c), and only one the lesson has (see clean_show_sketch). A sketch no moment brings
+in comes with the first. A later sketch that keeps every shape of the one before it is drawn
+on the board as that picture built up, only its new strokes added.
+
+ACROSS, BETWEEN THE WORKING AND A DIAGRAM. An `arrow` may go from a piece of the working to
+a point on a diagram, or from a diagram mark to a piece of the working, with `to`:
+
+    {line: 6, kind: arrow, at: '(2, 0)', to: {figure: sketch, target: A}, text: 'here'}
+    {figure: sketch, kind: arrow, target: A, to: {line: 6, at: '(2, 0)'}}
+
+The first starts at the piece `at` of line 6 and lands on A (its `to` is a figure and a target,
+checked like a diagram mark's); the second starts at A and lands on the piece (its `to` is a
+line, this moment or an earlier one, and a piece of it). Only an arrow goes across, and it
+does not also have a `from`.
 
 At most MAX_MARKS marks to a moment: more than that and the student cannot follow them all
 while one sentence is said.
@@ -56,9 +73,11 @@ LINE_KINDS = {"circle", "underline", "arrow", "box", "highlight", "strike", "mov
 FIGURE_KINDS = {"circle", "underline", "arrow", "highlight", "strike", "arc", "label"}
 POINT_KINDS = LINE_KINDS | FIGURE_KINDS
 MAX_MARKS = 3
-_KEYS = {"line", "kind", "text", "at", "from", "figure", "target"}
+_KEYS = {"line", "kind", "text", "at", "from", "figure", "target", "to"}
 #: What a mark calls a lesson's sketches: the first, and a second where there is one.
-SKETCH_NAMES = ("sketch", "sketch_b")
+SKETCH_NAMES = ("sketch", "sketch_b", "sketch_c")
+#: The file each is in: YYYY_qNN.svg, YYYY_qNN_b.svg, YYYY_qNN_c.svg.
+SKETCH_SUFFIXES = ("", "_b", "_c")
 
 #: Elements a sketch may not contain: anything that runs, embeds or fetches.
 _BANNED_TAGS = {"script", "foreignobject", "iframe", "object", "embed", "image", "use", "style",
@@ -187,7 +206,7 @@ def _moment(line: object, index: int, where: str, what: str) -> int:
 
 
 def _figure_mark(
-    mark: dict,
+    mark: dict[str, object],
     kind: object,
     where: str,
     figures: list[str] | None,
@@ -199,11 +218,14 @@ def _figure_mark(
             raise SystemExit(f"{where}: figure: {figure}, but this lesson has no {figure} file")
     elif isinstance(figure, bool) or not isinstance(figure, int) or figure < 0:
         raise SystemExit(
-            f"{where}: a diagram mark's figure is the figure's number from 0, or sketch / sketch_b"
+            f"{where}: a diagram mark's figure is the figure's number from 0, or sketch,"
+            " sketch_b or sketch_c"
         )
     for key in ("line", "at", "from"):
         if key in mark:
             raise SystemExit(f"{where}: a diagram mark has a figure and a target, not {key}")
+    if "to" in mark and kind != "arrow":
+        raise SystemExit(f"{where}: only an arrow goes across (to) between a diagram and a line")
     if kind not in FIGURE_KINDS:
         raise SystemExit(f"{where}: a diagram mark's kind is one of {sorted(FIGURE_KINDS)}")
     target = mark.get("target")
@@ -262,6 +284,54 @@ def _figure_mark(
     return clean
 
 
+def _to_line(to: object, index: int, where: str) -> dict[str, object]:
+    """Where an arrow across from a diagram lands: a line (this moment or earlier) and a piece."""
+    if not isinstance(to, dict) or "line" not in to or set(to) - {"line", "at"}:
+        raise SystemExit(f"{where}: an arrow across from a diagram has to: {{line: …, at: …}}")
+    clean: dict[str, object] = {"line": _moment(to.get("line"), index, where, "to.line")}
+    at = _piece(to.get("at"), "to.at", where)
+    if at is not None:
+        clean["at"] = at
+    return clean
+
+
+def _to_figure(
+    to: object,
+    where: str,
+    figures: list[str] | None,
+    sketches: dict[str, str] | None,
+) -> dict[str, object]:
+    """Where an arrow across from the working lands: a diagram and a target in it."""
+    if not isinstance(to, dict) or set(to) != {"figure", "target"}:
+        raise SystemExit(f"{where}: an arrow across to a diagram has to: {{figure: …, target: …}}")
+    found = _figure_mark(dict(to), "circle", f"{where} (to)", figures, sketches)
+    return {"figure": found["figure"], "target": found["target"]}
+
+
+def clean_show_sketch(value: object, drawn: dict[str, str], brought: list[str], where: str) -> str:
+    """The sketch a moment brings in (`show_sketch`), checked: true is the first sketch.
+
+    It must be one of the lesson's sketches, not brought in before, and after every sketch
+    already brought in (sketch, then sketch_b, then sketch_c); a later one only once every
+    earlier one the lesson has is up. `brought` is the names so far.
+    """
+    name = "sketch" if value is True else value
+    if name not in SKETCH_NAMES:
+        raise SystemExit(f"{where}: show_sketch is true, or one of {list(SKETCH_NAMES)}")
+    assert isinstance(name, str)
+    if name not in drawn:
+        raise SystemExit(f"{where}: show_sketch: {name}, but the lesson has no {name} file")
+    if name in brought:
+        raise SystemExit(f"{where}: {name} is brought in once")
+    if any(SKETCH_NAMES.index(name) < SKETCH_NAMES.index(earlier) for earlier in brought):
+        raise SystemExit(f"{where}: sketches are brought in in order (sketch, sketch_b, sketch_c)")
+    earlier = SKETCH_NAMES[: SKETCH_NAMES.index(name)]
+    before = [n for n in earlier if n in drawn and n not in brought]
+    if before:
+        raise SystemExit(f"{where}: {name} comes after {before[0]}, which no moment has brought in")
+    return name
+
+
 def clean_points(
     point: object,
     index: int,
@@ -300,6 +370,8 @@ def clean_points(
             clean = _figure_mark(mark, kind, where, figures, sketches)
             if kind == "label" and text is None:
                 raise SystemExit(f"{where}: a label mark needs its text")
+            if "to" in mark:
+                clean["to"] = _to_line(mark["to"], index, where)
         else:
             if kind not in LINE_KINDS:
                 raise SystemExit(f"{where}: {kind} is for the diagram (figure and target)")
@@ -322,9 +394,15 @@ def clean_points(
                 clean["from"] = begin
             elif kind == "move":
                 raise SystemExit(f"{where}: a move needs a from: where the piece is taken from")
+            if "to" in mark:
+                if kind != "arrow" or start is not None:
+                    raise SystemExit(
+                        f"{where}: only an arrow goes across (to) to a diagram, and not with a from"
+                    )
+                clean["to"] = _to_figure(mark["to"], where, figures, sketches)
         if text is not None:
             clean["text"] = text.strip()
         # Stored in the order the keys were always written: line, kind, then the rest.
-        order = ["line", "figure", "kind", "text", "at", "from", "target"]
+        order = ["line", "figure", "kind", "text", "at", "from", "target", "to"]
         marks.append({key: clean[key] for key in order if key in clean})
     return marks

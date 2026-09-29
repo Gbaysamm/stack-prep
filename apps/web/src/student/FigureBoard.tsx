@@ -41,7 +41,7 @@
  */
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { CSSProperties } from "react";
+import type { CSSProperties, RefObject } from "react";
 
 import type { QuestionFigure } from "../Figures.js";
 import type { FigureSpot, LessonPoint } from "./api.js";
@@ -56,6 +56,7 @@ import {
   chipWidth,
   markDelays,
   seeded,
+  stillMotion,
   through,
   unsteady,
   type Box,
@@ -93,6 +94,8 @@ interface Geometry {
   /** Where straight lines end, with how many of them meet there. */
   ends: { at: Pt; count: number }[];
   centroid: Pt;
+  /** The drawing's clean copy (see `cleanCopy`), for drawing it in stroke by stroke. */
+  clean: SVGSVGElement;
 }
 
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -105,7 +108,8 @@ const KEEP_ATTRS = new Set([
   "viewBox", "width", "height", "x", "y", "dx", "dy", "d", "cx", "cy", "r", "rx", "ry",
   "x1", "y1", "x2", "y2", "points", "transform", "font-family", "font-size", "font-weight",
   "font-style", "text-anchor", "dominant-baseline", "letter-spacing", "fill", "stroke",
-  "stroke-width",
+  "stroke-width", "stroke-dasharray", "stroke-linecap", "stroke-linejoin", "opacity",
+  "fill-opacity", "stroke-opacity", "fill-rule",
 ]);
 
 function cleanCopy(source: Element): SVGElement | null {
@@ -301,7 +305,7 @@ function measure(markup: string): Geometry | null {
     const centroid: Pt = all.length
       ? [all.reduce((s, p) => s + p[0], 0) / all.length, all.reduce((s, p) => s + p[1], 0) / all.length]
       : [box.x + box.w / 2, box.y + box.h / 2];
-    return { view: box, labels, dots, rings, segments, ends, centroid };
+    return { view: box, labels, dots, rings, segments, ends, centroid, clean: svg };
   } finally {
     host.remove();
   }
@@ -447,7 +451,20 @@ interface FigureShape {
   head?: string;
   label?: { x: number; y: number; text: string };
   delay: number;
+  /** The place the mark is at (a point, a side's middle, an angle's vertex), for a line across. */
+  anchor?: Pt;
+  /** The numbered dot of the pair this mark is in (see `FigureLink`), placed clear of the rest. */
+  badge?: { x: number; y: number; number: number };
 }
+
+/** A mark on the diagram paired with a line of the working (Board.tsx, `pairLinks`). */
+export interface FigureLink {
+  key: string;
+  number: number;
+}
+
+/** How many colours the pairs cycle through (board.css, `.pair-N`). */
+const PAIR_COLOURS = 5;
 
 const unit = (v: Pt): Pt => {
   const d = Math.hypot(v[0], v[1]) || 1;
@@ -553,6 +570,291 @@ function ringFor(geo: Geometry, p: Pt, q: Pt): Ring | null {
   return null;
 }
 
+/* ---- Drawing a figure in, stroke by stroke ----------------------------------------------- */
+
+/**
+ * A DIAGRAM IS DRAWN, NOT SHOWN. When a figure or sketch comes onto the board the marker draws
+ * it: every line, circle and side in the order the drawing lists them, each followed along its
+ * length by the pen; then the fills washed in; then the labels written one by one. It takes the
+ * time the moment introducing it takes, stops while the lesson is paused, and is simply there,
+ * whole, for a student who has asked for less movement.
+ *
+ * What is drawn is the drawing's clean copy (see `cleanCopy`: only shapes, text and the
+ * attributes that place and colour them), never the file's own markup. Once it is finished the
+ * picture itself (the <img>) is shown again in its place, exactly as before.
+ *
+ * A sketch that builds on the one before (every shape of the earlier one is in it, unchanged)
+ * takes its place, and only what is new is drawn: the teacher adding to the same picture.
+ */
+
+/** A drawable element as it is compared between two drawings: its tag, attributes and text. */
+function signature(element: Element): string {
+  const attributes = Array.from(element.attributes)
+    .map((attribute) => `${attribute.name}=${attribute.value.trim()}`)
+    .sort()
+    .join(";");
+  const text = element.localName === "text" ? `|${(element.textContent ?? "").trim()}` : "";
+  return `${element.localName}[${attributes}]${text}`;
+}
+
+const DRAWN = "path, line, polyline, polygon, circle, ellipse, rect, text";
+
+/** The signatures of everything drawn in a drawing, from its markup (cleaned first). */
+export function drawingSignatures(markup: string): string[] {
+  const parsed = new DOMParser().parseFromString(markup, "image/svg+xml");
+  const source = parsed.documentElement;
+  if (!source || source.localName !== "svg" || parsed.querySelector("parsererror")) return [];
+  const svg = cleanCopy(source);
+  return svg ? Array.from(svg.querySelectorAll(DRAWN)).map(signature) : [];
+}
+
+/** Whether every shape of `earlier` is in `later`, as many times: `later` is a build-up. */
+export function buildsOn(earlier: string[], later: string[]): boolean {
+  if (earlier.length === 0 || later.length <= earlier.length) return false;
+  const left = new Map<string, number>();
+  for (const sig of later) left.set(sig, (left.get(sig) ?? 0) + 1);
+  for (const sig of earlier) {
+    const n = left.get(sig) ?? 0;
+    if (n === 0) return false;
+    left.set(sig, n - 1);
+  }
+  return true;
+}
+
+/** One thing the pen draws: a stroke along a shape, a fill washed in, or a label written. */
+interface Stroke {
+  element: SVGGraphicsElement;
+  kind: "stroke" | "fade" | "fill" | "text";
+  length: number;
+  /** Its share of the time. */
+  weight: number;
+  /** What to put back when it is drawn. */
+  restore: () => void;
+  /** Its state `p` of the way through (0 to 1). */
+  show: (p: number) => void;
+}
+
+/** Figures already drawn this visit, so a figure shown again is not drawn a second time. */
+const drawnOnce = new Set<string>();
+
+/** How long to wait for a drawing's shapes before showing the picture as it is. */
+const DRAW_WAIT_MS = 2500;
+
+function useDrawIn({
+  geometry,
+  url,
+  liveRef,
+  penRef,
+  drawMs,
+  paused,
+  base,
+  onDrawn,
+}: {
+  geometry: Geometry | null;
+  url: string;
+  liveRef: RefObject<HTMLDivElement>;
+  penRef: RefObject<HTMLDivElement>;
+  drawMs: number;
+  paused: boolean;
+  /** What is already on the board of this picture (a build-up): not drawn again. */
+  base: string[];
+  onDrawn: () => void;
+}): boolean {
+  const [done, setDone] = useState(() => stillMotion() || drawnOnce.has(url));
+  const pausedRef = useRef(paused);
+  pausedRef.current = paused;
+  const finish = useRef(onDrawn);
+  finish.current = onDrawn;
+  const started = useRef(false);
+
+  // Nothing to wait for: tell the board straight away.
+  useEffect(() => {
+    if (done) finish.current();
+  }, [done]);
+
+  // A drawing that cannot be read (not an SVG, not reachable) is shown as it is.
+  useEffect(() => {
+    if (done || geometry) return;
+    const timer = window.setTimeout(() => setDone(true), DRAW_WAIT_MS);
+    return () => window.clearTimeout(timer);
+  }, [done, geometry]);
+
+  useEffect(() => {
+    const host = liveRef.current;
+    if (done || !geometry || !host || started.current) return;
+    started.current = true;
+    const svg = geometry.clean.cloneNode(true) as SVGSVGElement;
+    svg.removeAttribute("width");
+    svg.removeAttribute("height");
+    svg.setAttribute("class", "pb-live-svg");
+    host.replaceChildren(svg);
+    const already = new Map<string, number>();
+    for (const sig of base) already.set(sig, (already.get(sig) ?? 0) + 1);
+    const strokes: Stroke[] = [];
+    const fills: Stroke[] = [];
+    const texts: Stroke[] = [];
+    for (const element of Array.from(svg.querySelectorAll<SVGGraphicsElement>(DRAWN))) {
+      const sig = signature(element);
+      const kept = already.get(sig) ?? 0;
+      if (kept > 0) {
+        already.set(sig, kept - 1);
+        continue;
+      }
+      const style = window.getComputedStyle(element);
+      if (element.localName === "text") {
+        const was = element.style.opacity;
+        element.style.opacity = "0";
+        texts.push({
+          element,
+          kind: "text",
+          length: 0,
+          weight: 28,
+          restore: () => (element.style.opacity = was),
+          show: (p) => (element.style.opacity = String(Math.min(1, p * 1.6))),
+        });
+        continue;
+      }
+      const stroked = style.stroke !== "none" && Number.parseFloat(style.strokeWidth) > 0;
+      const filled = style.fill !== "none" && style.fill !== "transparent" && Number.parseFloat(style.fillOpacity || "1") > 0;
+      let length = 0;
+      try {
+        length = (element as unknown as SVGGeometryElement).getTotalLength();
+      } catch {
+        length = 0;
+      }
+      if (stroked && length > 0) {
+        const dashed = style.strokeDasharray && style.strokeDasharray !== "none";
+        const was = { dash: element.style.strokeDasharray, offset: element.style.strokeDashoffset, opacity: element.style.opacity };
+        if (dashed) element.style.opacity = "0";
+        else {
+          element.style.strokeDasharray = `${length} ${length}`;
+          element.style.strokeDashoffset = String(length);
+        }
+        const fillWas = element.style.fillOpacity;
+        if (filled) element.style.fillOpacity = "0";
+        strokes.push({
+          element,
+          kind: dashed ? "fade" : "stroke",
+          length,
+          weight: Math.max(18, length),
+          restore: () => {
+            element.style.strokeDasharray = was.dash;
+            element.style.strokeDashoffset = was.offset;
+            element.style.opacity = was.opacity;
+            element.style.fillOpacity = fillWas;
+          },
+          show: (p) => {
+            if (dashed) element.style.opacity = String(p);
+            else element.style.strokeDashoffset = String(length * (1 - p));
+          },
+        });
+        continue;
+      }
+      if (filled) {
+        const was = element.style.opacity;
+        element.style.opacity = "0";
+        fills.push({
+          element,
+          kind: "fill",
+          length: 0,
+          weight: 6,
+          restore: () => (element.style.opacity = was),
+          show: (p) => (element.style.opacity = String(p)),
+        });
+      }
+    }
+    // Outlines and lines first, in the drawing's own order; then the fills; then the words.
+    const plan = [...strokes, ...fills, ...texts];
+    const total = plan.reduce((sum, stroke) => sum + stroke.weight, 0) || 1;
+    const spans = plan.map((stroke) => (stroke.weight / total) * drawMs);
+    const pen = penRef.current;
+    let clock = 0;
+    let owed = 0;
+    let last = performance.now();
+    let frame = 0;
+    const place = (x: number, y: number, lifted: boolean) => {
+      if (!pen) return;
+      const frameBox = host.getBoundingClientRect();
+      pen.style.transform = `translate(${(x - frameBox.left).toFixed(1)}px, ${(y - frameBox.top).toFixed(1)}px)`;
+      pen.dataset.lift = lifted ? "1" : "0";
+    };
+    const tipOf = (stroke: Stroke, p: number): [number, number] | null => {
+      const m = stroke.element.getScreenCTM();
+      if (!m) return null;
+      if (stroke.kind === "stroke" || stroke.kind === "fade") {
+        const at = (stroke.element as unknown as SVGGeometryElement).getPointAtLength(stroke.length * p);
+        const q = new DOMPoint(at.x, at.y).matrixTransform(m);
+        return [q.x, q.y];
+      }
+      const b = stroke.element.getBBox();
+      const q = new DOMPoint(b.x + b.width * p, b.y + b.height).matrixTransform(m);
+      return [q.x, q.y];
+    };
+    const tick = (now: number) => {
+      const step = Math.min(100, now - last);
+      last = now;
+      // One hand: while the marker is writing a line of the working, the drawing waits for it,
+      // and then makes up the time it waited (at up to twice the pace), so it still ends near
+      // the end of its moment and the marks waiting on it are not held back long.
+      const writing = document.querySelector('.pb-pen-rig[data-writing="1"][data-show="1"]') !== null;
+      if (!pausedRef.current) {
+        if (writing) owed += step;
+        else {
+          const extra = Math.min(owed, step);
+          owed -= extra;
+          clock += step + extra;
+        }
+      }
+      if (pen) pen.dataset.away = writing ? "1" : "0";
+      let t = clock;
+      let current = -1;
+      for (let i = 0; i < plan.length; i += 1) {
+        const span = spans[i] ?? 0;
+        if (t >= span) {
+          plan[i]!.show(1);
+          t -= span;
+          continue;
+        }
+        current = i;
+        const p = span > 0 ? t / span : 1;
+        plan[i]!.show(p);
+        const tip = tipOf(plan[i]!, p);
+        if (tip) place(tip[0], tip[1], plan[i]!.kind === "fill");
+        break;
+      }
+      if (current < 0) {
+        for (const stroke of plan) stroke.restore();
+        drawnOnce.add(url);
+        if (pen) pen.dataset.lift = "done";
+        setDone(true);
+        return;
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [base, done, drawMs, geometry, liveRef, penRef, url]);
+
+  return done;
+}
+
+/** The marker as it draws a figure: the working's pen, smaller, leaning the same way. */
+function FigurePen({ penRef }: { penRef: RefObject<HTMLDivElement> }) {
+  return (
+    <div ref={penRef} className="pb-figpen" aria-hidden="true" data-lift="1">
+      <div className="pb-figpen-body">
+        <svg viewBox="-9 -84 18 86" width="18" height="86">
+          <path className="pb-pen-nib" d="M-1.6 0h3.2l1.6-6.4h-6.4z" />
+          <path className="pb-pen-cone" d="M-3.2-6.2h6.4l2.2-7.6h-10.8z" />
+          <rect x="-6.5" y="-66.5" width="13" height="53.2" rx="3" fill="#f4f1f9" stroke="#cfc8dc" strokeWidth="0.8" />
+          <rect className="pb-pen-band" x="-6.5" y="-47" width="13" height="15" />
+          <rect x="-7.4" y="-82" width="14.8" height="19" rx="3.8" fill="#1b1726" />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
 /** A hand-drawn arc about `centre` from angle a0 through `sweep`, a little past each end. */
 function handArc(centre: Pt, r: number, a0: number, sweep: number, rnd: () => number, k: number): Pt[] {
   const over = Math.min(0.12, (6 * k) / r) * Math.sign(sweep || 1);
@@ -572,8 +874,9 @@ function handArc(centre: Pt, r: number, a0: number, sweep: number, rnd: () => nu
 function figureShapes(
   geo: Geometry,
   sets: FigureMarkSet[],
-  figure: DrawingKey,
+  covers: DrawingKey[],
   k: number,
+  pairs: Map<string, number> = new Map(),
 ): FigureShape[] {
   const shapes: FigureShape[] = [];
   const taken: Box[] = [];
@@ -593,17 +896,18 @@ function figureShapes(
     return Math.hypot(v[0], v[1]) < 1 ? [0, -1] : unit(v);
   };
   for (const set of sets) {
-    const delays = markDelays(set.points);
+    const delays = markDelays(set.points, set.index);
     set.points.forEach((point, n) => {
-      if (point.figure !== figure) return;
+      if (point.figure == null || !covers.includes(point.figure)) return;
       const found = places(geo, point.target);
       if (!found) return;
       const rnd = seeded(set.index * 131 + n * 17 + 11);
       const key = `${set.index}-${n}`;
       const text = point.text?.trim() || null;
-      const base = { key, kind: point.kind, state: set.state, delay: delays[n] ?? 0 };
       const [p, q, r] = found;
       if (!p) return;
+      const anchor: Pt = r && q ? q.at : q ? [(p.at[0] + q.at[0]) / 2, (p.at[1] + q.at[1]) / 2] : p.at;
+      const base = { key, kind: point.kind, state: set.state, delay: delays[n] ?? 0, anchor };
       // An angle: three places, the vertex in the middle.
       if (r && q) {
         const vertex = q.at;
@@ -818,6 +1122,18 @@ function figureShapes(
       if (spot) shapes.push({ ...base, kind: "label", d: "", label: spot });
     });
   }
+  // One numbered dot for each pair with a line of the working, beside the pair's first mark,
+  // clear of the printed labels and every mark's words.
+  const badged = new Set<number>();
+  for (const shape of shapes) {
+    const number = pairs.get(shape.key);
+    if (number === undefined || !shape.anchor || badged.has(number)) continue;
+    badged.add(number);
+    const size = 18 * k;
+    const centre = chipSpot(geo, shape.anchor, away(shape.anchor), size, size, 10 * k, taken);
+    taken.push({ left: centre[0] - size / 2, top: centre[1] - size / 2, right: centre[0] + size / 2, bottom: centre[1] + size / 2 });
+    shape.badge = { x: centre[0], y: centre[1], number };
+  }
   return shapes;
 }
 
@@ -826,13 +1142,55 @@ function figureShapes(
 function FigureCanvas({
   drawing,
   sets,
+  links,
+  lit,
+  joined,
+  onLit,
+  covers,
+  base,
+  paused,
+  onDrawn,
 }: {
   drawing: Drawing;
+  /** The diagrams whose marks it carries: its own, and those of a sketch it builds on. */
+  covers: DrawingKey[];
+  /** The shapes already on the board of the sketch it builds on, not drawn again. */
+  base: string[];
+  paused: boolean;
+  onDrawn: (key: DrawingKey) => void;
   sets: FigureMarkSet[];
+  links: FigureLink[];
+  lit: number | null;
+  joined: ReadonlySet<string>;
+  onLit: (number: number | null, tapped?: boolean) => void;
 }) {
-  const { figure, key: index } = drawing;
+  // Keyed on what the pairs are, not the list's identity, so the marks are not laid out again
+  // every time the board around them renders.
+  const signature = links.map((link) => `${link.key}:${link.number}`).join(",");
+  const pairs = useMemo(
+    () => new Map(signature ? signature.split(",").map((pair) => [pair.split(":")[0]!, Number(pair.split(":")[1])] as const) : []),
+    [signature],
+  );
+  const { figure } = drawing;
   const geometry = useGeometry(figure.url, drawing.markup);
   const imageRef = useRef<HTMLImageElement>(null);
+  const liveRef = useRef<HTMLDivElement>(null);
+  const penRef = useRef<HTMLDivElement>(null);
+  // Kept by what they hold, so the marks are not laid out again on every render of the panel.
+  const coverKey = covers.join(",");
+  const stableCovers = useMemo(() => covers, [coverKey]);
+  const baseKey = base.join("");
+  const stableBase = useMemo(() => base, [baseKey]);
+  const drawn = useDrawIn({
+    geometry,
+    url: figure.url,
+    liveRef,
+    penRef,
+    drawMs: drawing.drawMs ?? 4000,
+    paused,
+    base: stableBase,
+    onDrawn: () => onDrawn(drawing.key),
+  });
   //: The drawing's units per screen pixel, as the image is shown now.
   const [k, setK] = useState(0);
   useLayoutEffect(() => {
@@ -849,14 +1207,34 @@ function FigureCanvas({
     return () => observer.disconnect();
   }, [geometry]);
   const shapes = useMemo(
-    () => (geometry && k > 0 ? figureShapes(geometry, sets, index, k) : []),
-    [geometry, sets, index, k],
+    () => (geometry && k > 0 ? figureShapes(geometry, sets, stableCovers, k, pairs) : []),
+    [geometry, sets, stableCovers, k, pairs],
   );
   const view = geometry?.view;
   const box = view ? `${view.x} ${view.y} ${view.w} ${view.h}` : undefined;
   const under = shapes.filter((shape) => shape.kind === "highlight");
   const over = shapes.filter((shape) => shape.kind !== "highlight" && shape.d);
   const timing = (shape: FigureShape) => ({ "--delay": `${shape.delay}s` }) as CSSProperties;
+  const litOf = (shape: FigureShape) =>
+    lit !== null && pairs.get(shape.key) === lit ? " lit" : "";
+  const place = (x: number, y: number) =>
+    view ? { left: `${((x - view.x) / view.w) * 100}%`, top: `${((y - view.y) / view.h) * 100}%` } : {};
+  /** The pair whose mark is under the pointer, if any: within a finger's width of it. */
+  const pairAt = (event: { clientX: number; clientY: number }): number | null => {
+    const image = imageRef.current;
+    if (!image || !view || k <= 0) return null;
+    const frame = image.getBoundingClientRect();
+    const x = view.x + (event.clientX - frame.left) * k;
+    const y = view.y + (event.clientY - frame.top) * k;
+    let best: { number: number; gap: number } | null = null;
+    for (const shape of shapes) {
+      const number = pairs.get(shape.key);
+      if (number === undefined || !shape.anchor) continue;
+      const gap = Math.hypot(shape.anchor[0] - x, shape.anchor[1] - y) / k;
+      if (gap < 22 && (!best || gap < best.gap)) best = { number, gap };
+    }
+    return best?.number ?? null;
+  };
   const ratio =
     view && view.h > 0
       ? view.w / view.h
@@ -865,8 +1243,17 @@ function FigureCanvas({
         : undefined;
   return (
     <div
-      className={`pb-figure ${drawing.markup !== undefined ? "sketch" : ""}`}
+      className={`pb-figure ${drawing.markup !== undefined ? "sketch" : ""}${drawn ? "" : " drawing"}`}
       style={ratio ? ({ "--ratio": ratio } as CSSProperties) : undefined}
+      onMouseMove={pairs.size ? (event) => {
+        const number = pairAt(event);
+        if (number !== lit) onLit(number);
+      } : undefined}
+      onMouseLeave={pairs.size ? () => onLit(null) : undefined}
+      onClick={pairs.size ? (event) => {
+        const number = pairAt(event);
+        if (number !== null) onLit(number, true);
+      } : undefined}
     >
       <img
         ref={imageRef}
@@ -879,12 +1266,18 @@ function FigureCanvas({
           if (image && geometry) setK(geometry.view.w / (image.getBoundingClientRect().width || 1));
         }}
       />
+      {drawn ? null : (
+        <>
+          <div className="pb-live" ref={liveRef} aria-hidden="true" />
+          <FigurePen penRef={penRef} />
+        </>
+      )}
       {view && shapes.length ? (
         <>
           {under.length ? (
             <svg className="pb-figmarks under" viewBox={box} aria-hidden="true">
               {under.map((shape) => (
-                <g key={shape.key} className={`pb-mark highlight ${shape.state} ${shape.fill ? "fill" : ""}`} style={timing(shape)}>
+                <g key={shape.key} className={`pb-mark highlight ${shape.state} ${shape.fill ? "fill" : ""}${litOf(shape)}`} style={timing(shape)}>
                   <path className="pb-mark-line" d={shape.d} pathLength={1} style={shape.width ? { strokeWidth: shape.width } : undefined} />
                 </g>
               ))}
@@ -897,12 +1290,44 @@ function FigureCanvas({
             style={{ "--k": k } as CSSProperties}
           >
             {over.map((shape) => (
-              <g key={shape.key} className={`pb-mark ${shape.kind} ${shape.state} ${shape.fill ? "fill" : ""}`} style={timing(shape)}>
+              <g key={shape.key} className={`pb-mark ${shape.kind} ${shape.state} ${shape.fill ? "fill" : ""}${litOf(shape)}`} style={timing(shape)}>
                 <path className="pb-mark-line" d={shape.d} pathLength={1} />
                 {shape.head ? <path className="pb-mark-head" d={shape.head} pathLength={1} /> : null}
               </g>
             ))}
           </svg>
+          {shapes.map((shape) =>
+            shape.anchor && pairs.has(shape.key) ? (
+              <span
+                key={`anchor-${shape.key}`}
+                className="pb-link-anchor"
+                data-link-fig={shape.key}
+                style={place(shape.anchor[0], shape.anchor[1])}
+              />
+            ) : null,
+          )}
+          {shapes.map((shape) => {
+            const badge = shape.badge;
+            if (!badge) return null;
+            const keys = links.filter((link) => link.number === badge.number).map((link) => link.key);
+            return (
+              <span
+                key={`dot-${badge.number}`}
+                className={`pb-pairdot fig pair-${(badge.number - 1) % PAIR_COLOURS}${
+                  lit === badge.number ? " lit" : ""
+                }${keys.every((key) => joined.has(key)) ? " joined" : ""}`}
+                style={{ ...place(badge.x, badge.y), ...timing(shape) }}
+                aria-hidden="true"
+                onMouseEnter={() => onLit(badge.number)}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onLit(badge.number, true);
+                }}
+              >
+                {badge.number}
+              </span>
+            );
+          })}
           {shapes.map((shape) =>
             shape.label ? (
               <span
@@ -926,7 +1351,7 @@ function FigureCanvas({
 }
 
 /** Which diagram a mark is on: a printed figure's number, or the lesson's own sketch. */
-export type DrawingKey = number | "sketch" | "sketch_b";
+export type DrawingKey = number | "sketch" | "sketch_b" | "sketch_c";
 
 /** One diagram on the desk: a question's printed figure, or a sketch the lesson brings. */
 export interface Drawing {
@@ -936,6 +1361,8 @@ export interface Drawing {
   markup?: string;
   /** Whether it is on the board yet: a sketch comes in when the lesson turns to it. */
   shown: boolean;
+  /** How long drawing it in takes: the moment that brings it in (milliseconds). */
+  drawMs?: number;
 }
 
 /**
@@ -951,9 +1378,23 @@ export interface Drawing {
 export function FigurePanel({
   drawings,
   sets,
+  links = [],
+  lit = null,
+  joined = new Set<string>(),
+  onLit = () => undefined,
+  paused = false,
+  onDrawn = () => undefined,
 }: {
   drawings: Drawing[];
   sets: FigureMarkSet[];
+  /** The marks on the diagrams paired with lines of the working (Board.tsx, `pairLinks`). */
+  links?: (FigureLink & { figure: DrawingKey })[];
+  lit?: number | null;
+  joined?: ReadonlySet<string>;
+  onLit?: (number: number | null, tapped?: boolean) => void;
+  paused?: boolean;
+  /** A diagram has been drawn in: the marks on it may go up. */
+  onDrawn?: (key: DrawingKey) => void;
 }) {
   const [open, setOpen] = useState(true);
   const count = sets.reduce(
@@ -966,7 +1407,31 @@ export function FigurePanel({
     if (count > seen.current && !open) setFresh(true);
     seen.current = count;
   }, [count, open]);
-  const up = drawings.filter((drawing) => drawing.shown);
+  // A sketch that builds on an earlier one takes its place on the board, carrying its marks,
+  // and only what it adds is drawn.
+  const signatures = useMemo(
+    () => new Map(drawings.map((drawing) => [drawing.key, drawing.markup ? drawingSignatures(drawing.markup) : []])),
+    [drawings],
+  );
+  const shownAll = drawings.filter((drawing) => drawing.shown);
+  const replaced = new Map<DrawingKey, { covers: DrawingKey[]; base: string[] }>();
+  const gone = new Set<DrawingKey>();
+  shownAll.forEach((later, j) => {
+    const covers: DrawingKey[] = [later.key];
+    let base: string[] = [];
+    for (let i = j - 1; i >= 0; i -= 1) {
+      const earlier = shownAll[i]!;
+      if (gone.has(earlier.key) || typeof earlier.key === "number") continue;
+      if (buildsOn(signatures.get(earlier.key) ?? [], signatures.get(later.key) ?? [])) {
+        gone.add(earlier.key);
+        covers.push(...(replaced.get(earlier.key)?.covers ?? [earlier.key]));
+        base = signatures.get(earlier.key) ?? [];
+        break;
+      }
+    }
+    replaced.set(later.key, { covers, base });
+  });
+  const up = shownAll.filter((drawing) => !gone.has(drawing.key));
   if (drawings.length === 0) return null;
   const printed = up.filter((drawing) => typeof drawing.key === "number").length;
   const title =
@@ -991,9 +1456,25 @@ export function FigurePanel({
           {open ? "Hide" : "Show"}
         </button>
       </div>
-      <div className="pb-figbody">
+      <div
+        className="pb-figbody"
+        data-many={up.length > 1 ? "" : undefined}
+        style={{ "--count": up.length } as CSSProperties}
+      >
         {up.map((drawing) => (
-          <FigureCanvas key={String(drawing.key)} drawing={drawing} sets={sets} />
+          <FigureCanvas
+            key={String(drawing.key)}
+            drawing={drawing}
+            sets={sets}
+            covers={replaced.get(drawing.key)?.covers ?? [drawing.key]}
+            base={replaced.get(drawing.key)?.base ?? []}
+            paused={paused}
+            onDrawn={onDrawn}
+            links={links.filter((link) => (replaced.get(drawing.key)?.covers ?? [drawing.key]).includes(link.figure))}
+            lit={lit}
+            joined={joined}
+            onLit={onLit}
+          />
         ))}
       </div>
     </aside>

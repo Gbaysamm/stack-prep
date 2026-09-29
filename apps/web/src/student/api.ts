@@ -205,8 +205,11 @@ export interface LessonBeat {
   answer: boolean;
   /** Marks drawn over earlier lines while this beat is said: circles, underlines, arrows. */
   point?: LessonPoint[] | null;
-  /** The beat that brings the lesson's sketch onto the board (the first, where none does). */
-  show_sketch?: boolean;
+  /**
+   * The sketch this beat brings onto the board: true (or 'sketch') for the first, 'sketch_b' or
+   * 'sketch_c' for a later one. A sketch no beat brings in comes with the first.
+   */
+  show_sketch?: boolean | 'sketch' | 'sketch_b' | 'sketch_c';
 }
 
 /**
@@ -215,7 +218,7 @@ export interface LessonBeat {
  * markup.
  */
 export interface LessonSketch {
-  name: 'sketch' | 'sketch_b';
+  name: 'sketch' | 'sketch_b' | 'sketch_c';
   svg: string;
   alt_text?: string | null;
   width?: number | null;
@@ -253,13 +256,27 @@ export interface LessonPoint {
    * Which diagram a mark is on: one of the question's figures by its number from 0, or the
    * lesson's own sketch ('sketch', and 'sketch_b' for a second).
    */
-  figure?: number | 'sketch' | 'sketch_b' | null;
+  figure?: number | 'sketch' | 'sketch_b' | 'sketch_c' | null;
   /**
    * What on the figure is marked: a point by its label ('B'), a side by its two ends ('AB'),
    * an angle by three points with the vertex in the middle ('ABC'), the labels as a list where
    * one is longer than a letter (['P', "Q'"]), or a place in the drawing's own units ({x, y}).
    */
   target?: string | string[] | FigureSpot | null;
+  /**
+   * An arrow across between the working and a diagram: from a piece of the working (`line`,
+   * `at`) to a point on a figure (`to.figure`, `to.target`), or from a figure mark to a piece
+   * of the working (`to.line`, `to.at`).
+   */
+  to?: LessonPointTo | null;
+}
+
+/** Where an arrow across goes: a place on a diagram, or a piece of a line of the working. */
+export interface LessonPointTo {
+  figure?: number | 'sketch' | 'sketch_b' | 'sketch_c' | null;
+  target?: string | string[] | FigureSpot | null;
+  line?: number | null;
+  at?: string | null;
 }
 
 export type LessonPointKind =
