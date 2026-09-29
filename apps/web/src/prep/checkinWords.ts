@@ -37,6 +37,18 @@ export const WHY_BOARD: Record<LessonContext, Word> = {
     then: 'It counts, but for less than a sure answer: three quarters of the step up.',
     tone: 'purple',
   },
+  after_second_guess: {
+    label: 'Right after the hint, but unsure',
+    means: 'You got it on the second try, with the hint, but said you guessed or weren’t sure.',
+    then: 'Counted as learnt with a hint, not known. A fresh question on this idea comes back later.',
+    tone: 'yellow',
+  },
+  after_right: {
+    label: 'Right, and you looked anyway',
+    means: 'You got it right and chose to see how it’s worked out.',
+    then: 'Nothing changes in your score. If you said you’re still unsure, it goes on your “Worth another look” list.',
+    tone: 'lime',
+  },
   after_misses: {
     label: 'Missed twice',
     means: 'Both tries were wrong, so the coach worked it through with you.',

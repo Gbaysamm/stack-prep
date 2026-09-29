@@ -33,10 +33,14 @@ const KEEP_TAGS = new Set([
 ]);
 const KEEP_ATTRS = new Set([
   "viewBox", "x", "y", "dx", "dy", "d", "cx", "cy", "r", "rx", "ry", "x1", "y1", "x2", "y2",
+  // A rect's size (the root's own width and height are dropped where it is drawn).
+  "width", "height",
   "points", "transform", "fill", "fill-opacity", "fill-rule", "stroke", "stroke-width",
   "stroke-opacity", "stroke-linecap", "stroke-linejoin", "stroke-dasharray", "stroke-miterlimit",
   "opacity", "font-family", "font-size", "font-weight", "font-style", "text-anchor",
   "dominant-baseline", "letter-spacing", "data-anim", "data-origin", "data-react",
+  // Doodles v2: the parts actions name, a route to move along, a level to fill.
+  "data-part", "data-path", "data-fill", "data-level",
 ]);
 export const ANIMS = new Set(["bob", "blink", "wiggle", "pulse", "sway", "spin-slow", "shake", "pop"]);
 export const REACTS = new Set(["wiggle", "shake", "pop"]);
@@ -122,12 +126,12 @@ export function sanitiseDoodle(markup: string): { svg: SVGSVGElement; react: str
 }
 
 /** Doodles already drawn this visit, by key: shown again, they are not drawn a second time. */
-const drawnOnce = new Set<string>();
+export const drawnOnce = new Set<string>();
 
 /** The marker as it draws a doodle: the figure's pen (board.css), smaller. */
-function DoodlePen({ penRef }: { penRef: RefObject<HTMLDivElement> }) {
+export function DoodlePen({ penRef, lift = "1" }: { penRef: RefObject<HTMLDivElement>; lift?: string }) {
   return (
-    <div ref={penRef} className="pb-figpen dd-pen" aria-hidden="true" data-lift="1">
+    <div ref={penRef} className="pb-figpen dd-pen" aria-hidden="true" data-lift={lift}>
       <div className="pb-figpen-body">
         <svg viewBox="-9 -84 18 86" width="18" height="86">
           <path className="pb-pen-nib" d="M-1.6 0h3.2l1.6-6.4h-6.4z" />
@@ -142,7 +146,7 @@ function DoodlePen({ penRef }: { penRef: RefObject<HTMLDivElement> }) {
 }
 
 /** The caption, written left to right under the picture with the nib riding its end. */
-function captionItem(element: HTMLElement): DrawItem {
+export function captionItem(element: HTMLElement): DrawItem {
   const chars = Math.max(1, (element.textContent ?? "").length);
   element.style.clipPath = "inset(-0.3em 100% -0.3em -0.3em)";
   return {
@@ -175,6 +179,7 @@ export function Doodle({
   bump = 0,
   onTap,
   onDrawn,
+  parkPen = false,
 }: {
   /** The picture, in the board's art format. */
   svg: string;
@@ -194,6 +199,8 @@ export function Doodle({
   bump?: number;
   onTap?: () => void;
   onDrawn?: () => void;
+  /** While the drawing waits, the pen waits just above it rather than on it (the buddy). */
+  parkPen?: boolean;
 }) {
   const artRef = useRef<HTMLDivElement>(null);
   const penRef = useRef<HTMLDivElement>(null);
@@ -239,6 +246,13 @@ export function Doodle({
       pen: penRef.current,
       paused: () => pausedRef.current,
       hold: workingPenBusy,
+      park: parkPen
+        ? () => {
+            const box = rootRef.current?.getBoundingClientRect();
+            // Its nib above the top left, so the barrel, leaning down and right, clears the face.
+            return box ? [box.left - 6, box.top - 46] : null;
+          }
+        : undefined,
       onDone: () => {
         drawnOnce.add(drawKey);
         setAlive(true);
@@ -250,7 +264,7 @@ export function Doodle({
       if (captionRef.current) captionRef.current.style.clipPath = "";
     };
     // The caption is part of the drawing; a new caption is a new drawing.
-  }, [svg, drawKey, instant, caption]);
+  }, [svg, drawKey, instant, caption, parkPen]);
 
   // A REACTION: a bounce, and the one-shot move the art asks for. Restarted on every tap.
   const [reacting, setReacting] = useState(0);

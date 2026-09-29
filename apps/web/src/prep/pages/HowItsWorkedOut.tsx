@@ -62,14 +62,14 @@ export const METRICS: Record<MetricId, Metric> = {
     title: 'Predicted score',
     plain: 'What you’d likely score out of 100 if you sat the exam today, worked out from your latest check-up.',
     short:
-      'What you’d likely score if you sat the exam today, out of 100, from your latest check-up. We split the paper into its small parts and give each one the share of marks the real exam gives it. For each part we multiply that share by your mastery there, then add them all up. No curve, no bonus marks.',
+      'What you’d likely score if you sat the exam today, out of 100, from your latest check-up. We split the paper into its topics, as the syllabus lists them, and give each one the share of marks the real exam gives it. For each topic we multiply that share by your mastery there, then add them all up. No curve, no bonus marks.',
     more: [
-      'A part the check-up didn’t reach isn’t counted as zero. It’s given your average for the other parts of the same topic, or 40% if nothing in that topic was reached yet.',
-      'The shares come from the exam’s printed section structure. For a subject whose structure we haven’t loaded yet, every part gets an equal share, and the report says so.',
+      'A topic the check-up didn’t reach isn’t counted as zero. It’s given your average for the other topics in the same section, or 40% if nothing in that section was reached yet.',
+      'The shares come from the exam’s printed section structure. For a subject whose structure we haven’t loaded yet, every topic gets an equal share, and the report says so.',
       'Only check-ups set this number. Practice doesn’t change it, so take another check-up to see how far you’ve moved.',
     ],
     example:
-      'If one part is worth 10% of the paper and your mastery there is 60%, it adds 6 marks. Do the same for every part and add them up.',
+      'If one topic is worth 10% of the paper and your mastery there is 60%, it adds 6 marks. Do the same for every topic and add them up.',
   },
   range: {
     title: 'Likely range',
@@ -82,13 +82,13 @@ export const METRICS: Record<MetricId, Metric> = {
     title: 'By exam day',
     plain: 'Where your score could be on exam day if you do every study session the plan counted.',
     short:
-      'Where your score could be on exam day if you do every study session we counted and follow the plan. We spend your sessions one at a time on the part where one more session adds the most marks. A session moves you most when you’re around the middle (about 55%), less near the bottom or the top, and no part is taken past 90%.',
+      'Where your score could be on exam day if you do every study session we counted and follow the plan. We spend your sessions one at a time on the topic where one more session adds the most marks. A session moves you most when you’re around the middle (about 55%), less near the bottom or the top, and no topic is taken past 90%.',
     more: [
-      'About 30% of the sessions go first to your heaviest weak parts (under 50%), so the big topics that hold your score down are never left till last.',
+      'About 30% of the sessions go first to your heaviest weak topics (under 50%), so the big topics that hold your score down are never left till last.',
       'It assumes the study actually happens and it doesn’t allow for forgetting, so read it as a good case, not a promise.',
     ],
     example:
-      'A part at 45% that carries 10% of the paper: one session lifts it to about 54%, worth about 0.9 of a mark. The same session on a part already at 85% adds less than half a point of mastery.',
+      'A topic at 45% that carries 10% of the paper: one session lifts it to about 54%, worth about 0.9 of a mark. The same session on a topic already at 85% adds less than half a point of mastery.',
   },
   target: {
     title: 'Your target',
@@ -106,10 +106,10 @@ export const METRICS: Record<MetricId, Metric> = {
   },
   plan: {
     title: 'Your plan: sessions and marks added',
-    plain: 'Which parts of the syllabus your sessions go to, in order of the marks each is expected to add.',
+    plain: 'Which topics your sessions go to, in order of the marks each is expected to add.',
     short:
-      'Each line is one part of the syllabus the plan spends sessions on, ordered by the marks it’s expected to add, not just by how weak it is. “Now → after plan” is your mastery there today and after those sessions. The marks it adds are the part’s share of the paper times how much the sessions lift your mastery.',
-    example: 'A part worth 8% of the paper going from 40% to 58% adds 0.08 × 18 = about 1.4 marks.',
+      'Each line is one topic of the syllabus the plan spends sessions on, ordered by the marks it’s expected to add, not just by how weak it is. “Now → after plan” is your mastery there today and after those sessions. The marks it adds are the topic’s share of the paper times how much the sessions lift your mastery.',
+    example: 'A topic worth 8% of the paper going from 40% to 58% adds 0.08 × 18 = about 1.4 marks.',
   },
   days: {
     title: 'Days to exam',
@@ -127,12 +127,12 @@ export const METRICS: Record<MetricId, Metric> = {
   },
   mastery: {
     title: 'Mastery',
-    plain: 'Your chance of getting a standard exam-level question on that part right.',
+    plain: 'Your chance of getting a standard exam-level question on that topic right.',
     short:
-      'Your chance of getting a standard exam-level question on that part right, from your check-up answers. Everyone starts at 50%. A right answer lifts it and a wrong one lowers it, by more when the result is a surprise: a hard question right lifts it more than an easy one. Early answers move it most. A right answer given in under a quarter of the time the question should take moves it only half as much, because it may be a guess.',
+      'Your chance of getting a standard exam-level question on that topic right, from your check-up answers. Everyone starts at 50%. A right answer lifts it and a wrong one lowers it, by more when the result is a surprise: a hard question right lifts it more than an easy one. Early answers move it most. A right answer given in under a quarter of the time the question should take moves it only half as much, because it may be a guess.',
     more: [
-      '“Standard exam-level” is the middle of our five difficulty levels. A topic’s percentage comes from all its answers together, not from averaging its parts.',
-      'With only two or three questions on a part, mastery can’t move far from 50%. That’s on purpose: a few answers are a starting point, not a verdict.',
+      '“Standard exam-level” is the middle of our five difficulty levels. A section’s percentage comes from all its answers together, not from averaging its topics.',
+      'With only two or three questions on a topic, mastery can’t move far from 50%. That’s on purpose: a few answers are a starting point, not a verdict.',
     ],
     example: 'Start at 50%. Right on a middle question: 55%. Then right on a harder one: 61%. Then wrong on the hardest: 59%.',
   },
@@ -141,20 +141,20 @@ export const METRICS: Record<MetricId, Metric> = {
     plain: 'Plain names for your mastery: Strong, Holding, Shaky or Needs teaching, or Not checked yet.',
     short:
       'Names for the mastery percentage: Strong is 75% and up, Holding is 50–74%, Shaky is 30–49%, and Needs teaching is under 30%. Not checked means the check-up asked nothing there, so we don’t know yet. It isn’t a low score. On the bars, the colour runs from pink (weak) to green (strong), and stripes mean not checked.',
-    example: '62% on Indices is Holding. 28% on Logarithms is Needs teaching.',
+    example: '62% on Polynomials is Holding. 28% on Loci is Needs teaching.',
   },
   weakest: {
-    title: 'Your weakest spots',
-    plain: 'The parts your latest check-up reached where your mastery is lowest, lowest first.',
+    title: 'Your weakest topics',
+    plain: 'The topics your latest check-up reached where your mastery is lowest, lowest first.',
     short:
-      'The parts of the syllabus with the lowest mastery, among the ones your latest check-up reached, lowest first. Home and your subject page show the three lowest. A part the check-up didn’t reach is never listed here, because no answers isn’t the same as weak.',
-    example: 'If you’re at 22% on Surds, 35% on Logarithms and 48% on Sets, they’re listed in that order.',
+      'The topics of the syllabus with the lowest mastery, among the ones your latest check-up reached, lowest first. Home and your subject page show the three lowest. A topic the check-up didn’t reach is never listed here, because no answers isn’t the same as weak.',
+    example: 'If you’re at 22% on Sets, 35% on Variation and 48% on Probability, they’re listed in that order.',
   },
   checkup: {
     title: 'Check-up answers',
-    plain: 'Up to 15 questions across the paper. Each topic gets harder when you’re right and easier when you’re wrong.',
+    plain: 'Up to 15 questions across the paper. Each section gets harder when you’re right and easier when you’re wrong.',
     short:
-      'A check-up is up to 15 questions. They’re spread over the topics by how much of the paper each is worth, with at least one per topic while there’s room. Each topic starts at a middle question, then goes one step harder after a right answer and one step easier after a wrong one. There’s no pass mark and no time limit.',
+      'A check-up is up to 15 questions. They’re spread over the syllabus sections by how much of the paper each is worth, with at least one per section while there’s room, and within a section over its topics. Each section starts at a middle question, then goes one step harder after a right answer and one step easier after a wrong one. There’s no pass mark and no time limit.',
     example: 'Right on your first Algebra question? Your next Algebra question is one level harder.',
   },
   answered: {

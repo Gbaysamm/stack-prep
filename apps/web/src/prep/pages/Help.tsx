@@ -56,14 +56,14 @@ interface Step {
 const STEPS: Step[] = [
   {
     title: 'Take a check-up',
-    body: 'Up to 15 questions, no time limit and no pass mark. It shows where you stand in each part of the syllabus.',
+    body: 'Up to 15 questions, no time limit and no pass mark. It shows where you stand in each topic of the syllabus.',
     to: '/checkup',
     go: 'Check-up',
     icon: IconTarget,
   },
   {
     title: 'Practise',
-    body: 'Questions come from the part of the syllabus where one more session adds the most marks.',
+    body: 'Questions come from the topic where one more session adds the most marks.',
     to: '/practice',
     go: 'Practice',
     icon: IconBolt,
@@ -129,7 +129,7 @@ const FAQS: Faq[] = [
     q: 'Why does a question come back?',
     a: [
       'The same question comes back once, straight after your first miss, with a hint. After that you never get a question you’ve already met.',
-      'What comes back is the idea. A part you guessed or were taught is still weak, so the plan keeps choosing it and brings you a fresh question on it.',
+      'What comes back is the idea. A topic you guessed on or were taught is still weak, so the plan keeps choosing it and brings you a fresh question on it.',
     ],
   },
   {

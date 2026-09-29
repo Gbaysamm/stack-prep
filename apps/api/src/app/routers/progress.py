@@ -113,13 +113,19 @@ class SubjectGoal(BaseModel):
 
 
 class WeakSubtopic(BaseModel):
+    """One weak JAMB topic. The DB calls it a subtopic; students call it a topic."""
+
     subtopic_id: UUID
     name: str
+    #: The DB topic, which is JAMB's section. Kept for older clients.
     topic_name: str
     #: 0 to 1, as the report shows it.
     mastery: float
     #: How much the reading can carry: "low" or "medium", from the number answered.
     confidence: str
+    #: JAMB's section (the DB topic): a heading, never the unit a student works on.
+    section_id: UUID | None = None
+    section_name: str | None = None
 
 
 class LatestCheckup(BaseModel):
@@ -174,8 +180,13 @@ class PracticeRun(BaseModel):
 
 
 class PracticeRunDetail(PracticeRun):
-    #: The topics this run's questions came from, in alphabetical order.
+    #: The DB topics this run's questions came from, which are JAMB's SECTIONS, alphabetical.
+    #: Kept for older clients; `sections` is the same list named for what it is.
     topics: list[str]
+    #: JAMB's sections (DB topics) the run touched, alphabetical.
+    sections: list[str] = Field(default_factory=list)
+    #: JAMB's topics (DB subtopics) the run touched, alphabetical: what students see.
+    subtopics: list[str] = Field(default_factory=list)
 
 
 class PracticeRunPage(BaseModel):
@@ -348,6 +359,8 @@ async def _latest_checkup(
                 topic_name=line.topic_name,
                 mastery=float(line.mastery or 0.0),
                 confidence=line.confidence,
+                section_id=line.section_id,
+                section_name=line.section_name,
             )
             for line in reached[:WEAKEST]
         ],
@@ -544,7 +557,17 @@ async def practice_runs(
                  JOIN curriculum_items sub ON sub.id = skill.parent_id
                  JOIN curriculum_items topic ON topic.id = sub.parent_id
                  WHERE a.session_id = runs.session_id
-               ), ARRAY[]::text[]) AS topics
+               ), ARRAY[]::text[]) AS topics,
+               coalesce((
+                 SELECT array_agg(DISTINCT sub.name ORDER BY sub.name)
+                 FROM attempts a
+                 JOIN question_versions v ON v.id = a.question_version_id
+                 JOIN question_classifications c
+                   ON c.question_id = v.question_id AND c.classification_role = 'primary'
+                 JOIN curriculum_items skill ON skill.id = c.curriculum_item_id
+                 JOIN curriculum_items sub ON sub.id = skill.parent_id
+                 WHERE a.session_id = runs.session_id
+               ), ARRAY[]::text[]) AS subtopics
         FROM runs
         ORDER BY runs.started_at DESC
         """,
@@ -553,7 +576,15 @@ async def practice_runs(
         before=before,
         limit=limit,
     )
-    page = [PracticeRunDetail(**_run(row).model_dump(), topics=list(row["topics"])) for row in rows]
+    page = [
+        PracticeRunDetail(
+            **_run(row).model_dump(),
+            topics=list(row["topics"]),
+            sections=list(row["topics"]),
+            subtopics=list(row["subtopics"]),
+        )
+        for row in rows
+    ]
     return PracticeRunPage(
         runs=page,
         next_before=page[-1].started_at if len(page) == limit else None,
@@ -573,8 +604,14 @@ class LessonToRevisit(BaseModel):
     question_version_id: UUID
     subject_id: UUID
     subject_name: str
+    #: The DB topic, which is JAMB's section. Kept for older clients.
     topic_name: str | None
+    #: So "practise this again" can start a run on this subtopic alone.
+    subtopic_id: UUID | None = None
+    #: The DB subtopic, which is JAMB's topic: the name students see.
     subtopic_name: str | None
+    #: JAMB's section, the same as `topic_name`, named for what it is.
+    section_name: str | None = None
     #: The start of the question, as plain text.
     stem_excerpt: str
     understood: Literal["unsure", "too_hard"]
@@ -622,7 +659,7 @@ async def lesson_feedback(
         )
         SELECT l.question_version_id, l.understood, l.matched_working, l.created_at,
                v.stem, s.id AS subject_id, s.name AS subject_name,
-               topic.name AS topic_name, sub.name AS subtopic_name,
+               topic.name AS topic_name, sub.id AS subtopic_id, sub.name AS subtopic_name,
                -- Hidden the way the web hides them: the sandbox and the test exams.
                (upper(e.short_name) = 'SANDBOX' OR upper(e.short_name) LIKE 'PR%') AS hidden
         FROM latest l
@@ -650,7 +687,9 @@ async def lesson_feedback(
             subject_id=row["subject_id"],
             subject_name=row["subject_name"],
             topic_name=row["topic_name"],
+            subtopic_id=row["subtopic_id"],
             subtopic_name=row["subtopic_name"],
+            section_name=row["topic_name"],
             stem_excerpt=stem_excerpt(str(row["stem"] or "")),
             understood=row["understood"],
             at=row["created_at"],
@@ -673,13 +712,21 @@ class CheckinEntry(BaseModel):
     session_id: UUID
     question_version_id: UUID
     #: Why the board opened: two misses, or a right answer the student guessed or doubted.
-    context: Literal["after_misses", "after_guess", "after_unsure"]
+    context: Literal[
+        "after_misses", "after_guess", "after_unsure", "after_second_guess", "after_right"
+    ]
     understood: Literal["got_it", "unsure", "too_hard"]
     matched_working: Literal["yes", "partly", "no"] | None
     subject_id: UUID
     subject_name: str
+    #: The DB topic, which is JAMB's section. Kept for older clients.
     topic_name: str | None
+    #: So a check-in's "practise this" can start a run on this subtopic alone.
+    subtopic_id: UUID | None = None
+    #: The DB subtopic, which is JAMB's topic: the name students see.
     subtopic_name: str | None
+    #: JAMB's section, the same as `topic_name`, named for what it is.
+    section_name: str | None = None
     stem_excerpt: str
 
 
@@ -704,7 +751,7 @@ async def lesson_feedback_entries(
         SELECT f.id, f.created_at, f.session_id, f.question_version_id, f.context,
                f.understood, f.matched_working, v.stem,
                s.id AS subject_id, s.name AS subject_name,
-               topic.name AS topic_name, sub.name AS subtopic_name
+               topic.name AS topic_name, sub.id AS subtopic_id, sub.name AS subtopic_name
         FROM lesson_feedback f
         JOIN question_versions v ON v.id = f.question_version_id
         JOIN subjects s ON s.id = v.subject_id
@@ -735,7 +782,9 @@ async def lesson_feedback_entries(
                 subject_id=row["subject_id"],
                 subject_name=row["subject_name"],
                 topic_name=row["topic_name"],
+                subtopic_id=row["subtopic_id"],
                 subtopic_name=row["subtopic_name"],
+                section_name=row["topic_name"],
                 stem_excerpt=stem_excerpt(str(row["stem"] or "")),
             )
             for row in rows

@@ -117,6 +117,7 @@ export function Buddy({
         paused={paused}
         drawKey="pb-buddy"
         instant={drawn.current}
+        parkPen
         bump={bump}
         onDrawn={() => {
           drawn.current = true;

@@ -11,6 +11,7 @@ import { useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { api } from '../../student/api.js';
+import { Refused, runsApi } from '../runsApi.js';
 import {
   IconArrowRight,
   IconBolt,
@@ -88,26 +89,94 @@ export function masteryWord(m: number | null): string {
 export const runHref = (run: Pick<PracticeRun, 'session_id' | 'finished'>) =>
   run.finished ? `/practice/${run.session_id}/report` : `/practice/${run.session_id}`;
 
-/** Starts a practice run and takes the student into it. */
+/**
+ * What a practice run is narrowed to. Empty, the engine plans the run across the whole subject;
+ * given, the run only ever serves those subtopics, topics or years (the API filters strictly).
+ */
+export interface PracticeFocus {
+  subtopicIds?: string[];
+  topicIds?: string[];
+  examYears?: number[];
+  length?: number;
+  /** What the student would call the choice ("Indices"), for when it has nothing fresh left. */
+  label?: string;
+}
+
+/** A narrowed run the API refused because the student has met every question in it. */
+export interface NothingFresh {
+  subjectId: string;
+  label: string;
+  /** The busy key of the button that asked, so a page with two can answer beside the right one. */
+  key: string;
+}
+
+const isNarrowed = (focus: PracticeFocus) =>
+  Boolean(focus.subtopicIds?.length || focus.topicIds?.length || focus.examYears?.length);
+
+/**
+ * Starts a practice run and takes the student into it. `key` only marks which button spins;
+ * `focus` is what the run is about. A topic with nothing fresh left is never swapped for a
+ * general run behind the student's back: `exhausted` says so, and `<NothingFreshNote>` offers one.
+ */
 export function useStartPractice() {
   const student = useStudent();
   const navigate = useNavigate();
   const toast = useToast();
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const start = async (subjectId: string, key: string = subjectId) => {
+  const [exhausted, setExhausted] = useState<NothingFresh | null>(null);
+  // Which button last asked, so a page with many can show a failure beside the one that failed.
+  const [lastKey, setLastKey] = useState<string | null>(null);
+  const start = async (subjectId: string, focus: PracticeFocus = {}, key: string = subjectId) => {
     setBusy(key);
+    setLastKey(key);
     setError(null);
+    setExhausted(null);
     try {
-      const run = await api.startPractice(student.studentId, subjectId);
+      const run = await runsApi.start({
+        student_id: student.studentId,
+        subject_id: subjectId,
+        length: focus.length,
+        subtopic_ids: focus.subtopicIds?.length ? focus.subtopicIds : undefined,
+        topic_ids: focus.topicIds?.length ? focus.topicIds : undefined,
+        exam_years: focus.examYears?.length ? focus.examYears : undefined,
+      });
       toast('New run started');
       navigate(`/practice/${run.session_id}`);
     } catch (failure) {
-      setError(`We couldn't start a run just now: ${(failure as Error).message}`);
       setBusy(null);
+      // 422 on a narrowed start is the API's "nothing matches": every question there is met.
+      if (isNarrowed(focus) && failure instanceof Refused && failure.status === 422) {
+        setExhausted({ subjectId, label: focus.label ?? 'that choice', key });
+        return;
+      }
+      setError(`We couldn't start a run just now: ${(failure as Error).message}`);
     }
   };
-  return { busy, error, start };
+  return { busy, error, exhausted, lastKey, start };
+}
+
+/** Said when a chosen topic has no fresh questions: plainly, with a general run one tap away. */
+export function NothingFreshNote({ starter }: { starter: ReturnType<typeof useStartPractice> }) {
+  const left = starter.exhausted;
+  if (!left) return null;
+  return (
+    <div className="home-fresh" role="status">
+      <p>
+        You've answered every question in <b>{left.label}</b> for now, so there's nothing new to ask there. A general
+        run carries on with the rest of your plan.
+      </p>
+      <Button
+        size="sm"
+        tone="soft"
+        busy={starter.busy === `general:${left.subjectId}`}
+        disabled={starter.busy !== null}
+        onClick={() => void starter.start(left.subjectId, {}, `general:${left.subjectId}`)}
+      >
+        Start a general run
+      </Button>
+    </div>
+  );
 }
 
 /** Starts a check-up and takes the student into it. */
@@ -424,17 +493,21 @@ export function Standing({ subject, className, sample }: { subject: SubjectOverv
   );
 }
 
-/** One practice run as a row. `detail` adds the topics and an accuracy bar (progress page). */
+/**
+ * One practice run as a row. `detail` adds the topics and an accuracy bar (progress page). The
+ * topics are JAMB's (`subtopics` in the API); `topics` there are its sections, the fallback.
+ */
 export function RunRow({
   run,
   detail,
   showSubject = true,
 }: {
-  run: PracticeRun & { topics?: string[] };
+  run: PracticeRun & { topics?: string[]; subtopics?: string[] };
   detail?: boolean;
   showSubject?: boolean;
 }) {
   const accuracy = run.answered > 0 ? run.correct_unaided / run.answered : 0;
+  const topics = run.subtopics ?? run.topics ?? [];
   return (
     <li>
       <Link className={cx('home-run', detail && 'detail')} to={runHref(run)}>
@@ -446,7 +519,7 @@ export function RunRow({
           <span className="meta sj-mono">
             {whenLabel(run.started_at)} · {run.answered} of {run.length}
           </span>
-          {detail && run.topics && run.topics.length > 0 ? <span className="topics">{run.topics.join(' · ')}</span> : null}
+          {detail && topics.length > 0 ? <span className="topics">{topics.join(' · ')}</span> : null}
         </span>
         {detail ? (
           <span className="home-run-acc">
@@ -474,7 +547,7 @@ export function RunRow({
   );
 }
 
-/** The weakest subtopics, each with a way straight into practice. */
+/** The weakest topics (JAMB's), each under its section and with a way straight into practice. */
 export function WeakList({
   subject,
   weak,
@@ -485,12 +558,13 @@ export function WeakList({
   starter: ReturnType<typeof useStartPractice>;
 }) {
   return (
+    <>
     <ol className="home-weak">
       {weak.map((spot, index) => (
         <li key={spot.subtopic_id} className={`sj-rise d${Math.min(index + 1, 4)}`}>
           <div className="txt">
             <span className="topic sj-mono">
-              <b>{String(index + 1).padStart(2, '0')}</b> · {spot.topic_name}
+              <b>{String(index + 1).padStart(2, '0')}</b> · {spot.section_name ?? spot.topic_name}
             </span>
             <strong>{spot.name}</strong>
           </div>
@@ -503,14 +577,18 @@ export function WeakList({
             tone="soft"
             busy={starter.busy === spot.subtopic_id}
             disabled={starter.busy !== null && starter.busy !== spot.subtopic_id}
-            onClick={() => starter.start(subject.subject_id, spot.subtopic_id)}
-            aria-label={`Practise ${subject.subject_name}, starting with ${spot.name}`}
+            onClick={() =>
+              starter.start(subject.subject_id, { subtopicIds: [spot.subtopic_id], label: spot.name }, spot.subtopic_id)
+            }
+            aria-label={`Practise ${spot.name} in ${subject.subject_name}`}
           >
             Practise
           </Button>
         </li>
       ))}
     </ol>
+    <NothingFreshNote starter={starter} />
+    </>
   );
 }
 
@@ -715,9 +793,10 @@ function Hero({ overview, step }: { overview: Overview; step: NextStep; focus?: 
     case 'practice': {
       const first = step.subject.latest_checkup?.weakest_subtopics[0];
       lead = `Start a ${name} run.`;
+      // The run is sent to the spot the label names, so what it says is what the student gets.
       body = first ? (
         <>
-          Ten questions aimed at what's holding your score down, starting with <b>{first.name}</b>.
+          A run on <b>{first.name}</b>, the topic your check-up found weakest in {name}.
         </>
       ) : (
         "Ten questions aimed at what's holding your score down."
@@ -727,7 +806,12 @@ function Hero({ overview, step }: { overview: Overview; step: NextStep; focus?: 
           tone="lime"
           size="lg"
           busy={practice.busy !== null}
-          onClick={() => practice.start(step.subject.subject_id)}
+          onClick={() =>
+            practice.start(
+              step.subject.subject_id,
+              first ? { subtopicIds: [first.subtopic_id], label: first.name } : {},
+            )
+          }
           trailing={<IconArrowRight size={18} />}
         >
           Start practice
@@ -798,6 +882,7 @@ function Hero({ overview, step }: { overview: Overview; step: NextStep; focus?: 
       aside={stats.length > 0 ? <HeroStats stats={stats} /> : undefined}
     />
     {practice.error || checkup.error ? <Alert>{practice.error ?? checkup.error}</Alert> : null}
+    <NothingFreshNote starter={practice} />
     </>
   );
 }
@@ -807,7 +892,7 @@ function Hero({ overview, step }: { overview: Overview; step: NextStep; focus?: 
 const STEPS = [
   { n: '01', title: 'Set your goal', body: 'Pick your exam, the score you want and the day you sit it.' },
   { n: '02', title: 'Take a check-up', body: 'A short set of questions that predicts your score today.' },
-  { n: '03', title: 'Practise daily', body: 'Ten-question runs on your weakest spots, with a coach when you are stuck.' },
+  { n: '03', title: 'Practise daily', body: 'Ten-question runs on your weakest topics, with a coach when you are stuck.' },
 ];
 
 /** Clearly marked example numbers for the preview of the score card. Never shown as real. */
@@ -1131,7 +1216,7 @@ function HomeBody({
       <div className="home-duo">
         <Section
           eyebrow={many && chosen ? `Work on next · ${chosen.subject_name}` : 'Work on next'}
-          title="Your weakest spots"
+          title="Your weakest topics"
           id="home-weak"
           className="sj-rise d3"
           tip={<MetricTip id="weakest" />}
@@ -1146,7 +1231,7 @@ function HomeBody({
             {weak.length > 0 && chosen ? (
               <>
                 <WeakList subject={chosen} weak={weak} starter={starter} />
-                <p className="home-note">A run starts with the spot your plan puts first, then works down the list.</p>
+                <p className="home-note">Practise gives you a run on that one topic, so every question is about it.</p>
                 {starter.error ? <Alert>{starter.error}</Alert> : null}
               </>
             ) : (
@@ -1156,7 +1241,7 @@ function HomeBody({
               >
                 {chosen?.latest_checkup
                   ? 'Your check-up found nothing weak enough to single out. Keep practising to hold it.'
-                  : `Take a ${chosen?.subject_name ?? ''} check-up and the spots holding that score down show up here, weakest first.`}
+                  : `Take a ${chosen?.subject_name ?? ''} check-up and the topics holding that score down show up here, weakest first.`}
               </Note>
             )}
           </div>

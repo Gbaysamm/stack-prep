@@ -80,7 +80,12 @@ class AnswerIn(BaseModel):
 class QuestionOut(BaseModel):
     position: int
     of: int
+    #: The DB topic, which is JAMB's section ("Algebra"). Kept for older clients.
     topic_name: str
+    #: The same as `topic_name`, named for what it is: JAMB's section, a heading only.
+    section_name: str | None = None
+    #: The DB subtopic, which is JAMB's topic ("Polynomials"): what students see.
+    subtopic_name: str | None = None
     question_version_id: UUID
     stem: str
     instructions: str | None
@@ -123,8 +128,11 @@ class UnitWeight:
 
 
 class SubtopicReport(BaseModel):
+    """One JAMB topic (the DB's subtopic): the unit a student sees and works on."""
+
     subtopic_id: UUID
     name: str
+    #: The DB topic above it, which is JAMB's section. Kept for older clients.
     topic_name: str
     #: Share of the paper, 0 to 1.
     share: float
@@ -133,11 +141,15 @@ class SubtopicReport(BaseModel):
     #: None when the sitting never reached it. Not the same as zero.
     mastery: float | None
     confidence: str
+    #: JAMB's section this topic sits under (the DB topic), for grouping under a heading.
+    section_id: UUID | None = None
+    section_name: str | None = None
 
 
 class PlanLine(BaseModel):
     subtopic_id: UUID
     name: str
+    #: JAMB's section (the DB topic). Kept for older clients; `section_name` says it plainly.
     topic_name: str
     share: float
     mastery_now: float
@@ -146,6 +158,7 @@ class PlanLine(BaseModel):
     #: Marks out of 100 these sessions are expected to add.
     marks_gained: float
     reason: str
+    section_name: str | None = None
 
 
 class ScoreProjection(BaseModel):
@@ -167,13 +180,17 @@ class CheckupReport(BaseModel):
     subject_id: UUID
     answered: int
     finished: bool
+    #: Per DB topic, which is JAMB's SECTION (5 in Maths). Students see `subtopics`.
     topics: list[TopicReport]
-    #: The finer reading a student can act on: "Idiomatic usage 35%", not "Lexis 62%".
+    #: Per JAMB topic (the DB subtopic, 23 in Maths), in syllabus order. The finer reading
+    #: a student can act on: "Idiomatic usage 35%", not "Lexis 62%".
     subtopics: list[SubtopicReport]
     weights_source: str
     #: Present once the student has a goal; the whole point of the sitting.
     projection: ScoreProjection | None
+    #: Section names (DB topics) the sitting did not reach.
     unassessed_topics: list[str]
+    #: Section names (DB topics) to start with.
     priority_topics: list[str]
     #: Said plainly, because a short sitting is a starting point and not a measurement.
     caveat: str
@@ -371,7 +388,8 @@ async def _pick_question(
           WHERE dq.subject_id = :subject
         )
         SELECT dq.question_version_id, dq.mastery_level_number, v.stem, v.instructions,
-               pg.title AS passage_title, pg.body AS passage_body, topic.name AS topic_name
+               pg.title AS passage_title, pg.body AS passage_body, topic.name AS topic_name,
+               sub.name AS subtopic_name
         FROM deliverable dq
         -- The stem and its passage are read from the tables rather than through
         -- candidate_question_payload, which is itself built on deliverable_questions: joining
@@ -474,6 +492,8 @@ async def _next_state(
             position=position + 1,
             of=len(blueprint),
             topic_name=str(question["topic_name"]),
+            section_name=str(question["topic_name"]),
+            subtopic_name=str(question["subtopic_name"]),
             question_version_id=question["question_version_id"],
             stem=str(question["stem"]),
             instructions=question["instructions"],
@@ -750,6 +770,7 @@ async def _forecast(
                 sessions=line.sessions,
                 marks_gained=round(line.marks_gained, 2),
                 reason=line.reason,
+                section_name=line.topic_name,
             )
             for line in result.plan
         ],
@@ -846,6 +867,8 @@ async def build_report(conn: AsyncConnection, session_id: UUID) -> CheckupReport
                 correct=correct_by_unit.get(standing.unit_id, 0),
                 mastery=standing.mastery,
                 confidence=confidence_for(standing.answered),
+                section_id=UUID(standing.topic_id),
+                section_name=standing.topic_name,
             )
             for standing in standings
         ],

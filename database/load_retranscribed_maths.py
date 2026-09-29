@@ -56,9 +56,9 @@ import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lesson_doodles import (
+    DoodleBook,
     check_all_used,
     check_doodle_files,
-    clean_doodle,
     doodles_column,
     library_names,
     need_doodles_column,
@@ -269,7 +269,8 @@ def read_lessons(
                 raise SystemExit(f"{where}: a _c sketch with no _b sketch")
             # The pictures drawn for this question's board (lesson_doodles.py).
             doodles = read_custom_doodles(DOODLE_DIR, year, int(number))
-            custom = {doodle["name"] for doodle in doodles}
+            # Followed through the moments: what each brings in and does (doodles v2).
+            book = DoodleBook(library, doodles, year, int(number))
             clean = []
             brought: list[str] = []
             for moment in moments:
@@ -292,6 +293,13 @@ def read_lessons(
                     )
                     brought.append(name)
                     entry["show_sketch"] = True if name == "sketch" else name
+                # Its doodles first: a mark may link to one (to: {doodle, part}).
+                bringing, linkable = book.moment(
+                    moment,
+                    len(clean),
+                    [bool(m.get("write")) for m in clean] + [bool(write)],
+                    f"{where} moment {len(clean)}",
+                )
                 point = moment.get("point")
                 if point is not None:
                     entry["point"] = clean_points(
@@ -300,18 +308,9 @@ def read_lessons(
                         f"{where} moment {len(clean)}",
                         None if figures is None else figures.get((year, int(number)), []),
                         drawn,
+                        doodles=linkable,
                     )
-                if moment.get("doodle") is not None:
-                    entry["doodle"] = clean_doodle(
-                        moment["doodle"],
-                        len(clean),
-                        [bool(m.get("write")) for m in clean] + [bool(write)],
-                        library,
-                        custom,
-                        year,
-                        int(number),
-                        f"{where} moment {len(clean)}",
-                    )
+                entry.update(bringing)
                 clean.append(entry)
             check_all_used(doodles, clean, where)
             traps = lesson.get("traps") or {}

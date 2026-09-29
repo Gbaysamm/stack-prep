@@ -52,6 +52,8 @@ class YearOption(BaseModel):
 
 
 class SubtopicOption(BaseModel):
+    """One JAMB topic (the DB subtopic): what a student picks."""
+
     subtopic_id: UUID
     name: str
     questions: int
@@ -60,10 +62,15 @@ class SubtopicOption(BaseModel):
 
 
 class TopicOption(BaseModel):
+    """One DB topic, which is JAMB's SECTION: a heading over its topics (`subtopics`)."""
+
     topic_id: UUID
     name: str
     questions: int
     subtopics: list[SubtopicOption]
+    #: The same as `topic_id` and `name`, named for what they are: JAMB's section.
+    section_id: UUID | None = None
+    section_name: str | None = None
 
 
 class PracticeOptions(BaseModel):
@@ -146,7 +153,12 @@ async def practice_options(
         if not topics or str(topics[-1].topic_id) != unit.topic_id:
             topics.append(
                 TopicOption(
-                    topic_id=UUID(unit.topic_id), name=unit.topic_name, questions=0, subtopics=[]
+                    topic_id=UUID(unit.topic_id),
+                    name=unit.topic_name,
+                    questions=0,
+                    subtopics=[],
+                    section_id=UUID(unit.topic_id),
+                    section_name=unit.topic_name,
                 )
             )
         topic = topics[-1]
@@ -191,7 +203,9 @@ class ReviewItem(BaseModel):
     question_version_id: UUID
     exam_year: int | None
     question_number: str | None
+    #: The DB topic, which is JAMB's section. Kept for older clients.
     topic_name: str | None
+    #: The DB subtopic, which is JAMB's topic: the name students see.
     subtopic_name: str | None
     passage_title: str | None
     passage_body: str | None
@@ -206,6 +220,8 @@ class ReviewItem(BaseModel):
     hint: str | None
     #: The student's latest word on this question's lesson in this run, if they gave one.
     lesson_feedback: ReviewFeedback | None
+    #: JAMB's section, the same as `topic_name`, named for what it is.
+    section_name: str | None = None
 
 
 class RunReview(BaseModel):
@@ -335,6 +351,7 @@ async def review_run(
                 question_number=row["question_number"],
                 topic_name=row["topic_name"],
                 subtopic_name=row["subtopic_name"],
+                section_name=row["topic_name"],
                 passage_title=row["passage_title"],
                 passage_body=row["passage_body"],
                 instructions=row["instructions"],

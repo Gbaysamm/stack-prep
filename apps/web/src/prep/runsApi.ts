@@ -14,12 +14,17 @@ export interface PracticeOptions {
   subject_name: string;
   /** Questions that can be served, per year, newest first. */
   years: { exam_year: number; questions: number }[];
-  /** In syllabus order. */
+  /**
+   * In syllabus order. Each entry is a DB topic, which is JAMB's SECTION (a heading); its
+   * `subtopics` are JAMB's TOPICS, the units a student picks.
+   */
   topics: {
     topic_id: string;
     name: string;
     questions: number;
     subtopics: { subtopic_id: string; name: string; questions: number; mastery: number | null }[];
+    section_id?: string | null;
+    section_name?: string | null;
   }[];
 }
 
@@ -55,8 +60,11 @@ export interface ReviewItem {
   question_version_id: string;
   exam_year: number | null;
   question_number: string | null;
+  /** The DB topic, which is JAMB's section. Prefer `section_name`. */
   topic_name: string | null;
+  /** JAMB's topic: the name to show. */
   subtopic_name: string | null;
+  section_name?: string | null;
   passage_title: string | null;
   passage_body: string | null;
   instructions: string | null;

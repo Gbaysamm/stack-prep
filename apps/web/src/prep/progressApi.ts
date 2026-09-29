@@ -13,10 +13,17 @@ export interface GoalSummary {
   sessions_before_exam: number | null;
 }
 
+/**
+ * One weak JAMB topic. The database calls it a subtopic, and its `topic_name` is JAMB's
+ * section: show `section_name` as the heading, and `name` as the topic.
+ */
 export interface WeakSubtopic {
   subtopic_id: string;
   name: string;
+  /** The DB topic, which is JAMB's section. Prefer `section_name`. */
   topic_name: string;
+  section_id?: string | null;
+  section_name?: string | null;
   /** 0..1 */
   mastery: number;
   confidence: string;
@@ -91,7 +98,8 @@ export interface Overview {
 }
 
 export interface PracticeRunPage {
-  runs: (PracticeRun & { topics: string[] })[];
+  /** `subtopics` are JAMB's topics, the names to show; `topics`/`sections` are its sections. */
+  runs: (PracticeRun & { topics: string[]; sections?: string[]; subtopics?: string[] })[];
   next_before: string | null;
 }
 

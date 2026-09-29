@@ -195,6 +195,47 @@ function keepWrong(sessionId: string, versionId: string, key: string | null) {
   }
 }
 
+/*
+ * A right answer's result screen survives a reload, so the offer to see the working is not lost.
+ * Kept under the session and the question waiting after it (what the server will say is current
+ * on reload), and only brought back while the server still agrees that is where the run is.
+ */
+const resultKey = (sessionId: string, next: PracticeState) =>
+  `sj.practice.result.${sessionId}.${next.question?.question_version_id ?? "end"}`;
+function readResult(sessionId: string, current: PracticeState): Outcome | null {
+  try {
+    const raw = window.sessionStorage.getItem(resultKey(sessionId, current));
+    if (!raw) return null;
+    const kept = JSON.parse(raw) as Outcome;
+    const same =
+      kept.next.stage === current.stage &&
+      kept.next.answered === current.answered &&
+      kept.next.question?.question_version_id === current.question?.question_version_id;
+    return same ? { ...kept, next: current } : null;
+  } catch {
+    return null;
+  }
+}
+function keepResult(sessionId: string, outcome: Outcome | null, next?: PracticeState) {
+  try {
+    if (outcome) {
+      window.sessionStorage.setItem(resultKey(sessionId, outcome.next), JSON.stringify(outcome));
+    } else if (next) {
+      window.sessionStorage.removeItem(resultKey(sessionId, next));
+    }
+  } catch {
+    /* private mode: a reload goes straight on to the next question, as it used to */
+  }
+}
+
+/** Why the review board was opened, from how the right answer came and how sure they were. */
+function reviewContext(outcome: Outcome): LessonContext {
+  const doubted = outcome.confidence === "guessed" || outcome.confidence === "unsure";
+  if (!doubted) return "after_right";
+  if (outcome.kind === "second") return "after_second_guess";
+  return outcome.confidence === "guessed" ? "after_guess" : "after_unsure";
+}
+
 function praiseFor(confidence: Confidence | null): string {
   switch (confidence) {
     case "sure":
@@ -269,6 +310,9 @@ export function PracticeRoom() {
       .then((next) => {
         if (cancelled) return;
         setState(next);
+        // A reload on a right answer's result: put the result back rather than skip past it.
+        const kept = readResult(sessionId, next);
+        if (kept) setOutcome(kept);
         askedAt.current = Date.now();
         const version = next.question?.question_version_id;
         setWrong(
@@ -295,6 +339,16 @@ export function PracticeRoom() {
     warmed.current = hintedVersion;
     api.practiceWarm(sessionId, hintedVersion).catch(() => undefined);
   }, [canHear, hintedVersion, sessionId]);
+  // On a doubted right answer too, where the working is the recommended next step. A sure answer's
+  // lesson is optional, so its voice is made only if the student opens it: warming every right
+  // answer would pay for voice that is mostly never heard.
+  const doubted = outcome?.confidence === "guessed" || outcome?.confidence === "unsure";
+  const rightVersion = doubted ? outcome?.question.question_version_id : undefined;
+  useEffect(() => {
+    if (!canHear || !rightVersion || warmed.current === rightVersion) return;
+    warmed.current = rightVersion;
+    api.practiceWarm(sessionId, rightVersion).catch(() => undefined);
+  }, [canHear, rightVersion, sessionId]);
 
   // Dev only: `?demo=confidence|correct|hinted|guessed|unsure|twice|saved` jumps straight to that moment on
   // the current question, so each screen can be looked at without playing a run to it.
@@ -389,14 +443,16 @@ export function PracticeRoom() {
           // question actually appears.
           keepWrong(sessionId, question.question_version_id, null);
           setWrong(null);
-          setOutcome({
+          const right: Outcome = {
             kind: prev.stage === "hint" ? "second" : "right",
             confidence,
             chose,
             question,
             number: numberOf(prev).number,
             next,
-          });
+          };
+          keepResult(sessionId, right);
+          setOutcome(right);
         }
       } catch (error) {
         toast(`That did not send: ${(error as Error).message || "try again"}`);
@@ -410,17 +466,21 @@ export function PracticeRoom() {
   const pressOn = useCallback(() => {
     if (!outcome) return;
     const next = outcome.next;
+    keepResult(sessionId, null, next);
     setOutcome(null);
     setState(next);
     askedAt.current = Date.now();
-  }, [outcome]);
+  }, [outcome, sessionId]);
 
   const openBoard = () => {
     tapped.current = true;
     navigate(`/practice/${sessionId}/lesson`);
   };
 
-  /** Right, but not trusted (a guess, or "I think so"): the board for the answered question. */
+  /**
+   * The board for the answered question: recommended after a right answer they guessed or
+   * doubted (first try or second), and there to open after any other right answer.
+   */
   const openReview = () => {
     tapped.current = true;
     navigate(`/practice/${sessionId}/lesson`);
@@ -643,7 +703,7 @@ export function PracticeRoom() {
   const lessonRoute =
     checkin ? (
       <Navigate to={`/practice/${sessionId}`} replace />
-    ) : outcome && outcome.kind === "right" && tapped.current ? (
+    ) : outcome && tapped.current ? (
       <ReviewBoard
         sessionId={sessionId}
         outcome={outcome}
@@ -651,10 +711,7 @@ export function PracticeRoom() {
         canHear={canHear}
         canSpeak={canSpeak}
         onDone={() =>
-          leaveBoard(
-            outcome.confidence === "guessed" ? "after_guess" : "after_unsure",
-            outcome.question.question_version_id,
-          )
+          leaveBoard(reviewContext(outcome), outcome.question.question_version_id)
         }
       />
     ) : state.stage === "explain" && question && tapped.current ? (
@@ -1153,14 +1210,16 @@ function Result({
         : outcome.confidence === "unsure"
           ? "unsure"
           : "right";
-  const check = tone === "guessed" || tone === "unsure";
+  // Guessed or unsure, first try or second: the working is recommended, Next sits beside it.
+  // Otherwise Next leads, and the working is there for anyone who wants it.
+  const check = outcome.confidence === "guessed" || outcome.confidence === "unsure";
   const said = CONFIDENCE.find((item) => item.value === outcome.confidence);
   const primary = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     primary.current?.focus({ preventScroll: true });
   }, []);
 
-  // Enter presses the one button from anywhere on the page, not only while it has focus.
+  // Enter presses the main button from anywhere on the page, not only while it has focus.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "Enter" || event.metaKey || event.ctrlKey || event.altKey)
@@ -1189,13 +1248,18 @@ function Result({
         ? "Right answer — let’s check your thinking."
         : "Correct.";
   const praise =
-    tone === "second"
+    tone === "second" && check
+      ? `That was the hint doing its job, but you said you ${
+          outcome.confidence === "guessed" ? "guessed" : "weren’t sure"
+        }. See the working so it sticks. It won’t count as known yet — a fresh question on this idea comes back later.`
+      : tone === "second"
       ? "That was the hint doing its job. It won’t count as known yet — a fresh question on this idea comes back later."
       : tone === "guessed"
         ? "Lucky guesses don’t count as knowing it. See the working, then tell us if it matches what you did."
         : tone === "unsure"
           ? "You were right but not certain. A quick look at the working will tell you whether to trust that thinking next time."
           : praiseFor(outcome.confidence);
+  const nextLabel = last ? "See how you did" : "Next question";
 
   return (
     <section className={cx("pr-res", tone)} aria-live="polite">
@@ -1275,21 +1339,26 @@ function Result({
           onClick={check ? onWhy : onNext}
         >
           {check ? <IconBook size={18} /> : null}
-          {check
-            ? "Show me the working"
-            : last
-              ? "See how you did"
-              : "Next question"}
+          {check ? "Show me the working" : nextLabel}
           <kbd className="pr-enter sj-mono" aria-hidden="true">
             Enter ↵
           </kbd>
         </button>
-        {check ? (
-          <p className="pr-go-note">
-            A short lesson on this question, then two quick taps and on to{" "}
-            {last ? "your results" : "the next one"}.
-          </p>
-        ) : null}
+        <button
+          type="button"
+          className={cx("sj-btn ghost lg", narrow && "block")}
+          onClick={check ? onNext : onWhy}
+        >
+          {check ? null : <IconBook size={18} />}
+          {check ? nextLabel : "See how it’s worked out"}
+        </button>
+        <p className="pr-go-note">
+          {check
+            ? `Recommended: a short lesson on this question, then two quick taps and on to ${
+                last ? "your results" : "the next one"
+              }.`
+            : "Optional: the lesson for this question. Your score stays as it is."}
+        </p>
       </div>
     </section>
   );
@@ -1501,6 +1570,34 @@ const LANDED: Choice<Understood>[] = [
   },
 ];
 
+/** After a lesson opened by choice on a right answer: one light question, not the full check-in. */
+type Useful = "helped" | "knew" | "unsure";
+const USEFUL: Choice<Useful>[] = [
+  {
+    value: "helped",
+    label: "Yes, it helped",
+    meaning: "Good to see it worked through.",
+    level: 3,
+  },
+  {
+    value: "knew",
+    label: "I knew this already",
+    meaning: "It matched how I did it.",
+    level: 3,
+  },
+  {
+    value: "unsure",
+    label: "Still unsure",
+    meaning: "Some of it didn’t click.",
+    level: 2,
+  },
+];
+const USEFUL_SAYS: Record<Useful, { understood: Understood; matched: MatchedWorking | null }> = {
+  helped: { understood: "got_it", matched: null },
+  knew: { understood: "got_it", matched: "yes" },
+  unsure: { understood: "unsure", matched: null },
+};
+
 function ChoiceRow<T extends string>({
   id,
   step,
@@ -1565,7 +1662,8 @@ function CheckIn({
   onDone: () => void;
   narrow: boolean;
 }) {
-  const both = checkin.context !== "after_misses";
+  const light = checkin.context === "after_right";
+  const both = checkin.context !== "after_misses" && !light;
   // Dev only: `?demo=saved` opens on the saved moment, answered.
   const demoSaved =
     import.meta.env.DEV && new URLSearchParams(window.location.search).get("demo") === "saved";
@@ -1575,8 +1673,87 @@ function CheckIn({
   const [failed, setFailed] = useState<string | null>(null);
   /** Once saved, the answers stay on screen with what they mean until the student goes on. */
   const [saved, setSaved] = useState(demoSaved);
+  const [useful, setUseful] = useState<Useful | null>(null);
   const toast = useToast();
   const ready = !!landed && (!both || !!matched);
+
+  if (light) {
+    const sendUseful = () => {
+      if (!useful) return;
+      setSending(true);
+      setFailed(null);
+      const says = USEFUL_SAYS[useful];
+      lessonFeedbackApi
+        .send(sessionId, checkin.versionId, {
+          context: checkin.context,
+          understood: says.understood,
+          matched_working: says.matched,
+        })
+        .then(() => {
+          toast("Thanks — noted");
+          onDone();
+        })
+        .catch((error: Error) => setFailed(error.message || "It didn’t save."))
+        .finally(() => setSending(false));
+    };
+    return (
+      <section className="pr-res checkin">
+        <div className="pr-panel checkin">
+          <div className="pr-panel-head">
+            <span className="pr-medal checkin" aria-hidden="true">
+              <IconBook size={22} />
+            </span>
+            <span className="pr-panel-eyebrow sj-mono">
+              Question {pad(number)} · after the lesson
+            </span>
+          </div>
+          <h2 className="sj-display pr-panel-title">Was this useful?</h2>
+          <p className="pr-praise">
+            One tap if you like. You got this one right, so nothing here changes your score.
+          </p>
+        </div>
+
+        <div className="pr-asks">
+          <ChoiceRow
+            id="pr-ask-useful"
+            step={null}
+            question="Was seeing the working useful?"
+            choices={USEFUL}
+            value={useful}
+            onChange={setUseful}
+          />
+          {failed ? (
+            <div className="pr-ask-fail" role="alert">
+              <p>
+                <b>That didn’t save.</b> ({failed}) You can try again, or carry on without it.
+              </p>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="pr-res-go">
+          <Button
+            size="lg"
+            block={narrow}
+            disabled={!useful}
+            busy={sending || busy}
+            onClick={sendUseful}
+            trailing={sending || busy ? undefined : <IconArrowRight size={18} />}
+          >
+            {sending ? "Saving…" : "Continue"}
+          </Button>
+          <button
+            type="button"
+            className={cx("sj-btn ghost lg", narrow && "block")}
+            onClick={onDone}
+            disabled={sending || busy}
+          >
+            Skip
+          </button>
+        </div>
+      </section>
+    );
+  }
 
   const submit = () => {
     if (!landed || !ready) return;

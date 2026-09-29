@@ -80,6 +80,15 @@ A mark on the working may link its piece to a place in the passage with `to`:
 (`to.nth` as above). The passage piece is highlighted and the two are paired on the board. Any
 mark on the working but a move may link so, and not together with a `from`.
 
+A mark on the working may link its piece to a doodle on the board, or to a named part of one
+(lesson_doodles.py), with `to`:
+
+    {line: 3, kind: highlight, at: '₦1,240', to: {doodle: jar, part: label}}
+
+`doodle` is the id a moment gave the doodle when it brought it in, this moment or an earlier
+one, and `part` (optional) a `data-part` its art has at this moment. Any mark on the working
+but a move may link so, and not together with a `from`.
+
 At most MAX_MARKS marks to a moment: more than that and the student cannot follow them all
 while one sentence is said.
 """
@@ -428,6 +437,31 @@ def _to_passage(to: object, where: str, passage: str | None) -> dict[str, object
     return _passage_target(dict(to), where, passage, "to")
 
 
+_DOODLE_ID = re.compile(r"[a-z][a-z0-9_]*")
+
+
+def _to_doodle(to: object, where: str, doodles: dict[str, set[str]] | None) -> dict[str, object]:
+    """Where a mark on the working links to a doodle: its id, and a part of its art."""
+    if not isinstance(to, dict) or set(to) - {"doodle", "part"}:
+        raise SystemExit(f"{where}: a link to a doodle is to: {{doodle: <id>, part: <name>}}")
+    handle, part = to.get("doodle"), to.get("part")
+    if not isinstance(handle, str) or not _DOODLE_ID.fullmatch(handle):
+        raise SystemExit(f"{where}: to.doodle is a doodle's id ({handle!r})")
+    if doodles is not None and handle not in doodles:
+        raise SystemExit(
+            f"{where}: to.doodle {handle!r} is not a doodle brought in by this moment or earlier"
+        )
+    clean: dict[str, object] = {"doodle": handle}
+    if part is not None:
+        if not isinstance(part, str) or (doodles is not None and part not in doodles[handle]):
+            known = sorted(doodles[handle]) if doodles is not None else []
+            raise SystemExit(
+                f"{where}: {handle} has no part {part!r} (its parts: {known or 'none'})"
+            )
+        clean["part"] = part
+    return clean
+
+
 def clean_show_sketch(value: object, drawn: dict[str, str], brought: list[str], where: str) -> str:
     """The sketch a moment brings in (`show_sketch`), checked: true is the first sketch.
 
@@ -459,6 +493,7 @@ def clean_points(
     figures: list[str] | None = None,
     sketches: dict[str, str] | None = None,
     passage: str | None = None,
+    doodles: dict[str, set[str]] | None = None,
 ) -> list[dict[str, object]]:
     """A moment's marks, checked, in the form they are stored and played.
 
@@ -470,7 +505,9 @@ def clean_points(
     `sketches` is the lesson's own sketches by name ('sketch', 'sketch_b'), checked the same
     way where it is given. `passage` is the body of the question's passage, where it has one:
     a passage mark, or a link into the passage, is checked against it (see the head of this
-    file), and refused where there is none.
+    file), and refused where there is none. `doodles` is the lesson's doodles brought in by this
+    moment, by id, with the parts each has now (lesson_doodles.DoodleBook.links): a link to a
+    doodle is checked against it where it is given.
     """
     if not isinstance(point, list) or not point:
         raise SystemExit(f"{where}: point is a list of marks")
@@ -528,6 +565,12 @@ def clean_points(
                         f"{where}: a link into the passage is not a move, and not with a from"
                     )
                 clean["to"] = _to_passage(to, where, passage)
+            elif isinstance(to, dict) and "doodle" in to:
+                if kind == "move" or start is not None:
+                    raise SystemExit(
+                        f"{where}: a link to a doodle is not a move, and not with a from"
+                    )
+                clean["to"] = _to_doodle(to, where, doodles)
             elif "to" in mark:
                 if kind != "arrow" or start is not None:
                     raise SystemExit(

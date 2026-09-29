@@ -260,6 +260,21 @@ async def test_lesson_feedback_is_summarised_from_the_latest_word(
     assert revisit["subject_id"] == fixture["subject_id"]
     assert revisit["subject_name"] == "Practice subject"
     assert (revisit["topic_name"], revisit["subtopic_name"]) == ("The topic", "The subtopic")
+    # The subtopic's id too, so "practise this again" can start a run on it alone.
+    async with get_engine().connect() as conn:
+        subtopic = str(
+            (
+                await conn.execute(
+                    text(
+                        "SELECT id FROM curriculum_items WHERE subject_id = CAST(:s AS uuid) "
+                        "AND item_type = 'subtopic'"
+                    ),
+                    {"s": fixture["subject_id"]},
+                )
+            ).scalar_one()
+        )
+    assert revisit["subtopic_id"] == subtopic
+    assert {entry["subtopic_id"] for entry in entries} == {subtopic}
     assert revisit["understood"] == "too_hard"
     assert revisit["stem_excerpt"]
     assert revisit["at"]

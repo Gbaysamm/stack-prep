@@ -487,13 +487,14 @@ async def test_a_doubted_right_answer_opens_the_lesson(
     assert response.json()["beats"]
     warmed = await client.post(lesson_url(session, version, "/warm"))
     assert warmed.status_code == 202, warmed.text
-    # The lesson opens; the coach's own door does not. `/ask` is still for the board.
-    assert (await ask(client, session, version, "why?"))["status"] == 409
+    # The review board has the ask box, so the coach answers there too.
+    assert (await ask(client, session, version, "why?"))["status"] == 200
 
 
-async def test_a_sure_right_answer_has_no_lesson(
+async def test_a_sure_right_answer_may_open_the_lesson(
     client: httpx.AsyncClient, fixture: dict[str, str], quiet_settings: None
 ) -> None:
+    """Optional after a sure answer ("See how it's worked out"), but never before answering."""
     state = await start(client, fixture)
     session, version = state["session_id"], state["question"]["question_version_id"]
     # Nothing answered yet: no lesson, as before.
@@ -501,9 +502,53 @@ async def test_a_sure_right_answer_has_no_lesson(
     assert (await client.post(lesson_url(session, version, "/warm"))).status_code == 409
 
     await answer(client, session, state, "A", confidence="sure")
-    assert (await client.get(lesson_url(session, version))).status_code == 409
-    assert (await client.post(lesson_url(session, version, "/warm"))).status_code == 409
-    assert (await client.get(lesson_url(session, version, "/voice/0"))).status_code == 409
+    assert (await client.get(lesson_url(session, version))).status_code == 200
+    assert (await client.post(lesson_url(session, version, "/warm"))).status_code == 202
+
+
+async def _attempts_in(session: str) -> list[tuple[Any, ...]]:
+    async with get_engine().connect() as conn:
+        rows = await conn.execute(
+            text(
+                "SELECT id, question_version_id, selected_option_key, is_correct, confidence "
+                "FROM attempts WHERE session_id = :s ORDER BY answered_at_client, id"
+            ),
+            {"s": session},
+        )
+        return [tuple(row) for row in rows]
+
+
+@pytest.mark.parametrize("said", ["sure", None])
+async def test_opening_a_lesson_after_a_right_answer_scores_nothing(
+    client: httpx.AsyncClient, fixture: dict[str, str], quiet_settings: None, said: str | None
+) -> None:
+    """Sure-right and second-try-right both open the lesson, and no attempt is written by it."""
+    state = await start(client, fixture)
+    session, first = state["session_id"], state["question"]["question_version_id"]
+    state = await answer(client, session, state, "A", confidence=said)
+    second = state["question"]["question_version_id"]
+    state = await answer(client, session, state, "B")
+    assert state["stage"] == "hint"
+    state = await answer(client, session, state, "A", confidence="guessed")
+    before = await _attempts_in(session)
+    counted = (state["correct_unaided"], state["guessed_right"])
+    assert len(before) == 3
+
+    for version, context in ((first, "after_right"), (second, "after_second_guess")):
+        opened = await client.get(lesson_url(session, version))
+        assert opened.status_code == 200, opened.text
+        assert opened.json()["beats"]
+        assert (await client.post(lesson_url(session, version, "/warm"))).status_code == 202
+        assert (await ask(client, session, version, "why?"))["status"] == 200
+        made = await client.post(
+            lesson_url(session, version, "/feedback"),
+            json={"context": context, "understood": "got_it"},
+        )
+        assert made.status_code == 201, made.text
+
+    assert await _attempts_in(session) == before
+    current = (await client.get(f"/v1/practice/{session}")).json()
+    assert (current["correct_unaided"], current["guessed_right"]) == counted
 
 
 async def test_the_lesson_opens_at_the_board_as_before(
@@ -548,8 +593,15 @@ async def test_lesson_feedback_is_taken_only_where_the_lesson_opens(
     ):
         assert (await client.post(url, json=bad)).status_code == 422, bad
 
-    refused = await client.post(
+    # A sure right answer may open its lesson, so it may be checked in on too.
+    opted = await client.post(
         lesson_url(session, sure, "/feedback"),
+        json={"context": "after_right", "understood": "got_it"},
+    )
+    assert opted.status_code == 201, opted.text
+    # A question this sitting never answered has no lesson to have an opinion about.
+    refused = await client.post(
+        lesson_url(session, str(uuid.uuid4()), "/feedback"),
         json={"context": "after_unsure", "understood": "got_it"},
     )
     assert refused.status_code == 409
@@ -569,7 +621,11 @@ async def test_lesson_feedback_is_taken_only_where_the_lesson_opens(
                 {"s": session},
             )
         ).all()
-    assert [tuple(row) for row in rows] == [("too_hard", None), ("got_it", "partly")]
+    assert [tuple(row) for row in rows] == [
+        ("too_hard", None),
+        ("got_it", "partly"),
+        ("got_it", None),
+    ]
 
 
 # ---------------------------------------------------------------------------

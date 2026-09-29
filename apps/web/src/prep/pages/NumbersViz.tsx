@@ -79,7 +79,7 @@ function Predicted() {
         {Array.from({ length: 10 }, (_, index) => (
           <span key={index} className={index < 6 ? 'on' : ''} style={{ '--i': index } as CSSProperties} />
         ))}
-        <span className="nv-cells-note">10 marks on this part · you’d get 6</span>
+        <span className="nv-cells-note">10 marks on this topic · you’d get 6</span>
       </div>
     </>
   );
@@ -147,7 +147,7 @@ function Plan() {
   return (
     <>
       <div className="nv-planrow">
-        <span className="nv-planrow-name">A part worth 8% of the paper</span>
+        <span className="nv-planrow-name">A topic worth 8% of the paper</span>
         <span className="nv-growbar">
           <span className="was" style={{ width: pct(40) }} />
           <span className="gain" style={{ left: pct(40), width: pct(18) }} />
@@ -233,10 +233,10 @@ function Bands() {
           </span>
         ))}
         <span className="nv-pin" style={{ left: pct(28) }}>
-          Logarithms 28%
+          Loci 28%
         </span>
         <span className="nv-pin" style={{ left: pct(62) }}>
-          Indices 62%
+          Polynomials 62%
         </span>
       </div>
       <div className="nv-keys">
@@ -250,9 +250,9 @@ function Bands() {
 
 function Weakest() {
   const rows = [
-    { name: 'Surds', value: 22 },
-    { name: 'Logarithms', value: 35 },
-    { name: 'Sets', value: 48 },
+    { name: 'Sets', value: 22 },
+    { name: 'Variation', value: 35 },
+    { name: 'Probability', value: 48 },
   ];
   return (
     <ol className="nv-rank">

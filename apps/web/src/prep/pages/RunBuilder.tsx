@@ -1,5 +1,7 @@
 /**
- * Build your own run: the subject, the topics (down to their parts), the years, and how long.
+ * Build your own run: the subject, the topics (grouped under their syllabus sections), the years,
+ * and how long. JAMB's words: a SECTION (the API's `topics`) is a heading with a tick for all of
+ * it; a TOPIC (the API's `subtopics`) is what a student picks.
  *
  * Everything starts chosen — every topic, every year, ten questions — so the page reads as "narrow
  * it down", and the number of questions that match updates as the student picks. When both the
@@ -127,6 +129,11 @@ function Builder({
   const navigate = useNavigate();
   const options = useLoad(() => orGone(runsApi.options(studentId, subjectId)), [studentId, subjectId]);
   const data = options.data;
+  // A deep link (?topic= or ?subtopic=, from a topic elsewhere in the app) arrives with that
+  // topic already chosen and opened; everything else still starts chosen.
+  const [params] = useSearchParams();
+  const linkedTopic = params.get('topic');
+  const linkedSub = params.get('subtopic');
 
   // null = everything; otherwise the chosen subtopic ids / years.
   const [chosen, setChosen] = useState<Set<string> | null>(null);
@@ -134,6 +141,23 @@ function Builder({
   const [length, setLength] = useState(10);
   const [starting, setStarting] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
+
+  const preset = useMemo(() => {
+    if (!data) return null;
+    for (const topic of data.topics) {
+      if (linkedTopic && topic.topic_id === linkedTopic)
+        return { topicId: topic.topic_id, subs: topic.subtopics.map((sub) => sub.subtopic_id) };
+      const sub = linkedSub ? topic.subtopics.find((item) => item.subtopic_id === linkedSub) : undefined;
+      if (sub) return { topicId: topic.topic_id, subs: [sub.subtopic_id] };
+    }
+    return null;
+  }, [data, linkedTopic, linkedSub]);
+  const presetApplied = useRef(false);
+  useEffect(() => {
+    if (!preset || presetApplied.current) return;
+    presetApplied.current = true;
+    setChosen(new Set(preset.subs));
+  }, [preset]);
 
   const allSubs = useMemo(() => data?.topics.flatMap((t) => t.subtopics.map((s) => s.subtopic_id)) ?? [], [data]);
   const picked = (id: string) => chosen === null || chosen.has(id);
@@ -196,7 +220,7 @@ function Builder({
       ? 'None chosen'
       : (() => {
           const touched = data?.topics.filter((t) => t.subtopics.some((s) => picked(s.subtopic_id))).length ?? 0;
-          return `${plural(touched, 'topic')} · ${plural(pickedCount, 'part')}`;
+          return touched > 1 ? `${plural(pickedCount, 'topic')} · ${plural(touched, 'section')}` : plural(pickedCount, 'topic');
         })();
   const yearsText = years === null ? 'All years' : (yearsLabel([...years]) ?? 'None');
   const blocked =
@@ -238,7 +262,7 @@ function Builder({
                 <h2 className="sj-display sj-h3">Choosing topics isn’t ready here yet</h2>
               </div>
               <p className="sj-muted">
-                You can still start an ordinary run from the practice page. It aims at your weakest spots for you.
+                You can still start an ordinary run from the practice page. It aims at your weakest topics for you.
               </p>
               <div className="rb-note-actions">
                 <Button to="/practice" trailing={<IconArrowRight size={18} />}>
@@ -261,7 +285,7 @@ function Builder({
           ) : (
             <>
               <Step n={2} title="Topics" status={topicsLabel} className="d2">
-                <TopicTree data={data} chosen={chosen} setChosen={setChosen} />
+                <TopicTree data={data} chosen={chosen} setChosen={setChosen} openFirst={preset?.topicId} />
               </Step>
               <Step n={3} title="Exam years" status={yearsText} className="d3">
                 <YearPicker data={data} years={years} setYears={setYears} />
@@ -392,13 +416,20 @@ function TopicTree({
   data,
   chosen,
   setChosen,
+  openFirst,
 }: {
   data: PracticeOptions;
   chosen: Set<string> | null;
   setChosen: (next: Set<string> | null) => void;
+  /** A section to show open from the start: the one a deep link chose. Every section starts open. */
+  openFirst?: string;
 }) {
   const [query, setQuery] = useState('');
-  const [openTopics, setOpenTopics] = useState<Set<string>>(new Set());
+  // Sections start open: the topics are what a student picks, so they are on show from the
+  // start, and a section only folds away when the student folds it.
+  const [openTopics, setOpenTopics] = useState<Set<string>>(
+    () => new Set([...data.topics.map((t) => t.topic_id), ...(openFirst ? [openFirst] : [])]),
+  );
   const all = useMemo(() => data.topics.flatMap((t) => t.subtopics.map((s) => s.subtopic_id)), [data]);
   const isOn = (id: string) => chosen === null || chosen.has(id);
   const set = (next: Set<string>) => setChosen(next.size === all.length ? null : next);
@@ -479,10 +510,10 @@ function TopicTree({
             type="button"
             className="rb-qbtn"
             disabled={weakest.length === 0}
-            title={weakest.length === 0 ? 'Take a check-up first: it finds your weakest parts.' : 'Your three weakest parts, from your answers so far'}
+            title={weakest.length === 0 ? 'Take a check-up first: it finds your weakest topics.' : 'Your three weakest topics, from your answers so far'}
             onClick={() => {
               setChosen(new Set(weakest.map((s) => s.subtopic_id)));
-              setOpenTopics(new Set(weakest.map((s) => s.topic_id)));
+              setOpenTopics((open) => new Set([...open, ...weakest.map((s) => s.topic_id)]));
             }}
           >
             Weakest 3
@@ -497,7 +528,7 @@ function TopicTree({
       </p>
 
       {visible.length === 0 ? (
-        <p className="rb-nomatch">No topic called “{query.trim()}”. Try a shorter word.</p>
+        <p className="rb-nomatch">No topic or section called “{query.trim()}”. Try a shorter word.</p>
       ) : (
         <ul className="rb-tree">
           {visible.map(({ topic, subs }) => {
@@ -510,7 +541,7 @@ function TopicTree({
                 <div className="rb-topic-row">
                   <Check
                     state={state}
-                    label={`${topic.name}: all its parts`}
+                    label={`All of ${topic.name}`}
                     onChange={() => toggleTopic(topic)}
                     disabled={topic.questions === 0}
                   />
@@ -521,9 +552,12 @@ function TopicTree({
                     onClick={() => expand(topic.topic_id)}
                     disabled={!!q}
                   >
-                    <span className="t">{topic.name}</span>
+                    <span className="t">
+                      <span className="rb-sec-eyebrow sj-mono">Section</span>
+                      {topic.name}
+                    </span>
                     <span className="rb-count sj-mono">
-                      {state === 'some' ? `${on}/${ids.length} parts · ` : ''}
+                      {state === 'some' ? `${on}/${ids.length} topics · ` : `${plural(ids.length, 'topic')} · `}
                       {topic.questions}
                       <span className="u"> q</span>
                     </span>

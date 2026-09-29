@@ -43,7 +43,10 @@ class SubjectOffer(BaseModel):
     name: str
     #: What a student can actually do with this subject today.
     deliverable_questions: int
+    #: Internal count; students are never shown the word "skill". See `teachable_topics`.
     teachable_skills: int
+    #: JAMB topics (DB subtopics) with at least one skill we teach: the count students see.
+    teachable_topics: int = 0
     ready: bool
     #: Present when ready is false: the plain reason, for the student, not the operator.
     blocked_reason: str | None
@@ -135,7 +138,9 @@ async def catalogue(
                (SELECT count(*) FROM deliverable_questions d WHERE d.subject_id = s.id)
                  AS deliverable_questions,
                (SELECT count(*) FROM teachable_skills t WHERE t.subject_id = s.id)
-                 AS teachable_skills
+                 AS teachable_skills,
+               (SELECT count(DISTINCT t.parent_id) FROM teachable_skills t
+                 WHERE t.subject_id = s.id) AS teachable_topics
         FROM examinations e
         JOIN subjects s ON s.examination_id = e.id
         WHERE e.status = 'active' AND s.status = 'active'
@@ -178,6 +183,7 @@ async def catalogue(
                 name=row["subject_name"],
                 deliverable_questions=deliverable,
                 teachable_skills=teachable,
+                teachable_topics=int(row["teachable_topics"]),
                 ready=ready,
                 blocked_reason=reason,
                 compulsory=row["code"] in (row["compulsory_subject_codes"] or []),

@@ -2,13 +2,28 @@
  * WHERE THE DOODLES GO on the working: beside the line each belongs to, in free board, never over
  * the writing, a mark, a mark's words or another doodle.
  *
- * A doodle comes in with the moment that names it (`doodle: {name, caption?, near?}`), beside
- * the line `near` names (by default the moment's own line, or the latest line before it when
- * the moment writes none). It is looked for in the right-hand gutter of the working first, level
- * with its line and then a little higher, then just after the end of the line; only in board
- * already written on (never below the lowest line, where the next line will be written). Where
- * nothing is free at full size it tries smaller, and where nothing is free even then, it makes
- * room: the lines after its own are moved down and it sits under its line, at the right.
+ * A doodle comes in with the moment that names it (`doodle: {name, caption?, near?}`, or two
+ * with `doodles: [..]`), beside the line `near` names (by default the moment's own line, or the
+ * latest line before it when the moment writes none). It is looked for in the right-hand gutter
+ * of the working first, level with its line and then a little higher, then just after the end
+ * of the line; only in board already written on (never below the lowest line, where the next
+ * line will be written). Where nothing is free at full size it tries smaller, and where nothing
+ * is free even then, it makes room: the lines after its own are moved down and it sits under its
+ * line, at the right (two under one line side by side where they fit, else one under the other).
+ *
+ * DOODLES V2 (docs/plans/doodles-v2-contract.md):
+ * - A doodle's `size`: small (about 70px), medium (120px, the default) or a scene (320x200 on a
+ *   laptop). A scene takes the right-hand panel when the lesson has no figure or passage there
+ *   (Board.tsx gives it one), else a wider place beside the working; on a phone it always goes
+ *   in room made under its line.
+ * - A `repeat` is a community of small figures, laid out in a row, grid or cluster, sized to
+ *   hold every arrangement its actions will spread it into (doodleArt.ts).
+ * - Its later moments' `doodle_do` actions, and board lines linked to it (`to: {doodle, part}`),
+ *   are its tasks, played by the pen as their moment's line is written (LiveDoodle.tsx). A doodle
+ *   that writes notes beside itself is given room for them on its right.
+ * - A board line linked to a doodle is joined to it by a line across, drawn from the pair's
+ *   numbered dot on the working to the dot beside the doodle's part, and kept where it runs
+ *   clear of everything; lit with both ends on a hover or a tap.
  *
  * Like the marks, a doodle stays once it is up. At most about two are meant to share a
  * screenful; a doodle with another close above it is drawn smaller.
@@ -18,17 +33,35 @@
  */
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { RefObject } from "react";
+import type { CSSProperties, RefObject } from "react";
+import { createPortal } from "react-dom";
 
-import type { LessonDoodle, LessonDoodleRef } from "./api.js";
-import { Doodle } from "./Doodle.js";
+import type { LessonDoodle, LessonDoodleOp, LessonDoodleRef } from "./api.js";
+import { CELL, charsIn, repeatCount, repeatShape, viewBoxOf } from "./doodleArt.js";
+import type { ArtSource, DoodleEngine } from "./doodleEngine.js";
 import { libraryDoodle } from "./doodles/index.js";
-import type { Box } from "./ink.js";
+import { stillMotion, type Box, type Pt } from "./ink.js";
+import { LiveDoodle, type DoodleTask } from "./LiveDoodle.js";
 
 /** What the layer needs of a moment of the lesson. */
 export interface DoodleMoment {
   items: string[];
   doodle?: LessonDoodleRef | null;
+  doodles?: LessonDoodleRef[] | null;
+  doodleDo?: LessonDoodleOp[] | null;
+}
+
+/** A board line's link to a doodle (Board.tsx `pairLinks`): the pair, and what it points at. */
+export interface DoodleLink {
+  /** The mark's key (`<moment>-<place>`), as the working's end of the pair has it. */
+  key: string;
+  number: number;
+  /** The moment whose mark it is. */
+  set: number;
+  doodle: string;
+  part: string | null;
+  /** The mark's kind on the working: the doodle's part gets the same kind of mark. */
+  kind: string;
 }
 
 interface Due {
@@ -37,28 +70,52 @@ interface Due {
   moment: number;
   /** The moment whose line it sits by. */
   near: number;
-  svg: string;
+  id: string | null;
+  source: ArtSource;
+  sourceKey: string;
   alt: string;
   caption: string | null;
+  size: "small" | "medium" | "scene" | "repeat";
+  /** The art's width over its height. */
+  aspect: number;
+  /** For a repeat: its width in its own units (figures are CELL units each). */
+  units: number;
+  /** The longest note it writes beside itself, in characters (0: none). */
+  notes: number;
+  /** Asked to be drawn small. */
+  small: boolean;
+  tasks: DoodleTask[];
 }
 
 interface Spot {
   left: number;
   top: number;
-  /** The picture's width and height. */
-  size: number;
-  /** The whole of what it covers, the caption under it included. */
+  /** The art's width and height. */
   w: number;
   h: number;
+  /** The room on its right for its notes. */
+  note: number;
+  /** The whole of what it covers, the caption and notes included. */
+  outerW: number;
+  outerH: number;
   /** The line moved down to make room under it, if it had to be. */
   roomUnder: number | null;
+  /** In the right-hand panel rather than on the working. */
+  panel: boolean;
 }
 
-/** A doodle's size: about 120px beside the working on a laptop, 80px on a phone. */
-function sizes(width: number): number[] {
-  return width < 520 ? [84, 76, 68] : [124, 108, 92];
-}
 const GAP = 10;
+
+/** The art's widths to try, largest first, for a kind of doodle on this width of board. */
+function widths(due: Due, column: number, phone: boolean): number[] {
+  if (due.size === "repeat") {
+    const figure = due.small ? (phone ? [22, 20, 18] : [24, 21, 18]) : phone ? [24, 21, 18] : [30, 26, 23];
+    return figure.map((px) => (due.units * px) / CELL);
+  }
+  if (due.size === "scene") return phone ? [Math.min(320, column)] : [320, 288, 256];
+  if (due.size === "small") return phone ? [60, 54, 48] : [72, 64, 56];
+  return phone ? [84, 76, 68] : [124, 108, 92];
+}
 
 /**
  * The room a caption takes under a picture of `size`: its width (at most a little wider than
@@ -72,6 +129,21 @@ export function captionRoom(caption: string | null, size: number): { w: number; 
   const most = size + 56;
   const lines = wide > most ? 2 : 1;
   return { w: Math.max(size, Math.min(wide, most)), h: lines * font * 1.08 + 6 };
+}
+
+/** The whole footprint of a doodle drawn `w` wide: the art, its caption, its notes' room. */
+function footprint(due: Due, w: number, column: number, phone: boolean): Omit<Spot, "left" | "top" | "roomUnder" | "panel"> {
+  const h = w / due.aspect;
+  let note = 0;
+  if (due.notes > 0) {
+    const want = Math.min(phone ? 140 : 230, due.notes * 7.4 + 22);
+    // Notes on the right only where the art and some notes fit across the column; else they
+    // are written inside the picture, by the part.
+    if (w + want <= column) note = want;
+    else if (column - w >= charsIn(0) * 7.4 + 30) note = column - w;
+  }
+  const room = captionRoom(due.caption, Math.min(w, 180));
+  return { w, h, note, outerW: Math.max(w, room.w) + note, outerH: h + room.h };
 }
 
 function meets(a: Box, b: Box, pad: number): boolean {
@@ -104,7 +176,7 @@ function obstacles(sheet: HTMLElement, base: DOMRect): Box[] {
     .forEach((element) => found.push(relative(element.getBoundingClientRect(), base)));
   // The marks: their strokes (a circle, an arrow's bow), their words and the pairs' dots.
   sheet
-    .querySelectorAll<Element>(".pb-marks .pb-mark, .pb-mark-label, .pb-pairdot, .pb-carried")
+    .querySelectorAll<Element>(".pb-marks .pb-mark, .pb-mark-label, .pb-marks .pb-pairdot, .pb-carried")
     .forEach((element) => {
       const rect = element.getBoundingClientRect();
       if (rect.width > 0 || rect.height > 0) found.push(relative(rect, base));
@@ -112,36 +184,62 @@ function obstacles(sheet: HTMLElement, base: DOMRect): Box[] {
   return found;
 }
 
+/** Whether the right-hand panel for scenes is there to be used (a wide board, no figure). */
+function panelOpen(panel: HTMLElement | null): boolean {
+  return Boolean(panel && panel.offsetParent !== null && panel.clientWidth >= 240);
+}
+
 /**
  * Find a spot for each doodle in turn: beside its line if it can, else under it with room made.
- * `taken` is the spots already settled, which stay where they are.
+ * `settled` is the spots already settled, which stay where they are.
  */
 function place(
   sheet: HTMLElement,
   due: Due[],
   settled: Map<string, Spot>,
   screen: number,
+  panel: HTMLElement | null,
 ): Map<string, Spot> {
   const base = sheet.getBoundingClientRect();
   // The column the working is written in: the sheet less its side padding (the page's gutter).
   const style = getComputedStyle(sheet);
   const minX = Number.parseFloat(style.paddingLeft) || 0;
   const width = sheet.clientWidth - (Number.parseFloat(style.paddingRight) || 0);
+  const column = width - minX;
+  const phone = column < 520;
+  const inPanel = panelOpen(panel);
   const spots = new Map<string, Spot>();
   const blocked = obstacles(sheet, base);
   const lowest = Math.max(0, ...blocked.map((box) => box.bottom));
   const doodleBoxes: Box[] = [];
+  /** What has been put under each line already: the next goes beside it, or under it. */
+  const under = new Map<number, { left: number; bottom: number; top: number }>();
   const boxOf = (spot: Spot): Box => ({
     left: spot.left,
     top: spot.top,
-    right: spot.left + spot.w,
-    bottom: spot.top + spot.h,
+    right: spot.left + spot.outerW,
+    bottom: spot.top + spot.outerH,
   });
   for (const doodle of due) {
     const kept = settled.get(doodle.key);
-    if (kept) {
+    if (kept && kept.panel === (doodle.size === "scene" && inPanel)) {
       spots.set(doodle.key, kept);
-      doodleBoxes.push(boxOf(kept));
+      if (!kept.panel) doodleBoxes.push(boxOf(kept));
+      if (kept.roomUnder !== null) {
+        const was = under.get(kept.roomUnder);
+        under.set(kept.roomUnder, {
+          left: Math.min(was?.left ?? Infinity, kept.left),
+          top: Math.min(was?.top ?? Infinity, kept.top),
+          bottom: Math.max(was?.bottom ?? 0, kept.top + kept.outerH),
+        });
+      }
+      continue;
+    }
+    if (doodle.size === "scene" && inPanel && panel) {
+      // The panel's own column: as wide as it is (up to a comfortable size), one under another.
+      const w = Math.min(400, panel.clientWidth - 28);
+      const print = footprint(doodle, w, w + 1, false);
+      spots.set(doodle.key, { ...print, note: 0, outerW: w, left: 0, top: 0, roomUnder: null, panel: true });
       continue;
     }
     const line = sheet.querySelector<HTMLElement>(`[data-line="${doodle.near}"]`);
@@ -155,12 +253,16 @@ function place(
     };
     // Another doodle within a screenful above: this one is drawn smaller, so two can share it.
     const crowd = doodleBoxes.filter((box) => Math.abs(box.bottom - row.bottom) < screen).length;
-    const options = sizes(width - minX).slice(Math.min(2, crowd));
+    const all = widths(doodle, column, phone);
+    const options = all.slice(Math.min(all.length - 1, crowd));
+    // On a phone a scene, or a group of figures wider than half the column, goes straight under
+    // its line, where it has the width.
+    const wide = phone && (doodle.size === "scene" || (options[0] ?? 0) > column * 0.5);
     let found: Spot | null = null;
-    for (const size of options) {
-      const room = captionRoom(doodle.caption, size);
-      const w = room.w;
-      const h = size + room.h;
+    for (const artW of wide ? [] : options) {
+      const print = footprint(doodle, Math.min(artW, column), column, phone);
+      const w = print.outerW;
+      const h = print.outerH;
       const tries: [number, number][] = [];
       // Level with the line, then higher; never lower than the board written so far.
       const floor = Math.min(lowest, row.bottom + h * 0.35);
@@ -177,7 +279,7 @@ function place(
         if (top < 0 || left < minX) continue;
         const box = { left, top, right: left + w, bottom: top + h };
         if (blocked.some((b) => meets(box, b, GAP)) || doodleBoxes.some((b) => meets(box, b, GAP))) continue;
-        found = { left, top, size, w, h, roomUnder: null };
+        found = { ...print, left, top, roomUnder: null, panel: false };
         break;
       }
       if (found) break;
@@ -185,30 +287,57 @@ function place(
     if (!found) {
       // No room beside it anywhere: room is made under the line, and the doodle sits there, at
       // the size it has room for (the one smaller where another shares the screenful).
-      const size = options[0] ?? 80;
-      const room = captionRoom(doodle.caption, size);
-      found = {
-        left: Math.max(minX, width - room.w),
-        top: row.bottom + 8,
-        size,
-        w: room.w,
-        h: size + room.h,
-        roomUnder: doodle.near,
-      };
+      const artW = Math.min(options[0] ?? 80, column);
+      const print = footprint(doodle, artW, column, phone);
+      const was = under.get(doodle.near);
+      const centred = print.outerW > column * 0.6;
+      let left = centred ? minX + (column - print.outerW) / 2 : Math.max(minX, width - print.outerW);
+      let top = row.bottom + 8;
+      if (was) {
+        // Beside the one already there, where it fits; else under it.
+        if (was.left - GAP * 2 - print.outerW >= minX) {
+          left = was.left - GAP * 2 - print.outerW;
+          top = was.top;
+        } else top = was.bottom + GAP;
+      }
+      found = { ...print, left, top, roomUnder: doodle.near, panel: false };
     }
     spots.set(doodle.key, found);
     doodleBoxes.push(boxOf(found));
+    if (found.roomUnder !== null) {
+      const was = under.get(found.roomUnder);
+      under.set(found.roomUnder, {
+        left: Math.min(was?.left ?? Infinity, found.left),
+        top: Math.min(was?.top ?? Infinity, found.top),
+        bottom: Math.max(was?.bottom ?? 0, found.top + found.outerH),
+      });
+    }
   }
   return spots;
 }
+
+/** A mark's kind on the working, as the doodle's part is marked for it. */
+function doodleMark(kind: string): LessonDoodleOp["op"] {
+  if (kind === "highlight" || kind === "underline" || kind === "circle") return kind;
+  if (kind === "strike") return "cross";
+  return "circle";
+}
+
+/** The ops that write words beside the doodle (not a group's names, not an arrow's). */
+const NOTE_OPS = new Set(["label", "circle", "highlight", "underline", "cross"]);
 
 export function DoodleLayer({
   sheetRef,
   moments,
   shown,
   itemsShown,
+  pointing,
   doodles,
   paused,
+  links = [],
+  lit = null,
+  onLit = () => undefined,
+  panel = null,
 }: {
   sheetRef: RefObject<HTMLDivElement>;
   /** The lesson's moments, in order. */
@@ -217,62 +346,152 @@ export function DoodleLayer({
   shown: number;
   /** How many of the newest moment's pieces are up. */
   itemsShown: number;
+  /** The moment whose marks are going up: its line is written, and its actions are due. */
+  pointing: number | null;
   /** The lesson's own pictures (`custom:…`). */
   doodles?: LessonDoodle[];
   paused: boolean;
+  /** Board lines' links to doodles, as they are due. */
+  links?: DoodleLink[];
+  lit?: number | null;
+  onLit?: (number: number | null, tapped?: boolean) => void;
+  /** The right-hand panel a scene may take, where the board has made one. */
+  panel?: HTMLElement | null;
 }) {
+  const artOf = useCallback(
+    (name: string): { svg: string; alt: string } | null => {
+      if (name.startsWith("custom:")) {
+        const own = (doodles ?? []).find((doodle) => doodle.name === name);
+        return own ? { svg: own.svg, alt: own.alt_text ?? "A doodle" } : null;
+      }
+      const shared = libraryDoodle(name);
+      return shared ? { svg: shared.svg, alt: shared.alt } : null;
+    },
+    [doodles],
+  );
+  const stageArt = useCallback((name: string) => artOf(name)?.svg ?? null, [artOf]);
+
+  // Every action in the lesson on each id, in order: a group's room is kept for all of them.
+  const plans = useMemo(() => {
+    const out = new Map<string, LessonDoodleOp[]>();
+    for (const moment of moments)
+      for (const op of moment.doodleDo ?? []) out.set(op.id, [...(out.get(op.id) ?? []), op]);
+    return out;
+  }, [moments]);
+
   // The doodles due: every moment up to the one being said that brings one in, whose line is on
-  // the board.
+  // the board; and what has been done to each so far.
   const due: Due[] = useMemo(() => {
     const out: Due[] = [];
+    const byId = new Map<string, Due>();
+    const current = shown - 1;
     moments.slice(0, shown).forEach((moment, index) => {
-      const ref = moment.doodle;
-      if (!ref?.name) return;
-      let near = typeof ref.near === "number" ? ref.near : index;
-      if (!moments[near]?.items.length) {
-        near = -1;
-        for (let back = index; back >= 0; back -= 1)
-          if (moments[back]?.items.length) {
-            near = back;
-            break;
-          }
-      }
-      if (near < 0 || near > index) return;
-      // The line it sits by has to be up: the newest moment's, once its first piece is written.
-      if (near === shown - 1 && itemsShown === 0) return;
-      const art = ref.name.startsWith("custom:")
-        ? (doodles ?? []).find((doodle) => doodle.name === ref.name)
-        : null;
-      const library = art ? null : libraryDoodle(ref.name);
-      const svg = art?.svg ?? library?.svg;
-      if (!svg) return;
-      out.push({
-        key: `${index}:${ref.name}`,
-        moment: index,
-        near,
-        svg,
-        alt: art?.alt_text ?? library?.alt ?? "A doodle",
-        caption: ref.caption?.trim() || null,
+      const refs = [moment.doodle, ...(moment.doodles ?? [])].filter(
+        (ref): ref is LessonDoodleRef => Boolean(ref && (ref.name || ref.repeat)),
+      );
+      refs.forEach((ref, k) => {
+        let near = typeof ref.near === "number" ? ref.near : index;
+        if (!moments[near]?.items.length) {
+          near = -1;
+          for (let back = index; back >= 0; back -= 1)
+            if (moments[back]?.items.length) {
+              near = back;
+              break;
+            }
+        }
+        if (near < 0 || near > index) return;
+        // The line it sits by has to be up: the newest moment's, once its first piece is written.
+        if (near === shown - 1 && itemsShown === 0) return;
+        const id = ref.id?.trim() || null;
+        const plan = id ? plans.get(id) ?? [] : [];
+        const count = repeatCount(ref);
+        let source: ArtSource;
+        let alt: string;
+        let aspect = 1;
+        let units = 0;
+        let size: Due["size"];
+        if (count > 0) {
+          const kinds = Array.isArray(ref.repeat)
+            ? ref.repeat.map((kind) => ({ svg: artOf(kind.name)?.svg ?? "", n: kind.n }))
+            : [{ svg: artOf(ref.name)?.svg ?? "", n: count }];
+          if (kinds.every((kind) => !kind.svg)) return;
+          source = { kind: "repeat", ref, kinds, plan };
+          const shape = repeatShape(ref, plan);
+          aspect = shape.width / shape.height;
+          units = shape.width;
+          size = "repeat";
+          alt = `${count} ${artOf(Array.isArray(ref.repeat) ? ref.repeat[0]!.name : ref.name)?.alt.toLowerCase() ?? "figures"}`;
+        } else {
+          const art = artOf(ref.name);
+          if (!art) return;
+          source = { kind: "single", name: ref.name, svg: art.svg };
+          const [, , w, h] = viewBoxOf(art.svg);
+          aspect = w / h;
+          size = ref.size === "scene" ? "scene" : ref.size === "small" ? "small" : "medium";
+          alt = art.alt;
+        }
+        const notes = Math.max(0, ...plan.filter((op) => NOTE_OPS.has(op.op) && op.text).map((op) => op.text!.length));
+        const item: Due = {
+          key: id ? `id:${id}` : `${index}:${k}:${ref.name}`,
+          moment: index,
+          near,
+          id,
+          source,
+          sourceKey: JSON.stringify([ref.name, ref.repeat ?? null, ref.layout ?? null, plan.map((op) => [op.op, op.n, Boolean(op.text)])]),
+          alt,
+          caption: ref.caption?.trim() || null,
+          size,
+          aspect: aspect > 0 && Number.isFinite(aspect) ? aspect : 1,
+          units,
+          // A group writes its notes over itself, in room of its own.
+          notes: size === "repeat" ? 0 : notes,
+          small: ref.size === "small",
+          tasks: [],
+        };
+        out.push(item);
+        if (id) byId.set(id, item);
       });
+      // This moment's actions and links, once its line is written (or it is past).
+      if (index < current || pointing === index) {
+        (moment.doodleDo ?? []).forEach((op, k) => {
+          byId.get(op.id)?.tasks.push({ key: `${index}:${k}`, op, live: index === current });
+        });
+        for (const link of links.filter((one) => one.set === index)) {
+          byId.get(link.doodle)?.tasks.push({
+            key: `link:${link.key}`,
+            op: { id: link.doodle, op: doodleMark(link.kind), part: link.part },
+            live: index === current,
+            link: { key: link.key, number: link.number },
+          });
+        }
+      }
     });
     return out;
-  }, [doodles, itemsShown, moments, shown]);
+  }, [artOf, itemsShown, links, moments, plans, pointing, shown]);
 
   const [spots, setSpots] = useState<Map<string, Spot>>(() => new Map());
   const settled = useRef(new Map<string, Spot>());
   const width = useRef(0);
   const room = useRef(new Map<HTMLElement, string>());
+  const engines = useRef(new Map<string, DoodleEngine>());
 
   /** Make the room a doodle under its line needs: its line's bottom margin grows by it. */
   const makeRoom = useCallback((sheet: HTMLElement, placed: Map<string, Spot>) => {
     for (const [element, was] of room.current) element.style.marginBottom = was;
     room.current.clear();
+    const need = new Map<number, number>();
     for (const spot of placed.values()) {
       if (spot.roomUnder === null) continue;
       const line = sheet.querySelector<HTMLElement>(`[data-line="${spot.roomUnder}"]`);
       if (!line) continue;
+      const top = line.getBoundingClientRect().bottom - sheet.getBoundingClientRect().top;
+      need.set(spot.roomUnder, Math.max(need.get(spot.roomUnder) ?? 0, spot.top + spot.outerH - top));
+    }
+    for (const [at, height] of need) {
+      const line = sheet.querySelector<HTMLElement>(`[data-line="${at}"]`);
+      if (!line) continue;
       if (!room.current.has(line)) room.current.set(line, line.style.marginBottom);
-      line.style.marginBottom = `${spot.h + 22}px`;
+      line.style.marginBottom = `${height + 22}px`;
     }
   }, []);
 
@@ -287,12 +506,12 @@ export function DoodleLayer({
         settled.current = new Map();
       }
       const ink = sheet.closest(".pb-ink");
-      const placed = place(sheet, due, settled.current, ink?.clientHeight ?? 700);
+      const placed = place(sheet, due, settled.current, ink?.clientHeight ?? 700, panel);
       settled.current = placed;
       makeRoom(sheet, placed);
       setSpots(placed);
     },
-    [due, makeRoom, sheetRef],
+    [due, makeRoom, panel, sheetRef],
   );
 
   useLayoutEffect(() => {
@@ -348,7 +567,7 @@ export function DoodleLayer({
         const coach =
           Number.parseFloat(stage ? getComputedStyle(stage).getPropertyValue("--coach-room") : "") || 76;
         const floor = view.bottom - coach - 12;
-        const bottom = sheet.getBoundingClientRect().top + spot.top + spot.h;
+        const bottom = sheet.getBoundingClientRect().top + spot.top + spot.outerH;
         const seen = lineBox && lineBox.top >= view.top && lineBox.bottom <= floor + 4;
         if (seen && bottom > floor) {
           const by = Math.min(bottom - floor, lineBox.top - view.top - 12);
@@ -362,29 +581,189 @@ export function DoodleLayer({
   }, [sheetRef, spots]);
 
   if (due.length === 0) return null;
+  const render = (doodle: Due, spot: Spot) => (
+    <LiveDoodle
+      drawKey={`${doodle.key}:${doodle.sourceKey.length}`}
+      doodleId={doodle.id}
+      source={doodle.source}
+      sourceKey={doodle.sourceKey}
+      width={Math.round(spot.w)}
+      height={Math.round(spot.h)}
+      caption={doodle.caption}
+      alt={doodle.alt}
+      tasks={doodle.tasks}
+      paused={paused}
+      noteRoom={Math.round(spot.note)}
+      engines={engines.current}
+      stageArt={stageArt}
+      lit={lit}
+      onLit={onLit}
+    />
+  );
+  const inPanel = due.filter((doodle) => spots.get(doodle.key)?.panel);
   return (
     <div className="dd-layer">
       {due.map((doodle) => {
         const spot = spots.get(doodle.key);
-        if (!spot) return null;
+        if (!spot || spot.panel) return null;
         return (
           <div
             key={doodle.key}
             className="dd-spot"
-            style={{ left: spot.left, top: spot.top, width: spot.w, height: spot.h }}
+            style={{ left: spot.left, top: spot.top, width: spot.outerW, height: spot.outerH }}
             data-moment={doodle.moment}
           >
-            <Doodle
-              svg={doodle.svg}
-              alt={doodle.alt}
-              size={spot.size}
-              caption={doodle.caption}
-              paused={paused}
-              drawKey={`${doodle.key}:${doodle.svg.length}`}
-            />
+            {render(doodle, spot)}
           </div>
         );
       })}
+      {panel && inPanel.length
+        ? createPortal(
+            inPanel.map((doodle) => (
+              <div key={doodle.key} className="dd-panelspot" data-moment={doodle.moment}>
+                {render(doodle, spots.get(doodle.key)!)}
+              </div>
+            )),
+            panel,
+          )
+        : null}
+      {links.length ? (
+        <DoodleLinks sheetRef={sheetRef} links={links} lit={lit} onLit={onLit} />
+      ) : null}
     </div>
+  );
+}
+
+/** How long a line across that cannot stay is held once drawn, before it is let go. */
+const HOLD_MS = 2800;
+
+interface Across {
+  key: string;
+  number: number;
+  d: string;
+  clean: boolean;
+  fresh: boolean;
+}
+
+/**
+ * THE LINES ACROSS between a board line and the doodle it links to: from the working's end of
+ * the pair (the piece, or its numbered dot) to the dot beside the doodle's part. Kept where it
+ * runs clear of the writing, the marks and the other doodles; where it cannot, drawn as its
+ * mark goes up and then let go, the numbered dots saying what goes with what; drawn again while
+ * the pair is lit.
+ */
+function DoodleLinks({
+  sheetRef,
+  links,
+  lit,
+  onLit,
+}: {
+  sheetRef: RefObject<HTMLDivElement>;
+  links: DoodleLink[];
+  lit: number | null;
+  onLit: (number: number | null, tapped?: boolean) => void;
+}) {
+  const [across, setAcross] = useState<Across[]>([]);
+  const seen = useRef(new Map<string, number>());
+  const measure = useCallback(() => {
+    const sheet = sheetRef.current;
+    if (!sheet) return;
+    const base = sheet.getBoundingClientRect();
+    const blocked = obstacles(sheet, base);
+    const doodleBoxes = Array.from(sheet.querySelectorAll<HTMLElement>(".dd-spot")).map((spot) =>
+      relative(spot.getBoundingClientRect(), base),
+    );
+    const now = performance.now();
+    const out: Across[] = [];
+    for (const link of links) {
+      const start = sheet.querySelector(`[data-link-work="${link.key}"]`)?.getBoundingClientRect();
+      const end = document.querySelector(`[data-link-doodle="${link.key}"]`)?.getBoundingClientRect();
+      if (!start || !end || end.width === 0) continue;
+      if (!seen.current.has(link.key)) seen.current.set(link.key, now);
+      const a: Pt = [start.left - base.left, start.top - base.top];
+      const dot: Pt = [end.left + end.width / 2 - base.left, end.top + end.height / 2 - base.top];
+      // Stopped just short of the dot, so the line points at it rather than covering it.
+      const far = Math.hypot(dot[0] - a[0], dot[1] - a[1]) || 1;
+      const b: Pt = [dot[0] - ((dot[0] - a[0]) / far) * 11, dot[1] - ((dot[1] - a[1]) / far) * 11];
+      const dx = b[0] - a[0];
+      const dy = b[1] - a[1];
+      const reach = Math.max(40, Math.abs(dx) * 0.45);
+      const c1: Pt = [a[0] + reach, a[1]];
+      const c2: Pt = Math.abs(dx) > Math.abs(dy) ? [b[0] - Math.sign(dx) * reach * 0.7, b[1]] : [b[0], b[1] - Math.sign(dy) * Math.max(30, Math.abs(dy) * 0.4)];
+      const route: Pt[] = [];
+      for (let i = 0; i <= 24; i += 1) {
+        const t = i / 24;
+        const u = 1 - t;
+        route.push([
+          u * u * u * a[0] + 3 * u * u * t * c1[0] + 3 * u * t * t * c2[0] + t * t * t * b[0],
+          u * u * u * a[1] + 3 * u * u * t * c1[1] + 3 * u * t * t * c2[1] + t * t * t * b[1],
+        ]);
+      }
+      // Its own ends are not in its way: the working's dot beside its piece, and the doodle the
+      // line goes to.
+      const holds = (o: Box, p: Pt, pad: number) =>
+        p[0] > o.left - pad && p[0] < o.right + pad && p[1] > o.top - pad && p[1] < o.bottom + pad;
+      const others = [
+        ...blocked.filter((o) => !holds(o, a, 26)),
+        ...doodleBoxes.filter((o) => !holds(o, b, 2)),
+      ];
+      const clear = (p: Pt, i: number) => {
+        if (i < 2 || i > 22) return true;
+        return !others.some((o) => holds(o, p, 2));
+      };
+      const clean = route.every(clear);
+      const fresh = !stillMotion() && now - (seen.current.get(link.key) ?? now) < HOLD_MS;
+      if (!clean && !fresh && lit !== link.number) continue;
+      out.push({
+        key: link.key,
+        number: link.number,
+        d: `M${a[0].toFixed(1)} ${a[1].toFixed(1)}C${c1[0].toFixed(1)} ${c1[1].toFixed(1)} ${c2[0].toFixed(1)} ${c2[1].toFixed(1)} ${b[0].toFixed(1)} ${b[1].toFixed(1)}`,
+        clean,
+        fresh,
+      });
+    }
+    setAcross((was) => (JSON.stringify(was) === JSON.stringify(out) ? was : out));
+  }, [links, lit, sheetRef]);
+
+  useEffect(() => {
+    const sheet = sheetRef.current;
+    const ink = sheet?.closest<HTMLElement>(".pb-ink");
+    let frame = 0;
+    const again = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(measure);
+    };
+    again();
+    const timer = window.setInterval(again, 400);
+    ink?.addEventListener("scroll", again, { passive: true });
+    window.addEventListener("resize", again);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearInterval(timer);
+      ink?.removeEventListener("scroll", again);
+      window.removeEventListener("resize", again);
+    };
+  }, [measure, sheetRef]);
+
+  if (across.length === 0) return null;
+  return (
+    <svg className="pb-links dd-links" aria-hidden="true">
+      {across.map((line) => {
+        const state = lit === line.number ? "lit" : line.clean ? (line.fresh ? "draw" : "kept") : "pass";
+        return (
+          <g
+            key={line.key}
+            className={`pb-link pair-${(line.number - 1) % 5} ${state}`}
+            style={{ "--delay": "0s" } as CSSProperties}
+            onMouseEnter={() => onLit(line.number)}
+            onMouseLeave={() => onLit(null)}
+            onClick={() => onLit(line.number, true)}
+          >
+            <path className="pb-link-hit" d={line.d} />
+            <path className="pb-link-line" d={line.d} pathLength={1} />
+          </g>
+        );
+      })}
+    </svg>
   );
 }

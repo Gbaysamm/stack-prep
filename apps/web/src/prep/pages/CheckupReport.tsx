@@ -3,15 +3,18 @@
  *
  * Ordered the way a student reads it: the number first (in the page hero), then where it sits on
  * the 0–100 scale against the plan and the target, then what's behind it, then what to do. Every
- * number says what stands behind it. A subtopic the sitting never reached shows as "not checked",
+ * number says what stands behind it. A topic the sitting never reached shows as "not checked",
  * never as a low score: silence is not evidence of weakness.
+ *
+ * JAMB's words throughout: a TOPIC (the API's `subtopics`) is the unit read, scored and planned;
+ * a SECTION (the API's `topics`) is only the heading that groups them.
  *
  * The projection needs a goal (a target and a date). Without one the report still shows the
  * topics, and asks for the goal instead of inventing a score.
  */
 
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 import {
   api,
@@ -33,6 +36,7 @@ import { progressApi } from '../progressApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
 import { Button, Card, CountUp, Eyebrow, PageHero, Pager, ShowMore, Skeleton, cx, usePaged, useShowMore } from '../ui.js';
 import { HOW_PATH, MetricTip } from './HowItsWorkedOut.js';
+import { NothingFreshNote, useStartPractice } from './Home.js';
 import './CheckupReport.css';
 
 /* ------------------------------------------------------------------ mastery bands */
@@ -112,7 +116,6 @@ const wholeNumbers = (text: string) => text.replace(/\b\d+\.\d+\b/g, (n) => Stri
 export function CheckupReport() {
   const { sessionId = '' } = useParams();
   const student = useStudent();
-  const navigate = useNavigate();
 
   const report = useLoad(() => api.report(sessionId), [sessionId]);
   const overview = useLoad(() => progressApi.overview(student.studentId), [student.studentId]);
@@ -123,7 +126,6 @@ export function CheckupReport() {
   const subjectName = subject?.subject_name ?? '';
   usePageTitle(subjectName ? `${subjectName} report` : 'Check-up report');
 
-  const [starting, setStarting] = useState(false);
   // A link to a part of the report (#topics, #plan) lands on it once the report is in.
   const ready = Boolean(report.data);
   useEffect(() => {
@@ -133,19 +135,19 @@ export function CheckupReport() {
     }, 60);
     return () => window.clearTimeout(id);
   }, [ready]);
-  const [startIssue, setStartIssue] = useState<string | null>(null);
-
-  const practise = async () => {
+  // "Practise weakest topic" means that topic: the run is narrowed to the spot the plan puts
+  // first (or, with no plan, the lowest mastery measured), never a general run.
+  const starter = useStartPractice();
+  const starting = starter.busy !== null;
+  const startIssue = starter.error;
+  const practise = (where: 'hero' | 'cta') => {
     if (!report.data || starting) return;
-    setStarting(true);
-    setStartIssue(null);
-    try {
-      const state = await api.startPractice(student.studentId, report.data.subject_id);
-      navigate(`/practice/${state.session_id}`);
-    } catch (error) {
-      setStartIssue((error as Error).message || 'Practice could not start.');
-      setStarting(false);
-    }
+    const target = weakestSpot(report.data);
+    void starter.start(
+      report.data.subject_id,
+      target ? { subtopicIds: [target.subtopic_id], label: target.name } : {},
+      where,
+    );
   };
 
   if (report.error && !report.data) {
@@ -194,7 +196,7 @@ export function CheckupReport() {
           <>
             <Button
               tone="lime"
-              onClick={() => void practise()}
+              onClick={() => practise('hero')}
               busy={starting}
               icon={starting ? undefined : <IconBolt size={18} />}
             >
@@ -246,6 +248,7 @@ export function CheckupReport() {
           {startIssue}
         </p>
       ) : null}
+      {starter.exhausted?.key === 'hero' ? <NothingFreshNote starter={starter} /> : null}
 
       {!data.finished ? (
         <Notice
@@ -268,7 +271,10 @@ export function CheckupReport() {
 
       <HowWorkedOut report={data} />
 
-      {data.unassessed_topics.length > 0 ? <NotReached topics={data.unassessed_topics} /> : null}
+      {/* JAMB topics no question reached (the API's own list names sections). */}
+      {data.subtopics.some((s) => s.answered === 0) ? (
+        <NotReached topics={data.subtopics.filter((s) => s.answered === 0).map((s) => s.name)} />
+      ) : null}
 
       <Topics report={data} />
 
@@ -289,11 +295,12 @@ export function CheckupReport() {
             {startIssue}
           </p>
         ) : null}
+        {starter.exhausted?.key === 'cta' ? <NothingFreshNote starter={starter} /> : null}
         <div className="cp-cta-actions">
           <Button
             tone="lime"
             size="lg"
-            onClick={() => void practise()}
+            onClick={() => practise('cta')}
             busy={starting}
             trailing={starting ? undefined : <IconArrowRight size={18} />}
           >
@@ -431,7 +438,7 @@ function ScoreSection({
 }
 
 function NoGoal({ report, goalPath }: { report: Report; goalPath: string }) {
-  const measured = report.topics.filter((t) => t.answered > 0);
+  const measured = report.subtopics.filter((t) => t.answered > 0);
   const right = report.topics.reduce((sum, t) => sum + t.correct, 0);
   return (
     <section className="cp-section first" aria-labelledby="cp-nogoal-title">
@@ -465,7 +472,9 @@ function NoGoal({ report, goalPath }: { report: Report; goalPath: string }) {
           <div className="cp-statcell">
             <span className="sj-eyebrow">Topics checked</span>
             <span className="sj-num">{measured.length}</span>
-            <span className="cp-statcell-foot">reached by at least one question</span>
+            <span className="cp-statcell-foot">
+              of {report.subtopics.length} reached by at least one question
+            </span>
           </div>
         </div>
         <div className="cp-nogoal-actions">
@@ -555,14 +564,14 @@ function HowWorkedOut({ report }: { report: Report }) {
           <li>
             <span className="cp-how-head">
               <span className="n sj-mono">1</span>
-              <b>Each part of the syllabus is worth what the exam gives it.</b>
+              <b>Each topic of the syllabus is worth what the exam gives it.</b>
             </span>
             <p>Weights used: {report.weights_source}.</p>
           </li>
           <li>
             <span className="cp-how-head">
               <span className="n sj-mono">2</span>
-              <b>Your score is how much of each part you have.</b>
+              <b>Your score is how much of each topic you have.</b>
             </span>
             <p>Worked out from your answers, question by question. Nothing is curved.</p>
           </li>
@@ -573,7 +582,7 @@ function HowWorkedOut({ report }: { report: Report }) {
             </span>
             <p>
               {p
-                ? `${pct(p.unmeasured_share)} of the paper wasn’t reached, so it sits at your average for its topic. More answers narrow the range.`
+                ? `${pct(p.unmeasured_share)} of the paper wasn’t reached, so it sits at your average for its section. More answers narrow the range.`
                 : 'More answers narrow the range.'}
             </p>
           </li>
@@ -592,9 +601,9 @@ function HowWorkedOut({ report }: { report: Report }) {
 
 /* ------------------------------------------------------------------ topics */
 
-/** Topic cards a page, subtopics a card before "Show all", plan lines a page. */
+/** Section cards a page, topics a card before "Show all" (every section's fit), plan lines a page. */
 const TOPICS_PER_PAGE = 6;
-const SUBS_SHOWN = 5;
+const SUBS_SHOWN = 8;
 const PLAN_PER_PAGE = 8;
 /** Names in the "not reached" note before the rest fold away. */
 const NOT_REACHED_SHOWN = 4;
@@ -621,17 +630,25 @@ function NotReached({ topics }: { topics: string[] }) {
 function Topics({ report }: { report: Report }) {
   const [weakestFirst, setWeakestFirst] = useState(false);
   const groups = useMemo(() => {
+    // Grouped under their sections, in syllabus order; a section is a heading, not a score.
     const subs = new Map<string, SubtopicReport[]>();
-    for (const s of report.subtopics) subs.set(s.topic_name, [...(subs.get(s.topic_name) ?? []), s]);
+    for (const s of report.subtopics) {
+      const key = s.section_name ?? s.topic_name;
+      subs.set(key, [...(subs.get(key) ?? []), s]);
+    }
     const topics = report.topics.map((topic) => ({
       topic,
       subtopics: subs.get(topic.name) ?? [],
       share: (subs.get(topic.name) ?? []).reduce((sum, s) => sum + s.share, 0),
     }));
     if (!weakestFirst) return topics;
-    return [...topics]
-      .sort((a, b) => byWeakness(a.topic, b.topic))
-      .map((g) => ({ ...g, subtopics: [...g.subtopics].sort(byWeakness) }));
+    // Weakest first: each section's topics weakest first, and the section with the weakest
+    // topic leads. Unchecked topics sort last, never as weak.
+    const weakestIn = (g: (typeof topics)[number]) =>
+      Math.min(2, ...g.subtopics.map((s) => (s.mastery === null ? 2 : s.mastery)));
+    return topics
+      .map((g) => ({ ...g, subtopics: [...g.subtopics].sort(byWeakness) }))
+      .sort((a, b) => weakestIn(a) - weakestIn(b));
   }, [report, weakestFirst]);
   const paged = usePaged(groups, TOPICS_PER_PAGE, weakestFirst);
 
@@ -647,7 +664,8 @@ function Topics({ report }: { report: Report }) {
             <MetricTip id="bands" />
           </div>
           <p>
-            How much of each part you have, from what you answered. Grey isn’t a low score — we just didn’t get there.{' '}
+            How much of each topic you have, from what you answered, under its syllabus section. Grey isn’t a low
+            score — we just didn’t get there.{' '}
             <MetricTip id="mastery" />
           </p>
         </div>
@@ -679,7 +697,7 @@ function Topics({ report }: { report: Report }) {
           <TopicCard key={topic.topic_id} topic={topic} subtopics={subtopics} share={share} index={index} />
         ))}
       </div>
-      <Pager paged={paged} noun="topics" label="Pages of topics" anchorId="topics" />
+      <Pager paged={paged} noun="sections" label="Pages of sections" anchorId="topics" />
     </section>
   );
 }
@@ -695,25 +713,26 @@ function TopicCard({
   share: number;
   index: number;
 }) {
-  const band = bandOf(topic.mastery);
   const more = useShowMore(subtopics, SUBS_SHOWN);
   const listId = `cp-subs-${topic.topic_id}`;
+  const checked = subtopics.filter((s) => s.mastery !== null).length;
+  // A section is a heading over its topics: what it holds and how much of it was reached,
+  // never a mastery of its own.
   return (
     <article className="sj-card cp-topic" style={{ animationDelay: `${index * 50}ms` } as CSSProperties}>
       <header className="cp-topic-head">
         <div className="cp-topic-name">
+          <span className="cp-sec-eyebrow sj-mono">Section</span>
           <h3 className="sj-display sj-h3">{topic.name}</h3>
           <span className="meta">
-            {topic.answered > 0 ? `${topic.correct} of ${topic.answered} right` : 'Not reached'}
+            {subtopics.length} {subtopics.length === 1 ? 'topic' : 'topics'} · {checked} checked
             {share > 0 ? ` · ${pct(share)} of the paper` : ''}
           </span>
         </div>
-        <span className={cx('cp-pill', band)}>{BAND_LABEL[band]}</span>
+        <span className="cp-sec-right sj-mono">
+          {topic.answered > 0 ? `${topic.correct}/${topic.answered} right` : 'Not reached'}
+        </span>
       </header>
-      <div className="cp-topic-meter">
-        <span className="cp-topic-pct sj-num">{topic.mastery !== null ? pct(topic.mastery) : '—'}</span>
-        <Bar value={topic.mastery} band={band} thick />
-      </div>
       {subtopics.length > 0 ? (
         <ul className="cp-subs" id={listId}>
           {more.items.map((s) => {
@@ -734,7 +753,7 @@ function TopicCard({
           })}
         </ul>
       ) : null}
-      <ShowMore more={more} noun="parts" controls={listId} className="cp-submore" />
+      <ShowMore more={more} noun="topics" controls={listId} className="cp-submore" />
     </article>
   );
 }
@@ -785,8 +804,8 @@ function Plan({ lines, sessionsAvailable }: { lines: PlanLine[]; sessionsAvailab
             <MetricTip id="plan" />
           </div>
           <p>
-            Ordered by the marks each part is likely to add — not just by how weak it is. An hour on a big part of
-            the paper pays back more than an hour on a small one.
+            Ordered by the marks each topic is likely to add — not just by how weak it is. An hour on a big topic
+            pays back more than an hour on a small one.
           </p>
         </div>
       </div>
@@ -819,7 +838,7 @@ function Plan({ lines, sessionsAvailable }: { lines: PlanLine[]; sessionsAvailab
                 </span>
               </div>
             </div>
-            <div className="cp-split-bar" role="img" aria-label={`Sessions by topic: ${byTopic.map((t) => `${t.topic} ${t.sessions}`).join(', ')}`}>
+            <div className="cp-split-bar" role="img" aria-label={`Sessions by section: ${byTopic.map((t) => `${t.topic} ${t.sessions}`).join(', ')}`}>
               {byTopic.map((t) => (
                 <span
                   key={t.topic}
@@ -877,7 +896,7 @@ function Plan({ lines, sessionsAvailable }: { lines: PlanLine[]; sessionsAvailab
               </li>
             ))}
           </ol>
-          <Pager paged={paged} noun="parts" label="Pages of your plan" anchorId="plan" />
+          <Pager paged={paged} noun="topics" label="Pages of your plan" anchorId="plan" />
         </div>
       )}
     </section>
@@ -907,4 +926,13 @@ function ReportSkeleton() {
       </div>
     </div>
   );
+}
+
+/** The spot "Practise weakest topic" means: the plan's first, else the lowest mastery measured. */
+function weakestSpot(report: Report): { subtopic_id: string; name: string } | null {
+  const planned = report.projection?.plan.find((line) => line.sessions > 0);
+  if (planned) return planned;
+  const measured = report.subtopics.filter((sub) => sub.mastery !== null);
+  measured.sort((a, b) => (a.mastery ?? 0) - (b.mastery ?? 0));
+  return measured[0] ?? null;
 }

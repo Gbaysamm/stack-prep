@@ -157,7 +157,7 @@ function ActionCards({ subject, openRun }: { subject: SubjectOverview; openRun?:
           <h3 className="sj-display sj-h3">Practice</h3>
         </div>
         <p className="hub-action-text">
-          Ten questions aimed at your weakest spots. Miss one twice and the coach teaches it on the board.
+          Ten questions aimed at your weakest topics. Miss one twice and the coach teaches it on the board.
           {!latest && !subject.open_practice_session_id ? ' Works best after a check-up, so it knows where to start.' : ''}
         </p>
         {subject.open_practice_session_id && openRun ? (
@@ -236,31 +236,23 @@ function ActionCards({ subject, openRun }: { subject: SubjectOverview; openRun?:
   );
 }
 
-/** How many topics show before "Show all". */
-const TOPICS_SHOWN = 6;
+/** How many JAMB topics show before "Show all": the weakest, under their section headings. */
+const TOPICS_SHOWN = 8;
 
 function Topics({ subject }: { subject: SubjectOverview }) {
   const latest = subject.latest_checkup;
   const report = useCachedLoad<CheckupReport | null>(`report:${latest?.session_id ?? 'none'}`, () =>
     latest ? api.report(latest.session_id) : Promise.resolve(null),
   );
-  // Weakest first, the order TopicStrengths shows them in, so the cap keeps the weakest.
-  const ordered = useMemo(
-    () => [...(report.data?.topics ?? [])].sort((a, b) => (a.mastery ?? 2) - (b.mastery ?? 2)),
-    [report.data],
-  );
-  const more = useShowMore(ordered, TOPICS_SHOWN);
-  const shownReport = useMemo(
-    () => (report.data ? { ...report.data, topics: more.items } : null),
-    [report.data, more.items],
-  );
+  // Capped to the weakest topics (TopicStrengths picks them), until "Show all" opens every one.
+  const more = useShowMore(report.data?.subtopics ?? [], TOPICS_SHOWN);
   if (!latest) return null;
   return (
     <Section
       eyebrow="Topic by topic"
       title="How each topic stands"
       id="hub-topics"
-      sub="From your last check-up, weakest first. Open a topic to see its parts. Striped means the check-up didn't reach it yet."
+      sub="From your last check-up: your weakest topics, under their syllabus sections. Show all for every topic. Striped means the check-up didn't reach it yet."
       tip={<MetricTip id="bands" />}
       action={
         <Link className="sj-link" to={`/checkup/${latest.session_id}/report`}>
@@ -292,7 +284,7 @@ function Topics({ subject }: { subject: SubjectOverview }) {
           <>
             <MasteryLegend />
             <div id="hub-topic-list">
-              <TopicStrengths report={shownReport ?? report.data} />
+              <TopicStrengths report={report.data} limit={more.open ? undefined : TOPICS_SHOWN} />
             </div>
             <ShowMore more={more} noun="topics" controls="hub-topic-list" className="hub-more" />
           </>
@@ -441,7 +433,7 @@ function HubBody({
       <div className="hub-duo">
         <Section
           eyebrow="Work on next"
-          title="Your weakest spots"
+          title="Your weakest topics"
           id="hub-weak"
           className="sj-rise d2"
           tip={<MetricTip id="weakest" />}
@@ -456,14 +448,14 @@ function HubBody({
             {weak.length > 0 ? (
               <>
                 <WeakList subject={subject} weak={weak} starter={starter} />
-                <p className="home-note">A run starts with the spot your plan puts first, then works down the list.</p>
+                <p className="home-note">Practise gives you a run on that one topic, so every question is about it.</p>
                 {starter.error ? <Alert>{starter.error}</Alert> : null}
               </>
             ) : (
               <Note icon={<IconTarget size={18} />} title={subject.latest_checkup ? 'Nothing weak to single out' : 'Nothing to show yet'}>
                 {subject.latest_checkup
                   ? 'Your check-up found nothing weak enough to single out. Keep practising to hold it.'
-                  : 'Take a check-up and the spots holding your score down show up here, weakest first.'}
+                  : 'Take a check-up and the topics holding your score down show up here, weakest first.'}
               </Note>
             )}
           </div>

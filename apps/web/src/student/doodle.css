@@ -247,6 +247,67 @@
   border-radius: 12px;
 }
 
+/* ------------------------------------------------------------------ doodles v2 */
+/* A doodle that takes part in the lesson (LiveDoodle.tsx): any shape of art (a scene is 320 by
+   200, a crowd as wide as it spreads), with room kept on its right for the notes the pen
+   writes beside it, and the numbered dots of the board lines linked to its parts. */
+.dd.dd-live {
+  width: auto;
+  align-items: flex-start;
+}
+.dd-live .dd-art {
+  width: var(--dd-size, 120px);
+  height: var(--dd-h, var(--dd-size, 120px));
+  transform-origin: 50% 92%;
+}
+.dd-live .dd-caption {
+  align-self: center;
+  max-width: calc(var(--dd-size, 120px) + 56px);
+}
+.dd-live .dd-dot {
+  z-index: 4;
+}
+/* The ink the pen writes over the art is never tapped through to: the doodle takes the tap. */
+.dd-live .dd-ink {
+  pointer-events: none;
+}
+.dd-links {
+  z-index: 3;
+}
+/* The column a scene takes beside the working on a wide screen when the lesson has no figure
+   or passage there (Board.tsx). Held, unseen, until the scene comes, so the working keeps its
+   width; on a narrower screen there is none, and the scene goes under its line. */
+.dd-scenepanel {
+  display: none;
+}
+.dd-panelspot {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 12px 8px 8px;
+  border: 1px solid var(--gray-100, #f1f0f5);
+  border-radius: var(--r-lg, 16px);
+  background: var(--white, #fff);
+  box-shadow: 0 1px 2px rgb(20 12 40 / 0.04);
+}
+@media (min-width: 1080px) {
+  .dd-scenepanel {
+    position: sticky;
+    top: clamp(18px, 4vh, 40px);
+    z-index: 4;
+    order: 2;
+    display: flex;
+    flex: 0 0 clamp(300px, 30vw, 420px);
+    flex-direction: column;
+    gap: 12px;
+    margin: clamp(18px, 4vh, 40px) 0 0;
+  }
+  .dd-scenepanel:empty {
+    visibility: hidden;
+  }
+}
+
 /* ------------------------------------------------------------------ the coach buddy */
 .pb-buddy {
   pointer-events: auto;

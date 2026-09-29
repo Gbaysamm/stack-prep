@@ -807,7 +807,7 @@ function SubjectCard({
         <span className="onb-opt-meta">{subject.blocked_reason ?? 'Not ready yet. We are still building it.'}</span>
       ) : (
         <span className="onb-opt-meta">
-          {nf.format(subject.deliverable_questions)} past questions · {subject.teachable_skills} skills we teach
+          {nf.format(subject.deliverable_questions)} past questions · {subject.teachable_topics ?? 0} topics we teach
         </span>
       )}
       {subject.compulsory || goal?.target_score != null ? (

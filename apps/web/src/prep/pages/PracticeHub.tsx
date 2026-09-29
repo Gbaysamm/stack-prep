@@ -160,7 +160,7 @@ export function PracticeHub() {
     : everyRun.filter((run) => run.subject_id === subject.subject_id);
   const anyOpen = subjects.some((s) => s.open_practice_session_id);
   const sub =
-    "Short sets of questions aimed at your weak spots. Miss one and you get a hint; miss it again and the coach works it through with you.";
+    "Short sets of questions aimed at your weakest topics. Miss one and you get a hint; miss it again and the coach works it through with you.";
 
   if (overview.error && !overview.data) {
     return (
@@ -628,7 +628,7 @@ function SubjectStanding({ subject }: { subject: SubjectOverview }) {
         <div className="ph-aims">
           <span className="ph-aims-label">
             <IconTarget size={16} />
-            {weak.length > 0 ? "Runs aim at these first" : "Runs aim at your weakest areas first"}
+            {weak.length > 0 ? "Runs aim at these first" : "Runs aim at your weakest topics first"}
           </span>
           {weak.length > 0 ? (
             <div className="ph-aims-chips">
@@ -762,7 +762,7 @@ function RunRow({
   onDelete,
   showSubject,
 }: {
-  run: PracticeRun & { topics?: string[] };
+  run: PracticeRun & { topics?: string[]; subtopics?: string[] };
   onDelete: () => void;
   /** With every subject listed, the row leads with the subject's name. */
   showSubject: boolean;
@@ -770,7 +770,9 @@ function RunRow({
   const to = run.finished
     ? `/practice/${run.session_id}/report`
     : `/practice/${run.session_id}`;
-  const topics = run.topics && run.topics.length > 0 ? run.topics.join(", ") : "";
+  // JAMB's topics (the API's `subtopics`); its `topics` are sections, the fallback.
+  const names = run.subtopics ?? run.topics ?? [];
+  const topics = names.length > 0 ? names.join(", ") : "";
   const title = showSubject ? run.subject_name : topics || `${run.length}-question run`;
   const detail = showSubject ? topics : "";
   return (
@@ -959,29 +961,32 @@ function optionFacts(o: Options) {
   return { subtopics, questions, years, span };
 }
 
-/** A topic's standing from its subtopics' mastery, for the colour of its slice. */
-function topicTone(topic: Options["topics"][number]): string {
-  const known = topic.subtopics.map((s) => s.mastery).filter((m): m is number => m !== null);
-  if (known.length === 0) return "none";
-  const m = known.reduce((a, b) => a + b, 0) / known.length;
+/** A topic's standing from its mastery, for the colour of its slice. */
+function topicTone(m: number | null): string {
+  if (m === null) return "none";
   if (m >= 0.75) return "strong";
   if (m >= 0.5) return "holding";
   if (m >= 0.3) return "shaky";
   return "weak";
 }
 
-/** Every topic as a slice, as wide as its share of the questions, coloured by where you stand. */
+/**
+ * Every JAMB topic as a slice, as wide as its share of the questions, coloured by where you
+ * stand. A slightly wider gap marks where one syllabus section ends and the next begins.
+ */
 function TopicBar({ topics }: { topics: Options["topics"] }) {
   return (
     <span className="ph-tbar" aria-hidden="true">
-      {topics.map((t) => (
-        <i
-          key={t.topic_id}
-          className={topicTone(t)}
-          style={{ flexGrow: Math.max(1, t.questions) }}
-          title={`${t.name}: ${t.questions} questions`}
-        />
-      ))}
+      {topics.flatMap((section) =>
+        section.subtopics.map((t, index) => (
+          <i
+            key={t.subtopic_id}
+            className={cx(topicTone(t.mastery), index === 0 && "sec-start")}
+            style={{ flexGrow: Math.max(1, t.questions) }}
+            title={`${t.name}: ${t.questions} questions`}
+          />
+        )),
+      )}
     </span>
   );
 }
@@ -1017,13 +1022,13 @@ function BuildOwn({ subject }: { subject: SubjectOverview }) {
     {
       n: "01",
       label: "Topics",
-      value: facts && o ? `${plural(o.topics.length, "topic")} · ${facts.subtopics} parts` : "Any of its topics",
+      value: facts && o ? `${plural(facts.subtopics, "topic")} · ${plural(o.topics.length, "section")}` : "Any of its topics",
       viz: o && o.topics.length > 0 ? <TopicBar topics={o.topics} /> : null,
       note: facts && o
         ? checked
           ? "Width is the questions in each; colour is how you stand."
           : "Width is the questions in each topic."
-        : "Whole topics, or single parts of one.",
+        : "Whole sections, or single topics.",
     },
     {
       n: "02",
@@ -1116,7 +1121,7 @@ function BuildLine({ subject, onFocus }: { subject: SubjectOverview; onFocus: (i
           <Skeleton width={220} height={14} radius={6} />
         ) : facts && o ? (
           <>
-            {plural(o.topics.length, "topic")} · {facts.span || "no papers yet"} · {facts.questions.toLocaleString()} questions
+            {plural(facts.subtopics, "topic")} · {facts.span || "no papers yet"} · {facts.questions.toLocaleString()} questions
           </>
         ) : (
           "Its topics and past papers, in the builder"

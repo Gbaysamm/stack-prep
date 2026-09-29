@@ -43,10 +43,16 @@ import {
 } from "react";
 import type { CSSProperties, MutableRefObject, ReactNode, RefObject } from "react";
 
-import type { LessonDoodleRef, LessonPoint, NarratedLesson, TutorReply } from "./api.js";
+import type {
+  LessonDoodleOp,
+  LessonDoodleRef,
+  LessonPoint,
+  NarratedLesson,
+  TutorReply,
+} from "./api.js";
 import { Buddy } from "./Buddy.js";
 import { Coach } from "./Coach.js";
-import { DoodleLayer } from "./DoodleLayer.js";
+import { DoodleLayer, type DoodleLink } from "./DoodleLayer.js";
 import { FigurePanel, type Drawing, type DrawingKey } from "./FigureBoard.js";
 import { PassagePanel, type PassageKind, type PassageMark } from "./PassagePanel.js";
 import { findInPassage, foldPassage, gapOf, quotedPieces } from "./passage.js";
@@ -113,6 +119,9 @@ interface Entry {
   showSketch?: string | null;
   /** The small picture this moment draws beside a line (DoodleLayer.tsx), if any. */
   doodle?: LessonDoodleRef | null;
+  /** Or the one or two it brings in, and what the pen does to earlier ones (doodles v2). */
+  doodles?: LessonDoodleRef[] | null;
+  doodleDo?: LessonDoodleOp[] | null;
 }
 
 /**
@@ -435,6 +444,8 @@ export function Board({
                 ? beat.show_sketch
                 : null,
           doodle: beat.doodle ?? null,
+          doodles: beat.doodles ?? null,
+          doodleDo: beat.doodle_do ?? null,
         };
       });
     }
@@ -1244,10 +1255,29 @@ export function Board({
     () => pairLinks(markSets, (index) => (lines[index]?.items.length ?? 0) > 0),
     [lines, markSets],
   );
-  //: The pairs with a diagram, for the figure panel (the passage's go to the passage).
+  //: The pairs with a diagram, for the figure panel (the passage's go to the passage, and a
+  //: doodle's to the doodle).
   const figureLinks = useMemo(
-    () => links.filter((link): link is LinkPair & { figure: DrawingKey } => link.figure !== "passage"),
+    () =>
+      links.filter(
+        (link): link is LinkPair & { figure: DrawingKey } =>
+          link.figure !== "passage" && link.figure !== "doodle",
+      ),
     [links],
+  );
+  //: The pairs with a doodle (DoodleLayer.tsx), with what each points at.
+  const doodleLinks = useMemo(
+    () =>
+      links.flatMap((link): DoodleLink[] => {
+        if (link.figure !== "doodle") return [];
+        const k = Number(link.key.split("-")[1]);
+        const point = markSets.find((set) => set.index === link.set)?.points[k];
+        const doodle = point?.to?.doodle;
+        return doodle
+          ? [{ key: link.key, number: link.number, set: link.set, doodle, part: point.to?.part ?? null, kind: point.kind }]
+          : [];
+      }),
+    [links, markSets],
   );
   const figureSets = useMemo(() => figureCopy(markSets), [markSets]);
   // THE PASSAGE'S COPY of the marks: those drawn in it, and the places the working links to.
@@ -1263,6 +1293,8 @@ export function Board({
   //: The pairs whose line across runs clear of everything, so their numbered dots stand down.
   const [joined, setJoined] = useState<ReadonlySet<string>>(() => new Set());
   const deskRef = useRef<HTMLDivElement>(null);
+  //: The column a doodle scene takes on a wide screen, where there is no figure or passage.
+  const [scenePanel, setScenePanel] = useState<HTMLElement | null>(null);
   const layoutRef = useRef<BoardLayout | null>(null);
   const litTimer = useRef(0);
   const lightPair = useCallback((number: number | null, tapped = false) => {
@@ -1463,6 +1495,12 @@ export function Board({
   const hasFigure = drawings.length > 0;
   //: A column beside the working (a pinned sheet on a phone): the figures, the passage, or both.
   const hasSide = hasFigure || hasPassage;
+  //: With neither, a doodle scene takes that column on a wide screen (DoodleLayer.tsx).
+  const sceneSide =
+    !hasSide &&
+    (lesson?.beats ?? []).some((beat) =>
+      [beat.doodle, ...(beat.doodles ?? [])].some((doodle) => doodle?.size === "scene"),
+    );
   // The marker puts itself down for each line and lifts off when it is done, so it is only
   // held back while the board is waiting for a tap or has stepped back for the student.
   const penActive = !needsTap && !(paused && asked === null && !waiting);
@@ -1476,7 +1514,7 @@ export function Board({
 
   return (
     <div
-      className={`sj pb ${talking ? "is-talking" : ""} ${hasSide ? "has-fig" : ""} ${
+      className={`sj pb ${talking ? "is-talking" : ""} ${hasSide || sceneSide ? "has-fig" : ""} ${
         hasPassage ? "has-passage" : ""
       }`}
     >
@@ -1553,7 +1591,8 @@ export function Board({
             are written on, and every mark and the pen measured against it, is the same either
             way.
           */}
-          <div className={hasSide ? "pb-col pb-desk" : "pb-plain"} ref={deskRef}>
+          <div className={hasSide || sceneSide ? "pb-col pb-desk" : "pb-plain"} ref={deskRef}>
+          {sceneSide ? <aside className="dd-scenepanel" ref={setScenePanel} aria-label="Pictures" /> : null}
           {hasPassage && passage ? (
             // The passage, and any figure with it, in one column beside the working.
             <aside className="pb-side">
@@ -1593,7 +1632,7 @@ export function Board({
             />
           ) : null}
           <div
-            className={`${hasSide ? "" : "pb-col "}pb-sheet sp-textbook ${dim ? "dim" : ""}`}
+            className={`${hasSide || sceneSide ? "" : "pb-col "}pb-sheet sp-textbook ${dim ? "dim" : ""}`}
             ref={sheetRef}
             onMouseOver={
               links.length
@@ -1768,8 +1807,13 @@ export function Board({
               moments={lines}
               shown={shown}
               itemsShown={itemsShown}
+              pointing={pointing}
               doodles={lesson?.doodles}
               paused={paused}
+              links={doodleLinks}
+              lit={litPair}
+              onLit={lightPair}
+              panel={sceneSide ? scenePanel : null}
             />
             <Pen
               sheetRef={sheetRef}
@@ -1778,11 +1822,11 @@ export function Board({
               canSee={penCanSee}
             />
           </div>
-          {hasSide && links.length ? (
+          {hasSide && figureLinks.length + links.filter((link) => link.figure === "passage").length ? (
             <Links
               deskRef={deskRef}
               sheetRef={sheetRef}
-              links={links}
+              links={links.filter((link) => link.figure !== "doodle")}
               lit={litPair}
               layoutRef={layoutRef}
               onLit={lightPair}
@@ -3010,8 +3054,8 @@ interface LinkPair {
   piece: string | null;
   /** Whether `piece` is only the mark's words, to be used only if the line has them. */
   hint: boolean;
-  /** The diagram the mark is on, or the passage. */
-  figure: DrawingKey | "passage";
+  /** The diagram the mark is on, the passage, or a doodle (DoodleLayer.tsx). */
+  figure: DrawingKey | "passage" | "doodle";
   /** An arrowhead at the diagram's end (an arrow across from the working)… */
   toFigure: boolean;
   /** …or at the working's end (an arrow across from the diagram). */
@@ -3062,7 +3106,7 @@ function pairLinks(sets: MarkSet[], writes: (index: number) => boolean): LinkPai
     const delays = markDelays(set.points, set.index);
     const moment = (line: number) => (line < 0 ? set.index + line : line);
     set.points.forEach((point, k) => {
-      let figure: DrawingKey | "passage";
+      let figure: DrawingKey | "passage" | "doodle";
       let line: number;
       let piece: string | null = null;
       let hint = false;
@@ -3095,6 +3139,11 @@ function pairLinks(sets: MarkSet[], writes: (index: number) => boolean): LinkPai
         line = back(moment(point.line));
         piece = point.at?.trim() || null;
         toFigure = true;
+      } else if (point.to?.doodle && point.line != null) {
+        // A board line linked to a doodle, or to a part of one.
+        figure = "doodle";
+        line = back(moment(point.line));
+        piece = point.at?.trim() || null;
       } else return;
       if (line < 0) return;
       if (!numbers.has(line)) numbers.set(line, numbers.size + 1);

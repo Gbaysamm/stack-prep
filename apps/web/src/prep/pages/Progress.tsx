@@ -9,16 +9,16 @@
  */
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import { Maths } from "../../Maths.js";
 
 import { api, type CheckupReport } from "../../student/api.js";
-import { IconArrowRight, IconBolt, IconBook, IconChart, IconChevronRight, IconTarget } from "../icons.js";
+import { IconArrowRight, IconBolt, IconBook, IconChart, IconTarget } from "../icons.js";
 import { lessonFeedbackApi, type LessonToRevisit, type Understood } from "../lessonFeedbackApi.js";
 import { progressApi, type PracticeRunPage, type SubjectOverview } from "../progressApi.js";
 import { useCachedLoad, useLoad, usePageTitle, useStudent } from "../store.js";
-import { Badge, Button, CountUp, PageHero, Pager, Skeleton, cx, usePaged, useToast } from "../ui.js";
+import { Badge, Button, CountUp, PageHero, Pager, Skeleton, cx, usePaged } from "../ui.js";
 import {
   ALL,
   ScoreCell,
@@ -30,15 +30,18 @@ import {
   type SubjectColumn,
 } from "../SubjectSwitcher.js";
 import {
+  Alert,
   HeroStats,
   MasteryBar,
   Note,
+  NothingFreshNote,
   RunRow,
   Section,
   masteryWord,
   plural,
   runHref,
   shortDate,
+  useStartPractice,
 } from "./Home.js";
 import "./Progress.css";
 
@@ -66,78 +69,88 @@ export function MasteryLegend() {
 }
 
 /**
- * Topics from a check-up report, each opening onto its subtopics. Silence is not weakness: a
- * subtopic the check-up did not reach is shown striped, as not checked, not as a low bar.
+ * Every JAMB topic from a check-up report (23 in Maths), grouped under its syllabus section.
+ * The topic is the unit: each has its own bar and its own way into practice. A section is only
+ * a heading, with how many of its topics were checked. Silence is not weakness: a topic the
+ * check-up did not reach is shown striped, as not checked, not as a low bar.
+ *
+ * With `limit`, only that many topics show, the weakest checked ones first (then unchecked),
+ * still under their section headings and in syllabus order.
  */
-export function TopicStrengths({ report, openFirst = false }: { report: CheckupReport; openFirst?: boolean }) {
-  const groups = useMemo(() => {
-    const byTopic = new Map<string, CheckupReport["subtopics"]>();
+export function TopicStrengths({ report, limit }: { report: CheckupReport; limit?: number }) {
+  const sections = useMemo(() => {
+    const keep =
+      limit === undefined
+        ? null
+        : new Set(
+            [...report.subtopics]
+              .sort((a, b) => (a.mastery ?? 2) - (b.mastery ?? 2))
+              .slice(0, limit)
+              .map((sub) => sub.subtopic_id),
+          );
+    // The report lists topics in syllabus order; a section starts where its first topic is.
+    const groups: { id: string; name: string; all: CheckupReport["subtopics"]; shown: CheckupReport["subtopics"] }[] = [];
     for (const sub of report.subtopics) {
-      const list = byTopic.get(sub.topic_name) ?? [];
-      list.push(sub);
-      byTopic.set(sub.topic_name, list);
+      const id = sub.section_id ?? sub.topic_name;
+      let group = groups.find((g) => g.id === id);
+      if (!group) {
+        group = { id, name: sub.section_name ?? sub.topic_name, all: [], shown: [] };
+        groups.push(group);
+      }
+      group.all.push(sub);
+      if (!keep || keep.has(sub.subtopic_id)) group.shown.push(sub);
     }
-    const topics = report.topics.map((topic) => ({ topic, subs: byTopic.get(topic.name) ?? [] }));
-    // Weakest first: that's where the marks are.
-    return topics.sort((a, b) => (a.topic.mastery ?? 2) - (b.topic.mastery ?? 2));
-  }, [report]);
-  const [open, setOpen] = useState<Set<string>>(
-    () => new Set(openFirst && groups[0] ? [groups[0].topic.topic_id] : []),
-  );
-  const toggle = (id: string) =>
-    setOpen((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+    return groups.filter((g) => g.shown.length > 0);
+  }, [report, limit]);
 
   return (
-    <ul className="prog-topics">
-      {groups.map(({ topic, subs }) => {
-        const isOpen = open.has(topic.topic_id);
-        const panelId = `prog-topic-${topic.topic_id}`;
-        const checked = subs.filter((s) => s.mastery !== null).length;
+    <div className="prog-sections">
+      {sections.map((section) => {
+        const checked = section.all.filter((s) => s.mastery !== null).length;
+        const headId = `prog-sec-${section.id}`;
         return (
-          <li key={topic.topic_id} className={cx("prog-topic", isOpen && "open")}>
-            <button
-              type="button"
-              className="prog-topic-head"
-              aria-expanded={isOpen}
-              aria-controls={panelId}
-              onClick={() => toggle(topic.topic_id)}
-            >
-              <span className="name">
-                <strong>{topic.name}</strong>
-                <span className="meta sj-mono">
-                  {topic.correct}/{topic.answered} right · {checked}/{subs.length} parts checked
-                </span>
+          <section key={section.id} className="prog-section" aria-labelledby={headId}>
+            <header className="prog-section-head">
+              <span className="eyebrow sj-mono">Section</span>
+              <h3 id={headId} className="prog-section-name">
+                {section.name}
+              </h3>
+              <span className="meta sj-mono">
+                {checked} of {section.all.length} {section.all.length === 1 ? "topic" : "topics"} checked
               </span>
-              <span className="bar">
-                <MasteryBar value={topic.mastery} label={`${topic.name} mastery`} />
-                <span className="word">{masteryWord(topic.mastery)}</span>
-              </span>
-              <IconChevronRight size={18} className="chev" />
-            </button>
-            <div id={panelId} className="prog-subs" hidden={!isOpen}>
-              <ul>
-                {subs.map((sub) => (
-                  <li key={sub.subtopic_id}>
-                    <span className="sub-name">{sub.name}</span>
-                    <span className="bar">
-                      <MasteryBar value={sub.mastery} label={`${sub.name} mastery`} />
-                      <span className={cx("sub-word sj-mono", sub.mastery === null && "none")}>
-                        {sub.mastery === null ? "Not checked" : `${Math.round(sub.mastery * 100)}%`}
-                      </span>
+            </header>
+            <ul className="prog-tlist">
+              {section.shown.map((sub) => (
+                <li key={sub.subtopic_id} className="prog-trow">
+                  <span className="name">
+                    <strong>{sub.name}</strong>
+                    <span className="meta sj-mono">
+                      {sub.answered > 0 ? `${sub.correct}/${sub.answered} right` : "No check-up question yet"}
                     </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </li>
+                  </span>
+                  <span className="bar">
+                    <MasteryBar value={sub.mastery} label={`${sub.name} mastery`} />
+                    <span className={cx("word", sub.mastery === null && "none")}>
+                      {sub.mastery === null ? "Not checked" : `${Math.round(sub.mastery * 100)}% · ${masteryWord(sub.mastery)}`}
+                    </span>
+                  </span>
+                  {/* Straight into the run builder with this topic alone chosen. */}
+                  <Link
+                    className="prog-trow-go"
+                    to={`/practice/new?subject=${report.subject_id}&subtopic=${sub.subtopic_id}`}
+                    aria-label={`Practise ${sub.name}`}
+                    title={`Practise ${sub.name}`}
+                  >
+                    <span className="lbl">Practise</span>
+                    <IconArrowRight size={14} />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
         );
       })}
-    </ul>
+    </div>
   );
 }
 
@@ -387,8 +400,8 @@ function LessonsLanded({ studentId, subjectId }: { studentId: string; subjectId:
             question_version_id: "demo-1",
             subject_id: "33bb5ef4-bda4-5b88-83d9-41f7beff0dfd",
             subject_name: "Mathematics",
-            topic_name: "Algebra",
-            subtopic_name: "Indices",
+            topic_name: "Number and Numeration",
+            subtopic_name: "Indices, Logarithms and Surds",
             stem_excerpt: "If $\\dfrac{9^{2x-1}}{27^{x+1}} = 1$, find the value of $x$.",
             understood: "too_hard" as const,
             at: "2026-09-27T10:00:00Z",
@@ -397,8 +410,8 @@ function LessonsLanded({ studentId, subjectId }: { studentId: string; subjectId:
             question_version_id: "demo-2",
             subject_id: "33bb5ef4-bda4-5b88-83d9-41f7beff0dfd",
             subject_name: "Mathematics",
-            topic_name: "Geometry",
-            subtopic_name: "Euclidean geometry",
+            topic_name: "Geometry and Trigonometry",
+            subtopic_name: "Euclidean Geometry",
             stem_excerpt: "Each of the interior angles of a regular polygon is $140^\\circ$. How many sides has the polygon?",
             understood: "unsure" as const,
             at: "2026-09-26T10:00:00Z",
@@ -407,19 +420,17 @@ function LessonsLanded({ studentId, subjectId }: { studentId: string; subjectId:
       });
     return lessonFeedbackApi.summary(studentId);
   }, [studentId]);
-  const navigate = useNavigate();
-  const toast = useToast();
-  const [starting, setStarting] = useState<string | null>(null);
-
-  const practise = (subject: string) => {
-    setStarting(subject);
-    api
-      .startPractice(studentId, subject)
-      .then((run) => navigate(`/practice/${run.session_id}`))
-      .catch((error: Error) => {
-        toast(`Couldn't start a run: ${error.message || "try again"}`);
-        setStarting(null);
-      });
+  // A group's button practises the subtopics its lessons were on, not the whole subject.
+  const starter = useStartPractice();
+  const practise = (group: ReturnType<typeof groupBySubject>[number]) => {
+    const spots = new Map<string, string>();
+    for (const item of group.items) if (item.subtopic_id) spots.set(item.subtopic_id, item.subtopic_name);
+    const names = [...spots.values()];
+    void starter.start(
+      group.subject_id,
+      { subtopicIds: [...spots.keys()], label: names.length === 1 ? names[0] : `these ${group.subject_name} topics` },
+      group.subject_id,
+    );
   };
 
   let body: ReactNode;
@@ -560,14 +571,18 @@ function LessonsLanded({ studentId, subjectId }: { studentId: string; subjectId:
                   <Button
                     tone="soft"
                     size="sm"
-                    busy={starting === group.subject_id}
-                    disabled={starting !== null}
-                    onClick={() => practise(group.subject_id)}
+                    busy={starter.busy === group.subject_id}
+                    disabled={starter.busy !== null}
+                    onClick={() => practise(group)}
                     trailing={<IconArrowRight size={16} />}
                   >
-                    Practise {group.subject_name}
+                    Practise these
                   </Button>
                 </div>
+                {starter.exhausted?.key === group.subject_id ? <NothingFreshNote starter={starter} /> : null}
+                {starter.error && starter.busy === null && starter.lastKey === group.subject_id ? (
+                  <Alert>{starter.error}</Alert>
+                ) : null}
                 <ul>
                   {group.items.map((item) => (
                     <li key={`${item.question_version_id}-${item.at}`} className="prog-ll-item">
@@ -792,7 +807,7 @@ export function Progress() {
           title="How each topic stands"
           id="prog-strengths"
           className="sj-rise d3"
-          sub="Mastery: how often we think you'd get a question on it right. Weakest first; open a topic to see its parts."
+          sub="Mastery: how often we think you'd get a question on it right. Every topic on the syllabus, under its section, from your latest check-up. Striped means it didn't reach that topic yet."
           action={
             strengthSubject.latest_checkup ? (
               <Link className="sj-link" to={`/checkup/${strengthSubject.latest_checkup.session_id}/report`}>

@@ -261,7 +261,8 @@ export function RunReport() {
 function ScopeLine({ data }: { data: RunReview }) {
   const bits = [`${data.length} ${data.length === 1 ? 'question' : 'questions'}`];
   const years = yearsLabel(data.filters?.exam_years ?? []);
-  const topicCount = new Set(data.items.map((item) => item.topic_name).filter(Boolean)).size;
+  // JAMB's topics (the DB subtopics), not its sections.
+  const topicCount = new Set(data.items.map((item) => item.subtopic_name ?? item.topic_name).filter(Boolean)).size;
   if (data.filters && (data.filters.topic_ids.length > 0 || data.filters.subtopic_ids.length > 0)) {
     bits.push('your choice of topics');
   } else if (topicCount > 0) {
@@ -533,7 +534,8 @@ function QuestionCard({
   const first = item.attempts[0];
   const second = item.attempts[1];
   const hintUsed = item.attempts.some((attempt) => attempt.hint_used) || item.outcome === 'right_after_hint';
-  const where = [item.topic_name, item.subtopic_name].filter(Boolean).join(' · ');
+  // Section, then JAMB topic: "Algebra · Polynomials".
+  const where = [item.section_name ?? item.topic_name, item.subtopic_name].filter(Boolean).join(' · ');
   const source = [item.exam_year ? String(item.exam_year) : null, item.question_number ? `Q${item.question_number}` : null]
     .filter(Boolean)
     .join(' · ');

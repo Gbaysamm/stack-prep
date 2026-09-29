@@ -71,7 +71,16 @@ from app.auth import require_session_owner, require_student
 from app.config import Settings, get_settings
 from app.db import connection, fetch_all
 from app.figures import QuestionFigure, figures_for, resolve
-from app.lesson_doodles import DoodleRef, LessonDoodle, doodle_ref, lesson_doodles
+from app.lesson_doodles import (
+    DoodleOp,
+    DoodleRef,
+    LessonDoodle,
+    doodle_actions,
+    doodle_link,
+    doodle_ref,
+    doodle_refs,
+    lesson_doodles,
+)
 from app.routers.checkup import UnitWeight, _subtopics
 from engine.projection import UnitStanding, project
 from engine.version import ENGINE_VERSION
@@ -1298,10 +1307,12 @@ async def _lesson_on_the_board(
 
 
 async def _must_be_at_the_board(conn: AsyncConnection, session_id: UUID, version_id: UUID) -> None:
-    """Refuse unless this session's own attempts say the question was missed twice.
+    """Refuse unless this session's own attempts say the question was missed twice, or answered.
 
-    The same test `_state` uses to decide something was taught rather than answered, read
-    from what is stored rather than from anything the client says. Both ask endpoints go
+    Missed twice is the same test `_state` uses to decide something was taught rather than
+    answered. A right latest answer is the other way to a board: the review lesson a student
+    opens after answering, where the answer is already recorded. Both are read from what is
+    stored rather than from anything the client says. Both ask endpoints and the microphone go
     through here, so the streaming one cannot become the softer door.
     """
     standing = (
@@ -1322,7 +1333,9 @@ async def _must_be_at_the_board(conn: AsyncConnection, session_id: UUID, version
         .first()
     )
     assert standing is not None
-    if int(standing["tries"]) < 2 or not standing["never_right"]:
+    if int(standing["tries"]) >= 2 and standing["never_right"]:
+        return
+    if not await _answered_right(conn, session_id, version_id):
         raise HTTPException(
             status_code=409, detail="the coach answers at the board, once a question is taught"
         )
@@ -1379,8 +1392,9 @@ async def ask(
 
     ONLY AT THE BOARD. The session's own attempts have to say this question was missed twice
     and never got right — the same test `_state` uses to decide something was taught rather
-    than answered. So a client cannot point this at a question the student is still answering,
-    at one from another sitting, or at anything outside the practice pool it was served from.
+    than answered — or that it was answered right, and the board is the review of it. So a
+    client cannot point this at a question the student is still answering, at one from another
+    sitting, or at anything outside the practice pool it was served from.
     That is what keeps protected assessment content out of tutor retrieval (S5-AC6), and it
     means the answer is already written on the board before anything can be asked about it.
 
@@ -1609,8 +1623,8 @@ async def listen(
     the words reach `tutor_turns` by the ordinary route, as though they had typed them.
 
     SAME DOOR AS ASKING. The mic lives in the ask box and the ask box only exists at the
-    board, so the same guard applies: a session that has not missed this question twice
-    cannot use this to spend the deployment's transcription budget.
+    board, so the same guard applies: a session that has neither missed this question twice
+    nor answered it cannot use this to spend the deployment's transcription budget.
     """
     await require_session_owner(request, conn, session_id)
     if not settings.ai_listen:
@@ -1667,6 +1681,9 @@ class PointTo(BaseModel):
     #: Or a place in the question's passage: `target` is its words, `nth` which occurrence.
     passage: bool | None = None
     nth: int | None = None
+    #: Or a doodle on the board, by the id a moment gave it, and a part of its art.
+    doodle: str | None = None
+    part: str | None = None
 
 
 class LessonPoint(BaseModel):
@@ -1810,8 +1827,11 @@ def _points(raw: object) -> list[LessonPoint] | None:
         if kind in ("arrow", "move"):
             point.from_ = begin
         linked = _in_passage(item.get("to"))
+        drawn = doodle_link(item.get("to"))
         if linked is not None and kind != "move" and begin is None:
             point.to = PointTo(passage=True, target=linked[0], nth=linked[1])
+        elif drawn is not None and kind != "move" and begin is None:
+            point.to = PointTo(doodle=drawn[0], part=drawn[1])
         elif kind == "arrow" and begin is None:
             point.to = _across(item.get("to"), to_figure=True)
         kept.append(point)
@@ -1839,6 +1859,9 @@ class LessonBeat(BaseModel):
     show_sketch: bool | Literal["sketch_b", "sketch_c"] = False
     #: A small picture this beat draws beside a line (app/lesson_doodles.py), if any.
     doodle: DoodleRef | None = None
+    #: Or the one or two it brings in (doodles v2), and what the pen does to earlier ones.
+    doodles: list[DoodleRef] | None = None
+    doodle_do: list[DoodleOp] | None = None
 
 
 class LessonSketch(BaseModel):
@@ -1882,6 +1905,8 @@ class _Beat:
     point: list[LessonPoint] | None = None
     show_sketch: bool | Literal["sketch_b", "sketch_c"] = False
     doodle: DoodleRef | None = None
+    doodles: list[DoodleRef] | None = None
+    doodle_do: list[DoodleOp] | None = None
 
 
 async def _must_have_missed(conn: AsyncConnection, session_id: UUID, version_id: UUID) -> None:
@@ -1932,19 +1957,17 @@ async def _latest_answer(
     return dict(row) if row is not None else None
 
 
-async def _right_but_doubted(conn: AsyncConnection, session_id: UUID, version_id: UUID) -> bool:
-    """Whether this sitting's latest answer to the question was right but not believed.
+async def _answered_right(conn: AsyncConnection, session_id: UUID, version_id: UUID) -> bool:
+    """Whether this sitting's latest answer to the question was right.
 
-    Right, and the student said they guessed or were unsure. Nothing was missed, but a lucky
-    or shaky right answer has not shown they understand it, so the lesson is theirs to open
-    ("Show me why"). Read from what is stored, like every other door here.
+    First try or second, sure or not. A right answer the student guessed or doubted is where
+    the working is recommended ("Show me the working"); after a sure one it is still theirs to
+    open ("See how it's worked out"). Either way the answer is already recorded, so opening
+    the lesson changes nothing that is scored. Read from what is stored, like every other door
+    here.
     """
     latest = await _latest_answer(conn, session_id, version_id)
-    return (
-        latest is not None
-        and bool(latest["is_correct"])
-        and latest["confidence"] in ("guessed", "unsure")
-    )
+    return latest is not None and bool(latest["is_correct"])
 
 
 async def _lesson_is_open(
@@ -1953,10 +1976,10 @@ async def _lesson_is_open(
     """Refuse the lesson unless this sitting has earned it.
 
     `whole` is the lesson itself, which opens at the board (missed twice); otherwise its voice
-    and its preparation, which may start from the first miss. Either way a right answer the
-    student doubted opens it too.
+    and its preparation, which may start from the first miss. Either way a right answer opens
+    it too.
     """
-    if await _right_but_doubted(conn, session_id, version_id):
+    if await _answered_right(conn, session_id, version_id):
         return
     if whole:
         await _must_be_at_the_board(conn, session_id, version_id)
@@ -2127,6 +2150,7 @@ async def _lesson_beats(
         moments = json.loads(moments) if isinstance(moments, str) else moments
         traps = written["traps"]
         traps = json.loads(traps) if isinstance(traps, str) else (traps or {})
+        acting = doodle_actions(moments)
         beats = [
             _Beat(
                 board_index=None,
@@ -2137,8 +2161,10 @@ async def _lesson_beats(
                 point=_points(moment.get("point")),
                 show_sketch=_show_sketch(moment.get("show_sketch")),
                 doodle=doodle_ref(moment.get("doodle")),
+                doodles=doodle_refs(moment.get("doodles")),
+                doodle_do=acting[index],
             )
-            for moment in moments
+            for index, moment in enumerate(moments)
         ]
         chose, _ = await _mistake(conn, session_id, version_id, first=False)
         # No trap when the option they ended on was the right one: a student who got there
@@ -2196,6 +2222,8 @@ async def lesson(
                 point=beat.point,
                 show_sketch=beat.show_sketch,
                 doodle=beat.doodle,
+                doodles=beat.doodles,
+                doodle_do=beat.doodle_do,
             )
             for index, beat in enumerate(beats)
         ],
@@ -2279,8 +2307,11 @@ async def warm_lesson(
 class LessonFeedbackIn(BaseModel):
     """What the student said once the lesson was over."""
 
-    #: Which door they came through: two misses, or a right answer they guessed or doubted.
-    context: Literal["after_misses", "after_guess", "after_unsure"]
+    #: Which door they came through: two misses, a right answer they guessed or doubted (first
+    #: try or second), or any other right answer they chose to see worked out.
+    context: Literal[
+        "after_misses", "after_guess", "after_unsure", "after_second_guess", "after_right"
+    ]
     understood: Literal["got_it", "unsure", "too_hard"]
     #: Whether the working matched what they did. Optional: not every student worked it out.
     matched_working: Literal["yes", "partly", "no"] | None = None

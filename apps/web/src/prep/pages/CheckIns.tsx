@@ -7,17 +7,16 @@
  * reason here, in words, next to the question it was about.
  */
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { api } from "../../student/api.js";
 import { Maths } from "../../Maths.js";
 import { MATCHED_WORD, UNDERSTOOD_WORD, WHY_BOARD, type Word } from "../checkinWords.js";
 import { IconArrowRight, IconBook, IconBolt, IconChevronDown, IconReplay } from "../icons.js";
 import { lessonFeedbackApi, type CheckinEntry, type Understood } from "../lessonFeedbackApi.js";
 import { useLoad, usePageTitle, useStudent } from "../store.js";
-import { Button, CountUp, PageHero, Pager, Skeleton, cx, useNarrow, usePaged, useToast } from "../ui.js";
-import { Note, Section } from "./Home.js";
+import { Button, CountUp, PageHero, Pager, Skeleton, cx, useNarrow, usePaged } from "../ui.js";
+import { Alert, Note, NothingFreshNote, Section, useStartPractice } from "./Home.js";
 import { whenLabel } from "./PracticeHub.js";
 import "./CheckIns.css";
 
@@ -97,10 +96,13 @@ function Entry({
   entry,
   starting,
   onPractise,
+  notice,
 }: {
   entry: CheckinEntry;
   starting: boolean;
   onPractise: () => void;
+  /** Said under the buttons after a start: nothing fresh left there, or a failure. */
+  notice?: ReactNode;
 }) {
   const navigate = useNavigate();
   const why = WHY_BOARD[entry.context];
@@ -157,12 +159,13 @@ function Entry({
           onClick={onPractise}
           trailing={<IconArrowRight size={16} />}
         >
-          Practise {entry.subject_name}
+          {entry.subtopic_name ? `Practise ${entry.subtopic_name}` : `Practise ${entry.subject_name}`}
         </Button>
         <Button tone="ghost" size="sm" onClick={() => navigate(`/practice/${entry.session_id}/report`)}>
           See the run
         </Button>
       </div>
+      {notice}
     </li>
   );
 }
@@ -170,12 +173,10 @@ function Entry({
 export function CheckIns() {
   usePageTitle("Your check-ins");
   const student = useStudent();
-  const navigate = useNavigate();
-  const toast = useToast();
   const narrow = useNarrow(560);
   const list = useLoad(() => lessonFeedbackApi.entries(student.studentId), [student.studentId]);
   const [filter, setFilter] = useState<Filter>("all");
-  const [starting, setStarting] = useState<string | null>(null);
+  const starter = useStartPractice();
 
   const entries = list.data ?? [];
   const counts = useMemo(() => {
@@ -186,16 +187,13 @@ export function CheckIns() {
   const shown = filter === "all" ? entries : entries.filter((entry) => entry.understood === filter);
   const paged = usePaged(shown, PAGE, filter);
 
-  const practise = (entry: CheckinEntry) => {
-    setStarting(entry.id);
-    api
-      .startPractice(student.studentId, entry.subject_id)
-      .then((run) => navigate(`/practice/${run.session_id}`))
-      .catch((error: Error) => {
-        toast(`Couldn’t start a run: ${error.message || "try again"}`);
-        setStarting(null);
-      });
-  };
+  // A check-in's run is on the subtopic that lesson was about; without one, the whole subject.
+  const practise = (entry: CheckinEntry) =>
+    void starter.start(
+      entry.subject_id,
+      entry.subtopic_id ? { subtopicIds: [entry.subtopic_id], label: entry.subtopic_name ?? undefined } : {},
+      entry.id,
+    );
 
   let body;
   if (list.error && !list.data) {
@@ -263,8 +261,15 @@ export function CheckIns() {
               <Entry
                 key={entry.id}
                 entry={entry}
-                starting={starting === entry.id}
+                starting={starter.busy === entry.id}
                 onPractise={() => practise(entry)}
+                notice={
+                  starter.exhausted?.key === entry.id ? (
+                    <NothingFreshNote starter={starter} />
+                  ) : starter.error && starter.busy === null && starter.lastKey === entry.id ? (
+                    <Alert>{starter.error}</Alert>
+                  ) : null
+                }
               />
             ))}
           </ul>

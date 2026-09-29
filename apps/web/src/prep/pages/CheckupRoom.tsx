@@ -306,7 +306,10 @@ export function CheckupRoom() {
                   QUESTION {pad2(question.position)}
                   <span className="of"> / {pad2(total)}</span>
                 </span>
-                <Badge className="cr-topic">{question.topic_name}</Badge>
+                {/* JAMB's topic when the server names it; older servers only send the section. */}
+                <Badge className="cr-topic">
+                  {question.subtopic_name ?? question.topic_name}
+                </Badge>
               </header>
 
               {question.passage_body ? (

@@ -3,7 +3,12 @@
  * they were not sure of) whether the working was how they had thought it through.
  */
 
-export type LessonContext = 'after_guess' | 'after_unsure' | 'after_misses';
+export type LessonContext =
+  | 'after_guess'
+  | 'after_unsure'
+  | 'after_second_guess'
+  | 'after_right'
+  | 'after_misses';
 export type Understood = 'got_it' | 'unsure' | 'too_hard';
 export type MatchedWorking = 'yes' | 'partly' | 'no';
 
@@ -18,8 +23,13 @@ export interface LessonToRevisit {
   question_version_id: string;
   subject_id: string;
   subject_name: string;
+  /** The DB topic, which is JAMB's section. Prefer `section_name`. */
   topic_name: string;
+  /** Null only for a question with no approved classification. */
+  subtopic_id?: string | null;
+  /** JAMB's topic: the name to show. */
   subtopic_name: string;
+  section_name?: string | null;
   stem_excerpt: string;
   understood: Understood;
   at: string;
@@ -49,8 +59,12 @@ export interface CheckinEntry {
   matched_working: MatchedWorking | null;
   subject_id: string;
   subject_name: string;
+  /** The DB topic, which is JAMB's section. Prefer `section_name`. */
   topic_name: string | null;
+  subtopic_id?: string | null;
+  /** JAMB's topic: the name to show. */
   subtopic_name: string | null;
+  section_name?: string | null;
   stem_excerpt: string;
 }
 

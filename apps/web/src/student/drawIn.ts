@@ -342,6 +342,7 @@ export function runDrawing({
   totalMs,
   paused,
   hold = () => false,
+  park,
   onDone,
 }: {
   items: DrawItem[];
@@ -351,6 +352,8 @@ export function runDrawing({
   totalMs?: number;
   paused: () => boolean;
   hold?: () => boolean;
+  /** Where the pen waits, lifted, while the drawing is paused (the buddy's: off its face). */
+  park?: () => Pt | null;
   onDone: () => void;
 }): () => void {
   // The travel before each item: from where the last one ended to where this one starts.
@@ -402,6 +405,11 @@ export function runDrawing({
       }
     }
     if (pen) pen.dataset.away = away ? "1" : "0";
+    if (park && paused()) {
+      place(park(), true);
+      frame = requestAnimationFrame(tick);
+      return;
+    }
     let t = clock;
     for (let i = 0; i < items.length; i += 1) {
       const hop = hops[i] ?? 0;
@@ -438,7 +446,7 @@ export function runDrawing({
     return () => undefined;
   }
   for (const item of items) item.show(0);
-  place(items[0]!.tip(0), true);
+  place((park && paused() ? park() : null) ?? items[0]!.tip(0), true);
   frame = requestAnimationFrame(tick);
   return () => cancelAnimationFrame(frame);
 }

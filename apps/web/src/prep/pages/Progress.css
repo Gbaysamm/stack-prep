@@ -215,6 +215,114 @@
   box-shadow: inset 0 0 0 1px var(--gray-200);
 }
 
+/* ---------------------------------------------------------------- topics under sections (shared) */
+/* JAMB's words: the topic is the row; the section is only a heading over its topics. */
+.sj .prog-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.sj .prog-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+  padding: 0 4px 8px;
+  border-bottom: 1px solid var(--gray-200);
+}
+.sj .prog-section-head .eyebrow {
+  flex-basis: 100%;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--purple-600);
+}
+.sj .prog-section-name {
+  margin: 0;
+  font-family: var(--f-display);
+  letter-spacing: -0.01em;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--gray-900);
+}
+.sj .prog-section-head .meta {
+  margin-left: auto;
+  font-size: 11.5px;
+  color: var(--gray-600);
+  white-space: nowrap;
+}
+.sj .prog-tlist {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .prog-trow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(190px, 270px) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 11px 4px;
+  border-bottom: 1px dashed var(--gray-200);
+}
+.sj .prog-trow:last-child {
+  border-bottom: 0;
+}
+.sj .prog-trow .name {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.sj .prog-trow strong {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-wrap: pretty;
+}
+.sj .prog-trow .name .meta {
+  font-size: 11.5px;
+  color: var(--gray-600);
+}
+.sj .prog-trow .bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.sj .prog-trow .word {
+  flex: none;
+  min-width: 118px;
+  white-space: nowrap;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: right;
+}
+.sj .prog-trow .word.none {
+  font-weight: 400;
+  color: var(--gray-500);
+}
+.sj .prog-trow-go {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--purple-600);
+  background: var(--purple-050);
+  transition: background var(--t-fast) var(--ease);
+}
+.sj .prog-trow-go:hover {
+  background: var(--purple-100);
+}
+
 /* ---------------------------------------------------------------- topics (shared) */
 .sj .prog-topics {
   display: flex;
@@ -323,6 +431,15 @@
   font-weight: 400;
   color: var(--gray-500);
 }
+/* Into the run builder with this topic already chosen. */
+.sj .prog-subs .prog-topic-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 16px 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
 
 .sj .prog-skel {
   display: flex;
@@ -399,6 +516,29 @@
 }
 
 @media (max-width: 560px) {
+  .sj .prog-trow {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "name go"
+      "bar bar";
+    gap: 8px 12px;
+  }
+  .sj .prog-trow .name {
+    grid-area: name;
+  }
+  .sj .prog-trow .bar {
+    grid-area: bar;
+  }
+  .sj .prog-trow-go {
+    grid-area: go;
+  }
+  .sj .prog-trow-go .lbl {
+    display: none;
+  }
+  .sj .prog-trow-go {
+    width: 36px;
+    padding: 0;
+  }
   .sj .prog-topic-head {
     grid-template-columns: minmax(0, 1fr) 18px;
     grid-template-areas:

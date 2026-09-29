@@ -7,10 +7,9 @@
  * than pretending to remember their order.
  */
 
-import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { api } from "../../student/api.js";
+import { api, type PracticeState } from "../../student/api.js";
 import {
   IconArrowRight,
   IconBolt,
@@ -24,6 +23,7 @@ import {
   IconTarget,
 } from "../icons.js";
 import { progressApi } from "../progressApi.js";
+import type { RunFilters } from "../runsApi.js";
 import { useLoad, usePageTitle, useStudent } from "../store.js";
 import {
   Badge,
@@ -35,8 +35,8 @@ import {
   Skeleton,
   cx,
   useNarrow,
-  useToast,
 } from "../ui.js";
+import { Alert, NothingFreshNote, useStartPractice } from "./Home.js";
 import { RunStrip, whenLabel } from "./PracticeHub.js";
 import "./RunSummary.css";
 
@@ -75,7 +75,6 @@ export function RunSummary() {
   const { sessionId = "" } = useParams();
   const student = useStudent();
   const navigate = useNavigate();
-  const toast = useToast();
   const narrow = useNarrow();
   const state = useLoad(() => api.practiceCurrent(sessionId), [sessionId]);
   const runs = useLoad(
@@ -86,25 +85,37 @@ export function RunSummary() {
     () => progressApi.overview(student.studentId),
     [student.studentId],
   );
-  const [starting, setStarting] = useState(false);
+  const starter = useStartPractice();
+  const starting = starter.busy !== null;
 
   const run = runs.data?.runs.find((item) => item.session_id === sessionId);
   const subject = overview.data?.subjects.find(
     (item) => item.subject_id === run?.subject_id,
   );
   const weakest = subject?.latest_checkup?.weakest_subtopics[0];
+  // JAMB's topics this run touched (the API's `subtopics`); older servers only name sections.
+  const covered = run ? (run.subtopics ?? run.topics) : [];
   usePageTitle(run ? `${run.subject_name} run` : "Run summary");
 
+  // "Another run" is another run of the same kind: a run on Indices is followed by more Indices,
+  // not by whatever the plan would pick. Only a general run gets a general run.
+  const chosen = (state.data as (PracticeState & { filters?: RunFilters | null }) | null)?.filters ?? null;
+  const narrowed = Boolean(
+    chosen && (chosen.subtopic_ids.length || chosen.topic_ids.length || chosen.exam_years.length),
+  );
   const again = () => {
     if (!run) return;
-    setStarting(true);
-    api
-      .startPractice(student.studentId, run.subject_id, run.length)
-      .then((next) => navigate(`/practice/${next.session_id}`))
-      .catch((error: Error) => {
-        toast(`Couldn’t start the run: ${error.message || "try again"}`);
-        setStarting(false);
-      });
+    void starter.start(
+      run.subject_id,
+      {
+        length: run.length,
+        subtopicIds: chosen?.subtopic_ids,
+        topicIds: chosen?.topic_ids,
+        examYears: chosen?.exam_years,
+        label: "the topics this run was on",
+      },
+      "again",
+    );
   };
 
   if (state.error && !state.data) {
@@ -324,15 +335,15 @@ export function RunSummary() {
               </li>
             ) : null}
           </ul>
-          {(run && run.topics.length > 0) || data.closing_note ? (
+          {covered.length > 0 || data.closing_note ? (
             <div className="rs-foot">
-              {run && run.topics.length > 0 ? (
+              {covered.length > 0 ? (
                 <div className="rs-topics">
                   <span className="rs-topics-label sj-mono">
                     <IconLayers size={14} /> Topics covered
                   </span>
                   <div className="rs-chips">
-                    {run.topics.map((topic) => (
+                    {covered.map((topic) => (
                       <Badge key={topic} tone="ghost" className="rs-chip">
                         {topic}
                       </Badge>
@@ -368,7 +379,9 @@ export function RunSummary() {
             </span>
             <span className="rs-next-text">
               {run
-                ? `${run.length} more ${run.subject_name} questions, aimed at what’s still weak.`
+                ? narrowed
+                  ? `Up to ${run.length} more questions on the same choice as this run.`
+                  : `${run.length} more ${run.subject_name} questions, aimed at what’s still weak.`
                 : "Loading…"}
             </span>
             <span className="rs-next-go">
@@ -386,10 +399,10 @@ export function RunSummary() {
                 <span className="rs-tile pink" aria-hidden="true">
                   <IconTarget size={18} />
                 </span>
-                <b>Your weakest area</b>
+                <b>Your weakest topic</b>
               </span>
               <span className="rs-next-text">
-                {weakest.name} · {weakest.topic_name}
+                {weakest.name} · {weakest.section_name ?? weakest.topic_name}
               </span>
               <span className="rs-next-go">
                 Open subject
@@ -417,6 +430,8 @@ export function RunSummary() {
             </span>
           </button>
         </div>
+        <NothingFreshNote starter={starter} />
+        {starter.error ? <Alert>{starter.error}</Alert> : null}
       </section>
     </div>
   );

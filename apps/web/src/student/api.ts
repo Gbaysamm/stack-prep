@@ -14,6 +14,8 @@ export interface SubjectOffer {
   name: string;
   deliverable_questions: number;
   teachable_skills: number;
+  /** JAMB topics with lessons: the count students see. "Skill" is never shown. */
+  teachable_topics?: number;
   ready: boolean;
   blocked_reason: string | null;
   /** Every candidate of the exam sits it (UTME: Use of English). */
@@ -71,7 +73,11 @@ export interface CheckupOption {
 export interface CheckupQuestion {
   position: number;
   of: number;
+  /** The DB topic, which is JAMB's section. Prefer `section_name` / `subtopic_name`. */
   topic_name: string;
+  section_name?: string | null;
+  /** JAMB's topic this question is on. */
+  subtopic_name?: string | null;
   question_version_id: string;
   stem: string;
   instructions: string | null;
@@ -90,10 +96,13 @@ export interface CheckupState {
   question: CheckupQuestion | null;
 }
 
+/** One JAMB topic (the DB subtopic). `topic_name` is its JAMB section; so is `section_name`. */
 export interface SubtopicReport {
   subtopic_id: string;
   name: string;
   topic_name: string;
+  section_id?: string | null;
+  section_name?: string | null;
   share: number;
   answered: number;
   correct: number;
@@ -104,7 +113,9 @@ export interface SubtopicReport {
 export interface PlanLine {
   subtopic_id: string;
   name: string;
+  /** JAMB's section (the DB topic); so is `section_name`. */
   topic_name: string;
+  section_name?: string | null;
   share: number;
   mastery_now: number;
   mastery_projected: number;
@@ -126,6 +137,7 @@ export interface ScoreProjection {
   caveat: string;
 }
 
+/** One DB topic, which is JAMB's SECTION: a heading over its topics, not a unit of work. */
 export interface TopicReport {
   topic_id: string;
   name: string;
@@ -212,6 +224,9 @@ export interface LessonBeat {
   show_sketch?: boolean | 'sketch' | 'sketch_b' | 'sketch_c';
   /** A small picture this beat draws beside a line (Doodle.tsx), if any. */
   doodle?: LessonDoodleRef | null;
+  /** Or the one or two it brings in (doodles v2), and what the pen does to earlier ones. */
+  doodles?: LessonDoodleRef[] | null;
+  doodle_do?: LessonDoodleOp[] | null;
 }
 
 /**
@@ -223,6 +238,45 @@ export interface LessonDoodleRef {
   name: string;
   caption?: string | null;
   near?: number | null;
+  /** Its handle in the lesson, which later beats' `doodle_do` name it by. */
+  id?: string | null;
+  /** small (about 70px), medium (120px, the default) or a scene (320x200). */
+  size?: 'small' | 'medium' | 'scene' | null;
+  /** A community of small figures drawn one by one: how many of `name`, or of each kind. */
+  repeat?: number | { name: string; n: number }[] | null;
+  layout?: 'row' | 'grid' | 'cluster' | null;
+}
+
+/** Something the pen does to a doodle already on the board (docs/plans/doodles-v2-contract.md). */
+export interface LessonDoodleOp {
+  id: string;
+  op:
+    | 'pulse'
+    | 'circle'
+    | 'highlight'
+    | 'underline'
+    | 'cross'
+    | 'label'
+    | 'arrow'
+    | 'stage'
+    | 'move'
+    | 'fill'
+    | 'grow'
+    | 'shrink'
+    | 'count'
+    | 'group'
+    | 'split';
+  part?: string | null;
+  n?: number | null;
+  text?: string | null;
+  /** A fill's level, 0 to 1. */
+  to?: number | null;
+  to_part?: string | null;
+  to_id?: string | null;
+  stage?: string | null;
+  path?: string | null;
+  fill?: string | null;
+  by?: number | null;
 }
 
 /** A picture drawn for this question's lesson, in the board's art format (Doodle.tsx). */
@@ -312,6 +366,9 @@ export interface LessonPointTo {
   /** Or a place in the passage: `target` is its words, `nth` which occurrence. */
   passage?: boolean | null;
   nth?: number | null;
+  /** Or a doodle on the board, by its id, and a part of its art. */
+  doodle?: string | null;
+  part?: string | null;
 }
 
 export type LessonPointKind =

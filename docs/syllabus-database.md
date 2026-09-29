@@ -44,6 +44,24 @@ belongs to a topic, and an assessable skill belongs to a subtopic. For example,
 only; it is **not** a verified statement about the current NECO syllabus. An item can
 have several evidence rows, and a skill can have several defined mastery levels.
 
+### Which DB level is which JAMB level
+
+The DB names are one level off JAMB's. The columns keep their names; the API and the
+student app use JAMB's words.
+
+| `curriculum_items.item_type` | JAMB calls it | UTME Maths | Use of English | Shown to students as |
+|---|---|---|---|---|
+| `topic` (no parent) | **Section** | 5 (Number and Numeration … Statistics) | 3 (A, B, C) | a heading that groups topics |
+| `subtopic` | **Topic** | 23 (e.g. Indices, Logarithms and Surds) | 18 | the unit students see, practise, get status on and get weak-spot lists by |
+| `skill` | (no JAMB level) | many per topic | many per topic | never shown |
+
+In API responses, `subtopic_id` / `subtopic_name` / `subtopics` are JAMB topics. Fields
+named `topic_*` on a response are the DB topic, i.e. JAMB's section; they are kept for
+older clients, and every student-facing response also carries `section_id` /
+`section_name` (or `sections`) naming the same thing plainly. English's 18 includes
+"Cloze passage", which the syllabus sets as one of Section A's passages rather than listing
+as a lettered topic.
+
 ## Attributes taken from the attached HTML
 
 | Entity | Important attributes | Why they matter |

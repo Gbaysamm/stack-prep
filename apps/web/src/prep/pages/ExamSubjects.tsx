@@ -221,7 +221,7 @@ function ExamBody({
 
       <p className="exs-legend sj-small sj-muted">
         <b>Questions ready</b>: questions our team has checked, ready to be asked.{' '}
-        <b>Skills we teach</b>: topics where your coach can walk you through the working.
+        <b>Topics we teach</b>: syllabus topics where your coach can walk you through the working.
         {overview?.subjects.some((item) => item.latest_checkup?.score_now != null) ? (
           <>
             {' '}
@@ -298,8 +298,8 @@ function SubjectCard({
           <span className="exs-num-label">questions ready</span>
         </div>
         <div className="exs-num">
-          <span className="sj-num">{fmt(subject.teachable_skills)}</span>
-          <span className="exs-num-label">skills we teach</span>
+          <span className="sj-num">{fmt(subject.teachable_topics ?? 0)}</span>
+          <span className="exs-num-label">topics we teach</span>
         </div>
       </div>
 
