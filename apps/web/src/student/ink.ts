@@ -329,3 +329,132 @@ export function markDelays(points: { kind: string }[]): number[] {
   }, 0);
   return delays;
 }
+
+/* ---- Chip layout: where a mark's words can go without landing on anything ----------------- */
+
+/** A chip's height on the working: 13px words, 1.35 line height, and its padding. */
+export const CHIP_HEIGHT = 23;
+
+let measurer: CanvasRenderingContext2D | null | undefined;
+
+/**
+ * How wide a chip really is: its words measured in the face they are set in (13px semibold
+ * body font) plus its padding — the estimate `labelWidth` gives is used where nothing can be
+ * measured (no canvas, a test).
+ */
+export function chipWidth(text: string): number {
+  if (measurer === undefined) {
+    try {
+      measurer = document.createElement("canvas").getContext("2d");
+    } catch {
+      measurer = null;
+    }
+  }
+  if (!measurer) return labelWidth(text);
+  const family =
+    getComputedStyle(document.documentElement).getPropertyValue("--f-body").trim() ||
+    "Poppins, sans-serif";
+  measurer.font = `600 13px ${family}`;
+  const cap = typeof window === "undefined" ? 400 : window.innerWidth * 0.44;
+  return Math.min(cap, Math.ceil(measurer.measureText(text).width) + 20);
+}
+
+/** The box a label's chip covers, as the CSS sets it against its point (board.css). */
+export function chipBox(label: Label, w: number, h = CHIP_HEIGHT): Box {
+  const left = label.side === "right" ? label.x : label.side === "left" ? label.x - w : label.x - w / 2;
+  const top = label.side === "above" ? label.y - h : label.y - h / 2;
+  return { left, top, right: left + w, bottom: top + h };
+}
+
+export function boxesMeet(a: Box, b: Box, pad = 0): boolean {
+  return a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad;
+}
+
+/**
+ * EVERYTHING ON THE BOARD A CHIP MUST NOT LAND ON: the rows of writing, the chips already
+ * placed and the traces already drawn — for every mark that has gone up, not only the
+ * newest, since every mark stays. Each new chip takes the first free place from the list its
+ * mark offers, nearest first; where none of them is free it looks further afield, and where
+ * nothing near its mark is free at all it is left off rather than laid over the writing.
+ */
+export class ChipLayout {
+  readonly text: Box[] = [];
+  readonly chips: Box[] = [];
+  private readonly trails: { box: Box; points: Pt[] }[] = [];
+
+  constructor(
+    /** The room chips may use: the sheet's width, and the band from the top of the writing
+     * to the bottom of it (below that the coach card floats over the board). */
+    readonly bounds: Box,
+  ) {}
+
+  /** A route or stroke the chips must keep off. */
+  addTrail(points: Pt[]): void {
+    if (points.length === 0) return;
+    let box: Box = { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity };
+    for (const [x, y] of points)
+      box = {
+        left: Math.min(box.left, x),
+        top: Math.min(box.top, y),
+        right: Math.max(box.right, x),
+        bottom: Math.max(box.bottom, y),
+      };
+    this.trails.push({ box, points });
+  }
+
+  /** Whether a trace already drawn passes through the box. */
+  trailWithin(box: Box): boolean {
+    for (const trail of this.trails) {
+      if (!boxesMeet(box, trail.box, 0)) continue;
+      for (const [x, y] of trail.points)
+        if (x > box.left && x < box.right && y > box.top && y < box.bottom) return true;
+    }
+    return false;
+  }
+
+  /** How badly a chip there would sit: 0 where it is free. */
+  cost(box: Box): number {
+    const b = this.bounds;
+    let cost = 0;
+    if (box.left < b.left || box.right > b.right || box.top < b.top || box.bottom > b.bottom) cost += 100;
+    for (const t of this.text) if (boxesMeet(box, t, 2)) cost += 10;
+    for (const c of this.chips) if (boxesMeet(box, c, 4)) cost += 10;
+    for (const trail of this.trails) {
+      if (!boxesMeet(box, trail.box, 3)) continue;
+      for (const [x, y] of trail.points)
+        if (x > box.left - 3 && x < box.right + 3 && y > box.top - 3 && y < box.bottom + 3) {
+          cost += 3;
+          break;
+        }
+    }
+    return cost;
+  }
+
+  /**
+   * Place a chip: the first of `options` that is free, else the first free place found by
+   * sliding right along the row at `anchor` (the end of the mark's row, at its middle) and
+   * then a little up or down from it. Null — no words — where nothing near is free.
+   */
+  place(text: string, options: Label[], anchor: Pt | null): Label | null {
+    const w = chipWidth(text);
+    const tries: Label[] = [...options];
+    if (anchor) {
+      const [ax, ay] = anchor;
+      const b = this.bounds;
+      for (const dy of [0, -9, 9, -18, 18, -27, 27, -38, 38, -50, 50, -64, 64]) {
+        for (let x = ax; x + w <= b.right; x += 12) tries.push({ x, y: ay + dy, side: "right", text });
+        // Short of the row end, where the row the chip was nudged onto is shorter.
+        for (let x = ax - 12; x >= b.left && dy !== 0; x -= 12) tries.push({ x, y: ay + dy, side: "right", text });
+      }
+    }
+    for (const option of tries) {
+      const label = { ...option, text };
+      const box = chipBox(label, w);
+      if (this.cost(box) === 0) {
+        this.chips.push(box);
+        return label;
+      }
+    }
+    return null;
+  }
+}

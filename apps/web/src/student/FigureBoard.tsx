@@ -53,7 +53,7 @@ import {
   drawLoop,
   drawStrike,
   drawStroke,
-  labelWidth,
+  chipWidth,
   markDelays,
   seeded,
   through,
@@ -473,10 +473,11 @@ function chipSpot(
   const { view } = geo;
   let best: { centre: Pt; score: number } | null = null;
   const base = Math.atan2(prefer[1], prefer[0]);
-  // Three distances, sixteen directions: a little further out in the preferred direction is
+  // Five distances, sixteen directions: a little further out in the preferred direction is
   // better than the right distance on the far side of the figure, where it would not read as
-  // belonging to its mark.
-  for (let j = 0; j < 48; j += 1) {
+  // belonging to its mark. Another mark's words are never covered: every chip stays up for the
+  // rest of the lesson, so a spot on top of one is ruled out, however near.
+  for (let j = 0; j < 80; j += 1) {
     const i = j % 16;
     const further = Math.floor(j / 16);
     const turn = base + (i % 2 ? 1 : -1) * Math.ceil(i / 2) * (Math.PI / 8);
@@ -492,9 +493,11 @@ function chipSpot(
       right: centre[0] + w / 2,
       bottom: centre[1] + h / 2,
     };
-    let score = Math.ceil(i / 2) * 1.1 + further * 1.5;
+    // Each ring further out costs more than turning a few steps round: words far from their
+    // mark read as belonging to whatever they sit beside.
+    let score = Math.ceil(i / 2) * 1.1 + further * 5;
     for (const label of geo.labels) if (overlaps(box, label.box, 2)) score += 10;
-    for (const other of taken) if (overlaps(box, other, 2)) score += 12;
+    for (const other of taken) if (overlaps(box, other, 3)) score += 1000;
     for (const [a, b] of geo.segments) {
       if (crosses(a, b, box)) score += 4;
       // Words with one of the figure's lines between them and their mark read as belonging to
@@ -575,13 +578,13 @@ function figureShapes(
   const shapes: FigureShape[] = [];
   const taken: Box[] = [];
   const chipBox = (centre: Pt, text: string): Box => {
-    const w = labelWidth(text) * k;
+    const w = figChipWidth(text) * k;
     const h = 22 * k;
     return { left: centre[0] - w / 2, top: centre[1] - h / 2, right: centre[0] + w / 2, bottom: centre[1] + h / 2 };
   };
   const chip = (at: Pt, prefer: Pt, text: string | null, distance: number) => {
     if (!text) return undefined;
-    const centre = chipSpot(geo, at, prefer, labelWidth(text) * k, 22 * k, distance, taken);
+    const centre = chipSpot(geo, at, prefer, figChipWidth(text) * k, 22 * k, distance, taken);
     taken.push(chipBox(centre, text));
     return { x: centre[0], y: centre[1], text };
   };
@@ -995,4 +998,9 @@ export function FigurePanel({
       </div>
     </aside>
   );
+}
+
+/** A figure chip's width in screen pixels: its words are set a touch smaller there (board.css). */
+function figChipWidth(text: string): number {
+  return chipWidth(text) * (12.5 / 13);
 }

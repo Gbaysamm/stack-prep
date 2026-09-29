@@ -397,6 +397,14 @@
   stroke-width: 2;
   stroke-opacity: 0.5;
 }
+/* A move from an earlier beat: the same trace, whole and the same colour, a little thinner,
+   so on a busy board the newest step is the one that stands out. */
+.pb-mark.move.older path {
+  stroke-width: 1.4;
+}
+.pb-mark.move path {
+  transition: stroke-width 420ms var(--ease);
+}
 .pb-mark.move .pb-mark-line {
   animation: pb-draw var(--draw, 900ms) cubic-bezier(0.45, 0, 0.55, 1) var(--delay, 0s) forwards;
 }
@@ -1246,5 +1254,34 @@
   }
   .pb-pen {
     display: none;
+  }
+}
+
+/* Where a piece brought down from far above came from: a highlighter pass that lights up as
+   the piece sets off and fades again, so the eye finds the source without a long trace down
+   the page (Board.tsx, `stubRoute`). */
+.pb-flash path {
+  fill: none;
+  stroke: var(--yellow-300);
+  stroke-linecap: butt;
+  opacity: 0;
+  animation: pb-flash 1800ms var(--ease) var(--delay, 0s) both;
+}
+@keyframes pb-flash {
+  0% {
+    opacity: 0;
+  }
+  20%,
+  65% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pb-flash path {
+    animation: none;
+    opacity: 0;
   }
 }

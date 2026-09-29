@@ -47,7 +47,8 @@ import type { LessonPoint, NarratedLesson, TutorReply } from "./api.js";
 import { Coach } from "./Coach.js";
 import { FigurePanel, type Drawing } from "./FigureBoard.js";
 import {
-  LABEL_ROOM,
+  CHIP_HEIGHT,
+  ChipLayout,
   arrowAlong,
   arrowHead,
   bezierAt,
@@ -57,7 +58,6 @@ import {
   drawCircle,
   drawHighlight,
   drawStrike,
-  labelWidth,
   markDelays,
   seeded,
   stillMotion,
@@ -1751,6 +1751,75 @@ interface Shape {
   delay?: number;
   /** A piece being carried to where it goes, for a `move`. */
   ghost?: Ghost;
+  /** A move made in an earlier beat than the newest: its trace drawn a little thinner. */
+  older?: boolean;
+  /** For a piece brought from far above: a highlighter flash over where it came from. */
+  flash?: { d: string; width: number };
+}
+
+/**
+ * More rows than this between a piece and where it goes, and it is not carried the whole way:
+ * a curve around even one row of writing reads as a bracket. Only a piece carried from the row
+ * just above travels the whole way; anything further comes in on a short hook, with a chip
+ * saying where it came from and a flash on the source.
+ */
+const FAR_ROWS = 0;
+
+/** How many rows of writing lie between two pieces. */
+function rowsBetween(writing: Box[], from: Box, to: Box): number {
+  const top = Math.min(from.bottom, to.bottom);
+  const bottom = Math.max(from.top, to.top);
+  return bands(
+    writing.filter((o) => {
+      const m = (o.top + o.bottom) / 2;
+      return m > top && m < bottom;
+    }),
+    true,
+  ).length;
+}
+
+/**
+ * The words for a piece brought from far above: the mark's own words and the piece it came
+ * from — "given · 72 above" — so the student can find it on the board.
+ */
+function fromWords(text: string | null, at: string | null | undefined): string {
+  const inner = at ? (/\[\[([\s\S]+?)\]\]/.exec(at)?.[1] ?? at) : "";
+  const piece = inner
+    .replace(/∘/g, "°")
+    .replace(/\s+/g, " ")
+    // The signs round a piece pick it out on its line; they are not what it is called.
+    .replace(/^[\s=+×÷,:;]+|[\s=+×÷,:;]+$/g, "");
+  const where = piece ? `${piece} above` : "from above";
+  return text ? `${text} · ${where}` : where;
+}
+
+/**
+ * A short hooked arrow into a piece from the gap over its row: along the gap from the right
+ * of the piece (the left where the right has no room) and down onto it.
+ */
+function stubRoute(
+  to: Box,
+  writing: Box[],
+  layout: ChipLayout,
+  minX: number,
+  maxX: number,
+  rnd: () => number,
+): { route: Route } {
+  const tx = (to.left + to.right) / 2;
+  const cy = (to.top + to.bottom) / 2;
+  const row = writing.filter((o) => o.top < cy && o.bottom > cy);
+  const top = Math.min(to.top, ...row.map((o) => o.top));
+  const above = Math.max(top - 40, ...writing.filter((o) => o.bottom <= top + 1).map((o) => o.bottom));
+  const gy = Math.max((above + top) / 2, top - 16);
+  const tip: Pt = [tx, to.top - 3];
+  const reach = 46;
+  const clear = (x: number) => !layout.trailWithin({ left: Math.min(x, tx) + 4, top: gy - 4, right: Math.max(x, tx) - 4, bottom: gy + 4 });
+  const right = tx + reach <= maxX && clear(tx + reach);
+  const left = tx - reach >= minX && clear(tx - reach);
+  const sx = right || !left ? Math.min(maxX, tx + reach) : tx - reach;
+  const start: Pt = [sx, gy - 2];
+  const route = cubicRoute(start, [tx + (sx - tx) * 0.25, gy - 3], [tx, gy], tip);
+  return { route: unsteady(route, rnd, 0.5) };
 }
 
 /** A run of a piece's glyphs, in the font it is set in, placed on the sheet. */
@@ -2011,27 +2080,52 @@ function drawBox(box: Box, rnd: () => number): string {
   return `M${f(c0)} Q${f(mid(c0, c1))} ${f(c1)} Q${f(mid(c1, c2))} ${f(c2)} Q${f(mid(c2, c3))} ${f(c3)} Q${f(mid(c3, c0))} ${f(c0)} L${f(end)}`;
 }
 
-/** Where a piece-to-piece arrow goes, and (for its words) where it runs down a margin. */
+/** Where a piece-to-piece arrow goes, and (for its words) where it runs round the writing. */
 interface Way {
   route: Route;
-  /** The x of the margin the route runs down, or null when it goes straight across. */
+  /** The x of the furthest-out run of the route round the writing, or null when it goes
+   * straight across. */
   lane: number | null;
-  /** Half way down the route, for words beside it. */
+  /** Half way along that run, for words beside it. */
   middle: number;
 }
 
+/** Boxes that share any height merged into one band, in the order `down` travels past them. */
+function bands(boxes: Box[], down: boolean): Box[] {
+  const sorted = [...boxes].sort((a, b) => a.top - b.top);
+  const out: Box[] = [];
+  for (const b of sorted) {
+    const last = out[out.length - 1];
+    if (last && b.top < last.bottom - 1) {
+      last.left = Math.min(last.left, b.left);
+      last.right = Math.max(last.right, b.right);
+      last.bottom = Math.max(last.bottom, b.bottom);
+    } else out.push({ ...b });
+  }
+  return down ? out : out.reverse();
+}
+
+function routeLength(corners: Pt[]): number {
+  let length = 0;
+  for (let i = 1; i < corners.length; i += 1)
+    length += Math.hypot(corners[i]![0] - corners[i - 1]![0], corners[i]![1] - corners[i - 1]![1]);
+  return length;
+}
+
 /**
- * THE WAY FROM ONE PIECE TO ANOTHER, kept off the working it annotates.
+ * THE WAY FROM ONE PIECE TO ANOTHER, kept off the working it annotates and off the words of
+ * the marks already on it.
  *
  * On the same row — the 2 in front of a log going up to be its power — it is a small hop over
  * the words, leaving the top of one piece and landing on the top of the other, no higher than
  * the room under the line above allows (and under the row instead where there is no room over
- * it). Between a row and the row just under it, it drops out of the bottom of the first piece
- * and into the top of the second through the gap between the rows. Across rows with other
- * writing between them, it drops into the gap under the first row, runs along it to the right
- * margin (the left where the right has no room), down the margin past the rows between, and
- * back along the gap over the last row to the piece — every corner rounded, as a hand takes
- * it. Only where neither margin has room does it cut across.
+ * it). Between a row and the row just under it, or past rows that are wholly to one side of
+ * the way down, it goes straight through the gap. Only where writing between the two rows
+ * really stands in the way does it go round it: into the gap under the first row, along it to
+ * just past the end of the rows between, down beside them — stepping in again past rows that
+ * are shorter, so it hugs the writing rather than running down the far margin — and back along
+ * the gap over the last row to the piece. Round the right-hand end or the left-hand start of
+ * the rows, whichever way is shorter; every corner rounded, as a hand takes it.
  */
 function pieceRoute(
   from: Box,
@@ -2040,6 +2134,9 @@ function pieceRoute(
   minX: number,
   maxX: number,
   rnd: () => number,
+  /** Whether a trace already on the board runs through the box: a way round the writing
+   * keeps a little apart from one that went that way before, rather than drawn over it. */
+  taken: (box: Box) => boolean = () => false,
 ): Way {
   const cx = (b: Box) => (b.left + b.right) / 2;
   const cy = (b: Box) => (b.top + b.bottom) / 2;
@@ -2081,7 +2178,10 @@ function pieceRoute(
     const route = cubicRoute(start, [fx, start[1] + gap * 0.85], [tx, tip[1] - gap * 0.85], tip);
     return { route: unsteady(route, rnd, 0.8), lane: null, middle: (start[1] + tip[1]) / 2 };
   };
-  if (between.length === 0) return direct();
+  // Writing between the rows that is all to one side of the way down is not in the way.
+  const lo = Math.min(fx, tx) - 10;
+  const hi = Math.max(fx, tx) + 10;
+  if (!between.some((o) => o.left < hi && o.right > lo)) return direct();
   // The edges of the rows the two pieces sit in, so the run along a gap clears the whole row
   // (a fraction's denominator under a piece in its numerator, say), not just the piece.
   const rowOf = (b: Box) => obstacles.filter((o) => o.top < cy(b) && o.bottom > cy(b));
@@ -2093,19 +2193,63 @@ function pieceRoute(
   const toEdge = down
     ? Math.min(to.top, ...toRow.map((o) => o.top))
     : Math.max(to.bottom, ...toRow.map((o) => o.bottom));
-  const first = down ? Math.min(...between.map((o) => o.top)) : Math.max(...between.map((o) => o.bottom));
-  const last = down ? Math.max(...between.map((o) => o.bottom)) : Math.min(...between.map((o) => o.top));
-  const gy1 = (fromEdge + first) / 2;
-  const gy2 = (last + toEdge) / 2;
-  const right = Math.max(...between.map((o) => o.right)) + 18;
-  const left = Math.min(...between.map((o) => o.left)) - 18;
-  const lane = right <= maxX - 4 ? right : left >= minX + 4 ? left : null;
-  if (lane === null) return direct();
-  const route = cornerRoute(
-    [start, [fx, gy1], [lane, gy1], [lane, gy2], [tx, gy2], tip],
-    12,
-  );
-  return { route: unsteady(route, rnd, 0.9), lane, middle: (gy1 + gy2) / 2 };
+  const rows = bands(between, down);
+  const near = (b: Box) => (down ? b.top : b.bottom);
+  const far = (b: Box) => (down ? b.bottom : b.top);
+  const gy1 = (fromEdge + near(rows[0]!)) / 2;
+  const gy2 = (far(rows[rows.length - 1]!) + toEdge) / 2;
+
+  // Round one end of the rows: `sign` 1 past their right-hand ends, -1 before their starts.
+  const round = (sign: 1 | -1): { corners: Pt[]; lane: number; middle: number } | null => {
+    const out = (x: number, y: number) => (sign > 0 ? Math.max(x, y) : Math.min(x, y));
+    const edges = rows.map((b) => (sign > 0 ? b.right + 16 : b.left - 16));
+    // Out as far as the furthest row still to come, in again past it: a single bulge, so the
+    // way never weaves in and out between rows of different lengths.
+    const before: number[] = [];
+    edges.forEach((e, i) => before.push(i ? out(before[i - 1]!, e) : e));
+    const after: number[] = new Array(edges.length);
+    for (let i = edges.length - 1; i >= 0; i -= 1)
+      after[i] = i < edges.length - 1 ? out(after[i + 1]!, edges[i]!) : edges[i]!;
+    const lanes = edges.map((_, i) => (sign > 0 ? Math.min(before[i]!, after[i]!) : Math.max(before[i]!, after[i]!)));
+    // Steps of less than a couple of letters are not worth a corner: keep to the outer line.
+    const runs: { x: number; first: number; last: number }[] = [];
+    lanes.forEach((x, i) => {
+      const run = runs[runs.length - 1];
+      if (run && Math.abs(run.x - x) < 28) {
+        run.x = out(run.x, x);
+        run.last = i;
+      } else runs.push({ x, first: i, last: i });
+    });
+    for (const run of runs) {
+      const top = Math.min(near(rows[run.first]!), far(rows[run.last]!));
+      const bottom = Math.max(near(rows[run.first]!), far(rows[run.last]!));
+      for (let step = 0; step < 4 && taken({ left: run.x - 4, top, right: run.x + 4, bottom }); step += 1)
+        run.x += sign * 9;
+    }
+    if (runs.some((run) => run.x < minX + 4 || run.x > maxX - 4)) return null;
+    const corners: Pt[] = [start, [fx, gy1], [runs[0]!.x, gy1]];
+    for (let r = 0; r < runs.length - 1; r += 1) {
+      const leave = rows[runs[r]!.last]!;
+      const enter = rows[runs[r + 1]!.first]!;
+      const gy = (far(leave) + near(enter)) / 2;
+      corners.push([runs[r]!.x, gy], [runs[r + 1]!.x, gy]);
+    }
+    corners.push([runs[runs.length - 1]!.x, gy2], [tx, gy2], tip);
+    const outer = runs.reduce((best, run) => (sign * run.x > sign * best.x ? run : best));
+    const middle = (near(rows[outer.first]!) + far(rows[outer.last]!)) / 2;
+    return { corners, lane: outer.x, middle };
+  };
+  const right = round(1);
+  const left = round(-1);
+  const best =
+    right && left
+      ? routeLength(right.corners) <= routeLength(left.corners) * 1.1
+        ? right
+        : left
+      : (right ?? left);
+  if (!best) return direct();
+  const route = cornerRoute(best.corners, 12);
+  return { route: unsteady(route, rnd, 0.9), lane: best.lane, middle: best.middle };
 }
 
 function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
@@ -2115,39 +2259,34 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
   const minX = 6;
   const maxX = width - 6;
   const shapes: Shape[] = [];
-  // Where labels already sit, so a second one on the same line does not land on the first.
-  const placed: Box[] = [];
-  const labelBox = (label: Label): Box => {
-    const w = labelWidth(label.text);
-    const left =
-      label.side === "right" ? label.x : label.side === "left" ? label.x - w : label.x - w / 2;
-    const top = label.side === "above" ? label.y - 22 : label.y - 11;
-    return { left, top, right: left + w, bottom: top + 22 };
-  };
-  const clashes = (label: Label) => {
-    const a = labelBox(label);
-    return placed.some(
-      (b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top,
-    );
-  };
+  // Every row of writing on the board. The question's panel, the answer's card and the
+  // coach's lines count as blocks.
+  const writing: Box[] = [];
+  sheet.querySelectorAll<HTMLElement>("[data-line]").forEach((element) => {
+    for (const row of inkRows(element)) writing.push(relative(row, base));
+  });
+  sheet
+    .querySelectorAll<HTMLElement>(".pb-question, .pb-line.answer, .pb-coachline, .pb-asked")
+    .forEach((element) => writing.push(relative(element.getBoundingClientRect(), base)));
+  const lowest = Math.max(0, ...writing.map((b) => b.bottom));
+  // Chips stay within the writing: below it the coach card floats over the board.
+  const layout = new ChipLayout({ left: 2, top: 0, right: width - 2, bottom: lowest + 4 });
+  layout.text.push(...writing);
+  // What a piece-to-piece route goes round: the writing, and the words of every mark so far.
+  const obstacles = () => [...layout.text, ...layout.chips];
+  // The newest beat's marks are drawn at full weight; the traces of moves before it a little
+  // thinner, still whole, so the latest step stands out on a busy board.
+  const newest = Math.max(-1, ...sets.map((set) => set.index));
   let stagger = 0;
   const push = (shape: Shape) => {
-    if (shape.label && shape.state !== "gone") placed.push(labelBox(shape.label));
     shapes.push({ ...shape, delay: stagger });
   };
-  // Every row of writing on the board, for routing a piece-to-piece arrow round the words
-  // rather than through them. The question's panel counts as one block.
-  const obstacles: Box[] = [];
-  sheet.querySelectorAll<HTMLElement>("[data-line]").forEach((element) => {
-    for (const row of inkRows(element)) obstacles.push(relative(row, base));
-  });
-  const panel = sheet.querySelector(".pb-question");
-  if (panel) obstacles.push(relative(panel.getBoundingClientRect(), base));
-  // The mark being made now gets first choice of where its words go.
-  const order: Record<MarkState, number> = { live: 0, past: 1, gone: 2 };
-  for (const set of [...sets].sort((a, b) => order[a.state] - order[b.state])) {
+  // In the order the lesson made them, so a chip that went up early keeps its place when later
+  // marks join it, and every later chip and route finds its way round the ones before.
+  for (const set of [...sets].sort((a, b) => a.index - b.index)) {
     // Each mark in a moment waits for the ones before it; a move, for its piece to land.
     const delays = markDelays(set.points);
+    const older = set.index !== newest;
     set.points.forEach((point, k) => {
       stagger = delays[k] ?? 0;
       // A mark on the diagram is drawn over the figure (FigureBoard.tsx), not here.
@@ -2164,47 +2303,54 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
       const rnd = seeded(set.index * 131 + k * 17 + target * 7 + 3);
       const key = `${set.index}-${k}`;
       const text = point.text?.trim() || null;
-      // Right of the mark where there is room, else left of it, never off the board.
-      const beside = (right: number, left: number, y: number): Label | null =>
-        text
-          ? right + LABEL_ROOM <= width
-            ? { x: right, y, side: "right", text }
-            : left - LABEL_ROOM >= 0
-              ? { x: left, y, side: "left", text }
-              : null
-          : null;
-      // Words for a mark inside a run of text — an underlined word, a highlighted clue, a
-      // crossed-out option: after the end of its row, where the board is clear, else just
-      // above the mark. Beside the mark itself they sat on top of the next words.
-      const inline = (rows: Box[]): Label | null => {
-        const first = rows[0];
-        const last = rows[rows.length - 1];
-        if (!text || !first || !last) return null;
-        const w = labelWidth(text);
+      /** The end of the row of writing the piece sits in, at the row's middle: where the
+       * board beside a mark is clear. */
+      const rowEnd = (rows: Box[]): Pt => {
+        const last = rows[rows.length - 1] ?? box;
         const middle = (last.top + last.bottom) / 2;
-        const rowEnd =
+        const end =
           inkRows(line)
             .map((row) => relative(row, base))
             .find((row) => middle > row.top && middle < row.bottom)?.right ?? last.right;
-        const options: Label[] = [];
-        if (rowEnd + 12 + w <= width) options.push({ x: rowEnd + 12, y: middle, side: "right", text });
-        const cx = Math.min(
-          Math.max((first.left + first.right) / 2, w / 2 + 2),
-          width - w / 2 - 2,
+        return [Math.max(end, last.right) + 12, middle];
+      };
+      const chip = (options: Label[], anchor: Pt | null, words = text): Label | null =>
+        words ? layout.place(words, options.map((o) => ({ ...o, text: words })), anchor) : null;
+      const at = (p: Pt, side: Label["side"] = "right"): Label => ({ x: p[0], y: p[1], side, text: "" });
+      // Words for a mark inside a run of text — an underlined word, a highlighted clue, a
+      // crossed-out option: after the end of its row, where the board is clear, else just
+      // above or below the mark.
+      const inline = (rows: Box[]): Label | null => {
+        const first = rows[0] ?? box;
+        const last = rows[rows.length - 1] ?? box;
+        const end = rowEnd(rows);
+        const cx = (first.left + first.right) / 2;
+        return chip(
+          [at(end), at([cx, first.top - 2], "above"), at([cx, last.bottom + 2 + CHIP_HEIGHT], "above")],
+          end,
         );
-        options.push({ x: cx, y: first.top - 2, side: "above", text });
-        return options.find((option) => !clashes(option)) ?? options[options.length - 1]!;
       };
 
       if (point.kind === "circle" || point.kind === "box") {
         const d = point.kind === "circle" ? drawCircle(box, rnd) : drawBox(box, rnd);
-        const rx = (box.right - box.left) / 2 + 12;
+        const ry = Math.max(13, (box.bottom - box.top) / 2 + 6);
+        const rx =
+          point.kind === "circle" ? Math.max(ry + 5, (box.right - box.left) / 2 + 10) : (box.right - box.left) / 2 + 8;
         const cx = (box.left + box.right) / 2;
-        // Beside the circle at its shoulder; on a narrow board, sat on top of it instead.
-        const label: Label | null =
-          text && cx + rx + 4 + LABEL_ROOM > width
-            ? { x: Math.min(Math.max(cx, 70), width - 70), y: box.top - 8, side: "above", text }
-            : beside(cx + rx + 4, cx - rx - 4, box.top - 2);
+        const cy = (box.top + box.bottom) / 2;
+        // The loop itself is kept clear of other marks' words.
+        layout.text.push({ left: cx - rx - 2, top: cy - ry - 3, right: cx + rx + 4, bottom: cy + ry + 3 });
+        // Beside the loop at its shoulder, else after the row, else over or under it.
+        const end = rowEnd([box]);
+        const label = chip(
+          [
+            at([cx + rx + 6, box.top - 2]),
+            at(end),
+            at([cx, cy - ry - 3], "above"),
+            at([cx, cy + ry + 3 + CHIP_HEIGHT], "above"),
+          ],
+          end,
+        );
         push({ key, kind: point.kind, state: set.state, d, head: null, label });
         return;
       }
@@ -2229,6 +2375,7 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
       }
       if (point.kind === "underline") {
         const d = drawUnderline(box, rnd);
+        layout.text.push({ left: box.left - 4, top: box.bottom, right: box.right + 7, bottom: box.bottom + 6 });
         push({
           key,
           kind: "underline",
@@ -2250,8 +2397,45 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
           const fromFound = fromLine ? inkBox(fromLine, start.at) : null;
           if (!fromLine || !fromFound) return;
           const from = relative(fromFound, base);
-          const way = pieceRoute(from, box, obstacles, minX, maxX, rnd);
           const moving = point.kind === "move";
+          // FROM FAR ABOVE: a piece brought down from more than a couple of rows up is not
+          // carried the whole way — a route that long runs down the page past everything in
+          // between. Its source flashes, a short hooked arrow comes into the piece from the gap
+          // above it, and the words say where it came from.
+          if (rowsBetween(writing, from, box) > FAR_ROWS) {
+            const stub = stubRoute(box, writing, layout, minX, maxX, rnd);
+            layout.addTrail(stub.route);
+            const { d, head } = arrowAlong(stub.route, moving ? 8 : 9);
+            const first = stub.route[0]!;
+            const h = from.bottom - from.top;
+            const w = from.right - from.left;
+            // The piece rises from the start of the arrow rather than from where it was written.
+            const dx = first[0] - (from.left + from.right) / 2;
+            const dy = first[1] - h / 2 - 3 - (from.top + from.bottom) / 2;
+            const ghost: Ghost | undefined =
+              moving && !stillMotion()
+                ? {
+                    glyphs: inkGlyphs(fromLine, start.at, base).map((g) => ({
+                      ...g,
+                      left: g.left + dx,
+                      top: g.top + dy,
+                    })),
+                    from: { left: from.left + dx, top: from.top + dy, right: from.left + dx + w, bottom: from.top + dy + h },
+                    to: box,
+                    route: stub.route,
+                    ...moveTimes(stub.route),
+                  }
+                : undefined;
+            const end = rowEnd([box]);
+            const words = fromWords(text, start.at);
+            const label = chip([at(end), at([stub.route[0]![0] + 6, stub.route[0]![1]])], end, words);
+            const rows = inkRows(fromLine, start.at).map((row) => relative(row, base));
+            const flash = set.index === newest && rows.length ? drawHighlight(rows, rnd) : undefined;
+            push({ key, kind: point.kind, state: set.state, d, head, label, ghost, older: moving && older, flash });
+            return;
+          }
+          const way = pieceRoute(from, box, obstacles(), minX, maxX, rnd, (b) => layout.trailWithin(b));
+          layout.addTrail(way.route);
           const { d, head } = arrowAlong(way.route, moving ? 8 : 10);
           const ghost: Ghost | undefined =
             moving && !stillMotion()
@@ -2263,15 +2447,16 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
                   ...moveTimes(way.route),
                 }
               : undefined;
-          // Words by the route where it runs down a margin; otherwise after the end of the
-          // row the piece lands in, where the board is clear.
-          const label =
-            way.lane !== null && text
-              ? way.lane > box.right
-                ? beside(way.lane + 8, -1, way.middle)
-                : beside(Number.POSITIVE_INFINITY, way.lane - 8, way.middle)
-              : inline([box]);
-          push({ key, kind: point.kind, state: set.state, d, head, label, ghost });
+          // Words after the end of the row the piece lands in, where the board is clear; else
+          // beside the run round the writing, where the route has one.
+          const end = rowEnd([box]);
+          const options = [at(end)];
+          if (way.lane !== null)
+            options.push(
+              way.lane > box.right ? at([way.lane + 8, way.middle]) : at([way.lane - 8, way.middle], "left"),
+            );
+          const label = chip(options, end);
+          push({ key, kind: point.kind, state: set.state, d, head, label, ghost, older: moving && older });
           return;
         }
         // A move with nowhere to come from has nothing to carry.
@@ -2294,15 +2479,12 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
       let tip: Pt;
       let c1: Pt;
       let c2: Pt;
-      let label: Label | null = null;
       if (atStart) {
         start = [from.left - 6, fromY];
         tip = [box.left - 6, (box.top + box.bottom) / 2];
         const bow = Math.max(minX, Math.min(from.left, box.left) - 34);
         c1 = [bow, start[1]];
         c2 = [bow, tip[1]];
-        // The words go at the line the arrow starts from, where the margin has no room.
-        label = beside(from.right + 34, -1, fromY);
       } else if (atEnd) {
         const right = Math.max(from.right, box.right);
         let bow = right + Math.min(90, Math.max(30, Math.abs(fromY - box.top) * 0.3));
@@ -2330,8 +2512,15 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
       c2 = wob(c2);
       const f = (n: number) => n.toFixed(1);
       const d = `M${f(start[0])} ${f(start[1])} C${f(c1[0])} ${f(c1[1])} ${f(c2[0])} ${f(c2[1])} ${f(tip[0])} ${f(tip[1])}`;
+      const trail: Pt[] = [];
+      for (let i = 0; i <= 32; i += 1) trail.push(bezierAt(start, c1, c2, tip, i / 32));
+      layout.addTrail(trail);
       const mid = bezierAt(start, c1, c2, tip, 0.5);
-      if (!atStart) label = beside(mid[0] + 8, mid[0] - 8, mid[1]);
+      // Beside the bow of the arrow; for one round the start of the lines, at the line it
+      // starts from, where the margin has no room.
+      const label = atStart
+        ? chip([at([from.right + 34, fromY])], [from.right + 12, fromY])
+        : chip([at([mid[0] + 8, mid[1]]), at([mid[0] - 8, mid[1]], "left")], [mid[0] + 8, mid[1]]);
       push({
         key,
         kind: "arrow",
@@ -2508,14 +2697,21 @@ function Marks({
 
   if (shapes.length === 0) return null;
   const highlights = shapes.filter((shape) => shape.kind === "highlight");
+  const flashes = shapes.filter((shape) => shape.flash);
   return (
     <div className="pb-marks" aria-hidden="true">
       {/*
         Highlights on a layer of their own, multiplied into the board: the yellow goes behind
         the words, which stay black, the way a highlighter pen works on paper.
       */}
-      {highlights.length ? (
+      {highlights.length || flashes.length ? (
         <svg className="pb-marks-svg under">
+          {/* Where a piece brought from far above came from, lit up briefly as it goes. */}
+          {flashes.map((shape) => (
+            <g key={`flash-${shape.key}`} className="pb-flash" style={markTiming(shape)}>
+              <path d={shape.flash!.d} style={{ strokeWidth: shape.flash!.width }} />
+            </g>
+          ))}
           {highlights.map((shape) => (
             <g
               key={shape.key}
@@ -2536,7 +2732,7 @@ function Marks({
         {shapes.filter((shape) => shape.kind !== "highlight").map((shape) => (
           <g
             key={shape.key}
-            className={`pb-mark ${shape.kind} ${shape.state}`}
+            className={`pb-mark ${shape.kind} ${shape.state}${shape.older ? " older" : ""}`}
             style={markTiming(shape)}
           >
             <path className="pb-mark-line" d={shape.d} pathLength={1} />
