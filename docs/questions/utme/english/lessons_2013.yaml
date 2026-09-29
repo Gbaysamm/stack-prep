@@ -8,14 +8,17 @@ lessons:
     moments:
       - say: 'We want the one statement the passage really supports.'
         write: 'Which is TRUE by the passage?'
-      - say: 'The passage ends by saying why the wheel is used. Let me write that line.'
+      - say: 'The passage ends by saying why the wheel is used: the pot spins, and it is made more quickly. Let me write that line.'
         write: '“made more quickly and accurately”'
+        doodle: {name: 'custom:2013_q02_a', id: wheel, caption: 'the potter’s wheel'}
         point:
           - {line: 1, kind: highlight, at: 'quickly and accurately', text: 'the clue'}
           - {passage: true, kind: underline, target: 'In this way, a small and medium-sized pot can be made more quickly and accurately'}
           - {passage: true, kind: label, target: 'In this way', text: 'sums up the whole wheel process'}
-      - say: 'Accurately means correctly. So the passage says pots are made quickly and correctly.'
+      - say: 'Accurately means correctly: every pot comes out the same. So pots are made quickly and correctly.'
         write: 'accurately = correctly'
+        doodle_do:
+          - {id: wheel, op: stage, stage: 'custom:2013_q02_a2'}
         point:
           - {line: 1, kind: underline, at: 'accurately'}
           - {passage: true, kind: label, target: 'accurately', text: 'accurately = correctly → B'}
@@ -25,8 +28,12 @@ lessons:
         point:
           - {line: 3, kind: strike, at: 'A training? C breaking? D hard work?'}
           - {passage: true, kind: label, target: 'The first work is to force the lump to the centre', text: 'skilled steps: never called easy (D)'}
+          - {line: 2, kind: highlight, at: 'accurately = correctly', to: {doodle: wheel, part: same}}
       - say: 'So the answer is pots can be made quickly and correctly, which is answer choice B.'
         write: 'B · quickly and correctly'
+        doodle_do:
+          - {id: wheel, op: circle, part: speed}
+          - {id: wheel, op: circle, part: same}
         answer: true
         point:
           - {line: 1, kind: arrow}
@@ -45,7 +52,10 @@ lessons:
           - {passage: true, kind: circle, target: 'weighed out', text: 'the step that fixes the size'}
       - say: 'Picture the scale: same weight of clay, same size of pot. The example is one and a half kilogrammes for a pint jug.'
         write: 'same weight of clay → same size pot'
-        doodle: {name: 'custom:2013_q03_a', caption: 'same weight of clay → same size pot'}
+        doodle: {name: 'custom:2013_q03_a', id: scale, caption: 'same weight of clay → same size pot'}
+        doodle_do:
+          - {id: scale, op: circle, part: clay, text: '1.5 kg each'}
+          - {id: scale, op: arrow, part: clay, to_part: pots}
         point:
           - {passage: true, kind: label, target: 'one and a half kilogrammes', text: 'the example: same weight every time'}
           - {line: 2, kind: highlight, at: 'same weight of clay', to: {passage: true, target: 'the lumps of clay will be one and a half kilogrammes'}}
@@ -54,8 +64,10 @@ lessons:
         point:
           - {line: 3, kind: strike, at: 'tools, experience'}
           - {passage: true, kind: label, target: 'He has a bowl of water, a loofah', text: 'tools are for shaping, not size (C)'}
-      - say: 'So he weighs the lumps of clay, which is answer choice B.'
+      - say: 'So he weighs the lumps of clay on the scale, which is answer choice B.'
         write: 'B · weighing the lumps'
+        doodle_do:
+          - {id: scale, op: pulse, part: scale}
         answer: true
         point:
           - {line: 1, kind: arrow}
@@ -72,17 +84,24 @@ lessons:
           - {passage: true, kind: underline, target: 'He trims off any waste clay'}
       - say: 'To trim is to cut off small unwanted bits, like a barber trimming hair.'
         write: 'trim = cut off small unwanted bits'
-        doodle: {name: 'custom:2013_q04_a', caption: 'trim = cut off the extra bits'}
+        doodle: {name: 'custom:2013_q04_a', id: pot, caption: 'trim = cut off the extra bits'}
+        doodle_do:
+          - {id: pot, op: pulse, part: knife}
         point:
           - {line: 1, kind: circle, at: 'trim'}
           - {passage: true, kind: label, target: 'trims off', text: 'trim = cut off small unwanted bits'}
       - say: 'Waste clay is extra clay the pot does not need.'
         write: 'waste clay = clay not needed'
+        doodle_do:
+          - {id: pot, op: label, part: waste, text: 'waste clay: not needed'}
         point:
           - {passage: true, kind: label, target: 'Then he shapes the belly and shoulder of the pot', text: 'pot shaped first; extra clay is left'}
           - {line: 2, kind: highlight, at: 'waste clay', to: {passage: true, target: 'waste clay'}}
-      - say: 'Put them together: cut away what is not needed.'
+          - {line: 2, kind: highlight, at: 'clay not needed', to: {doodle: pot, part: waste}}
+      - say: 'Put them together: the knife cuts away what is not needed.'
         write: 'cut away unnecessary parts'
+        doodle_do:
+          - {id: pot, op: circle, part: waste}
       - say: 'Forcing clay to the centre was an earlier step, so it is not this.'
         write: 'centre = earlier step'
         point:
@@ -106,14 +125,21 @@ lessons:
           - {line: 0, kind: underline, at: 'congenial'}
           - {passage: true, kind: circle, target: 'congenial', text: 'the word'}
           - {passage: true, kind: underline, target: 'learners from many different parts can find a congenial temporary home'}
-      - say: 'Why would learners come from far away? Because the home is pleasant and friendly.'
+      - say: 'Why would learners come from far away? Because the home is pleasant and friendly, like this one with a smiling host.'
         write: 'congenial = pleasant, friendly'
+        doodles:
+          - {name: 'custom:2013_q05_a', id: home, caption: 'a pleasant, friendly home'}
+          - {name: student-small, id: learners, caption: 'learners from far away', repeat: 6, layout: row}
+        doodle_do:
+          - {id: learners, op: group, n: 6, text: 'learners from many parts'}
         point:
           - {line: 0, kind: arrow}
           - {passage: true, kind: label, target: 'learners from many different parts', text: 'they come from far to live here'}
           - {line: 1, kind: highlight, at: 'pleasant, friendly', to: {passage: true, target: 'a congenial temporary home'}}
       - say: 'Test the options. Congested means overcrowded: not a draw for learners.'
         write: 'congested = overcrowded ✗'
+        doodle_do:
+          - {id: home, op: label, part: host, text: 'welcoming, not crowded'}
         point:
           - {line: 2, kind: strike, at: 'congested'}
           - {passage: true, kind: label, target: 'the Emir and his Council are actively interested', text: 'welcoming hosts, not crowded (A)'}
@@ -121,8 +147,10 @@ lessons:
         write: 'precise, similar ✗'
         point:
           - {line: 3, kind: strike, at: 'precise, similar'}
-      - say: 'Nice is the nearest to pleasant. So the answer is nice, which is answer choice D.'
+      - say: 'Nice is the nearest to pleasant, the friendly home. So the answer is nice, which is answer choice D.'
         write: 'D · nice'
+        doodle_do:
+          - {id: home, op: pulse, part: heart}
         answer: true
     traps:
       A: 'You went for congested. It starts with con- like congenial, but it means overcrowded, the opposite of a welcoming home.'
@@ -132,18 +160,25 @@ lessons:
     moments:
       - say: 'Which statement does Passage II support? Let us collect the clues about feelings.'
         write: 'Which is TRUE?'
-      - say: 'First clue: our response to music is rooted in deep feelings.'
+      - say: 'First clue: our response to music is rooted in deep feelings, right in the heart.'
         write: '“rooted in deep feelings”'
+        doodle: {name: 'custom:2013_q06_a', id: feel, caption: 'music reaches our feelings'}
         point:
           - {passage: true, kind: label, target: 'rooted in deep feelings', text: 'music reaches our feelings'}
-      - say: 'Second clue: music can be a barely perceived background, or a totally absorbing experience.'
+      - say: 'Second clue: music can be a barely perceived background, the meter hardly moves. Or a totally absorbing experience...'
         write: 'background (film) ↔ absorbing (concert)'
+        doodle_do:
+          - {id: feel, op: fill, to: 0.2}
+          - {id: feel, op: label, part: meter, text: 'film: barely noticed'}
         point:
           - {line: 2, kind: highlight, at: 'background (film)', to: {passage: true, target: 'a barely perceived background as in a film'}}
           - {line: 2, kind: highlight, at: 'absorbing (concert)', to: {passage: true, target: 'a totally absorbing experience as in a concert'}}
           - {passage: true, kind: label, target: 'People listen to music in many different ways', text: 'different ways = different levels'}
-      - say: 'So music reaches our feelings lightly at times and deeply at others: different levels.'
+      - say: '...and then it fills us right up. So music reaches our feelings lightly at times and deeply at others: different levels.'
         write: 'feelings at different levels'
+        doodle_do:
+          - {id: feel, op: fill, to: 0.95}
+          - {id: feel, op: label, part: heart, text: 'concert: fills us up'}
         point:
           - {line: 2, kind: highlight, at: 'background', text: 'the clue'}
           - {passage: true, kind: label, target: 'barely perceived', text: 'level 1: hardly noticed'}
@@ -157,6 +192,8 @@ lessons:
       - say: 'So the answer is music influences feelings at different levels, which is answer choice D.'
         write: 'D · feelings at different levels'
         answer: true
+        point:
+          - {line: 3, kind: highlight, at: 'different levels', to: {doodle: feel, part: meter}}
     traps:
       A: 'You went for “music can enhance evaluation performance”. The passage says we evaluate performances; it never says music improves evaluation.'
       B: 'You went for “all listeners are music makers”. Listeners take part by feeling, but the passage never says they make music.'
@@ -170,12 +207,16 @@ lessons:
           - {passage: true, kind: underline, target: 'feelings are exchanged between stage and hall'}
       - say: 'Picture a concert. Who is on the stage? The artiste who performs.'
         write: 'stage → artiste'
-        doodle: {name: 'custom:2013_q07_a', caption: 'stage → artiste, hall → audience'}
+        doodle: {name: 'custom:2013_q07_a', id: concert, caption: 'stage → artiste, hall → audience'}
+        doodle_do:
+          - {id: concert, op: circle, part: artiste, text: 'the artiste'}
         point:
           - {passage: true, kind: circle, target: 'stage', text: 'who is here? the artiste'}
           - {passage: true, kind: label, target: 'In a live performance artistes put themselves on the line', text: 'the artistes perform on the stage'}
-      - say: 'Who is in the hall? The listeners, the audience.'
+      - say: 'Who is in the hall? The listeners, the audience in their seats.'
         write: 'hall → audience'
+        doodle_do:
+          - {id: concert, op: circle, part: hall, text: 'the audience'}
         point:
           - {passage: true, kind: circle, target: 'hall', text: 'who is here? the listeners', nth: 2}
           - {passage: true, kind: label, target: 'the listeners are actively involved', text: 'the listeners sit in the hall'}
@@ -184,8 +225,10 @@ lessons:
         point:
           - {line: 3, kind: strike, at: 'producer, director'}
           - {passage: true, kind: label, target: 'What is performed', text: 'no producer or director named (C, D)'}
-      - say: 'So stage and hall means the artiste and the audience, which is answer choice B.'
+      - say: 'So stage and hall means the artiste and the audience, feelings passing between them. That is answer choice B.'
         write: 'B · artiste and the audience'
+        doodle_do:
+          - {id: concert, op: arrow, part: artiste, to_part: hall}
         answer: true
     traps:
       A: 'You went for “artiste and his music”. The music is what passes between them; the hall is the people listening.'
@@ -195,19 +238,23 @@ lessons:
     moments:
       - say: 'A deduction must follow from what is written. Look at the last paragraph.'
         write: 'Deduce: music is ...'
-      - say: 'Music can be a barely perceived background, as in a film.'
+      - say: 'Music can be a barely perceived background, as in a film: see how small the note is.'
         write: 'film → barely perceived'
+        doodle: {name: 'custom:2013_q08_a', id: places, caption: 'music in the background'}
         point:
           - {line: 1, kind: highlight, at: 'barely perceived', to: {passage: true, target: 'a barely perceived background as in a film'}}
           - {passage: true, kind: label, target: 'as in a film', text: 'setting 1: film → background'}
-      - say: 'Or a totally absorbing experience, as in a concert.'
+      - say: 'Or a totally absorbing experience, as in a concert, where the notes fill the air.'
         write: 'concert → totally absorbing'
+        doodle_do:
+          - {id: places, op: stage, stage: 'custom:2013_q08_a2'}
         point:
           - {line: 2, kind: highlight, at: 'totally absorbing', to: {passage: true, target: 'a totally absorbing experience as in a concert'}}
           - {passage: true, kind: label, target: 'as in a concert', text: 'setting 2: concert → full attention'}
-      - say: 'Picture the two settings: quiet background in a film, all-absorbing at a concert. The setting decides how we take it in. The environment dictates.'
+      - say: 'Look at the two settings: quiet background in a film, all-absorbing at a concert. The setting decides how we take it in. The environment dictates.'
         write: 'setting decides → environment dictates'
-        doodle: {name: 'custom:2013_q08_a', caption: 'the setting decides how we listen'}
+        doodle_do:
+          - {id: places, op: label, part: concert, text: 'the setting decides'}
         point:
           - {line: 3, kind: highlight, at: 'setting decides', text: 'the clue'}
           - {passage: true, kind: underline, target: 'People listen to music in many different ways'}
@@ -217,6 +264,7 @@ lessons:
         point:
           - {line: 4, kind: strike, at: 'crowd? happy? critics?'}
           - {passage: true, kind: label, target: 'Even professional critics can differ strongly', text: 'critics differ: not “better” (D)'}
+          - {line: 3, kind: highlight, at: 'environment dictates', to: {doodle: places, part: concert}}
       - say: 'So music is appreciated as the environment dictates, which is answer choice A.'
         write: 'A · as the environment dictates'
         answer: true
@@ -232,21 +280,29 @@ lessons:
         write: 'live performance → special excitement'
         point:
           - {passage: true, kind: label, target: 'Live performances provide a special excitement', text: 'the question''s own words'}
-      - say: 'The artiste must make sure the listeners are actively involved.'
+      - say: 'The artiste must make sure the listeners, down in the hall, are actively involved.'
         write: '“listeners are actively involved”'
+        doodle: {name: 'custom:2013_q09_a', id: live, caption: 'a live performance'}
+        doodle_do:
+          - {id: live, op: circle, part: hall, text: 'actively involved'}
         point:
           - {line: 1, kind: highlight, at: 'actively involved', text: 'the clue'}
           - {passage: true, kind: circle, target: 'actively involved', text: 'listeners take part'}
-      - say: 'And feelings are exchanged between stage and hall: a two-way exchange.'
+      - say: 'And feelings are exchanged between stage and hall: a two-way exchange, both arrows.'
         write: '“feelings are exchanged”'
+        doodle_do:
+          - {id: live, op: stage, stage: 'custom:2013_q09_a2'}
         point:
           - {line: 2, kind: highlight, at: 'exchanged'}
           - {passage: true, kind: label, target: 'between stage and hall', text: 'performer ↔ listeners, both ways'}
       - say: 'Two sides acting on each other: that is interaction.'
         write: 'two-way = interactive'
+        doodle_do:
+          - {id: live, op: label, part: both, text: interactive}
         point:
           - {line: 3, kind: highlight, at: 'two-way', to: {passage: true, target: 'feelings are exchanged between stage and hall'}}
           - {passage: true, kind: label, target: 'technical difficulties are avoided', text: 'an aim, not why it excites (C)'}
+          - {line: 3, kind: highlight, at: interactive, to: {doodle: live, part: both}}
       - say: 'So live performances are interactive, which is answer choice B.'
         write: 'B · interactive'
         answer: true
@@ -263,13 +319,16 @@ lessons:
         point:
           - {passage: true, kind: underline, target: 'Music plays a vital role in human society'}
           - {passage: true, kind: label, target: 'vital role', text: 'the claim: the reason comes next'}
-      - say: 'Good music provides entertainment and emotional release.'
+      - say: 'Good music provides entertainment and emotional release. Here is the first: pure fun.'
         write: '“entertainment and emotional release”'
+        doodle: {name: 'custom:2013_q10_a', id: music, caption: 'what music gives us'}
         point:
           - {line: 1, kind: highlight, at: 'entertainment and emotional release', text: 'the clue'}
           - {passage: true, kind: circle, target: 'Good music provides', text: 'the reason, right after the claim'}
-      - say: 'Entertainment is enjoyment. Emotional release is relief.'
+      - say: 'Entertainment is enjoyment. Emotional release is relief: the long breath out.'
         write: 'entertainment = enjoyment; release = relief'
+        doodle_do:
+          - {id: music, op: stage, stage: 'custom:2013_q10_a2'}
         point:
           - {line: 1, kind: arrow}
           - {line: 2, kind: highlight, at: 'enjoyment', to: {passage: true, target: 'entertainment'}}
@@ -279,6 +338,7 @@ lessons:
         point:
           - {line: 3, kind: strike, at: 'D technology'}
           - {passage: true, kind: label, target: 'Thanks to modern technology', text: 'how we hear it, not why it matters'}
+          - {line: 2, kind: highlight, at: relief, to: {doodle: music, part: relief}}
       - say: 'So music provides enjoyment and relief, which is answer choice A.'
         write: 'A · enjoyment and relief'
         answer: true
@@ -294,13 +354,20 @@ lessons:
           - {line: 0, kind: highlight, at: 'such as volcanic', text: 'the clue'}
           - {passage: true, kind: label, target: 'simply another atmospheric disturbance', text: 'the bomb = one more disturbance'}
           - {passage: true, kind: circle, target: 'rare natural', text: 'clue: things that happen in nature'}
-      - say: 'A volcanic eruption is an event that happens in nature.'
+      - say: 'A volcanic eruption is an event that happens in nature, like a lightning storm.'
         write: 'volcano → a natural event'
+        doodle: {name: 'custom:2013_q11_a', id: nature, caption: 'events in nature'}
+        doodle_do:
+          - {id: nature, op: circle, part: volcano}
         point:
           - {passage: true, kind: label, target: 'such as volcanic', text: 'an example of the gap: an event'}
           - {line: 1, kind: highlight, at: 'volcano', to: {passage: true, target: 'volcanic'}}
       - say: 'Another word for an event is an occurrence.'
         write: 'event = occurrence'
+        doodle_do:
+          - {id: nature, op: label, part: tag, text: occurrences}
+        point:
+          - {line: 2, kind: highlight, at: occurrence, to: {doodle: nature, part: tag}}
       - say: 'Resources and laws are not disturbances. Programmes are planned by people.'
         write: 'resources, laws, programmes ✗'
         point:
@@ -322,12 +389,18 @@ lessons:
           - {passage: true, kind: circle, target: 'volcanic', text: 'clue: what does a volcano do?'}
       - say: 'Picture a volcano. What does it do? It erupts.'
         write: 'volcano erupts'
-        doodle: {name: 'custom:2013_q12_a', caption: 'a volcano erupts'}
+        doodle: {name: 'custom:2013_q12_a', id: volcano, caption: 'a volcano erupts'}
+        doodle_do:
+          - {id: volcano, op: pulse, part: lava}
         point:
           - {line: 1, kind: circle, at: 'erupts'}
           - {passage: true, kind: label, target: 'rare natural', text: 'a natural event → eruption'}
       - say: 'So the event is a volcanic eruption.'
         write: 'volcanic eruption'
+        doodle_do:
+          - {id: volcano, op: label, part: lava, text: eruption}
+        point:
+          - {line: 2, kind: highlight, at: 'volcanic eruption', to: {doodle: volcano, part: lava}}
       - say: 'Insurrection is a revolt; expulsion is being thrown out.'
         write: 'insurrection = revolt; expulsion = thrown out'
         point:
@@ -348,16 +421,20 @@ lessons:
         point:
           - {line: 0, kind: highlight, at: 'events on this', text: 'the clue'}
           - {passage: true, kind: label, target: 'As with all events on this', text: '“on this ___” = of this size'}
-      - say: 'Why impossible? Because the explosion is so huge.'
+      - say: 'Why impossible to describe? A small bang like this, anyone could describe. But the explosion is huge.'
         write: 'huge event → hard to describe'
+        doodle: {name: 'custom:2013_q13_a', id: blast, caption: 'a small bang'}
         point:
           - {line: 1, kind: highlight, at: 'hard to describe', to: {passage: true, target: 'it is impossible to describe what happens in details'}}
           - {passage: true, kind: label, target: 'impossible to describe', text: 'so huge it cannot be fully described'}
-      - say: 'We say an event on a large scale. On this scale means of this size.'
+      - say: 'We say an event on a large scale, like the giant cloud beside the tiny pop. On this scale means of this size.'
         write: 'on this scale = of this size'
+        doodle_do:
+          - {id: blast, op: stage, stage: 'custom:2013_q13_a2'}
         point:
           - {line: 2, kind: box, at: 'on this scale = of this size'}
           - {passage: true, kind: circle, target: 'the explosion of hydrogen bomb', text: 'an event on a huge scale'}
+          - {line: 2, kind: highlight, at: 'of this size', to: {doodle: blast, part: scale}}
       - say: 'Scanner, skate and snow make no sense here.'
         write: 'scanner, skate, snow ✗'
         point:
@@ -375,16 +452,22 @@ lessons:
         write: 'arises from pressure ___(14)___'
         point:
           - {passage: true, kind: label, target: 'the most impressive of these arises from', text: 'clue: the main effect of the blast'}
-      - say: 'Now look at the rest of the passage. What keeps coming up?'
+      - say: 'Now look at the rest of the passage. What keeps coming up? Rings of waves, spreading out from the blast.'
         write: 'shock waves ... blast wave ... gravity waves'
+        doodle: {name: 'custom:2013_q14_a', id: waves, caption: 'rings of waves'}
+        doodle_do:
+          - {id: waves, op: pulse, part: waves}
         point:
           - {line: 1, kind: highlight, at: 'shock waves ... blast wave ... gravity waves', text: 'the clue'}
           - {passage: true, kind: circle, target: 'blast wave', text: 'a wave'}
           - {passage: true, kind: circle, target: 'Another kind of wave', text: '“another”: the first was a wave too'}
       - say: 'Waves, again and again. The effect arises from pressure waves.'
         write: 'pressure waves'
+        doodle_do:
+          - {id: waves, op: label, part: waves, text: 'pressure waves'}
         point:
           - {passage: true, kind: label, target: 'The gravity waves', text: 'waves again: the effect is waves'}
+          - {line: 2, kind: highlight, at: 'pressure waves', to: {doodle: waves, part: waves}}
       - say: 'Pressure volume and pressure air are not real expressions.'
         write: 'pressure volume / air ✗'
         point:
@@ -407,15 +490,19 @@ lessons:
         point:
           - {line: 0, kind: highlight, at: 'immediate result', text: 'the clue'}
           - {passage: true, kind: label, target: 'The immediate result of the', text: 'the first thing that happens'}
-      - say: 'What happens to a bomb first? It is set off. It explodes.'
+      - say: 'What happens to a bomb first? The fuse burns, and it is set off. It explodes.'
         write: 'bomb is set off'
+        doodle: {name: 'custom:2013_q15_a', id: bomb, caption: 'set off'}
         point:
           - {line: 1, kind: highlight, at: 'bomb is set off', to: {passage: true, target: 'the explosion of hydrogen bomb'}}
           - {passage: true, kind: label, target: 'the explosion of hydrogen bomb', text: 'what a bomb does: it explodes'}
-      - say: 'To detonate means to set off. The noun is detonation.'
+      - say: 'To detonate means to set off: boom. The noun is detonation.'
         write: 'detonate = set off → detonation'
+        doodle_do:
+          - {id: bomb, op: stage, stage: 'custom:2013_q15_a2'}
         point:
           - {line: 2, kind: circle, at: 'detonation', text: 'noun'}
+          - {line: 2, kind: highlight, at: detonation, to: {doodle: bomb, part: boom}}
       - say: 'Distortion is bending out of shape; reduction is making smaller.'
         write: 'distortion, reduction ✗'
         point:
@@ -439,11 +526,15 @@ lessons:
         point:
           - {line: 1, kind: highlight, at: 'hot gases', text: 'the clue'}
           - {passage: true, kind: circle, target: 'hot gases', text: 'hot → temperature'}
-      - say: 'Air that has become hot has reached a high temperature.'
+      - say: 'Air that has become that hot has reached a high temperature: the line shoots to the top.'
         write: 'hot → high temperature'
-        doodle: {name: 'custom:2013_q16_a', caption: 'hot air → high temperature'}
+        doodle: {name: 'custom:2013_q16_a', id: temp, caption: 'hot air → high temperature'}
+        doodle_do:
+          - {id: temp, op: label, part: level, text: 'high temperature'}
       - say: 'A high class or a high profile is about status, not heat.'
         write: 'class, profile ✗'
+        doodle_do:
+          - {id: temp, op: pulse, part: heat}
         point:
           - {line: 3, kind: strike, at: 'class, profile'}
           - {passage: true, kind: label, target: 'the air surrounding the bomb', text: 'air heats up; it has no class'}
@@ -463,13 +554,18 @@ lessons:
           - {passage: true, kind: circle, target: 'The hot gases expand violently', text: 'clue: burning gas swells out'}
       - say: 'Picture it: burning gases swelling outwards into huge balls of fire.'
         write: 'burning gas → ball of fire'
-        doodle: {name: 'custom:2013_q17_a', caption: 'a ball of fire'}
+        doodle: {name: 'custom:2013_q17_a', id: fire, caption: 'a ball of fire'}
+        doodle_do:
+          - {id: fire, op: grow, part: ball, by: 1.2}
         point:
           - {line: 1, kind: highlight, at: 'burning gas', to: {passage: true, target: 'The hot gases'}}
       - say: 'That is a fireball.'
         write: 'fireballs'
+        doodle_do:
+          - {id: fire, op: label, part: ball, text: fireball}
         point:
           - {passage: true, kind: label, target: 'compressing the air around them', text: 'the fireballs push the air outward'}
+          - {line: 2, kind: highlight, at: fireballs, to: {doodle: fire, part: ball}}
       - say: 'Firearms are guns. Fireworks are for celebrations. Firesmokes is not a word.'
         write: 'firearms = guns; fireworks = celebration'
         point:
@@ -490,14 +586,20 @@ lessons:
         point:
           - {line: 0, kind: highlight, at: 'or blast wave', text: 'the clue'}
           - {passage: true, kind: circle, target: 'or blast wave', text: '“or” = another name for it'}
-      - say: 'The word or gives a second name for the same thing.'
+      - say: 'The word or gives a second name for the same thing: the ring of squeezed air rushing out.'
         write: 'X, or blast wave → X is a wave'
+        doodle: {name: 'custom:2013_q18_a', id: shock, caption: 'squeezed air'}
+        doodle_do:
+          - {id: shock, op: grow, part: ring, by: 1.4}
         point:
           - {passage: true, kind: label, target: 'responsible for much of terrible destructive power', text: 'what the wave does: destroys'}
-      - say: 'So we need a kind of wave: shock waves.'
+      - say: 'So we need a kind of wave: shock waves, the blast wave.'
         write: 'shock waves'
+        doodle_do:
+          - {id: shock, op: label, part: ring, text: 'shock waves'}
         point:
           - {passage: true, kind: label, target: 'Another kind of wave', text: '“another” wave: so 18 was a wave'}
+          - {line: 2, kind: highlight, at: 'shock waves', to: {doodle: shock, part: ring}}
       - say: 'Shock troops are soldiers; shock therapy is treatment; shock jocks are radio hosts.'
         write: 'troops, therapy, jocks ✗'
         point:
@@ -516,14 +618,23 @@ lessons:
         point:
           - {line: 0, kind: highlight, at: 'weight of the air', text: 'the clue'}
           - {passage: true, kind: circle, target: 'the weight of the air', text: 'clue: the air has weight'}
-      - say: 'What do we call the air around the Earth? The atmosphere.'
+      - say: 'What do we call the blanket of air around the Earth? The atmosphere.'
         write: 'air around the Earth = atmosphere'
+        doodle: {name: 'custom:2013_q19_a', id: air, caption: 'the air around the Earth'}
+        doodle_do:
+          - {id: air, op: label, part: air, text: atmosphere}
         point:
           - {passage: true, kind: label, target: 'The force of the explosion lifts the', text: 'what is lifted? the air'}
       - say: 'So the explosion lifts the atmosphere, the air, around the bomb.'
         write: 'lifts the atmosphere'
+        doodle_do:
+          - {id: air, op: move, part: air, path: up}
+        point:
+          - {line: 2, kind: highlight, at: 'lifts the atmosphere', to: {doodle: air, part: air}}
       - say: 'Space is empty; it has no weight of air to lift.'
         write: 'space = empty ✗'
+        doodle_do:
+          - {id: air, op: label, part: earth, text: 'space: no air to lift'}
         point:
           - {line: 3, kind: strike, at: 'space'}
           - {passage: true, kind: label, target: 'they have their effect on the weather', text: 'weather happens in the atmosphere'}
@@ -541,17 +652,21 @@ lessons:
         point:
           - {line: 0, kind: highlight, at: 'waves', text: 'the clue'}
           - {passage: true, kind: label, target: 'resemble ordinary', text: 'clue: waves we already know'}
-      - say: 'Which water is famous for its big rolling waves? The ocean.'
+      - say: 'Which water is famous for its big rolling waves, like this one? The ocean.'
         write: 'big rolling waves → ocean'
-        doodle: {name: 'custom:2013_q20_a', caption: 'big rolling waves → ocean'}
+        doodle: {name: 'custom:2013_q20_a', id: waves, caption: 'big rolling waves → ocean'}
         point:
           - {passage: true, kind: label, target: 'Waves of this type are normally felt', text: 'big waves, not ripples'}
-      - say: 'Streams, rivers and lakes have ripples and currents, not great waves.'
+      - say: 'Streams, rivers and lakes have ripples and currents, not great waves: just look at the little stream.'
         write: 'stream, lake, river → ripples'
+        doodle_do:
+          - {id: waves, op: stage, stage: 'custom:2013_q20_a2'}
         point:
           - {line: 2, kind: strike, at: 'stream, lake, river'}
       - say: 'And gravity is what pulls ocean waves back down, so the comparison fits.'
         write: 'gravity waves ≈ ocean waves'
+        doodle_do:
+          - {id: waves, op: pulse, part: ocean}
         point:
           - {line: 3, kind: highlight, at: 'gravity waves', to: {passage: true, target: 'The gravity waves can also resemble'}}
           - {passage: true, kind: circle, target: 'The gravity waves', text: 'gravity pulls these waves down'}
@@ -894,15 +1009,21 @@ lessons:
         write: 'plumb the depths of horror = ?'
         point:
           - {line: 0, kind: underline, at: 'plumb the depths of horror'}
-      - say: 'Picture a weight on a line, dropped down a deep pit. To plumb the depths is to reach the very lowest point.'
+      - say: 'Picture a weight on a line, lowered down a deep pit. To plumb the depths is to reach the very lowest point.'
         write: 'plumb the depths = reach the lowest point'
-        doodle: {name: 'custom:2013_q36_a', caption: 'plumb the depths = hit the bottom'}
+        doodle: {name: 'custom:2013_q36_a', id: pit, caption: 'plumb the depths = hit the bottom'}
+        doodle_do:
+          - {id: pit, op: move, part: weight, path: down}
       - say: 'And the sentence already calls it a poor performance.'
         write: '“poor performance”'
         point:
           - {line: 2, kind: highlight, at: 'poor', text: 'the clue'}
-      - say: 'So the performance was as bad as it could be: a huge disappointment.'
+      - say: 'So the performance sank as low as it could go: a huge disappointment.'
         write: 'lowest point → full of disappointment'
+        doodle_do:
+          - {id: pit, op: label, part: bottom, text: 'the worst it could be'}
+        point:
+          - {line: 3, kind: highlight, at: 'lowest point', to: {doodle: pit, part: bottom}}
       - say: 'Next round, enjoyed, rewarded: all are good news, so they cannot fit.'
         write: 'A, B, D = good news ✗'
         point:
@@ -920,15 +1041,20 @@ lessons:
         write: 'live in each other’s pockets = ?'
         point:
           - {line: 0, kind: underline, at: 'live in each other’s pockets', text: 'idiom'}
-      - say: 'Picture two people so close that one could fit in the other’s pocket.'
+      - say: 'Picture it literally: one friend so small he fits in the other''s pocket. But that is not what it means.'
         write: 'always together'
-        doodle: {name: 'custom:2013_q37_a', caption: 'not a real pocket: always together'}
+        doodle: {name: 'custom:2013_q37_a', id: pocket, caption: 'not a real pocket'}
       - say: 'It means they spend nearly all their time together: very close.'
         write: '= very close to each other'
+        doodle_do:
+          - {id: pocket, op: stage, stage: 'custom:2013_q37_a2'}
         point:
           - {line: 0, kind: arrow}
-      - say: 'The idiom is not about money, so stealing and blackmail are too literal.'
+          - {line: 2, kind: highlight, at: 'very close', to: {doodle: pocket, part: friends}}
+      - say: 'The idiom is not about money in a pocket, so stealing and blackmail are too literal.'
         write: 'pockets ≠ money here'
+        doodle_do:
+          - {id: pocket, op: cross, part: pocket}
         point:
           - {line: 3, kind: strike, at: 'money'}
       - say: 'So the answer is they are very close to each other, which is answer choice D.'
@@ -944,17 +1070,22 @@ lessons:
         write: 'keep your shirt on = ?'
         point:
           - {line: 0, kind: underline, at: 'keep your shirt on'}
-      - say: 'This is an idiom. It is not about clothes at all.'
+      - say: 'This is an idiom. It is not about a real shirt at all.'
         write: 'idiom, not clothing'
+        doodle: {name: 'custom:2013_q38_a', id: shirt, caption: 'not about clothes'}
         point:
           - {line: 1, kind: strike, at: 'clothing'}
-      - say: 'It means stay calm, do not lose your temper.'
+      - say: 'It means stay calm, breathe slowly, do not lose your temper.'
         write: 'keep your shirt on = stay calm'
-        doodle: {name: 'custom:2013_q38_a', caption: 'not about clothes: stay calm'}
+        doodle_do:
+          - {id: shirt, op: stage, stage: 'custom:2013_q38_a2'}
         point:
           - {line: 2, kind: box, at: 'stay calm'}
+          - {line: 2, kind: highlight, at: 'stay calm', to: {doodle: shirt, part: calm}}
       - say: 'As a drama unfolds, tempers rise. She was told to stay calm.'
         write: 'drama → tempers rise → stay calm'
+        doodle_do:
+          - {id: shirt, op: pulse, part: breath}
       - say: 'So the answer is she was advised to stay calm, which is answer choice C.'
         write: 'C · stay calm'
         answer: true
@@ -970,15 +1101,22 @@ lessons:
           - {line: 0, kind: underline, at: 'clinging'}
       - say: 'Picture a small child holding on to a leg. To cling is to hold on tightly and not let go.'
         write: 'cling = hold tight, not let go'
-        doodle: {name: 'custom:2013_q39_a', caption: 'cling = hold on tight'}
+        doodle: {name: 'custom:2013_q39_a', id: cling, caption: 'cling = hold on tight'}
+        doodle_do:
+          - {id: cling, op: circle, part: child}
       - say: 'A clinging child will not let people go. He wants them to himself.'
         write: 'wants people to himself'
+        doodle_do:
+          - {id: cling, op: label, part: legs, text: 'not letting go'}
         point:
           - {line: 2, kind: highlight, at: 'to himself', text: 'the clue'}
       - say: 'Wanting to keep people to yourself is being possessive.'
         write: '= possessive'
+        doodle_do:
+          - {id: cling, op: label, part: child, text: possessive}
         point:
           - {line: 2, kind: arrow}
+          - {line: 3, kind: highlight, at: possessive, to: {doodle: cling, part: child}}
       - say: 'So the answer is he is possessive, which is answer choice B.'
         write: 'B · possessive'
         answer: true
@@ -988,18 +1126,24 @@ lessons:
       D: 'You went for bully. A bully pushes others away; a clinging child holds on to them.'
   40:
     moments:
-      - say: 'Look closely: not unfavourable. Two negatives.'
+      - say: 'Look closely: not unfavourable. Two negatives, two minus signs.'
         write: 'not + unfavourable'
+        doodle: {name: 'custom:2013_q40_a', id: signs, caption: 'two negatives'}
         point:
           - {line: 0, kind: circle, at: 'not', text: 'negative 1'}
           - {line: 0, kind: circle, at: 'un', text: 'negative 2'}
-      - say: 'Two negatives cancel each other out.'
+      - say: 'Two negatives cancel each other out, and leave a plus.'
         write: 'not + un- = cancel'
-        doodle: {name: 'custom:2013_q40_a', caption: 'two negatives cancel out'}
+        doodle_do:
+          - {id: signs, op: stage, stage: 'custom:2013_q40_a2'}
         point:
           - {line: 1, kind: box, text: 'the rule'}
       - say: 'So not unfavourable means favourable: a good result.'
         write: 'not unfavourable = favourable'
+        doodle_do:
+          - {id: signs, op: circle, part: plus}
+        point:
+          - {line: 2, kind: highlight, at: favourable, to: {doodle: signs, part: plus}}
       - say: 'A good result means she did well. She was successful.'
         write: 'favourable → successful'
       - say: 'So the answer is she was successful in the examination, which is answer choice C.'
@@ -1017,13 +1161,19 @@ lessons:
           - {line: 0, kind: underline, at: 'brush up on'}
       - say: 'Picture dusting off an old book. To brush up on something is to practise and improve a skill you have let slip.'
         write: 'brush up on = improve, refresh'
-        doodle: {name: 'custom:2013_q41_a', caption: 'dust off a skill you let slip'}
+        doodle: {name: 'custom:2013_q41_a', id: book, caption: 'dust off a skill you let slip'}
+        doodle_do:
+          - {id: book, op: pulse, part: brush}
         point:
           - {line: 1, kind: highlight, at: 'improve'}
       - say: 'Your Spanish is a skill. So you need to improve your skills.'
         write: 'Spanish = a language skill'
-      - say: 'A brush from Spain takes the words literally.'
+        doodle_do:
+          - {id: book, op: label, part: book, text: 'a language skill'}
+      - say: 'A brush from Spain takes the words literally: there is no real brush.'
         write: 'C = too literal ✗'
+        doodle_do:
+          - {id: book, op: cross, part: brush}
         point:
           - {line: 3, kind: strike, at: 'C'}
       - say: 'So the answer is you need to improve your skills, which is answer choice B.'
@@ -1039,12 +1189,17 @@ lessons:
         write: 'pass for = ?'
         point:
           - {line: 0, kind: underline, at: 'pass for'}
-      - say: 'To pass for something is to be taken as that thing.'
+      - say: 'To pass for something is to be taken as that thing: people look at Amaka and see a queen.'
         write: 'pass for = be taken as'
+        doodle: {name: 'custom:2013_q42_a', id: pass, caption: 'taken as a beauty queen'}
         point:
           - {line: 1, kind: highlight, at: 'be taken as'}
       - say: 'So people would take Amaka as a beauty queen.'
         write: 'Amaka taken as a beauty queen'
+        doodle_do:
+          - {id: pass, op: circle, part: crown}
+        point:
+          - {line: 2, kind: highlight, at: 'taken as a beauty queen', to: {doodle: pass, part: crowd}}
       - say: 'Passing a drink or walking past take “pass” literally.'
         write: 'A, C = literal “pass” ✗'
         point:
@@ -1058,8 +1213,9 @@ lessons:
       D: 'You went for acting as a beauty queen. Acting is pretending; passing for one means others accept her as one.'
   43:
     moments:
-      - say: 'The bride says: I can’t wait to become a mother.'
+      - say: 'The bride says: I can''t wait to become a mother. Look at her face.'
         write: '“I can’t wait”'
+        doodle: {name: 'custom:2013_q43_a', id: bride, caption: 'can’t wait = eager, excited'}
         point:
           - {line: 0, kind: underline, at: 'can’t wait'}
       - say: 'I can’t wait does not mean she is impatient in a bad way.'
@@ -1068,11 +1224,14 @@ lessons:
           - {line: 1, kind: strike, at: 'patience'}
       - say: 'It means she is eager and looking forward to it.'
         write: 'can’t wait = eager, excited'
-        doodle: {name: 'custom:2013_q43_a', caption: 'can’t wait = eager, excited'}
+        doodle_do:
+          - {id: bride, op: label, part: bride, text: 'eager, excited'}
         point:
           - {line: 0, kind: arrow}
       - say: 'So she is excited about motherhood.'
         write: 'excited about motherhood'
+        doodle_do:
+          - {id: bride, op: pulse, part: baby}
       - say: 'So the answer is she is excited about motherhood, which is answer choice B.'
         write: 'B · excited'
         answer: true
@@ -1086,13 +1245,17 @@ lessons:
         write: 'get your act together = ?'
         point:
           - {line: 0, kind: underline, at: 'get your act together'}
-      - say: 'It is said to someone who is disorganised.'
+      - say: 'It is said to someone who is disorganised, papers everywhere.'
         write: 'said to the disorganised'
+        doodle: {name: 'custom:2013_q44_a', id: papers, caption: disorganised}
         point:
           - {line: 1, kind: highlight, at: 'disorganised', text: 'the clue'}
-      - say: 'It means organise yourself and start working properly.'
+      - say: 'It means organise yourself and start working properly: one neat stack.'
         write: '= organise yourself'
-        doodle: {name: 'custom:2013_q44_a', caption: 'get your act together = get organised'}
+        doodle_do:
+          - {id: papers, op: stage, stage: 'custom:2013_q44_a2'}
+        point:
+          - {line: 2, kind: highlight, at: 'organise yourself', to: {doodle: papers, part: neat}}
       - say: 'Stage costume takes “act” as a stage show. That is too literal.'
         write: 'D = too literal ✗'
         point:
@@ -1110,14 +1273,21 @@ lessons:
         write: 'in no uncertain terms = ?'
         point:
           - {line: 0, kind: underline, at: 'in no uncertain terms'}
-      - say: 'No uncertain terms means nothing unclear. She left no doubt.'
+      - say: 'No uncertain terms means nothing unclear. She left no doubt, loud and bold.'
         write: 'no uncertainty = no doubt'
+        doodle: {name: 'custom:2013_q45_a', id: loud, caption: 'no doubt at all'}
         point:
           - {line: 1, kind: circle, at: 'no', text: 'not + un-'}
       - say: 'So she spoke clearly and forcefully.'
         write: '= clearly and strongly'
-      - say: 'Quietly and cautiously would leave people unsure. That is the opposite.'
+        doodle_do:
+          - {id: loud, op: label, part: words, text: 'clearly and strongly'}
+        point:
+          - {line: 2, kind: highlight, at: 'clearly and strongly', to: {doodle: loud, part: words}}
+      - say: 'Quietly and cautiously would leave people unsure. That is the opposite of this megaphone.'
         write: 'C quietly, cautiously = opposite ✗'
+        doodle_do:
+          - {id: loud, op: pulse, part: horn}
         point:
           - {line: 3, kind: strike, at: 'C quietly, cautiously'}
       - say: 'So the answer is she expressed it clearly and strongly, which is answer choice A.'
@@ -1133,17 +1303,20 @@ lessons:
         write: 'OPPOSITE of curt'
         point:
           - {line: 0, kind: underline, at: 'curt'}
-      - say: 'Curt means rudely short, a quick cold nod with no courtesy.'
+      - say: 'Curt means rudely short: a quick, cold nod with no courtesy. Hmph.'
         write: 'curt = rudely short'
+        doodle: {name: 'custom:2013_q46_a', id: faces, caption: 'curt = rudely short'}
       - say: 'Rude is close to curt, so it is not the opposite.'
         write: 'B rude = synonym ✗'
         point:
           - {line: 2, kind: strike, at: 'B rude'}
-      - say: 'The opposite of rude and abrupt is polite.'
+      - say: 'The opposite of rude and abrupt is polite: a warm smile and a please.'
         write: 'rude ↔ polite'
-        doodle: {name: 'custom:2013_q46_a', caption: 'curt ↔ polite'}
+        doodle_do:
+          - {id: faces, op: stage, stage: 'custom:2013_q46_a2'}
         point:
           - {line: 1, kind: arrow, text: 'opposite'}
+          - {line: 3, kind: highlight, at: polite, to: {doodle: faces, part: polite}}
       - say: 'Gentle is soft, but the rudeness in curt is cancelled by polite.'
         write: 'gentle = soft; polite = courteous'
       - say: 'So the opposite is polite, which is answer choice C.'
@@ -1159,16 +1332,20 @@ lessons:
         write: 'OPPOSITE of cursory'
         point:
           - {line: 0, kind: underline, at: 'cursory'}
-      - say: 'A cursory glance is quick and careless.'
+      - say: 'A cursory glance is quick and careless: a blink, a tiny stretch of time.'
         write: 'cursory = quick, hasty'
+        doodle: {name: 'custom:2013_q47_a', id: look, caption: 'cursory = quick'}
       - say: 'Brief and concise also mean short. They are synonyms, not opposites.'
         write: 'brief, concise = short ✗'
         point:
           - {line: 2, kind: strike, at: 'brief, concise'}
-      - say: 'The opposite of quick is long: lasting.'
+      - say: 'The opposite of quick is long: a look that lasts and lasts. Lasting.'
         write: 'quick ↔ lasting'
+        doodle_do:
+          - {id: look, op: stage, stage: 'custom:2013_q47_a2'}
         point:
           - {line: 1, kind: arrow, text: 'opposite'}
+          - {line: 3, kind: highlight, at: lasting, to: {doodle: look, part: lasting}}
       - say: 'So the opposite is lasting, which is answer choice D.'
         write: 'D · lasting'
         answer: true
@@ -1182,13 +1359,16 @@ lessons:
         write: 'OPPOSITE of frosty'
         point:
           - {line: 0, kind: underline, at: 'frosty'}
-      - say: 'Frost is cold. A frosty relationship is cold and unfriendly.'
+      - say: 'Frost is cold. A frosty relationship is cold and unfriendly, icicles and all.'
         write: 'frosty = cold, unfriendly'
-      - say: 'The opposite is warm and friendly. That is cordial.'
+        doodle: {name: 'custom:2013_q48_a', id: faces, caption: 'frosty = cold, unfriendly'}
+      - say: 'The opposite is warm and friendly, sunshine on the face. That is cordial.'
         write: 'cordial = warm, friendly'
-        doodle: {name: 'custom:2013_q48_a', caption: 'frosty ↔ cordial'}
+        doodle_do:
+          - {id: faces, op: stage, stage: 'custom:2013_q48_a2'}
         point:
           - {line: 1, kind: arrow, text: 'opposite'}
+          - {line: 2, kind: highlight, at: cordial, to: {doodle: faces, part: cordial}}
       - say: 'Fraudulent means dishonest; frugal means careful with money.'
         write: 'fraudulent, frugal ✗'
         point:
@@ -1208,14 +1388,18 @@ lessons:
           - {line: 0, kind: underline, at: 'heinous'}
       - say: 'Heinous means wicked, shockingly evil.'
         write: 'heinous = wicked'
+        doodle: {name: 'custom:2013_q49_a', id: acts, caption: 'heinous = wicked'}
       - say: 'Deplorable is close to heinous, so it is a synonym.'
         write: 'deplorable = synonym ✗'
         point:
           - {line: 2, kind: strike, at: 'deplorable'}
-      - say: 'The opposite of wicked is praiseworthy: laudable.'
+      - say: 'The opposite of wicked is praiseworthy, worth a medal and applause: laudable.'
         write: 'laudable = deserving praise'
+        doodle_do:
+          - {id: acts, op: stage, stage: 'custom:2013_q49_a2'}
         point:
           - {line: 1, kind: arrow, text: 'opposite'}
+          - {line: 3, kind: highlight, at: laudable, to: {doodle: acts, part: praise}}
       - say: 'So the opposite is laudable, which is answer choice B.'
         write: 'B · laudable'
         answer: true
@@ -1229,17 +1413,20 @@ lessons:
         write: 'OPPOSITE of eventually'
         point:
           - {line: 0, kind: underline, at: 'eventually'}
-      - say: 'Eventually means in the end, after a long time.'
+      - say: 'Eventually means in the end, after a long time: the flag at the end of the line.'
         write: 'eventually = in the end'
+        doodle: {name: 'custom:2013_q50_a', id: time, caption: 'eventually = in the end'}
       - say: 'Finally and subsequently are close to it.'
         write: 'finally, subsequently ✗'
         point:
           - {line: 2, kind: strike, at: 'finally, subsequently'}
-      - say: 'The opposite of in the end is at the beginning: initially.'
+      - say: 'The opposite of in the end is at the beginning: the start flag. Initially.'
         write: 'end ↔ beginning = initially'
-        doodle: {name: 'custom:2013_q50_a', caption: 'initially ↔ eventually'}
+        doodle_do:
+          - {id: time, op: stage, stage: 'custom:2013_q50_a2'}
         point:
           - {line: 1, kind: arrow, text: 'opposite'}
+          - {line: 3, kind: highlight, at: initially, to: {doodle: time, part: start}}
       - say: 'So the opposite is initially, which is answer choice A.'
         write: 'A · initially'
         answer: true
@@ -1253,17 +1440,22 @@ lessons:
         write: 'OPPOSITE of plebs'
         point:
           - {line: 0, kind: underline, at: 'plebs'}
-      - say: 'The plebs are the ordinary common people.'
+      - say: 'The plebs are the ordinary common people, the crowd at the wide bottom of society.'
         write: 'plebs = common people'
+        doodle: {name: 'custom:2013_q51_a', id: society, caption: 'the common people'}
       - say: 'Masses means the same thing.'
         write: 'masses = synonym ✗'
+        doodle_do:
+          - {id: society, op: circle, part: plebs, text: 'masses: the same people'}
         point:
           - {line: 2, kind: strike, at: 'masses'}
       - say: 'Picture society as a pyramid. The opposite of the common people is the small top group: the elite.'
         write: 'common ↔ elite'
-        doodle: {name: 'custom:2013_q51_a', caption: 'plebs at the base, elite at the top'}
+        doodle_do:
+          - {id: society, op: stage, stage: 'custom:2013_q51_a2'}
         point:
           - {line: 1, kind: arrow, text: 'opposite'}
+          - {line: 3, kind: highlight, at: elite, to: {doodle: society, part: elite}}
       - say: 'So the opposite is elite, which is answer choice C.'
         write: 'C · elite'
         answer: true
@@ -1277,12 +1469,16 @@ lessons:
         write: 'OPPOSITE of appalling'
         point:
           - {line: 0, kind: underline, at: 'appalling'}
-      - say: 'Appalling means shockingly bad.'
+      - say: 'Appalling means shockingly bad. Look at that face.'
         write: 'appalling = shockingly bad'
+        doodle: {name: 'custom:2013_q52_a', id: faces, caption: 'appalling = shockingly bad'}
       - say: 'The opposite of bad is good, nice: pleasant.'
         write: 'bad ↔ pleasant'
+        doodle_do:
+          - {id: faces, op: stage, stage: 'custom:2013_q52_a2'}
         point:
           - {line: 1, kind: arrow, text: 'opposite'}
+          - {line: 2, kind: highlight, at: pleasant, to: {doodle: faces, part: good}}
       - say: 'Simple and complex are about difficulty, not good or bad.'
         write: 'simple, complex ✗'
         point:
@@ -1300,16 +1496,20 @@ lessons:
         write: 'OPPOSITE of mordant'
         point:
           - {line: 0, kind: underline, at: 'mordant'}
-      - say: 'Mordant wit is sharp and biting: humour that hurts.'
+      - say: 'Mordant wit is sharp and biting: humour with teeth, that hurts.'
         write: 'mordant = biting, hurtful'
+        doodle: {name: 'custom:2013_q53_a', id: wit, caption: 'mordant = biting'}
       - say: 'Scathing, caustic and withering all mean harsh and cutting. They are synonyms.'
         write: 'scathing = caustic = withering = mordant'
         point:
           - {line: 2, kind: strike, at: 'scathing = caustic = withering'}
-      - say: 'Only one option goes the other way: kind.'
+      - say: 'Only one option goes the other way, a soft bubble with a heart in it: kind.'
         write: 'hurtful ↔ kind'
+        doodle_do:
+          - {id: wit, op: stage, stage: 'custom:2013_q53_a2'}
         point:
           - {line: 1, kind: arrow, text: 'opposite'}
+          - {line: 3, kind: highlight, at: kind, to: {doodle: wit, part: kind}}
       - say: 'So the opposite is kind, which is answer choice A.'
         write: 'A · kind'
         answer: true
@@ -1325,11 +1525,14 @@ lessons:
           - {line: 0, kind: underline, at: 'waxing'}
       - say: 'To wax is to grow, like the moon growing towards full.'
         write: 'wax = grow, increase'
-      - say: 'The moon waxes and wanes. To wane is to get smaller.'
+        doodle: {name: 'custom:2013_q54_a', id: moon, caption: 'wax = grow'}
+      - say: 'The moon waxes and then wanes. To wane is to get smaller again.'
         write: 'wax ↔ wane = decrease'
-        doodle: {name: 'custom:2013_q54_a', caption: 'wax = grow, wane = shrink'}
+        doodle_do:
+          - {id: moon, op: stage, stage: 'custom:2013_q54_a2'}
         point:
           - {line: 1, kind: arrow, text: 'opposite'}
+          - {line: 2, kind: highlight, at: decrease, to: {doodle: moon, part: wane}}
       - say: 'Increasing is a synonym. Wavering means swaying, being unsure.'
         write: 'increasing ✗  wavering ✗'
         point:
@@ -1348,16 +1551,20 @@ lessons:
         write: 'OPPOSITE of dogged'
         point:
           - {line: 0, kind: underline, at: 'dogged'}
-      - say: 'A dogged defence is stubborn and determined. They never give up.'
+      - say: 'A dogged defence is stubborn and determined, like a dog that will not let go of the rope.'
         write: 'dogged = determined, stubborn'
+        doodle: {name: 'custom:2013_q55_a', id: dog, caption: 'dogged = never gives up'}
       - say: 'Strong is on the same side, so it is not the opposite.'
         write: 'strong = synonym ✗'
         point:
           - {line: 2, kind: strike, at: 'strong'}
-      - say: 'The opposite of determined is not caring at all: indifferent.'
+      - say: 'The opposite of determined is not caring at all, a shrug: indifferent.'
         write: 'determined ↔ indifferent'
+        doodle_do:
+          - {id: dog, op: stage, stage: 'custom:2013_q55_a2'}
         point:
           - {line: 1, kind: arrow, text: 'opposite'}
+          - {line: 3, kind: highlight, at: indifferent, to: {doodle: dog, part: indifferent}}
       - say: 'So the opposite is indifferent, which is answer choice A.'
         write: 'A · indifferent'
         answer: true
@@ -1373,11 +1580,16 @@ lessons:
           - {line: 0, kind: underline, at: 'ardent'}
       - say: 'Ardent comes from a word for burning. An ardent supporter is fiery, very enthusiastic.'
         write: 'ardent = burning, very enthusiastic'
-        doodle: {name: 'custom:2013_q56_a', caption: 'ardent = burning with passion'}
+        doodle: {name: 'custom:2013_q56_a', id: heart, caption: 'ardent = burning with passion'}
+        doodle_do:
+          - {id: heart, op: pulse, part: flame}
       - say: 'Full of strong feeling is passionate.'
         write: 'ardent ≈ passionate'
+        doodle_do:
+          - {id: heart, op: label, part: heart, text: passionate}
         point:
           - {line: 1, kind: arrow}
+          - {line: 2, kind: highlight, at: passionate, to: {doodle: heart, part: heart}}
       - say: 'Cogent means convincing; optimistic means hopeful.'
         write: 'cogent = convincing; optimistic = hopeful'
         point:
@@ -1398,15 +1610,22 @@ lessons:
           - {line: 0, kind: underline, at: 'epitaph'}
       - say: 'An epitaph is the writing on a tomb or memorial, in honour of the dead.'
         write: 'epitaph = words on a tomb or memorial'
-        doodle: {name: 'custom:2013_q57_a', caption: 'words carved on a memorial'}
-      - say: 'Here it was demolished, so it is something built: a memorial.'
+        doodle: {name: 'custom:2013_q57_a', id: stone, caption: 'words carved on a memorial'}
+        doodle_do:
+          - {id: stone, op: circle, part: words}
+      - say: 'Here it was demolished, so it must be something built, like this stone: a memorial.'
         write: 'demolished → a structure'
+        doodle_do:
+          - {id: stone, op: label, part: stone, text: 'something built'}
         point:
           - {line: 2, kind: highlight, at: 'demolished', text: 'the clue'}
       - say: 'Of the options, a monument is a memorial structure.'
         write: 'epitaph ≈ monument'
+        doodle_do:
+          - {id: stone, op: label, part: stone, text: monument}
         point:
           - {line: 2, kind: arrow}
+          - {line: 3, kind: highlight, at: monument, to: {doodle: stone, part: stone}}
       - say: 'So the nearest is monument, which is answer choice A.'
         write: 'A · monument'
         answer: true
@@ -1420,12 +1639,16 @@ lessons:
         write: 'NEAREST to ardour'
         point:
           - {line: 0, kind: underline, at: 'ardour'}
-      - say: 'Ardour means great eagerness and passion.'
+      - say: 'Ardour means great eagerness and passion, the way this worker goes at the job.'
         write: 'ardour = great eagerness'
+        doodle: {name: 'custom:2013_q58_a', id: ardour, caption: 'working with great eagerness'}
       - say: 'Great eagerness is enthusiasm.'
         write: 'ardour ≈ enthusiasm'
+        doodle_do:
+          - {id: ardour, op: label, part: worker, text: enthusiasm}
         point:
           - {line: 1, kind: arrow}
+          - {line: 2, kind: highlight, at: enthusiasm, to: {doodle: ardour, part: worker}}
       - say: 'Discouragement and indifference are opposites.'
         write: 'discouragement, indifference = opposites'
         point:
@@ -1445,13 +1668,20 @@ lessons:
           - {line: 0, kind: underline, at: 'vanguard'}
       - say: 'The vanguard is the front part of an army, the soldiers who go first.'
         write: 'vanguard = the front, going first'
-        doodle: {name: 'custom:2013_q59_a', caption: 'vanguard = the ones out in front'}
+        doodle: {name: 'custom:2013_q59_a', id: march, caption: 'vanguard = the ones out in front'}
+        doodle_do:
+          - {id: march, op: circle, part: leader}
       - say: 'In sports development, being in the vanguard means leading the way.'
         write: 'in the vanguard = leading'
+        doodle_do:
+          - {id: march, op: label, part: leader, text: 'leading the way'}
         point:
           - {line: 1, kind: arrow}
-      - say: 'Emerging means just appearing. The vanguard is already out in front.'
+          - {line: 2, kind: highlight, at: leading, to: {doodle: march, part: leader}}
+      - say: 'Emerging means just appearing. The vanguard is already out in front, not coming up behind.'
         write: 'emerging = just appearing ✗'
+        doodle_do:
+          - {id: march, op: pulse, part: followers}
         point:
           - {line: 3, kind: strike, at: 'emerging'}
       - say: 'So the nearest is leading position, which is answer choice B.'
@@ -1469,11 +1699,16 @@ lessons:
           - {line: 0, kind: underline, at: 'verge'}
       - say: 'On the verge of means just about to. A verge is an edge.'
         write: 'verge = edge; on the verge of = about to'
-        doodle: {name: 'custom:2013_q60_a', caption: 'on the verge = at the very edge'}
+        doodle: {name: 'custom:2013_q60_a', id: cliff, caption: 'on the verge = at the very edge'}
+        doodle_do:
+          - {id: cliff, op: pulse, part: edge}
       - say: 'Another edge word in the same phrase is brink: on the brink of.'
         write: 'on the brink of = about to'
+        doodle_do:
+          - {id: cliff, op: label, part: person, text: 'on the brink'}
         point:
           - {line: 1, kind: arrow, text: 'same phrase'}
+          - {line: 2, kind: highlight, at: 'on the brink of', to: {doodle: cliff, part: person}}
       - say: 'Shore is an edge of the sea, but we never say on the shore of signing.'
         write: 'shore ✗'
         point:
@@ -1491,12 +1726,16 @@ lessons:
         write: 'NEAREST to eternal'
         point:
           - {line: 0, kind: underline, at: 'eternal'}
-      - say: 'Eternal means lasting for ever, never ending.'
+      - say: 'Eternal means lasting for ever, never ending, round and round like this.'
         write: 'eternal = never ending'
+        doodle: {name: 'custom:2013_q61_a', id: loop, caption: 'eternal = never ending'}
       - say: 'An argument that never ends is going on all the time: constant.'
         write: 'eternal argument = constant argument'
+        doodle_do:
+          - {id: loop, op: label, part: loop, text: constant}
         point:
           - {line: 1, kind: arrow}
+          - {line: 2, kind: highlight, at: 'constant argument', to: {doodle: loop, part: loop}}
       - say: 'Strong is about force, not about never stopping.'
         write: 'strong ✗'
         point:
@@ -1514,12 +1753,16 @@ lessons:
         write: 'NEAREST to feeble'
         point:
           - {line: 0, kind: underline, at: 'feeble'}
-      - say: 'Feeble means lacking strength.'
+      - say: 'Feeble means lacking strength, like a little lamb on wobbly legs.'
         write: 'feeble = lacking strength'
+        doodle: {name: 'custom:2013_q62_a', id: lamb, caption: 'feeble = lacking strength'}
       - say: 'The word for lacking strength is weak.'
         write: 'feeble ≈ weak'
+        doodle_do:
+          - {id: lamb, op: label, part: lamb, text: weak}
         point:
           - {line: 1, kind: arrow}
+          - {line: 2, kind: highlight, at: weak, to: {doodle: lamb, part: lamb}}
       - say: 'Fat, quiet and loving say nothing about strength.'
         write: 'fat, quiet, loving ✗'
         point:
@@ -1539,11 +1782,16 @@ lessons:
           - {line: 0, kind: underline, at: 'screamed'}
       - say: 'To scream is to cry out loudly and sharply, often in fear.'
         write: 'scream = cry out loudly'
-        doodle: {name: 'custom:2013_q63_a', caption: 'scream = cry out loudly'}
+        doodle: {name: 'custom:2013_q63_a', id: scream, caption: 'scream = cry out loudly'}
+        doodle_do:
+          - {id: scream, op: pulse, part: sound}
       - say: 'Which option is a loud cry? Wailed.'
         write: 'wail = cry out loudly'
+        doodle_do:
+          - {id: scream, op: label, part: sound, text: wailed}
         point:
           - {line: 1, kind: arrow, text: 'same meaning'}
+          - {line: 2, kind: highlight, at: wail, to: {doodle: scream, part: sound}}
       - say: 'Protested is complaining; waded in is getting involved; stormed out is leaving angrily.'
         write: 'protested, waded in, stormed out ✗'
         point:
@@ -1561,12 +1809,16 @@ lessons:
         write: 'NEAREST to exhibition'
         point:
           - {line: 0, kind: underline, at: 'exhibition'}
-      - say: 'An exhibition is a public show of things for people to see.'
+      - say: 'An exhibition is a public show of things for people to see, like pictures on a gallery wall.'
         write: 'exhibition = public show'
+        doodle: {name: 'custom:2013_q64_a', id: show, caption: 'exhibition = public show'}
       - say: 'Another word for a show of things is a display.'
         write: 'exhibition ≈ display'
+        doodle_do:
+          - {id: show, op: label, part: wall, text: display}
         point:
           - {line: 1, kind: arrow}
+          - {line: 2, kind: highlight, at: display, to: {doodle: show, part: wall}}
       - say: 'Examination looks similar in shape, but it is a test.'
         write: 'examination = a test ✗'
         point:
@@ -1586,15 +1838,23 @@ lessons:
           - {line: 0, kind: underline, at: 'a nose for'}
       - say: 'Think of a dog that can sniff out where something is hidden.'
         write: 'dog sniffs out → finds it'
-        doodle: {name: 'custom:2013_q65_a', caption: 'a dog sniffs out what is hidden'}
+        doodle: {name: 'custom:2013_q65_a', id: dog, caption: 'a dog sniffs out what is hidden'}
+        doodle_do:
+          - {id: dog, op: pulse, part: sniff}
+          - {id: dog, op: circle, part: story}
       - say: 'A nose for something is a natural ability to find it.'
         write: 'a nose for = a natural ability to find'
+        doodle_do:
+          - {id: dog, op: label, part: nose, text: 'a natural ability'}
         point:
           - {line: 2, kind: highlight, at: 'natural ability', text: 'the key'}
-      - say: 'A natural ability like that is an instinct.'
+      - say: 'A natural ability like that nose is an instinct.'
         write: '= an instinct'
+        doodle_do:
+          - {id: dog, op: label, part: nose, text: instinct}
         point:
           - {line: 2, kind: arrow}
+          - {line: 3, kind: highlight, at: instinct, to: {doodle: dog, part: nose}}
       - say: 'So the nearest is an instinct, which is answer choice C.'
         write: 'C · an instinct'
         answer: true
@@ -1653,16 +1913,21 @@ lessons:
     moments:
       - say: 'Tinu likes apples, gap, she does not like oranges.'
         write: 'likes apples ___ does not like oranges'
-      - say: 'One idea is positive, the other negative. They contrast.'
+        doodle: {name: 'custom:2013_q69_a', id: fruit, caption: 'likes apples'}
+      - say: 'One idea is positive, the other negative: a tick and a cross. They contrast.'
         write: 'likes ↔ does not like = contrast'
-        doodle: {name: 'custom:2013_q69_a', caption: 'likes ✓ but ✗ = contrast'}
+        doodle_do:
+          - {id: fruit, op: stage, stage: 'custom:2013_q69_a2'}
         point:
           - {line: 1, kind: underline, at: 'likes'}
           - {line: 1, kind: underline, at: 'does not like', text: 'contrast'}
       - say: 'The joining word for contrast is but.'
         write: 'contrast → but'
+        doodle_do:
+          - {id: fruit, op: circle, part: but}
         point:
           - {line: 2, kind: box, text: 'the rule'}
+          - {line: 2, kind: highlight, at: but, to: {doodle: fruit, part: but}}
       - say: 'So shows a result; or gives a choice; for gives a reason.'
         write: 'so = result; or = choice; for = reason'
       - say: 'So the answer is but, which is answer choice D.'
@@ -1678,13 +1943,19 @@ lessons:
         write: 'had a ___ on Independence Day'
       - say: 'The parade where people walk in step past a saluting guest is a march past.'
         write: 'march (walk in step) + past (go by)'
-        doodle: {name: 'custom:2013_q70_a', caption: 'march past'}
+        doodle: {name: 'custom:2013_q70_a', id: parade, caption: 'march past'}
+        doodle_do:
+          - {id: parade, op: move, part: marchers, path: past}
       - say: 'March, not match. A match is a game.'
         write: 'match = a game ✗'
+        doodle_do:
+          - {id: parade, op: label, part: marchers, text: 'march, not match'}
         point:
           - {line: 2, kind: strike, at: 'match'}
       - say: 'Past, not pass. Pass is a verb; past means going by.'
         write: 'pass ✗  past ✓'
+        doodle_do:
+          - {id: parade, op: label, part: stand, text: 'go past: past'}
         point:
           - {line: 3, kind: strike, at: 'pass'}
           - {line: 3, kind: circle, at: 'past'}
@@ -1726,9 +1997,15 @@ lessons:
           - {line: 0, kind: highlight, at: 'rain', text: 'the clue'}
       - say: 'Rain that keeps falling fills the soil with water until it can hold no more.'
         write: 'soil full of water'
-        doodle: {name: 'custom:2013_q72_a', caption: 'rain until the soil can hold no more'}
+        doodle: {name: 'custom:2013_q72_a', id: soil, caption: 'rain until the soil can hold no more'}
+        doodle_do:
+          - {id: soil, op: fill, to: 1}
       - say: 'The word for soaked full of water is saturated.'
         write: 'saturated = soaked full'
+        doodle_do:
+          - {id: soil, op: label, part: soil, text: saturated}
+        point:
+          - {line: 2, kind: highlight, at: saturated, to: {doodle: soil, part: soil}}
       - say: 'Satiated looks similar but means full of food, used of people.'
         write: 'satiated = full of food ✗'
         point:
@@ -1744,12 +2021,19 @@ lessons:
     moments:
       - say: 'The police described the boy as being, gap, hand.'
         write: 'being ___ hand'
-      - say: 'The idiom is out of hand.'
+      - say: 'The idiom is out of hand: like a balloon slipping out of your hand, gone where you cannot hold it.'
         write: 'out of hand'
+        doodle: {name: 'custom:2013_q73_a', id: balloon, caption: 'slipping out of hand'}
+        doodle_do:
+          - {id: balloon, op: move, part: balloon, path: away}
         point:
           - {line: 1, kind: underline, text: 'idiom'}
       - say: 'Out of hand means out of control.'
         write: 'out of hand = out of control'
+        doodle_do:
+          - {id: balloon, op: label, part: hand, text: 'out of control'}
+        point:
+          - {line: 2, kind: highlight, at: 'out of control', to: {doodle: balloon, part: balloon}}
       - say: 'On by, up to and over at are not idioms with hand.'
         write: 'on by, up to, over at ✗'
         point:
@@ -1769,9 +2053,14 @@ lessons:
           - {line: 0, kind: highlight, at: 'two parties', text: 'the clue'}
       - say: 'Picture two parties under one roof. When parties join together to govern, it is a coalition.'
         write: 'parties join to govern = coalition'
-        doodle: {name: 'custom:2013_q74_a', caption: 'parties join = coalition'}
-      - say: 'Collusion is secret cheating together. Colonial is about colonies.'
+        doodle: {name: 'custom:2013_q74_a', id: parties, caption: 'parties join = coalition'}
+        doodle_do:
+          - {id: parties, op: circle, part: hands}
+          - {id: parties, op: label, part: roof, text: 'one government'}
+      - say: 'Collusion is secret cheating together, not an open handshake. Colonial is about colonies.'
         write: 'collusion = secret cheating ✗'
+        doodle_do:
+          - {id: parties, op: cross, part: hands, text: 'not secret cheating'}
         point:
           - {line: 2, kind: strike, at: 'collusion'}
       - say: 'Co-operative is a kind of society or shop, not the name for this government.'
@@ -1945,14 +2234,18 @@ lessons:
     moments:
       - say: 'The killing of one’s mother is called, gap.'
         write: '___ = killing of one’s mother'
-      - say: 'Matri- means mother.'
+      - say: 'Matri- means mother. Here is that building block.'
         write: 'matri- = mother'
+        doodle: {name: 'custom:2013_q82_a', id: blocks, caption: 'matri- = mother'}
         point:
           - {line: 1, kind: circle, at: 'matri'}
-      - say: 'And -cide means killing.'
+      - say: 'And -cide means killing. Join the two blocks.'
         write: '-cide = killing'
+        doodle_do:
+          - {id: blocks, op: stage, stage: 'custom:2013_q82_a2'}
         point:
           - {line: 2, kind: circle, at: 'cide'}
+          - {line: 2, kind: highlight, at: '-cide = killing', to: {doodle: blocks, part: cide}}
       - say: 'Patricide is killing a father. A matriarch is a woman who heads a family.'
         write: 'patricide = father; matriarch = female head'
         point:
@@ -1994,12 +2287,17 @@ lessons:
         write: 'a family mutiny ___ our hands'
         point:
           - {line: 0, kind: highlight, at: 'our hands', text: 'the clue'}
-      - say: 'To have something on your hands is to have a problem to deal with.'
+      - say: 'To have something on your hands is to have a problem to deal with, like holding a little storm.'
         write: 'on your hands = a problem to handle'
+        doodle: {name: 'custom:2013_q84_a', id: hands, caption: 'a problem on your hands'}
         point:
           - {line: 1, kind: underline, at: 'on your hands', text: 'idiom'}
       - say: 'A mutiny is a rebellion, so it is a problem on our hands.'
         write: 'mutiny = rebellion → on our hands'
+        doodle_do:
+          - {id: hands, op: label, part: trouble, text: 'the mutiny'}
+        point:
+          - {line: 2, kind: highlight, at: 'on our hands', to: {doodle: hands, part: hands}}
       - say: 'From, of and for do not make this idiom.'
         write: 'from, of, for ✗'
         point:
@@ -2017,12 +2315,16 @@ lessons:
         write: 'gl-A-zier'
         point:
           - {line: 0, kind: circle, at: 'A', text: '/eɪ/'}
-      - say: 'It says the long a sound, as in day. That is the sound written /eɪ/.'
+      - say: 'It says the long a sound, as in day, lips spread wide. That is the sound written ay.'
         write: 'a in glazier = /eɪ/ as in day'
+        doodle: {name: 'custom:2013_q86_a', id: ay, caption: 'a wide ay, as in day'}
       - say: 'Now say each option. Feign sounds like fain. Same /eɪ/.'
         write: 'feign = /eɪ/ ✓'
+        doodle_do:
+          - {id: ay, op: label, part: mouth, text: 'feign: the same ay'}
         point:
           - {line: 2, kind: circle, at: 'ei', text: '/eɪ/'}
+          - {line: 2, kind: highlight, at: feign, to: {doodle: ay, part: mouth}}
       - say: 'Glass has /ɑː/ as in car. Flat has /æ/. Gleam has /iː/.'
         write: 'glass /ɑː/  flat /æ/  gleam /iː/'
         point:
@@ -2041,12 +2343,16 @@ lessons:
         write: 'l-AU-d'
         point:
           - {line: 0, kind: circle, at: 'AU', text: '/ɔː/'}
-      - say: 'Laud sounds like lord. The au is /ɔː/, the aw in law.'
+      - say: 'Laud sounds like lord. The au is aw, as in law: round your lips.'
         write: 'au in laud = /ɔː/ as in law'
+        doodle: {name: 'custom:2013_q87_a', id: aw, caption: 'round lips: aw'}
       - say: 'Core has the same /ɔː/.'
         write: 'core = /ɔː/ ✓'
+        doodle_do:
+          - {id: aw, op: label, part: mouth, text: 'core: the same aw'}
         point:
           - {line: 2, kind: circle, at: 'or', text: '/ɔː/'}
+          - {line: 2, kind: highlight, at: core, to: {doodle: aw, part: mouth}}
       - say: 'Loud has /aʊ/ as in cow. Lathe has /eɪ/. Lavatory has /æ/.'
         write: 'loud /aʊ/  lathe /eɪ/  lavatory /æ/'
         point:
@@ -2064,12 +2370,16 @@ lessons:
         write: 'c-O-ma'
         point:
           - {line: 0, kind: circle, at: 'O', text: '/əʊ/'}
-      - say: 'Coma sounds like KOH-ma. The o is /əʊ/ as in go.'
+      - say: 'Coma sounds like KOH-ma. The o is oh, as in go: the lips glide from open to round.'
         write: 'o in coma = /əʊ/ as in go'
+        doodle: {name: 'custom:2013_q88_a', id: oh, caption: 'oh: the lips glide'}
       - say: 'Cogent is KOH-jent. Same /əʊ/.'
         write: 'cogent = /əʊ/ ✓'
+        doodle_do:
+          - {id: oh, op: label, part: mouth, text: 'cogent: KOH-jent'}
         point:
           - {line: 2, kind: circle, at: 'co', text: '/əʊ/'}
+          - {line: 2, kind: highlight, at: cogent, to: {doodle: oh, part: mouth}}
       - say: 'Comma has /ɒ/ as in hot. Come has /ʌ/ as in cup. Colonel sounds like kernel.'
         write: 'comma /ɒ/  come /ʌ/  colonel /ɜː/'
         point:
@@ -2087,17 +2397,22 @@ lessons:
         write: 'lo-SE'
         point:
           - {line: 0, kind: circle, at: 'SE', text: '/z/'}
-      - say: 'Lose is said looz. The se is a buzz, /z/, like a bee.'
+      - say: 'Lose is said looz. The se is a buzz, z, like a bee.'
         write: 'se in lose = /z/'
-        doodle: {name: 'custom:2013_q89_a', caption: 'lose buzzes like a bee: z'}
-      - say: 'Noise ends with the same buzz, /z/.'
+        doodle: {name: 'custom:2013_q89_a', id: buzz, caption: 'lose buzzes like a bee: z'}
+      - say: 'Noise ends with the same buzz, z. It sits with the bee.'
         write: 'noise = /z/ ✓'
+        doodle_do:
+          - {id: buzz, op: circle, part: z}
         point:
           - {line: 2, kind: circle, at: 'se', text: '/z/'}
-      - say: 'Mouse, nurse and horse all end with a hiss, /s/.'
+      - say: 'Mouse, nurse and horse all end with a hiss, s, like a snake.'
         write: 'mouse, nurse, horse = /s/'
+        doodle_do:
+          - {id: buzz, op: stage, stage: 'custom:2013_q89_a2'}
         point:
           - {line: 3, kind: strike, at: 'mouse, nurse, horse'}
+          - {line: 3, kind: highlight, at: 'mouse, nurse, horse', to: {doodle: buzz, part: snake}}
       - say: 'So the answer is noise, which is answer choice C.'
         write: 'C · noise'
         answer: true
@@ -2111,12 +2426,16 @@ lessons:
         write: 'G-uitar'
         point:
           - {line: 0, kind: circle, at: 'G', text: '/g/'}
-      - say: 'It is the hard g, /g/, as in go.'
+      - say: 'It is the hard g, as in go: g-g-guitar.'
         write: 'g in guitar = /g/ as in go'
+        doodle: {name: 'custom:2013_q90_a', id: g, caption: 'a hard g, as in go'}
       - say: 'Rogue ends with the same hard /g/.'
         write: 'rogue = /g/ ✓'
+        doodle_do:
+          - {id: g, op: label, part: g, text: 'rogue: hard g too'}
         point:
           - {line: 2, kind: circle, at: 'gue', text: '/g/'}
+          - {line: 2, kind: highlight, at: rogue, to: {doodle: g, part: g}}
       - say: 'Jam, judge and strange all have the soft sound /dʒ/, as in jump.'
         write: 'jam, judge, strange = /dʒ/'
         point:
@@ -2134,12 +2453,16 @@ lessons:
         write: 'loo-SE'
         point:
           - {line: 0, kind: circle, at: 'SE', text: '/s/'}
-      - say: 'Loose ends with a hiss, /s/. Compare lose, which buzzes.'
+      - say: 'Loose ends with a hiss, s, like a snake. Compare lose, which buzzes.'
         write: 'se in loose = /s/'
+        doodle: {name: 'custom:2013_q91_a', id: hiss, caption: 'loose hisses: s'}
       - say: 'Sell begins with the same /s/.'
         write: 'sell = /s/ ✓'
+        doodle_do:
+          - {id: hiss, op: label, part: s, text: 'sell: the same hiss'}
         point:
           - {line: 2, kind: circle, at: 's', text: '/s/'}
+          - {line: 2, kind: highlight, at: sell, to: {doodle: hiss, part: s}}
       - say: 'Fuse and rouse buzz with /z/. Close, the verb, also buzzes.'
         write: 'fuse, rouse, close = /z/'
         point:
@@ -2157,12 +2480,16 @@ lessons:
         write: 'rite → -ite /aɪt/'
         point:
           - {line: 0, kind: circle, at: 'ite', text: '/aɪt/'}
-      - say: 'Rite sounds like bite: the long i plus t.'
+      - say: 'Rite sounds like bite: the long i plus t. Ring its bell.'
         write: 'rite = /raɪt/'
-      - say: 'Wright is said like write. The gh is silent.'
+        doodle: {name: 'custom:2013_q92_a', id: bells, caption: 'rite: long i + t'}
+      - say: 'Wright is said like write. The gh is silent, so its bell rings the same note.'
         write: 'wright = /raɪt/ ✓'
+        doodle_do:
+          - {id: bells, op: stage, stage: 'custom:2013_q92_a2'}
         point:
           - {line: 2, kind: circle, at: 'ight', text: '/aɪt/'}
+          - {line: 2, kind: highlight, at: wright, to: {doodle: bells, part: bell2}}
       - say: 'Wit has a short i. List and rim end differently.'
         write: 'wit /ɪt/  list, rim ✗'
         point:
@@ -2177,14 +2504,18 @@ lessons:
       D: 'You went for rim. It starts like rite but ends with m.'
   93:
     moments:
-      - say: 'We want a word that rhymes with joys.'
+      - say: 'We want a word that rhymes with joys. Ring its bell.'
         write: 'joys → -oys /ɔɪz/'
+        doodle: {name: 'custom:2013_q93_a', id: bells, caption: 'joys: -oys'}
         point:
           - {line: 0, kind: circle, at: 'oys', text: '/ɔɪz/'}
-      - say: 'Boys has exactly the same ending.'
+      - say: 'Boys has exactly the same ending: the two bells ring together.'
         write: 'boys = /ɔɪz/ ✓'
+        doodle_do:
+          - {id: bells, op: stage, stage: 'custom:2013_q93_a2'}
         point:
           - {line: 1, kind: circle, at: 'oys', text: '/ɔɪz/'}
+          - {line: 1, kind: highlight, at: boys, to: {doodle: bells, part: bell2}}
       - say: 'Stays ends in /eɪz/, a different vowel.'
         write: 'stays /eɪz/ ✗'
         point:
@@ -2202,14 +2533,18 @@ lessons:
       D: 'You went for stays. It ends in -s too, but the vowel is /eɪ/, not /ɔɪ/.'
   94:
     moments:
-      - say: 'We want a word that rhymes with call.'
+      - say: 'We want a word that rhymes with call. Ring its bell.'
         write: 'call → -all /ɔːl/'
+        doodle: {name: 'custom:2013_q94_a', id: bells, caption: 'call: -all'}
         point:
           - {line: 0, kind: circle, at: 'all', text: '/ɔːl/'}
-      - say: 'Wall has exactly the same ending.'
+      - say: 'Wall has exactly the same ending: same note.'
         write: 'wall = /ɔːl/ ✓'
+        doodle_do:
+          - {id: bells, op: stage, stage: 'custom:2013_q94_a2'}
         point:
           - {line: 1, kind: circle, at: 'all', text: '/ɔːl/'}
+          - {line: 1, kind: highlight, at: wall, to: {doodle: bells, part: bell2}}
       - say: 'Dull has /ʌl/. Quail has /eɪl/. Slate ends in t.'
         write: 'dull /ʌl/  quail /eɪl/  slate ✗'
         point:
@@ -2217,6 +2552,8 @@ lessons:
           - {line: 2, kind: strike, at: 'quail'}
       - say: 'Say them together: call, wall. Same vowel, same ending.'
         write: 'call ~ wall'
+        doodle_do:
+          - {id: bells, op: pulse, part: rhyme}
       - say: 'So the answer is wall, which is answer choice A.'
         write: 'A · wall'
         answer: true
@@ -2226,17 +2563,20 @@ lessons:
       D: 'You went for slate. It does not end in l at all.'
   95:
     moments:
-      - say: 'Break dedication into syllables.'
+      - say: 'Break dedication into syllables: four little beats.'
         write: 'de-di-ca-tion'
+        doodle: {name: 'custom:2013_q95_a', id: word, caption: 'four beats'}
       - say: 'Here is a rule: words ending in -tion are stressed just before -tion.'
         write: 'rule: stress the syllable before -tion'
         point:
           - {line: 1, kind: box, text: 'the rule'}
-      - say: 'The syllable before -tion is ca.'
+      - say: 'The syllable before -tion is ca, so that beat swells up big.'
         write: 'de-di-CA-tion'
-        doodle: {name: 'custom:2013_q95_a', caption: 'de-di-CA-tion'}
+        doodle_do:
+          - {id: word, op: stage, stage: 'custom:2013_q95_a2'}
         point:
           - {line: 2, kind: circle, at: 'CA', text: 'stress'}
+          - {line: 2, kind: highlight, at: 'CA', to: {doodle: word, part: stress}}
       - say: 'The -tion ending itself is never stressed.'
         write: '-TION ✗'
         point:
@@ -2250,18 +2590,24 @@ lessons:
       D: 'You went for DEdication. That is the stress of dedicate; dedication moves it to CA.'
   96:
     moments:
-      - say: 'Break international into syllables.'
+      - say: 'Break international into syllables: five little beats.'
         write: 'in-ter-na-tion-al'
+        doodle: {name: 'custom:2013_q96_a', id: word, caption: 'five beats'}
       - say: 'Use the -tion rule again: stress the syllable just before -tion.'
         write: 'stress before -tion'
         point:
           - {line: 1, kind: box, text: 'the rule'}
-      - say: 'The syllable before -tion is na.'
+      - say: 'The syllable before -tion is na, so that beat swells up big.'
         write: 'in-ter-NA-tion-al'
+        doodle_do:
+          - {id: word, op: stage, stage: 'custom:2013_q96_a2'}
         point:
           - {line: 2, kind: circle, at: 'NA', text: 'stress'}
+          - {line: 2, kind: highlight, at: 'NA', to: {doodle: word, part: stress}}
       - say: 'Adding -al does not move it.'
         write: '-al: no change'
+        doodle_do:
+          - {id: word, op: label, part: word, text: '-al: no change'}
       - say: 'So the pattern is interNAtional, which is answer choice A.'
         write: 'A · interNAtional'
         answer: true
@@ -2271,9 +2617,9 @@ lessons:
       D: 'You went for inTERnational. The ter is weak; the main stress falls on NA.'
   98:
     moments:
-      - say: 'The stressed word is CAR.'
+      - say: 'The stressed word is CAR, said loudest.'
         write: 'Adamu is leaving a CAR behind.'
-        doodle: {name: 'custom:2013_q98_a', caption: 'CAR is said loudest'}
+        doodle: {name: 'custom:2013_q98_a', id: say, caption: 'CAR is said loudest'}
         point:
           - {line: 0, kind: circle, at: 'CAR', text: 'stress'}
       - say: 'The stressed word is the answer to the question.'
@@ -2282,6 +2628,8 @@ lessons:
           - {line: 1, kind: box, text: 'the rule'}
       - say: 'CAR tells us what he is leaving. So the question is what.'
         write: 'CAR → What?'
+        doodle_do:
+          - {id: say, op: circle, part: car, text: 'what?'}
         point:
           - {line: 0, kind: arrow}
       - say: 'Who would stress Adamu. Where would stress behind.'
@@ -2295,18 +2643,25 @@ lessons:
       D: 'You went for where. That is answered by stressing BEHIND.'
   99:
     moments:
-      - say: 'The stressed words are TOOK OFF.'
+      - say: 'The stressed words are TOOK OFF, said loudest.'
         write: 'Lambusa TOOK OFF the wig.'
+        doodle: {name: 'custom:2013_q99_a', id: wig, caption: 'TOOK OFF is said loudest'}
         point:
           - {line: 0, kind: underline, at: 'TOOK OFF', text: 'stress'}
-      - say: 'TOOK OFF is the action, what she did.'
+      - say: 'TOOK OFF is the action, what she did: up and off comes the wig.'
         write: 'TOOK OFF = the action'
+        doodle_do:
+          - {id: wig, op: move, part: wig, path: 'off'}
+        point:
+          - {line: 1, kind: highlight, at: 'the action', to: {doodle: wig, part: wig}}
       - say: 'A question about the action is: what did Lambusa do?'
         write: 'action → What did Lambusa do?'
         point:
           - {line: 1, kind: arrow}
       - say: 'Who would stress LAMBUSA. The ring would stress WIG.'
         write: 'who → LAMBUSA; ring → WIG'
+        doodle_do:
+          - {id: wig, op: label, part: lambusa, text: 'who? would stress LAMBUSA'}
       - say: 'So the question is what did Lambusa do, which is answer choice B.'
         write: 'B · What did Lambusa do?'
         answer: true
@@ -2322,11 +2677,16 @@ lessons:
           - {line: 0, kind: circle, at: 'IN', text: 'stress'}
       - say: 'IN places the bed. It tells us its position.'
         write: 'IN = position'
-        doodle: {name: 'custom:2013_q100_a', caption: 'IN tells us where'}
+        doodle: {name: 'custom:2013_q100_a', id: room, caption: 'IN tells us where'}
+        doodle_do:
+          - {id: room, op: circle, part: bed}
       - say: 'A question about position is: where is the bed?'
         write: 'position → Where?'
+        doodle_do:
+          - {id: room, op: label, part: in, text: 'where?'}
         point:
           - {line: 1, kind: arrow}
+          - {line: 2, kind: highlight, at: 'Where', to: {doodle: room, part: in}}
       - say: 'The parlour question would stress ROOM. Was would stress IS. What would stress BED.'
         write: 'parlour → ROOM; was → IS; what → BED'
       - say: 'So the question is where is the bed, which is answer choice D.'
