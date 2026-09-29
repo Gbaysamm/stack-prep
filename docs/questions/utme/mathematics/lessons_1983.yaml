@@ -75,33 +75,41 @@ lessons:
     moments:
       - say: 'We have a regular hexagon, and we want the size of each of its interior angles.'
         write: 'Regular hexagon: $n = 6$ sides'
+      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+        show_sketch: true
       - say: 'Regular means all six sides are equal and all six angles are equal.'
         write: 'All 6 interior angles are equal'
       - say: 'The easiest way in is from the outside. Walk once round any polygon and you turn through one full turn, so the exterior angles always add up to 360 degrees.'
         write: 'Sum of exterior angles $= 360^{\circ}$'
+        point:
+          - {figure: sketch, kind: circle, target: '60°', text: 'exterior angle'}
       - say: 'Here the six exterior angles are equal, so each one is 360 divided by 6.'
         write: 'Each exterior angle $= \dfrac{360^{\circ}}{6}$'
         point:
-          - {line: 3, kind: move, from: {line: 2, at: '360∘'}, at: '360∘', text: 'shared by 6'}
+          - {line: 4, kind: move, from: {line: 3, at: '360∘'}, at: '360∘', text: 'shared by 6'}
       - say: '360 divided by 6 is 60, so each exterior angle is 60 degrees.'
         write: '$= 60^{\circ}$'
       - say: 'An interior angle and its exterior angle sit together on a straight line, so they add up to 180 degrees.'
         write: 'Interior $+$ exterior $= 180^{\circ}$'
+        point:
+          - {figure: sketch, kind: circle, target: '?', text: 'interior'}
+          - {figure: sketch, kind: circle, target: '60°', text: 'exterior'}
       - say: 'So each interior angle is 180 minus the 60 we just found, which is 120 degrees.'
         write: 'Interior $= 180^{\circ} - 60^{\circ} = 120^{\circ}$'
         point:
-          - {line: 6, kind: move, from: {line: 4, at: '60∘'}, at: '−60∘', text: 'from here'}
+          - {line: 7, kind: move, from: {line: 5, at: '60∘'}, at: '−60∘', text: 'from here'}
+          - {figure: sketch, kind: circle, target: '?', text: '120°'}
       - say: 'Let''s check another way. The interior angles of a polygon with $n$ sides add up to $n$ minus 2, times 180 degrees.'
         write: 'Sum of interior angles $= (n - 2) \times 180^{\circ}$'
       - say: 'Put in $n = 6$. 6 minus 2 is 4, and 4 times 180 is 720 degrees.'
         write: '$= (6 - 2) \times 180^{\circ} = 4 \times 180^{\circ} = 720^{\circ}$'
         point:
-          - {line: 7, kind: box, text: 'the rule'}
-          - {line: 8, kind: move, from: {line: 0, at: 'n=[[6]]'}, at: '([[6]]−2)', text: 'n = 6'}
+          - {line: 8, kind: box, text: 'the rule'}
+          - {line: 9, kind: move, from: {line: 0, at: 'n=[[6]]'}, at: '([[6]]−2)', text: 'n = 6'}
       - say: 'Shared equally among the six angles, 720 divided by 6 is 120. It agrees.'
         write: 'Each angle $= \dfrac{720^{\circ}}{6} = 120^{\circ}$'
         point:
-          - {line: 9, kind: move, from: {line: 8, at: '=720∘'}, at: '720∘'}
+          - {line: 10, kind: move, from: {line: 9, at: '=720∘'}, at: '720∘'}
       - say: 'So each interior angle is 120 degrees, which is answer choice C.'
         write: 'Each interior angle $= 120^{\circ}$'
         answer: true
@@ -239,12 +247,21 @@ lessons:
     moments:
       - say: 'In the figure, triangle $PQR$ has a right angle at $P$ and 60 degrees at $Q$, with $QR = 8$ cm. Triangle $PRS$ has a right angle at $R$ and 45 degrees at $P$. We want $PS$.'
         write: '$QR = 8$ cm, $\angle PQR = 60^{\circ}$, $\angle RPS = 45^{\circ}$'
+        point:
+          - {figure: 0, kind: arc, target: PQR, text: '60°'}
+          - {figure: 0, kind: highlight, target: QR, text: '8 cm'}
+          - {figure: 0, kind: arc, target: RPS, text: '45°'}
       - say: 'The plan: first find $PR$, the side the two triangles share. Then use it in triangle $PRS$ to reach $PS$.'
         write: 'Plan: find $PR$ first, then $PS$'
+        point:
+          - {figure: 0, kind: highlight, target: PR, text: 'shared side'}
+          - {figure: 0, kind: highlight, target: PS, text: 'want'}
       - say: 'In triangle $PQR$ the right angle is at $P$, so the side opposite it, $QR$, is the hypotenuse. It''s 8 cm.'
         write: 'In $\triangle PQR$: hypotenuse $QR = 8$'
         point:
           - {figure: 0, kind: highlight, target: QR, text: 'hypotenuse'}
+      - say: 'SOH: the sine of an angle is the opposite side over the hypotenuse.'
+        write: 'SOH: $\sin\theta = \dfrac{\text{opposite}}{\text{hypotenuse}}$'
       - say: '$PR$ is the side opposite the 60 degree angle at $Q$. Opposite over hypotenuse is sine.'
         write: '$\sin 60^{\circ} = \dfrac{PR}{QR} = \dfrac{PR}{8}$'
         point:
@@ -253,13 +270,15 @@ lessons:
       - say: 'Multiply both sides by 8, so $PR$ is 8 times sine 60 degrees.'
         write: '$PR = 8\sin 60^{\circ}$'
         point:
-          - {line: 4, kind: move, from: {line: 3, at: '[[8]]PR'}, at: '[[8]]sin', text: 'times 8'}
+          - {line: 5, kind: move, from: {line: 4, at: '[[8]]PR'}, at: '[[8]]sin', text: 'times 8'}
       - say: 'Sine 60 degrees is root 3 over 2.'
         write: '$= 8 \times \dfrac{\sqrt{3}}{2}$'
       - say: '8 divided by 2 is 4, so $PR$ is 4 root 3 cm.'
         write: '$PR = 4\sqrt{3}$ cm'
         point:
           - {figure: 0, kind: label, target: PR, text: '4√3'}
+      - say: 'The rule: the three angles of any triangle add up to 180 degrees.'
+        write: 'Angle sum of a triangle: $A + B + C = 180^{\circ}$'
       - say: 'Now triangle $PRS$. It has 90 degrees at $R$ and 45 at $P$, so the angle at $S$ is 180 minus 90 minus 45, which is 45 degrees too.'
         write: 'In $\triangle PRS$: $\angle PSR = 180^{\circ} - 90^{\circ} - 45^{\circ} = 45^{\circ}$'
         point:
@@ -267,8 +286,10 @@ lessons:
       - say: 'Two equal angles mean two equal sides. So $RS$ equals the $PR$ we just found, 4 root 3.'
         write: '$RS = PR = 4\sqrt{3}$'
         point:
-          - {line: 8, kind: move, from: {line: 6, at: '43'}, at: '43', text: 'just found'}
+          - {line: 10, kind: move, from: {line: 7, at: '43'}, at: '43', text: 'just found'}
           - {figure: 0, kind: label, target: RS, text: '4√3'}
+      - say: 'Pythagoras: the hypotenuse squared equals the opposite squared plus the adjacent squared.'
+        write: 'Pythagoras: $\text{hypotenuse}^{2} = \text{opposite}^{2} + \text{adjacent}^{2}$'
       - say: '$PS$ is opposite the right angle at $R$, so it''s the hypotenuse. By Pythagoras, $PS$ squared is $PR$ squared plus $RS$ squared.'
         write: '$PS^{2} = PR^{2} + RS^{2}$'
         point:
@@ -343,13 +364,15 @@ lessons:
         write: '$1.52 \times 4.2 = 1.52 \times 4 + 1.52 \times 0.2 = 6.08 + 0.304$'
       - say: 'Add them: 6.08 plus 0.304 is 6.384.'
         write: '$= 6.384$'
+      - say: 'Law of indices: to multiply powers of the same base, add the indices.'
+        write: 'Law of indices: $a^{m} \times a^{n} = a^{m + n}$'
       - say: 'Now the powers. When we multiply powers of 10, we add the indices. Negative 5 plus negative 4 is negative 9.'
         write: '$10^{-5} \times 10^{-4} = 10^{-5 + (-4)} = 10^{-9}$'
       - say: 'So the product is 6.384 times 10 to the negative 9. And 6.384 is between 1 and 10, as it should be.'
         write: 'Product $= 6.384 \times 10^{-9}$'
         point:
-          - {line: 8, kind: move, from: {line: 6, at: '6.384'}, at: '6.384'}
-          - {line: 8, kind: move, from: {line: 7, at: '=10−9'}, at: '10−9'}
+          - {line: 9, kind: move, from: {line: 6, at: '6.384'}, at: '6.384'}
+          - {line: 9, kind: move, from: {line: 8, at: '=10−9'}, at: '10−9'}
       - say: 'To two decimal places, $A$ is 6.38, and $B$ is negative 9, which is answer choice B.'
         write: '$A = 6.38,\ B = -9$'
         answer: true
@@ -479,6 +502,8 @@ lessons:
           - {figure: 0, kind: label, target: '(2x − 24)°', text: '= 60°'}
       - say: 'A sector of 60 degrees is 60 out of the 360 degrees of the whole circle. That simplifies to 1 over 6.'
         write: 'Fraction of the class $= \dfrac{60}{360} = \dfrac{1}{6}$'
+        point:
+          - {figure: 0, kind: circle, target: '(2x − 24)°', text: '60° of 360°'}
       - say: 'So 1 over 6 of the 60 pupils offer Additional Mathematics. 60 divided by 6 is 10.'
         write: 'Pupils $= \dfrac{1}{6} \times 60 = 10$'
       - say: 'So 10 pupils offer Additional Mathematics, which is answer choice B.'
@@ -542,7 +567,7 @@ lessons:
         write: '$16a + \dfrac{b}{2} = 6$'
       - say: 'Multiply every term by 2 to clear the fraction. $16a$ times 2 is $32a$, and 6 times 2 is 12. That''s equation two.'
         write: '$32a + b = 12 \quad (2)$'
-      - say: 'Both equations have a single $b$, so subtract equation one from equation two, and the $b$ disappears.'
+      - say: 'Both equations have a single $b$, so take equation two minus equation one, and the $b$ disappears.'
         write: '(2) $-$ (1): $32a - a = 12 - 2$'
       - say: '$32a$ minus $a$ is $31a$, and 12 minus 2 is 10.'
         write: '$31a = 10$'
@@ -607,7 +632,14 @@ lessons:
     moments:
       - say: 'A right-angled triangle has sides $3x + 1$, $3x - 1$ and $x$ centimetres. We want $x$.'
         write: 'Sides: $3x + 1,\ \ 3x - 1,\ \ x$'
+      - say: 'Let me draw a diagram of this, to make it simpler to see.'
         show_sketch: true
+        point:
+          - {figure: sketch, kind: highlight, target: AB, text: '3x + 1'}
+          - {figure: sketch, kind: highlight, target: BC, text: '3x − 1'}
+          - {figure: sketch, kind: highlight, target: AC, text: 'x'}
+      - say: 'Pythagoras: the hypotenuse squared equals the opposite squared plus the adjacent squared.'
+        write: 'Pythagoras: $\text{hypotenuse}^{2} = \text{opposite}^{2} + \text{adjacent}^{2}$'
       - say: 'In a right-angled triangle, Pythagoras works, and the hypotenuse is the longest side. Here that''s $3x + 1$.'
         write: 'Hypotenuse $= 3x + 1$, the longest side'
         point:
@@ -621,8 +653,8 @@ lessons:
       - say: 'Put both expansions back into the Pythagoras equation.'
         write: '$9x^{2} + 6x + 1 = 9x^{2} - 6x + 1 + x^{2}$'
         point:
-          - {line: 5, kind: move, from: {line: 3, at: '=9x2+6x+1'}, at: '9x2+6x+1'}
-          - {line: 5, kind: move, from: {line: 4, at: '=9x2−6x+1'}, at: '9x2−6x+1'}
+          - {line: 7, kind: move, from: {line: 5, at: '=9x2+6x+1'}, at: '9x2+6x+1'}
+          - {line: 7, kind: move, from: {line: 6, at: '=9x2−6x+1'}, at: '9x2−6x+1'}
       - say: 'Subtract $9x^2$ and 1 from both sides. They cancel from each side.'
         write: '$6x = -6x + x^{2}$'
       - say: 'Add $6x$ to both sides. $6x$ plus $6x$ is $12x$.'
@@ -630,13 +662,14 @@ lessons:
       - say: 'Bring everything to one side.'
         write: '$x^{2} - 12x = 0$'
         point:
-          - {line: 8, kind: move, from: {line: 7, at: '12x'}, at: '−12x', text: 'across'}
+          - {line: 10, kind: move, from: {line: 9, at: '12x'}, at: '−12x', text: 'across'}
       - say: 'Both terms have $x$ in them, so take $x$ out as a factor.'
         write: '$x(x - 12) = 0$'
       - say: 'So $x$ is 0 or 12. A side of length 0 makes no triangle, so $x$ is 12.'
         write: '$x = 0$ (no triangle) or $x = 12$'
         point:
-          - {line: 10, kind: strike, at: 'x=0', text: 'not this'}
+          - {line: 12, kind: strike, at: 'x=0', text: 'not this'}
+          - {figure: sketch, kind: label, target: AC, text: '12 cm'}
       - say: 'Let''s check. With $x = 12$, the sides are 3 times 12 plus 1, which is 37, then 3 times 12 minus 1, which is 35, and 12.'
         write: 'Sides: $3(12) + 1 = 37,\ \ 3(12) - 1 = 35,\ \ 12$'
         point:
@@ -692,12 +725,20 @@ lessons:
     moments:
       - say: 'We want the equation that matches the graph. Let''s read three clues off the graph: where it crosses the $y$-axis, which way it opens, and where it crosses the $x$-axis.'
         write: 'Clues: $y$-intercept, shape, $x$-intercepts'
+        point:
+          - {figure: 0, kind: circle, target: {x: 190, y: 50}, text: 'y-axis crossing'}
+          - {figure: 0, kind: arrow, target: {x: 152, y: 40}, text: 'shape'}
+          - {figure: 0, kind: circle, target: '−1', text: 'x-axis crossing'}
       - say: 'Clue one: the curve crosses the $y$-axis at 1. At $x = 0$, each equation gives just its constant term, so the constant must be 1.'
         write: '$y$-intercept: $y = 1$ when $x = 0$'
+        point:
+          - {figure: 0, kind: label, target: {x: 190, y: 50}, text: 'y-intercept 1'}
       - say: 'Test option E at $x = 0$: 3 times 0, plus 2 times 0, minus 1, is negative 1. So E is out.'
         write: 'E: $3(0)^{2} + 2(0) - 1 = -1$, out'
       - say: 'Clue two: the curve opens downwards, like a hill. That means the $x^2$ term must be negative.'
         write: 'Opens downwards: coefficient of $x^{2} < 0$'
+        point:
+          - {figure: 0, kind: arrow, target: {x: 152, y: 40}, text: 'opens down'}
       - say: 'A and B have plus $3x^2$, so they open upwards and are out. That leaves C and D, which both have minus $3x^2$.'
         write: 'A, B have $+3x^{2}$: out. Left: C and D'
         point:
@@ -715,10 +756,14 @@ lessons:
         point:
           - {line: 7, kind: strike, at: 'C', text: 'not this'}
           - {line: 6, kind: circle, at: '=0', text: 'D fits'}
+          - {figure: 0, kind: circle, target: '−1', text: 'x = −1'}
       - say: 'To be sure, let''s factorise D. $1 - 2x - 3x^2$ is $1 - 3x$ times $1 + x$.'
         write: '$1 - 2x - 3x^{2} = (1 - 3x)(1 + x)$'
       - say: 'Its roots are where each bracket is zero: $x = \tfrac{1}{3}$ and $x = -1$. Those are exactly where the graph crosses the $x$-axis.'
         write: '$1 - 3x = 0 \Rightarrow x = \tfrac{1}{3},\quad 1 + x = 0 \Rightarrow x = -1$'
+        point:
+          - {figure: 0, kind: circle, target: {x: 226.7, y: 80}, text: 'x = 1/3'}
+          - {figure: 0, kind: circle, target: '−1', text: 'x = −1'}
       - say: 'So the graph is $y = 1 - 2x - 3x^2$, which is answer choice D.'
         write: 'Graph: $y = 1 - 2x - 3x^{2}$'
         answer: true
@@ -735,6 +780,10 @@ lessons:
           - {figure: 0, kind: arc, target: GKF, text: '30°'}
       - say: 'A rhombus has four equal sides, and its opposite sides are parallel. One more fact: each diagonal cuts the angles at its ends exactly in half.'
         write: 'Rhombus: each diagonal bisects the corner angles'
+        point:
+          - {figure: 0, kind: highlight, target: KG, text: 'diagonal'}
+          - {figure: 0, kind: arc, target: GKF, text: '30°'}
+          - {figure: 0, kind: arc, target: HKG, text: '30°'}
       - say: 'So the diagonal $KG$ splits the angle at $K$ into two equal parts. The part on the other side, angle $HKG$, is also 30 degrees.'
         write: '$\angle HKG = \angle GKF = 30^{\circ}$'
         point:
@@ -742,19 +791,33 @@ lessons:
           - {figure: 0, kind: arc, target: HKG, text: '30°'}
       - say: 'So the whole angle at $K$ is 30 plus 30, which is 60 degrees.'
         write: '$\angle HKF = 30^{\circ} + 30^{\circ} = 60^{\circ}$'
+        point:
+          - {figure: 0, kind: arc, target: HKF, text: '60°'}
+      - say: 'The rule: co-interior angles between parallel lines add up to 180 degrees.'
+        write: 'Co-interior angles add up to $180^{\circ}$'
       - say: 'Now, $HG$ is parallel to $KF$. The angles at $K$ and $H$ sit between those parallel sides, on the same side of $KH$, so they add up to 180 degrees.'
         write: 'Co-interior angles: $\angle K + \angle H = 180^{\circ}$'
+        point:
+          - {figure: 0, kind: highlight, target: HG, text: 'parallel'}
+          - {figure: 0, kind: highlight, target: KF, text: 'parallel'}
+          - {figure: 0, kind: arc, target: KHG}
       - say: 'Put in the 60 degrees we found at $K$, and $x$ for the angle at $H$.'
         write: '$60^{\circ} + x = 180^{\circ}$'
         point:
-          - {line: 5, kind: move, from: {line: 3, at: '=60∘'}, at: '60∘', text: 'from here'}
+          - {line: 6, kind: move, from: {line: 3, at: '=60∘'}, at: '60∘', text: 'from here'}
+          - {figure: 0, kind: arc, target: HKF, text: '60°'}
+          - {figure: 0, kind: circle, target: x, text: 'x'}
       - say: 'Subtract 60 from both sides. 180 minus 60 is 120.'
         write: '$x = 180^{\circ} - 60^{\circ} = 120^{\circ}$'
         point:
-          - {line: 6, kind: move, from: {line: 5, at: '60∘+'}, at: '−60∘', text: 'across'}
+          - {line: 7, kind: move, from: {line: 6, at: '60∘+'}, at: '−60∘', text: 'across'}
           - {figure: 0, kind: arc, target: KHG, text: 'x = 120°'}
       - say: 'Let''s check with triangle $KHG$. $HK$ equals $HG$, since the sides of a rhombus are equal, so its base angles at $K$ and $G$ are equal, both 30 degrees.'
         write: 'In $\triangle KHG$: $\angle HKG = \angle HGK = 30^{\circ}$'
+        point:
+          - {figure: 0, kind: highlight, target: HK, text: 'equal'}
+          - {figure: 0, kind: highlight, target: HG, text: 'equal'}
+          - {figure: 0, kind: arc, target: HGK, text: '30°'}
       - say: 'Then $x$ is 180 minus 30 minus 30, which is 120 again.'
         write: '$x = 180^{\circ} - 30^{\circ} - 30^{\circ} = 120^{\circ}$'
       - say: 'So $x$ is 120 degrees, which is answer choice D.'
@@ -769,8 +832,14 @@ lessons:
     moments:
       - say: 'A desk $PQRS$ is 2 metres by 0.8 metres. It''s tilted at 30 degrees to the horizontal along its 2 metre edge $PQ$. We want the angle the diagonal $PR$ makes with the horizontal.'
         write: 'Desk: $PQ = 2$ m, $QR = 0.8$ m, tilted at $30^{\circ}$'
+        point:
+          - {figure: 0, kind: highlight, target: PQ, text: '2 m edge'}
+          - {figure: 0, kind: circle, target: '30°', text: 'tilt'}
+          - {figure: 0, kind: highlight, target: PR, text: 'diagonal'}
       - say: 'Picture it. The edge $PQ$ stays on the horizontal floor, and the short edge $QR$ rises from it at 30 degrees. So the corner $R$ is lifted off the floor.'
         write: '$QR$ rises at $30^{\circ}$ to the horizontal'
+      - say: 'SOH: the sine of an angle is the opposite side over the hypotenuse.'
+        write: 'SOH: $\sin\theta = \dfrac{\text{opposite}}{\text{hypotenuse}}$'
       - say: 'First, how high is $R$? $QR$ is 0.8 metres, sloping at 30 degrees, and the height is the side opposite that angle. So it''s 0.8 times sine 30.'
         write: 'Height of $R$: $h = QR\sin 30^{\circ} = 0.8\sin 30^{\circ}$'
         point:
@@ -780,6 +849,8 @@ lessons:
         write: '$h = 0.8 \times 0.5 = 0.4$ m'
         point:
           - {figure: 0, kind: label, target: R, text: '0.4 m up'}
+      - say: 'Pythagoras: the hypotenuse squared equals the opposite squared plus the adjacent squared.'
+        write: 'Pythagoras: $\text{hypotenuse}^{2} = \text{opposite}^{2} + \text{adjacent}^{2}$'
       - say: 'Next, the length of the diagonal $PR$. On the desk, $PQ$ and $QR$ meet at a right angle, so we use Pythagoras.'
         write: '$PR^{2} = PQ^{2} + QR^{2} = 2^{2} + 0.8^{2}$'
         point:
@@ -791,8 +862,8 @@ lessons:
       - say: 'Now, $PR$ starts at $P$ on the floor and climbs to $R$, which we found is 0.4 metres up. So the sine of its angle, theta, is that height over the length of $PR$.'
         write: '$\sin\theta = \dfrac{h}{PR} = \dfrac{0.4}{2.154}$'
         point:
-          - {line: 7, kind: move, from: {line: 3, at: '0.4m'}, at: '0.4', text: 'height'}
-          - {line: 7, kind: move, from: {line: 6, at: '2.154'}, at: '2.154', text: 'PR'}
+          - {line: 9, kind: move, from: {line: 4, at: '0.4m'}, at: '0.4', text: 'height'}
+          - {line: 9, kind: move, from: {line: 8, at: '2.154'}, at: '2.154', text: 'PR'}
           - {figure: 0, kind: highlight, target: PR}
       - say: '0.4 divided by 2.154 is about 0.1857.'
         write: '$\sin\theta \approx 0.1857$'
@@ -803,6 +874,8 @@ lessons:
       - say: 'So the diagonal is inclined at 10 degrees 42 minutes, which is answer choice E.'
         write: '$\theta = 10^{\circ}42''$'
         answer: true
+        point:
+          - {figure: 0, kind: label, target: PR, text: '10°42′ to horizontal'}
     traps:
       A: 'You went for 23 degrees 35 minutes. That''s the angle whose sine is 0.4, as if the diagonal were 1 metre long. The sine is the height over the length of $PR$: 0.4 over 2.154.'
       B: 'You went for 30 degrees. That''s the slope of the short edge $QR$. The diagonal $PR$ is longer but rises to the same height of 0.4 metres, so it is less steep.'
@@ -992,16 +1065,24 @@ lessons:
           - {figure: 0, kind: circle, target: x, text: 'centre'}
       - say: 'The key fact: the angle at the centre is twice the angle at the circumference, when both stand on the same arc.'
         write: 'Angle at centre $= 2 \times$ angle at circumference'
+        point:
+          - {figure: 0, kind: circle, target: '130°', text: 'at circumference'}
+          - {figure: 0, kind: circle, target: O, text: 'centre'}
       - say: 'Look at which arc the 130 degree angle stands on. Its arms open upwards, away from the lower arc, so it stands on the big arc going round the top of the circle.'
         write: 'The $130^{\circ}$ stands on the upper arc'
+        point:
+          - {figure: 0, kind: circle, target: '130°'}
+          - {figure: 0, kind: arrow, target: {x: 120, y: 30}, text: 'upper arc'}
       - say: 'So the angle at $O$ facing that same upper arc is twice 130, which is 260 degrees. That''s a reflex angle, going round the top side of $O$.'
         write: 'Reflex angle at $O = 2 \times 130^{\circ} = 260^{\circ}$'
         point:
           - {line: 1, kind: box, text: 'the rule'}
+          - {figure: 0, kind: label, target: {x: 128, y: 92}, text: '260° reflex'}
       - say: '$x$ is the angle at $O$ on the other side, inside the four-sided shape. Angles around a point add up to 360 degrees.'
         write: '$x + 260^{\circ} = 360^{\circ}$'
         point:
           - {line: 4, kind: move, from: {line: 3, at: '=260∘'}, at: '260∘', text: 'from here'}
+          - {figure: 0, kind: circle, target: x, text: '360° − 260°'}
       - say: 'Subtract 260 from both sides.'
         write: '$x = 360^{\circ} - 260^{\circ}$'
         point:
@@ -1012,8 +1093,12 @@ lessons:
           - {figure: 0, kind: label, target: x, text: '100°'}
       - say: 'Let''s check another way. Take a point on the upper arc instead. The angle there, standing on the lower arc, makes a cyclic pair with the 130, so it''s 180 minus 130, which is 50.'
         write: 'Check: $180^{\circ} - 130^{\circ} = 50^{\circ}$'
+        point:
+          - {figure: 0, kind: label, target: {x: 120, y: 30}, text: '50° here'}
       - say: 'The angle at the centre on that lower arc is twice 50, which is 100. It agrees.'
         write: '$x = 2 \times 50^{\circ} = 100^{\circ}$'
+        point:
+          - {figure: 0, kind: circle, target: x, text: '100°'}
       - say: 'So $x$ is 100 degrees, which is answer choice C.'
         write: '$x = 100^{\circ}$'
         answer: true
@@ -1026,26 +1111,39 @@ lessons:
     moments:
       - say: 'We have the data 6, 10, 14, 16 and 26, and we want the angle of each sector in a pie chart.'
         write: 'Data: $6,\ 10,\ 14,\ 16,\ 26$'
+      - say: 'Let me draw the pie chart, so we can see the parts of the whole.'
+        show_sketch: true
       - say: 'In a pie chart, each item gets the same fraction of 360 degrees as it has of the total.'
         write: 'Angle $= \dfrac{\text{item}}{\text{total}} \times 360^{\circ}$'
       - say: 'So first, find the total. 6 plus 10 is 16, plus 14 is 30, plus 16 is 46, plus 26 is 72.'
         write: 'Total $= 6 + 10 + 14 + 16 + 26 = 72$'
+        point:
+          - {figure: sketch, kind: circle, target: 'Total 72 = 360°'}
       - say: 'So 72 units share 360 degrees. Each unit is worth 360 divided by 72, which is 5 degrees.'
         write: 'One unit $= \dfrac{360^{\circ}}{72} = 5^{\circ}$'
         point:
-          - {line: 3, kind: move, from: {line: 2, at: '=72'}, at: '72', text: 'total'}
+          - {line: 4, kind: move, from: {line: 3, at: '=72'}, at: '72', text: 'total'}
       - say: 'Now multiply each item by the 5 degrees we just found. 6 times 5 is 30 degrees.'
         write: '$6 \times 5^{\circ} = 30^{\circ}$'
         point:
-          - {line: 4, kind: move, from: {line: 3, at: '=5∘'}, at: '5∘', text: 'one unit'}
+          - {line: 5, kind: move, from: {line: 4, at: '=5∘'}, at: '5∘', text: 'one unit'}
+          - {figure: sketch, kind: circle, target: '6', text: '30°'}
       - say: '10 times 5 is 50 degrees.'
         write: '$10 \times 5^{\circ} = 50^{\circ}$'
+        point:
+          - {figure: sketch, kind: circle, target: '10', text: '50°'}
       - say: '14 times 5 is 70 degrees.'
         write: '$14 \times 5^{\circ} = 70^{\circ}$'
+        point:
+          - {figure: sketch, kind: circle, target: '14', text: '70°'}
       - say: '16 times 5 is 80 degrees.'
         write: '$16 \times 5^{\circ} = 80^{\circ}$'
+        point:
+          - {figure: sketch, kind: circle, target: '16', text: '80°'}
       - say: 'And 26 times 5 is 130 degrees.'
         write: '$26 \times 5^{\circ} = 130^{\circ}$'
+        point:
+          - {figure: sketch, kind: circle, target: '26', text: '130°'}
       - say: 'Check that they make a full turn: 30 plus 50 is 80, plus 70 is 150, plus 80 is 230, plus 130 is 360. Good.'
         write: 'Check: $30 + 50 + 70 + 80 + 130 = 360$'
       - say: 'So the angles are 30, 50, 70, 80 and 130 degrees, which is answer choice D.'
@@ -1248,6 +1346,8 @@ lessons:
         point:
           - {line: 6, kind: move, from: {line: 3, at: '=2'}, at: '=[[2]]+'}
           - {line: 6, kind: move, from: {line: 5, at: '=−1'}, at: '(−1)'}
+      - say: 'The product law of logs: the log of one number plus the log of another is the log of their product.'
+        write: 'Product law: $\log_{a}m + \log_{a}n = \log_{a}(mn)$'
       - say: 'Let''s check with the rule: log $a$ plus log $b$ equals the log of $a$ times $b$.'
         write: 'Check: $\log_{7}49 + \log_{7}\tfrac{1}{7} = \log_{7}\left(49 \times \tfrac{1}{7}\right)$'
       - say: '49 times 1 over 7 is 7, and log base 7 of 7 is 1, because 7 to the power 1 is 7. It agrees.'
@@ -1301,22 +1401,29 @@ lessons:
     moments:
       - say: 'A convex hexagon has one angle of 170 degrees, and the other five angles are all $x$ degrees. We want $x$.'
         write: 'One angle $170^{\circ}$, five angles of $x^{\circ}$'
+      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+        show_sketch: true
+        point:
+          - {figure: sketch, kind: circle, target: '170°', text: 'one angle'}
+          - {figure: sketch, kind: arc, target: ABC, text: 'x'}
       - say: 'The interior angles of a polygon with $n$ sides add up to $n$ minus 2, times 180 degrees. That''s because it can be cut into $n$ minus 2 triangles from one corner.'
         write: 'Sum of interior angles $= (n - 2) \times 180^{\circ}$'
       - say: 'A hexagon has 6 sides, so put in $n = 6$. 6 minus 2 is 4.'
         write: '$= (6 - 2) \times 180^{\circ} = 4 \times 180^{\circ}$'
         point:
-          - {line: 1, kind: box, text: 'the rule'}
+          - {line: 2, kind: box, text: 'the rule'}
       - say: '4 times 180 is 720 degrees.'
         write: '$= 720^{\circ}$'
       - say: 'The angles are 170 and five lots of $x$, and together they make the 720 we just found.'
         write: '$170 + 5x = 720$'
         point:
-          - {line: 4, kind: move, from: {line: 3, at: '720∘'}, at: '720'}
+          - {line: 5, kind: move, from: {line: 4, at: '720∘'}, at: '720'}
+          - {figure: sketch, kind: circle, target: '170°'}
+          - {figure: sketch, kind: arc, target: CDE, text: '5 angles of x'}
       - say: 'Subtract 170 from both sides. 720 minus 170 is 550.'
         write: '$5x = 720 - 170 = 550$'
         point:
-          - {line: 5, kind: move, from: {line: 4, at: '170+'}, at: '−170', text: 'across'}
+          - {line: 6, kind: move, from: {line: 5, at: '170+'}, at: '−170', text: 'across'}
       - say: 'Divide both sides by 5. 550 divided by 5 is 110.'
         write: '$x = \dfrac{550}{5} = 110$'
       - say: 'Check: 5 times 110 is 550, and 550 plus 170 is 720. Good.'
@@ -1325,6 +1432,8 @@ lessons:
         write: '$170^{\circ} < 180^{\circ}$ and $110^{\circ} < 180^{\circ}$: convex'
       - say: 'So each of the other angles is 110 degrees, which is answer choice B.'
         write: '$x = 110^{\circ}$'
+        point:
+          - {figure: sketch, kind: arc, target: DEF, text: '110°'}
         answer: true
     traps:
       A: 'You went for 120 degrees. That''s each angle of a regular hexagon. This one isn''t regular: one angle is 170, so the other five must share 720 minus 170, which is 550, giving 110 each.'
@@ -1339,8 +1448,13 @@ lessons:
           - {figure: 0, kind: arc, target: TPQ, text: '50°'}
       - say: 'Imagine the diagonal $QS$ drawn in. We''ll use three circle facts, one after another.'
         write: 'Join $QS$'
+        point:
+          - {figure: 0, kind: highlight, target: QS, text: 'join QS'}
       - say: 'First, the alternate segment theorem: the angle between a tangent and a chord equals the angle in the alternate segment, on the other side of the chord.'
         write: 'Tangent-chord angle $=$ angle in alternate segment'
+        point:
+          - {figure: 0, kind: arc, target: TPQ, text: '50°'}
+          - {figure: 0, kind: arc, target: QSP, text: '50°'}
       - say: 'Here the chord is $PQ$, and the angle on the other side of it is at $S$. So angle $PSQ$ equals the 50 degrees between the tangent and $PQ$.'
         write: '$\angle PSQ = \angle TPQ = 50^{\circ}$'
         point:
@@ -1351,26 +1465,37 @@ lessons:
         point:
           - {line: 0, kind: underline, at: 'PQ=PS', text: 'given'}
           - {figure: 0, kind: arc, target: PQS, text: '50°'}
+      - say: 'The rule: the three angles of any triangle add up to 180 degrees.'
+        write: 'Angle sum of a triangle: $A + B + C = 180^{\circ}$'
       - say: 'The angles in triangle $PQS$ add to 180, so the angle at $P$ is 180 minus 50 minus 50.'
         write: '$\angle QPS = 180^{\circ} - 50^{\circ} - 50^{\circ}$'
+        point:
+          - {figure: 0, kind: arc, target: QPS, text: '80°'}
       - say: '50 plus 50 is 100, and 180 minus 100 is 80 degrees.'
         write: '$= 180^{\circ} - 100^{\circ} = 80^{\circ}$'
         point:
           - {figure: 0, kind: arc, target: QPS, text: '80°'}
+      - say: 'The rule: opposite angles of a cyclic quadrilateral add up to 180 degrees.'
+        write: 'Cyclic quadrilateral: opposite angles add up to $180^{\circ}$'
       - say: 'Third, in a cyclic quadrilateral, opposite angles add to 180 degrees. The angle at $R$ is opposite the angle at $P$.'
         write: '$\angle QRS + \angle QPS = 180^{\circ}$'
+        point:
+          - {figure: 0, kind: arc, target: QRS, text: 'R'}
+          - {figure: 0, kind: arc, target: QPS, text: 'P'}
       - say: 'Put in the 80 degrees we found at $P$.'
         write: '$\angle QRS + 80^{\circ} = 180^{\circ}$'
         point:
-          - {line: 8, kind: move, from: {line: 6, at: '=80∘'}, at: '+[[80∘]]', text: 'from here'}
+          - {line: 10, kind: move, from: {line: 7, at: '=80∘'}, at: '+[[80∘]]', text: 'from here'}
       - say: 'So angle $QRS$ is 180 minus 80, which is 100 degrees.'
         write: '$\angle QRS = 180^{\circ} - 80^{\circ} = 100^{\circ}$'
         point:
-          - {line: 9, kind: move, from: {line: 8, at: '+80∘'}, at: '−80∘', text: 'across'}
+          - {line: 11, kind: move, from: {line: 10, at: '+80∘'}, at: '−80∘', text: 'across'}
           - {figure: 0, kind: arc, target: QRS, text: '100°'}
       - say: 'So angle $QRS$ is 100 degrees, which is answer choice E.'
         write: 'So $\angle QRS = 100^{\circ}$'
         answer: true
+        point:
+          - {figure: 0, kind: arc, target: QRS, text: '100°'}
     traps:
       A: 'You went for 50 degrees. That''s the angle between the tangent and the chord, which gives the angle $PSQ$. We still need the angle at $P$, which is 80, and then the opposite angle at $R$, which is 100.'
       B: 'You went for 40 degrees. That''s 90 minus 50, but there''s no right angle to use here. The alternate segment theorem gives 50 at $S$, then 80 at $P$, then 180 minus 80 at $R$.'
@@ -1380,11 +1505,21 @@ lessons:
     moments:
       - say: 'A ship leaves port $P$, sails 30 km due south, then 60 km due west. We want the bearing of the ship $H$ from $P$.'
         write: '$30$ km south, then $60$ km west'
+      - say: 'Let me draw a diagram of this, to make it simpler to see.'
         show_sketch: true
+        point:
+          - {figure: sketch, kind: circle, target: P, text: 'port'}
+          - {figure: sketch, kind: circle, target: '30 km', text: 'south'}
+          - {figure: sketch, kind: circle, target: '60 km', text: 'west'}
       - say: 'A bearing is measured from north, turning clockwise, and it''s written with three figures.'
         write: 'Bearing: clockwise from north'
+        point:
+          - {figure: sketch, kind: circle, target: N, text: 'north'}
+          - {figure: sketch, kind: circle, target: '?', text: 'clockwise'}
       - say: 'The ship ends up south and west of the port, so it''s in the south-west quarter. Its bearing must be between 180 and 270 degrees.'
         write: '$180^{\circ} < \text{bearing} < 270^{\circ}$'
+        point:
+          - {figure: sketch, kind: circle, target: H, text: 'south-west'}
       - say: 'Draw the right-angled triangle: 30 km down from $P$, then 60 km across to $H$. Let theta be the angle at $P$ between due south and the line $PH$.'
         write: 'Angle $\theta$ at $P$: from due south, towards $H$'
         point:
@@ -1398,12 +1533,15 @@ lessons:
         write: '$= 2$'
       - say: 'From the tables, the angle whose tangent is 2 is about 63.435 degrees.'
         write: '$\theta \approx 63.435^{\circ}$'
+        point:
+          - {figure: sketch, kind: circle, target: θ, text: '63.435°'}
       - say: 'Change the decimal part to minutes: 0.435 times 60 is about 26. So theta is 63 degrees 26 minutes.'
         write: '$0.435 \times 60 \approx 26$, so $\theta = 63^{\circ}26''$'
       - say: 'Now turn from north. 180 degrees turns us to face due south, and then we turn a further 63 degrees 26 minutes towards the west.'
         write: 'Bearing $= 180^{\circ} + 63^{\circ}26''$'
         point:
-          - {line: 8, kind: move, from: {line: 7, at: '63∘26′'}, at: '63∘26′', text: 'from here'}
+          - {line: 9, kind: move, from: {line: 8, at: '63∘26′'}, at: '63∘26′', text: 'from here'}
+          - {figure: sketch, kind: circle, target: '?', text: '180° + 63°26′'}
       - say: '180 plus 63 is 243. So the bearing of $H$ from $P$ is 243 degrees 26 minutes, which is answer choice B.'
         write: '$= 243^{\circ}26''$'
         point:
@@ -1450,8 +1588,24 @@ lessons:
     moments:
       - say: 'A square paper has side 2.524375 cm, and a square diagram of side 0.524375 cm is drawn on it. We want the area not covered, to 3 significant figures.'
         write: 'Paper side $a = 2.524375$, diagram side $b = 0.524375$'
+        show_sketch: true
+        point:
+          - {figure: sketch, kind: circle, target: '2.524375 cm', text: 'a'}
+          - {figure: sketch, kind: circle, target: '0.524375 cm', text: 'b'}
+      - say: 'The area of a square is its side, squared.'
+        write: 'Area of a square $= \text{side}^{2}$'
+      - say: 'First part: the paper, a big square of side 2.524375. Its area is 2.524375 squared.'
+        write: 'Paper: $A_{1} = 2.524375^{2}$'
+        point:
+          - {figure: sketch, kind: highlight, target: '2.524375 cm', text: 'big square'}
+      - say: 'Second part: the diagram, a small square of side 0.524375. Its area is 0.524375 squared.'
+        write: 'Diagram: $A_{2} = 0.524375^{2}$'
+        point:
+          - {figure: sketch, kind: highlight, target: '0.524375 cm', text: 'small square'}
       - say: 'The uncovered area is the area of the big square minus the area of the small square.'
         write: 'Uncovered area $= a^{2} - b^{2} = 2.524375^{2} - 0.524375^{2}$'
+        point:
+          - {figure: sketch, kind: circle, target: '?', text: 'a² − b²'}
       - say: 'Squaring those long decimals would be painful. But this is a difference of two squares, so we can use $a - b$ times $a + b$.'
         write: 'Difference of squares: $a^{2} - b^{2} = (a - b)(a + b)$'
       - say: 'Look how neat it gets. The decimal parts are the same, so $a$ minus $b$ is exactly 2.'
@@ -1461,9 +1615,9 @@ lessons:
       - say: 'Now put both of those back into the area.'
         write: 'Area $= (a - b)(a + b) = 2 \times 3.04875$'
         point:
-          - {line: 2, kind: box, text: 'the rule'}
-          - {line: 5, kind: move, from: {line: 3, at: '0.524375[[=2]]'}, at: '[[2]]×'}
-          - {line: 5, kind: move, from: {line: 4, at: '=3.04875'}, at: '3.04875'}
+          - {line: 5, kind: box, text: 'the rule'}
+          - {line: 8, kind: move, from: {line: 6, at: '0.524375[[=2]]'}, at: '[[2]]×'}
+          - {line: 8, kind: move, from: {line: 7, at: '=3.04875'}, at: '3.04875'}
       - say: '2 times 3.04875 is 6.0975 square centimetres.'
         write: '$= 6.0975\ \text{cm}^{2}$'
       - say: 'Now round to 3 significant figures. The first three figures are 6, 0 and 9, and the next digit is 7, so the 9 goes up. 6.09 becomes 6.10.'
@@ -1472,6 +1626,8 @@ lessons:
         write: 'Keep the zero: $6.10$, not $6$'
       - say: 'So the area not covered is 6.10 square centimetres, which is answer choice B.'
         write: 'Area $\approx 6.10\ \text{cm}^{2}$'
+        point:
+          - {figure: sketch, kind: circle, target: '?', text: '6.10 cm²'}
         answer: true
     traps:
       A: 'You went for 6.00. The area is 6.0975, and to 3 significant figures that is 6.10, because the 9 rounds up when the next digit is 7.'
@@ -1519,6 +1675,9 @@ lessons:
           - {figure: 0, kind: circle, target: '235°', text: 'reflex'}
       - say: 'First, turn the reflex angle into the ordinary angle on the other side. Angles around a point add up to 360 degrees.'
         write: '$\angle POQ + 235^{\circ} = 360^{\circ}$'
+        point:
+          - {figure: 0, kind: circle, target: '235°', text: 'reflex'}
+          - {figure: 0, kind: arc, target: POQ, text: '125°'}
       - say: 'So the ordinary angle $POQ$ is 360 minus 235, which is 125 degrees.'
         write: '$\angle POQ = 360^{\circ} - 235^{\circ} = 125^{\circ}$'
         point:
@@ -1526,15 +1685,24 @@ lessons:
           - {figure: 0, kind: arc, target: POQ, text: '125°'}
       - say: 'Now, which arc does angle $PRQ$ stand on? In the diagram, $R$ is on the big arc, so the angle at $R$ stands on the small arc $PQ$.'
         write: '$\angle PRQ$ stands on the minor arc $PQ$'
+        point:
+          - {figure: 0, kind: arc, target: PRQ}
+          - {figure: 0, kind: arc, target: PQ, text: 'minor arc'}
       - say: 'And the 125 degree angle at the centre stands on that same small arc.'
         write: '$\angle POQ = 125^{\circ}$ stands on the minor arc $PQ$ too'
+        point:
+          - {figure: 0, kind: arc, target: POQ, text: '125°'}
       - say: 'The angle at the centre is twice the angle at the circumference on the same arc.'
         write: 'Angle at centre $= 2 \times$ angle at circumference'
+        point:
+          - {figure: 0, kind: arc, target: POQ, text: 'centre'}
+          - {figure: 0, kind: arc, target: PRQ, text: 'circumference'}
       - say: 'So the 125 degrees we found is twice angle $PRQ$.'
         write: '$125^{\circ} = 2 \times \angle PRQ$'
         point:
           - {line: 5, kind: box, text: 'the rule'}
           - {line: 6, kind: move, from: {line: 2, at: '=125∘'}, at: '125∘'}
+          - {figure: 0, kind: arc, target: PRQ}
       - say: 'Divide both sides by 2.'
         write: '$\angle PRQ = \dfrac{125^{\circ}}{2}$'
         point:
@@ -1546,6 +1714,8 @@ lessons:
       - say: 'So angle $PRQ$ is 62 and a half degrees, which is answer choice B.'
         write: '$\angle PRQ = 62\tfrac{1}{2}^{\circ}$'
         answer: true
+        point:
+          - {figure: 0, kind: arc, target: PRQ, text: '62½°'}
     traps:
       A: 'You went for 66 and a half degrees. The ordinary angle at $O$ is 360 minus 235, which is 125, and the angle at $R$ is half of that: 62 and a half.'
       C: 'You went for 125 degrees. That''s the angle at the centre. The angle at the circumference on the same arc is half of it, 62 and a half degrees.'
@@ -1601,6 +1771,7 @@ lessons:
         write: 'Okro $= \dfrac{14.5}{270} \times 360^{\circ}$'
         point:
           - {line: 5, kind: move, from: {line: 4, at: '270'}, at: '270', text: 'total'}
+          - {figure: 0, kind: circle, target: Okro, text: '14.5 of 270'}
       - say: '360 over 270 simplifies. Divide both by 90, and it''s 4 over 3. So each kilogram is worth 4 over 3 of a degree.'
         write: '$\dfrac{360}{270} = \dfrac{4}{3}$'
       - say: 'So okro''s angle is 14.5 times 4 over 3. 14.5 times 4 is 58, so we have 58 over 3.'
@@ -1616,6 +1787,8 @@ lessons:
       - say: 'So the okro sector is 19 and a third degrees, which is answer choice B.'
         write: 'Okro $= 19\tfrac{1}{3}^{\circ}$'
         answer: true
+        point:
+          - {figure: 0, kind: label, target: Okro, text: '19⅓°'}
     traps:
       A: 'You went for 91 and a half degrees. That''s far too big for 14.5 kg out of 270 kg, which is only about 1 over 19 of the chart. 14.5 times 4 over 3 is 19 and a third degrees.'
       C: 'You went for 33 and a third degrees. Find the total first, 270 kg. Then each kilogram is 360 over 270, which is 4 over 3 of a degree, and 14.5 times 4 over 3 is 19 and a third.'
@@ -1625,8 +1798,16 @@ lessons:
     moments:
       - say: 'In the figure, $PQR$ is a straight line. Above it, at $Q$, the angles are $x + 3y$ and 45 degrees. Below it they are $y$ and $3x + y$. We want $x$ and $y$.'
         write: 'Above: $(x + 3y)^{\circ},\ 45^{\circ}$; below: $y^{\circ},\ (3x + y)^{\circ}$'
+        point:
+          - {figure: 0, kind: highlight, target: PR, text: 'straight line'}
+          - {figure: 0, kind: circle, target: '(x + 3y)°', text: 'above'}
+          - {figure: 0, kind: circle, target: 'y°', text: 'below'}
       - say: 'Angles on a straight line add up to 180 degrees. That''s true on the top side and on the bottom side, so we get two equations.'
         write: 'Angles on a straight line $= 180^{\circ}$'
+        point:
+          - {figure: 0, kind: highlight, target: PR, text: 'straight line'}
+          - {figure: 0, kind: circle, target: '45°', text: 'top: 180°'}
+          - {figure: 0, kind: circle, target: '(3x + y)°', text: 'bottom: 180°'}
       - say: 'Above the line: $x + 3y$ plus 45 is 180.'
         write: 'Above: $(x + 3y) + 45 = 180$'
         point:
@@ -1683,8 +1864,16 @@ lessons:
     moments:
       - say: '$PR$ is the diameter of a semicircle with centre $Q$ and radius 3.5 cm. Below it is a triangle $PTR$ with 60 degree angles at $P$ and $R$. We want the perimeter of the figure $PTRS$. Take $\pi$ as 22 over 7.'
         write: '$r = 3.5$ cm, $\angle QPT = \angle QRT = 60^{\circ}$, $\pi = \tfrac{22}{7}$'
+        point:
+          - {figure: 0, kind: highlight, target: PR, text: 'diameter'}
+          - {figure: 0, kind: circle, target: '3.5 cm', text: 'radius'}
+          - {figure: 0, kind: circle, target: T, text: 'triangle PTR'}
       - say: 'Perimeter means the distance around the outside edge. The edge is the curved arc $RSP$, then the straight sides $PT$ and $TR$. The diameter $PR$ is inside the figure, so it doesn''t count.'
         write: 'Perimeter $=$ arc $RSP + PT + TR$'
+        point:
+          - {figure: 0, kind: circle, target: S, text: 'arc RSP'}
+          - {figure: 0, kind: highlight, target: PT}
+          - {figure: 0, kind: highlight, target: TR}
       - say: 'First the arc. A semicircle''s arc is half of the full circumference, $2\pi r$, so it''s $\pi r$.'
         write: 'Arc $= \tfrac{1}{2} \times 2\pi r = \pi r$'
         point:
@@ -1697,12 +1886,20 @@ lessons:
           - {line: 3, kind: move, from: {line: 0, at: 'r=3.5'}, at: '3.5', text: 'r'}
       - say: '3.5 divided by 7 is 0.5, and 22 times 0.5 is 11. So the arc is 11 cm.'
         write: '$= 22 \times 0.5 = 11$ cm'
+        point:
+          - {figure: 0, kind: label, target: S, text: 'arc 11 cm'}
+      - say: 'The rule: the three angles of any triangle add up to 180 degrees.'
+        write: 'Angle sum of a triangle: $A + B + C = 180^{\circ}$'
       - say: 'Now triangle $PTR$. It has 60 degrees at $P$ and at $R$, so the angle at $T$ is 180 minus 60 minus 60, which is also 60.'
         write: '$\angle PTR = 180^{\circ} - 60^{\circ} - 60^{\circ} = 60^{\circ}$'
         point:
           - {figure: 0, kind: arc, target: PTR, text: '60°'}
       - say: 'All three angles are 60, so triangle $PTR$ is equilateral: all its sides are equal.'
         write: '$\triangle PTR$ is equilateral: $PT = TR = PR$'
+        point:
+          - {figure: 0, kind: arc, target: PTR, text: '60°'}
+          - {figure: 0, kind: highlight, target: PT, text: 'equal'}
+          - {figure: 0, kind: highlight, target: TR, text: 'equal'}
       - say: 'Its side $PR$ is the diameter, twice the radius. 2 times 3.5 is 7 cm.'
         write: '$PR = 2 \times 3.5 = 7$ cm'
         point:
@@ -1715,9 +1912,9 @@ lessons:
       - say: 'Now go back to our perimeter line and put in the pieces: the arc, 11, plus 7, plus 7.'
         write: 'Perimeter $= 11 + 7 + 7$'
         point:
-          - {line: 9, kind: move, from: {line: 4, at: '11cm'}, at: '11', text: 'arc'}
-          - {line: 9, kind: move, from: {line: 8, at: '7cm'}, at: '11+[[7]]', text: 'sides'}
-          - {line: 9, kind: move, from: {line: 8, at: '7cm'}, at: '7+[[7]]'}
+          - {line: 10, kind: move, from: {line: 4, at: '11cm'}, at: '11', text: 'arc'}
+          - {line: 10, kind: move, from: {line: 9, at: '7cm'}, at: '11+[[7]]', text: 'sides'}
+          - {line: 10, kind: move, from: {line: 9, at: '7cm'}, at: '7+[[7]]'}
       - say: '11 plus 7 plus 7 is 25. So the perimeter is 25 cm, which is answer choice A.'
         write: '$= 25$ cm'
         answer: true
@@ -1730,7 +1927,14 @@ lessons:
     moments:
       - say: 'Triangle $PQR$ has $QR = 3$ cm, $PR = \sqrt{3}$ cm, $PQ = 2\sqrt{3}$ cm, and angle $PQR$ is 30 degrees. We want the angles at $P$ and $R$.'
         write: '$QR = 3, \quad PR = \sqrt{3}, \quad PQ = 2\sqrt{3}, \quad \angle Q = 30^{\circ}$'
+      - say: 'Let me draw a diagram of this, to make it simpler to see.'
         show_sketch: true
+        point:
+          - {figure: sketch, kind: arc, target: PQR, text: '30°'}
+          - {figure: sketch, kind: arc, target: QPR, text: '?'}
+          - {figure: sketch, kind: arc, target: PRQ, text: '?'}
+      - say: 'Pythagoras: in a right-angled triangle, the hypotenuse squared equals the opposite squared plus the adjacent squared. If three sides fit this, the triangle is right-angled.'
+        write: 'Pythagoras: $\text{hypotenuse}^{2} = \text{opposite}^{2} + \text{adjacent}^{2}$'
       - say: 'Before anything else, let''s test the sides with Pythagoras. Square each one. Root 3 squared is 3.'
         write: '$PR^{2} = (\sqrt{3})^{2} = 3$'
         point:
@@ -1745,19 +1949,29 @@ lessons:
           - {figure: sketch, kind: highlight, target: PQ, text: 'longest'}
       - say: 'Now add the two smaller squares: 3 plus 9 is 12, exactly the square on the longest side.'
         write: '$PR^{2} + QR^{2} = 3 + 9 = 12 = PQ^{2}$'
+        point:
+          - {figure: sketch, kind: highlight, target: PQ, text: 'longest: 12'}
       - say: 'That means the triangle is right-angled, and the right angle is opposite the longest side, $PQ$. The corner opposite $PQ$ is $R$.'
         write: 'Right angle opposite $PQ$: $R = 90^{\circ}$'
         point:
-          - {line: 4, kind: circle, at: '=PQ2', text: 'Pythagoras fits'}
+          - {line: 6, kind: circle, at: '=PQ2', text: 'Pythagoras fits'}
           - {figure: sketch, kind: arc, target: PRQ, text: '90°'}
+      - say: 'SOH: the sine of an angle is the opposite side over the hypotenuse.'
+        write: 'SOH: $\sin\theta = \dfrac{\text{opposite}}{\text{hypotenuse}}$'
       - say: 'The angle at $Q$ is given as 30 degrees. Let''s confirm it. Opposite $Q$ is $PR$, and the hypotenuse is $PQ$, so sine $Q$ is root 3 over 2 root 3.'
         write: '$\sin Q = \dfrac{PR}{PQ} = \dfrac{\sqrt{3}}{2\sqrt{3}}$'
+        point:
+          - {figure: sketch, kind: arc, target: PQR, text: '30°'}
+          - {figure: sketch, kind: highlight, target: PR, text: 'opposite'}
+          - {figure: sketch, kind: highlight, target: PQ, text: 'hypotenuse'}
       - say: 'The root 3s cancel, leaving a half, and sine 30 degrees is a half. So $Q$ is 30 degrees, as given.'
         write: '$= \dfrac{1}{2}$, so $Q = 30^{\circ}$'
+      - say: 'The rule: the three angles of any triangle add up to 180 degrees.'
+        write: 'Angle sum of a triangle: $A + B + C = 180^{\circ}$'
       - say: 'The angles of a triangle add up to 180, so the angle at $P$ is 180 minus 90 minus 30, which is 60 degrees.'
         write: '$P = 180^{\circ} - 90^{\circ} - 30^{\circ} = 60^{\circ}$'
         point:
-          - {line: 8, kind: move, from: {line: 5, at: 'R=[[90∘]]'}, at: '−90∘'}
+          - {line: 12, kind: move, from: {line: 7, at: 'R=[[90∘]]'}, at: '−90∘'}
           - {figure: sketch, kind: arc, target: QPR, text: '60°'}
       - say: 'So $P$ is 60 degrees and $R$ is 90 degrees, which is answer choice A.'
         write: '$P = 60^{\circ},\ \ R = 90^{\circ}$'
@@ -1771,11 +1985,17 @@ lessons:
     moments:
       - say: 'In the diagram, $PS = SR$ and $PQ$ is parallel to $SR$. Angle $PSR$ is 130 degrees and angle $PRQ$ is 100 degrees. We want angle $PQR$.'
         write: '$PS = SR, \quad PQ \parallel SR, \quad \angle PSR = 130^{\circ}, \quad \angle PRQ = 100^{\circ}$'
+        point:
+          - {figure: 0, kind: highlight, target: PS, text: 'equal'}
+          - {figure: 0, kind: highlight, target: SR, text: 'equal'}
+          - {figure: 0, kind: arc, target: PQR, text: '?'}
       - say: 'Start with triangle $PSR$. Since $PS$ equals $SR$, it''s isosceles, so its base angles at $P$ and $R$ are equal.'
         write: 'In $\triangle PSR$: $\angle SPR = \angle SRP$'
         point:
           - {figure: 0, kind: highlight, target: PS}
           - {figure: 0, kind: highlight, target: SR}
+      - say: 'The rule: the three angles of any triangle add up to 180 degrees.'
+        write: 'Angle sum of a triangle: $A + B + C = 180^{\circ}$'
       - say: 'The angles of the triangle add to 180, and the top angle is 130. So the two base angles share 180 minus 130, which is 50.'
         write: '$\angle SPR + \angle SRP = 180^{\circ} - 130^{\circ} = 50^{\circ}$'
         point:
@@ -1783,19 +2003,25 @@ lessons:
       - say: 'The two base angles are equal, so each is half of 50, which is 25 degrees.'
         write: '$\angle SRP = \dfrac{50^{\circ}}{2} = 25^{\circ}$'
         point:
-          - {line: 3, kind: move, from: {line: 2, at: '=50∘'}, at: '50∘'}
+          - {line: 4, kind: move, from: {line: 3, at: '=50∘'}, at: '50∘'}
           - {figure: 0, kind: arc, target: SRP, text: '25°'}
+      - say: 'The rule: alternate angles between parallel lines are equal.'
+        write: 'Alternate angles are equal'
       - say: 'Now the parallel lines. $PR$ crosses both $SR$ and $PQ$, making a Z shape. Alternate angles in a Z are equal.'
         write: 'Alternate angles, $PQ \parallel SR$: $\angle RPQ = \angle SRP$'
+        point:
+          - {figure: 0, kind: highlight, target: PR, text: 'crosses both'}
+          - {figure: 0, kind: arc, target: SRP}
+          - {figure: 0, kind: arc, target: RPQ, text: 'equal'}
       - say: 'So angle $RPQ$ is the 25 degrees we just found.'
         write: '$\angle RPQ = 25^{\circ}$'
         point:
-          - {line: 5, kind: move, from: {line: 3, at: '=25∘'}, at: '25∘', text: 'alternate'}
+          - {line: 7, kind: move, from: {line: 4, at: '=25∘'}, at: '25∘', text: 'alternate'}
           - {figure: 0, kind: arc, target: RPQ, text: '25°'}
       - say: 'Now look at triangle $PRQ$. It has 25 degrees at $P$ and 100 degrees at $R$, and its angles add up to 180.'
         write: 'In $\triangle PRQ$: $\angle PQR = 180^{\circ} - 25^{\circ} - 100^{\circ}$'
         point:
-          - {line: 6, kind: move, from: {line: 5, at: '25∘'}, at: '−25∘'}
+          - {line: 8, kind: move, from: {line: 7, at: '25∘'}, at: '−25∘'}
           - {figure: 0, kind: arc, target: PRQ, text: '100°'}
       - say: '25 plus 100 is 125.'
         write: '$= 180^{\circ} - 125^{\circ}$'
@@ -1806,6 +2032,8 @@ lessons:
       - say: 'So angle $PQR$ is 55 degrees, which is answer choice C.'
         write: '$\angle PQR = 55^{\circ}$'
         answer: true
+        point:
+          - {figure: 0, kind: arc, target: PQR, text: '55°'}
     traps:
       A: 'You went for 25 degrees. That''s the base angle of triangle $PSR$, found on the way. Carry it to $P$ with alternate angles, then use triangle $PRQ$: 180 minus 25 minus 100 is 55.'
       B: 'You went for 50 degrees. That''s 180 minus 130, the two base angles together. Each base angle is 25, and then triangle $PRQ$ gives 180 minus 25 minus 100, which is 55.'
@@ -1847,6 +2075,10 @@ lessons:
     moments:
       - say: '$PT$ is a tangent to the circle at $P$, and $O$ is the centre. Angle $PQT$ is 30 degrees, and the marked angles are $OPQ = x$, $QTO = x$ and $OTP = 2x$. We want angle $PTO$.'
         write: '$\angle PQT = 30^{\circ}, \ \angle OPQ = x, \ \angle QTO = x, \ \angle OTP = 2x$'
+        point:
+          - {figure: 0, kind: highlight, target: PT, text: 'tangent'}
+          - {figure: 0, kind: circle, target: O, text: 'centre'}
+          - {figure: 0, kind: arc, target: PQT, text: '30°'}
       - say: 'Here''s the key fact: a tangent is perpendicular to the radius at the point where it touches. So angle $OPT$ is 90 degrees.'
         write: 'Tangent meets radius at right angles: $\angle OPT = 90^{\circ}$'
         point:
@@ -1864,29 +2096,33 @@ lessons:
         write: '$\angle QTP = \angle QTO + \angle OTP = x + 2x = 3x$'
         point:
           - {figure: 0, kind: arc, target: QTP, text: '3x'}
+      - say: 'The rule: the three angles of any triangle add up to 180 degrees.'
+        write: 'Angle sum of a triangle: $A + B + C = 180^{\circ}$'
       - say: 'The three angles of the triangle add up to 180 degrees. Put in the three angles we just wrote.'
         write: '$30 + (x + 90) + 3x = 180$'
         point:
-          - {line: 5, kind: move, from: {line: 2, at: '30∘'}, at: '30+'}
-          - {line: 5, kind: move, from: {line: 3, at: '=x+90∘'}, at: '(x+90)'}
-          - {line: 5, kind: move, from: {line: 4, at: '=3x'}, at: '3x'}
+          - {line: 6, kind: move, from: {line: 2, at: '30∘'}, at: '30+'}
+          - {line: 6, kind: move, from: {line: 3, at: '=x+90∘'}, at: '(x+90)'}
+          - {line: 6, kind: move, from: {line: 4, at: '=3x'}, at: '3x'}
       - say: 'Collect like terms: $x$ plus $3x$ is $4x$, and 30 plus 90 is 120.'
         write: '$4x + 120 = 180$'
       - say: 'Subtract 120 from both sides. 180 minus 120 is 60.'
         write: '$4x = 180 - 120 = 60$'
         point:
-          - {line: 7, kind: move, from: {line: 6, at: '+120'}, at: '−120', text: 'across'}
+          - {line: 8, kind: move, from: {line: 7, at: '+120'}, at: '−120', text: 'across'}
       - say: 'Divide by 4. 60 divided by 4 is 15.'
         write: '$x = \dfrac{60}{4} = 15^{\circ}$'
       - say: 'But the question wants angle $PTO$, which is marked $2x$. 2 times 15 is 30.'
         write: '$\angle PTO = 2x = 2 \times 15^{\circ} = 30^{\circ}$'
         point:
           - {line: 0, kind: underline, at: 'OTP=2x', text: 'asked for'}
-          - {line: 9, kind: move, from: {line: 8, at: '15∘'}, at: '15∘'}
+          - {line: 10, kind: move, from: {line: 9, at: '15∘'}, at: '15∘'}
           - {figure: 0, kind: arc, target: PTO, text: '30°'}
       - say: 'So angle $PTO$ is 30 degrees, which is answer choice A.'
         write: 'So $\angle PTO = 30^{\circ}$'
         answer: true
+        point:
+          - {figure: 0, kind: arc, target: PTO, text: '30°'}
     traps:
       B: 'You went for 15 degrees. That''s $x$, the halfway result. The angle asked for, $PTO$, is $2x$, which is 30 degrees.'
       C: 'You went for 24 degrees. Remember the tangent makes 90 degrees with the radius, so the angle at $P$ is $x + 90$. Then $4x + 120 = 180$ gives $x = 15$, and $2x$ is 30.'

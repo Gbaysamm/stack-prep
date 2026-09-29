@@ -328,6 +328,8 @@ lessons:
         write: 'Conjugate of $3\sqrt{2} - 2\sqrt{3}$ is $3\sqrt{2} + 2\sqrt{3}$'
       - say: 'Multiply the top and the bottom by that conjugate. Multiplying by something over itself is multiplying by 1, so the value does not change.'
         write: '$= \dfrac{(2\sqrt{3} + 3\sqrt{2})(3\sqrt{2} + 2\sqrt{3})}{(3\sqrt{2} - 2\sqrt{3})(3\sqrt{2} + 2\sqrt{3})}$'
+      - say: 'Difference of two squares: a minus b, times a plus b, is a squared minus b squared.'
+        write: 'Difference of two squares: $(a - b)(a + b) = a^{2} - b^{2}$'
       - say: 'Denominator first. It is a difference of two squares: the first term squared minus the second term squared.'
         write: 'Denominator $= (3\sqrt{2})^{2} - (2\sqrt{3})^{2}$'
       - say: '3 root 2 squared is 9 times 2, which is 18. 2 root 3 squared is 4 times 3, which is 12.'
@@ -336,6 +338,8 @@ lessons:
         write: '$= 6$'
       - say: 'Now the numerator. Look closely: 2 root 3 plus 3 root 2, and 3 root 2 plus 2 root 3, are the same two terms in a different order. So the numerator is that bracket squared.'
         write: 'Numerator $= (2\sqrt{3} + 3\sqrt{2})^{2}$'
+      - say: 'Squaring a sum: a plus b, all squared, is a squared plus 2ab plus b squared.'
+        write: 'Perfect square: $(a + b)^{2} = a^{2} + 2ab + b^{2}$'
       - say: 'Expand it as the first term squared, plus twice the product of the two terms, plus the second term squared.'
         write: '$= (2\sqrt{3})^{2} + 2(2\sqrt{3})(3\sqrt{2}) + (3\sqrt{2})^{2}$'
       - say: '2 root 3 squared is 12. In the middle, 2 times 2 times 3 is 12, and root 3 times root 2 is root 6, so 12 root 6. 3 root 2 squared is 18.'
@@ -345,8 +349,8 @@ lessons:
       - say: 'Now put this new numerator over the new denominator, the 6 we found earlier.'
         write: 'Fraction $= \dfrac{30 + 12\sqrt{6}}{6}$'
         point:
-          - {line: 10, kind: move, from: {line: 5, at: '= 6'}, at: '[[6]]30', text: 'denominator'}
-          - {line: 10, kind: move, from: {line: 9, at: '30+126'}, at: '30+126', text: 'numerator'}
+          - {line: 12, kind: move, from: {line: 6, at: '= 6'}, at: '[[6]]30', text: 'denominator'}
+          - {line: 12, kind: move, from: {line: 11, at: '30+126'}, at: '30+126', text: 'numerator'}
       - say: 'Divide each term by 6. 30 over 6 is 5, and 12 over 6 is 2. So the answer is 5 plus 2 root 6, which is answer choice B.'
         write: '$= \dfrac{30}{6} + \dfrac{12\sqrt{6}}{6} = 5 + 2\sqrt{6}$'
         answer: true
@@ -361,6 +365,8 @@ lessons:
         write: '$\dfrac{1}{3 + \sqrt{5}} - \dfrac{1}{3 - \sqrt{5}}$'
       - say: 'To subtract fractions we need a common denominator. Here the two denominators are conjugates, partners that differ only in the sign, so their product is a whole number.'
         write: 'Common denominator $= (3 + \sqrt{5})(3 - \sqrt{5})$'
+      - say: 'Difference of two squares: a minus b, times a plus b, is a squared minus b squared.'
+        write: 'Difference of two squares: $(a - b)(a + b) = a^{2} - b^{2}$'
       - say: 'That is a difference of two squares: 3 squared minus root 5 squared. 3 squared is 9, and root 5 squared is 5.'
         write: '$= 3^{2} - (\sqrt{5})^{2} = 9 - 5$'
       - say: '9 minus 5 is 4.'
@@ -368,7 +374,7 @@ lessons:
       - say: 'For the first fraction, multiply top and bottom by 3 minus root 5. The top becomes 3 minus root 5, and the bottom is the 4 we just found.'
         write: '$\dfrac{1}{3 + \sqrt{5}} = \dfrac{3 - \sqrt{5}}{(3 + \sqrt{5})(3 - \sqrt{5})} = \dfrac{3 - \sqrt{5}}{4}$'
         point:
-          - {line: 4, kind: move, from: {line: 3, at: '= 4'}, at: '= [[4]]3', text: 'common bottom'}
+          - {line: 5, kind: move, from: {line: 4, at: '= 4'}, at: '= [[4]]3', text: 'common bottom'}
       - say: 'For the second fraction, multiply top and bottom by 3 plus root 5. The top becomes 3 plus root 5, and again the bottom is 4.'
         write: '$\dfrac{1}{3 - \sqrt{5}} = \dfrac{3 + \sqrt{5}}{(3 - \sqrt{5})(3 + \sqrt{5})} = \dfrac{3 + \sqrt{5}}{4}$'
       - say: 'Now subtract the second from the first. Both are over 4, so we subtract the tops, keeping the second top in a bracket.'
@@ -469,14 +475,30 @@ lessons:
     moments:
       - say: 'A car goes $p$ km at $u$ km per hour, then $q$ km at $w$ km per hour. We want its average speed for the whole journey.'
         write: 'First leg: $p$ km at $u$ km/h; second leg: $q$ km at $w$ km/h'
+      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+        show_sketch: true
+        point:
+          - {figure: sketch, kind: underline, target: 'p km'}
+          - {figure: sketch, kind: underline, target: 'q km'}
       - say: 'Here''s the one rule to hold on to. Average speed is total distance divided by total time. It is not the average of the two speeds, because the car spends different amounts of time on each leg.'
         write: 'Average speed $= \dfrac{\text{total distance}}{\text{total time}}$'
       - say: 'The total distance is easy: $p$ plus $q$ km.'
         write: 'Total distance $= p + q$'
+        point:
+          - {figure: sketch, kind: circle, target: Calabar}
+          - {figure: sketch, kind: circle, target: Benin, text: 'p + q km'}
+      - say: 'Time equals distance divided by speed.'
+        write: 'Time $= \dfrac{\text{distance}}{\text{speed}}$'
       - say: 'Now the times. Time is distance over speed. The first leg is $p$ km at $u$ km per hour, so it takes $p$ over $u$ hours.'
         write: 'Time for first leg $= \dfrac{p}{u}$'
+        point:
+          - {figure: sketch, kind: circle, target: 'p km'}
+          - {figure: sketch, kind: circle, target: 'u km/h', text: 'p/u hours'}
       - say: 'The second leg is $q$ km at $w$ km per hour, so it takes $q$ over $w$ hours.'
         write: 'Time for second leg $= \dfrac{q}{w}$'
+        point:
+          - {figure: sketch, kind: circle, target: 'q km'}
+          - {figure: sketch, kind: circle, target: 'w km/h', text: 'q/w hours'}
       - say: 'The total time is the sum of those two times.'
         write: 'Total time $= \dfrac{p}{u} + \dfrac{q}{w}$'
       - say: 'Add them over the common denominator $u w$. Multiply the top and bottom of $p$ over $u$ by $w$, and the top and bottom of $q$ over $w$ by $u$.'
@@ -486,13 +508,13 @@ lessons:
       - say: 'Now back to our rule: the total distance, $p$ plus $q$, divided by the total time we just found.'
         write: 'Average speed $= (p + q) \div \dfrac{pw + qu}{uw}$'
         point:
-          - {line: 1, kind: box, text: 'the rule'}
-          - {line: 8, kind: move, from: {line: 2, at: 'p + q'}, at: '(p + q)', text: 'distance'}
-          - {line: 8, kind: move, from: {line: 7, at: 'uwpw+qu'}, at: 'uwpw+qu', text: 'total time'}
+          - {line: 2, kind: box, text: 'the rule'}
+          - {line: 10, kind: move, from: {line: 3, at: 'p + q'}, at: '(p + q)', text: 'distance'}
+          - {line: 10, kind: move, from: {line: 9, at: 'uwpw+qu'}, at: 'uwpw+qu', text: 'total time'}
       - say: 'Dividing by a fraction means multiplying by it turned upside down.'
         write: '$= (p + q) \times \dfrac{uw}{pw + qu}$'
         point:
-          - {line: 9, kind: move, from: {line: 8, at: 'uwpw+qu'}, at: 'pw+quuw', text: 'flipped'}
+          - {line: 11, kind: move, from: {line: 10, at: 'uwpw+qu'}, at: 'pw+quuw', text: 'flipped'}
       - say: 'That gives $u w$ times $p$ plus $q$, over $p w$ plus $q u$. Written the way the options write it, the bottom is $w p$ plus $u q$.'
         write: '$= \dfrac{uw(p + q)}{wp + uq}$'
       - say: 'Let''s test it. If both legs are 60 km and both speeds are 30 km per hour, the average must be 30. Our formula gives 30 times 30 times 120, over 30 times 60 plus 30 times 60.'
@@ -725,6 +747,10 @@ lessons:
     moments:
       - say: 'We need the values of $x$ for which $x$ over 2, plus $x$ over 3, plus $x$ over 4, is less than 1.'
         write: '$\dfrac{x}{2} + \dfrac{x}{3} + \dfrac{x}{4} < 1$'
+      - say: 'Let me draw this on a number line, so we can see the values.'
+        show_sketch: true
+        point:
+          - {figure: sketch, kind: circle, target: 'x = ? (x less than 12/13)'}
       - say: 'Don''t worry about the fractions. We clear them in one move by multiplying through by the lowest common denominator.'
       - say: 'The denominators are 2, 3 and 4. The smallest number they all divide into is 12.'
         write: 'LCM of 2, 3 and 4 $= 12$'
@@ -733,13 +759,14 @@ lessons:
       - say: '12 over 2 is 6, 12 over 3 is 4, and 12 over 4 is 3.'
         write: '$6x + 4x + 3x < 12$'
         point:
-          - {line: 2, kind: circle, at: '= 12', text: 'times 12'}
+          - {line: 3, kind: circle, at: '= 12', text: 'times 12'}
       - say: '6 plus 4 plus 3 is 13.'
         write: '$13x < 12$'
       - say: 'To get $x$ by itself, divide both sides by 13. Again it is positive, so the sign does not change.'
         write: '$x < \dfrac{12}{13}$'
         point:
-          - {line: 6, kind: move, from: {line: 5, at: '[[13]]x'}, at: '[[13]]12', text: 'divide across'}
+          - {line: 7, kind: move, from: {line: 6, at: '[[13]]x'}, at: '[[13]]12', text: 'divide across'}
+          - {figure: sketch, kind: circle, target: '12', text: 'boundary 12/13'}
       - say: 'Let''s check the boundary. Over 12, a half is 6 over 12, a third is 4 over 12, and a quarter is 3 over 12. Together that is 13 over 12.'
         write: 'Check: $\tfrac{1}{2} + \tfrac{1}{3} + \tfrac{1}{4} = \tfrac{6}{12} + \tfrac{4}{12} + \tfrac{3}{12} = \tfrac{13}{12}$'
       - say: 'So at the boundary, the left side is 12 over 13 times 13 over 12, which is exactly 1. That confirms it: $x$ is less than 12 over 13, which is answer choice A.'
@@ -823,12 +850,16 @@ lessons:
         write: '$\dfrac{\sqrt{1 + x} + \sqrt{x}}{\sqrt{1 + x} - \sqrt{x}}$'
       - say: 'To clear surds from the denominator, we multiply top and bottom by the conjugate. Here the conjugate is root of 1 plus $x$, plus root $x$, which is exactly the numerator.'
         write: '$= \dfrac{(\sqrt{1 + x} + \sqrt{x})(\sqrt{1 + x} + \sqrt{x})}{(\sqrt{1 + x} - \sqrt{x})(\sqrt{1 + x} + \sqrt{x})}$'
+      - say: 'Difference of two squares: a minus b, times a plus b, is a squared minus b squared.'
+        write: 'Difference of two squares: $(a - b)(a + b) = a^{2} - b^{2}$'
       - say: 'The new denominator is a difference of two squares: the first term squared minus the second term squared.'
         write: 'Denominator $= (\sqrt{1 + x})^{2} - (\sqrt{x})^{2}$'
       - say: 'Squaring a square root removes it. So this is 1 plus $x$, minus $x$, which is just 1. The surds vanish completely.'
         write: '$= (1 + x) - x = 1$'
       - say: 'The new numerator is the old numerator times itself, so it is a square.'
         write: 'Numerator $= (\sqrt{1 + x} + \sqrt{x})^{2}$'
+      - say: 'Squaring a sum: a plus b, all squared, is a squared plus 2ab plus b squared.'
+        write: 'Perfect square: $(a + b)^{2} = a^{2} + 2ab + b^{2}$'
       - say: 'Expand it as the first squared, plus twice the product, plus the second squared.'
         write: '$= (\sqrt{1 + x})^{2} + 2\sqrt{1 + x}\sqrt{x} + (\sqrt{x})^{2}$'
       - say: 'The first square is 1 plus $x$. The middle term is 2 root of $x$ times 1 plus $x$. The last square is $x$.'
@@ -838,8 +869,8 @@ lessons:
       - say: 'Now put this numerator over the denominator, which we found is just 1. Dividing by 1 changes nothing.'
         write: 'Fraction $= \dfrac{1 + 2x + 2\sqrt{x(1 + x)}}{1} = 1 + 2x + 2\sqrt{x(1 + x)}$'
         point:
-          - {line: 8, kind: move, from: {line: 3, at: '− x = [[1]]'}, at: '= [[1]]', text: 'denominator'}
-          - {line: 8, kind: move, from: {line: 7, at: '1+2x+2x(1+x)'}, at: '= 1[[1+2x+2x(1+x)]]', text: 'numerator'}
+          - {line: 10, kind: move, from: {line: 4, at: '− x = [[1]]'}, at: '= [[1]]', text: 'denominator'}
+          - {line: 10, kind: move, from: {line: 9, at: '1+2x+2x(1+x)'}, at: '= 1[[1+2x+2x(1+x)]]', text: 'numerator'}
       - say: 'Let''s check with $x$ equal to 1. The original is root 2 plus 1, over root 2 minus 1. That is 2.414 over 0.414, which is about 5.83.'
         write: 'Check at $x = 1$: $\ \dfrac{\sqrt{2} + 1}{\sqrt{2} - 1} = \dfrac{2.414}{0.414} \approx 5.83$'
       - say: 'Our answer gives 1 plus 2 plus 2 root 2, which is 3 plus 2.83, or 5.83. It matches.'
@@ -860,6 +891,8 @@ lessons:
         write: 'Lower power is $-\tfrac{1}{2}$, so take out $(x^{2} - 1)^{-\frac{1}{2}}$'
       - say: 'The first term already has that factor, with $x$ squared left behind.'
         write: 'First term: $x^{2}(x^{2} - 1)^{-\frac{1}{2}}$ leaves $x^{2}$'
+      - say: 'Multiplying powers of the same base: add the indices.'
+        write: 'Law of indices: $a^{m} \times a^{n} = a^{m + n}$'
       - say: 'For the second term, split the power. Negative a half plus 1 is a half, so the power a half is the power negative a half times the power 1.'
         write: 'Second term: $(x^{2} - 1)^{\frac{1}{2}} = (x^{2} - 1)^{-\frac{1}{2}}(x^{2} - 1)$'
       - say: 'So the second term leaves $x$ squared minus 1 behind. Now take out the common factor from both terms, and write what is left in a square bracket.'
@@ -869,7 +902,7 @@ lessons:
       - say: 'Inside the square bracket, the minus changes both signs. $x$ squared minus $x$ squared plus 1 is just 1.'
         write: 'Inside the bracket: $x^{2} - x^{2} + 1 = 1$'
         point:
-          - {line: 5, kind: strike, at: 'x2−x2', text: 'cancel'}
+          - {line: 6, kind: strike, at: 'x2−x2', text: 'cancel'}
       - say: 'So the whole expression is $x$ squared minus 1, to the power negative a half, times that 1.'
         write: 'Expression $= (x^{2} - 1)^{-\frac{1}{2}} \times 1 = (x^{2} - 1)^{-\frac{1}{2}}$'
       - say: 'Let''s check with $x$ equal to root 5. Then $x$ squared is 5, and $x$ squared minus 1 is 4. The original is 5 times 4 to the power negative a half, minus 4 to the power a half.'
@@ -888,6 +921,7 @@ lessons:
     moments:
       - say: 'We want the gradient of the line through negative 2, 0 and 0, negative 4.'
         write: '$(-2,\ 0) \text{ and } (0,\ -4)$'
+      - say: 'Let me sketch the graph, so we can see its shape.'
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: '(−2, 0)'}
@@ -896,6 +930,9 @@ lessons:
         write: 'Gradient $m = \dfrac{y_{2} - y_{1}}{x_{2} - x_{1}}$'
       - say: 'Let the first point be negative 2, 0 and the second be 0, negative 4.'
         write: '$(x_{1}, y_{1}) = (-2, 0),\quad (x_{2}, y_{2}) = (0, -4)$'
+        point:
+          - {figure: sketch, kind: circle, target: A, text: 'first point'}
+          - {figure: sketch, kind: circle, target: B, text: 'second point'}
       - say: 'The only danger is the order of subtraction. Whichever point we take first on top, we must take first underneath too.'
         write: 'Same order top and bottom: second point minus first point'
       - say: 'The change in $y$ is the second $y$, negative 4, minus the first $y$, 0. That is negative 4.'
@@ -905,8 +942,8 @@ lessons:
       - say: 'Now put those two changes into the formula.'
         write: '$m = \dfrac{-4 - 0}{0 - (-2)}$'
         point:
-          - {line: 6, kind: move, from: {line: 4, at: '−4−0'}, at: '−4−0', text: 'top'}
-          - {line: 6, kind: move, from: {line: 5, at: '0−(−2)'}, at: '0−(−2)', text: 'bottom'}
+          - {line: 7, kind: move, from: {line: 5, at: '−4−0'}, at: '−4−0', text: 'top'}
+          - {line: 7, kind: move, from: {line: 6, at: '0−(−2)'}, at: '0−(−2)', text: 'bottom'}
       - say: 'The top is negative 4, and the bottom is 2.'
         write: '$= \dfrac{-4}{2}$'
       - say: 'Negative 4 divided by 2 is negative 2.'
@@ -927,9 +964,10 @@ lessons:
     moments:
       - say: 'We want the value of $x$ at which $y$ equals $x$ squared minus $2x$ minus 3 is a minimum.'
         write: '$y = x^{2} - 2x - 3$'
+      - say: 'Let me sketch the graph, so we can see its shape.'
+        show_sketch: true
       - say: 'The number in front of $x$ squared is positive, so the curve is U-shaped and has a lowest point. For $a x$ squared plus $b x$ plus $c$, that point is at $x$ equals negative $b$ over $2a$.'
         write: '$x = -\dfrac{b}{2a}$'
-        show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: A, text: 'lowest point'}
       - say: 'Here $a$ is 1 and $b$ is negative 2.'
@@ -937,8 +975,8 @@ lessons:
       - say: 'Put $a$ equal to 1 and $b$ equal to negative 2 into the formula.'
         write: '$x = -\dfrac{-2}{2(1)}$'
         point:
-          - {line: 1, kind: box, text: 'the rule'}
-          - {line: 2, kind: circle, at: 'a=1,b=−2', text: 'sub in'}
+          - {line: 2, kind: box, text: 'the rule'}
+          - {line: 3, kind: circle, at: 'a=1,b=−2', text: 'sub in'}
       - say: 'The two minus signs make a plus, and 2 over 2 is 1.'
         write: '$x = \dfrac{2}{2} = 1$'
         point:
@@ -947,12 +985,14 @@ lessons:
         write: '$\dfrac{dy}{dx} = 2x - 2$'
       - say: 'At a turning point the derivative is zero. So $2x$ minus 2 equals zero, $2x$ equals 2, and $x$ is 1.'
         write: '$2x - 2 = 0 \Rightarrow x = 1$'
+        point:
+          - {figure: sketch, kind: circle, target: A, text: 'gradient 0 here'}
       - say: 'The second derivative is 2, which is positive, so this is a minimum, not a maximum.'
         write: '$\dfrac{d^{2}y}{dx^{2}} = 2 > 0$'
       - say: 'Notice the minimum value of $y$ is 1 minus 2 minus 3, which is negative 4. But that is not what is asked. The question wants the $x$.'
         write: '$y_{\min} = 1 - 2 - 3 = -4$'
         point:
-          - {line: 8, kind: strike, at: '−4', text: 'not asked'}
+          - {line: 9, kind: strike, at: '−4', text: 'not asked'}
       - say: 'So the function is a minimum at $x$ equals 1, which is answer choice A.'
         write: '$x = 1$'
         answer: true
@@ -1038,12 +1078,18 @@ lessons:
           - {figure: 0, kind: circle, target: R, text: 'the bend'}
       - say: 'Take the upper part. The 110-degree angle at $Q$ and the upper part at $R$ sit between two parallel lines, on the same side of $Q R$. They are co-interior angles, and co-interior angles add to 180 degrees.'
         write: 'Co-interior: upper part $+ 110^{\circ} = 180^{\circ}$'
+        point:
+          - {figure: 0, kind: circle, target: '110°', text: 'co-interior'}
+          - {figure: 0, kind: underline, target: QR}
       - say: 'Take 110 from both sides. 180 minus 110 is 70, so the upper part is 70 degrees.'
         write: 'Upper part $= 180^{\circ} - 110^{\circ} = 70^{\circ}$'
         point:
           - {line: 3, kind: move, from: {line: 2, at: '+ 110∘'}, at: '− 110∘', text: 'across the ='}
       - say: 'The lower part works the same way with $S$. The 120-degree angle at $S$ and the lower part are co-interior too, so they also add to 180.'
         write: 'Co-interior: lower part $+ 120^{\circ} = 180^{\circ}$'
+        point:
+          - {figure: 0, kind: circle, target: '120°', text: 'co-interior'}
+          - {figure: 0, kind: underline, target: RS}
       - say: '180 minus 120 is 60, so the lower part is 60 degrees.'
         write: 'Lower part $= 180^{\circ} - 120^{\circ} = 60^{\circ}$'
         point:
@@ -1071,6 +1117,10 @@ lessons:
     moments:
       - say: 'The four angles of a quadrilateral are given in terms of $x$. We want the smallest one. We can''t compare them until we know $x$, so let''s find $x$ first.'
         write: '$(5x - 30),\ (4x + 60),\ (60 - x),\ (3x + 61)$'
+      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+        show_sketch: true
+      - say: 'The angles in a quadrilateral add up to 360 degrees.'
+        write: 'Angles in a quadrilateral add up to $360^{\circ}$'
       - say: 'The angles of a quadrilateral add up to 360 degrees. So we add the four expressions and set them equal to 360.'
         write: '$(5x - 30) + (4x + 60) + (60 - x) + (3x + 61) = 360$'
       - say: 'Collect the $x$ terms. $5x$ plus $4x$ is $9x$, minus $x$ is $8x$, plus $3x$ is $11x$.'
@@ -1080,8 +1130,8 @@ lessons:
       - say: 'So the equation is $11x$ plus 151 equals 360.'
         write: '$11x + 151 = 360$'
         point:
-          - {line: 4, kind: move, from: {line: 2, at: '= 11x'}, at: '11x', text: 'x terms'}
-          - {line: 4, kind: move, from: {line: 3, at: '= 151'}, at: '151', text: 'numbers'}
+          - {line: 6, kind: move, from: {line: 4, at: '= 11x'}, at: '11x', text: 'x terms'}
+          - {line: 6, kind: move, from: {line: 5, at: '= 151'}, at: '151', text: 'numbers'}
       - say: 'Subtract 151 from both sides. 360 minus 151 is 209.'
         write: '$11x = 209$'
       - say: 'Divide both sides by 11. 11 times 19 is 209, so $x$ is 19.'
@@ -1089,20 +1139,29 @@ lessons:
       - say: 'Now work out each angle. 5 times 19 is 95, minus 30 is 65 degrees.'
         write: '$5(19) - 30 = 95 - 30 = 65^{\circ}$'
         point:
-          - {line: 7, kind: move, from: {line: 6, at: '19'}, at: '(19)', text: 'sub in'}
+          - {line: 9, kind: move, from: {line: 8, at: '19'}, at: '(19)', text: 'sub in'}
+          - {figure: sketch, kind: label, target: '(5x−30)°', text: '65°'}
       - say: '4 times 19 is 76, plus 60 is 136 degrees.'
         write: '$4(19) + 60 = 76 + 60 = 136^{\circ}$'
+        point:
+          - {figure: sketch, kind: label, target: '(4x+60)°', text: '136°'}
       - say: '60 minus 19 is 41 degrees.'
         write: '$60 - 19 = 41^{\circ}$'
+        point:
+          - {figure: sketch, kind: label, target: '(60−x)°', text: '41°'}
       - say: '3 times 19 is 57, plus 61 is 118 degrees.'
         write: '$3(19) + 61 = 57 + 61 = 118^{\circ}$'
+        point:
+          - {figure: sketch, kind: label, target: '(3x+61)°', text: '118°'}
       - say: 'Let''s check they add to 360. 65 plus 136 is 201, plus 41 is 242, plus 118 is 360. Good.'
         write: '$65 + 136 + 41 + 118 = 360\ \checkmark$'
         point:
-          - {line: 9, kind: circle, at: '41∘', text: 'smallest'}
+          - {line: 11, kind: circle, at: '41∘', text: 'smallest'}
       - say: 'The smallest is 41 degrees, and that is the angle $60$ minus $x$. So the answer is answer choice C.'
         write: '$60 - x = 41^{\circ}$'
         answer: true
+        point:
+          - {figure: sketch, kind: circle, target: '(60−x)°', text: 'smallest'}
     traps:
       A: 'You went for $5x$ minus 30. It looks smallest because of the minus 30, but with $x$ equal to 19 it is 65 degrees. The angle $60$ minus $x$ is only 41 degrees.'
       B: 'You went for $4x$ plus 60. With $x$ equal to 19 that is 136 degrees, the largest angle of all. The smallest is $60$ minus $x$, which is 41 degrees.'
@@ -1112,15 +1171,20 @@ lessons:
     moments:
       - say: 'A square has area 144 square centimetres. We want the length of its diagonal. First we find the side, then the diagonal.'
         write: 'Area $= 144\ \text{cm}^{2}$'
+      - say: 'Let me draw a diagram of this, to make it simpler to see.'
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: 'Area = 144 cm²', text: 'given'}
       - say: 'The area of a square is its side squared. Call the side $s$.'
         write: 'Area $= s^{2}$, so $s^{2} = 144$'
+        point:
+          - {figure: sketch, kind: highlight, target: AB, text: 's'}
       - say: 'So the side is the square root of 144. 12 times 12 is 144, so the side is 12 centimetres.'
         write: '$s = \sqrt{144} = 12$ cm'
         point:
           - {figure: sketch, kind: label, target: AB, text: '12 cm'}
+      - say: 'Pythagoras: the hypotenuse squared equals the opposite squared plus the adjacent squared.'
+        write: 'Pythagoras: $\text{hypotenuse}^{2} = \text{opposite}^{2} + \text{adjacent}^{2}$'
       - say: 'Now the diagonal. It cuts the square into two right-angled triangles. The two shorter sides are sides of the square, 12 each, and the diagonal is the hypotenuse.'
         write: 'Right-angled triangle: legs $12$ and $12$, hypotenuse $d$'
         point:
@@ -1128,11 +1192,13 @@ lessons:
       - say: 'So we use Pythagoras: $d$ squared is 12 squared plus 12 squared.'
         write: '$d^{2} = 12^{2} + 12^{2}$'
         point:
-          - {line: 4, kind: move, from: {line: 2, at: '= 12'}, at: '= [[12]]2', text: 'side'}
+          - {line: 6, kind: move, from: {line: 3, at: '= 12'}, at: '= [[12]]2', text: 'side'}
       - say: '12 squared is 144. 144 plus 144 is 288.'
         write: '$= 144 + 144 = 288$'
       - say: 'So the diagonal is the square root of 288.'
         write: '$d = \sqrt{288}$'
+        point:
+          - {figure: sketch, kind: circle, target: '?', text: '√288'}
       - say: 'Simplify the surd. 288 is 144 times 2, and 144 is a perfect square, so we split the root.'
         write: '$= \sqrt{144 \times 2} = \sqrt{144} \times \sqrt{2}$'
       - say: 'The square root of 144 is 12.'
@@ -1151,34 +1217,49 @@ lessons:
     moments:
       - say: 'One angle of a rhombus is 60 degrees, and the shorter diagonal is 8 cm. We want the longer diagonal.'
         write: '$\text{angle } 60^{\circ},\quad \text{short diagonal} = 8$'
+      - say: 'Let me draw a diagram of this, to make it simpler to see.'
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: '60°', text: 'angle at A'}
           - {figure: sketch, kind: highlight, target: BD, text: 'short diagonal'}
       - say: 'Remember the facts about a rhombus. All four sides are equal, and the diagonals cut each other in half at right angles, and they bisect the angles.'
       - say: 'The short diagonal cuts the rhombus into two triangles. Each has two equal sides, the sides of the rhombus, with the 60-degree angle between them.'
+        point:
+          - {figure: sketch, kind: highlight, target: AB}
+          - {figure: sketch, kind: highlight, target: AD, text: 'equal sides'}
+      - say: 'The angles in a triangle add up to 180 degrees.'
+        write: 'Angles in a triangle: $A + B + C = 180^{\circ}$'
       - say: 'In that isosceles triangle, the two base angles are equal. 180 minus 60 is 120, and half of 120 is 60. So all three angles are 60 degrees.'
         write: '$\dfrac{180^{\circ} - 60^{\circ}}{2} = 60^{\circ}$'
+        point:
+          - {figure: sketch, kind: arc, target: ABD, text: '60°'}
+          - {figure: sketch, kind: arc, target: ADB, text: '60°'}
       - say: 'A triangle with all angles 60 degrees is equilateral. So the side of the rhombus equals the short diagonal: 8 cm.'
         write: '$\text{side} = 8\ \text{cm}$'
         point:
           - {figure: sketch, kind: label, target: AB, text: '8 cm'}
+      - say: 'In a right-angled triangle, the cos of an angle is the adjacent side over the hypotenuse.'
+        write: 'SOH CAH TOA: $\cos\theta = \dfrac{\text{adjacent}}{\text{hypotenuse}}$'
       - say: 'Now the long diagonal. It splits the 60-degree angle into two 30-degree angles. At the centre we get a right-angled triangle with hypotenuse 8, and half the long diagonal is next to the 30-degree angle.'
         write: 'Half the long diagonal $= 8\cos 30^{\circ}$'
         point:
-          - {line: 5, kind: move, from: {line: 4, at: '8'}, at: '8cos', text: 'hypotenuse'}
+          - {line: 8, kind: move, from: {line: 6, at: '8'}, at: '8cos', text: 'hypotenuse'}
           - {figure: sketch, kind: highlight, target: AO, text: 'half the long diagonal'}
       - say: 'Cos 30 degrees is root 3 over 2.'
         write: '$= 8 \times \dfrac{\sqrt{3}}{2}$'
       - say: '8 over 2 is 4, so half the long diagonal is 4 root 3.'
         write: '$= 4\sqrt{3}$'
+        point:
+          - {figure: sketch, kind: label, target: AO, text: '4√3'}
       - say: 'The full long diagonal is twice that. 2 times 4 root 3 is 8 root 3.'
         write: 'Long diagonal $= 2 \times 4\sqrt{3} = 8\sqrt{3}$'
         point:
-          - {line: 8, kind: move, from: {line: 7, at: '= 43'}, at: '× [[43]]', text: 'half'}
+          - {line: 11, kind: move, from: {line: 10, at: '= 43'}, at: '× [[43]]', text: 'half'}
           - {figure: sketch, kind: highlight, target: AC, text: '8√3 cm'}
       - say: 'Let''s check with Pythagoras. Half the short diagonal is 4. 4 squared is 16, and 4 root 3 squared is 16 times 3, which is 48. 16 plus 48 is 64, which is 8 squared.'
         write: 'Check: $4^{2} + (4\sqrt{3})^{2} = 16 + 48 = 64 = 8^{2}\ \checkmark$'
+        point:
+          - {figure: sketch, kind: label, target: BO, text: '4'}
       - say: 'So the longer diagonal is 8 root 3 cm, which is answer choice A.'
         write: 'Longer diagonal $= 8\sqrt{3}$ cm'
         answer: true
@@ -1191,12 +1272,16 @@ lessons:
     moments:
       - say: 'The five exterior angles of a pentagon are $x$, $x$ plus 5, $x$ plus 10, $x$ plus 15 and $x$ plus 20 degrees. We want $x$.'
         write: '$x,\ x + 5,\ x + 10,\ x + 15,\ x + 20$'
+      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+        show_sketch: true
+        point:
+          - {figure: sketch, kind: circle, target: 'x°'}
       - say: 'Here''s the key fact. The exterior angles of any polygon add up to 360 degrees. Walking once round the shape turns you through one full turn.'
         write: '$\text{sum of exterior angles} = 360^{\circ}$'
       - say: 'So add the five angles and set the total equal to 360.'
         write: '$x + (x + 5) + (x + 10) + (x + 15) + (x + 20) = 360$'
         point:
-          - {line: 1, kind: box, text: 'the rule'}
+          - {line: 2, kind: box, text: 'the rule'}
       - say: 'There are five $x$s, making $5x$. The numbers are 5 plus 10 plus 15 plus 20, which is 50.'
         write: '$5x + 50 = 360$'
       - say: 'Subtract 50 from both sides. 360 minus 50 is 310.'
@@ -1206,12 +1291,20 @@ lessons:
       - say: 'Let''s check. Put $x$ equal to 62 into each angle: 62, 62 plus 5 is 67, then 72, 77 and 82.'
         write: 'Angles: $62,\ 67,\ 72,\ 77,\ 82$'
         point:
-          - {line: 6, kind: move, from: {line: 5, at: '62'}, at: '62', text: 'sub in'}
+          - {line: 7, kind: move, from: {line: 6, at: '62'}, at: '62', text: 'sub in'}
+          - {figure: sketch, kind: label, target: 'x°', text: '62°'}
+          - {figure: sketch, kind: label, target: '(x+5)°', text: '67°'}
       - say: '62 plus 67 is 129, plus 72 is 201, plus 77 is 278, plus 82 is 360. They make a full turn, as they should.'
         write: 'Check: $62 + 67 + 72 + 77 + 82 = 360\ \checkmark$'
+        point:
+          - {figure: sketch, kind: label, target: '(x+10)°', text: '72°'}
+          - {figure: sketch, kind: label, target: '(x+15)°', text: '77°'}
+          - {figure: sketch, kind: label, target: '(x+20)°', text: '82°'}
       - say: 'So $x$ is 62 degrees, which is answer choice C.'
         write: '$x = 62^{\circ}$'
         answer: true
+        point:
+          - {figure: sketch, kind: label, target: 'x = ?', text: '62°'}
     traps:
       A: 'You went for 118 degrees. That is 180 minus 62, the interior angle next to the exterior angle $x$. The question gives exterior angles, which add to 360, so $x$ is 62.'
       B: 'You went for 72 degrees. That is 360 divided by 5, the exterior angle of a regular pentagon. Here the angles are not equal: $5x$ plus 50 equals 360 gives $x$ equals 62.'
@@ -1221,8 +1314,14 @@ lessons:
     moments:
       - say: '$P M N$ and $P Q R$ are secants from the point $P$, and $P T$ is a tangent. We have $P M$ equals 5, $P N$ equals 12 and $P Q$ equals 4.8. We want $P R$ and $P T$.'
         write: '$PM = 5,\quad PN = 12,\quad PQ = 4.8$'
+        point:
+          - {figure: 0, kind: circle, target: '5', text: 'PM'}
+          - {figure: 0, kind: circle, target: '4.8', text: 'PQ'}
+          - {figure: 0, kind: circle, target: T, text: 'tangent'}
       - say: 'The whole question turns on one fact. From a point outside a circle, every line through it gives the same product of the two distances to the circle. For the tangent, both distances are $P T$, so the product is $P T$ squared.'
         write: '$PM \times PN = PQ \times PR = PT^{2}$'
+        point:
+          - {figure: 0, kind: highlight, target: PT, text: 'PT × PT'}
       - say: 'The first secant gives us the value of that product. 5 times 12 is 60.'
         write: '$PM \times PN = 5 \times 12 = 60$'
         point:
@@ -1267,21 +1366,32 @@ lessons:
           - {figure: 0, kind: arc, target: PNR, text: '110°'}
           - {figure: 0, kind: arc, target: PMQ, text: '55°'}
       - say: '$M$, $Q$, $R$ and $N$ all lie on the circle, so $M Q R N$ is a cyclic quadrilateral. The key fact: an exterior angle of a cyclic quadrilateral equals the interior angle at the opposite vertex.'
+        point:
+          - {figure: 0, kind: highlight, target: MQ}
+          - {figure: 0, kind: highlight, target: RN, text: 'cyclic MQRN'}
+      - say: 'The exterior angle of a cyclic quadrilateral equals the interior opposite angle.'
+        write: 'Cyclic quadrilateral: exterior angle $=$ interior opposite angle'
       - say: '$P$, $M$ and $N$ are on one straight line, so angle $P N R$ is the same as angle $M N R$. That is the interior angle of the quadrilateral at $N$.'
         write: '$\angle MNR = \angle PNR = 110^{\circ}$'
+        point:
+          - {figure: 0, kind: highlight, target: PN, text: 'straight line'}
       - say: 'The vertex opposite $N$ is $Q$. The exterior angle at $Q$ is angle $P Q M$, made by extending $R Q$ out to $P$.'
         write: '$\angle PQM = \angle MNR$'
+        point:
+          - {figure: 0, kind: circle, target: Q, text: 'opposite N'}
       - say: 'So angle $P Q M$ is 110 degrees.'
         write: '$\angle PQM = 110^{\circ}$'
         point:
           - {figure: 0, kind: arc, target: PQM, text: '110°'}
       - say: 'Now look at triangle $P Q M$. Its three angles add to 180 degrees.'
         write: '$\angle MPQ + \angle PQM + \angle PMQ = 180^{\circ}$'
+        point:
+          - {figure: 0, kind: circle, target: '?', text: 'angle at P'}
       - say: 'Put in the two angles we know, 110 and 55.'
         write: '$\angle MPQ + 110^{\circ} + 55^{\circ} = 180^{\circ}$'
         point:
-          - {line: 6, kind: move, from: {line: 4, at: '110∘'}, at: '110∘', text: 'found'}
-          - {line: 6, kind: move, from: {line: 0, at: '55∘'}, at: '55∘', text: 'given'}
+          - {line: 7, kind: move, from: {line: 5, at: '110∘'}, at: '110∘', text: 'found'}
+          - {line: 7, kind: move, from: {line: 0, at: '55∘'}, at: '55∘', text: 'given'}
       - say: '110 plus 55 is 165.'
         write: '$\angle MPQ + 165^{\circ} = 180^{\circ}$'
       - say: 'Subtract 165 from both sides. 180 minus 165 is 15.'
@@ -1290,6 +1400,9 @@ lessons:
           - {figure: 0, kind: arc, target: MPQ, text: '15°'}
       - say: 'We can cross-check from the other side. The exterior angle at $M$, 55 degrees, equals the interior angle at $R$. Then in triangle $P N R$, the angle at $P$ is 180 minus 110 minus 55, which is also 15.'
         write: '$180^{\circ} - 110^{\circ} - 55^{\circ} = 15^{\circ}\ \checkmark$'
+        point:
+          - {figure: 0, kind: circle, target: '55°', text: 'exterior at M'}
+          - {figure: 0, kind: arc, target: PRN, text: '55°'}
       - say: 'So angle $M P Q$ is 15 degrees, which is answer choice D.'
         write: '$\angle MPQ = 15^{\circ}$'
         answer: true
@@ -1302,12 +1415,18 @@ lessons:
     moments:
       - say: 'In the figure, the two arrowed lines are parallel. The path rises from the upper line, turns back at the top, and comes down to the lower line. We want the angle $y$.'
         write: '$\text{upper line} \parallel \text{lower line}$'
+        point:
+          - {figure: 0, kind: circle, target: {x: 121, y: 160}}
+          - {figure: 0, kind: circle, target: {x: 148, y: 318}, text: 'parallel'}
+          - {figure: 0, kind: circle, target: y, text: 'want y'}
       - say: 'Let''s trace the path one bend at a time. At the first bend, the angle between the upper line and the rising line is 152 degrees. Angles on a straight line add to 180, so the rising line makes 180 minus 152 with the horizontal.'
         write: '$180^{\circ} - 152^{\circ} = 28^{\circ}$'
         point:
           - {figure: 0, kind: circle, target: '152°', text: 'first bend'}
       - say: 'So the rising line is tilted 28 degrees above the horizontal.'
         write: 'Rising line makes $28^{\circ}$ with the horizontal'
+        point:
+          - {figure: 0, kind: label, target: {x: 335, y: 99}, text: '28° to horizontal'}
       - say: 'At the top, the path turns back through 30 degrees, so the line coming down is steeper by 30 degrees. 28 plus 30 is 58.'
         write: '$28^{\circ} + 30^{\circ} = 58^{\circ}$'
         point:
@@ -1315,8 +1434,13 @@ lessons:
           - {figure: 0, kind: circle, target: '30°', text: 'turn back'}
       - say: 'So the descending line makes 58 degrees with the horizontal. The lower line is parallel to the upper one, so it meets the lower line at 58 degrees too.'
         write: 'Descending line makes $58^{\circ}$ with the horizontal'
+        point:
+          - {figure: 0, kind: label, target: {x: 362, y: 178}, text: '58° to horizontal'}
       - say: 'Now, $y$ is the angle between that line and the part of the lower line pointing back to the left. On the other side of the line the angle is 58, and angles on a straight line add to 180.'
         write: '$y + 58^{\circ} = 180^{\circ}$'
+        point:
+          - {figure: 0, kind: arrow, target: {x: 200, y: 318}, text: 'back to the left'}
+          - {figure: 0, kind: label, target: {x: 292, y: 318}, text: '58°'}
       - say: '180 minus 58 is 122.'
         write: '$y = 180^{\circ} - 58^{\circ} = 122^{\circ}$'
         point:
@@ -1343,6 +1467,8 @@ lessons:
           - {figure: 0, kind: highlight, target: PR}
           - {figure: 0, kind: highlight, target: PS, text: 'all equal'}
       - say: 'Three equal lengths from one point make two isosceles triangles, $P Q R$ and $P R S$. In an isosceles triangle, the base angles are equal.'
+        point:
+          - {figure: 0, kind: circle, target: P, text: 'one point'}
       - say: 'In triangle $P Q R$, $P Q$ equals $P R$, so the angles at $Q$ and $R$ are equal. Call each of them $a$.'
         write: '$\angle PQR = \angle PRQ = a$'
         point:
@@ -1353,25 +1479,35 @@ lessons:
         point:
           - {figure: 0, kind: arc, target: PRS, text: 'b'}
           - {figure: 0, kind: arc, target: PSR, text: 'b'}
+      - say: 'Angles on a straight line add up to 180 degrees.'
+        write: 'Angles on a straight line add up to $180^{\circ}$'
       - say: 'At $R$, three angles sit along the straight line $Q R T$: $a$, $b$ and the 68 degrees. They add to 180.'
         write: '$a + b + 68^{\circ} = 180^{\circ}$'
         point:
-          - {line: 4, kind: move, from: {line: 0, at: '68∘'}, at: '68∘', text: 'given'}
+          - {line: 5, kind: move, from: {line: 0, at: '68∘'}, at: '68∘', text: 'given'}
           - {figure: 0, kind: arc, target: SRT, text: '68°'}
       - say: 'Subtract 68 from both sides. 180 minus 68 is 112.'
         write: '$a + b = 112^{\circ}$'
+      - say: 'The angles in a triangle add up to 180 degrees.'
+        write: 'Angles in a triangle: $A + B + C = 180^{\circ}$'
       - say: 'Now the angles at $P$. In triangle $P Q R$, the two base angles are $a$ each, so the angle at $P$ is 180 minus $2a$.'
         write: '$\angle QPR = 180^{\circ} - 2a$'
+        point:
+          - {figure: 0, kind: arc, target: QPR, text: '180° − 2a'}
       - say: 'In triangle $P R S$, the angle at $P$ is 180 minus $2b$.'
         write: '$\angle RPS = 180^{\circ} - 2b$'
+        point:
+          - {figure: 0, kind: arc, target: RPS, text: '180° − 2b'}
       - say: 'Angle $Q P S$ is those two angles added together.'
         write: '$\angle QPS = (180^{\circ} - 2a) + (180^{\circ} - 2b)$'
+        point:
+          - {figure: 0, kind: circle, target: P, text: 'QPS: both together'}
       - say: '180 plus 180 is 360, and $2a$ plus $2b$ is 2 times $a$ plus $b$.'
         write: '$= 360^{\circ} - 2(a + b)$'
       - say: 'We know $a$ plus $b$ is 112.'
         write: '$= 360^{\circ} - 2(112^{\circ})$'
         point:
-          - {line: 10, kind: move, from: {line: 5, at: '112∘'}, at: '(112∘)', text: 'we know'}
+          - {line: 12, kind: move, from: {line: 6, at: '112∘'}, at: '(112∘)', text: 'we know'}
       - say: '2 times 112 is 224, and 360 minus 224 is 136.'
         write: '$= 360^{\circ} - 224^{\circ} = 136^{\circ}$'
         point:
@@ -1388,13 +1524,19 @@ lessons:
     moments:
       - say: 'A flagstaff stands on a tower. From 60 m away, the top of the flagstaff is seen at 64 degrees and the bottom at 62 degrees. We want the length of the flagstaff.'
         write: '$\text{distance} = 60,\quad 64^{\circ} \text{ (top)},\quad 62^{\circ} \text{ (bottom)}$'
+      - say: 'Let me draw a diagram of this, to make it simpler to see.'
         show_sketch: true
       - say: 'Both angles are measured from the same spot, so each gives a right-angled triangle with the same 60 m base. Tangent links the height to the base: opposite over adjacent.'
+        point:
+          - {figure: sketch, kind: circle, target: A, text: 'same spot'}
+          - {figure: sketch, kind: circle, target: '60 m', text: 'base'}
       - say: 'Let $h$ be the height of the tower, which is where the bottom of the flagstaff is, and let $f$ be the length of the flagstaff.'
         write: '$h = \text{tower},\quad f = \text{flagstaff}$'
         point:
           - {figure: sketch, kind: highlight, target: BC, text: 'h'}
           - {figure: sketch, kind: highlight, target: CD, text: 'f'}
+      - say: 'In a right-angled triangle, the tan of an angle is the opposite side over the adjacent side.'
+        write: 'SOH CAH TOA: $\tan\theta = \dfrac{\text{opposite}}{\text{adjacent}}$'
       - say: 'The bottom of the flagstaff is seen at 62 degrees. So tan 62 is $h$ over 60.'
         write: '$\tan 62^{\circ} = \dfrac{h}{60}$'
         point:
@@ -1403,7 +1545,7 @@ lessons:
       - say: 'Multiply both sides by 60.'
         write: '$h = 60\tan 62^{\circ}$'
         point:
-          - {line: 4, kind: move, from: {line: 3, at: '60'}, at: '60', text: 'multiply across'}
+          - {line: 6, kind: move, from: {line: 5, at: '60'}, at: '60', text: 'multiply across'}
       - say: 'The top of the flagstaff is seen at 64 degrees. Its height is $h$ plus $f$, so tan 64 is $h$ plus $f$ over 60.'
         write: '$\tan 64^{\circ} = \dfrac{h + f}{60}$'
         point:
@@ -1411,12 +1553,13 @@ lessons:
       - say: 'Multiply both sides by 60.'
         write: '$h + f = 60\tan 64^{\circ}$'
         point:
-          - {line: 6, kind: move, from: {line: 5, at: '60'}, at: '60', text: 'multiply across'}
+          - {line: 8, kind: move, from: {line: 7, at: '60'}, at: '60', text: 'multiply across'}
       - say: 'Now subtract the tower from the total height to leave the flagstaff.'
         write: '$f = 60\tan 64^{\circ} - 60\tan 62^{\circ}$'
         point:
-          - {line: 7, kind: move, from: {line: 6, at: '60tan64∘'}, at: '60tan64∘', text: 'total'}
-          - {line: 7, kind: move, from: {line: 4, at: '60tan62∘'}, at: '60tan62∘', text: 'tower'}
+          - {line: 9, kind: move, from: {line: 8, at: '60tan64∘'}, at: '60tan64∘', text: 'total'}
+          - {line: 9, kind: move, from: {line: 6, at: '60tan62∘'}, at: '60tan62∘', text: 'tower'}
+          - {figure: sketch, kind: circle, target: f, text: 'what is left'}
       - say: 'Take out the common factor of 60.'
         write: '$f = 60(\tan 64^{\circ} - \tan 62^{\circ})$'
       - say: 'A size check: tan 64 is about 2.050 and tan 62 is about 1.881. The difference is about 0.17, and 60 times 0.17 is about 10 m, a believable flagstaff. So the answer is answer choice D.'
@@ -1488,9 +1631,10 @@ lessons:
         write: '$\operatorname{cosec} x = \dfrac{b}{\sqrt{b^{2} - a}}$'
         point:
           - {line: 6, kind: arrow, from: {line: 5, at: 'bb2−a'}, at: 'b2−ab', text: 'flip this'}
+      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+        show_sketch: true
       - say: 'Check with a triangle. The adjacent side is root $a$ and the hypotenuse is $b$. By Pythagoras, the opposite side is root of $b$ squared minus $a$.'
         write: '$\text{opposite} = \sqrt{b^{2} - (\sqrt{a})^{2}} = \sqrt{b^{2} - a}$'
-        show_sketch: true
         point:
           - {figure: sketch, kind: highlight, target: AB, text: 'adjacent √a'}
           - {figure: sketch, kind: highlight, target: AC, text: 'hypotenuse b'}
@@ -1507,6 +1651,9 @@ lessons:
     moments:
       - say: 'From $Z$, which is 60 m north of $X$, a man walks 60 root 3 m east to $Y$. We want the bearing of $Y$ from $X$. A quick sketch helps.'
         write: '$XZ = 60 \text{ (north)},\quad ZY = 60\sqrt{3} \text{ (east)}$'
+        point:
+          - {figure: sketch, kind: circle, target: '60 m', text: 'north'}
+          - {figure: sketch, kind: circle, target: '60√3 m', text: 'east'}
       - say: 'Let''s sketch it. Put $X$ at the bottom. $Z$ is 60 m straight up from it, to the north, and $Y$ is 60 root 3 m to the right of $Z$, to the east.'
         write: 'From $X$: $Y$ is $60$ m north and $60\sqrt{3}$ m east'
         show_sketch: true
@@ -1514,10 +1661,15 @@ lessons:
           - {figure: sketch, kind: highlight, target: XZ, text: 'north'}
           - {figure: sketch, kind: highlight, target: ZY, text: 'east'}
       - say: 'Remember, a bearing is measured clockwise from north. So we want the angle between north and the line $X Y$, measured at $X$.'
+        point:
+          - {figure: sketch, kind: circle, target: N, text: 'north'}
+          - {figure: sketch, kind: highlight, target: XY}
       - say: 'North and east are at right angles, so $X$, $Z$ and $Y$ make a right-angled triangle with the right angle at $Z$.'
         write: '$\angle XZY = 90^{\circ}$'
         point:
           - {figure: sketch, kind: arc, target: XZY, text: '90°'}
+      - say: 'In a right-angled triangle, the tan of an angle is the opposite side over the adjacent side.'
+        write: 'SOH CAH TOA: $\tan\theta = \dfrac{\text{opposite}}{\text{adjacent}}$'
       - say: 'Call the angle at $X$ theta. The east distance $Z Y$ is opposite theta, and the north distance $X Z$ is adjacent. Opposite over adjacent is tangent.'
         write: '$\tan\theta = \dfrac{ZY}{XZ}$'
         point:
@@ -1537,6 +1689,8 @@ lessons:
       - say: 'Theta is measured clockwise from north, so it is the bearing. Bearings are written with three figures: 060 degrees. That is answer choice C.'
         write: '$\text{bearing} = 060^{\circ}$'
         answer: true
+        point:
+          - {figure: sketch, kind: circle, target: θ, text: 'bearing 060°'}
     traps:
       A: 'You went for 030 degrees. That measures the angle from the east direction instead of from north. Bearings always start from north: tan theta is 60 root 3 over 60, which is root 3, so theta is 60.'
       B: 'You went for 045 degrees. That would need the north and east distances to be equal. Here east is 60 root 3, which is bigger than 60, so tan theta is root 3 and the bearing is 060.'
@@ -1546,24 +1700,31 @@ lessons:
     moments:
       - say: 'A surveyor walks 500 m up a hill that slopes at 30 degrees. We want the height he rises.'
         write: 'Path along the slope $= 500$ m, slope $= 30^{\circ}$'
+      - say: 'Let me draw a diagram of this, to make it simpler to see.'
         show_sketch: true
+        point:
+          - {figure: sketch, kind: circle, target: '500 m', text: 'along the slope'}
+          - {figure: sketch, kind: circle, target: '30°', text: 'slope'}
+          - {figure: sketch, kind: circle, target: h, text: 'want'}
       - say: 'Walking up a slope makes a right-angled triangle. The path he walks is the hypotenuse, and the height he rises, call it $h$, is the side opposite the 30-degree angle.'
         write: 'Hypotenuse $= 500$, height $h$ is opposite the $30^{\circ}$'
         point:
           - {figure: sketch, kind: highlight, target: AB, text: 'hypotenuse'}
           - {figure: sketch, kind: highlight, target: BC, text: 'opposite'}
+      - say: 'In a right-angled triangle, the sine of an angle is the opposite side over the hypotenuse.'
+        write: 'SOH CAH TOA: $\sin\theta = \dfrac{\text{opposite}}{\text{hypotenuse}}$'
       - say: 'Opposite over hypotenuse is sine. So sin 30 degrees is $h$ over 500.'
         write: '$\sin 30^{\circ} = \dfrac{h}{500}$'
       - say: 'Multiply both sides by 500 to get $h$ by itself.'
         write: '$h = 500\sin 30^{\circ}$'
         point:
-          - {line: 3, kind: move, from: {line: 2, at: '500'}, at: '500', text: 'multiply across'}
+          - {line: 5, kind: move, from: {line: 4, at: '500'}, at: '500', text: 'multiply across'}
       - say: 'Sin 30 degrees is exactly a half. It is one of the special angles worth knowing by heart.'
         write: '$\sin 30^{\circ} = \dfrac{1}{2}$'
       - say: 'Put that a half into our equation for $h$.'
         write: '$h = 500 \times \dfrac{1}{2}$'
         point:
-          - {line: 5, kind: move, from: {line: 4, at: '= 21'}, at: '21', text: 'sin 30'}
+          - {line: 7, kind: move, from: {line: 6, at: '= 21'}, at: '21', text: 'sin 30'}
       - say: 'Half of 500 is 250.'
         write: '$= 250$'
         point:
@@ -1582,9 +1743,19 @@ lessons:
     moments:
       - say: '$P Q R S$ is a square of side 8 cm. $U Q$ is 4, $Q V$ is 6 and $W R$ is 2. We want the area of the shaded triangle $U V W$.'
         write: '$\text{side} = 8,\quad UQ = 4,\quad QV = 6,\quad WR = 2$'
+        point:
+          - {figure: 0, kind: circle, target: U}
+          - {figure: 0, kind: circle, target: V}
+          - {figure: 0, kind: circle, target: W, text: 'shaded UVW'}
       - say: 'The triangle is awkward to measure directly. But the pieces of the square outside it are easy. So we find the whole square and subtract those pieces.'
+        point:
+          - {figure: 0, kind: label, target: {x: 100, y: 136}, text: 'pieces outside'}
+      - say: 'The area of a square is its side squared.'
+        write: 'Area of a square $= \text{side}^{2}$'
       - say: 'The square has area 8 times 8, which is 64.'
         write: '$\text{square} = 8 \times 8 = 64$'
+      - say: 'The area of a triangle is half the base times the height.'
+        write: 'Area of a triangle $= \tfrac{1}{2} \times \text{base} \times \text{height}$'
       - say: 'The first piece is the right-angled triangle $U Q V$ at the top right. Its legs are 4 and 6, so its area is half of 4 times 6, which is 12.'
         write: '$\triangle UQV = \tfrac{1}{2}(4)(6) = 12$'
         point:
@@ -1597,7 +1768,7 @@ lessons:
       - say: 'Its legs are 2 and 2, so its area is half of 2 times 2, which is 2.'
         write: '$\triangle VRW = \tfrac{1}{2}(2)(2) = 2$'
         point:
-          - {line: 5, kind: move, from: {line: 4, at: '= 2'}, at: '[[(2)]](2)', text: 'VR'}
+          - {line: 7, kind: move, from: {line: 6, at: '= 2'}, at: '[[(2)]](2)', text: 'VR'}
       - say: 'The third piece is the trapezium $P U W S$ on the left. $P U$ is 8 minus 4, which is 4.'
         write: '$PU = 8 - 4 = 4$'
         point:
@@ -1606,21 +1777,25 @@ lessons:
         write: '$SW = 8 - 2 = 6$'
         point:
           - {figure: 0, kind: label, target: SW, text: '6'}
+      - say: 'The area of a trapezium is half the sum of the two parallel sides, times the height between them.'
+        write: 'Area of a trapezium $= \tfrac{1}{2}(a + b)h$'
       - say: 'The trapezium has parallel sides 4 and 6, and height 8. Its area is half the sum of the parallel sides times the height.'
         write: '$\text{trapezium} = \tfrac{1}{2}(4 + 6)(8)$'
         point:
-          - {line: 8, kind: move, from: {line: 6, at: '= 4'}, at: '(4', text: 'PU'}
-          - {line: 8, kind: move, from: {line: 7, at: '= 6'}, at: '+ 6', text: 'SW'}
+          - {line: 11, kind: move, from: {line: 8, at: '= 4'}, at: '(4', text: 'PU'}
+          - {line: 11, kind: move, from: {line: 9, at: '= 6'}, at: '+ 6', text: 'SW'}
+          - {figure: 0, kind: highlight, target: PS, text: 'height 8'}
       - say: '4 plus 6 is 10, half of 10 is 5, and 5 times 8 is 40.'
         write: '$= 40$'
       - say: 'Together the three pieces cover 12 plus 2 plus 40, which is 54.'
         write: '$12 + 2 + 40 = 54$'
       - say: 'Subtract that from the square. 64 minus 54 is 10. So the triangle has area 10 square centimetres, which is answer choice D.'
         write: '$\triangle UVW = 64 - 54 = 10\ \text{cm}^{2}$'
-        point:
-          - {line: 11, kind: move, from: {line: 2, at: '= 64'}, at: '64', text: 'square'}
-          - {line: 11, kind: move, from: {line: 10, at: '= 54'}, at: '54', text: 'pieces'}
         answer: true
+        point:
+          - {line: 14, kind: move, from: {line: 3, at: '= 64'}, at: '64', text: 'square'}
+          - {line: 14, kind: move, from: {line: 13, at: '= 54'}, at: '54', text: 'pieces'}
+          - {figure: 0, kind: label, target: {x: 206, y: 153}, text: '10 cm²'}
     traps:
       A: 'You went for 64. That is the whole square. The triangle is only part of it: take away the three outside pieces, 12, 2 and 40, to leave 10.'
       B: 'You went for 54. That is the area outside the triangle. The last step is 64 minus 54, which leaves 10.'
@@ -1630,24 +1805,32 @@ lessons:
     moments:
       - say: 'We want the total surface area of a solid cylinder with radius 4 cm and height 5 cm.'
         write: '$r = 4,\quad h = 5$'
+      - say: 'Let me draw the shape, so we can see its measurements.'
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: '4 cm', text: 'radius'}
           - {figure: sketch, kind: circle, target: '5 cm', text: 'height'}
       - say: 'A solid cylinder has three surfaces: two circular ends and the curved side. Let''s find each one.'
+        point:
+          - {figure: sketch, kind: label, target: {x: 160, y: 50}, text: 'end'}
+          - {figure: sketch, kind: label, target: {x: 160, y: 182}, text: 'end'}
+          - {figure: sketch, kind: label, target: {x: 80, y: 105}, text: 'curved side'}
       - say: 'Each circular end has area pi $r$ squared. 4 squared is 16, so each end is 16 pi.'
         write: '$\pi r^{2} = \pi(4)^{2} = 16\pi$'
       - say: 'There are two ends. 2 times 16 pi is 32 pi.'
         write: '$2 \times 16\pi = 32\pi$'
       - say: 'The curved side unrolls into a rectangle. Its length is the circumference, 2 pi $r$, and its width is the height. So its area is 2 pi $r h$.'
         write: '$2\pi rh = 2\pi(4)(5)$'
+        point:
+          - {figure: sketch, kind: label, target: {x: 110, y: 178}, text: 'length 2πr'}
+          - {figure: sketch, kind: circle, target: '5 cm', text: 'width = h'}
       - say: '2 times 4 is 8, and 8 times 5 is 40. So the curved side is 40 pi.'
         write: '$= 40\pi$'
       - say: 'Add the ends and the side. 32 pi plus 40 pi is 72 pi.'
         write: '$32\pi + 40\pi = 72\pi$'
         point:
-          - {line: 6, kind: move, from: {line: 3, at: '= 32π'}, at: '32π', text: 'ends'}
-          - {line: 6, kind: move, from: {line: 5, at: '= 40π'}, at: '40π', text: 'side'}
+          - {line: 7, kind: move, from: {line: 4, at: '= 32π'}, at: '32π', text: 'ends'}
+          - {line: 7, kind: move, from: {line: 6, at: '= 40π'}, at: '40π', text: 'side'}
       - say: 'The one-line formula agrees: 2 pi $r$, times $r$ plus $h$. 4 plus 5 is 9, and 2 times 4 times 9 is 72.'
         write: '$2\pi r(r + h) = 2\pi(4)(9) = 72\pi\ \checkmark$'
       - say: 'So the total surface area is 72 pi square centimetres, which is answer choice B.'
@@ -1669,12 +1852,22 @@ lessons:
         write: '$V = V_{\text{cylinder}} + V_{\text{cone}}$'
       - say: 'A cylinder''s volume is the area of its circular base, pi $r$ squared, times its height.'
         write: 'Cylinder: $V = \pi r^{2}h$'
+        point:
+          - {figure: 0, kind: label, target: {x: 150, y: 352}, text: 'base πr²'}
       - say: 'Here the radius is $a$ and the height is $y$, so the cylinder is pi $a$ squared $y$.'
         write: '$V_{\text{cylinder}} = \pi a^{2}y$'
+        point:
+          - {figure: 0, kind: circle, target: {x: 195, y: 320}, text: 'radius a'}
+          - {figure: 0, kind: circle, target: y, text: 'height y'}
       - say: 'A cone holds exactly a third of the cylinder with the same base and height, so its volume is a third of pi $r$ squared $h$.'
         write: 'Cone: $V = \tfrac{1}{3}\pi r^{2}h$'
+        point:
+          - {figure: 0, kind: label, target: {x: 150, y: 100}, text: 'cone'}
       - say: 'Our cone has radius $a$ and height $x$, so it is a third of pi $a$ squared $x$.'
         write: '$V_{\text{cone}} = \tfrac{1}{3}\pi a^{2}x$'
+        point:
+          - {figure: 0, kind: circle, target: {x: 195, y: 140}, text: 'radius a'}
+          - {figure: 0, kind: circle, target: x, text: 'height x'}
       - say: 'Now add the two volumes we just found.'
         write: '$V = \pi a^{2}y + \tfrac{1}{3}\pi a^{2}x$'
         point:
@@ -1698,6 +1891,8 @@ lessons:
     moments:
       - say: 'A family''s income is split: 59% food, 3% electricity, 20% transport, 11% education and 7% extended family. We want the pie chart angles for education and food, in that order.'
         write: '$59\%,\ 3\%,\ 20\%,\ 11\%,\ 7\%$'
+      - say: 'Let me draw the pie chart, so we can see the parts of the whole.'
+        show_sketch: true
       - say: 'First check that the percentages make a whole. 59 plus 3 is 62, plus 20 is 82, plus 11 is 93, plus 7 is 100. Good.'
         write: '$59 + 3 + 20 + 11 + 7 = 100$'
       - say: 'A pie chart shares out the 360 degrees of a full circle, so each item gets its percentage of 360.'
@@ -1707,15 +1902,21 @@ lessons:
       - say: 'Education is 11%, so its angle is 11 times 3.6. 10 times 3.6 is 36, plus one more 3.6 is 39.6 degrees.'
         write: '$11 \times 3.6^{\circ} = 39.6^{\circ}$'
         point:
-          - {line: 4, kind: move, from: {line: 0, at: '11%'}, at: '11', text: 'education'}
-          - {line: 4, kind: move, from: {line: 3, at: '= 3.6∘'}, at: '3.6∘', text: 'per 1%'}
+          - {line: 5, kind: move, from: {line: 0, at: '11%'}, at: '11', text: 'education'}
+          - {line: 5, kind: move, from: {line: 4, at: '= 3.6∘'}, at: '3.6∘', text: 'per 1%'}
+          - {figure: sketch, kind: label, target: '11%, ?', text: '39.6°'}
       - say: 'Food is 59%, so its angle is 59 times 3.6. 60 times 3.6 is 216, and taking away one 3.6 gives 212.4 degrees.'
         write: '$59 \times 3.6^{\circ} = 216 - 3.6 = 212.4^{\circ}$'
         point:
-          - {line: 5, kind: move, from: {line: 0, at: '59%'}, at: '59', text: 'food'}
-          - {line: 5, kind: move, from: {line: 3, at: '= 3.6∘'}, at: '3.6∘', text: 'per 1%'}
+          - {line: 6, kind: move, from: {line: 0, at: '59%'}, at: '59', text: 'food'}
+          - {line: 6, kind: move, from: {line: 4, at: '= 3.6∘'}, at: '3.6∘', text: 'per 1%'}
+          - {figure: sketch, kind: label, target: 'angle ?', text: '212.4°'}
       - say: 'Let''s check the rest. Electricity is 3 times 3.6, which is 10.8. Transport is 20 times 3.6, which is 72. Extended family is 7 times 3.6, which is 25.2.'
         write: 'Others: $3 \times 3.6 = 10.8,\ \ 20 \times 3.6 = 72,\ \ 7 \times 3.6 = 25.2$'
+        point:
+          - {figure: sketch, kind: label, target: 'electricity 3%', text: '10.8°'}
+          - {figure: sketch, kind: label, target: '20%', text: '72°'}
+          - {figure: sketch, kind: label, target: 'family 7%', text: '25.2°'}
       - say: 'All five: 39.6 plus 212.4 is 252, plus 10.8 is 262.8, plus 72 is 334.8, plus 25.2 is 360. Good.'
         write: 'Check: $39.6 + 212.4 + 10.8 + 72 + 25.2 = 360\ \checkmark$'
       - say: 'Education first, then food: 39.6 degrees and 212.4 degrees. That is answer choice D.'
@@ -1730,6 +1931,8 @@ lessons:
     moments:
       - say: 'Fifty boxes of bolts were checked for defective bolts. We want the mean and then the median of the number defective per box.'
         write: '$x:\ 4,\ 5,\ 6,\ 7,\ 8,\ 9 \qquad f:\ 2,\ 7,\ 17,\ 10,\ 8,\ 6$'
+      - say: 'The mean of a frequency table is the sum of f times x, over the sum of f.'
+        write: 'Mean $= \dfrac{\sum fx}{\sum f}$'
       - say: 'The mean is the sum of $f$ times $x$, divided by the sum of $f$. First, the total number of boxes. 2 plus 7 is 9, plus 17 is 26, plus 10 is 36, plus 8 is 44, plus 6 is 50.'
         write: '$\sum f = 2 + 7 + 17 + 10 + 8 + 6 = 50$'
       - say: 'Now each $f$ times $x$. 4 times 2 is 8, 5 times 7 is 35, and 6 times 17 is 102.'
@@ -1741,8 +1944,8 @@ lessons:
       - say: 'So the mean is 333 over 50, which is 6.66. To one decimal place, that is 6.7.'
         write: '$\text{mean} = \dfrac{333}{50} = 6.66 \approx 6.7$'
         point:
-          - {line: 5, kind: move, from: {line: 4, at: '333'}, at: '333', text: 'Σfx'}
-          - {line: 5, kind: move, from: {line: 1, at: '= 50'}, at: '50', text: 'Σf'}
+          - {line: 6, kind: move, from: {line: 5, at: '333'}, at: '333', text: 'Σfx'}
+          - {line: 6, kind: move, from: {line: 2, at: '= 50'}, at: '50', text: 'Σf'}
       - say: 'Now the median. With 50 values in order, the middle lies between the 25th and 26th values, so we need those two.'
         write: 'Median: average of the 25th and 26th values'
       - say: 'Count along the table. The first 2 boxes have 4. Then 2 plus 7 is 9 boxes up to 5. Then 9 plus 17 is 26 boxes up to 6.'
@@ -1750,7 +1953,7 @@ lessons:
       - say: 'So boxes 10 to 26 all have 6 defective. The 25th and 26th both fall there, so the median is 6.'
         write: '$\text{median} = 6$'
         point:
-          - {line: 7, kind: circle, at: '9+17=26', text: 'up to 26th'}
+          - {line: 8, kind: circle, at: '9+17=26', text: 'up to 26th'}
       - say: 'The question asks for the mean first, then the median. The mean we found is 6.7 and the median is 6. That is answer choice A.'
         write: 'Mean, median $= 6.7,\ 6$'
         answer: true
