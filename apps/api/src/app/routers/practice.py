@@ -48,7 +48,7 @@ import secrets
 import time
 from collections.abc import AsyncIterator
 from pathlib import Path
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Literal, get_args
 from uuid import UUID, uuid4
 
 from fastapi import (
@@ -62,7 +62,7 @@ from fastapi import (
     UploadFile,
 )
 from fastapi.responses import FileResponse, Response, StreamingResponse
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
@@ -1629,26 +1629,81 @@ async def listen(
 
 
 #: How a beat may mark an earlier line on the board, the way a teacher circles a term or draws
-#: an arrow back to where a line came from.
-PointKind = Literal["circle", "underline", "arrow", "box", "highlight", "strike"]
+#: an arrow back to where a line came from. `move` carries a piece from one place to another
+#: (the 2 in front of a log up into its power); `arc` and `label` are for the diagram only.
+PointKind = Literal[
+    "circle", "underline", "arrow", "box", "highlight", "strike", "move", "arc", "label"
+]
+_POINT_KINDS = frozenset(get_args(PointKind))
+#: A mark on the working, and a mark on the diagram: the kinds each may be.
+_LINE_KINDS = frozenset({"circle", "underline", "arrow", "box", "highlight", "strike", "move"})
+_FIGURE_KINDS = frozenset(
+    {"circle", "underline", "arrow", "highlight", "strike", "arc", "label"}
+)
+
+
+class PointFrom(BaseModel):
+    #: Where an arrow or a move starts: a moment (as `line` counts them) and a piece of it.
+    line: int
+    at: str | None = None
+
+
+class FigureSpot(BaseModel):
+    #: A place on a figure, in the units of its SVG's viewBox.
+    x: float
+    y: float
 
 
 class LessonPoint(BaseModel):
+    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)
+
     #: The line pointed at: the index of a moment in this lesson (from 0), or counted back from
-    #: this beat when negative (-1 is the moment just before it).
-    line: int
+    #: this beat when negative (-1 is the moment just before it). None on a diagram mark.
+    line: int | None = None
     kind: PointKind
     #: A few words written beside the mark.
     text: str | None = None
     #: Part of the line to mark rather than all of it, as it reads on the board (spaces ignored).
     at: str | None = None
+    #: Where an arrow or a move starts, when it goes piece to piece rather than line to line.
+    from_: PointFrom | None = Field(default=None, alias="from")
+    #: A mark on a diagram: which one — a question's figure by its number (from 0), or the
+    #: lesson's own sketch, "sketch" (a second, "sketch_b") — and what in it: a point's label,
+    #: two labels for a side, three for an angle, or a place in the drawing's units.
+    figure: int | Literal["sketch", "sketch_b"] | None = None
+    target: str | list[str] | FigureSpot | None = None
+
+
+def _words(value: object) -> str | None:
+    return (str(value).strip() or None) if value is not None else None
+
+
+def _whole(value: object) -> int | None:
+    """An integer that is really one (YAML's `true` is not a line number)."""
+    return value if isinstance(value, int) and not isinstance(value, bool) else None
+
+
+def _target(raw: object) -> str | list[str] | FigureSpot | None:
+    if isinstance(raw, str):
+        return raw.strip() or None
+    if isinstance(raw, list):
+        labels = [str(label).strip() for label in raw if isinstance(label, str | int)]
+        return [label for label in labels if label] or None
+    if isinstance(raw, dict):
+        x, y = raw.get("x"), raw.get("y")
+        if all(isinstance(n, int | float) and not isinstance(n, bool) for n in (x, y)):
+            return FigureSpot(x=float(x), y=float(y))  # type: ignore[arg-type]
+    return None
 
 
 def _points(raw: object) -> list[LessonPoint] | None:
     """A moment's `point` list as the board draws it, or None when it has none.
 
     Lenient on purpose: a mark is decoration over a lesson that already teaches without it, so a
-    malformed one is dropped rather than taking the lesson down.
+    malformed one is dropped rather than taking the lesson down. A mark is either on the
+    working (a whole-number `line`) or on the diagram (a whole-number `figure` and a `target`
+    it can find), and its kind has to be one that makes sense there; a `from` that is not a
+    piece of a line is left off rather than losing the mark.
     """
     if not isinstance(raw, list):
         return None
@@ -1656,20 +1711,34 @@ def _points(raw: object) -> list[LessonPoint] | None:
     for item in raw:
         if not isinstance(item, dict):
             continue
-        line, kind = item.get("line"), item.get("kind")
-        if isinstance(line, bool) or not isinstance(line, int):
+        kind = item.get("kind")
+        if kind not in _POINT_KINDS:
             continue
-        if kind not in ("circle", "underline", "arrow", "box", "highlight", "strike"):
+        line, figure = _whole(item.get("line")), _whole(item.get("figure"))
+        drawing: int | Literal["sketch", "sketch_b"] | None = figure
+        if item.get("figure") == "sketch":
+            drawing = "sketch"
+        elif item.get("figure") == "sketch_b":
+            drawing = "sketch_b"
+        label = _words(item.get("text"))
+        if drawing is not None and (not isinstance(drawing, int) or drawing >= 0):
+            target = _target(item.get("target"))
+            if kind not in _FIGURE_KINDS or target is None:
+                continue
+            kept.append(LessonPoint(kind=kind, text=label, figure=drawing, target=target))
             continue
-        label, at = item.get("text"), item.get("at")
-        kept.append(
-            LessonPoint(
-                line=line,
-                kind=kind,
-                text=(str(label).strip() or None) if label is not None else None,
-                at=(str(at).strip() or None) if at is not None else None,
-            )
-        )
+        if line is None or kind not in _LINE_KINDS:
+            continue
+        start = item.get("from")
+        begin = None
+        if isinstance(start, dict) and _whole(start.get("line")) is not None:
+            begin = PointFrom(line=start["line"], at=_words(start.get("at")))
+        if kind == "move" and begin is None:
+            continue
+        point = LessonPoint(line=line, kind=kind, text=label, at=_words(item.get("at")))
+        if kind in ("arrow", "move"):
+            point.from_ = begin
+        kept.append(point)
     return kept or None
 
 
@@ -1689,6 +1758,24 @@ class LessonBeat(BaseModel):
     answer: bool = False
     #: Marks drawn over earlier lines while this beat is said: circles, underlines, arrows.
     point: list[LessonPoint] | None = None
+    #: The beat at which the lesson's sketch is brought onto the board (the first, if none is).
+    show_sketch: bool = False
+
+
+class LessonSketch(BaseModel):
+    """A diagram drawn for the lesson from the question's words (migration 026).
+
+    Sent as the SVG's text for the board to show as a picture — an <img> of a data: URL,
+    never as markup. It was checked when it was loaded (database/lesson_marks.py): nothing in
+    it runs or fetches.
+    """
+
+    #: What the lesson's marks call it: "sketch", or "sketch_b" for a second.
+    name: Literal["sketch", "sketch_b"]
+    svg: str
+    alt_text: str | None = None
+    width: int | None = None
+    height: int | None = None
 
 
 class NarratedLesson(BaseModel):
@@ -1697,6 +1784,8 @@ class NarratedLesson(BaseModel):
     #: be had, and the board reads the reviewed steps.
     source: Literal["script", "model", "steps"]
     beats: list[LessonBeat]
+    #: The lesson's own diagrams, for a question that describes its figure in words.
+    sketches: list[LessonSketch] = []
 
 
 @dataclasses.dataclass(frozen=True)
@@ -1707,6 +1796,7 @@ class _Beat:
     say: str
     answer: bool = False
     point: list[LessonPoint] | None = None
+    show_sketch: bool = False
 
 
 async def _must_have_missed(conn: AsyncConnection, session_id: UUID, version_id: UUID) -> None:
@@ -1877,6 +1967,40 @@ async def _narration(
     return plain, lesson.steps, "steps"
 
 
+async def _lesson_sketches(conn: AsyncConnection, version_id: UUID) -> list[LessonSketch]:
+    """The written lesson's own sketches, found the way `_lesson_beats` finds the lesson.
+
+    Read as `to_jsonb(l) -> 'sketches'` rather than by column name, so a database not yet
+    migrated to 026 reads as a lesson with no sketches instead of failing the lesson. A stored
+    sketch that does not fit the model is left out: the lesson teaches without it.
+    """
+    stored = (
+        await conn.execute(
+            text(
+                """
+                SELECT to_jsonb(l) -> 'sketches'
+                FROM question_versions seen
+                JOIN questions q ON q.id = seen.question_id
+                JOIN question_lessons l
+                  ON l.question_version_id IN (seen.id, q.current_version_id)
+                WHERE seen.id = :v
+                ORDER BY l.question_version_id = seen.id DESC
+                LIMIT 1
+                """
+            ),
+            {"v": version_id},
+        )
+    ).scalar()
+    stored = json.loads(stored) if isinstance(stored, str) else stored
+    sketches: list[LessonSketch] = []
+    for raw in stored if isinstance(stored, list) else []:
+        try:
+            sketches.append(LessonSketch.model_validate(raw))
+        except ValueError:
+            continue
+    return sketches
+
+
 async def _lesson_beats(
     conn: AsyncConnection, session_id: UUID, version_id: UUID, settings: Settings
 ) -> tuple[list[_Beat], Literal["script", "model", "steps"]]:
@@ -1926,6 +2050,7 @@ async def _lesson_beats(
                 say=str(moment["say"]),
                 answer=bool(moment.get("answer")),
                 point=_points(moment.get("point")),
+                show_sketch=bool(moment.get("show_sketch")),
             )
             for moment in moments
         ]
@@ -1983,9 +2108,11 @@ async def lesson(
                 voice_url=f"/v1/practice/{session_id}/lesson/{question_version_id}/voice/{index}",
                 answer=beat.answer,
                 point=beat.point,
+                show_sketch=beat.show_sketch,
             )
             for index, beat in enumerate(beats)
         ],
+        sketches=await _lesson_sketches(conn, question_version_id) if source == "script" else [],
     )
 
 

@@ -55,6 +55,7 @@ import asyncpg
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from lesson_marks import SKETCH_NAMES, check_sketch, clean_points
 from load_questions import content_hash, normalise, uuid_for
 from propose_levels_maths import propose
 from reclassify_maths import FALLBACK, classify
@@ -62,6 +63,9 @@ from reclassify_maths import FALLBACK, classify
 ROOT = Path(__file__).resolve().parent.parent
 MATHS = ROOT / "docs" / "questions" / "utme" / "mathematics"
 SVG_DIR = MATHS / "figures" / "svg"
+#: Diagrams drawn for a lesson, for a question that describes its figure in words:
+#: YYYY_qNN.svg, and YYYY_qNN_b.svg for a second (see lesson_marks.py).
+SKETCH_DIR = MATHS / "sketches"
 SUBJECT = "MATH"
 EXAMINATION = "UTME"
 AUTHOR = "Hand re-transcription (UTME Mathematics)"
@@ -207,46 +211,16 @@ async def report_uncertain(conn: asyncpg.Connection, version_id: object, q: dict
 
 
 OPTION_LETTERS = {"A", "B", "C", "D", "E"}
-POINT_KINDS = {"circle", "underline", "arrow", "box", "highlight", "strike"}
 
 
-def _clean_points(point: object, index: int, where: str) -> list[dict[str, object]]:
-    """A moment's marks on the board (circle, underline, arrow, box), checked.
-
-    `line` is the moment pointed at: its index in the lesson from 0, or counted back from this
-    moment when negative. It must be this moment or an earlier one, since a mark cannot point
-    at a line that has not been written yet.
-    """
-    if not isinstance(point, list) or not point:
-        raise SystemExit(f"{where}: point is a list of marks")
-    marks: list[dict[str, object]] = []
-    for mark in point:
-        if not isinstance(mark, dict):
-            raise SystemExit(f"{where}: each mark is a mapping")
-        line, kind = mark.get("line"), mark.get("kind")
-        if isinstance(line, bool) or not isinstance(line, int):
-            raise SystemExit(f"{where}: a mark's line is a moment number")
-        target = index + line if line < 0 else line
-        if not 0 <= target <= index:
-            raise SystemExit(f"{where}: a mark can only point at this moment or an earlier one")
-        if kind not in POINT_KINDS:
-            raise SystemExit(f"{where}: a mark's kind is one of {sorted(POINT_KINDS)}")
-        clean: dict[str, object] = {"line": line, "kind": kind}
-        for key in ("text", "at"):
-            value = mark.get(key)
-            if value is not None:
-                if not isinstance(value, str) or not value.strip():
-                    raise SystemExit(f"{where}: a mark's {key} is a few words or nothing")
-                clean[key] = value.strip()
-        unknown = set(mark) - {"line", "kind", "text", "at"}
-        if unknown:
-            raise SystemExit(f"{where}: a mark has unknown keys {sorted(unknown)}")
-        marks.append(clean)
-    return marks
-
-
-def read_lessons() -> dict[tuple[int, int], dict]:
+def read_lessons(
+    figures: dict[tuple[int, int], list[str]] | None = None,
+) -> dict[tuple[int, int], dict]:
     """Every written lesson (lessons_YYYY.yaml), checked, keyed by year and question number.
+
+    `figures` is each question's drawings as SVG text (from read_papers), so a mark on the
+    diagram is checked against the drawing it is on: the labels it names are really printed
+    there (see lesson_marks.py). A question with no drawing takes no diagram marks.
 
     A malformed lesson stops the load with its address rather than being skipped: a lesson
     is played to students exactly as written, so one that is wrong has to be fixed, not
@@ -261,6 +235,17 @@ def read_lessons() -> dict[tuple[int, int], dict]:
             moments = lesson.get("moments")
             if not isinstance(moments, list) or not moments:
                 raise SystemExit(f"{where}: a lesson needs moments")
+            # The lesson's own sketches, found by the question's number, checked, and stored
+            # with it. Marks call them `figure: sketch` / `figure: sketch_b`.
+            sketches: list[dict[str, object]] = []
+            for name, suffix in zip(SKETCH_NAMES, ("", "_b"), strict=True):
+                file = SKETCH_DIR / f"{year}_q{int(number):02d}{suffix}.svg"
+                if file.is_file():
+                    checked = check_sketch(file.read_text(encoding="utf-8"), file.name)
+                    sketches.append({"name": name, **checked})
+            drawn = {str(sketch["name"]): str(sketch["svg"]) for sketch in sketches}
+            if "sketch_b" in drawn and "sketch" not in drawn:
+                raise SystemExit(f"{where}: a _b sketch with no first sketch")
             clean = []
             for moment in moments:
                 say = moment.get("say") if isinstance(moment, dict) else None
@@ -274,10 +259,21 @@ def read_lessons() -> dict[tuple[int, int], dict]:
                     entry["write"] = write.strip()
                 if moment.get("answer"):
                     entry["answer"] = True
+                if moment.get("show_sketch"):
+                    # The moment the voice first turns to the sketch; the first moment otherwise.
+                    if not sketches:
+                        raise SystemExit(f"{where}: show_sketch, but the lesson has no sketch")
+                    if any(m.get("show_sketch") for m in clean):
+                        raise SystemExit(f"{where}: the sketch is brought in once")
+                    entry["show_sketch"] = True
                 point = moment.get("point")
                 if point is not None:
-                    entry["point"] = _clean_points(
-                        point, len(clean), f"{where} moment {len(clean)}"
+                    entry["point"] = clean_points(
+                        point,
+                        len(clean),
+                        f"{where} moment {len(clean)}",
+                        None if figures is None else figures.get((year, int(number)), []),
+                        drawn,
                     )
                 clean.append(entry)
             traps = lesson.get("traps") or {}
@@ -285,9 +281,16 @@ def read_lessons() -> dict[tuple[int, int], dict]:
                 raise SystemExit(f"{where}: traps are keyed by option letter")
             found[(year, int(number))] = {
                 "moments": clean,
+                "sketches": sketches,
                 "traps": {str(key): str(value).strip() for key, value in traps.items()},
                 "file": path.relative_to(ROOT).as_posix(),
             }
+    for file in sorted(SKETCH_DIR.glob("*.svg")) if SKETCH_DIR.is_dir() else []:
+        named = re.fullmatch(r"(\d{4})_q(\d{2})(_b)?\.svg", file.name)
+        if not named:
+            raise SystemExit(f"sketches/{file.name}: named YYYY_qNN.svg or YYYY_qNN_b.svg")
+        if (int(named.group(1)), int(named.group(2))) not in found:
+            raise SystemExit(f"sketches/{file.name}: there is no written lesson for it to go with")
     return found
 
 
@@ -299,7 +302,8 @@ async def lessons_to_load(
     for (year, number), lesson in lessons.items():
         row = await conn.fetchrow(
             """
-            SELECT q.current_version_id AS version_id, l.moments, l.traps
+            SELECT q.current_version_id AS version_id, l.moments, l.traps,
+                   to_jsonb(l) -> 'sketches' AS sketches
             FROM questions q
             LEFT JOIN question_lessons l ON l.question_version_id = q.current_version_id
             WHERE q.subject_id = $1 AND q.exam_year = $2 AND q.question_number = $3
@@ -315,6 +319,8 @@ async def lessons_to_load(
             row["moments"] is not None
             and json.loads(row["moments"]) == lesson["moments"]
             and json.loads(row["traps"]) == lesson["traps"]
+            # Read whether or not migration 026 has added the column yet: absent reads as none.
+            and json.loads(row["sketches"] or "[]") == lesson["sketches"]
         )
         if not same:
             work.append((row["version_id"], lesson))
@@ -435,6 +441,7 @@ async def run(args: argparse.Namespace) -> int:
             "create": [],
             "complete": [],
             "same": [],
+            "figure": [],
         }
         for q in questions:
             row = current.get((q["year"], str(q["number"])))
@@ -469,10 +476,27 @@ async def run(args: argparse.Namespace) -> int:
                 and key == q["answer"]
                 and assets == (1 if q["svg"] else 0)
             )
+            # The words and the key are as approved and only the figure is new (the paper said
+            # "the diagram above" and none was stored): a new version would have the same
+            # content hash, which the bank refuses, and needs none — the figure is attached to
+            # the version students are already on.
+            figure_only = (
+                row["review_status"] == "approved"
+                and same_text
+                and key == q["answer"]
+                and assets != (1 if q["svg"] else 0)
+            )
             if same_text and row["review_status"] == "draft":
                 # The import read this one correctly. A new version would repeat its content,
                 # which the bank refuses; the draft is completed and approved instead.
                 plan["complete"].append((q, row))
+            elif figure_only:
+                plan["figure"].append((q, row))
+                if (
+                    json.loads(row["solution_steps"] or "[]") != q["steps"]
+                    or json.loads(row["hints"] or "[]") != [q["hint"]]
+                ):
+                    plan["explain"].append((q, row))
             elif not unchanged:
                 plan["revise"].append((q, row))
             elif (
@@ -484,6 +508,29 @@ async def run(args: argparse.Namespace) -> int:
             else:
                 plan["same"].append((q, row))
 
+        # A figure redrawn in place keeps its file path, so the question is "unchanged", but the
+        # row describing it is not: its alt text (the aria-label a screen reader reads out), its
+        # size and its byte count follow the drawing and are brought up to date here.
+        figure_work: list[tuple[object, dict]] = []
+        for q, row in plan["same"] + plan["explain"]:
+            if not q["svg"]:
+                continue
+            asset = await conn.fetchrow(
+                "SELECT id, alt_text, width, height, byte_size FROM question_assets "
+                "WHERE question_version_id = $1",
+                row["version_id"],
+            )
+            if asset is None:
+                continue
+            width, height = svg_size(q["svg"])
+            size = svg_path(q["year"], q["number"]).stat().st_size
+            if (asset["alt_text"], asset["width"], asset["height"], asset["byte_size"]) != (
+                q["alt_text"], width, height, size
+            ):
+                figure_work.append(
+                    (asset["id"], {"alt": q["alt_text"], "w": width, "h": height, "size": size})
+                )
+
         with_figure = sum(1 for q in questions if q["svg"])
         uncertain = [q for q in questions if q["uncertain"]]
         print(f"{len(questions)} questions re-transcribed, {with_figure} with a redrawn figure.")
@@ -491,12 +538,16 @@ async def run(args: argparse.Namespace) -> int:
         print(f"  {len(plan['create'])} not in the bank yet: created, approved")
         print(f"  {len(plan['complete'])} drafts already read correctly: completed, approved")
         print(f"  {len(plan['explain'])} unchanged but for the explanation: rewritten in place")
+        print(f"  {len(plan['figure'])} as approved but for a figure never stored: attached")
         print(f"  {len(plan['same'])} already exactly as written")
-        lessons = read_lessons()
+        print(f"  {len(figure_work)} figures redrawn in place: description and size updated")
+        lessons = read_lessons(
+            {(q["year"], q["number"]): [q["svg"]] if q["svg"] else [] for q in questions}
+        )
         lesson_work = await lessons_to_load(conn, subject_id, lessons)
         print(f"  {len(lessons)} written lessons, {len(lesson_work)} to load or update")
-        pending = sum(len(plan[k]) for k in ("revise", "create", "complete", "explain"))
-        pending += len(lesson_work)
+        pending = sum(len(plan[k]) for k in ("revise", "create", "complete", "explain", "figure"))
+        pending += len(lesson_work) + len(figure_work)
         if args.pending:
             # For a deploy: exit 10 when there is work, so it knows to take a backup first.
             return 10 if pending else 0
@@ -541,6 +592,12 @@ async def run(args: argparse.Namespace) -> int:
                     json.dumps(q["steps"]),
                     json.dumps([q["hint"]]),
                 )
+
+            for q, row in plan["figure"]:
+                await conn.execute(
+                    "DELETE FROM question_assets WHERE question_version_id = $1", row["version_id"]
+                )
+                await add_figure(conn, row["version_id"], q, reviewer_name)
 
             for q, row in plan["create"] + plan["revise"]:
                 paper = papers[q["year"]]
@@ -721,6 +778,16 @@ async def run(args: argparse.Namespace) -> int:
                 )
                 await report_uncertain(conn, version_id, q)
 
+        async with conn.transaction():
+            for asset_id, fresh in figure_work:
+                await conn.execute(
+                    "UPDATE question_assets SET alt_text = $2, width = $3, height = $4, "
+                    "byte_size = $5 WHERE id = $1",
+                    asset_id, fresh["alt"], fresh["w"], fresh["h"], fresh["size"],
+                )
+        if figure_work:
+            print(f"{len(figure_work)} figure descriptions brought up to date.")
+
         # After the questions, because a lesson belongs to the version a question is ON, and
         # the corrections above may just have moved it.
         lesson_work = await lessons_to_load(conn, subject_id, lessons)
@@ -729,16 +796,18 @@ async def run(args: argparse.Namespace) -> int:
                 await conn.execute(
                     """
                     INSERT INTO question_lessons (question_version_id, moments, traps,
-                      source_file)
-                    VALUES ($1, $2::jsonb, $3::jsonb, $4)
+                      source_file, sketches)
+                    VALUES ($1, $2::jsonb, $3::jsonb, $4, $5::jsonb)
                     ON CONFLICT (question_version_id) DO UPDATE
                       SET moments = EXCLUDED.moments, traps = EXCLUDED.traps,
-                          source_file = EXCLUDED.source_file, updated_at = now()
+                          source_file = EXCLUDED.source_file, sketches = EXCLUDED.sketches,
+                          updated_at = now()
                     """,
                     version_id,
                     json.dumps(lesson["moments"]),
                     json.dumps(lesson["traps"]),
                     lesson["file"],
+                    json.dumps(lesson["sketches"]),
                 )
         print(f"{len(lesson_work)} written lessons loaded or updated.")
 

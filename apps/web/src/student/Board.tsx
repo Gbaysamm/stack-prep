@@ -45,7 +45,31 @@ import type { CSSProperties, ReactNode, RefObject } from "react";
 
 import type { LessonPoint, NarratedLesson, TutorReply } from "./api.js";
 import { Coach } from "./Coach.js";
-import { Figures, type QuestionFigure } from "../Figures.js";
+import { FigurePanel, type Drawing } from "./FigureBoard.js";
+import {
+  LABEL_ROOM,
+  arrowAlong,
+  arrowHead,
+  bezierAt,
+  cornerRoute,
+  cubicRoute,
+  distances,
+  drawCircle,
+  drawHighlight,
+  drawStrike,
+  labelWidth,
+  markDelays,
+  seeded,
+  stillMotion,
+  through,
+  unsteady,
+  along,
+  type Box,
+  type Label,
+  type Pt,
+  type Route,
+} from "./ink.js";
+import type { QuestionFigure } from "../Figures.js";
 import { Maths } from "../Maths.js";
 import "../prep/prep.css";
 import "../prep/board.css";
@@ -77,6 +101,8 @@ interface Entry {
   answer: boolean;
   /** Marks drawn back over earlier lines while this is said: circles, underlines, arrows. */
   point: LessonPoint[];
+  /** This is where the lesson's sketch comes onto the board. */
+  showSketch?: boolean;
 }
 
 /**
@@ -187,15 +213,22 @@ function inkLength(line: string): number {
     .replace(/\s+/g, " ").length;
 }
 
+/**
+ * The top of the part of the board a line can be seen in: the top of the board, or on a phone
+ * the bottom of the figure pinned over the working, which covers what scrolls under it.
+ */
+function pinnedEdge(ink: HTMLElement, view: DOMRect): number {
+  const panel = ink.querySelector<HTMLElement>(".pb-figpanel");
+  if (!panel || window.getComputedStyle(panel).position !== "sticky") return view.top;
+  const box = panel.getBoundingClientRect();
+  // Beside the working, not over it: it covers nothing the lines are written in.
+  if (box.width < view.width * 0.6) return view.top;
+  return Math.max(view.top, Math.min(box.bottom, view.bottom));
+}
+
 /** The room left between the line being written and the top of the coach card. */
 const FOLLOW_GAP = 16;
 
-function stillMotion(): boolean {
-  return (
-    typeof window.matchMedia === "function" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  );
-}
 
 /** How long to hold a beat that has no audio, so a silent lesson still reads at a pace. */
 function silentBeatMs(said: string): number {
@@ -343,6 +376,7 @@ export function Board({
           step: beat.board_index !== null && !answer ? beat.board_index : null,
           answer,
           point: beat.point ?? [],
+          showSketch: Boolean(beat.show_sketch),
         };
       });
     }
@@ -1129,7 +1163,7 @@ export function Board({
     if (!ink || !target || !target.isConnected) return;
     const view = ink.getBoundingClientRect();
     const box = target.getBoundingClientRect();
-    const ceiling = view.top + 12;
+    const ceiling = pinnedEdge(ink, view) + 12;
     const floor = view.bottom - coachRoom.current - FOLLOW_GAP;
     let by = box.bottom > floor ? box.bottom - floor : 0;
     // Taller than the room there is: its top stays in view, where the writing starts.
@@ -1148,7 +1182,8 @@ export function Board({
     const view = ink.getBoundingClientRect();
     const box = target.getBoundingClientRect();
     return (
-      box.bottom <= view.bottom - coachRoom.current + 2 && box.top >= view.top
+      box.bottom <= view.bottom - coachRoom.current + 2 &&
+      box.top >= pinnedEdge(ink, view)
     );
   }, []);
 
@@ -1244,6 +1279,28 @@ export function Board({
   }, [keepInView]);
 
   const talking = speaking !== null || voicing;
+  // THE DESK'S DIAGRAMS: the question's printed figures, up with the question, and the
+  // sketches the lesson draws from the question's words, each brought in at the moment the
+  // lesson first turns to it (`show_sketch`), or with the first moment where none says.
+  const sketchAt = Math.max(0, lines.findIndex((line) => line.showSketch));
+  const drawings: Drawing[] = useMemo(
+    () => [
+      ...(figures ?? []).map((figure, index) => ({ key: index, figure, shown: questionUp })),
+      ...(lesson?.sketches ?? []).map((sketch) => ({
+        key: sketch.name,
+        figure: {
+          url: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(sketch.svg)}`,
+          alt_text: sketch.alt_text ?? "A sketch of the question",
+          width: sketch.width ?? null,
+          height: sketch.height ?? null,
+        },
+        markup: sketch.svg,
+        shown: shown - 1 >= sketchAt,
+      })),
+    ],
+    [figures, lesson, questionUp, shown, sketchAt],
+  );
+  const hasFigure = drawings.length > 0;
   // The marker puts itself down for each line and lifts off when it is done, so it is only
   // held back while the board is waiting for a tap or has stepped back for the student.
   const penActive = !needsTap && !(paused && asked === null && !waiting);
@@ -1256,7 +1313,7 @@ export function Board({
   const nextLabel = finished ? "Done" : "Next step";
 
   return (
-    <div className={`sj pb ${talking ? "is-talking" : ""}`}>
+    <div className={`sj pb ${talking ? "is-talking" : ""} ${hasFigure ? "has-fig" : ""}`}>
       <header className="pb-bar">
         <div className="pb-col pb-bar-in">
           <button
@@ -1324,8 +1381,16 @@ export function Board({
         ) : null}
 
         <div className="pb-ink" ref={inkRef}>
+          {/*
+            With a figure, the working and the figure share a desk: the figure beside the lines
+            on a wide screen, pinned over them on a phone (FigureBoard.tsx). The sheet the lines
+            are written on, and every mark and the pen measured against it, is the same either
+            way.
+          */}
+          <div className={hasFigure ? "pb-col pb-desk" : "pb-plain"}>
+          {hasFigure ? <FigurePanel drawings={drawings} sets={markSets} /> : null}
           <div
-            className={`pb-col pb-sheet sp-textbook ${dim ? "dim" : ""}`}
+            className={`${hasFigure ? "" : "pb-col "}pb-sheet sp-textbook ${dim ? "dim" : ""}`}
             ref={sheetRef}
           >
             {questionUp ? (
@@ -1338,7 +1403,6 @@ export function Board({
                 >
                   <Maths text={question} />
                 </div>
-                <Figures figures={figures} compact />
               </section>
             ) : null}
 
@@ -1470,6 +1534,7 @@ export function Board({
               tick={inkTick}
               canSee={penCanSee}
             />
+          </div>
           </div>
         </div>
 
@@ -1670,13 +1735,6 @@ interface MarkSet {
   state: MarkState;
 }
 
-interface Box {
-  left: number;
-  top: number;
-  right: number;
-  bottom: number;
-}
-
 interface Shape {
   key: string;
   kind: LessonPoint["kind"];
@@ -1686,45 +1744,41 @@ interface Shape {
   width?: number;
   head: string | null;
   label: Label | null;
+  /**
+   * Seconds after its moment's marks start that this one is drawn: a moment's marks go up one
+   * after another, in the order the lesson lists them, so the eye can follow each in turn.
+   */
+  delay?: number;
+  /** A piece being carried to where it goes, for a `move`. */
+  ghost?: Ghost;
 }
 
-/** A mark's few words: beside it on the right, on the left, or centred above it. */
-interface Label {
-  x: number;
-  y: number;
-  side: "right" | "left" | "above";
+/** A run of a piece's glyphs, in the font it is set in, placed on the sheet. */
+interface Glyph {
   text: string;
+  left: number;
+  top: number;
+  height: number;
+  font: string;
 }
 
-/** A small seeded generator, so a mark wobbles the same way every time it is redrawn. */
-function seeded(seed: number): () => number {
-  let a = seed >>> 0 || 1;
-  return () => {
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
+/** A `move`: the piece's glyphs, where they start and land, and the way between. */
+interface Ghost {
+  glyphs: Glyph[];
+  from: Box;
+  to: Box;
+  route: Route;
+  /** How long the lift, the journey and the landing take, in milliseconds. */
+  lift: number;
+  travel: number;
+  land: number;
 }
 
-type Pt = [number, number];
-
-/** A smooth open curve through the points (Catmull–Rom, as cubic Béziers). */
-function through(points: Pt[]): string {
-  const f = (n: number) => n.toFixed(1);
-  const first = points[0];
-  if (!first) return "";
-  let d = `M${f(first[0])} ${f(first[1])}`;
-  for (let i = 0; i < points.length - 1; i += 1) {
-    const p1 = points[i]!;
-    const p2 = points[i + 1]!;
-    const p0 = points[i - 1] ?? p1;
-    const p3 = points[i + 2] ?? p2;
-    const c1: Pt = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
-    const c2: Pt = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
-    d += ` C${f(c1[0])} ${f(c1[1])} ${f(c2[0])} ${f(c2[1])} ${f(p2[0])} ${f(p2[1])}`;
-  }
-  return d;
+/** How long a moving piece is lifted, carried and set down: the carry scales with the way. */
+function moveTimes(route: Route): { lift: number; travel: number; land: number } {
+  const lengths = distances(route);
+  const way = lengths[lengths.length - 1] ?? 0;
+  return { lift: 320, travel: Math.round(Math.min(1500, Math.max(650, way * 2.2))), land: 700 };
 }
 
 /**
@@ -1801,53 +1855,72 @@ function inkRows(root: Element, at?: string | null): Box[] {
   return rows;
 }
 
+/**
+ * What a mark's `at` looks for, folded the way the board's text is. Where the piece occurs
+ * more than once, the words around it pick it out and `[[ ]]` marks the part meant — `6[[2]]`
+ * finds "62" and marks only its 2 — so the whole is searched for and only the inside kept.
+ */
+function piece(at: string): { needle: string; skip: number; take: number } {
+  const folded = (text: string) => Array.from(text).map(fold).join("");
+  const parts = /^([\s\S]*?)\[\[([\s\S]+?)\]\]([\s\S]*)$/.exec(at);
+  if (!parts) {
+    const needle = folded(at);
+    return { needle, skip: 0, take: needle.length };
+  }
+  const before = folded(parts[1] ?? "");
+  const inside = folded(parts[2] ?? "");
+  return { needle: before + inside + folded(parts[3] ?? ""), skip: before.length, take: inside.length };
+}
+
+/** One run of a piece's characters inside a single text node. */
+interface Run {
+  node: Text;
+  start: number;
+  end: number;
+}
+
+/** The runs of text a mark covers: the whole line, or the piece `at` names (the whole line if
+ * it cannot be found, so a mark whose words were edited away still lands somewhere sensible). */
+function inkRanges(root: Element, at?: string | null): Run[] {
+  const nodes = textNodes(root);
+  const whole = () => nodes.map((node) => ({ node, start: 0, end: node.data.length }));
+  const wanted = at ? piece(at) : null;
+  if (!wanted || !wanted.needle) return whole();
+  let compact = "";
+  const where: { node: Text; offset: number }[] = [];
+  for (const node of nodes) {
+    for (let offset = 0; offset < node.data.length; offset += 1) {
+      const char = fold(node.data.charAt(offset));
+      if (!char) continue;
+      compact += char;
+      where.push({ node, offset });
+    }
+  }
+  const found = compact.indexOf(wanted.needle);
+  const first = found < 0 ? undefined : where[found + wanted.skip];
+  if (!first) return whole();
+  const runs: Run[] = [];
+  let run: Run = { node: first.node, start: first.offset, end: first.offset + 1 };
+  for (let i = found + wanted.skip + 1; i < found + wanted.skip + wanted.take; i += 1) {
+    const next = where[i];
+    if (!next) break;
+    if (next.node !== run.node) {
+      runs.push(run);
+      run = { node: next.node, start: next.offset, end: next.offset + 1 };
+    } else run.end = next.offset + 1;
+  }
+  runs.push(run);
+  return runs;
+}
+
 /** The glyph boxes behind `inkBox`, kept to the part of a sideways-scrolling line on screen. */
 function inkRects(root: Element, at?: string | null): DOMRect[] {
-  const nodes = textNodes(root);
   const range = document.createRange();
   const rects: DOMRect[] = [];
-  const whole = () => {
-    for (const node of nodes) {
-      range.selectNodeContents(node);
-      rects.push(...Array.from(range.getClientRects()));
-    }
-  };
-  const needle = at ? Array.from(at).map(fold).join("") : "";
-  if (!needle) whole();
-  else {
-    let compact = "";
-    const where: { node: Text; offset: number }[] = [];
-    for (const node of nodes) {
-      for (let offset = 0; offset < node.data.length; offset += 1) {
-        const char = fold(node.data.charAt(offset));
-        if (!char) continue;
-        compact += char;
-        where.push({ node, offset });
-      }
-    }
-    const found = compact.indexOf(needle);
-    const first = found < 0 ? undefined : where[found];
-    if (!first) whole();
-    else {
-      // One range per run of characters inside the same text node.
-      let start = first;
-      let last = first;
-      const flush = () => {
-        range.setStart(start.node, start.offset);
-        range.setEnd(last.node, last.offset + 1);
-        rects.push(...Array.from(range.getClientRects()));
-      };
-      for (let i = found + 1; i < found + needle.length; i += 1) {
-        const next = where[i];
-        if (!next) break;
-        if (next.node !== last.node) {
-          flush();
-          start = next;
-        }
-        last = next;
-      }
-      flush();
-    }
+  for (const run of inkRanges(root, at)) {
+    range.setStart(run.node, run.start);
+    range.setEnd(run.node, run.end);
+    rects.push(...Array.from(range.getClientRects()));
   }
   // A long line scrolls sideways inside itself: keep the mark to the part that is on screen.
   const frame = root.getBoundingClientRect();
@@ -1858,6 +1931,33 @@ function inkRects(root: Element, at?: string | null): DOMRect[] {
       return new DOMRect(left, r.top, Math.max(0, right - left), r.height);
     })
     .filter((r) => r.width > 0);
+}
+
+/**
+ * A piece's own glyphs, each run with the font it is set in, relative to the sheet: what a
+ * `move` lifts off the board and carries. Copied as text in the same face, size and place —
+ * not as KaTeX's markup, whose layout depends on the boxes around it and falls apart when a
+ * fragment of it is taken out on its own.
+ */
+function inkGlyphs(root: Element, at: string | null | undefined, base: DOMRect): Glyph[] {
+  const range = document.createRange();
+  const glyphs: Glyph[] = [];
+  for (const run of inkRanges(root, at)) {
+    range.setStart(run.node, run.start);
+    range.setEnd(run.node, run.end);
+    const rect = range.getBoundingClientRect();
+    const parent = run.node.parentElement;
+    if (!parent || rect.width < 0.5) continue;
+    const style = window.getComputedStyle(parent);
+    glyphs.push({
+      text: run.node.data.slice(run.start, run.end),
+      left: rect.left - base.left,
+      top: rect.top - base.top,
+      height: rect.height,
+      font: `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`,
+    });
+  }
+  return glyphs;
 }
 
 function relative(box: Box, base: DOMRect): Box {
@@ -1880,30 +1980,6 @@ function lineFrom(sheet: HTMLElement, index: number): HTMLElement | null {
     if (found) return found;
   }
   return null;
-}
-
-function drawCircle(box: Box, rnd: () => number): string {
-  const cx = (box.left + box.right) / 2;
-  const cy = (box.top + box.bottom) / 2;
-  const ry = Math.max(13, (box.bottom - box.top) / 2 + 6);
-  // Never taller than it is wide: round a single figure, not bracket it.
-  const rx = Math.max(ry + 5, (box.right - box.left) / 2 + 10);
-  const start = -2.35 + (rnd() - 0.5) * 0.3;
-  // A hand does not close a circle exactly: it goes a little past where it began.
-  const sweep = Math.PI * 2 + 0.5;
-  const points: Pt[] = [];
-  const count = 22;
-  for (let i = 0; i < count; i += 1) {
-    const t = i / (count - 1);
-    const angle = start + sweep * t;
-    const wobble = 1 + (rnd() - 0.5) * 0.06;
-    const grow = 1 + 0.08 * t;
-    points.push([
-      cx + Math.cos(angle) * rx * grow * wobble,
-      cy + Math.sin(angle) * ry * grow * wobble,
-    ]);
-  }
-  return through(points);
 }
 
 function drawUnderline(box: Box, rnd: () => number): string {
@@ -1935,78 +2011,102 @@ function drawBox(box: Box, rnd: () => number): string {
   return `M${f(c0)} Q${f(mid(c0, c1))} ${f(c1)} Q${f(mid(c1, c2))} ${f(c2)} Q${f(mid(c2, c3))} ${f(c3)} Q${f(mid(c3, c0))} ${f(c0)} L${f(end)}`;
 }
 
+/** Where a piece-to-piece arrow goes, and (for its words) where it runs down a margin. */
+interface Way {
+  route: Route;
+  /** The x of the margin the route runs down, or null when it goes straight across. */
+  lane: number | null;
+  /** Half way down the route, for words beside it. */
+  middle: number;
+}
+
 /**
- * A highlighter pass along each row: a broad flat stroke, a touch uneven top and bottom and
- * not quite level, the way a chisel marker goes across words.
+ * THE WAY FROM ONE PIECE TO ANOTHER, kept off the working it annotates.
+ *
+ * On the same row — the 2 in front of a log going up to be its power — it is a small hop over
+ * the words, leaving the top of one piece and landing on the top of the other, no higher than
+ * the room under the line above allows (and under the row instead where there is no room over
+ * it). Between a row and the row just under it, it drops out of the bottom of the first piece
+ * and into the top of the second through the gap between the rows. Across rows with other
+ * writing between them, it drops into the gap under the first row, runs along it to the right
+ * margin (the left where the right has no room), down the margin past the rows between, and
+ * back along the gap over the last row to the piece — every corner rounded, as a hand takes
+ * it. Only where neither margin has room does it cut across.
  */
-function drawHighlight(rows: Box[], rnd: () => number): { d: string; width: number } {
-  let d = "";
-  let width = 0;
-  for (const row of rows) {
-    const height = row.bottom - row.top;
-    width = Math.max(width, height * 0.82);
-    const x0 = row.left - 3 + (rnd() - 0.5) * 2;
-    const x1 = row.right + 3 + (rnd() - 0.5) * 3;
-    const y = (row.top + row.bottom) / 2 + height * 0.04;
-    const tilt = (rnd() - 0.5) * 2.2;
-    const points: Pt[] = [];
-    const count = Math.max(3, Math.round((x1 - x0) / 60) + 2);
-    for (let i = 0; i < count; i += 1) {
-      const t = i / (count - 1);
-      points.push([x0 + (x1 - x0) * t, y + tilt * (t - 0.5) + (rnd() - 0.5) * 1.4]);
-    }
-    d += (d ? " " : "") + through(points);
+function pieceRoute(
+  from: Box,
+  to: Box,
+  obstacles: Box[],
+  minX: number,
+  maxX: number,
+  rnd: () => number,
+): Way {
+  const cx = (b: Box) => (b.left + b.right) / 2;
+  const cy = (b: Box) => (b.top + b.bottom) / 2;
+  const fx = cx(from);
+  const tx = cx(to);
+  const sameRow =
+    (cy(from) > to.top && cy(from) < to.bottom) || (cy(to) > from.top && cy(to) < from.bottom);
+  if (sameRow) {
+    const lo = Math.min(from.left, to.left) - 4;
+    const hi = Math.max(from.right, to.right) + 4;
+    const top = Math.min(from.top, to.top);
+    const bottom = Math.max(from.bottom, to.bottom);
+    const across = obstacles.filter((o) => o.left < hi && o.right > lo);
+    const ceiling = Math.max(top - 60, ...across.filter((o) => o.bottom <= top + 2).map((o) => o.bottom));
+    const floor = Math.min(bottom + 60, ...across.filter((o) => o.top >= bottom - 2).map((o) => o.top));
+    const roomAbove = top - ceiling;
+    const roomBelow = floor - bottom;
+    const above = roomAbove >= 14 || roomAbove >= roomBelow;
+    const room = above ? roomAbove : roomBelow;
+    const rise = Math.max(7, Math.min(Math.abs(tx - fx) * 0.32, 30, room - 5));
+    // A cubic whose two handles are level reaches three quarters of the way to them.
+    const pull = rise / 0.75;
+    const start: Pt = above ? [fx, from.top - 2] : [fx, from.bottom + 2];
+    const tip: Pt = above ? [tx, to.top - 2] : [tx, to.bottom + 2];
+    const edge = above ? Math.min(start[1], tip[1]) - pull : Math.max(start[1], tip[1]) + pull;
+    const lean = (tx - fx) * 0.08;
+    const route = cubicRoute(start, [fx + lean, edge], [tx - lean, edge], tip);
+    return { route: unsteady(route, rnd, 0.6), lane: null, middle: above ? top - rise : bottom + rise };
   }
-  return { d, width };
+  const down = cy(to) > cy(from);
+  const between = obstacles.filter((o) => {
+    const m = cy(o);
+    return down ? m > from.bottom && m < to.top : m < from.top && m > to.bottom;
+  });
+  const start: Pt = down ? [fx, from.bottom + 2] : [fx, from.top - 2];
+  const tip: Pt = down ? [tx, to.top - 3] : [tx, to.bottom + 3];
+  const direct = (): Way => {
+    const gap = tip[1] - start[1];
+    const route = cubicRoute(start, [fx, start[1] + gap * 0.85], [tx, tip[1] - gap * 0.85], tip);
+    return { route: unsteady(route, rnd, 0.8), lane: null, middle: (start[1] + tip[1]) / 2 };
+  };
+  if (between.length === 0) return direct();
+  // The edges of the rows the two pieces sit in, so the run along a gap clears the whole row
+  // (a fraction's denominator under a piece in its numerator, say), not just the piece.
+  const rowOf = (b: Box) => obstacles.filter((o) => o.top < cy(b) && o.bottom > cy(b));
+  const fromRow = rowOf(from);
+  const toRow = rowOf(to);
+  const fromEdge = down
+    ? Math.max(from.bottom, ...fromRow.map((o) => o.bottom))
+    : Math.min(from.top, ...fromRow.map((o) => o.top));
+  const toEdge = down
+    ? Math.min(to.top, ...toRow.map((o) => o.top))
+    : Math.max(to.bottom, ...toRow.map((o) => o.bottom));
+  const first = down ? Math.min(...between.map((o) => o.top)) : Math.max(...between.map((o) => o.bottom));
+  const last = down ? Math.max(...between.map((o) => o.bottom)) : Math.min(...between.map((o) => o.top));
+  const gy1 = (fromEdge + first) / 2;
+  const gy2 = (last + toEdge) / 2;
+  const right = Math.max(...between.map((o) => o.right)) + 18;
+  const left = Math.min(...between.map((o) => o.left)) - 18;
+  const lane = right <= maxX - 4 ? right : left >= minX + 4 ? left : null;
+  if (lane === null) return direct();
+  const route = cornerRoute(
+    [start, [fx, gy1], [lane, gy1], [lane, gy2], [tx, gy2], tip],
+    12,
+  );
+  return { route: unsteady(route, rnd, 0.9), lane, middle: (gy1 + gy2) / 2 };
 }
-
-/** A crossing-out: one quick line through each row, rising a little, overshooting the ends. */
-function drawStrike(rows: Box[], rnd: () => number): string {
-  let d = "";
-  for (const row of rows) {
-    const height = row.bottom - row.top;
-    const y = (row.top + row.bottom) / 2 + height * 0.06;
-    const x0 = row.left - 5;
-    const x1 = row.right + 6;
-    const rise = Math.min(5, (x1 - x0) * 0.03) + rnd() * 1.5;
-    const points: Pt[] = [];
-    for (let i = 0; i < 4; i += 1) {
-      const t = i / 3;
-      points.push([x0 + (x1 - x0) * t, y + rise * (0.5 - t) + (rnd() - 0.5) * 1.6]);
-    }
-    d += (d ? " " : "") + through(points);
-  }
-  return d;
-}
-
-function arrowHead(tip: Pt, from: Pt): string {
-  const angle = Math.atan2(tip[1] - from[1], tip[0] - from[0]);
-  const size = 10;
-  const a1 = angle + Math.PI - 0.5;
-  const a2 = angle + Math.PI + 0.5;
-  const f = (n: number) => n.toFixed(1);
-  return `M${f(tip[0] + Math.cos(a1) * size)} ${f(tip[1] + Math.sin(a1) * size)} L${f(tip[0])} ${f(tip[1])} L${f(tip[0] + Math.cos(a2) * size)} ${f(tip[1] + Math.sin(a2) * size)}`;
-}
-
-function bezierAt(p0: Pt, c1: Pt, c2: Pt, p3: Pt, t: number): Pt {
-  const u = 1 - t;
-  const a = u * u * u;
-  const b = 3 * u * u * t;
-  const c = 3 * u * t * t;
-  const e = t * t * t;
-  return [
-    a * p0[0] + b * c1[0] + c * c2[0] + e * p3[0],
-    a * p0[1] + b * c1[1] + c * c2[1] + e * p3[1],
-  ];
-}
-
-/** About how wide a label's chip is: 13px semibold, and its padding. */
-function labelWidth(text: string): number {
-  return Math.min(text.length * 7.4 + 22, 260);
-}
-
-/** Room a label needs beside its mark before it is put on the other side instead. */
-const LABEL_ROOM = 150;
 
 function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
   const base = sheet.getBoundingClientRect();
@@ -2030,14 +2130,28 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
       (b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top,
     );
   };
+  let stagger = 0;
   const push = (shape: Shape) => {
     if (shape.label && shape.state !== "gone") placed.push(labelBox(shape.label));
-    shapes.push(shape);
+    shapes.push({ ...shape, delay: stagger });
   };
+  // Every row of writing on the board, for routing a piece-to-piece arrow round the words
+  // rather than through them. The question's panel counts as one block.
+  const obstacles: Box[] = [];
+  sheet.querySelectorAll<HTMLElement>("[data-line]").forEach((element) => {
+    for (const row of inkRows(element)) obstacles.push(relative(row, base));
+  });
+  const panel = sheet.querySelector(".pb-question");
+  if (panel) obstacles.push(relative(panel.getBoundingClientRect(), base));
   // The mark being made now gets first choice of where its words go.
   const order: Record<MarkState, number> = { live: 0, past: 1, gone: 2 };
   for (const set of [...sets].sort((a, b) => order[a.state] - order[b.state])) {
+    // Each mark in a moment waits for the ones before it; a move, for its piece to land.
+    const delays = markDelays(set.points);
     set.points.forEach((point, k) => {
+      stagger = delays[k] ?? 0;
+      // A mark on the diagram is drawn over the figure (FigureBoard.tsx), not here.
+      if (point.figure != null || point.line == null) return;
       const target = point.line < 0 ? set.index + point.line : point.line;
       if (target < 0 || target > set.index) return;
       const line = lineAt(sheet, target);
@@ -2126,6 +2240,44 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
         return;
       }
 
+      // PIECE TO PIECE: an arrow or a move from one piece of working to another — on the same
+      // line, or from a line above — along a route that goes round the writing in between.
+      if (point.kind === "arrow" || point.kind === "move") {
+        const start = point.from;
+        if (start) {
+          const fromIndex = start.line < 0 ? set.index + start.line : start.line;
+          const fromLine = fromIndex >= 0 && fromIndex <= set.index ? lineAt(sheet, fromIndex) : null;
+          const fromFound = fromLine ? inkBox(fromLine, start.at) : null;
+          if (!fromLine || !fromFound) return;
+          const from = relative(fromFound, base);
+          const way = pieceRoute(from, box, obstacles, minX, maxX, rnd);
+          const moving = point.kind === "move";
+          const { d, head } = arrowAlong(way.route, moving ? 8 : 10);
+          const ghost: Ghost | undefined =
+            moving && !stillMotion()
+              ? {
+                  glyphs: inkGlyphs(fromLine, start.at, base),
+                  from,
+                  to: box,
+                  route: way.route,
+                  ...moveTimes(way.route),
+                }
+              : undefined;
+          // Words by the route where it runs down a margin; otherwise after the end of the
+          // row the piece lands in, where the board is clear.
+          const label =
+            way.lane !== null && text
+              ? way.lane > box.right
+                ? beside(way.lane + 8, -1, way.middle)
+                : beside(Number.POSITIVE_INFINITY, way.lane - 8, way.middle)
+              : inline([box]);
+          push({ key, kind: point.kind, state: set.state, d, head, label, ghost });
+          return;
+        }
+        // A move with nowhere to come from has nothing to carry.
+        if (point.kind === "move") return;
+      }
+
       // An arrow, from the line this beat wrote back to the one it came from.
       if (target === set.index) return;
       const fromLine = lineFrom(sheet, set.index);
@@ -2194,6 +2346,118 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[]): Shape[] {
 }
 
 /**
+ * When a mark's strokes start and how long they take, as CSS variables its animations read:
+ * `--delay`, its turn among its moment's marks, and for a move, `--draw`, the carry — the
+ * trace is drawn behind the moving piece, keeping pace with it, and its head and words come
+ * once the piece has landed.
+ */
+function markTiming(shape: Shape): CSSProperties {
+  const delay = shape.delay ?? 0;
+  if (!shape.ghost) return { "--delay": `${delay}s` } as CSSProperties;
+  return {
+    "--delay": `${delay + shape.ghost.lift / 1000}s`,
+    "--draw": `${shape.ghost.travel}ms`,
+  } as CSSProperties;
+}
+
+/**
+ * A MOVE: the piece lifted off the board, carried along its route and set down on the piece it
+ * becomes — the 2 in front of the log rising, crossing over and settling as the log's power,
+ * growing or shrinking on the way to the size it lands at. A copy travels; the writing it was
+ * copied from stays where it was, as it does on paper.
+ *
+ * Played once, when the mark first goes up. The board is measured again whenever it changes
+ * size, but the piece has long since landed by then, and replaying it would say the step was
+ * being taken again.
+ */
+function Carried({ shape, ghost }: { shape: Shape; ghost: Ghost }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const played = useRef(false);
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element || played.current || typeof element.animate !== "function") return;
+    played.current = true;
+    const { from, to, route, lift, travel, land } = ghost;
+    const fromCentre: Pt = [(from.left + from.right) / 2, (from.top + from.bottom) / 2];
+    const toCentre: Pt = [(to.left + to.right) / 2, (to.top + to.bottom) / 2];
+    const first = route[0] ?? fromCentre;
+    const last = route[route.length - 1] ?? toCentre;
+    // The route runs edge to edge (top of one piece to top of the other); the piece's middle
+    // rides that far off it, the offset shifting from the one end's to the other's.
+    const startOff: Pt = [fromCentre[0] - first[0], fromCentre[1] - first[1]];
+    const endOff: Pt = [toCentre[0] - last[0], toCentre[1] - last[1]];
+    const grow = Math.max(
+      0.45,
+      Math.min(2.2, (to.bottom - to.top) / Math.max(1, from.bottom - from.top)),
+    );
+    const lengths = distances(route);
+    const total = lengths[lengths.length - 1] ?? 0;
+    const all = lift + travel + land;
+    const frames: Keyframe[] = [
+      { offset: 0, opacity: 0, transform: "translate(0px, 0px) scale(1)" },
+      { offset: (lift * 0.45) / all, opacity: 1, transform: "translate(0px, -4px) scale(1.08)" },
+      { offset: lift / all, opacity: 1, transform: "translate(0px, -4px) scale(1.08)" },
+    ];
+    const steps = 24;
+    for (let i = 1; i <= steps; i += 1) {
+      const t = i / steps;
+      // Eased: picks up, carries, slows to set down.
+      const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      const at = along(route, lengths, e * total);
+      const x = at[0] + startOff[0] + (endOff[0] - startOff[0]) * e - fromCentre[0];
+      const y = at[1] + startOff[1] + (endOff[1] - startOff[1]) * e - fromCentre[1];
+      const lifted = Math.sin(Math.PI * t) * 3 + (1 - t) * 4;
+      const scale = (1 + (grow - 1) * e) * (1 + 0.08 * (1 - e));
+      frames.push({
+        offset: (lift + travel * t) / all,
+        opacity: 1,
+        transform: `translate(${x.toFixed(1)}px, ${(y - lifted).toFixed(1)}px) scale(${scale.toFixed(3)})`,
+      });
+    }
+    const landed = `translate(${(toCentre[0] - fromCentre[0]).toFixed(1)}px, ${(
+      toCentre[1] - fromCentre[1]
+    ).toFixed(1)}px) scale(${grow.toFixed(3)})`;
+    frames.push({ offset: (lift + travel + land * 0.35) / all, opacity: 1, transform: landed });
+    frames.push({ offset: 1, opacity: 0, transform: landed });
+    element.animate(frames, {
+      duration: all,
+      delay: (shape.delay ?? 0) * 1000,
+      fill: "both",
+      easing: "linear",
+    });
+  }, [ghost, shape.delay]);
+  const { from } = ghost;
+  return (
+    <div
+      ref={ref}
+      className="pb-carried"
+      style={{
+        left: from.left,
+        top: from.top,
+        width: from.right - from.left,
+        height: from.bottom - from.top,
+      }}
+    >
+      {ghost.glyphs.map((glyph, i) => (
+        <span
+          key={i}
+          style={{
+            left: glyph.left - from.left,
+            top: glyph.top - from.top,
+            height: glyph.height,
+            // After the shorthand, which would otherwise set it back to normal.
+            font: glyph.font,
+            lineHeight: `${glyph.height}px`,
+          }}
+        >
+          {glyph.text}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/**
  * The teacher's marks over the board, drawn by hand.
  *
  * An SVG laid over the sheet the working is written on, in the sheet's own coordinates — so
@@ -2253,7 +2517,11 @@ function Marks({
       {highlights.length ? (
         <svg className="pb-marks-svg under">
           {highlights.map((shape) => (
-            <g key={shape.key} className={`pb-mark highlight ${shape.state}`}>
+            <g
+              key={shape.key}
+              className={`pb-mark highlight ${shape.state}`}
+              style={markTiming(shape)}
+            >
               <path
                 className="pb-mark-line"
                 d={shape.d}
@@ -2266,7 +2534,11 @@ function Marks({
       ) : null}
       <svg className="pb-marks-svg">
         {shapes.filter((shape) => shape.kind !== "highlight").map((shape) => (
-          <g key={shape.key} className={`pb-mark ${shape.kind} ${shape.state}`}>
+          <g
+            key={shape.key}
+            className={`pb-mark ${shape.kind} ${shape.state}`}
+            style={markTiming(shape)}
+          >
             <path className="pb-mark-line" d={shape.d} pathLength={1} />
             {shape.head ? (
               <path className="pb-mark-head" d={shape.head} pathLength={1} />
@@ -2275,11 +2547,14 @@ function Marks({
         ))}
       </svg>
       {shapes.map((shape) =>
+        shape.ghost ? <Carried key={`ghost-${shape.key}`} shape={shape} ghost={shape.ghost} /> : null,
+      )}
+      {shapes.map((shape) =>
         shape.label ? (
           <span
             key={`label-${shape.key}`}
             className={`pb-mark-label ${shape.kind} ${shape.state} ${shape.label.side}`}
-            style={{ left: shape.label.x, top: shape.label.y }}
+            style={{ left: shape.label.x, top: shape.label.y, ...markTiming(shape) }}
           >
             {shape.label.text}
           </span>

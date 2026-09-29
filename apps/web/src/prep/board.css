@@ -380,12 +380,50 @@
   animation-duration: 300ms;
   animation-timing-function: cubic-bezier(0.5, 0, 0.6, 1);
 }
-/* Drawn on, the way a marker crosses the board: the stroke first, then the arrowhead. */
+/* Drawn on, the way a marker crosses the board: the stroke first, then the arrowhead. A
+   moment's marks go up in turn: each waits its `--delay` (Board.tsx, `markTiming`). */
 .pb-mark-line {
-  animation: pb-draw 520ms cubic-bezier(0.45, 0.05, 0.3, 1) forwards;
+  animation: pb-draw 520ms cubic-bezier(0.45, 0.05, 0.3, 1) var(--delay, 0s) forwards;
 }
 .pb-mark-head {
-  animation: pb-draw 170ms ease-out 470ms forwards;
+  animation: pb-draw 170ms ease-out calc(var(--delay, 0s) + 470ms) forwards;
+}
+
+/* A move: the light trace a carried piece leaves behind it, drawn at the piece's own pace
+   (`--draw`) as it travels, the head once it has landed. Lighter than an arrow: the piece
+   that moved is the point, the trace is only the memory of where it went. */
+.pb-mark.move path {
+  stroke: var(--mark-purple);
+  stroke-width: 2;
+  stroke-opacity: 0.5;
+}
+.pb-mark.move .pb-mark-line {
+  animation: pb-draw var(--draw, 900ms) cubic-bezier(0.45, 0, 0.55, 1) var(--delay, 0s) forwards;
+}
+.pb-mark.move .pb-mark-head {
+  animation: pb-draw 160ms ease-out calc(var(--delay, 0s) + var(--draw, 900ms)) forwards;
+}
+.pb-mark-label.move {
+  background: var(--purple-050);
+  color: var(--purple-700);
+  animation-delay: calc(var(--delay, 0s) + var(--draw, 900ms) + 120ms);
+}
+/* The piece being carried: a copy of its glyphs in the marker's purple, lifted off the board
+   (the shadow under it), travelling, and set down on the piece it becomes. Board.tsx
+   (`Carried`) moves it; it starts and ends unseen. */
+.pb-carried {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transform-origin: 50% 50%;
+  filter: drop-shadow(0 3px 3px rgb(59 26 140 / 0.28));
+  will-change: transform, opacity;
+}
+.pb-carried > span {
+  position: absolute;
+  white-space: pre;
+  color: var(--mark-purple);
 }
 @keyframes pb-draw {
   to {
@@ -408,7 +446,7 @@
   background: var(--pink-100);
   transform: translate(0, -50%) rotate(-2deg);
   transform-origin: left center;
-  animation: pb-label 260ms var(--ease-spring) 380ms both;
+  animation: pb-label 260ms var(--ease-spring) calc(var(--delay, 0s) + 380ms) both;
   transition: opacity 420ms var(--ease);
 }
 .pb-mark-label.left {
@@ -418,6 +456,10 @@
 .pb-mark-label.above {
   transform: translate(-50%, -100%) rotate(-2deg);
   transform-origin: center bottom;
+}
+.pb-mark-label.center {
+  transform: translate(-50%, -50%) rotate(-2deg);
+  transform-origin: center;
 }
 .pb-mark-label.arrow {
   background: var(--purple-050);
@@ -433,6 +475,195 @@
   from {
     opacity: 0;
     scale: 0.7;
+  }
+}
+
+/* ---------------------------------------------------------------- the figure in the working */
+/* With a figure, the working and the figure share a desk (FigureBoard.tsx). On a wide screen
+   the figure has a column of its own on the right, held in view (sticky) while the working
+   scrolls past it, and the board's column widens to make room, so the working keeps its
+   width. On a narrower screen it is pinned over the working instead, and can be folded. */
+.pb-plain {
+  min-width: 0;
+}
+.pb-desk {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.pb-desk > .pb-sheet {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.pb-figpanel {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  margin: 0 calc(var(--gut) * -1);
+  padding: 8px var(--gut) 10px;
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-100);
+  box-shadow: 0 10px 18px -16px rgb(20 12 40 / 0.35);
+}
+.pb-fighead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 30px;
+}
+.sj .pb-figtoggle {
+  position: relative;
+  min-height: 30px;
+  padding: 4px 14px;
+  border: 1px solid var(--purple-200);
+  border-radius: var(--r-pill);
+  background: var(--white);
+  color: var(--purple-700);
+  font: 600 13px/1 var(--f-body);
+  cursor: pointer;
+}
+.sj .pb-figtoggle:focus-visible {
+  outline: 2px solid var(--purple-500);
+  outline-offset: 2px;
+}
+/* A mark went up on the figure while it was folded away. */
+.pb-figtoggle.fresh::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--mark-pink);
+  box-shadow: 0 0 0 2px var(--white);
+}
+.pb-figpanel.shut .pb-figbody {
+  display: none;
+}
+/* A sketch not yet brought in: on a phone it takes no room; beside the working (below) its
+   column is held, unseen, so the working keeps its width when the sketch arrives. */
+.pb-figpanel.waiting {
+  display: none;
+}
+/* A lesson's sketch arrives as the teacher turns to it: wiped in from the left, the way a
+   line is written, and faded up. */
+.pb-figure.sketch {
+  animation: pb-sketch-in 1100ms cubic-bezier(0.45, 0.05, 0.3, 1) both;
+}
+@keyframes pb-sketch-in {
+  from {
+    opacity: 0;
+    clip-path: inset(-12% 100% -12% -12%);
+  }
+  40% {
+    opacity: 1;
+  }
+  to {
+    clip-path: inset(-12% -12% -12% -12%);
+  }
+}
+.pb-figbody {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  /* Room round the drawing for marks that reach past its edge: an arrow's tail, words. */
+  padding: 6px 18px 16px;
+}
+/* As large as the room allows, never taller than `--fig-h`: the width is worked out from the
+   drawing's own proportions (`--ratio`, width over height), so the image keeps its shape and
+   the marks' layer, sized to the same box, stays exactly over it. */
+.pb-figure {
+  --fig-h: 26vh;
+  position: relative;
+  width: min(100%, calc(var(--fig-h) * var(--ratio, 1.3)));
+}
+.pb-figure > img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* The marks' layer: the drawing's own viewBox, laid exactly over the image. */
+.pb-figmarks {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 2;
+}
+.pb-figmarks.under {
+  z-index: 1;
+  mix-blend-mode: multiply;
+}
+/* Strokes in the drawing's units: `--k` is its units per screen pixel, so a mark is as bold
+   here as on the working however large the figure is shown. */
+.pb-figmarks .pb-mark path {
+  stroke-width: calc(2.6px * var(--k, 1));
+}
+.pb-figmarks .pb-mark.arrow path {
+  stroke-width: calc(2.4px * var(--k, 1));
+}
+.pb-figmarks .pb-mark.arc path {
+  stroke-width: calc(3px * var(--k, 1));
+}
+/* A highlighter's wedge in an angle, or its spot on a point: a fill, faded in. */
+.pb .pb-mark.fill path {
+  fill: var(--yellow-300);
+  fill-opacity: 0.6;
+  stroke: none;
+  stroke-dasharray: none;
+  stroke-dashoffset: 0;
+}
+.pb-mark.fill .pb-mark-line {
+  animation: pb-wash 420ms var(--ease) var(--delay, 0s) both;
+}
+@keyframes pb-wash {
+  from {
+    opacity: 0;
+  }
+}
+.pb-figure .pb-mark-label {
+  z-index: 3;
+  max-width: none;
+  font-size: 12.5px;
+}
+@media (min-width: 1080px) {
+  .sj.pb.has-fig {
+    --col: 1260px;
+  }
+  .pb-desk {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: clamp(24px, 3vw, 44px);
+  }
+  .pb-figpanel {
+    order: 2;
+    flex: 0 0 clamp(300px, 30vw, 420px);
+    top: clamp(18px, 4vh, 40px);
+    margin: clamp(18px, 4vh, 40px) 0 0;
+    padding: 14px 14px 16px;
+    border: 1px solid var(--gray-100);
+    border-radius: var(--r-lg);
+    background: var(--white);
+    box-shadow: 0 1px 2px rgb(20 12 40 / 0.04);
+  }
+  .pb-figtoggle {
+    display: none;
+  }
+  .pb-figpanel.waiting {
+    display: block;
+    visibility: hidden;
+  }
+  .pb-figbody {
+    padding: 8px 16px 6px;
+  }
+  .pb-figure {
+    --fig-h: max(220px, calc(100dvh - 360px));
   }
 }
 
@@ -999,6 +1230,12 @@
   }
   .pb-mark path {
     stroke-dashoffset: 0;
+  }
+  .pb-carried {
+    display: none;
+  }
+  .pb-figure.sketch {
+    animation: none;
   }
   /* Lines go up whole. */
   .pb-stroke {

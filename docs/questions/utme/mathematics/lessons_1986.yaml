@@ -1203,8 +1203,13 @@ lessons:
     moments:
       - say: 'In the figure, $PQ$ and $PR$ are tangents from $P$ to a circle with centre $O$. Angle $QRP$ is 34 degrees, and we want the angle $x$ at the centre.'
         write: '$\angle QRP = 34^{\circ}$'
+        point:
+          - {figure: 0, kind: arc, target: QRP, text: '34°'}
       - say: 'First fact: two tangents from the same point are equal in length. So $PQ$ equals $PR$, and triangle $PQR$ is isosceles.'
         write: '$PQ = PR$'
+        point:
+          - {figure: 0, kind: highlight, target: PQ}
+          - {figure: 0, kind: highlight, target: PR}
       - say: 'In an isosceles triangle the base angles are equal. So angle $PQR$ is also 34 degrees.'
         write: '$\angle PQR = \angle PRQ = 34^{\circ}$'
         point:
@@ -1215,15 +1220,21 @@ lessons:
         write: '$= 180^{\circ} - 68^{\circ} = 112^{\circ}$'
       - say: 'Second fact: a tangent is perpendicular to the radius at the point where it touches. So the angles at $Q$ and $R$ in the shape $OQPR$ are each 90 degrees.'
         write: '$\angle OQP = \angle ORP = 90^{\circ}$'
+        point:
+          - {figure: 0, kind: arc, target: OQP, text: '90°'}
+          - {figure: 0, kind: arc, target: ORP, text: '90°'}
       - say: '$OQPR$ is a quadrilateral, and the angles in a quadrilateral add up to 360 degrees.'
         write: '$x + 90^{\circ} + 90^{\circ} + 112^{\circ} = 360^{\circ}$'
         point:
           - {line: 5, kind: arrow, text: 'right angles'}
           - {line: 4, kind: arrow, at: '112∘', text: 'angle P'}
+          - {figure: 0, kind: circle, target: x}
       - say: '90 plus 90 is 180, and 180 plus 112 is 292.'
         write: '$x + 292^{\circ} = 360^{\circ}$'
       - say: 'Take 292 from both sides. 360 minus 292 is 68.'
         write: '$x = 360^{\circ} - 292^{\circ} = 68^{\circ}$'
+        point:
+          - {line: 8, kind: move, from: {line: 7, at: '+ 292∘'}, at: '− 292∘', text: 'across the ='}
       - say: 'A shortcut agrees: the angle between the two radii is always twice the angle between a tangent and the chord. 2 times 34 is 68.'
         write: 'Shortcut: $\ x = 2 \times 34^{\circ} = 68^{\circ}$'
       - say: 'So $x$ is 68 degrees, which is answer choice C.'

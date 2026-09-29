@@ -152,6 +152,8 @@ lessons:
         write: '$\log_{2}96 - 2\log_{2}6$'
       - say: 'Two logs can only be combined into one when there is no number in front. So the first thing we do is move the 2 in front of the second log inside it, as a power. That''s the power law.'
         write: 'Power law: $2\log_{2}6 = \log_{2}6^{2}$'
+        point:
+          - {line: 1, kind: move, from: {line: 1, at: '[[2]]log'}, at: '6[[2]]', text: 'up as the power'}
       - say: '6 squared is 36.'
         write: '$= \log_{2}36$'
       - say: 'Put that back into the expression. It becomes $\log_{2}96$ minus $\log_{2}36$.'
@@ -1173,8 +1175,15 @@ lessons:
         write: 'Angle of elevation $= 30^{\circ}$, height $= 40$ m'
       - say: 'Picture a right-angled triangle. The building stands straight up, the ground is flat, and the line of sight goes from the instrument up to the top of the building.'
         write: 'Right angle at the foot of the building'
+        show_sketch: true
+        point:
+          - {figure: sketch, kind: circle, target: B, text: 'right angle'}
       - say: 'The 30 degree angle is at the instrument. The building''s 40 m is opposite that angle, and the ground distance, call it $d$, is next to it: the adjacent side.'
         write: 'Opposite $= 40$, adjacent $= d$'
+        point:
+          - {figure: sketch, kind: arc, target: BAC, text: '30°'}
+          - {figure: sketch, kind: highlight, target: BC, text: 'opposite'}
+          - {figure: sketch, kind: underline, target: AB, text: 'adjacent'}
       - say: 'Opposite over adjacent is tangent.'
         write: '$\tan 30^{\circ} = \dfrac{40}{d}$'
       - say: 'Multiply both sides by $d$.'

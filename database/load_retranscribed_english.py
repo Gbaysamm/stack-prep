@@ -83,6 +83,7 @@ import asyncpg
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from lesson_marks import clean_points
 from load_questions import content_hash, normalise, uuid_for
 from propose_levels_english import propose
 
@@ -93,7 +94,6 @@ EXAMINATION = "UTME"
 AUTHOR = "Hand re-transcription (UTME Use of English)"
 SECONDS_BY_LEVEL = {1: 30, 2: 45, 3: 60, 4: 80, 5: 100}
 OPTION_LETTERS = {"A", "B", "C", "D", "E"}
-POINT_KINDS = {"circle", "underline", "arrow", "box", "highlight", "strike"}
 
 #: Said on every version this supersedes, so the reason is in the row and not only in a commit.
 NOTE = (
@@ -302,36 +302,6 @@ def read_retirements(years: list[int]) -> list[tuple[int, int, str]]:
     return found
 
 
-def _clean_points(point: object, index: int, where: str) -> list[dict[str, object]]:
-    """A moment's marks on the board, checked (as load_retranscribed_maths.py does)."""
-    if not isinstance(point, list) or not point:
-        raise SystemExit(f"{where}: point is a list of marks")
-    marks: list[dict[str, object]] = []
-    for mark in point:
-        if not isinstance(mark, dict):
-            raise SystemExit(f"{where}: each mark is a mapping")
-        line, kind = mark.get("line"), mark.get("kind")
-        if isinstance(line, bool) or not isinstance(line, int):
-            raise SystemExit(f"{where}: a mark's line is a moment number")
-        target = index + line if line < 0 else line
-        if not 0 <= target <= index:
-            raise SystemExit(f"{where}: a mark can only point at this moment or an earlier one")
-        if kind not in POINT_KINDS:
-            raise SystemExit(f"{where}: a mark's kind is one of {sorted(POINT_KINDS)}")
-        clean: dict[str, object] = {"line": line, "kind": kind}
-        for key in ("text", "at"):
-            value = mark.get(key)
-            if value is not None:
-                if not isinstance(value, str) or not value.strip():
-                    raise SystemExit(f"{where}: a mark's {key} is a few words or nothing")
-                clean[key] = value.strip()
-        unknown = set(mark) - {"line", "kind", "text", "at"}
-        if unknown:
-            raise SystemExit(f"{where}: a mark has unknown keys {sorted(unknown)}")
-        marks.append(clean)
-    return marks
-
-
 def read_lessons(
     years: list[int], questions: list[dict[str, Any]]
 ) -> dict[tuple[int, int], dict[str, Any]]:
@@ -371,7 +341,9 @@ def read_lessons(
                     entry["answer"] = True
                 point = moment.get("point")
                 if point is not None:
-                    entry["point"] = _clean_points(
+                    # The English papers carry no redrawn figures through this loader, so a mark
+                    # on a diagram is checked for its shape only (lesson_marks.py).
+                    entry["point"] = clean_points(
                         point, len(clean), f"{where} moment {len(clean)}"
                     )
                 clean.append(entry)

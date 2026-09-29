@@ -1218,9 +1218,43 @@ def test_a_lessons_marks_pass_through_and_a_bad_one_is_dropped() -> None:
         ]
     )
     assert points is not None
+    blank = {"from": None, "figure": None, "target": None}
     assert [point.model_dump() for point in points] == [
-        {"line": 0, "kind": "circle", "text": "the limits", "at": "0 <= y <= 3"},
-        {"line": -1, "kind": "arrow", "text": None, "at": None},
+        {"line": 0, "kind": "circle", "text": "the limits", "at": "0 <= y <= 3", **blank},
+        {"line": -1, "kind": "arrow", "text": None, "at": None, **blank},
     ]
     assert _points(None) is None
     assert _points([{"line": 1, "kind": "nope"}]) is None
+
+
+def test_piece_to_piece_and_diagram_marks_pass_through() -> None:
+    """An arrow or a move may start from a piece; a diagram mark names a figure and a target.
+
+    Each kind only where it makes sense: a move needs somewhere to come from, an arc belongs on
+    a diagram, a box does not, and a diagram mark with nothing to find is dropped.
+    """
+    points = _points(
+        [
+            {"line": 1, "kind": "move", "at": "6[[2]]", "from": {"line": 1, "at": "[[2]]log"}},
+            {"line": -1, "kind": "arrow", "from": {"line": "x"}},
+            {"line": 2, "kind": "move"},
+            {"figure": 0, "kind": "arc", "target": "QRP", "text": "34°"},
+            {"figure": 0, "kind": "highlight", "target": ["P", "Q"]},
+            {"figure": 0, "kind": "label", "target": {"x": 40, "y": 12.5}, "text": "O"},
+            {"figure": "sketch", "kind": "label", "target": "A", "text": "40 m"},
+            {"figure": "sketch_c", "kind": "circle", "target": "A"},
+            {"figure": 0, "kind": "box", "target": "B"},
+            {"figure": 0, "kind": "circle"},
+            {"line": 0, "kind": "arc"},
+        ]
+    )
+    assert points is not None
+    dumped = [point.model_dump(exclude_none=True) for point in points]
+    assert dumped == [
+        {"line": 1, "kind": "move", "at": "6[[2]]", "from": {"line": 1, "at": "[[2]]log"}},
+        {"line": -1, "kind": "arrow"},
+        {"kind": "arc", "text": "34°", "figure": 0, "target": "QRP"},
+        {"kind": "highlight", "figure": 0, "target": ["P", "Q"]},
+        {"kind": "label", "text": "O", "figure": 0, "target": {"x": 40.0, "y": 12.5}},
+        {"kind": "label", "text": "40 m", "figure": "sketch", "target": "A"},
+    ]

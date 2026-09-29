@@ -205,23 +205,91 @@ export interface LessonBeat {
   answer: boolean;
   /** Marks drawn over earlier lines while this beat is said: circles, underlines, arrows. */
   point?: LessonPoint[] | null;
+  /** The beat that brings the lesson's sketch onto the board (the first, where none does). */
+  show_sketch?: boolean;
 }
 
-/** A teacher's mark on the board, pointing back at a line already written. */
+/**
+ * A diagram drawn for the lesson from the question's own words, for a question with no printed
+ * figure. The SVG's text, shown on the board as a picture (an <img> of a data: URL), never as
+ * markup.
+ */
+export interface LessonSketch {
+  name: 'sketch' | 'sketch_b';
+  svg: string;
+  alt_text?: string | null;
+  width?: number | null;
+  height?: number | null;
+}
+
+/**
+ * A teacher's mark on the board, pointing back at a line already written — or, for a question
+ * with a diagram, at the diagram itself.
+ *
+ * A mark on the working names a moment (`line`) and, if only part of it, the piece (`at`).
+ * An `arrow` or a `move` may also say where it comes FROM, another piece on this line or an
+ * earlier one, and is then drawn piece to piece: the 2 in front of a log carried up to be its
+ * power, a term taken across the equals sign, a value brought down from the line it was found
+ * on. A mark on the diagram names the figure (`figure`) and a `target` in it instead of a line.
+ */
 export interface LessonPoint {
-  /** The moment pointed at: its index from 0, or counted back from this beat when negative. */
-  line: number;
-  kind: 'circle' | 'underline' | 'arrow' | 'box' | 'highlight' | 'strike';
+  /**
+   * The moment pointed at: its index from 0, or counted back from this beat when negative.
+   * Absent on a mark on the diagram.
+   */
+  line?: number | null;
+  kind: LessonPointKind;
   /** A few words written beside the mark. */
   text?: string | null;
-  /** Part of the line to mark rather than all of it, as it reads on the board (spaces ignored). */
+  /**
+   * Part of the line to mark rather than all of it, as it reads on the board (spaces ignored).
+   * Where the piece occurs more than once, the words around it pick it out and `[[ ]]` marks
+   * the part meant: `6[[2]]` is the 2 just after the 6.
+   */
   at?: string | null;
+  /** Where an arrow or a move starts: a piece of this line or an earlier one. */
+  from?: LessonPointFrom | null;
+  /**
+   * Which diagram a mark is on: one of the question's figures by its number from 0, or the
+   * lesson's own sketch ('sketch', and 'sketch_b' for a second).
+   */
+  figure?: number | 'sketch' | 'sketch_b' | null;
+  /**
+   * What on the figure is marked: a point by its label ('B'), a side by its two ends ('AB'),
+   * an angle by three points with the vertex in the middle ('ABC'), the labels as a list where
+   * one is longer than a letter (['P', "Q'"]), or a place in the drawing's own units ({x, y}).
+   */
+  target?: string | string[] | FigureSpot | null;
+}
+
+export type LessonPointKind =
+  | 'circle'
+  | 'underline'
+  | 'arrow'
+  | 'box'
+  | 'highlight'
+  | 'strike'
+  | 'move'
+  | 'arc'
+  | 'label';
+
+export interface LessonPointFrom {
+  line: number;
+  at?: string | null;
+}
+
+/** A place on a figure, in the units of its SVG's viewBox. */
+export interface FigureSpot {
+  x: number;
+  y: number;
 }
 
 export interface NarratedLesson {
   /** "model": a teacher's narration. "steps": none could be made; the steps are read. */
   source: 'model' | 'steps';
   beats: LessonBeat[];
+  /** The lesson's own diagrams, for a question that describes its figure in words. */
+  sketches?: LessonSketch[];
 }
 
 export interface TutorReply {
