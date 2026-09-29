@@ -83,12 +83,24 @@ import asyncpg
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from lesson_doodles import (
+    check_all_used,
+    check_doodle_files,
+    clean_doodle,
+    doodles_column,
+    library_names,
+    need_doodles_column,
+    read_custom_doodles,
+)
 from lesson_marks import clean_points
 from load_questions import content_hash, normalise, uuid_for
 from propose_levels_english import propose
 
 ROOT = Path(__file__).resolve().parent.parent
 ENGLISH = ROOT / "docs" / "questions" / "utme" / "english"
+#: Pictures drawn for a lesson's board, to make the question make sense: YYYY_qNN_x.svg
+#: (lesson_doodles.py). A moment brings one in with `doodle: {name: custom:YYYY_qNN_x}`.
+DOODLE_DIR = ENGLISH / "doodles"
 SUBJECT = "ENG"
 EXAMINATION = "UTME"
 AUTHOR = "Hand re-transcription (UTME Use of English)"
@@ -312,6 +324,9 @@ def read_lessons(
     """
     by_key = {(q["year"], q["number"]): q for q in questions}
     found: dict[tuple[int, int], dict[str, Any]] = {}
+    library = library_names()
+    #: Every lesson written, loaded or not (one for an unloadable item still owns its doodles).
+    written: set[tuple[int, int]] = set()
     for year in years:
         path = ENGLISH / f"lessons_{year}.yaml"
         doc = _load(path)
@@ -319,6 +334,7 @@ def read_lessons(
             raise SystemExit(f"{path.name} says it is {doc['exam_year']}")
         for number, lesson in (doc.get("lessons") or {}).items():
             where = f"{path.name} Q{number}"
+            written.add((year, int(number)))
             q = by_key.get((year, int(number)))
             if q is None:
                 # A lesson for an item the file marks unrecoverable has nothing to attach to.
@@ -326,6 +342,9 @@ def read_lessons(
             moments = lesson.get("moments") if isinstance(lesson, dict) else None
             if not isinstance(moments, list) or not moments:
                 raise SystemExit(f"{where}: a lesson needs moments")
+            # The pictures drawn for this question's board (lesson_doodles.py).
+            doodles = read_custom_doodles(DOODLE_DIR, year, int(number))
+            custom = {doodle["name"] for doodle in doodles}
             clean: list[dict[str, object]] = []
             for moment in moments:
                 say = moment.get("say") if isinstance(moment, dict) else None
@@ -342,11 +361,27 @@ def read_lessons(
                 point = moment.get("point")
                 if point is not None:
                     # The English papers carry no redrawn figures through this loader, so a mark
-                    # on a diagram is checked for its shape only (lesson_marks.py).
+                    # on a diagram is checked for its shape only (lesson_marks.py). A mark in the
+                    # passage is checked against the passage's text, as it is stored.
                     entry["point"] = clean_points(
-                        point, len(clean), f"{where} moment {len(clean)}"
+                        point,
+                        len(clean),
+                        f"{where} moment {len(clean)}",
+                        passage=q["passage"]["body"] if q["passage"] else None,
+                    )
+                if moment.get("doodle") is not None:
+                    entry["doodle"] = clean_doodle(
+                        moment["doodle"],
+                        len(clean),
+                        [bool(m.get("write")) for m in clean] + [bool(write)],
+                        library,
+                        custom,
+                        year,
+                        int(number),
+                        f"{where} moment {len(clean)}",
                     )
                 clean.append(entry)
+            check_all_used(doodles, clean, where)
             answers = [m for m in clean if m.get("answer")]
             if len(answers) != 1:
                 raise SystemExit(f"{where}: exactly one moment is the answer, found {len(answers)}")
@@ -372,8 +407,10 @@ def read_lessons(
             found[(year, int(number))] = {
                 "moments": clean,
                 "traps": traps,
+                "doodles": doodles,
                 "file": path.relative_to(ROOT).as_posix(),
             }
+    check_doodle_files(DOODLE_DIR, written)
     return found
 
 
@@ -444,7 +481,8 @@ async def lessons_to_load(
     for (year, number), lesson in lessons.items():
         row = await conn.fetchrow(
             """
-            SELECT q.current_version_id AS version_id, l.moments, l.traps
+            SELECT q.current_version_id AS version_id, l.moments, l.traps,
+                   to_jsonb(l) -> 'doodles' AS doodles
             FROM questions q
             LEFT JOIN question_lessons l ON l.question_version_id = q.current_version_id
             WHERE q.subject_id = $1 AND q.exam_year = $2 AND q.question_number = $3
@@ -460,6 +498,8 @@ async def lessons_to_load(
             row["moments"] is not None
             and json.loads(row["moments"]) == lesson["moments"]
             and json.loads(row["traps"]) == lesson["traps"]
+            # Read whether or not migration 027 has added the column yet: absent reads as none.
+            and json.loads(row["doodles"] or "[]") == lesson["doodles"]
         )
         if not same:
             work.append((row["version_id"], lesson))
@@ -1040,6 +1080,9 @@ async def run(args: argparse.Namespace) -> int:
         # After the questions, because a lesson belongs to the version a question is ON, and
         # the corrections above may just have moved it.
         lesson_work = await lessons_to_load(conn, subject_id, lessons)
+        # The doodles need migration 027; a database without it takes lessons with none.
+        with_doodles = await doodles_column(conn)
+        need_doodles_column(with_doodles, lesson_work)
         async with conn.transaction():
             for version_id, lesson in lesson_work:
                 await conn.execute(
@@ -1056,6 +1099,13 @@ async def run(args: argparse.Namespace) -> int:
                     json.dumps(lesson["traps"]),
                     lesson["file"],
                 )
+                if with_doodles:
+                    await conn.execute(
+                        "UPDATE question_lessons SET doodles = $2::jsonb "
+                        "WHERE question_version_id = $1",
+                        version_id,
+                        json.dumps(lesson["doodles"]),
+                    )
         print(f"{len(lesson_work)} written lessons loaded or updated.")
 
         deliverable = await conn.fetchval(

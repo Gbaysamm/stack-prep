@@ -71,6 +71,7 @@ from app.auth import require_session_owner, require_student
 from app.config import Settings, get_settings
 from app.db import connection, fetch_all
 from app.figures import QuestionFigure, figures_for, resolve
+from app.lesson_doodles import DoodleRef, LessonDoodle, doodle_ref, lesson_doodles
 from app.routers.checkup import UnitWeight, _subtopics
 from engine.projection import UnitStanding, project
 from engine.version import ENGINE_VERSION
@@ -1640,6 +1641,8 @@ _LINE_KINDS = frozenset({"circle", "underline", "arrow", "box", "highlight", "st
 _FIGURE_KINDS = frozenset(
     {"circle", "underline", "arrow", "highlight", "strike", "arc", "label"}
 )
+#: A mark in the question's passage (comprehension, cloze): the kinds it may be.
+_PASSAGE_KINDS = frozenset({"highlight", "underline", "circle", "strike", "label"})
 
 
 class PointFrom(BaseModel):
@@ -1661,6 +1664,9 @@ class PointTo(BaseModel):
     target: str | list[str] | FigureSpot | None = None
     line: int | None = None
     at: str | None = None
+    #: Or a place in the question's passage: `target` is its words, `nth` which occurrence.
+    passage: bool | None = None
+    nth: int | None = None
 
 
 class LessonPoint(BaseModel):
@@ -1681,8 +1687,13 @@ class LessonPoint(BaseModel):
     #: two labels for a side, three for an angle, or a place in the drawing's units.
     figure: int | Literal["sketch", "sketch_b", "sketch_c"] | None = None
     target: str | list[str] | FigureSpot | None = None
-    #: An arrow across between the working and a diagram: where it lands.
+    #: An arrow across between the working and a diagram: where it lands. Or, for any mark on
+    #: the working, the place in the passage its piece is linked to (`passage` and `target`).
     to: PointTo | None = None
+    #: A mark in the question's passage: `target` is the words in it, `nth` which occurrence
+    #: (from 1) where they occur more than once (database/lesson_marks.py).
+    passage: bool | None = None
+    nth: int | None = None
 
 
 def _drawing(value: object) -> int | Literal["sketch", "sketch_b", "sketch_c"] | None:
@@ -1704,6 +1715,17 @@ def _across(raw: object, to_figure: bool) -> PointTo | None:
         return PointTo(figure=drawing, target=target) if drawing is not None and target else None
     line = _whole(raw.get("line"))
     return PointTo(line=line, at=_words(raw.get("at"))) if line is not None else None
+
+
+def _in_passage(raw: object) -> tuple[str, int | None] | None:
+    """A place in the passage (`passage: true`, `target`, `nth`), or None where it is not one."""
+    if not isinstance(raw, dict) or raw.get("passage") is not True:
+        return None
+    target = raw.get("target")
+    if not isinstance(target, str) or not target.strip():
+        return None
+    nth = _whole(raw.get("nth"))
+    return target.strip(), nth if nth is not None and nth >= 1 else None
 
 
 def _show_sketch(value: object) -> bool | Literal["sketch_b", "sketch_c"]:
@@ -1760,6 +1782,13 @@ def _points(raw: object) -> list[LessonPoint] | None:
         if item.get("figure") in ("sketch", "sketch_b", "sketch_c"):
             drawing = _drawing(item.get("figure"))
         label = _words(item.get("text"))
+        spot = _in_passage(item)
+        if item.get("passage") is not None:
+            if spot is not None and kind in _PASSAGE_KINDS:
+                kept.append(
+                    LessonPoint(kind=kind, text=label, passage=True, target=spot[0], nth=spot[1])
+                )
+            continue
         if drawing is not None and (not isinstance(drawing, int) or drawing >= 0):
             target = _target(item.get("target"))
             if kind not in _FIGURE_KINDS or target is None:
@@ -1780,7 +1809,10 @@ def _points(raw: object) -> list[LessonPoint] | None:
         point = LessonPoint(line=line, kind=kind, text=label, at=_words(item.get("at")))
         if kind in ("arrow", "move"):
             point.from_ = begin
-        if kind == "arrow" and begin is None:
+        linked = _in_passage(item.get("to"))
+        if linked is not None and kind != "move" and begin is None:
+            point.to = PointTo(passage=True, target=linked[0], nth=linked[1])
+        elif kind == "arrow" and begin is None:
             point.to = _across(item.get("to"), to_figure=True)
         kept.append(point)
     return kept or None
@@ -1805,6 +1837,8 @@ class LessonBeat(BaseModel):
     #: The sketch this beat brings onto the board: true for the first ("sketch"), or the name of
     #: a later one. A sketch no beat brings in comes with the first.
     show_sketch: bool | Literal["sketch_b", "sketch_c"] = False
+    #: A small picture this beat draws beside a line (app/lesson_doodles.py), if any.
+    doodle: DoodleRef | None = None
 
 
 class LessonSketch(BaseModel):
@@ -1831,6 +1865,11 @@ class NarratedLesson(BaseModel):
     beats: list[LessonBeat]
     #: The lesson's own diagrams, for a question that describes its figure in words.
     sketches: list[LessonSketch] = []
+    #: The pictures drawn for this lesson's board, which its beats' `doodle` name (027).
+    doodles: list[LessonDoodle] = []
+    #: The right option's own words, which the board writes into a cloze passage's gap at the
+    #: moment of the answer. None where the question has no right option on record.
+    answer_text: str | None = None
 
 
 @dataclasses.dataclass(frozen=True)
@@ -1842,6 +1881,7 @@ class _Beat:
     answer: bool = False
     point: list[LessonPoint] | None = None
     show_sketch: bool | Literal["sketch_b", "sketch_c"] = False
+    doodle: DoodleRef | None = None
 
 
 async def _must_have_missed(conn: AsyncConnection, session_id: UUID, version_id: UUID) -> None:
@@ -2096,6 +2136,7 @@ async def _lesson_beats(
                 answer=bool(moment.get("answer")),
                 point=_points(moment.get("point")),
                 show_sketch=_show_sketch(moment.get("show_sketch")),
+                doodle=doodle_ref(moment.get("doodle")),
             )
             for moment in moments
         ]
@@ -2154,11 +2195,31 @@ async def lesson(
                 answer=beat.answer,
                 point=beat.point,
                 show_sketch=beat.show_sketch,
+                doodle=beat.doodle,
             )
             for index, beat in enumerate(beats)
         ],
         sketches=await _lesson_sketches(conn, question_version_id) if source == "script" else [],
+        doodles=await lesson_doodles(conn, question_version_id) if source == "script" else [],
+        answer_text=await _answer_text(conn, question_version_id),
     )
+
+
+async def _answer_text(conn: AsyncConnection, version_id: UUID) -> str | None:
+    """The right option's words: the lesson opens only once the answer is shown anyway."""
+    body = (
+        await conn.execute(
+            text(
+                """
+                SELECT body FROM question_options
+                WHERE question_version_id = :version AND is_correct
+                ORDER BY display_order LIMIT 1
+                """
+            ),
+            {"version": version_id},
+        )
+    ).scalar()
+    return str(body).strip() or None if body is not None else None
 
 
 @router.get(

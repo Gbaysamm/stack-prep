@@ -662,10 +662,19 @@ export function PracticeRoom() {
         <Board
           title={question.subtopic_name}
           subtitle={`${subjectName} · worked through`}
-          // The question, but never the passage: several paragraphs of comprehension text
-          // would bury the working underneath it.
+          // The question over the working; the passage has a place of its own beside it.
           question={question.stem}
           figures={question.figures}
+          passage={
+            question.passage_body
+              ? { title: question.passage_title, body: question.passage_body }
+              : null
+          }
+          answerText={
+            question.options.find(
+              (option) => option.option_key === state.correct_option_key,
+            )?.body ?? null
+          }
           steps={state.solution_steps ?? []}
           loadLesson={
             canHear
@@ -1332,6 +1341,14 @@ function ReviewBoard({
         subtitle={`${subjectName} · the working`}
         question={question.stem}
         figures={question.figures}
+        passage={
+          question.passage_body
+            ? { title: question.passage_title, body: question.passage_body }
+            : null
+        }
+        answerText={
+          question.options.find((option) => option.option_key === outcome.chose)?.body ?? null
+        }
         steps={loaded ? loaded.beats.flatMap((beat) => beat.write) : []}
         loadLesson={
           canHear && loaded ? () => Promise.resolve(loaded) : undefined

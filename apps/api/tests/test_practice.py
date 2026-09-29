@@ -516,7 +516,10 @@ async def test_the_lesson_opens_at_the_board_as_before(
     assert (await client.post(lesson_url(session, version, "/warm"))).status_code == 202
     assert (await client.get(lesson_url(session, version))).status_code == 409
     await answer(client, session, state, "C")
-    assert (await client.get(lesson_url(session, version))).status_code == 200
+    opened = await client.get(lesson_url(session, version))
+    assert opened.status_code == 200
+    # The right option's words come with it, for a cloze gap to be written in at the answer.
+    assert "answer_text" in opened.json()
 
 
 async def test_lesson_feedback_is_taken_only_where_the_lesson_opens(
@@ -1225,7 +1228,14 @@ def test_a_lessons_marks_pass_through_and_a_bad_one_is_dropped() -> None:
         ]
     )
     assert points is not None
-    blank = {"from": None, "figure": None, "target": None, "to": None}
+    blank = {
+        "from": None,
+        "figure": None,
+        "target": None,
+        "to": None,
+        "passage": None,
+        "nth": None,
+    }
     assert [point.model_dump() for point in points] == [
         {"line": 0, "kind": "circle", "text": "the limits", "at": "0 <= y <= 3", **blank},
         {"line": -1, "kind": "arrow", "text": None, "at": None, **blank},
@@ -1300,6 +1310,45 @@ def test_arrows_across_between_the_working_and_a_diagram() -> None:
         {"line": 6, "kind": "arrow"},
         {"kind": "circle", "figure": 0, "target": "B"},
         {"line": 3, "kind": "circle"},
+    ]
+
+
+def test_passage_marks_and_links_into_the_passage_pass_through() -> None:
+    """A mark in the passage names its words (and which occurrence); a mark on the working may
+    link its piece to a place in the passage. A passage mark of a kind the passage does not
+    take, or with no words to find, is dropped; a move never links."""
+    points = _points(
+        [
+            {"passage": True, "kind": "highlight", "target": "once or twice a year"},
+            {"passage": True, "kind": "label", "target": "but", "nth": 2, "text": "contrast"},
+            {"passage": True, "kind": "arrow", "target": "but"},
+            {"passage": True, "kind": "circle"},
+            {
+                "line": 2,
+                "kind": "highlight",
+                "at": "once or twice",
+                "to": {"passage": True, "target": "once or twice a year", "nth": 1},
+            },
+            {
+                "line": 1,
+                "kind": "move",
+                "from": {"line": 0},
+                "to": {"passage": True, "target": "x"},
+            },
+        ]
+    )
+    assert points is not None
+    dumped = [point.model_dump(exclude_none=True) for point in points]
+    assert dumped == [
+        {"kind": "highlight", "target": "once or twice a year", "passage": True},
+        {"kind": "label", "text": "contrast", "target": "but", "passage": True, "nth": 2},
+        {
+            "line": 2,
+            "kind": "highlight",
+            "at": "once or twice",
+            "to": {"passage": True, "target": "once or twice a year", "nth": 1},
+        },
+        {"line": 1, "kind": "move", "from": {"line": 0}},
     ]
 
 

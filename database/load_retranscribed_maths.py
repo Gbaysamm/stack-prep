@@ -55,6 +55,15 @@ import asyncpg
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from lesson_doodles import (
+    check_all_used,
+    check_doodle_files,
+    clean_doodle,
+    doodles_column,
+    library_names,
+    need_doodles_column,
+    read_custom_doodles,
+)
 from lesson_marks import (
     SKETCH_NAMES,
     SKETCH_SUFFIXES,
@@ -72,6 +81,9 @@ SVG_DIR = MATHS / "figures" / "svg"
 #: Diagrams drawn for a lesson, for a question that describes its figure in words:
 #: YYYY_qNN.svg, YYYY_qNN_b.svg for a second, YYYY_qNN_c.svg for a third (lesson_marks.py).
 SKETCH_DIR = MATHS / "sketches"
+#: Pictures drawn for a lesson's board, to make the question make sense: YYYY_qNN_x.svg
+#: (lesson_doodles.py). A moment brings one in with `doodle: {name: custom:YYYY_qNN_x}`.
+DOODLE_DIR = MATHS / "doodles"
 SUBJECT = "MATH"
 EXAMINATION = "UTME"
 AUTHOR = "Hand re-transcription (UTME Mathematics)"
@@ -233,6 +245,7 @@ def read_lessons(
     quietly left out.
     """
     found: dict[tuple[int, int], dict] = {}
+    library = library_names()
     for path in sorted(MATHS.glob("lessons_*.yaml")):
         doc = yaml.safe_load(path.read_text(encoding="utf-8"))
         year = int(doc["exam_year"])
@@ -254,6 +267,9 @@ def read_lessons(
                 raise SystemExit(f"{where}: a _b sketch with no first sketch")
             if "sketch_c" in drawn and "sketch_b" not in drawn:
                 raise SystemExit(f"{where}: a _c sketch with no _b sketch")
+            # The pictures drawn for this question's board (lesson_doodles.py).
+            doodles = read_custom_doodles(DOODLE_DIR, year, int(number))
+            custom = {doodle["name"] for doodle in doodles}
             clean = []
             brought: list[str] = []
             for moment in moments:
@@ -285,13 +301,26 @@ def read_lessons(
                         None if figures is None else figures.get((year, int(number)), []),
                         drawn,
                     )
+                if moment.get("doodle") is not None:
+                    entry["doodle"] = clean_doodle(
+                        moment["doodle"],
+                        len(clean),
+                        [bool(m.get("write")) for m in clean] + [bool(write)],
+                        library,
+                        custom,
+                        year,
+                        int(number),
+                        f"{where} moment {len(clean)}",
+                    )
                 clean.append(entry)
+            check_all_used(doodles, clean, where)
             traps = lesson.get("traps") or {}
             if not isinstance(traps, dict) or not set(traps) <= OPTION_LETTERS:
                 raise SystemExit(f"{where}: traps are keyed by option letter")
             found[(year, int(number))] = {
                 "moments": clean,
                 "sketches": sketches,
+                "doodles": doodles,
                 "traps": {str(key): str(value).strip() for key, value in traps.items()},
                 "file": path.relative_to(ROOT).as_posix(),
             }
@@ -303,6 +332,7 @@ def read_lessons(
             )
         if (int(named.group(1)), int(named.group(2))) not in found:
             raise SystemExit(f"sketches/{file.name}: there is no written lesson for it to go with")
+    check_doodle_files(DOODLE_DIR, set(found))
     return found
 
 
@@ -315,7 +345,8 @@ async def lessons_to_load(
         row = await conn.fetchrow(
             """
             SELECT q.current_version_id AS version_id, l.moments, l.traps,
-                   to_jsonb(l) -> 'sketches' AS sketches
+                   to_jsonb(l) -> 'sketches' AS sketches,
+                   to_jsonb(l) -> 'doodles' AS doodles
             FROM questions q
             LEFT JOIN question_lessons l ON l.question_version_id = q.current_version_id
             WHERE q.subject_id = $1 AND q.exam_year = $2 AND q.question_number = $3
@@ -333,6 +364,8 @@ async def lessons_to_load(
             and json.loads(row["traps"]) == lesson["traps"]
             # Read whether or not migration 026 has added the column yet: absent reads as none.
             and json.loads(row["sketches"] or "[]") == lesson["sketches"]
+            # Likewise migration 027.
+            and json.loads(row["doodles"] or "[]") == lesson["doodles"]
         )
         if not same:
             work.append((row["version_id"], lesson))
@@ -803,6 +836,9 @@ async def run(args: argparse.Namespace) -> int:
         # After the questions, because a lesson belongs to the version a question is ON, and
         # the corrections above may just have moved it.
         lesson_work = await lessons_to_load(conn, subject_id, lessons)
+        # The doodles need migration 027; a database without it takes lessons with none.
+        with_doodles = await doodles_column(conn)
+        need_doodles_column(with_doodles, lesson_work)
         async with conn.transaction():
             for version_id, lesson in lesson_work:
                 await conn.execute(
@@ -821,6 +857,13 @@ async def run(args: argparse.Namespace) -> int:
                     lesson["file"],
                     json.dumps(lesson["sketches"]),
                 )
+                if with_doodles:
+                    await conn.execute(
+                        "UPDATE question_lessons SET doodles = $2::jsonb "
+                        "WHERE question_version_id = $1",
+                        version_id,
+                        json.dumps(lesson["doodles"]),
+                    )
         print(f"{len(lesson_work)} written lessons loaded or updated.")
 
         deliverable = await conn.fetchval(

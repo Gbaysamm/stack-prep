@@ -1,0 +1,322 @@
+/*
+ * Doodles on the coach's board (Doodle.tsx, DoodleLayer.tsx) and the coach buddy (Buddy.tsx).
+ *
+ * A doodle is drawn by the pen (drawIn.ts), then comes alive: its `data-anim` groups are
+ * carried on wrappers (`.dd-a-<anim>`) that move here, only once `.dd.alive`. A tap or a hover
+ * adds `.reacting` for one bounce. Every move stops where it is while the lesson is paused, and
+ * none runs at all for a student who has asked for less movement.
+ */
+
+.dd {
+  --dd-ink: #1d1b3a;
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  width: var(--dd-size, 120px);
+  margin: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.dd-art {
+  width: var(--dd-size, 120px);
+  height: var(--dd-size, 120px);
+  transform-origin: 50% 92%;
+}
+.dd-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.dd-caption {
+  max-width: calc(var(--dd-size, 120px) + 56px);
+  margin-top: 2px;
+  padding: 0 4px;
+  font-family: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive;
+  font-size: clamp(17px, calc(var(--dd-size, 120px) * 0.17), 22px);
+  font-weight: 700;
+  line-height: 1.05;
+  text-align: center;
+  color: var(--purple-700, #5b21b6);
+  text-wrap: balance;
+  transform: rotate(-2deg);
+}
+/* The pen that draws a doodle: the figure's marker (board.css), smaller. */
+.dd-pen .pb-figpen-body {
+  scale: 0.62;
+}
+
+/* ------------------------------------------------------------------ the idle life */
+.dd .dd-a,
+.dd .dd-r {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.dd .dd-a[style],
+.dd .dd-r[style] {
+  /* The art's own data-origin, set on the wrapper, in the picture's units. */
+  transform-box: view-box;
+}
+.dd.alive .dd-a-bob {
+  animation: dd-bob 2.8s ease-in-out infinite;
+}
+.dd.alive .dd-a-blink {
+  animation: dd-blink 4.6s ease-in-out 1.2s infinite;
+}
+.dd.alive .dd-a-wiggle {
+  animation: dd-wiggle 2.4s ease-in-out infinite;
+}
+.dd.alive .dd-a-pulse {
+  animation: dd-pulse 2.2s ease-in-out infinite;
+}
+.dd.alive .dd-a-sway {
+  animation: dd-sway 3.6s ease-in-out infinite;
+}
+.dd.alive .dd-a-spin-slow {
+  animation: dd-spin 9s linear infinite;
+}
+.dd.alive .dd-a-shake {
+  animation: dd-shake 620ms ease-in-out 200ms 2 both;
+}
+.dd.alive .dd-a-pop {
+  animation: dd-pop 520ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes dd-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+@keyframes dd-blink {
+  0%,
+  90%,
+  100% {
+    transform: scaleY(1);
+  }
+  93% {
+    transform: scaleY(0.1);
+  }
+  96% {
+    transform: scaleY(1);
+  }
+}
+@keyframes dd-wiggle {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(-5deg);
+  }
+  75% {
+    transform: rotate(5deg);
+  }
+}
+@keyframes dd-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.09);
+  }
+}
+@keyframes dd-sway {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+@keyframes dd-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes dd-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-4px) rotate(-3deg);
+  }
+  40% {
+    transform: translateX(4px) rotate(3deg);
+  }
+  60% {
+    transform: translateX(-3px) rotate(-2deg);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+/* Drawn already by the pen, so a pop never grows it from nothing: it swells and settles. */
+@keyframes dd-pop {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.28);
+  }
+  70% {
+    transform: scale(0.94);
+  }
+}
+
+/* ------------------------------------------------------------------ a reaction */
+.dd.reacting .dd-art {
+  animation: dd-squash 640ms cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+.dd.reacting[data-react='wiggle'] .dd-svg,
+.dd.reacting .dd-r-wiggle {
+  animation: dd-wiggle 420ms ease-in-out 2;
+}
+.dd.reacting[data-react='shake'] .dd-svg,
+.dd.reacting .dd-r-shake {
+  animation: dd-shake 520ms ease-in-out;
+}
+.dd.reacting[data-react='pop'] .dd-svg,
+.dd.reacting .dd-r-pop {
+  animation: dd-pop 460ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes dd-squash {
+  0% {
+    transform: scale(1, 1);
+  }
+  18% {
+    transform: scale(1.14, 0.84);
+  }
+  42% {
+    transform: scale(0.9, 1.14) translateY(-8%);
+  }
+  64% {
+    transform: scale(1.05, 0.95);
+  }
+  82% {
+    transform: scale(0.98, 1.02);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+
+.dd[data-paused] *,
+.dd[data-paused] {
+  animation-play-state: paused !important;
+}
+
+/* ------------------------------------------------------------------ on the board */
+/* The layer over the working that the doodles sit on: nothing in it takes a tap but the
+   doodles themselves. Placed by DoodleLayer.tsx clear of the writing and every mark. */
+.dd-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity 240ms var(--ease, ease);
+}
+.dd-layer .dd {
+  pointer-events: auto;
+}
+.pb-sheet.dim .dd-layer {
+  opacity: 0.4;
+}
+.dd-spot {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+.dd-layer .dd-spot .dd {
+  position: relative;
+  width: auto;
+}
+.dd-spot:focus-visible {
+  outline: 2px solid var(--purple-400, #a78bfa);
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+
+/* ------------------------------------------------------------------ the coach buddy */
+.pb-buddy {
+  pointer-events: auto;
+  position: relative;
+  flex: none;
+  align-self: flex-end;
+  margin-left: 10px;
+  margin-bottom: 2px;
+}
+.pb-buddy .dd {
+  display: flex;
+}
+/* A change of face lands with a little pop, so it reads as the buddy reacting. */
+.pb-buddy .dd.alive .dd-art {
+  animation: dd-face 360ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.pb-buddy .dd.reacting .dd-art {
+  animation: dd-squash 640ms cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+@keyframes dd-face {
+  0% {
+    transform: scale(0.86);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+/* A cheer: two small stars thrown up beside it. */
+.pb-buddy-stars {
+  position: absolute;
+  inset: -14px -6px auto auto;
+  width: 30px;
+  height: 30px;
+  pointer-events: none;
+}
+.pb-buddy-stars path {
+  fill: var(--yellow-300, #fde047);
+  stroke: #1d1b3a;
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dd-star 1.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.pb-buddy-stars path + path {
+  animation-delay: 160ms;
+}
+@keyframes dd-star {
+  0% {
+    transform: translateY(10px) scale(0) rotate(-40deg);
+    opacity: 0;
+  }
+  35% {
+    transform: translateY(0) scale(1.15) rotate(0);
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-6px) scale(0.9) rotate(20deg);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dd *,
+  .dd,
+  .pb-buddy * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

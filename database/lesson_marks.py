@@ -60,6 +60,26 @@ checked like a diagram mark's); the second starts at A and lands on the piece (i
 line, this moment or an earlier one, and a piece of it). Only an arrow goes across, and it
 does not also have a `from`.
 
+A MARK IN THE PASSAGE. For a question set on a passage (comprehension, cloze, words in
+context), the passage is on the board beside the working, and a mark may be drawn in it:
+
+    {passage: true, kind: highlight, target: 'once or twice a year', text: 'seldom'}
+    {passage: true, kind: label, target: 'but', text: 'contrast: "but" flips it', nth: 2}
+
+`target` is an exact piece of the passage's text, matched with whitespace normalised and
+curly and straight quotes, apostrophes and dashes treated as the same (see `norm_passage`);
+where it occurs more than once, `nth` (from 1) picks the occurrence, the first by default.
+The kinds a passage takes are highlight, underline, circle, strike and label (a note in the
+margin beside the words, which needs its `text`). A passage mark goes with the line of the
+working written at its moment, as a diagram mark does.
+
+A mark on the working may link its piece to a place in the passage with `to`:
+
+    {line: 2, kind: highlight, at: 'once or twice a year', to: {passage: true, target: '...'}}
+
+(`to.nth` as above). The passage piece is highlighted and the two are paired on the board. Any
+mark on the working but a move may link so, and not together with a `from`.
+
 At most MAX_MARKS marks to a moment: more than that and the student cannot follow them all
 while one sentence is said.
 """
@@ -73,7 +93,11 @@ LINE_KINDS = {"circle", "underline", "arrow", "box", "highlight", "strike", "mov
 FIGURE_KINDS = {"circle", "underline", "arrow", "highlight", "strike", "arc", "label"}
 POINT_KINDS = LINE_KINDS | FIGURE_KINDS
 MAX_MARKS = 3
-_KEYS = {"line", "kind", "text", "at", "from", "figure", "target", "to"}
+_KEYS = {"line", "kind", "text", "at", "from", "figure", "target", "to", "passage", "nth"}
+#: What a mark in the passage may be.
+PASSAGE_KINDS = {"highlight", "underline", "circle", "strike", "label"}
+#: The longest note a passage mark may carry: a short sentence in the margin.
+PASSAGE_NOTE_MAX = 80
 #: What a mark calls a lesson's sketches: the first, and a second where there is one.
 SKETCH_NAMES = ("sketch", "sketch_b", "sketch_c")
 #: The file each is in: YYYY_qNN.svg, YYYY_qNN_b.svg, YYYY_qNN_c.svg.
@@ -308,6 +332,102 @@ def _to_figure(
     return {"figure": found["figure"], "target": found["target"]}
 
 
+_SAME = str.maketrans(
+    {
+        "\u2018": "'",
+        "\u2019": "'",
+        "\u201a": "'",
+        "\u201b": "'",
+        "\u2032": "'",
+        "`": "'",
+        "\u201c": '"',
+        "\u201d": '"',
+        "\u201e": '"',
+        "\u201f": '"',
+        "\u2033": '"',
+        "\u2010": "-",
+        "\u2011": "-",
+        "\u2012": "-",
+        "\u2013": "-",
+        "\u2014": "-",
+        "\u2015": "-",
+        "\u2212": "-",
+        "\u2026": "...",
+        "\u00a0": " ",
+    }
+)
+
+
+def norm_passage(text: str) -> str:
+    """Passage text as a target is matched against it (the board's `normPassage` is the same).
+
+    Whitespace runs are one space, spaces round a dash are dropped, and curly and straight
+    quotes, apostrophes and every dash read the same.
+    """
+    flat = re.sub(r"\s+", " ", text.translate(_SAME))
+    return re.sub(r" ?- ?", "-", flat).strip()
+
+
+def passage_count(target: str, body: str) -> int:
+    """How many times the target occurs in the passage (not overlapping), as it is matched."""
+    needle = norm_passage(target)
+    return norm_passage(body).count(needle) if needle else 0
+
+
+def _passage_target(
+    raw: dict[str, object], where: str, passage: str | None, what: str
+) -> dict[str, object]:
+    """A passage target and its occurrence, checked against the question's passage."""
+    if raw.get("passage") is not True:
+        raise SystemExit(f"{where}: {what} is marked passage: true")
+    if passage is None:
+        raise SystemExit(f"{where}: {what} is in the passage, but this question has no passage")
+    target = raw.get("target")
+    if not isinstance(target, str) or not norm_passage(target):
+        raise SystemExit(f"{where}: {what} needs a target: the words in the passage")
+    count = passage_count(target, passage)
+    if count == 0:
+        raise SystemExit(f"{where}: {what} target {target!r} is not in the passage")
+    nth = raw.get("nth", 1)
+    if isinstance(nth, bool) or not isinstance(nth, int) or not 1 <= nth <= count:
+        times = f"{count} time{'s' if count != 1 else ''}"
+        raise SystemExit(
+            f"{where}: {what} nth {nth!r} is out of range: {target!r} is in the passage {times}"
+        )
+    clean: dict[str, object] = {"passage": True, "target": target.strip()}
+    if "nth" in raw:
+        clean["nth"] = nth
+    return clean
+
+
+def _passage_mark(
+    mark: dict[str, object], kind: object, where: str, passage: str | None
+) -> dict[str, object]:
+    """A mark drawn in the passage, checked: a kind the passage takes, and a target in it."""
+    for key in ("line", "at", "from", "figure", "to"):
+        if key in mark:
+            raise SystemExit(f"{where}: a passage mark has a target (and nth), not {key}")
+    if kind not in PASSAGE_KINDS:
+        raise SystemExit(f"{where}: a passage mark's kind is one of {sorted(PASSAGE_KINDS)}")
+    text = mark.get("text")
+    if kind == "label" and text is None:
+        raise SystemExit(f"{where}: a label in the passage needs its text")
+    if isinstance(text, str) and len(text.strip()) > PASSAGE_NOTE_MAX:
+        raise SystemExit(
+            f"{where}: a passage note is at most {PASSAGE_NOTE_MAX} characters ({len(text)})"
+        )
+    clean = _passage_target(mark, where, passage, "a passage mark")
+    clean["kind"] = kind
+    return clean
+
+
+def _to_passage(to: object, where: str, passage: str | None) -> dict[str, object]:
+    """Where a mark on the working links into the passage: a target in it, and which one."""
+    if not isinstance(to, dict) or set(to) - {"passage", "target", "nth"}:
+        raise SystemExit(f"{where}: a link into the passage is to: {{passage: true, target: …}}")
+    return _passage_target(dict(to), where, passage, "to")
+
+
 def clean_show_sketch(value: object, drawn: dict[str, str], brought: list[str], where: str) -> str:
     """The sketch a moment brings in (`show_sketch`), checked: true is the first sketch.
 
@@ -338,6 +458,7 @@ def clean_points(
     where: str,
     figures: list[str] | None = None,
     sketches: dict[str, str] | None = None,
+    passage: str | None = None,
 ) -> list[dict[str, object]]:
     """A moment's marks, checked, in the form they are stored and played.
 
@@ -347,7 +468,9 @@ def clean_points(
     it). Where it is None — a subject whose loader does not carry figures — only the shape of
     a diagram mark is checked, and the board draws nothing for a target it cannot find.
     `sketches` is the lesson's own sketches by name ('sketch', 'sketch_b'), checked the same
-    way where it is given.
+    way where it is given. `passage` is the body of the question's passage, where it has one:
+    a passage mark, or a link into the passage, is checked against it (see the head of this
+    file), and refused where there is none.
     """
     if not isinstance(point, list) or not point:
         raise SystemExit(f"{where}: point is a list of marks")
@@ -366,7 +489,11 @@ def clean_points(
         text = mark.get("text")
         if text is not None and (not isinstance(text, str) or not text.strip()):
             raise SystemExit(f"{where}: a mark's text is a few words or nothing")
-        if "figure" in mark or "target" in mark:
+        if "passage" in mark:
+            clean = _passage_mark(mark, kind, where, passage)
+        elif "nth" in mark:
+            raise SystemExit(f"{where}: nth picks an occurrence in the passage (passage: true)")
+        elif "figure" in mark or "target" in mark:
             clean = _figure_mark(mark, kind, where, figures, sketches)
             if kind == "label" and text is None:
                 raise SystemExit(f"{where}: a label mark needs its text")
@@ -394,7 +521,14 @@ def clean_points(
                 clean["from"] = begin
             elif kind == "move":
                 raise SystemExit(f"{where}: a move needs a from: where the piece is taken from")
-            if "to" in mark:
+            to = mark.get("to")
+            if isinstance(to, dict) and "passage" in to:
+                if kind == "move" or start is not None:
+                    raise SystemExit(
+                        f"{where}: a link into the passage is not a move, and not with a from"
+                    )
+                clean["to"] = _to_passage(to, where, passage)
+            elif "to" in mark:
                 if kind != "arrow" or start is not None:
                     raise SystemExit(
                         f"{where}: only an arrow goes across (to) to a diagram, and not with a from"
@@ -403,6 +537,6 @@ def clean_points(
         if text is not None:
             clean["text"] = text.strip()
         # Stored in the order the keys were always written: line, kind, then the rest.
-        order = ["line", "figure", "kind", "text", "at", "from", "target", "to"]
+        order = ["line", "passage", "figure", "kind", "text", "at", "from", "target", "nth", "to"]
         marks.append({key: clean[key] for key in order if key in clean})
     return marks

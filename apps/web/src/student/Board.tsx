@@ -43,9 +43,13 @@ import {
 } from "react";
 import type { CSSProperties, MutableRefObject, ReactNode, RefObject } from "react";
 
-import type { LessonPoint, NarratedLesson, TutorReply } from "./api.js";
+import type { LessonDoodleRef, LessonPoint, NarratedLesson, TutorReply } from "./api.js";
+import { Buddy } from "./Buddy.js";
 import { Coach } from "./Coach.js";
+import { DoodleLayer } from "./DoodleLayer.js";
 import { FigurePanel, type Drawing, type DrawingKey } from "./FigureBoard.js";
+import { PassagePanel, type PassageKind, type PassageMark } from "./PassagePanel.js";
+import { findInPassage, foldPassage, gapOf, quotedPieces } from "./passage.js";
 import {
   CHIP_HEIGHT,
   ChipLayout,
@@ -107,6 +111,8 @@ interface Entry {
   point: LessonPoint[];
   /** The sketch this moment brings onto the board ('sketch', 'sketch_b', 'sketch_c'), if any. */
   showSketch?: string | null;
+  /** The small picture this moment draws beside a line (DoodleLayer.tsx), if any. */
+  doodle?: LessonDoodleRef | null;
 }
 
 /**
@@ -222,7 +228,7 @@ function inkLength(line: string): number {
  * the bottom of the figure pinned over the working, which covers what scrolls under it.
  */
 function pinnedEdge(ink: HTMLElement, view: DOMRect): number {
-  const panel = ink.querySelector<HTMLElement>(".pb-figpanel");
+  const panel = ink.querySelector<HTMLElement>(".pb-side, .pb-figpanel");
   if (!panel || window.getComputedStyle(panel).position !== "sticky") return view.top;
   const box = panel.getBoundingClientRect();
   // Beside the working, not over it: it covers nothing the lines are written in.
@@ -253,6 +259,8 @@ export function Board({
   subtitle,
   question,
   figures,
+  passage,
+  answerText,
   steps,
   answerLine,
   loadLesson,
@@ -281,11 +289,22 @@ export function Board({
    * been moved off the question screen, and the first thing they see is step one of
    * something. A teacher writes the question up before working it.
    *
-   * The PASSAGE is deliberately not here. A comprehension passage is several paragraphs and
-   * writing it out would bury the working under it; the question about it is the part that
-   * needs to stay in front of the student.
+   * The passage is not written here: it is several paragraphs, and would bury the working.
+   * It has a place of its own beside the working (`passage`, below).
    */
   question: string;
+  /**
+   * The passage the question is set on (comprehension, cloze, words in context), kept on the
+   * board beside the working — in a sheet pinned over it on a phone — and marked by the lesson
+   * as the working is (PassagePanel.tsx). A quote on a line of the working that comes from the
+   * passage is found there and lit with its line, with no marks written for it at all.
+   */
+  passage?: { title: string | null; body: string } | null;
+  /**
+   * The right option's words, for a cloze passage: written into the question's gap at the
+   * moment of the answer. The lesson's own `answer_text` is used first.
+   */
+  answerText?: string | null;
   steps: string[];
   /** Shown last, in green: what the answer actually was. */
   answerLine: string;
@@ -365,7 +384,36 @@ export function Board({
     };
   }, []);
 
+  const folded = useMemo(() => (passage?.body ? foldPassage(passage.body) : null), [passage]);
   const lines: Entry[] = useMemo(() => {
+    const entries = teach();
+    if (!folded) return entries;
+    // THE QUOTES FOUND FOR THEMSELVES. A line of working that quotes the passage is linked to
+    // where the words are, with no mark written for it: lit in the passage as the line is
+    // written, and paired with it. Not where the moment already marks the passage itself.
+    return entries.map((entry, index) => {
+      if (entry.point.some((point) => point.passage || point.to?.passage)) return entry;
+      const found = quotedPieces(entry.items.join(" "))
+        .filter((piece) => findInPassage(folded, piece, 1, true) !== null)
+        .slice(0, 2);
+      if (found.length === 0) return entry;
+      return {
+        ...entry,
+        point: [
+          ...found.map((piece) => ({
+            line: index,
+            kind: "highlight" as const,
+            at: piece,
+            to: { passage: true, target: piece },
+            auto: true,
+          })),
+          ...entry.point,
+        ],
+      };
+    });
+  }, [answerLine, folded, lesson, steps]);
+  /** The lesson as moments, before the passage is looked at. */
+  function teach(): Entry[] {
     if (lesson && lesson.beats.length > 0) {
       return lesson.beats.map((beat) => {
         const answer = beat.answer || beat.board_index === steps.length;
@@ -386,6 +434,7 @@ export function Board({
               : typeof beat.show_sketch === "string"
                 ? beat.show_sketch
                 : null,
+          doodle: beat.doodle ?? null,
         };
       });
     }
@@ -411,7 +460,7 @@ export function Board({
         point: [],
       },
     ];
-  }, [answerLine, lesson, steps]);
+  }
   const inkRef = useRef<HTMLDivElement>(null);
 
   // The lesson is played rather than displayed. `script` is what has arrived, `cursor` is
@@ -1195,7 +1244,20 @@ export function Board({
     () => pairLinks(markSets, (index) => (lines[index]?.items.length ?? 0) > 0),
     [lines, markSets],
   );
+  //: The pairs with a diagram, for the figure panel (the passage's go to the passage).
+  const figureLinks = useMemo(
+    () => links.filter((link): link is LinkPair & { figure: DrawingKey } => link.figure !== "passage"),
+    [links],
+  );
   const figureSets = useMemo(() => figureCopy(markSets), [markSets]);
+  // THE PASSAGE'S COPY of the marks: those drawn in it, and the places the working links to.
+  const passageMarks = useMemo(() => passageCopy(markSets, links), [links, markSets]);
+  const hasPassage = Boolean(passage?.body);
+  const gap = useMemo(() => (hasPassage ? gapOf(question) : null), [hasPassage, question]);
+  // The answer is up once its moment's line is written: a cloze gap is filled in then.
+  const answerAt = lines.findIndex((line) => line.answer);
+  const answerUp =
+    answerAt >= 0 && (shown - 1 > answerAt || (shown - 1 === answerAt && pointing === answerAt));
   //: The pair lit by a hover or a tap, both its ends and the line between.
   const [litPair, setLitPair] = useState<number | null>(null);
   //: The pairs whose line across runs clear of everything, so their numbered dots stand down.
@@ -1360,6 +1422,7 @@ export function Board({
       );
       coachRoom.current = room;
       stage.style.setProperty("--coach-h", `${coach.offsetHeight}px`);
+      stage.style.setProperty("--stage-h", `${stage.clientHeight}px`);
       stage.style.setProperty("--coach-room", `${room}px`);
       if (following.current) keepInView(newest.current);
     };
@@ -1398,6 +1461,8 @@ export function Board({
     [drawMsAt, drawStarts, figures, lesson, questionUp, shown],
   );
   const hasFigure = drawings.length > 0;
+  //: A column beside the working (a pinned sheet on a phone): the figures, the passage, or both.
+  const hasSide = hasFigure || hasPassage;
   // The marker puts itself down for each line and lifts off when it is done, so it is only
   // held back while the board is waiting for a tap or has stepped back for the student.
   const penActive = !needsTap && !(paused && asked === null && !waiting);
@@ -1410,7 +1475,11 @@ export function Board({
   const nextLabel = finished ? "Done" : "Next step";
 
   return (
-    <div className={`sj pb ${talking ? "is-talking" : ""} ${hasFigure ? "has-fig" : ""}`}>
+    <div
+      className={`sj pb ${talking ? "is-talking" : ""} ${hasSide ? "has-fig" : ""} ${
+        hasPassage ? "has-passage" : ""
+      }`}
+    >
       <header className="pb-bar">
         <div className="pb-col pb-bar-in">
           <button
@@ -1484,12 +1553,38 @@ export function Board({
             are written on, and every mark and the pen measured against it, is the same either
             way.
           */}
-          <div className={hasFigure ? "pb-col pb-desk" : "pb-plain"} ref={deskRef}>
-          {hasFigure ? (
+          <div className={hasSide ? "pb-col pb-desk" : "pb-plain"} ref={deskRef}>
+          {hasPassage && passage ? (
+            // The passage, and any figure with it, in one column beside the working.
+            <aside className="pb-side">
+              {hasFigure ? (
+                <FigurePanel
+                  drawings={drawings}
+                  sets={figureSets}
+                  links={figureLinks}
+                  lit={litPair}
+                  joined={joined}
+                  onLit={lightPair}
+                  paused={paused}
+                  onDrawn={markDrawn}
+                />
+              ) : null}
+              <PassagePanel
+                title={passage.title}
+                body={passage.body}
+                marks={passageMarks}
+                gap={gap}
+                answerText={lesson?.answer_text ?? answerText ?? null}
+                answerUp={answerUp}
+                lit={litPair}
+                onLit={lightPair}
+              />
+            </aside>
+          ) : hasFigure ? (
             <FigurePanel
               drawings={drawings}
               sets={figureSets}
-              links={links}
+              links={figureLinks}
               lit={litPair}
               joined={joined}
               onLit={lightPair}
@@ -1498,7 +1593,7 @@ export function Board({
             />
           ) : null}
           <div
-            className={`${hasFigure ? "" : "pb-col "}pb-sheet sp-textbook ${dim ? "dim" : ""}`}
+            className={`${hasSide ? "" : "pb-col "}pb-sheet sp-textbook ${dim ? "dim" : ""}`}
             ref={sheetRef}
             onMouseOver={
               links.length
@@ -1538,11 +1633,16 @@ export function Board({
                   ? line.items.slice(0, itemsShown)
                   : line.items;
                 if (items.length === 0) return null;
+                // The line of a lit pair lights with its marks: one explanation, lit together.
+                const litHere =
+                  litPair !== null && links.some((link) => link.line === index && link.number === litPair);
                 return (
                   <div
                     key={line.say + String(index)}
                     data-line={index}
-                    className={`pb-line ${line.answer ? "answer" : ""}`}
+                    className={`pb-line ${line.answer ? "answer" : ""}${
+                      litHere && litPair !== null ? ` lit pair-${(litPair - 1) % PAIR_COLOURS}` : ""
+                    }`}
                   >
                     {line.answer ? (
                       <span className="pb-answer-tag sj-mono">Answer</span>
@@ -1663,6 +1763,14 @@ export function Board({
               onLit={lightPair}
               layoutRef={layoutRef}
             />
+            <DoodleLayer
+              sheetRef={sheetRef}
+              moments={lines}
+              shown={shown}
+              itemsShown={itemsShown}
+              doodles={lesson?.doodles}
+              paused={paused}
+            />
             <Pen
               sheetRef={sheetRef}
               active={penActive}
@@ -1670,7 +1778,7 @@ export function Board({
               canSee={penCanSee}
             />
           </div>
-          {hasFigure && links.length ? (
+          {hasSide && links.length ? (
             <Links
               deskRef={deskRef}
               sheetRef={sheetRef}
@@ -1740,6 +1848,14 @@ export function Board({
                 ) : null}
               </div>
             </div>
+            {/* The coach's buddy, reacting to the lesson as it goes (Buddy.tsx). */}
+            <Buddy
+              moment={shown > 0 ? lines[shown - 1] : undefined}
+              index={shown - 1}
+              marked={pointing !== null && pointing === shown - 1}
+              finished={finished}
+              paused={paused}
+            />
           </div>
         </div>
       </main>
@@ -2431,7 +2547,8 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[], links: LinkPair[] = [
     for (const row of inkRows(element)) writing.push(relative(row, base));
   });
   sheet
-    .querySelectorAll<HTMLElement>(".pb-question, .pb-line.answer, .pb-coachline, .pb-asked")
+    // A doodle (DoodleLayer.tsx) counts as writing: a mark's words and routes keep off it.
+    .querySelectorAll<HTMLElement>(".pb-question, .pb-line.answer, .pb-coachline, .pb-asked, .dd-spot")
     .forEach((element) => writing.push(relative(element.getBoundingClientRect(), base)));
   const lowest = Math.max(0, ...writing.map((b) => b.bottom));
   // Chips stay within the writing: below it the coach card floats over the board.
@@ -2488,9 +2605,13 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[], links: LinkPair[] = [
     }
     set.points.forEach((point, k) => {
       stagger = delays[k] ?? 0;
-      // A mark on the diagram is drawn over the figure (FigureBoard.tsx), not here.
-      if (point.figure != null || point.line == null) return;
-      const across = point.to?.figure != null;
+      // A mark on the diagram is drawn over the figure (FigureBoard.tsx), and a mark in the
+      // passage in the passage (PassagePanel.tsx), not here; nor is a quote's own link.
+      if (point.figure != null || point.line == null || point.passage || point.auto) return;
+      // An arrow across to a diagram, or into the passage: a line under the piece it starts
+      // from, the arrow's words by where it lands (a diagram) or beside the piece (a passage).
+      const intoPassage = point.to?.passage === true && point.kind === "arrow";
+      const across = point.to?.figure != null || intoPassage;
       const target = point.line < 0 ? set.index + point.line : point.line;
       if (target < 0 || target > set.index) return;
       const line = lineAt(sheet, target);
@@ -2583,7 +2704,8 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[], links: LinkPair[] = [
           d,
           head: null,
           // An arrow across has its words on the diagram, by the point it lands on.
-          label: across ? null : inline(inkRows(line, point.at).map((row) => relative(row, base))),
+          label:
+            across && !intoPassage ? null : inline(inkRows(line, point.at).map((row) => relative(row, base))),
         });
         return;
       }
@@ -2888,7 +3010,8 @@ interface LinkPair {
   piece: string | null;
   /** Whether `piece` is only the mark's words, to be used only if the line has them. */
   hint: boolean;
-  figure: DrawingKey;
+  /** The diagram the mark is on, or the passage. */
+  figure: DrawingKey | "passage";
   /** An arrowhead at the diagram's end (an arrow across from the working)… */
   toFigure: boolean;
   /** …or at the working's end (an arrow across from the diagram). */
@@ -2939,13 +3062,24 @@ function pairLinks(sets: MarkSet[], writes: (index: number) => boolean): LinkPai
     const delays = markDelays(set.points, set.index);
     const moment = (line: number) => (line < 0 ? set.index + line : line);
     set.points.forEach((point, k) => {
-      let figure: DrawingKey;
+      let figure: DrawingKey | "passage";
       let line: number;
       let piece: string | null = null;
       let hint = false;
       let toFigure = false;
       let toWork = false;
-      if (point.figure != null) {
+      if (point.passage) {
+        // A mark in the passage goes with the line written at its moment, as a diagram's does.
+        figure = "passage";
+        line = back(set.index);
+        piece = point.text?.trim() || null;
+        hint = true;
+      } else if (point.to?.passage && point.line != null) {
+        figure = "passage";
+        line = back(moment(point.line));
+        piece = point.at?.trim() || null;
+        toFigure = true;
+      } else if (point.figure != null) {
         figure = point.figure;
         if (point.to?.line != null) {
           line = back(moment(point.to.line));
@@ -2998,6 +3132,47 @@ function figureCopy(sets: MarkSet[]): MarkSet[] {
         }
       : set,
   );
+}
+
+const PASSAGE_KINDS = new Set<string>(["highlight", "underline", "circle", "strike", "label"]);
+
+/**
+ * The marks as the passage draws them: its own marks as they are, and for a mark on the working
+ * that links into the passage, the words it links to — highlighted, or underlined, circled or
+ * struck as the working's mark is — with the pair's number.
+ */
+function passageCopy(sets: MarkSet[], links: LinkPair[]): PassageMark[] {
+  const numbers = new Map(
+    links.filter((link) => link.figure === "passage").map((link) => [link.key, link.number]),
+  );
+  const out: PassageMark[] = [];
+  for (const set of [...sets].sort((a, b) => a.index - b.index)) {
+    const delays = markDelays(set.points, set.index);
+    set.points.forEach((point, k) => {
+      const key = `${set.index}-${k}`;
+      const base = { key, delay: delays[k] ?? 0, number: numbers.get(key) ?? null };
+      if (point.passage && typeof point.target === "string") {
+        out.push({
+          ...base,
+          kind: PASSAGE_KINDS.has(point.kind) ? (point.kind as PassageKind) : "highlight",
+          target: point.target,
+          nth: point.nth ?? 1,
+          text: point.text?.trim() || null,
+        });
+      } else if (point.to?.passage && typeof point.to.target === "string" && point.line != null) {
+        const same = point.kind === "underline" || point.kind === "circle" || point.kind === "strike";
+        out.push({
+          ...base,
+          kind: same ? (point.kind as PassageKind) : "highlight",
+          target: point.to.target,
+          nth: point.to.nth ?? 1,
+          text: null,
+          loose: point.auto === true,
+        });
+      }
+    });
+  }
+  return out;
 }
 
 /** Whether a line has the piece in it (a mark's words are only a guess at one). */
@@ -3069,7 +3244,8 @@ function Links({
     if (!desk || !sheet) return;
     const base = desk.getBoundingClientRect();
     const paper = sheet.getBoundingClientRect();
-    const panel = desk.querySelector<HTMLElement>(".pb-figpanel");
+    const panel =
+      desk.querySelector<HTMLElement>(".pb-side") ?? desk.querySelector<HTMLElement>(".pb-figpanel");
     const shelf = panel?.getBoundingClientRect();
     if (!panel || !shelf) return;
     const beside = shelf.left >= paper.right - 4;
@@ -3091,7 +3267,7 @@ function Links({
     const sight = band();
     // The drawings themselves: a line across may reach into one only for its last stretch, to
     // point at its mark; running across a drawing's lines and labels would read as part of it.
-    const pictures = Array.from(desk.querySelectorAll(".pb-figure img")).map((image) => {
+    const pictures = Array.from(desk.querySelectorAll(".pb-figure img, .pp-scroll")).map((image) => {
       const r = image.getBoundingClientRect();
       return { left: r.left - base.left, top: r.top - base.top, right: r.right - base.left, bottom: r.bottom - base.top };
     });
@@ -3105,7 +3281,13 @@ function Links({
       const a: Pt = [start.left - base.left, start.top - base.top];
       let b: Pt;
       let route: Route;
-      const shown = end && !shut && end.offsetParent !== null ? end.getBoundingClientRect() : null;
+      let shown = end && !shut && end.offsetParent !== null ? end.getBoundingClientRect() : null;
+      // A place in the passage scrolled out of its window, or folded away, is not a place to go.
+      const scroller = end?.closest(".pp-scroll");
+      if (shown && scroller) {
+        const view = scroller.getBoundingClientRect();
+        if (view.height < 4 || shown.top < view.top || shown.top > view.bottom) shown = null;
+      }
       if (beside) {
         if (!shown) continue;
         const point: Pt = [shown.left - base.left, shown.top - base.top];
@@ -3183,11 +3365,14 @@ function Links({
     // The figure loads, the marks settle, a fresh line's hold runs out: looked at again often.
     const timer = window.setInterval(again, 400);
     ink?.addEventListener("scroll", again, { passive: true });
+    // The passage scrolls by itself, and its marks with it.
+    desk?.addEventListener("scroll", again, { capture: true, passive: true });
     window.addEventListener("resize", again);
     return () => {
       cancelAnimationFrame(frame);
       window.clearInterval(timer);
       ink?.removeEventListener("scroll", again);
+      desk?.removeEventListener("scroll", again, { capture: true });
       window.removeEventListener("resize", again);
     };
   }, [deskRef, measure]);

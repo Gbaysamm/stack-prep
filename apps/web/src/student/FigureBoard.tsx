@@ -45,6 +45,7 @@ import type { CSSProperties, RefObject } from "react";
 
 import type { QuestionFigure } from "../Figures.js";
 import type { FigureSpot, LessonPoint } from "./api.js";
+import { planDrawing, runDrawing, workingPenBusy } from "./drawIn.js";
 import {
   arrowAlong,
   cubicRoute,
@@ -621,19 +622,6 @@ export function buildsOn(earlier: string[], later: string[]): boolean {
   return true;
 }
 
-/** One thing the pen draws: a stroke along a shape, a fill washed in, or a label written. */
-interface Stroke {
-  element: SVGGraphicsElement;
-  kind: "stroke" | "fade" | "fill" | "text";
-  length: number;
-  /** Its share of the time. */
-  weight: number;
-  /** What to put back when it is drawn. */
-  restore: () => void;
-  /** Its state `p` of the way through (0 to 1). */
-  show: (p: number) => void;
-}
-
 /** Figures already drawn this visit, so a figure shown again is not drawn a second time. */
 const drawnOnce = new Set<string>();
 
@@ -690,149 +678,28 @@ function useDrawIn({
     host.replaceChildren(svg);
     const already = new Map<string, number>();
     for (const sig of base) already.set(sig, (already.get(sig) ?? 0) + 1);
-    const strokes: Stroke[] = [];
-    const fills: Stroke[] = [];
-    const texts: Stroke[] = [];
-    for (const element of Array.from(svg.querySelectorAll<SVGGraphicsElement>(DRAWN))) {
+    const fresh = Array.from(svg.querySelectorAll<SVGGraphicsElement>(DRAWN)).filter((element) => {
       const sig = signature(element);
       const kept = already.get(sig) ?? 0;
-      if (kept > 0) {
-        already.set(sig, kept - 1);
-        continue;
-      }
-      const style = window.getComputedStyle(element);
-      if (element.localName === "text") {
-        const was = element.style.opacity;
-        element.style.opacity = "0";
-        texts.push({
-          element,
-          kind: "text",
-          length: 0,
-          weight: 28,
-          restore: () => (element.style.opacity = was),
-          show: (p) => (element.style.opacity = String(Math.min(1, p * 1.6))),
-        });
-        continue;
-      }
-      const stroked = style.stroke !== "none" && Number.parseFloat(style.strokeWidth) > 0;
-      const filled = style.fill !== "none" && style.fill !== "transparent" && Number.parseFloat(style.fillOpacity || "1") > 0;
-      let length = 0;
-      try {
-        length = (element as unknown as SVGGeometryElement).getTotalLength();
-      } catch {
-        length = 0;
-      }
-      if (stroked && length > 0) {
-        const dashed = style.strokeDasharray && style.strokeDasharray !== "none";
-        const was = { dash: element.style.strokeDasharray, offset: element.style.strokeDashoffset, opacity: element.style.opacity };
-        if (dashed) element.style.opacity = "0";
-        else {
-          element.style.strokeDasharray = `${length} ${length}`;
-          element.style.strokeDashoffset = String(length);
-        }
-        const fillWas = element.style.fillOpacity;
-        if (filled) element.style.fillOpacity = "0";
-        strokes.push({
-          element,
-          kind: dashed ? "fade" : "stroke",
-          length,
-          weight: Math.max(18, length),
-          restore: () => {
-            element.style.strokeDasharray = was.dash;
-            element.style.strokeDashoffset = was.offset;
-            element.style.opacity = was.opacity;
-            element.style.fillOpacity = fillWas;
-          },
-          show: (p) => {
-            if (dashed) element.style.opacity = String(p);
-            else element.style.strokeDashoffset = String(length * (1 - p));
-          },
-        });
-        continue;
-      }
-      if (filled) {
-        const was = element.style.opacity;
-        element.style.opacity = "0";
-        fills.push({
-          element,
-          kind: "fill",
-          length: 0,
-          weight: 6,
-          restore: () => (element.style.opacity = was),
-          show: (p) => (element.style.opacity = String(p)),
-        });
-      }
-    }
-    // Outlines and lines first, in the drawing's own order; then the fills; then the words.
-    const plan = [...strokes, ...fills, ...texts];
-    const total = plan.reduce((sum, stroke) => sum + stroke.weight, 0) || 1;
-    const spans = plan.map((stroke) => (stroke.weight / total) * drawMs);
-    const pen = penRef.current;
-    let clock = 0;
-    let owed = 0;
-    let last = performance.now();
-    let frame = 0;
-    const place = (x: number, y: number, lifted: boolean) => {
-      if (!pen) return;
-      const frameBox = host.getBoundingClientRect();
-      pen.style.transform = `translate(${(x - frameBox.left).toFixed(1)}px, ${(y - frameBox.top).toFixed(1)}px)`;
-      pen.dataset.lift = lifted ? "1" : "0";
-    };
-    const tipOf = (stroke: Stroke, p: number): [number, number] | null => {
-      const m = stroke.element.getScreenCTM();
-      if (!m) return null;
-      if (stroke.kind === "stroke" || stroke.kind === "fade") {
-        const at = (stroke.element as unknown as SVGGeometryElement).getPointAtLength(stroke.length * p);
-        const q = new DOMPoint(at.x, at.y).matrixTransform(m);
-        return [q.x, q.y];
-      }
-      const b = stroke.element.getBBox();
-      const q = new DOMPoint(b.x + b.width * p, b.y + b.height).matrixTransform(m);
-      return [q.x, q.y];
-    };
-    const tick = (now: number) => {
-      const step = Math.min(100, now - last);
-      last = now;
-      // One hand: while the marker is writing a line of the working, the drawing waits for it,
-      // and then makes up the time it waited (at up to twice the pace), so it still ends near
-      // the end of its moment and the marks waiting on it are not held back long.
-      const writing = document.querySelector('.pb-pen-rig[data-writing="1"][data-show="1"]') !== null;
-      if (!pausedRef.current) {
-        if (writing) owed += step;
-        else {
-          const extra = Math.min(owed, step);
-          owed -= extra;
-          clock += step + extra;
-        }
-      }
-      if (pen) pen.dataset.away = writing ? "1" : "0";
-      let t = clock;
-      let current = -1;
-      for (let i = 0; i < plan.length; i += 1) {
-        const span = spans[i] ?? 0;
-        if (t >= span) {
-          plan[i]!.show(1);
-          t -= span;
-          continue;
-        }
-        current = i;
-        const p = span > 0 ? t / span : 1;
-        plan[i]!.show(p);
-        const tip = tipOf(plan[i]!, p);
-        if (tip) place(tip[0], tip[1], plan[i]!.kind === "fill");
-        break;
-      }
-      if (current < 0) {
-        for (const stroke of plan) stroke.restore();
+      if (kept > 0) already.set(sig, kept - 1);
+      return kept === 0;
+    });
+    // Drawn from scratch by the pen, the same hand as a doodle (drawIn.ts): outlines traced,
+    // fills coloured in, words written — nothing faded in. Fitted to the words of its moment.
+    // One hand: while the marker writes a line of the working, the drawing waits for it, then
+    // makes up the time, so the marks waiting on it are not held back long.
+    return runDrawing({
+      items: planDrawing(svg, fresh),
+      host,
+      pen: penRef.current,
+      totalMs: drawMs,
+      paused: () => pausedRef.current,
+      hold: workingPenBusy,
+      onDone: () => {
         drawnOnce.add(url);
-        if (pen) pen.dataset.lift = "done";
         setDone(true);
-        return;
-      }
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
+      },
+    });
   }, [base, done, drawMs, geometry, liveRef, penRef, url]);
 
   return done;

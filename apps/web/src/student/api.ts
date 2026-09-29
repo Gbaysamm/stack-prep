@@ -210,6 +210,27 @@ export interface LessonBeat {
    * 'sketch_c' for a later one. A sketch no beat brings in comes with the first.
    */
   show_sketch?: boolean | 'sketch' | 'sketch_b' | 'sketch_c';
+  /** A small picture this beat draws beside a line (Doodle.tsx), if any. */
+  doodle?: LessonDoodleRef | null;
+}
+
+/**
+ * A doodle a beat brings onto the board: a picture drawn by the pen beside a line.
+ * `name` is a library doodle's ('lightbulb') or the lesson's own ('custom:2011_q42_roof', in
+ * `NarratedLesson.doodles`); `near` is the moment whose line it sits by (default: this one's).
+ */
+export interface LessonDoodleRef {
+  name: string;
+  caption?: string | null;
+  near?: number | null;
+}
+
+/** A picture drawn for this question's lesson, in the board's art format (Doodle.tsx). */
+export interface LessonDoodle {
+  /** 'custom:YYYY_qNN_x'. */
+  name: string;
+  svg: string;
+  alt_text?: string | null;
 }
 
 /**
@@ -269,6 +290,17 @@ export interface LessonPoint {
    * of the working (`to.line`, `to.at`).
    */
   to?: LessonPointTo | null;
+  /**
+   * A mark in the question's passage (comprehension, cloze): `target` is its words as they
+   * read there, and `nth` which occurrence (from 1) where they occur more than once.
+   */
+  passage?: boolean | null;
+  nth?: number | null;
+  /**
+   * Board-internal, never sent: a link the board found for itself (a quote on a line of the
+   * working that is in the passage). Drawn in the passage only, paired with its line.
+   */
+  auto?: boolean;
 }
 
 /** Where an arrow across goes: a place on a diagram, or a piece of a line of the working. */
@@ -277,6 +309,9 @@ export interface LessonPointTo {
   target?: string | string[] | FigureSpot | null;
   line?: number | null;
   at?: string | null;
+  /** Or a place in the passage: `target` is its words, `nth` which occurrence. */
+  passage?: boolean | null;
+  nth?: number | null;
 }
 
 export type LessonPointKind =
@@ -307,6 +342,10 @@ export interface NarratedLesson {
   beats: LessonBeat[];
   /** The lesson's own diagrams, for a question that describes its figure in words. */
   sketches?: LessonSketch[];
+  /** The pictures drawn for this lesson's board, which its beats' `doodle` name. */
+  doodles?: LessonDoodle[];
+  /** The right option's words: written into a cloze passage's gap at the answer. */
+  answer_text?: string | null;
 }
 
 export interface TutorReply {

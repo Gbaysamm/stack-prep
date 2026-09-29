@@ -71,3 +71,88 @@ def test_an_arrow_goes_across_between_the_working_and_a_sketch() -> None:
     for case in bad:
         with pytest.raises(SystemExit):
             marks.clean_points(case, 1, "here", [], sketches)
+
+
+PASSAGE = (
+    "Like all reptiles, snakes are cold-blooded, or more correctly, ectodermic — they "
+    "cannot produce their own body heat. Some wait for months between successive meals and a "
+    "few survive by eating a large meal just once or twice a year.\n\nThey don"
+    + chr(0x2019)  # a curly apostrophe, matched as a straight one
+    + "t eat often, but when they eat, they eat big. They eat a meal; a meal is a meal."
+)
+
+
+def test_a_mark_in_the_passage_names_words_that_are_there() -> None:
+    point = [
+        {"passage": True, "kind": "highlight", "target": "once or twice a year", "text": "seldom"},
+        {"passage": True, "kind": "label", "target": "a meal", "nth": 2, "text": "the clue"},
+        # Quotes, apostrophes, dashes and line breaks are matched loosely.
+        {"passage": True, "kind": "underline", "target": "They don't eat often"},
+    ]
+    assert marks.clean_points(point, 0, "here", passage=PASSAGE) == [
+        {
+            "passage": True,
+            "kind": "highlight",
+            "text": "seldom",
+            "target": "once or twice a year",
+        },
+        {"passage": True, "kind": "label", "text": "the clue", "target": "a meal", "nth": 2},
+        {"passage": True, "kind": "underline", "target": "They don't eat often"},
+    ]
+    assert marks.passage_count("ectodermic - they", PASSAGE) == 1
+    assert marks.passage_count("meals and a\n few", PASSAGE) == 1
+    assert marks.passage_count("A meal", PASSAGE) == 0  # matched with its case
+
+
+def test_a_passage_mark_that_cannot_be_found_is_refused() -> None:
+    bad: list[tuple[dict[str, object], str]] = [
+        ({"passage": True, "kind": "highlight", "target": "twice a week"}, "not in the passage"),
+        ({"passage": True, "kind": "highlight", "target": "a meal", "nth": 4}, "out of range"),
+        ({"passage": True, "kind": "highlight", "target": "a meal", "nth": 0}, "out of range"),
+        ({"passage": True, "kind": "arrow", "target": "a meal"}, "kind is one of"),
+        ({"passage": True, "kind": "label", "target": "a meal"}, "needs its text"),
+        ({"passage": True, "kind": "circle", "target": "a meal", "line": 0}, "not line"),
+        ({"passage": True, "kind": "circle"}, "needs a target"),
+        ({"passage": "yes", "kind": "circle", "target": "a meal"}, "passage: true"),
+        ({"line": 0, "kind": "circle", "nth": 2}, "nth picks"),
+        (
+            {"passage": True, "kind": "label", "target": "a meal", "text": "x" * 81},
+            "at most",
+        ),
+    ]
+    for mark, message in bad:
+        with pytest.raises(SystemExit, match=message):
+            marks.clean_points([mark], 0, "here", passage=PASSAGE)
+    with pytest.raises(SystemExit, match="has no passage"):
+        marks.clean_points([{"passage": True, "kind": "circle", "target": "a meal"}], 0, "here")
+
+
+def test_a_line_of_the_working_links_to_the_passage() -> None:
+    point = [
+        {
+            "line": 1,
+            "kind": "highlight",
+            "at": "once or twice a year",
+            "to": {"passage": True, "target": "once or twice a year"},
+        },
+        {"line": 0, "kind": "arrow", "to": {"passage": True, "target": "a meal", "nth": 2}},
+    ]
+    assert marks.clean_points(point, 1, "here", passage=PASSAGE) == [
+        {
+            "line": 1,
+            "kind": "highlight",
+            "at": "once or twice a year",
+            "to": {"passage": True, "target": "once or twice a year"},
+        },
+        {"line": 0, "kind": "arrow", "to": {"passage": True, "target": "a meal", "nth": 2}},
+    ]
+    bad: list[dict[str, object]] = [
+        {"line": 1, "kind": "highlight", "to": {"passage": True, "target": "twice a week"}},
+        {"line": 1, "kind": "highlight", "to": {"passage": True, "target": "a meal", "nth": 5}},
+        {"line": 1, "kind": "highlight", "to": {"passage": True, "target": "a", "at": "x"}},
+        {"line": 1, "kind": "move", "from": {"line": 0}, "to": {"passage": True, "target": "a"}},
+        {"line": 1, "kind": "arrow", "from": {"line": 0}, "to": {"passage": True, "target": "a"}},
+    ]
+    for mark in bad:
+        with pytest.raises(SystemExit):
+            marks.clean_points([mark], 1, "here", passage=PASSAGE)
