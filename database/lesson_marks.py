@@ -27,7 +27,8 @@ A MARK ON THE DIAGRAM names the figure and what in it, instead of a line:
     {figure: 0, kind: arc, target: 'QRP', text: '34°'}
 
 `figure` counts the question's figures from 0. `target` is a label's whole text as it is
-printed in the drawing — 'B', '(0, 4)', '1 − √2' (spaces ignored, − and - the same) — or, where
+printed in the drawing — 'B', '(0, 4)', '1 - √2' (spaces ignored, a typeset minus the same
+as -) — or, where
 every character is a one-letter label, shorthand for two points ('AB', the side between them)
 or three ('ABC', the angle at the middle one); a list of labels where they are longer than a
 letter (['P', "Q'"], ['(0, 4)', '(2, 0)']); or a place in the drawing's own units
@@ -106,7 +107,12 @@ def check_sketch(svg: str, where: str) -> dict[str, object]:
         found = re.match(r"\s*(\d+)", root.get(key) or "")
         return int(found.group(1)) if found else None
 
-    return {"svg": svg.strip(), "alt_text": label, "width": whole("width"), "height": whole("height")}
+    return {
+        "svg": svg.strip(),
+        "alt_text": label,
+        "width": whole("width"),
+        "height": whole("height"),
+    }
 
 
 def svg_labels(svg: str) -> list[str]:
@@ -130,8 +136,8 @@ def norm_label(text: str) -> str:
 def split_target(target: str | list[str], labels: list[str]) -> list[str] | None:
     """The labels a target names, or None where it names something not in the drawing.
 
-    A target is matched against the labels' whole text, spaces ignored and − the same as -:
-    '(0, 4)', '1 − √2', '44°' and 'B' each name the one label that reads so. A list names one
+    A target is matched against the labels' whole text, spaces ignored and a typeset minus the same
+    as -: '(0, 4)', '1 - √2', '44°' and 'B' each name the one label that reads so. A list names one
     label per item. Only where the whole text is no label, and every character of it is itself
     a one-letter label in the drawing, is it read as shorthand: 'AB' the side from A to B,
     'ABC' the angle at B.
