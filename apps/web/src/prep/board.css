@@ -1922,6 +1922,9 @@
     border-radius: var(--r-lg);
     background: var(--white);
     box-shadow: 0 1px 2px rgb(20 12 40 / 0.04);
+    /* Nothing in the passage (a note, a flag, a mark's stroke) ever shows outside its card. */
+    overflow: hidden;
+    overflow: clip;
   }
   .pp-head {
     padding-right: 8px;
@@ -1933,11 +1936,20 @@
   .pp-scroll {
     display: block;
     flex: 1 1 auto;
+    min-height: 0;
     max-height: none;
+    /* The window ends softly: a line running under its bottom edge fades out rather than being
+       cut through its letters. The passage's own bottom padding lets the last line clear the
+       fade at the end, and a mark scrolled to stops above it (PassagePanel.tsx, `bring`). */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 8px, #000 calc(100% - var(--pp-fade)), transparent);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 8px, #000 calc(100% - var(--pp-fade)), transparent);
+  }
+  .pp {
+    --pp-fade: 30px;
   }
   .pp-text {
     font-size: 15.5px;
-    padding: 6px 12px 24px 32px;
+    padding: 8px 12px calc(var(--pp-fade) + 6px) 32px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

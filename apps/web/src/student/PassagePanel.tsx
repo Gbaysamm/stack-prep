@@ -107,6 +107,9 @@ interface Layout {
   rows: Map<string, Box[]>;
 }
 
+/** How far above the passage window's bottom edge a mark is brought: clear of its fade (board.css). */
+const CLEAR_BOTTOM = 36;
+
 /** Where a note may go: the passage's width less this much at each side. */
 const NOTE_INSET = 4;
 /** Air between a line of the passage and a note under it, and after the note. */
@@ -325,10 +328,10 @@ export function PassagePanel({
     const a = offset + top;
     const b = offset + bottom;
     const view = scroller.clientHeight;
-    const inView = a >= scroller.scrollTop + 12 && b <= scroller.scrollTop + view - 16;
+    const inView = a >= scroller.scrollTop + 12 && b <= scroller.scrollTop + view - CLEAR_BOTTOM;
     if (inView) return;
     // A third of the way down, so the words before it are there to read too.
-    const goal = Math.max(0, Math.min(scroller.scrollHeight - view, a - Math.min(view * 0.3, Math.max(12, view - (b - a) - 16))));
+    const goal = Math.max(0, Math.min(scroller.scrollHeight - view, a - Math.min(view * 0.3, Math.max(12, view - (b - a) - CLEAR_BOTTOM))));
     scroller.scrollTo({ top: goal, behavior: instant || stillMotion() ? "auto" : "smooth" });
   }, []);
 

@@ -28,7 +28,8 @@ bank: a synonym question from 2011 is as good in 2027 as it was then, and a read
 question is worth nothing the moment the text is replaced. Licensing the novels would not fix
 it either — the problem is the cycle, not the copyright.
 
-So the 69 questions set on these texts are retired rather than held. What is worth keeping is
+So the 69 questions set on these texts are retired rather than held: each carries a `retire` line
+in its `retranscribed_YYYY.yaml`, and the loader takes it out of runs and check-ups. What is worth keeping is
 this table and the questions themselves, which show the shape the examiner uses: recall of
 incident, of character, and of a line's speaker. When a current text is announced and
 licensed, they are the model to write against.

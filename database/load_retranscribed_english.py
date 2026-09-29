@@ -803,7 +803,7 @@ async def run(args: argparse.Namespace) -> int:
         if plan["create"]:
             print("    new: " + ", ".join(f"{q['year']} Q{q['number']}" for q, _ in plan["create"]))
         print(
-            f"  {len(to_retire)} not questions at all (the paper-type instruction): retired"
+            f"  {len(to_retire)} not to be asked (`retire` in the files, with a reason): retired"
             + (" (" + ", ".join(f"{y} Q{n}" for y, n, _, _ in to_retire) + ")" if to_retire else "")
         )
         lesson_work = await lessons_to_load(conn, subject_id, lessons)
