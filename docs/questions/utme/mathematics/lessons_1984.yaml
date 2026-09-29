@@ -23,8 +23,8 @@ lessons:
       - say: 'Now the whole top is the bracket we found, 7 over 15, minus the "of" part, 2 over 15.'
         write: 'Top $= \dfrac{7}{15} - \dfrac{2}{15}$'
         point:
-          - {line: 2, kind: arrow, text: 'bracket'}
-          - {line: 4, kind: arrow, text: '"of" part'}
+          - {line: 5, kind: move, from: {line: 2, at: '=157'}, at: '[[157]]−', text: 'bracket'}
+          - {line: 5, kind: move, from: {line: 4, at: '=152'}, at: '−152', text: '"of" part'}
       - say: 'The bottoms are the same, so subtract the tops. 7 minus 2 is 5, giving 5 over 15.'
         write: '$= \dfrac{5}{15}$'
       - say: 'Divide the top and bottom by 5. 5 divided by 5 is 1, and 15 divided by 5 is 3. So the whole top is 1 over 3.'
@@ -33,11 +33,13 @@ lessons:
         write: 'Bottom: $\ \dfrac{1}{1/2} = 1 \times 2 = 2$'
       - say: 'So the bottom is 3 minus that 2, which is 1.'
         write: 'Bottom $= 3 - 2 = 1$'
+        point:
+          - {line: 9, kind: move, from: {line: 8, at: '=2'}, at: '−2'}
       - say: 'Now divide the top, 1 over 3, by the bottom, 1. Dividing by 1 changes nothing.'
         write: 'Whole expression $= \dfrac{1/3}{1} = \dfrac{1}{3}$'
         point:
-          - {line: 7, kind: arrow, text: 'top'}
-          - {line: 9, kind: arrow, at: '=1', text: 'bottom'}
+          - {line: 10, kind: move, from: {line: 7, at: '=31'}, at: '1/3', text: 'top'}
+          - {line: 10, kind: move, from: {line: 9, at: '=1'}, at: '[[1]]1/3', text: 'bottom'}
       - say: 'So the expression simplifies to one third, which is answer choice C.'
         write: 'Answer: $\ \dfrac{1}{3}$'
         answer: true
@@ -62,6 +64,8 @@ lessons:
           - {line: 3, kind: circle, at: '=10'}
       - say: 'Take 1 from both sides, and the base is 9.'
         write: '$b = 10 - 1 = 9$'
+        point:
+          - {line: 5, kind: move, from: {line: 4, at: '+1'}, at: '−1', text: 'across'}
       - say: 'Let''s check the left column with that carry. 2 plus 4 is 6, plus the carried 1 is 7, and the answer shows 7.'
         write: 'Left: $\ 2 + 4 + 1 = 7$'
       - say: 'To be completely sure, change each number to base ten. In base 9 the places are worth 81, 9 and 1. So 263 base 9 is 2 eighty-ones, plus 6 nines, plus 3.'
@@ -75,8 +79,8 @@ lessons:
       - say: 'Now add the first two base ten values we found, 219 and 361. That is 580, exactly the third number.'
         write: 'Check: $\ 219 + 361 = 580$'
         point:
-          - {line: 8, kind: arrow, at: '219'}
-          - {line: 9, kind: arrow, at: '361'}
+          - {line: 11, kind: move, from: {line: 8, at: '=219'}, at: '219'}
+          - {line: 11, kind: move, from: {line: 9, at: '=361'}, at: '361'}
       - say: 'So the number base used is 9, which is answer choice D.'
         write: 'Base $= 9$'
         answer: true
@@ -96,8 +100,8 @@ lessons:
       - say: 'Now put those two lines back into the fraction. We can divide the number parts and the powers of ten separately.'
         write: 'So $\ \dfrac{0.00014323}{1{,}940{,}000} = \dfrac{1.4323}{1.94} \times \dfrac{10^{-4}}{10^{6}}$'
         point:
-          - {line: 1, kind: arrow, text: 'top'}
-          - {line: 2, kind: arrow, text: 'bottom'}
+          - {line: 3, kind: move, from: {line: 1, at: '=[[1.4323]]'}, at: '1.94[[1.4323]]', text: 'top'}
+          - {line: 3, kind: move, from: {line: 2, at: '=[[1.94]]'}, at: '[[1.94]]1.4323', text: 'bottom'}
       - say: 'Powers first. To divide powers of ten, subtract the indices: minus 4 minus 6 is minus 10.'
         write: 'Powers: $\ \dfrac{10^{-4}}{10^{6}} = 10^{-4 - 6} = 10^{-10}$'
       - say: 'Now the number parts: 1.4323 divided by 1.94. Since 1.94 is bigger than 1.4323, the answer is less than 1. It comes to 0.7383.'
@@ -107,12 +111,14 @@ lessons:
       - say: 'Putting the two results together, the quotient is 0.7383 times 10 to the minus 10.'
         write: 'Quotient $= 0.7383 \times 10^{-10}$'
         point:
-          - {line: 5, kind: arrow, at: '0.7383'}
-          - {line: 4, kind: arrow, at: '=10−10'}
+          - {line: 7, kind: move, from: {line: 5, at: '=0.7383'}, at: '0.7383'}
+          - {line: 7, kind: move, from: {line: 4, at: '=10−10'}, at: '10−10'}
       - say: 'But that is not standard form yet, because 0.7383 is less than 1. Moving the point one place right gives 7.383, so 0.7383 is 7.383 times 10 to the minus 1.'
         write: '$0.7383 = 7.383 \times 10^{-1}$'
       - say: 'Put that into the quotient. Now we multiply 10 to the minus 1 by 10 to the minus 10, so we add the indices: minus 1 plus minus 10 is minus 11.'
         write: 'Quotient $= 7.383 \times 10^{-1} \times 10^{-10} = 7.383 \times 10^{-11}$'
+        point:
+          - {line: 9, kind: move, from: {line: 8, at: '=7.383×10−1'}, at: '7.383×10−1×'}
       - say: 'So $k$ is 7.383 and $n$ is minus 11, which is answer choice A.'
         write: '$k = 7.383,\quad n = -11$'
         answer: true
@@ -131,8 +137,11 @@ lessons:
         write: '$0.95 \times \text{Q''s cost} = 209$'
         point:
           - {line: 1, kind: circle, at: '95%'}
+          - {line: 2, kind: move, from: {line: 0, at: '₦209'}, at: '209'}
       - say: 'To get Q''s cost by itself, divide both sides by 0.95.'
         write: 'Q''s cost $= \dfrac{209}{0.95}$'
+        point:
+          - {line: 3, kind: move, from: {line: 2, at: '0.95'}, at: '0.95', text: 'divide'}
       - say: 'Multiply the top and bottom by 100 to clear the decimal. That gives 20,900 over 95.'
         write: '$= \dfrac{20{,}900}{95}$'
       - say: '95 times 200 is 19,000, and 95 times 20 is 1,900. Together that is 20,900, so the division gives 220.'
@@ -140,9 +149,11 @@ lessons:
       - say: 'So Q paid ₦220, and he paid it to P. Now step back to the first sale. P made a 10% profit, so ₦220 is 100 plus 10, which is 110%, of what P paid.'
         write: '$1.10 \times \text{P''s cost} = 220$'
         point:
-          - {line: 5, kind: arrow, at: '220', text: 'Q paid'}
+          - {line: 6, kind: move, from: {line: 5, at: '220'}, at: '220', text: 'Q paid'}
       - say: 'Divide both sides by 1.10.'
         write: 'P''s cost $= \dfrac{220}{1.10}$'
+        point:
+          - {line: 7, kind: move, from: {line: 6, at: '1.10'}, at: '1.10', text: 'divide'}
       - say: 'Multiply the top and bottom by 10 to get 2,200 over 11. 11 times 200 is 2,200, so P paid ₦200.'
         write: '$= \dfrac{2{,}200}{11} = 200$'
       - say: 'Let''s check by going forwards. 10% of 200 is 20, so Q paid 220. Then 5% of 220 is 11, and 220 minus 11 is 209. That matches.'
@@ -168,14 +179,14 @@ lessons:
       - say: 'The second number is 16 less than the first. So the first number minus the second number is 16.'
         write: '$\dfrac{240}{p} - \dfrac{240}{p + \frac{1}{2}} = 16$'
         point:
-          - {line: 2, kind: arrow, text: 'now'}
-          - {line: 3, kind: arrow, text: 'after'}
+          - {line: 4, kind: move, from: {line: 2, at: 'p240'}, at: 'p240', text: 'now'}
+          - {line: 4, kind: move, from: {line: 3, at: 'p+21240'}, at: 'p+21240', text: 'after'}
       - say: 'To subtract, use the common denominator $p$ times $p$ plus a half. The top becomes 240 times $p$ plus a half, minus 240 times $p$.'
         write: '$\dfrac{240\left(p + \frac{1}{2}\right) - 240p}{p\left(p + \frac{1}{2}\right)} = 16$'
       - say: 'Expand the top. 240 times $p$ is $240p$, and 240 times a half is 120. The two $240p$ terms cancel, leaving 120.'
         write: '$\dfrac{240p + 120 - 240p}{p\left(p + \frac{1}{2}\right)} = \dfrac{120}{p\left(p + \frac{1}{2}\right)} = 16$'
         point:
-          - {line: 6, kind: strike, at: '240p', text: 'cancel'}
+          - {line: 6, kind: strike, at: '[[240p]]+120', text: 'cancel'}
           - {line: 6, kind: strike, at: '−240p'}
       - say: 'Multiply both sides by the bottom. $p$ times $p$ plus a half is $p$ squared plus a half $p$.'
         write: '$120 = 16\left(p^{2} + \tfrac{1}{2}p\right)$'
@@ -183,6 +194,8 @@ lessons:
         write: '$120 = 16p^{2} + 8p$'
       - say: 'Bring the 120 across, then divide every term by 8. 16 over 8 is 2, 8 over 8 is 1, and 120 over 8 is 15.'
         write: '$16p^{2} + 8p - 120 = 0 \;\Rightarrow\; 2p^{2} + p - 15 = 0$'
+        point:
+          - {line: 9, kind: move, from: {line: 8, at: '120'}, at: '−120', text: 'across'}
       - say: 'Now factorise. We need two numbers that multiply to 2 times minus 15, which is minus 30, and add to 1. Those are 6 and minus 5.'
         write: 'Split the middle: $\ 2p^{2} + 6p - 5p - 15 = 0$'
       - say: 'Group in pairs. The first pair gives $2p$ times $p$ plus 3, and the second gives minus 5 times $p$ plus 3.'
@@ -216,8 +229,8 @@ lessons:
       - say: 'The two yields we just wrote add up to ₦3,700.'
         write: '$0.08x + 0.06(50{,}000 - x) = 3{,}700$'
         point:
-          - {line: 3, kind: arrow, at: '0.08x'}
-          - {line: 4, kind: arrow, at: '0.06(50,000−x)'}
+          - {line: 5, kind: move, from: {line: 3, at: '0.08x'}, at: '0.08x'}
+          - {line: 5, kind: move, from: {line: 4, at: '0.06(50,000−x)'}, at: '0.06(50,000−x)'}
       - say: 'Expand the bracket. 0.06 times 50,000 is 3,000, and 0.06 times $x$ is $0.06x$.'
         write: '$0.08x + 3{,}000 - 0.06x = 3{,}700$'
       - say: 'Collect the $x$ terms. 0.08 minus 0.06 is 0.02.'
@@ -253,10 +266,12 @@ lessons:
       - say: 'The two totals we just found make up the whole score, 468.'
         write: '$180 + 8x = 468$'
         point:
-          - {line: 3, kind: arrow, at: '180'}
-          - {line: 4, kind: arrow, at: '=8x'}
+          - {line: 5, kind: move, from: {line: 3, at: '=180'}, at: '180'}
+          - {line: 5, kind: move, from: {line: 4, at: '=8x'}, at: '8x'}
       - say: 'Subtract 180 from both sides. 468 minus 180 is 288.'
         write: '$8x = 468 - 180 = 288$'
+        point:
+          - {line: 6, kind: move, from: {line: 5, at: '180+'}, at: '−180', text: 'across'}
       - say: 'Divide both sides by 8. 288 divided by 8 is 36.'
         write: '$x = \dfrac{288}{8} = 36$'
       - say: 'Let''s check. 8 times 36 is 288, and 180 plus 288 is 468, the total we were given.'
@@ -281,13 +296,14 @@ lessons:
         write: 'Labour angle $= \dfrac{70}{120} \times 360^{\circ}$'
         point:
           - {line: 1, kind: box, text: 'the rule'}
-          - {line: 2, kind: arrow, at: '120', text: 'total'}
+          - {line: 3, kind: move, from: {line: 0, at: 'Labour[[70]]'}, at: '70', text: 'labour'}
+          - {line: 3, kind: move, from: {line: 2, at: '=120'}, at: '120', text: 'total'}
       - say: 'A neat way to finish: 360 divided by 120 is 3. So every naira is worth 3 degrees of the circle.'
         write: 'Each naira: $\ \dfrac{360^{\circ}}{120} = 3^{\circ}$'
       - say: 'So labour gets 70 times 3 degrees, which is 210 degrees.'
         write: 'Labour angle $= 70 \times 3^{\circ} = 210^{\circ}$'
         point:
-          - {line: 4, kind: circle, at: '=3∘', text: 'each naira'}
+          - {line: 5, kind: move, from: {line: 4, at: '=3∘'}, at: '3∘', text: 'each naira'}
       - say: 'Let''s check that all the sectors fill the circle. Power gets 15 times 3, which is 45. Materials get 30 times 3, which is 90. Miscellaneous gets 5 times 3, which is 15.'
         write: 'Others: $\ 15 \times 3 = 45^{\circ},\ \ 30 \times 3 = 90^{\circ},\ \ 5 \times 3 = 15^{\circ}$'
       - say: '210 plus 45 plus 90 plus 15 is 360. The whole circle is used, so the angles are right.'
@@ -318,7 +334,8 @@ lessons:
         write: '$P = \dfrac{75}{300}$'
         point:
           - {line: 1, kind: box, text: 'the rule'}
-          - {line: 5, kind: arrow, at: '75'}
+          - {line: 6, kind: move, from: {line: 5, at: '=75'}, at: '300[[75]]'}
+          - {line: 6, kind: move, from: {line: 2, at: '=300'}, at: '[[300]]75'}
       - say: '75 goes into 300 exactly 4 times, so divide the top and bottom by 75. That gives 1 over 4.'
         write: '$= \dfrac{75 \div 75}{300 \div 75} = \dfrac{1}{4}$'
       - say: 'That makes sense: every fourth whole number is a multiple of 4.'
@@ -351,8 +368,8 @@ lessons:
       - say: 'Now put the three values we found back in. The top is 3 minus minus 3, and the bottom is minus 4.'
         write: 'So the expression $= \dfrac{3 - (-3)}{-4}$'
         point:
-          - {line: 5, kind: arrow, at: '=−3'}
-          - {line: 6, kind: arrow, at: '=−4'}
+          - {line: 7, kind: move, from: {line: 5, at: '=−3'}, at: '(−3)'}
+          - {line: 7, kind: move, from: {line: 6, at: '=−4'}, at: '−4'}
       - say: 'Taking away a minus is adding, so 3 minus minus 3 is 3 plus 3, which is 6.'
         write: '$= \dfrac{3 + 3}{-4} = \dfrac{6}{-4}$'
       - say: 'Divide the top and bottom by 2: 6 over 2 is 3, and minus 4 over 2 is minus 2. A positive over a negative is negative.'
@@ -369,27 +386,38 @@ lessons:
     moments:
       - say: 'A point moves so that whenever $x$ goes up by 1, $y$ goes up by 4. One of its positions is 0, minus 3. We want the equation of its graph.'
         write: 'Point $(0,\ -3)$; $\ x$ up 1 $\Rightarrow y$ up 4'
+        show_sketch: true
       - say: 'A steady rate of change like this means the graph is a straight line. A straight line has the form $y$ equals $mx$ plus $c$: $m$ is the gradient and $c$ is where it crosses the $y$-axis.'
         write: 'Straight line: $\ y = mx + c$'
       - say: 'The gradient is the change in $y$ over the change in $x$. Here that is 4 over 1, which is 4.'
         write: '$m = \dfrac{\text{change in } y}{\text{change in } x} = \dfrac{4}{1} = 4$'
+        point:
+          - {figure: sketch, kind: circle, target: '4', text: 'up 4'}
       - say: 'Next, the point 0, minus 3 has $x$ equal to zero, so it sits on the $y$-axis. That makes minus 3 the $y$-intercept.'
         write: 'At $x = 0$: $\ y = -3$, so $c = -3$'
+        point:
+          - {figure: sketch, kind: circle, target: '(0, −3)', text: 'on the y-axis'}
       - say: 'Now put $m$ equals 4 and $c$ equals minus 3 into $y$ equals $mx$ plus $c$.'
         write: '$y = 4x + (-3)$'
         point:
-          - {line: 2, kind: arrow, text: 'm'}
-          - {line: 3, kind: arrow, at: 'c=−3', text: 'c'}
+          - {line: 4, kind: move, from: {line: 2, at: '=4'}, at: '4x', text: 'm'}
+          - {line: 4, kind: move, from: {line: 3, at: 'c=[[−3]]'}, at: '(−3)', text: 'c'}
       - say: 'Adding minus 3 is the same as taking away 3.'
         write: '$y = 4x - 3$'
       - say: 'None of the options looks exactly like this, so let''s rearrange. Add 3 to both sides.'
         write: '$y + 3 = 4x$'
+        point:
+          - {line: 6, kind: move, from: {line: 5, at: '−3'}, at: '+3', text: 'across'}
       - say: 'Let''s check the first fact. When $x$ is 0, $4x$ is 0, so $y$ plus 3 is 0, and $y$ is minus 3. That''s our starting point.'
         write: 'Check: $\ x = 0 \Rightarrow y + 3 = 0 \Rightarrow y = -3$'
       - say: 'And the second fact. When $x$ is 1, $y$ plus 3 is 4, so $y$ is 1. Going from minus 3 up to 1 is a rise of 4.'
         write: '$x = 1 \Rightarrow y + 3 = 4 \Rightarrow y = 1$, a rise of 4'
+        point:
+          - {figure: sketch, kind: circle, target: '(1, 1)'}
       - say: 'So the equation is $y$ plus 3 equals $4x$, which is answer choice D.'
         write: 'Equation: $\ y + 3 = 4x$'
+        point:
+          - {figure: sketch, kind: label, target: 'y = ?', text: 'y + 3 = 4x'}
         answer: true
     traps:
       A: 'You went for minus 3 equals $y$ plus 4 over $x$ plus 1. That mixes the point and the rise into one fraction, and at $x = 0$ it gives $y = -7$. The line has gradient 4 through 0, minus 3, so it is $y + 3 = 4x$.'
@@ -412,11 +440,14 @@ lessons:
         write: 'Sale: $\ 24_{5} = 2(5) + 4(1) = 14$'
       - say: 'So on each orange he gains the selling price minus the cost price: 14 minus 9, which is 5 monts.'
         write: 'Gain per orange $= 14 - 9 = 5$'
+        point:
+          - {line: 6, kind: move, from: {line: 5, at: '=14'}, at: '14'}
+          - {line: 6, kind: move, from: {line: 4, at: '=9'}, at: '−9'}
       - say: 'On all 28 oranges, the gain is 28 times 5, which is 140 monts.'
         write: 'Total gain $= 28 \times 5 = 140$'
         point:
-          - {line: 3, kind: arrow, at: '28', text: 'oranges'}
-          - {line: 6, kind: arrow, at: '=5', text: 'each'}
+          - {line: 7, kind: move, from: {line: 3, at: '28'}, at: '28', text: 'oranges'}
+          - {line: 7, kind: move, from: {line: 6, at: '=5'}, at: '×[[5]]', text: 'each'}
       - say: 'Now change 140 back to base five, by dividing by 5 again and again and keeping the remainders. 140 divided by 5 is 28, remainder 0.'
         write: '$140 \div 5 = 28 \text{ r } 0$'
       - say: 'Now divide that 28 by 5: it goes 5 times, remainder 3.'
@@ -466,8 +497,8 @@ lessons:
       - say: 'Now put the new top over the new bottom we found, 2. The 2s cancel.'
         write: 'Fraction $= \dfrac{-2\sqrt{35}}{2} = -\sqrt{35}$'
         point:
-          - {line: 10, kind: arrow, text: 'top'}
-          - {line: 5, kind: arrow, at: '=2', text: 'bottom'}
+          - {line: 11, kind: move, from: {line: 10, at: '=−235'}, at: '−235', text: 'top'}
+          - {line: 11, kind: move, from: {line: 5, at: '=2'}, at: '=[[2]]−235', text: 'bottom'}
       - say: 'So the fraction rationalises to minus root 35, which is answer choice C.'
         write: 'Answer: $\ -\sqrt{35}$'
         answer: true
@@ -499,8 +530,8 @@ lessons:
       - say: 'Now put the top we found over the bottom we found. 3 to the $n$ minus 1 is on both, so it cancels.'
         write: 'Fraction $= \dfrac{2 \times 3^{n-1}}{54 \times 3^{n-1}} = \dfrac{2}{54}$'
         point:
-          - {line: 3, kind: arrow, at: '2×3n−1', text: 'top'}
-          - {line: 7, kind: arrow, at: '54×3n−1', text: 'bottom'}
+          - {line: 8, kind: move, from: {line: 3, at: '=2×3n−1'}, at: '2×3n−1', text: 'top'}
+          - {line: 8, kind: move, from: {line: 7, at: '=54×3n−1'}, at: '54×3n−1', text: 'bottom'}
       - say: 'Divide the top and bottom by 2. 2 over 2 is 1, and 54 over 2 is 27.'
         write: '$= \dfrac{1}{27}$'
       - say: 'A quick test with $n$ equals 1. The top is 3 minus 1, which is 2. The bottom is 27 times 3, which is 81, minus 27 times 1, which gives 54. And 2 over 54 is 1 over 27.'
@@ -521,6 +552,10 @@ lessons:
         write: '$p = \dfrac{kq^{2}}{r}$'
       - say: 'To find $k$, put in the first set of values: $p$ is 36, $q$ is 3 and $r$ is 4.'
         write: '$36 = \dfrac{k \times 3^{2}}{4}$'
+        point:
+          - {line: 2, kind: move, from: {line: 0, at: 'p=[[36]]'}, at: '[[36]]=', text: 'p'}
+          - {line: 2, kind: move, from: {line: 0, at: 'q=[[3]]'}, at: '×[[3]]2', text: 'q'}
+          - {line: 2, kind: move, from: {line: 0, at: 'r=[[4]]'}, at: '[[4]]k', text: 'r'}
       - say: '3 squared is 9, so 36 equals $9k$ over 4.'
         write: '$36 = \dfrac{9k}{4}$'
       - say: 'Multiply both sides by 4. 36 times 4 is 144.'
@@ -530,7 +565,7 @@ lessons:
       - say: 'Now put that $k$ back into the rule.'
         write: 'So $\ p = \dfrac{16q^{2}}{r}$'
         point:
-          - {line: 5, kind: arrow, at: '16', text: 'k'}
+          - {line: 6, kind: move, from: {line: 5, at: '=16'}, at: '16', text: 'k'}
       - say: 'Now use the new values, $q$ equals 5 and $r$ equals 2.'
         write: '$p = \dfrac{16 \times 5^{2}}{2}$'
       - say: '5 squared is 25, and 16 times 25 is 400.'
@@ -566,7 +601,8 @@ lessons:
       - say: 'Don''t forget the 2 we took out at the very start. Put it back in front.'
         write: 'So $\ 6x^{2} - 14x - 12 = 2(x - 3)(3x + 2)$'
         point:
-          - {line: 1, kind: circle, at: '=2(', text: 'the 2'}
+          - {line: 7, kind: move, from: {line: 1, at: '=[[2]]('}, at: '=[[2]](x', text: 'the 2'}
+          - {line: 7, kind: move, from: {line: 6, at: '(x−3)(3x+2)'}, at: '(x−3)(3x+2)'}
       - say: 'Let''s check by expanding. $x$ minus 3, times $3x$ plus 2, is 3 $x$ squared plus $2x$ minus $9x$ minus 6.'
         write: 'Check: $\ (x - 3)(3x + 2) = 3x^{2} + 2x - 9x - 6$'
       - say: '$2x$ minus $9x$ is minus $7x$, so that is 3 $x$ squared minus $7x$ minus 6. Times 2, it gives back the expression we started with.'
@@ -583,18 +619,25 @@ lessons:
     moments:
       - say: 'A straight line $y$ equals $mx$ meets the curve $y$ equals $x$ squared minus $12x$ plus 40 at two points, and one of them is 5, 5. We want the other point.'
         write: '$y = mx, \quad y = x^{2} - 12x + 40$'
+        show_sketch: true
       - say: 'We don''t know $m$ yet, but the known point unlocks it. The point 5, 5 is on the line, so put $x$ equals 5 and $y$ equals 5 into $y$ equals $mx$.'
         write: 'At $(5,\ 5)$: $\ 5 = m \times 5$'
+        point:
+          - {figure: sketch, kind: circle, target: '(5, 5)', text: 'on the line'}
       - say: 'Divide both sides by 5, and $m$ is 1.'
         write: '$m = \dfrac{5}{5} = 1$'
       - say: 'So the line is $y$ equals 1 times $x$, which is just $y$ equals $x$.'
         write: 'Line: $\ y = x$'
+        point:
+          - {figure: sketch, kind: label, target: 'y = mx', text: 'y = x'}
       - say: 'Where the line meets the curve, both give the same $y$. So set the line''s $y$, which is $x$, equal to the curve''s $y$.'
         write: '$x = x^{2} - 12x + 40$'
         point:
-          - {line: 3, kind: arrow, at: 'y=x', text: 'the line'}
+          - {line: 4, kind: move, from: {line: 3, at: 'y=[[x]]'}, at: '[[x]]=x2', text: 'the line'}
       - say: 'Bring everything to one side by taking $x$ from both sides. Minus $12x$ minus $x$ is minus $13x$.'
         write: '$0 = x^{2} - 12x - x + 40 = x^{2} - 13x + 40$'
+        point:
+          - {line: 5, kind: move, from: {line: 4, at: '[[x]]=x2'}, at: '−x+', text: 'across'}
       - say: 'Factorise: we need two numbers that multiply to 40 and add to minus 13. Those are minus 5 and minus 8.'
         write: '$(x - 5)(x - 8) = 0$'
       - say: 'So $x$ is 5 or $x$ is 8. The 5 is the point we already knew, so the new point has $x$ equals 8.'
@@ -607,6 +650,8 @@ lessons:
         write: 'Check: $\ 8^{2} - 12(8) + 40 = 64 - 96 + 40 = 8$'
       - say: 'So the other point is 8, 8, which is answer choice B.'
         write: 'Other point: $\ (8,\ 8)$'
+        point:
+          - {figure: sketch, kind: label, target: '?', text: '(8, 8)'}
         answer: true
     traps:
       A: 'You went for 5, 6. That isn''t on the line $y = x$, and at $x = 5$ the curve gives 5, not 6. Solving $x = x^{2} - 12x + 40$ gives $x = 8$, and then $y = 8$.'
@@ -617,6 +662,7 @@ lessons:
     moments:
       - say: 'We have a table of values for $y$ equals $x$ squared minus $3x$ plus 1, and we want where the graph crosses the $x$-axis between $x$ equals minus 2 and $x$ equals 1.'
         write: '$y = x^{2} - 3x + 1$'
+        show_sketch: true
       - say: 'Here''s the key idea. On the $x$-axis, $y$ is zero. So where the graph crosses the axis, $y$ changes sign, from positive to negative or from negative to positive.'
         write: 'Crossing the $x$-axis $\Rightarrow$ $y$ changes sign'
       - say: 'Let''s check one value from the table first, at $x$ equals minus 2. Minus 2 squared is 4, minus 3 times minus 2 is plus 6, and 4 plus 6 plus 1 is 11, as the table says.'
@@ -631,12 +677,15 @@ lessons:
         write: '$0 < x < 1$: $\ 1 \to -1$, sign change'
         point:
           - {line: 6, kind: circle, at: '1→−1', text: 'sign change'}
+          - {figure: sketch, kind: highlight, target: AB}
+          - {figure: sketch, kind: circle, target: '?', text: 'crosses here'}
       - say: 'Let''s confirm with the quadratic formula. $a$ is 1, $b$ is minus 3 and $c$ is 1, so $x$ is 3 plus or minus the square root of 9 minus 4, all over 2.'
         write: '$x = \dfrac{3 \pm \sqrt{9 - 4}}{2} = \dfrac{3 \pm \sqrt{5}}{2}$'
       - say: 'Root 5 is about 2.24. So the roots are about 5.24 over 2, which is 2.62, and 0.76 over 2, which is 0.38. Only 0.38 lies between minus 2 and 1.'
         write: '$x \approx \dfrac{5.24}{2} = 2.62$ or $x \approx \dfrac{0.76}{2} = 0.38$'
         point:
           - {line: 8, kind: strike, at: '=2.62', text: 'outside'}
+          - {figure: sketch, kind: label, target: '?', text: '≈ 0.38'}
       - say: 'So in that stretch the graph crosses only in the range 0 less than $x$ less than 1, which is answer choice D.'
         write: 'Crossing: $\ 0 < x < 1$'
         answer: true
@@ -668,8 +717,8 @@ lessons:
       - say: 'Put the two results together: $x$ is bigger than 0 and smaller than 18.'
         write: 'So $\ 0 < x < 18$'
         point:
-          - {line: 5, kind: arrow, at: '=18'}
-          - {line: 7, kind: arrow, at: 'x>0'}
+          - {line: 8, kind: move, from: {line: 7, at: 'x>[[0]]'}, at: '[[0]]<x'}
+          - {line: 8, kind: move, from: {line: 5, at: '=18'}, at: '18'}
       - say: 'So the correct inequality is 0 less than $x$ less than 18, which is answer choice E.'
         write: 'Answer: $\ 0 < x < 18$'
         answer: true
@@ -689,23 +738,28 @@ lessons:
       - say: 'Now substitute that into equation 1, in place of $x$.'
         write: 'Into (1): $\ 2(11 + 2y) + 3y = 1$'
         point:
-          - {line: 2, kind: arrow, at: 'x=11+2y', text: 'sub in'}
+          - {line: 3, kind: move, from: {line: 2, at: '11+2y'}, at: '(11+2y)', text: 'in for x'}
       - say: 'Expand the bracket. 2 times 11 is 22, and 2 times $2y$ is $4y$.'
         write: '$22 + 4y + 3y = 1$'
       - say: '$4y$ plus $3y$ is $7y$.'
         write: '$22 + 7y = 1$'
       - say: 'Subtract 22 from both sides. 1 minus 22 is minus 21.'
         write: '$7y = 1 - 22 = -21$'
+        point:
+          - {line: 6, kind: move, from: {line: 5, at: '22+'}, at: '−22', text: 'across'}
       - say: 'Divide both sides by 7, and $y$ is minus 3.'
         write: '$y = \dfrac{-21}{7} = -3$'
       - say: 'Now go back to $x$ equals 11 plus $2y$, and put in $y$ equals minus 3. 2 times minus 3 is minus 6, and 11 minus 6 is 5.'
         write: '$x = 11 + 2(-3) = 11 - 6 = 5$'
         point:
-          - {line: 7, kind: arrow, at: '=−3', text: 'y'}
+          - {line: 8, kind: move, from: {line: 7, at: '=−3'}, at: '(−3)', text: 'y'}
       - say: 'Let''s check both equations. In equation 1, 10 minus 9 is 1. In equation 2, 5 minus 2 times minus 3 is 5 plus 6, which is 11.'
         write: 'Check: $\ 2(5) + 3(-3) = 10 - 9 = 1,\quad 5 - 2(-3) = 5 + 6 = 11$'
       - say: 'The question wants $x$ plus $y$. 5 plus minus 3 is 2.'
         write: '$x + y = 5 + (-3) = 2$'
+        point:
+          - {line: 10, kind: move, from: {line: 8, at: '=5'}, at: '=[[5]]+', text: 'x'}
+          - {line: 10, kind: move, from: {line: 7, at: '=−3'}, at: '(−3)', text: 'y'}
       - say: 'So $x$ plus $y$ is 2, which is answer choice D.'
         write: 'Answer: $\ x + y = 2$'
         answer: true
@@ -736,6 +790,9 @@ lessons:
         write: '$36x + 270 = x^{2} + 15x$'
       - say: 'Move everything to the right-hand side. $15x$ minus $36x$ is minus $21x$, and taking away 270 leaves minus 270.'
         write: '$0 = x^{2} + 15x - 36x - 270 = x^{2} - 21x - 270$'
+        point:
+          - {line: 8, kind: move, from: {line: 7, at: '36x'}, at: '−36x', text: 'across'}
+          - {line: 8, kind: move, from: {line: 7, at: '+270'}, at: '36x[[−270]]', text: 'across'}
       - say: 'Let''s check that this makes sense. It factorises as $x$ minus 30, times $x$ plus 9, so Tunde takes 30 days.'
         write: '$(x - 30)(x + 9) = 0 \Rightarrow x = 30$'
       - say: 'Then Shola takes 45 days. 1 over 30 plus 1 over 45 is 3 over 90 plus 2 over 90, which is 5 over 90, and that is 1 over 18.'
@@ -763,7 +820,7 @@ lessons:
       - say: 'Now feed that minus 5 into $g$. 5 plus minus 5 is zero, and the square root of zero is zero.'
         write: '$g(f(3)) = g(-5) = \sqrt{5 + (-5)} = \sqrt{0} = 0$'
         point:
-          - {line: 4, kind: arrow, at: '=−5', text: 'f(3)'}
+          - {line: 5, kind: move, from: {line: 4, at: '=−5'}, at: 'g[[(−5)]]', text: 'f(3)'}
       - say: 'Now $x$ equals 4. Every bracket becomes 4 minus 3, which is 1.'
         write: '$f(4) = 2(4 - 3)^{2} + 3(4 - 3) - 5 = 2(1)^{2} + 3(1) - 5$'
       - say: '1 squared is 1, so we have 2 plus 3 minus 5, which is zero.'
@@ -771,7 +828,7 @@ lessons:
       - say: 'Now feed that zero into $g$. 5 plus zero is 5, so we get root 5.'
         write: '$g(f(4)) = g(0) = \sqrt{5 + 0} = \sqrt{5}$'
         point:
-          - {line: 7, kind: arrow, at: '=0', text: 'f(4)'}
+          - {line: 8, kind: move, from: {line: 7, at: '=0'}, at: 'g[[(0)]]', text: 'f(4)'}
       - say: 'So the two values are 0 and root 5, which is answer choice E.'
         write: '$g(f(3)) = 0,\quad g(f(4)) = \sqrt{5}$'
         answer: true
@@ -799,8 +856,8 @@ lessons:
       - say: 'Now put the sum we found, 2, and the product, minus 12, into the pattern.'
         write: '$x^{2} - (2)x + (-12) = 0$'
         point:
-          - {line: 4, kind: arrow, at: '=2', text: 'sum'}
-          - {line: 6, kind: arrow, at: '=−12', text: 'product'}
+          - {line: 7, kind: move, from: {line: 4, at: '=2'}, at: '(2)', text: 'sum'}
+          - {line: 7, kind: move, from: {line: 6, at: '=−12'}, at: '(−12)', text: 'product'}
       - say: 'Tidy up the signs: minus 2 times $x$ is minus $2x$, and plus minus 12 is minus 12.'
         write: '$x^{2} - 2x - 12 = 0$'
       - say: 'Let''s check with the quadratic formula. $x$ is 2 plus or minus the square root of 4 plus 48, over 2. Root 52 is root of 4 times 13, which is 2 root 13.'
@@ -852,23 +909,31 @@ lessons:
     moments:
       - say: 'The figure is a prism whose cross-section is a right-angled triangle, with hypotenuse 5 cm and one shorter side 4 cm. The prism is 8 cm long. We want its volume.'
         write: 'Cross-section: hypotenuse 5 cm, one side 4 cm; length 8 cm'
+        point:
+          - {figure: 0, kind: highlight, target: PQ, text: 'hypotenuse'}
       - say: 'Here''s the idea. A prism has the same cross-section all the way along, so its volume is the area of that cross-section times its length.'
         write: 'Volume $=$ area of cross-section $\times$ length'
       - say: 'To find the triangle''s area we need the two shorter sides, the ones that meet at the right angle. We know one is 4. Pythagoras gives the other.'
         write: '$(\text{other side})^{2} = 5^{2} - 4^{2}$'
+        point:
+          - {line: 2, kind: move, from: {line: 0, at: '5cm'}, at: '[[5]]2', text: 'hypotenuse'}
+          - {line: 2, kind: move, from: {line: 0, at: '4cm'}, at: '[[4]]2', text: 'side'}
       - say: '5 squared is 25 and 4 squared is 16. 25 minus 16 is 9.'
         write: '$= 25 - 16 = 9$'
       - say: 'The square root of 9 is 3, so the other side is 3 cm. This is the well-known 3, 4, 5 triangle.'
         write: 'Other side $= \sqrt{9} = 3$ cm'
       - say: 'The two shorter sides meet at the right angle, so one is the base and the other is the height. The area is a half times base times height.'
         write: 'Area $= \tfrac{1}{2} \times 3 \times 4$'
+        point:
+          - {line: 5, kind: move, from: {line: 4, at: '=3cm'}, at: '×[[3]]×'}
       - say: '3 times 4 is 12, and half of 12 is 6.'
         write: '$= \tfrac{1}{2} \times 12 = 6\ \text{cm}^{2}$'
       - say: 'Now go back to the volume formula, and put in the area, 6, and the length, 8.'
         write: 'Volume $= 6 \times 8$'
         point:
           - {line: 1, kind: box, text: 'the rule'}
-          - {line: 6, kind: arrow, at: '=6cm', text: 'area'}
+          - {line: 7, kind: move, from: {line: 6, at: '=6cm'}, at: '[[6]]×', text: 'area'}
+          - {line: 7, kind: move, from: {line: 0, at: '8cm'}, at: '×[[8]]', text: 'length'}
       - say: '6 times 8 is 48.'
         write: '$= 48\ \text{cm}^{3}$'
       - say: 'So the volume is 48 cubic centimetres, which is answer choice B.'
@@ -905,7 +970,7 @@ lessons:
       - say: 'Now use equation 2 in equation 1: replace $q$ with $p$. $4p$ plus $2p$ is $6p$.'
         write: 'In (1): $\ 4p + 2p = -9 \Rightarrow 6p = -9$'
         point:
-          - {line: 7, kind: arrow, at: 'p=q', text: 'sub in'}
+          - {line: 8, kind: move, from: {line: 7, at: 'so[[p]]=q'}, at: '+[[2p]]', text: 'p for q'}
       - say: 'Divide by 6. Minus 9 over 6 simplifies to minus 3 over 2. And since $q$ equals $p$, $q$ is minus 3 over 2 as well.'
         write: '$p = -\dfrac{9}{6} = -\dfrac{3}{2}, \quad q = -\dfrac{3}{2}$'
       - say: 'Now add them. Minus 3 over 2 plus minus 3 over 2 is minus 6 over 2, which is minus 3.'
@@ -922,10 +987,15 @@ lessons:
     moments:
       - say: 'A sector with an angle of 210 degrees is cut from a circle of diameter 12 cm and bent into a cone. We want the radius of the cone''s base.'
         write: 'Sector angle $= 210^{\circ}$; circle diameter $= 12$ cm'
+        show_sketch: true
+        point:
+          - {figure: sketch, kind: circle, target: '210°'}
       - say: 'Picture bending the paper. The two straight edges join up to form the slanting side, and the curved edge, the arc, wraps round to become the circle at the bottom of the cone.'
         write: 'Arc of sector $=$ circumference of base'
       - say: 'The circle has diameter 12, so its radius is 12 divided by 2, which is 6.'
         write: 'Radius of circle $= 12 \div 2 = 6$ cm'
+        point:
+          - {figure: sketch, kind: highlight, target: OA, text: 'radius 6'}
       - say: 'The full circumference is 2 pi times the radius: 2 pi times 6, which is 12 pi.'
         write: 'Full circumference $= 2\pi \times 6 = 12\pi$ cm'
       - say: 'The sector is 210 out of the 360 degrees. Divide both by 30: 210 over 30 is 7, and 360 over 30 is 12. So it is 7 over 12 of the circle.'
@@ -933,15 +1003,21 @@ lessons:
       - say: 'So the arc is 7 over 12 of the full circumference we found, 12 pi. The 12s cancel, leaving 7 pi.'
         write: 'Arc $= \dfrac{7}{12} \times 12\pi = 7\pi$ cm'
         point:
-          - {line: 3, kind: arrow, at: '=12π', text: 'full circle'}
+          - {line: 5, kind: move, from: {line: 4, at: '=127'}, at: '127', text: 'fraction'}
+          - {line: 5, kind: move, from: {line: 3, at: '=12π'}, at: '12π', text: 'full circle'}
       - say: 'That arc becomes the base circumference. If the base radius is $r$, the base circumference is 2 pi $r$.'
         write: '$2\pi r = 7\pi$'
         point:
           - {line: 1, kind: box, text: 'the key'}
+          - {line: 6, kind: move, from: {line: 5, at: '=[[7π]]'}, at: '7π', text: 'the arc'}
       - say: 'Divide both sides by 2 pi. The pi cancels, leaving $r$ equals 7 over 2.'
         write: '$r = \dfrac{7\pi}{2\pi} = \dfrac{7}{2}$'
+        point:
+          - {line: 7, kind: move, from: {line: 6, at: '2πr'}, at: '[[2π]]7π', text: 'divide'}
       - say: '7 over 2 is 3.5.'
         write: '$r = 3.5$ cm'
+        point:
+          - {figure: sketch, kind: label, target: 'r = ?', text: '3.5 cm'}
       - say: 'A sense check: the base radius must be smaller than the slanting side, which is the circle''s radius, 6 cm. 3.5 is smaller, so it makes sense.'
         write: 'Check: $\ 3.5 < 6$'
       - say: 'So the base radius is 3.50 cm, which is answer choice D.'
@@ -956,22 +1032,29 @@ lessons:
     moments:
       - say: 'In triangle $XYZ$ in the diagram, the angle at $X$ is 120 degrees, $XZ$ is 3 cm and $YZ$ is 5 cm. We want the angle at $Y$.'
         write: '$\angle YXZ = 120^{\circ}, \quad XZ = 3 \text{ cm}, \quad YZ = 5 \text{ cm}$'
+        point:
+          - {figure: 0, kind: arc, target: YXZ, text: '120°'}
       - say: 'We know two sides and an angle that is not between them. That is a job for the sine rule: each side divided by the sine of the angle opposite it gives the same number.'
         write: 'Sine rule: $\ \dfrac{a}{\sin A} = \dfrac{b}{\sin B}$'
       - say: 'So match each side with the angle opposite it. $YZ$, which is 5, is opposite the 120 degrees at $X$. $XZ$, which is 3, is opposite the angle at $Y$.'
         write: '$YZ = 5$ is opposite $X$; $\ XZ = 3$ is opposite $Y$'
+        point:
+          - {figure: 0, kind: highlight, target: YZ, text: 'opposite X'}
+          - {figure: 0, kind: highlight, target: XZ, text: 'opposite Y'}
       - say: 'Put those pairs into the sine rule. We can turn both sides upside down, so the sine we want is on top.'
         write: '$\dfrac{\sin Y}{3} = \dfrac{\sin 120^{\circ}}{5}$'
         point:
           - {line: 1, kind: box, text: 'the rule'}
       - say: 'Multiply both sides by 3 to get sin $Y$ by itself.'
         write: '$\sin Y = \dfrac{3 \sin 120^{\circ}}{5}$'
+        point:
+          - {line: 4, kind: move, from: {line: 3, at: '[[3]]sinY'}, at: '[[3]]sin120', text: 'times 3'}
       - say: 'Sin 120 degrees is the same as sin of 180 minus 120, which is sin 60 degrees, and that is 0.8660.'
         write: '$\sin 120^{\circ} = \sin 60^{\circ} = 0.8660$'
       - say: 'Put that in. 3 times 0.8660 is 2.598.'
         write: '$\sin Y = \dfrac{3 \times 0.8660}{5} = \dfrac{2.598}{5}$'
         point:
-          - {line: 5, kind: arrow, at: '0.8660'}
+          - {line: 6, kind: move, from: {line: 5, at: '=0.8660'}, at: '0.8660'}
       - say: '2.598 divided by 5 is 0.5196.'
         write: '$= 0.5196$'
       - say: 'Now take the inverse sine. The angle whose sine is 0.5196 is 31.306 degrees.'
@@ -982,6 +1065,8 @@ lessons:
         write: '$0.306^{\circ} = 0.306 \times 60'' = 18.36'' \approx 18''$'
       - say: 'So angle $XYZ$ is 31 degrees 18 minutes, which is answer choice D.'
         write: '$\angle XYZ = 31^{\circ}18''$'
+        point:
+          - {figure: 0, kind: arc, target: XYZ, text: '31°18′'}
         answer: true
     traps:
       A: 'You went for 29 degrees. That''s about the third angle, at $Z$: 180 minus 120 minus 31.3 is about 28.7. The question asks for the angle at $Y$, opposite the 3 cm side.'
@@ -992,8 +1077,12 @@ lessons:
     moments:
       - say: 'A triangle has sides $x$ plus 4, $x$, and $x$ minus 4, and the cosine of its largest angle is 1 over 5. We want $x$.'
         write: 'Sides $x + 4,\ x,\ x - 4$; $\ \cos(\text{largest angle}) = \dfrac{1}{5}$'
+        show_sketch: true
       - say: 'Here''s the key fact: the largest angle is always opposite the longest side. The longest side is $x$ plus 4, so call the angle opposite it theta.'
         write: 'Largest angle $\theta$ is opposite $x + 4$'
+        point:
+          - {figure: sketch, kind: highlight, target: BC, text: 'longest'}
+          - {figure: sketch, kind: arc, target: BAC, text: 'θ'}
       - say: 'The cosine rule links an angle to the three sides: the two sides around the angle, squared and added, minus the opposite side squared, all over twice the two sides around it.'
         write: 'Cosine rule: $\ \cos\theta = \dfrac{b^{2} + c^{2} - a^{2}}{2bc}$'
       - say: 'Here the sides around theta are $x$ and $x$ minus 4, and the side opposite it is $x$ plus 4.'
@@ -1011,13 +1100,16 @@ lessons:
       - say: 'Put that back in. There is an $x$ on the top and on the bottom, and a side can''t be zero, so we can cancel it.'
         write: '$\cos\theta = \dfrac{x(x - 16)}{2x(x - 4)} = \dfrac{x - 16}{2(x - 4)}$'
         point:
-          - {line: 7, kind: arrow, at: 'x(x−16)', text: 'the top'}
+          - {line: 8, kind: move, from: {line: 7, at: '=x(x−16)'}, at: 'x(x−16)', text: 'the top'}
       - say: 'We are told this cosine is 1 over 5.'
         write: '$\dfrac{x - 16}{2(x - 4)} = \dfrac{1}{5}$'
         point:
-          - {line: 0, kind: underline, at: 'cos(largest angle)', text: 'given'}
+          - {line: 9, kind: move, from: {line: 0, at: '51'}, at: '51', text: 'given'}
       - say: 'Cross-multiply: 5 times $x$ minus 16 equals 2 times $x$ minus 4.'
         write: '$5(x - 16) = 2(x - 4)$'
+        point:
+          - {line: 10, kind: move, from: {line: 9, at: '[[5]]1'}, at: '[[5]](x', text: 'across'}
+          - {line: 10, kind: move, from: {line: 9, at: '2(x−4)'}, at: '=[[2(x−4)]]', text: 'across'}
       - say: 'Expand both sides. 5 times 16 is 80, and 2 times 4 is 8.'
         write: '$5x - 80 = 2x - 8$'
       - say: 'Take $2x$ from both sides and add 80 to both sides. $5x$ minus $2x$ is $3x$, and minus 8 plus 80 is 72.'
@@ -1047,8 +1139,8 @@ lessons:
       - say: 'Put both of those back into the top.'
         write: '$a^{2} - b^{2} = \dfrac{4x^{2} - (1 + 2x + x^{2})}{(1 - x)^{2}}$'
         point:
-          - {line: 2, kind: arrow, at: '=4x2'}
-          - {line: 3, kind: arrow, at: '1+2x+x2'}
+          - {line: 4, kind: move, from: {line: 2, at: '=4x2'}, at: '4x2'}
+          - {line: 4, kind: move, from: {line: 3, at: '=1+2x+x2'}, at: '(1+2x+x2)'}
       - say: 'Take off the bracket. The minus in front changes every sign inside it.'
         write: '$= \dfrac{4x^{2} - 1 - 2x - x^{2}}{(1 - x)^{2}}$'
       - say: '4 $x$ squared minus $x$ squared is 3 $x$ squared.'
@@ -1062,8 +1154,8 @@ lessons:
       - say: 'So one $x$ minus 1 cancels from the top and the bottom.'
         write: '$a^{2} - b^{2} = \dfrac{(3x + 1)(x - 1)}{(x - 1)^{2}} = \dfrac{3x + 1}{x - 1}$'
         point:
-          - {line: 8, kind: arrow, at: '=(3x+1)(x−1)', text: 'top'}
-          - {line: 9, kind: arrow, at: '=(x−1)2', text: 'bottom'}
+          - {line: 10, kind: move, from: {line: 8, at: '=(3x+1)(x−1)'}, at: '(3x+1)(x−1)', text: 'top'}
+          - {line: 10, kind: move, from: {line: 9, at: '=(x−1)2'}, at: '(x−1)2', text: 'bottom'}
       - say: 'Let''s check with $x$ equals 2. Then $a$ is minus 4 and $b$ is minus 3, so $a$ squared minus $b$ squared is 16 minus 9, which is 7. Our answer gives 3 times 2 plus 1, over 2 minus 1, which is 7 over 1. It matches.'
         write: 'Check $x = 2$: $\ a = -4,\ b = -3,\ 16 - 9 = 7$; $\ \dfrac{3(2) + 1}{2 - 1} = 7$'
       - say: 'So the simplest form is $3x$ plus 1, over $x$ minus 1, which is answer choice A.'
@@ -1087,7 +1179,7 @@ lessons:
       - say: 'Now multiply the bracket we just found by $x$ plus 2.'
         write: 'Expression $= \dfrac{2x}{x + 1} \times (x + 2)$'
         point:
-          - {line: 3, kind: arrow, text: 'the bracket'}
+          - {line: 4, kind: move, from: {line: 3, at: '0=[[x+12x]]'}, at: 'x+12x', text: 'the bracket'}
       - say: 'Multiplying a fraction by $x$ plus 2 multiplies its top.'
         write: '$= \dfrac{2x(x + 2)}{x + 1}$'
       - say: 'Can anything cancel? The bottom, $x$ plus 1, is not a factor of the top, so no. This is as simple as it gets.'
@@ -1115,24 +1207,32 @@ lessons:
       - say: 'Now look at triangle $QRS$. $QR$ equals $RS$, because all the sides of a regular hexagon are equal. So the triangle is isosceles, with 120 degrees at $R$.'
         write: 'In $\triangle QRS$: $\ QR = RS,\ \ \angle QRS = 120^{\circ}$'
         point:
-          - {line: 2, kind: arrow, at: '=120∘'}
+          - {line: 3, kind: move, from: {line: 2, at: '=120∘'}, at: '120∘'}
+          - {figure: 0, kind: arc, target: QRS, text: '120°'}
       - say: 'Its two base angles are equal, and they share what is left of 180 degrees. 180 minus 120 is 60, and half of 60 is 30.'
         write: '$\angle RSQ = \dfrac{180^{\circ} - 120^{\circ}}{2} = \dfrac{60^{\circ}}{2} = 30^{\circ}$'
+        point:
+          - {figure: 0, kind: arc, target: RSQ, text: '30°'}
       - say: 'In the same way, triangle $RST$ has $RS$ equal to $ST$, with 120 degrees at $S$. So its base angle $SRT$ is also 30 degrees.'
         write: 'In $\triangle RST$: $\ \angle SRT = \dfrac{180^{\circ} - 120^{\circ}}{2} = 30^{\circ}$'
+        point:
+          - {figure: 0, kind: arc, target: SRT, text: '30°'}
       - say: 'Now look at the small triangle $RVS$, where the diagonals cross. Its angle at $S$ is angle $RSQ$, 30 degrees, and its angle at $R$ is angle $SRT$, also 30 degrees.'
         write: 'In $\triangle RVS$: $\ 30^{\circ} + 30^{\circ} + \angle RVS = 180^{\circ}$'
         point:
-          - {line: 4, kind: arrow, at: '=30∘'}
-          - {line: 5, kind: arrow, at: '=30∘'}
+          - {line: 6, kind: move, from: {line: 4, at: '=30∘'}, at: '[[30∘]]+30∘'}
+          - {line: 6, kind: move, from: {line: 5, at: '=30∘'}, at: '30∘+[[30∘]]'}
       - say: '30 plus 30 is 60, and 180 minus 60 is 120. So angle $RVS$ is 120 degrees.'
         write: '$\angle RVS = 180^{\circ} - 60^{\circ} = 120^{\circ}$'
+        point:
+          - {figure: 0, kind: arc, target: RVS, text: '120°'}
       - say: 'Angle $TVS$ sits right next to angle $RVS$ on the straight line $RT$, and angles on a straight line add to 180 degrees.'
         write: '$\angle TVS + \angle RVS = 180^{\circ}$'
       - say: 'So angle $TVS$ is 180 minus 120, which is 60 degrees.'
         write: '$\angle TVS = 180^{\circ} - 120^{\circ} = 60^{\circ}$'
         point:
-          - {line: 7, kind: arrow, at: '=120∘', text: 'RVS'}
+          - {line: 9, kind: move, from: {line: 7, at: '=120∘'}, at: '−120∘', text: 'RVS'}
+          - {figure: 0, kind: arc, target: TVS, text: '60°'}
       - say: 'So angle $TVS$ is 60 degrees, which is answer choice A.'
         write: '$\angle TVS = 60^{\circ}$'
         answer: true
@@ -1179,6 +1279,8 @@ lessons:
         write: 'Shaded $=$ semicircle $-$ 3 triangles'
       - say: 'Why do exactly three fit? Each triangle is equilateral, so its angle at the centre is 60 degrees, and three of them fill the 180 degrees along the straight edge.'
         write: '$3 \times 60^{\circ} = 180^{\circ}$'
+        point:
+          - {figure: 0, kind: circle, target: '60°'}
       - say: 'The area of a triangle is a half, times two sides, times the sine of the angle between them. For each triangle the two sides are $r$ and $r$, and the angle is 60 degrees.'
         write: 'One triangle $= \tfrac{1}{2} \times r \times r \times \sin 60^{\circ}$'
       - say: 'Sin 60 degrees is root 3 over 2. A half times root 3 over 2 is root 3 over 4.'
@@ -1193,7 +1295,8 @@ lessons:
         write: 'Shaded $= \dfrac{2\pi}{4}r^{2} - \dfrac{3\sqrt{3}}{4}r^{2}$'
         point:
           - {line: 1, kind: box, text: 'the plan'}
-          - {line: 5, kind: arrow, text: 'triangles'}
+          - {line: 8, kind: move, from: {line: 7, at: '=42πr2'}, at: '42πr2', text: 'semicircle'}
+          - {line: 8, kind: move, from: {line: 5, at: '=433r2'}, at: '433r2', text: 'triangles'}
       - say: 'Both parts share $r$ squared over 4, so take it out as a common factor.'
         write: '$= \dfrac{r^{2}}{4}(2\pi - 3\sqrt{3})$'
       - say: 'So the shaded area is $r$ squared over 4, times 2 pi minus 3 root 3, which is answer choice B.'
@@ -1210,25 +1313,34 @@ lessons:
         write: '$\angle PSQ = 35^{\circ}, \quad \angle SPR = 30^{\circ}$; $\ QRS$ is straight'
       - say: 'We''ll chain three facts: one about triangles, then two about circles. Start with triangle $PRS$. Its angle at $S$ is 35 degrees and its angle at $P$ is 30 degrees.'
         write: 'In $\triangle PRS$: $\ \angle PSR = 35^{\circ},\ \ \angle SPR = 30^{\circ}$'
+        point:
+          - {figure: 0, kind: arc, target: PSR, text: '35°'}
+          - {figure: 0, kind: arc, target: SPR, text: '30°'}
       - say: 'Since $QRS$ is a straight line, angle $PRQ$ is the exterior angle of triangle $PRS$ at $R$. An exterior angle equals the sum of the two interior opposite angles.'
         write: 'Exterior angle: $\ \angle PRQ = \angle PSR + \angle SPR$'
       - say: 'Put in the two angles. 35 plus 30 is 65, so angle $PRQ$ is 65 degrees.'
         write: '$\angle PRQ = 35^{\circ} + 30^{\circ} = 65^{\circ}$'
         point:
           - {line: 2, kind: box, text: 'the rule'}
+          - {figure: 0, kind: arc, target: PRQ, text: '65°'}
       - say: 'Now the circle. Angle $PRQ$ is at the circumference, standing on the arc $PQ$. The angle at the centre standing on the same arc is twice as big.'
         write: 'Angle at centre: $\ \angle POQ = 2 \times \angle PRQ$'
       - say: 'Using the 65 degrees we just found, 2 times 65 is 130. So angle $POQ$ is 130 degrees.'
         write: '$\angle POQ = 2 \times 65^{\circ} = 130^{\circ}$'
         point:
           - {line: 4, kind: box, text: 'the rule'}
-          - {line: 3, kind: arrow, at: '=65∘'}
+          - {line: 5, kind: move, from: {line: 3, at: '=65∘'}, at: '65∘'}
+          - {figure: 0, kind: arc, target: POQ, text: '130°'}
       - say: 'Now look at triangle $OPQ$. $OP$ and $OQ$ are both radii, so they are equal, and the triangle is isosceles. Its base angles, at $P$ and at $Q$, are equal.'
         write: '$OP = OQ \Rightarrow \angle OQP = \angle OPQ$'
       - say: 'The angles of triangle $OPQ$ add to 180 degrees. Taking away the 130 at $O$ leaves 50 degrees for the two base angles together.'
         write: '$\angle OQP + \angle OPQ = 180^{\circ} - 130^{\circ} = 50^{\circ}$'
+        point:
+          - {line: 7, kind: move, from: {line: 5, at: '=130∘'}, at: '−130∘'}
       - say: 'The two base angles are equal, so each is half of 50, which is 25 degrees.'
         write: '$\angle OQP = \dfrac{50^{\circ}}{2} = 25^{\circ}$'
+        point:
+          - {figure: 0, kind: arc, target: OQP, text: '25°'}
       - say: 'So angle $OQP$ is 25 degrees, which is answer choice D.'
         write: '$\angle OQP = 25^{\circ}$'
         answer: true
@@ -1249,16 +1361,18 @@ lessons:
         write: 'From $pq + 1 = q^{2}$: $\ pq = q^{2} - 1$'
         point:
           - {line: 0, kind: underline, at: 'pq+1=q2', text: 'given'}
+          - {line: 3, kind: move, from: {line: 0, at: '+1'}, at: '−1', text: 'across'}
       - say: '$q$ squared minus 1 is a difference of two squares, $q$ squared minus 1 squared.'
         write: '$pq = (q - 1)(q + 1)$'
       - say: 'Now put that in place of $pq$ on the bottom of $t$.'
         write: '$t = \dfrac{q - 1}{(q - 1)(q + 1)}$'
         point:
-          - {line: 4, kind: arrow, text: 'for pq'}
+          - {line: 5, kind: move, from: {line: 4, at: '(q−1)(q+1)'}, at: '(q−1)(q+1)', text: 'for pq'}
       - say: '$q$ minus 1 is on the top and the bottom, so it cancels, leaving 1 on top.'
         write: '$t = \dfrac{1}{q + 1}$'
         point:
-          - {line: 5, kind: strike, at: 'q−1', text: 'cancels'}
+          - {line: 5, kind: strike, at: '(q+1)[[q−1]]', text: 'cancels'}
+          - {line: 5, kind: strike, at: '[[(q−1)]](q+1)'}
       - say: 'Let''s check with a number, $q$ equals 2. Then $2p$ plus 1 is 4, so $2p$ is 3 and $p$ is 3 over 2.'
         write: 'Check $q = 2$: $\ 2p + 1 = 4 \Rightarrow p = \dfrac{3}{2}$'
       - say: '1 over $p$ is 2 over 3, and 1 over $pq$ is 1 over 3. So $t$ is 2 over 3 minus 1 over 3, which is 1 over 3. And 1 over $q$ plus 1 is 1 over 3 too.'
@@ -1283,10 +1397,12 @@ lessons:
         write: '$cf(3) = 30$'
       - say: '$cf$ of 4 adds the 32 who scored 4. 30 plus 32 is 62.'
         write: '$cf(4) = cf(3) + 32 = 30 + 32 = 62$'
+        point:
+          - {line: 4, kind: move, from: {line: 3, at: '=30'}, at: '=[[30]]+32'}
       - say: '$cf$ of 5 adds the 30 who scored 5 to that 62. 62 plus 30 is 92.'
         write: '$cf(5) = cf(4) + 30 = 62 + 30 = 92$'
         point:
-          - {line: 4, kind: arrow, at: '62'}
+          - {line: 5, kind: move, from: {line: 4, at: '=62'}, at: '62+'}
       - say: 'Let''s check from the other end. All the frequencies add to 30 plus 32 plus 30 plus 35 plus 20, which is 147.'
         write: 'Total $= 30 + 32 + 30 + 35 + 20 = 147$'
       - say: 'The scores above 5 are 6 and 7, with 35 plus 20, which is 55 people.'
@@ -1294,8 +1410,8 @@ lessons:
       - say: '147 minus 55 is 92, the same as before.'
         write: 'Check: $\ 147 - 55 = 92$'
         point:
-          - {line: 6, kind: arrow, at: '147'}
-          - {line: 7, kind: arrow, at: '=55'}
+          - {line: 8, kind: move, from: {line: 6, at: '=147'}, at: '147'}
+          - {line: 8, kind: move, from: {line: 7, at: '=55'}, at: '−55'}
       - say: 'So $cf$ of 5 is 92, which is answer choice E.'
         write: '$cf(5) = 92$'
         answer: true
@@ -1308,6 +1424,9 @@ lessons:
     moments:
       - say: 'In the diagram, $P$ is outside the circle. The straight lines $PQR$ and $PTS$ cut the circle. Angle $QPT$ is 44 degrees and angle $PQT$ is 20 degrees. We want $y$, which is angle $QRS$.'
         write: '$\angle QPT = 44^{\circ}, \quad \angle PQT = 20^{\circ}$; $\ y = \angle QRS$'
+        point:
+          - {figure: 0, kind: arc, target: QPT, text: '44°'}
+          - {figure: 0, kind: arc, target: PQT, text: '20°'}
       - say: 'The four points $Q$, $T$, $S$ and $R$ all lie on the circle, so they make a cyclic quadrilateral.'
         write: '$QTSR$ is a cyclic quadrilateral'
       - say: 'Here''s the fact we''ll use: an exterior angle of a cyclic quadrilateral equals the interior angle at the opposite corner.'
@@ -1316,6 +1435,8 @@ lessons:
         write: 'In $\triangle PQT$: $\ \angle PTQ = 180^{\circ} - 44^{\circ} - 20^{\circ}$'
       - say: '44 plus 20 is 64, and 180 minus 64 is 116. So angle $PTQ$ is 116 degrees.'
         write: '$= 180^{\circ} - 64^{\circ} = 116^{\circ}$'
+        point:
+          - {figure: 0, kind: arc, target: PTQ, text: '116°'}
       - say: '$P$, $T$ and $S$ lie on a straight line. So angle $PTQ$ sits just outside the quadrilateral at $T$: it is the exterior angle at $T$.'
         write: '$\angle PTQ$ is the exterior angle of $QTSR$ at $T$'
       - say: 'The corner opposite $T$ in the quadrilateral is $R$, and the interior angle there is our $y$.'
@@ -1325,7 +1446,8 @@ lessons:
       - say: 'We found angle $PTQ$ is 116 degrees, so $y$ is 116 degrees too.'
         write: '$y = 116^{\circ}$'
         point:
-          - {line: 4, kind: arrow, at: '116∘'}
+          - {line: 7, kind: move, from: {line: 4, at: '=116∘'}, at: '116∘'}
+          - {figure: 0, kind: arc, target: QRS, text: 'y = 116°'}
       - say: 'A second route to check. The exterior angle at $Q$, 20 degrees, equals the interior angle at $S$. Then triangle $PRS$ has 44 at $P$ and 20 at $S$, so its angle at $R$ is 180 minus 44 minus 20, which is 116 again.'
         write: 'Check: $\ y = 180^{\circ} - 44^{\circ} - 20^{\circ} = 116^{\circ}$'
       - say: 'So the angle marked $y$ is 116 degrees, which is answer choice B.'
@@ -1340,26 +1462,41 @@ lessons:
     moments:
       - say: 'A right circular cone has base radius $r$ cm and a vertical angle of $2y$ degrees. We want its height.'
         write: 'Base radius $r$; vertical angle $2y^{\circ}$'
+        show_sketch: true
+        point:
+          - {figure: sketch, kind: circle, target: '2y°', text: 'vertical angle'}
       - say: 'Cone questions become trigonometry once you slice the cone straight down the middle. The height, a radius of the base, and a slanting edge make a right-angled triangle.'
         write: 'Right-angled triangle: height $h$, radius $r$, slant edge'
       - say: 'The vertical angle is the angle at the top, between two opposite slant edges. The height runs straight down the middle, so it cuts that angle exactly in half.'
         write: 'Angle at the top of the triangle $= \tfrac{1}{2} \times 2y = y$'
+        point:
+          - {figure: sketch, kind: arc, target: OVA, text: 'y'}
       - say: 'Now name the sides from that angle $y$ at the top. The radius $r$ is across from it, so it is the opposite side. The height $h$ runs beside it, so it is the adjacent side.'
         write: 'Opposite $= r$, adjacent $= h$'
+        point:
+          - {figure: sketch, kind: highlight, target: OA, text: 'opposite'}
+          - {figure: sketch, kind: highlight, target: VO, text: 'adjacent'}
       - say: 'Opposite over adjacent is tan. So tan $y$ is $r$ over $h$.'
         write: '$\tan y = \dfrac{\text{opposite}}{\text{adjacent}} = \dfrac{r}{h}$'
         point:
-          - {line: 3, kind: arrow, text: 'the sides'}
+          - {line: 4, kind: move, from: {line: 3, at: 'Opposite=[[r]]'}, at: 'h[[r]]', text: 'opposite'}
+          - {line: 4, kind: move, from: {line: 3, at: 'adjacent=[[h]]'}, at: '[[h]]r', text: 'adjacent'}
       - say: 'Multiply both sides by $h$.'
         write: '$h\tan y = r$'
+        point:
+          - {line: 5, kind: move, from: {line: 4, at: '[[h]]r'}, at: '[[h]]tany', text: 'times h'}
       - say: 'Now divide both sides by tan $y$ to get $h$ by itself.'
         write: '$h = \dfrac{r}{\tan y}$'
+        point:
+          - {line: 6, kind: move, from: {line: 5, at: 'h[[tany]]'}, at: '[[tany]]r', text: 'divide'}
       - say: '1 over tan is called cot, short for cotangent. So $r$ over tan $y$ is $r$ times cot $y$.'
         write: '$h = r \times \dfrac{1}{\tan y} = r\cot y$'
       - say: 'A sense check: a very narrow cone has a small angle $y$, and cot of a small angle is large, so the cone is tall. That fits.'
         write: 'Small $y \Rightarrow$ large $\cot y \Rightarrow$ tall cone'
       - say: 'So the height is $r$ cot $y$ centimetres, which is answer choice C.'
         write: 'Height $= r\cot y^{\circ}$ cm'
+        point:
+          - {figure: sketch, kind: label, target: 'h = ?', text: 'r cot y'}
         answer: true
     traps:
       A: 'You went for $r$ tan $y$. That puts the radius and height the wrong way round. From the top, $r$ is opposite and $h$ is adjacent, so tan $y$ is $r$ over $h$, and $h$ is $r$ cot $y$.'
@@ -1381,8 +1518,8 @@ lessons:
       - say: 'Put the two counts into the formula: 6 over 36.'
         write: '$P = \dfrac{6}{36}$'
         point:
-          - {line: 4, kind: arrow, at: '6', text: 'doubles'}
-          - {line: 2, kind: arrow, at: '=36', text: 'all'}
+          - {line: 5, kind: move, from: {line: 4, at: '=6'}, at: '36[[6]]', text: 'doubles'}
+          - {line: 5, kind: move, from: {line: 2, at: '=36'}, at: '[[36]]6', text: 'all'}
       - say: 'Divide the top and bottom by 6. 6 over 6 is 1, and 36 over 6 is 6.'
         write: '$= \dfrac{6 \div 6}{36 \div 6} = \dfrac{1}{6}$'
       - say: 'Another way to see it: whatever the first die shows, the second must match it, and only 1 of its 6 faces does.'
@@ -1406,7 +1543,7 @@ lessons:
       - say: 'Put that back into the equation in place of the bracket.'
         write: '$y^{2} - 2y + 1 = 4y - 7$'
         point:
-          - {line: 2, kind: arrow, at: '=y2−2y+1', text: 'sub in'}
+          - {line: 3, kind: move, from: {line: 2, at: '=y2−2y+1'}, at: 'y2−2y+1', text: 'sub in'}
       - say: 'Now bring everything to the left. Take $4y$ from both sides: minus $2y$ minus $4y$ is minus $6y$.'
         write: '$y^{2} - 6y + 1 = -7$'
       - say: 'Add 7 to both sides. 1 plus 7 is 8.'
@@ -1433,10 +1570,13 @@ lessons:
     moments:
       - say: 'In the diagram, the line $y$ equals $2x$ plus 1 crosses the curve $y$ equals $x$ squared minus $2x$ plus 1. We want the $x$-coordinates of the points where they meet.'
         write: '$y = 2x + 1, \quad y = x^{2} - 2x + 1$'
+        point:
+          - {figure: 0, kind: circle, target: 'y = 2x + 1'}
+          - {figure: 0, kind: circle, target: 'y = x² − 2x + 1'}
       - say: 'Where two graphs meet, they have the same $y$ for the same $x$. So set the two right-hand sides equal to each other.'
         write: 'Where they meet: $\ x^{2} - 2x + 1 = 2x + 1$'
         point:
-          - {line: 0, kind: underline, at: '2x+1'}
+          - {line: 0, kind: underline, at: 'y=[[2x+1]]'}
           - {line: 0, kind: underline, at: 'x2−2x+1'}
       - say: 'Bring everything to the left. Take $2x$ from both sides: minus $2x$ minus $2x$ is minus $4x$.'
         write: '$x^{2} - 4x + 1 = 1$'
@@ -1452,6 +1592,9 @@ lessons:
         write: 'At $x = 4$: $\ 2(4) + 1 = 9,\quad 4^{2} - 2(4) + 1 = 16 - 8 + 1 = 9$'
       - say: 'So the graphs meet at the points 0, 1 and 4, 9, just where the diagram shows them crossing.'
         write: 'Meeting points: $\ (0,\ 1)$ and $(4,\ 9)$'
+        point:
+          - {figure: 0, kind: circle, target: '4', text: 'x = 4'}
+          - {figure: 0, kind: circle, target: '9', text: 'y = 9'}
       - say: 'So the $x$-coordinates are 0 and 4, which is answer choice E.'
         write: '$x = 0$ and $x = 4$'
         answer: true
@@ -1466,16 +1609,24 @@ lessons:
         write: '$\sin\theta = \dfrac{x}{y}, \quad 0^{\circ} < \theta < 90^{\circ}$'
       - say: 'Sine is opposite over hypotenuse. So draw a triangle where the side opposite theta is $x$ and the hypotenuse is $y$.'
         write: 'Opposite $= x$, hypotenuse $= y$'
+        show_sketch: true
+        point:
+          - {figure: sketch, kind: circle, target: x, text: 'opposite'}
+          - {figure: sketch, kind: circle, target: y, text: 'hypotenuse'}
       - say: 'We need the third side, the adjacent. By Pythagoras, the two shorter sides squared and added make the hypotenuse squared.'
         write: '$x^{2} + (\text{adjacent})^{2} = y^{2}$'
       - say: 'Take $x$ squared from both sides.'
         write: '$(\text{adjacent})^{2} = y^{2} - x^{2}$'
+        point:
+          - {line: 3, kind: move, from: {line: 2, at: 'x2+'}, at: '−x2', text: 'across'}
       - say: 'Take the square root. The side is a length, so it is positive.'
         write: 'Adjacent $= \sqrt{y^{2} - x^{2}}$'
+        point:
+          - {figure: sketch, kind: label, target: '?', text: '√(y² − x²)'}
       - say: 'Now tan theta is opposite over adjacent. Using our sides, that is $x$ over the root of $y$ squared minus $x$ squared.'
         write: '$\tan\theta = \dfrac{\text{opposite}}{\text{adjacent}} = \dfrac{x}{\sqrt{y^{2} - x^{2}}}$'
         point:
-          - {line: 4, kind: arrow, text: 'adjacent'}
+          - {line: 5, kind: move, from: {line: 4, at: 'y2−x2'}, at: 'y2−x2', text: 'adjacent'}
       - say: '1 over tan theta turns that fraction upside down: adjacent over opposite.'
         write: '$\dfrac{1}{\tan\theta} = \dfrac{\text{adjacent}}{\text{opposite}} = \dfrac{\sqrt{y^{2} - x^{2}}}{x}$'
       - say: 'Let''s check with a 3, 4, 5 triangle. If $x$ is 3 and $y$ is 5, the adjacent side is the root of 25 minus 9, which is root 16, or 4.'
@@ -1494,29 +1645,45 @@ lessons:
     moments:
       - say: 'In the diagram, angle $TSP$ equals angle $PRQ$. $QR$ is 8 cm, $PR$ is 6 cm and $ST$ is 12 cm. We want the length $SP$.'
         write: '$\angle TSP = \angle PRQ$; $\ QR = 8,\ PR = 6,\ ST = 12$'
+        point:
+          - {figure: 0, kind: arc, target: PRQ}
+          - {figure: 0, kind: arc, target: TSP}
       - say: 'Look at the small triangle $PRQ$ and the big triangle $PST$. They share the angle at $P$.'
         write: 'Shared: $\ \angle RPQ = \angle TPS$, the angle at $P$'
+        point:
+          - {figure: 0, kind: arc, target: RPQ, text: 'shared'}
       - say: 'And we''re told the angle at $R$ in the small triangle equals the angle at $S$ in the big one. Two pairs of equal angles make the triangles similar.'
         write: 'Given $\angle PRQ = \angle PST$, so $\triangle PRQ \sim \triangle PST$'
       - say: 'Now match the corners by their equal angles. $P$ goes with $P$, $R$ goes with $S$, and so the last pair, $Q$, goes with $T$.'
         write: 'Matching corners: $\ P \leftrightarrow P,\quad R \leftrightarrow S,\quad Q \leftrightarrow T$'
       - say: 'That tells us which sides go together. $PR$ matches $PS$, and $RQ$ matches $ST$.'
         write: 'Matching sides: $\ PR \leftrightarrow PS,\quad RQ \leftrightarrow ST$'
+        point:
+          - {figure: 0, kind: highlight, target: PR}
+          - {figure: 0, kind: highlight, target: PS}
       - say: 'In similar triangles, matching sides are in the same ratio.'
         write: '$\dfrac{PR}{PS} = \dfrac{RQ}{ST}$'
       - say: 'Put in the numbers: $PR$ is 6, $RQ$ is 8 and $ST$ is 12.'
         write: '$\dfrac{6}{PS} = \dfrac{8}{12}$'
         point:
-          - {line: 5, kind: arrow, text: 'ratio'}
-          - {line: 0, kind: highlight, at: 'QR=8,PR=6,ST=12', text: 'given'}
+          - {line: 6, kind: move, from: {line: 0, at: 'PR=[[6]]'}, at: 'PS[[6]]', text: 'PR'}
+          - {line: 6, kind: move, from: {line: 0, at: 'QR=[[8]]'}, at: '12[[8]]', text: 'RQ'}
+          - {line: 6, kind: move, from: {line: 0, at: 'ST=[[12]]'}, at: '[[12]]8', text: 'ST'}
       - say: 'Cross-multiply: 8 times $PS$ equals 6 times 12, which is 72.'
         write: '$8 \times PS = 6 \times 12 = 72$'
+        point:
+          - {line: 7, kind: move, from: {line: 6, at: '[[PS]]6'}, at: '×[[PS]]', text: 'across'}
+          - {line: 7, kind: move, from: {line: 6, at: '[[12]]8'}, at: '×[[12]]', text: 'across'}
       - say: 'Divide both sides by 8. 72 divided by 8 is 9.'
         write: '$PS = \dfrac{72}{8} = 9$'
+        point:
+          - {line: 8, kind: move, from: {line: 7, at: '[[8]]×PS'}, at: '[[8]]72', text: 'divide'}
       - say: 'Check the scale: the big triangle is 12 over 8, which is 1.5 times the small one, and 6 times 1.5 is 9.'
         write: 'Check: $\ \dfrac{12}{8} = 1.5,\quad 6 \times 1.5 = 9$'
       - say: 'So $SP$ is 9 cm, which is answer choice C.'
         write: '$SP = 9$ cm'
+        point:
+          - {figure: 0, kind: label, target: PS, text: '9 cm'}
         answer: true
     traps:
       A: 'You went for 4 cm. That matches the sides the wrong way round, 6 times 8 over 12. The equal angles are at $R$ and $S$, so $PR$ goes with $PS$: 6 over $PS$ equals 8 over 12, giving 9.'
@@ -1531,10 +1698,19 @@ lessons:
         write: 'Height of each bar $=$ number of students in that group'
       - say: 'The 0 to 9 bar reaches 4, and the 10 to 19 bar reaches 6.'
         write: 'Marks 0–9: 4 students; 10–19: 6 students'
+        point:
+          - {figure: 0, kind: label, target: '0–9', text: '4'}
+          - {figure: 0, kind: label, target: '10–19', text: '6'}
       - say: 'The 20 to 29 bar reaches 8, and the 30 to 39 bar, the tallest, reaches 9.'
         write: 'Marks 20–29: 8 students; 30–39: 9 students'
+        point:
+          - {figure: 0, kind: label, target: '20–29', text: '8'}
+          - {figure: 0, kind: label, target: '30–39', text: '9'}
       - say: 'The 40 to 49 bar reaches 5, and the 50 to 59 bar reaches 2.'
         write: 'Marks 40–49: 5 students; 50–59: 2 students'
+        point:
+          - {figure: 0, kind: label, target: '40–49', text: '5'}
+          - {figure: 0, kind: label, target: '50–59', text: '2'}
       - say: 'Every student is in exactly one group, so the class size is the total of all six frequencies.'
         write: 'Class size $= 4 + 6 + 8 + 9 + 5 + 2$'
       - say: 'Add them up in steps. 4 plus 6 is 10, and 10 plus 8 is 18.'
@@ -1553,24 +1729,32 @@ lessons:
     moments:
       - say: 'In the diagram, $O$ is the centre of the circle, $PR$ and $SQ$ are diameters, and $PS$ is parallel to $RT$. Angle $PRT$ is 135 degrees. We want angle $PSQ$.'
         write: '$PS \parallel RT, \quad \angle PRT = 135^{\circ}$; $\ PR$ and $SQ$ are diameters'
+        point:
+          - {figure: 0, kind: arc, target: PRT, text: '135°'}
       - say: 'We''ll use the parallel lines first, then the circle. $PR$ cuts across the parallel lines $PS$ and $RT$. Angles $SPR$ and $PRT$ lie between the parallels on the same side, so they are co-interior angles, which add to 180 degrees.'
         write: 'Co-interior: $\ \angle SPR + \angle PRT = 180^{\circ}$'
       - say: 'Put in 135 for angle $PRT$. 180 minus 135 is 45.'
         write: '$\angle SPR = 180^{\circ} - 135^{\circ} = 45^{\circ}$'
         point:
-          - {line: 0, kind: underline, at: '135∘', text: 'given'}
+          - {line: 2, kind: move, from: {line: 0, at: '135∘'}, at: '−135∘', text: 'given'}
+          - {figure: 0, kind: arc, target: SPR, text: '45°'}
       - say: 'Now the circle. Angle $SPR$ is at the circumference, standing on the arc $SR$. The angle at the centre on the same arc is twice as big: 2 times 45 is 90.'
         write: 'At the centre: $\ \angle SOR = 2 \times \angle SPR = 2 \times 45^{\circ} = 90^{\circ}$'
+        point:
+          - {line: 3, kind: move, from: {line: 2, at: '=45∘'}, at: '45∘'}
+          - {figure: 0, kind: arc, target: SOR, text: '90°'}
       - say: '$PR$ and $SQ$ are both diameters, so they cross at $O$. Angle $POQ$ is vertically opposite angle $SOR$, so it is also 90 degrees.'
         write: 'Vertically opposite: $\ \angle POQ = \angle SOR = 90^{\circ}$'
         point:
-          - {line: 3, kind: arrow, at: '=90∘'}
+          - {line: 4, kind: move, from: {line: 3, at: '=90∘'}, at: '90∘'}
+          - {figure: 0, kind: arc, target: POQ, text: '90°'}
       - say: 'Now angle $PSQ$ is at the circumference, standing on the arc $PQ$. So it is half of the centre angle on that arc, angle $POQ$.'
         write: '$\angle PSQ = \tfrac{1}{2} \times \angle POQ$'
       - say: 'Half of 90 is 45.'
         write: '$= \tfrac{1}{2} \times 90^{\circ} = 45^{\circ}$'
         point:
-          - {line: 4, kind: arrow, at: '90∘'}
+          - {line: 6, kind: move, from: {line: 4, at: '=90∘'}, at: '90∘'}
+          - {figure: 0, kind: arc, target: PSQ, text: '45°'}
       - say: 'Another way to check: in triangle $OPS$, $OP$ equals $OS$, both radii. So the angle at $S$ equals the angle at $P$, which is angle $SPR$, 45 degrees. And since $O$ lies on $SQ$, the angle at $S$ is angle $PSQ$.'
         write: 'Check: $\ OP = OS \Rightarrow \angle PSQ = \angle OSP = \angle OPS = 45^{\circ}$'
       - say: 'So angle $PSQ$ is 45 degrees, which is answer choice B.'
@@ -1587,27 +1771,41 @@ lessons:
         write: '$XW \perp YZ$; $\ XZ = 5,\ WZ = 4,\ YZ = 10$'
       - say: 'The line $XW$ splits the big triangle into two right-angled triangles that share the side $XW$. Let''s find $XW$ from the triangle we know best, $XWZ$, which is right-angled at $W$.'
         write: 'In $\triangle XWZ$: $\ XW^{2} + WZ^{2} = XZ^{2}$'
+        point:
+          - {figure: 0, kind: highlight, target: XZ, text: '5 cm'}
+          - {figure: 0, kind: highlight, target: WZ, text: '4 cm'}
       - say: 'Rearrange: $XW$ squared is $XZ$ squared minus $WZ$ squared. Put in 5 and 4.'
         write: '$XW^{2} = XZ^{2} - WZ^{2} = 5^{2} - 4^{2}$'
+        point:
+          - {line: 2, kind: move, from: {line: 0, at: 'XZ=[[5]]'}, at: '[[5]]2−', text: 'XZ'}
+          - {line: 2, kind: move, from: {line: 0, at: 'WZ=[[4]]'}, at: '−[[4]]2', text: 'WZ'}
       - say: '5 squared is 25 and 4 squared is 16. 25 minus 16 is 9.'
         write: '$= 25 - 16 = 9$'
       - say: 'The square root of 9 is 3, so $XW$ is 3 cm.'
         write: '$XW = \sqrt{9} = 3$ cm'
+        point:
+          - {figure: 0, kind: label, target: XW, text: '3 cm'}
       - say: 'Next, the rest of the base. $YW$ is $YZ$ minus $WZ$: 10 minus 4 is 6.'
         write: '$YW = YZ - WZ = 10 - 4 = 6$ cm'
         point:
-          - {line: 0, kind: underline, at: 'YZ=10', text: 'given'}
+          - {line: 5, kind: move, from: {line: 0, at: 'YZ=[[10]]'}, at: '[[10]]−4', text: 'YZ'}
+          - {line: 5, kind: move, from: {line: 0, at: 'WZ=[[4]]'}, at: '10[[−4]]', text: 'WZ'}
+          - {figure: 0, kind: label, target: YW, text: '6 cm'}
       - say: 'Now the other triangle, $XWY$, also right-angled at $W$. By Pythagoras, $XY$ squared is $YW$ squared plus $XW$ squared.'
         write: 'In $\triangle XWY$: $\ XY^{2} = YW^{2} + XW^{2}$'
+        point:
+          - {figure: 0, kind: highlight, target: XY}
       - say: 'Put in the 6 and the 3 we just found. 6 squared is 36, 3 squared is 9, and 36 plus 9 is 45.'
         write: '$= 6^{2} + 3^{2} = 36 + 9 = 45$'
         point:
-          - {line: 5, kind: arrow, at: '=6cm'}
-          - {line: 4, kind: arrow, at: '=3cm'}
+          - {line: 7, kind: move, from: {line: 5, at: '=6cm'}, at: '[[6]]2+'}
+          - {line: 7, kind: move, from: {line: 4, at: '=3cm'}, at: '+[[3]]2'}
       - say: 'Take the square root. 45 is 9 times 5, and the square root of 9 is 3, so this is 3 root 5.'
         write: '$XY = \sqrt{45} = \sqrt{9 \times 5} = 3\sqrt{5}$'
       - say: 'So $XY$ is 3 root 5 cm, which is answer choice B.'
         write: '$XY = 3\sqrt{5}$ cm'
+        point:
+          - {figure: 0, kind: label, target: XY, text: '3√5 cm'}
         answer: true
     traps:
       A: 'You went for 5 root 3 cm. The numbers are swapped: $XY$ squared is 45, which is 9 times 5, so $XY$ is 3 root 5. 5 root 3 would need 75.'
@@ -1635,8 +1833,8 @@ lessons:
       - say: 'Now put both totals into the formula: 71.2 over 20.'
         write: 'Mean $= \dfrac{71.2}{20}$'
         point:
-          - {line: 7, kind: arrow, at: '=71.2', text: 'Σfx'}
-          - {line: 4, kind: arrow, at: '=20', text: 'Σf'}
+          - {line: 8, kind: move, from: {line: 7, at: '=71.2'}, at: '71.2', text: 'Σfx'}
+          - {line: 8, kind: move, from: {line: 4, at: '=20'}, at: '[[20]]71.2', text: 'Σf'}
       - say: '71.2 divided by 20 is 3.56.'
         write: '$= 3.56$'
       - say: 'So the mean diameter is 3.56 cm, which is answer choice C.'
@@ -1653,19 +1851,32 @@ lessons:
         write: 'Construction at $O$: find the obtuse $\angle UOP$'
       - say: '$OT$ is perpendicular to $OP$, so angle $TOP$ is 90 degrees.'
         write: '$\angle TOP = 90^{\circ}$'
+        point:
+          - {figure: 0, kind: arc, target: TOP, text: '90°'}
       - say: 'And $S$ is placed so that angle $SOP$ is 120 degrees.'
         write: '$\angle SOP = 120^{\circ}$'
+        point:
+          - {figure: 0, kind: arc, target: SOP, text: '120°'}
       - say: 'So the angle $TOS$, between $OT$ and $OS$, is 120 minus 90, which is 30 degrees.'
         write: '$\angle TOS = \angle SOP - \angle TOP = 120^{\circ} - 90^{\circ} = 30^{\circ}$'
+        point:
+          - {line: 3, kind: move, from: {line: 2, at: '120∘'}, at: '[[120∘]]−90', text: 'SOP'}
+          - {line: 3, kind: move, from: {line: 1, at: '90∘'}, at: '−90∘', text: 'TOP'}
+          - {figure: 0, kind: arc, target: TOS, text: '30°'}
       - say: '$U$ is on the bisector of angle $TOS$. Bisecting means cutting exactly in half, so each half is 30 over 2, which is 15 degrees.'
         write: 'Each half of $\angle TOS = \dfrac{30^{\circ}}{2} = 15^{\circ}$'
+        point:
+          - {line: 4, kind: move, from: {line: 3, at: '=30∘'}, at: '30∘'}
+          - {figure: 0, kind: arc, target: TOU, text: '15°'}
       - say: 'So starting from $OP$, we turn 90 degrees to reach $OT$, then another 15 degrees to reach $OU$.'
         write: '$\angle UOP = \angle TOP + 15^{\circ} = 90^{\circ} + 15^{\circ}$'
         point:
-          - {line: 1, kind: arrow, at: '90∘'}
-          - {line: 4, kind: arrow, at: '=15∘'}
+          - {line: 5, kind: move, from: {line: 1, at: '90∘'}, at: '[[90∘]]+15∘'}
+          - {line: 5, kind: move, from: {line: 4, at: '=15∘'}, at: '90∘+[[15∘]]'}
       - say: '90 plus 15 is 105.'
         write: '$= 105^{\circ}$'
+        point:
+          - {figure: 0, kind: arc, target: UOP, text: '105°'}
       - say: 'Check: $OU$ should sit halfway between $OT$ at 90 degrees and $OS$ at 120 degrees. 90 plus 120 is 210, and 210 over 2 is 105.'
         write: 'Check: $\ \dfrac{90^{\circ} + 120^{\circ}}{2} = \dfrac{210^{\circ}}{2} = 105^{\circ}$'
       - say: '105 degrees is more than 90, so it is obtuse, the angle the question asks for. On the other side of $OU$, with $OP$ extended, the angle would be 180 minus 105, the acute 75 degrees.'
@@ -1686,12 +1897,15 @@ lessons:
         write: 'Same radius from $O$ and from the point on $OP$ $\Rightarrow R$'
       - say: 'So $O$, $R$ and that point on $OP$ are all one radius apart. They make an equilateral triangle, and every angle in an equilateral triangle is 60 degrees.'
         write: 'Equilateral triangle $\Rightarrow \angle ROP = 60^{\circ}$'
+        point:
+          - {figure: 0, kind: arc, target: ROP, text: '60°'}
       - say: 'Next, $V$ is on the bisector of angle $ROP$. Bisecting an angle means cutting it exactly in half.'
         write: '$\angle VOP = \tfrac{1}{2} \times \angle ROP$'
       - say: 'Put in the 60 degrees we just found. Half of 60 is 30.'
         write: '$= \tfrac{1}{2} \times 60^{\circ} = 30^{\circ}$'
         point:
-          - {line: 2, kind: arrow, at: '60∘'}
+          - {line: 4, kind: move, from: {line: 2, at: '60∘'}, at: '60∘'}
+          - {figure: 0, kind: arc, target: VOP, text: '30°'}
       - say: 'And 30 degrees is less than 90, so it is acute, as the question says.'
         write: 'Acute: $\ 30^{\circ} < 90^{\circ}$'
       - say: 'You may recognise this. It is the standard ruler-and-compasses way to make a 30 degree angle: build 60 degrees, then bisect it.'
