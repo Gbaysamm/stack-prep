@@ -89,6 +89,31 @@ A mark on the working may link its piece to a doodle on the board, or to a named
 one, and `part` (optional) a `data-part` its art has at this moment. Any mark on the working
 but a move may link so, and not together with a `from`.
 
+Or to a LIVE DIAGRAM's part (lesson_diagrams.py; docs/plans/doodles-v2-contract.md section 8):
+
+    {line: 1, kind: highlight, at: '18', to: {diagram: v, part: 'M∩P'}}
+
+`diagram` is the diagram's id, and `part` (optional) one of its parts drawn by this moment
+(its actions go first, then its links), named as section 8 names them.
+
+A VALUE THAT TRAVELS. A `travel` mark answers "where did this number come from?": a chip with
+the value rides a curved arrow from where it was found into the line that uses it.
+
+    {line: 4, kind: travel, at: '40', from: {doodle: class, part: total}, text: '40 students'}
+    {line: 4, kind: travel, at: '7', from: {figure: sketch, target: AB}}
+    {line: 5, kind: travel, at: '[[2]]x', from: {line: 3, at: 'x = 2'}}
+
+`line` and `at` are the piece it lands on (both needed); `from` is exactly one source: a
+doodle on the board by its id and, optionally, a named part of it (as a link's `to` names
+one); a place on a diagram (`figure` and `target`, as a diagram mark names them); or a piece
+of this line or an earlier one (`line` and `at`). `text` is the chip's words; the piece `at`
+is used where there is none. The whiteboard style rides the chip along the arrow; the classic
+style draws the arrow alone. A travel has no `to`.
+
+A moment may start a titled SECTION of the working with `section: 'Find the union'` (a short
+heading, at most SECTION_MAX characters; see clean_section). The whiteboard style puts it up
+as a heading chip with room above it; the classic style ignores it.
+
 At most MAX_MARKS marks to a moment: more than that and the student cannot follow them all
 while one sentence is said.
 """
@@ -98,9 +123,15 @@ from __future__ import annotations
 import re
 import xml.etree.ElementTree as ET
 
+from lesson_diagrams import DiagramBook, check_diagram_link
+
 LINE_KINDS = {"circle", "underline", "arrow", "box", "highlight", "strike", "move"}
 FIGURE_KINDS = {"circle", "underline", "arrow", "highlight", "strike", "arc", "label"}
-POINT_KINDS = LINE_KINDS | FIGURE_KINDS
+#: A value riding an arrow from a picture part, or another line, into a line (see `_travel`).
+TRAVEL = "travel"
+POINT_KINDS = LINE_KINDS | FIGURE_KINDS | {TRAVEL}
+#: The longest `section` heading a moment may start: a few words on a chip.
+SECTION_MAX = 40
 MAX_MARKS = 3
 _KEYS = {"line", "kind", "text", "at", "from", "figure", "target", "to", "passage", "nth"}
 #: What a mark in the passage may be.
@@ -486,6 +517,82 @@ def clean_show_sketch(value: object, drawn: dict[str, str], brought: list[str], 
     return name
 
 
+def clean_section(value: object, where: str) -> str:
+    """A moment's `section`: the heading of the part of the working it starts, a few words."""
+    if not isinstance(value, str) or not value.strip():
+        raise SystemExit(f"{where}: section is a short heading, e.g. 'Find the union'")
+    heading = " ".join(value.split())
+    if len(heading) > SECTION_MAX:
+        raise SystemExit(
+            f"{where}: section {heading!r} is {len(heading)} characters (at most {SECTION_MAX})"
+        )
+    return heading
+
+
+def _travel(
+    mark: dict[str, object],
+    index: int,
+    where: str,
+    figures: list[str] | None,
+    sketches: dict[str, str] | None,
+    doodles: dict[str, set[str]] | None,
+) -> dict[str, object]:
+    """A `travel` mark, checked: the piece it lands on, and the one place it comes from."""
+    for key in ("figure", "target", "to", "passage", "nth"):
+        if key in mark:
+            raise SystemExit(f"{where}: a travel has line, at, from and text, not {key}")
+    clean: dict[str, object] = {
+        "line": _moment(mark.get("line"), index, where, "line"),
+        "kind": TRAVEL,
+    }
+    at = _piece(mark.get("at"), "at", where)
+    if at is None:
+        raise SystemExit(f"{where}: a travel needs at: the piece of its line the value lands on")
+    clean["at"] = at
+    start = mark.get("from")
+    if not isinstance(start, dict) or not start:
+        raise SystemExit(
+            f"{where}: a travel needs from: {{doodle, part}}, {{figure, target}} or {{line, at}}"
+        )
+    if "doodle" in start:
+        if set(start) - {"doodle", "part"}:
+            raise SystemExit(f"{where}: a travel from a doodle is from: {{doodle: <id>, part: …}}")
+        handle, part = start.get("doodle"), start.get("part")
+        if not isinstance(handle, str) or not _DOODLE_ID.fullmatch(handle):
+            raise SystemExit(f"{where}: from.doodle is a doodle's id ({handle!r})")
+        if doodles is not None and handle not in doodles:
+            raise SystemExit(
+                f"{where}: from.doodle {handle!r} is not a doodle brought in by this moment"
+                " or earlier"
+            )
+        begin: dict[str, object] = {"doodle": handle}
+        if part is not None:
+            if not isinstance(part, str) or (doodles is not None and part not in doodles[handle]):
+                known = sorted(doodles[handle]) if doodles is not None else []
+                raise SystemExit(
+                    f"{where}: {handle} has no part {part!r} (its parts: {known or 'none'})"
+                )
+            begin["part"] = part
+    elif "figure" in start:
+        if set(start) != {"figure", "target"}:
+            raise SystemExit(f"{where}: a travel from a diagram is from: {{figure: …, target: …}}")
+        found = _figure_mark(dict(start), "circle", f"{where} (from)", figures, sketches)
+        begin = {"figure": found["figure"], "target": found["target"]}
+    elif "line" in start:
+        if set(start) - {"line", "at"}:
+            raise SystemExit(f"{where}: a travel from a line is from: {{line: …, at: …}}")
+        begin = {"line": _moment(start.get("line"), index, where, "from.line")}
+        begin_at = _piece(start.get("at"), "from.at", where)
+        if begin_at is not None:
+            begin["at"] = begin_at
+    else:
+        raise SystemExit(
+            f"{where}: a travel's from is {{doodle, part}}, {{figure, target}} or {{line, at}}"
+        )
+    clean["from"] = begin
+    return clean
+
+
 def clean_points(
     point: object,
     index: int,
@@ -494,6 +601,7 @@ def clean_points(
     sketches: dict[str, str] | None = None,
     passage: str | None = None,
     doodles: dict[str, set[str]] | None = None,
+    diagrams: DiagramBook | None = None,
 ) -> list[dict[str, object]]:
     """A moment's marks, checked, in the form they are stored and played.
 
@@ -507,7 +615,9 @@ def clean_points(
     a passage mark, or a link into the passage, is checked against it (see the head of this
     file), and refused where there is none. `doodles` is the lesson's doodles brought in by this
     moment, by id, with the parts each has now (lesson_doodles.DoodleBook.links): a link to a
-    doodle is checked against it where it is given.
+    doodle is checked against it where it is given. `diagrams` is the lesson's DiagramBook
+    (lesson_diagrams.py): a link to a live diagram's part, `to: {diagram, part}`, is checked
+    against it where it is given.
     """
     if not isinstance(point, list) or not point:
         raise SystemExit(f"{where}: point is a list of marks")
@@ -526,7 +636,9 @@ def clean_points(
         text = mark.get("text")
         if text is not None and (not isinstance(text, str) or not text.strip()):
             raise SystemExit(f"{where}: a mark's text is a few words or nothing")
-        if "passage" in mark:
+        if kind == TRAVEL:
+            clean = _travel(mark, index, where, figures, sketches, doodles)
+        elif "passage" in mark:
             clean = _passage_mark(mark, kind, where, passage)
         elif "nth" in mark:
             raise SystemExit(f"{where}: nth picks an occurrence in the passage (passage: true)")
@@ -571,6 +683,14 @@ def clean_points(
                         f"{where}: a link to a doodle is not a move, and not with a from"
                     )
                 clean["to"] = _to_doodle(to, where, doodles)
+            elif isinstance(to, dict) and "diagram" in to:
+                # A live diagram's part (lesson_diagrams.py): `diagrams` is the lesson's
+                # DiagramBook, which checks the part is drawn by now.
+                if kind == "move" or start is not None:
+                    raise SystemExit(
+                        f"{where}: a link to a diagram is not a move, and not with a from"
+                    )
+                clean["to"] = check_diagram_link(to, where, diagrams)
             elif "to" in mark:
                 if kind != "arrow" or start is not None:
                     raise SystemExit(

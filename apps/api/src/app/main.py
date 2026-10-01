@@ -21,6 +21,7 @@ from app.routers import (
     curriculum,
     dev,
     health,
+    mouth,
     pool,
     practice,
     progress,
@@ -62,6 +63,7 @@ def create_app() -> FastAPI:
     app.include_router(checkup.router)
     app.include_router(pool.router)
     app.include_router(practice.router)
+    app.include_router(mouth.router)
     app.include_router(figures.router)
     app.include_router(student.router)
     app.include_router(progress.router)

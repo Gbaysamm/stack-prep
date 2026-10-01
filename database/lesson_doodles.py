@@ -53,6 +53,7 @@ from pathlib import Path
 from typing import Any
 
 from lesson_marks import check_sketch
+from lesson_mouth import clean_mouth, clean_say
 
 ROOT = Path(__file__).resolve().parent.parent
 #: The board's shared doodles: <name>.svg, read by the web app's doodles/index.ts.
@@ -469,6 +470,8 @@ class DoodleBook:
         self.library_dir = library_dir
         self.held: dict[str, _Held] = {}
         self._art: dict[str, ArtInfo] = {}
+        #: The talking mouths brought in so far, by id (lesson_mouth.py).
+        self.mouths: set[str] = set()
 
     def info(self, name: str, where: str) -> ArtInfo:
         """What actions can find in the art of this name."""
@@ -510,7 +513,7 @@ class DoodleBook:
             handle = doodle.get("id")
             if handle is None:
                 continue
-            if handle in self.held:
+            if handle in self.held or handle in self.mouths:
                 raise SystemExit(f"{where}: two doodles in this lesson have the id {handle!r}")
             repeat = doodle.get("repeat")
             if isinstance(repeat, list):
@@ -528,6 +531,16 @@ class DoodleBook:
         `doodle_do`), and what its marks may link to — each doodle's parts before its actions
         or after them, since a mark may point at a part a stage of this moment draws."""
         stored = self.bring(moment, index, writes, where)
+        if moment.get("mouth") is not None:
+            # A talking mouth (docs/plans/doodles-v2-contract.md section 7).
+            say = moment.get("say")
+            mouth = clean_mouth(moment["mouth"], say if isinstance(say, str) else "", where)
+            handle = mouth.get("id")
+            if handle is not None:
+                if handle in self.held or handle in self.mouths:
+                    raise SystemExit(f"{where}: two doodles in this lesson have the id {handle!r}")
+                self.mouths.add(handle)
+            stored["mouth"] = mouth
         before = self.links()
         if moment.get("doodle_do") is not None:
             stored["doodle_do"] = self.act(moment["doodle_do"], where)
@@ -567,6 +580,17 @@ class DoodleBook:
         if not isinstance(action, dict):
             raise SystemExit(f"{where}: each doodle action is {{id, op, ...}}")
         op = action.get("op")
+        if action.get("id") in self.mouths:
+            # A talking mouth says a word again, or is pointed at; nothing else.
+            if op == "say":
+                return clean_say(action, where)
+            if op == "pulse" and set(action) <= {"id", "op"}:
+                return {"id": action["id"], "op": "pulse"}
+            raise SystemExit(f"{where}: a talking mouth takes say or pulse ({op!r})")
+        if op == "say":
+            raise SystemExit(
+                f"{where}: say is for a talking mouth, and {action.get('id')!r} is not one"
+            )
         if not isinstance(op, str) or op not in OPS:
             raise SystemExit(f"{where}: a doodle action's op is one of {sorted(OPS)} ({op!r})")
         needs, may = OPS[op]

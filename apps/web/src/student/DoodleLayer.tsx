@@ -36,12 +36,13 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import type { CSSProperties, RefObject } from "react";
 import { createPortal } from "react-dom";
 
-import type { LessonDoodle, LessonDoodleOp, LessonDoodleRef } from "./api.js";
+import type { LessonDoodle, LessonDoodleOp, LessonDoodleRef, LessonMouth } from "./api.js";
 import { CELL, charsIn, repeatCount, repeatShape, viewBoxOf } from "./doodleArt.js";
 import type { ArtSource, DoodleEngine } from "./doodleEngine.js";
 import { libraryDoodle } from "./doodles/index.js";
 import { stillMotion, type Box, type Pt } from "./ink.js";
 import { LiveDoodle, type DoodleTask } from "./LiveDoodle.js";
+import { Mouth, mouthBox } from "./Mouth.js";
 
 /** What the layer needs of a moment of the lesson. */
 export interface DoodleMoment {
@@ -49,6 +50,10 @@ export interface DoodleMoment {
   doodle?: LessonDoodleRef | null;
   doodles?: LessonDoodleRef[] | null;
   doodleDo?: LessonDoodleOp[] | null;
+  /** A talking mouth it brings in (Mouth.tsx), and what it says and its voice, for the mouth. */
+  mouth?: LessonMouth | null;
+  say?: string;
+  voice?: string | null;
 }
 
 /** A board line's link to a doodle (Board.tsx `pairLinks`): the pair, and what it points at. */
@@ -75,7 +80,9 @@ interface Due {
   sourceKey: string;
   alt: string;
   caption: string | null;
-  size: "small" | "medium" | "scene" | "repeat";
+  size: "small" | "medium" | "scene" | "repeat" | "mouth";
+  /** A talking mouth (Mouth.tsx) rather than a picture. */
+  mouth?: LessonMouth;
   /** The art's width over its height. */
   aspect: number;
   /** For a repeat: its width in its own units (figures are CELL units each). */
@@ -108,6 +115,9 @@ const GAP = 10;
 
 /** The art's widths to try, largest first, for a kind of doodle on this width of board. */
 function widths(due: Due, column: number, phone: boolean): number[] {
+  // A talking mouth's box holds its face, the symbol beside it and its syllables: about 130px of
+  // face on a laptop.
+  if (due.size === "mouth") return phone ? [150, 138, 126] : [176, 160, 146];
   if (due.size === "repeat") {
     const figure = due.small ? (phone ? [22, 20, 18] : [24, 21, 18]) : phone ? [24, 21, 18] : [30, 26, 23];
     return figure.map((px) => (due.units * px) / CELL);
@@ -172,7 +182,8 @@ function obstacles(sheet: HTMLElement, base: DOMRect): Box[] {
   const found: Box[] = [];
   sheet.querySelectorAll("[data-line]").forEach((line) => found.push(...inkOf(line, base)));
   sheet
-    .querySelectorAll<HTMLElement>(".pb-question, .pb-line.answer, .pb-coachline, .pb-asked")
+    // A live diagram (DiagramLayer.tsx) is kept off too.
+    .querySelectorAll<HTMLElement>(".pb-question, .pb-line.answer, .pb-coachline, .pb-asked, .ld-spot")
     .forEach((element) => found.push(relative(element.getBoundingClientRect(), base)));
   // The marks: their strokes (a circle, an arrow's bow), their words and the pairs' dots.
   sheet
@@ -338,6 +349,8 @@ export function DoodleLayer({
   lit = null,
   onLit = () => undefined,
   panel = null,
+  hold,
+  clipAt,
 }: {
   sheetRef: RefObject<HTMLDivElement>;
   /** The lesson's moments, in order. */
@@ -357,6 +370,13 @@ export function DoodleLayer({
   onLit?: (number: number | null, tapped?: boolean) => void;
   /** The right-hand panel a scene may take, where the board has made one. */
   panel?: HTMLElement | null;
+  /**
+   * The whiteboard style's timing (Board.tsx): for a moment's doodle k (`doodle`) or action k
+   * (`do`), true to hold it back, false to let it go now, null for the usual rule.
+   */
+  hold?: (moment: number, what: "doodle" | "do", k: number) => boolean | null;
+  /** A moment's voice clip, for a talking mouth to keep time with (Mouth.tsx). */
+  clipAt?: (moment: number) => HTMLAudioElement | null;
 }) {
   const artOf = useCallback(
     (name: string): { svg: string; alt: string } | null => {
@@ -402,6 +422,7 @@ export function DoodleLayer({
         if (near < 0 || near > index) return;
         // The line it sits by has to be up: the newest moment's, once its first piece is written.
         if (near === shown - 1 && itemsShown === 0) return;
+        if (hold?.(index, "doodle", k) === true) return;
         const id = ref.id?.trim() || null;
         const plan = id ? plans.get(id) ?? [] : [];
         const count = repeatCount(ref);
@@ -451,11 +472,51 @@ export function DoodleLayer({
         out.push(item);
         if (id) byId.set(id, item);
       });
+      // A talking mouth it brings in, placed like a doodle (Mouth.tsx).
+      const mouth = moment.mouth;
+      if (mouth?.word) {
+        // By its line, or (until that is written) the line before: the mouth comes in as its
+        // moment starts, so it is there for the first word said.
+        let near = index;
+        while (near >= 0 && (!moments[near]?.items.length || (near === shown - 1 && itemsShown === 0)))
+          near -= 1;
+        const up = near >= 0;
+        if (up) {
+          const id = mouth.id?.trim() || null;
+          const box = mouthBox(mouth);
+          const item: Due = {
+            key: id ? `id:${id}` : `${index}:mouth`,
+            moment: index,
+            near,
+            id,
+            source: { kind: "single", name: "mouth", svg: "" },
+            sourceKey: `mouth:${mouth.word}:${mouth.view ?? "front"}`,
+            alt: `A mouth saying ${mouth.word}`,
+            caption: mouth.caption?.trim() || null,
+            size: "mouth",
+            mouth,
+            aspect: box.w / box.h,
+            units: 0,
+            notes: 0,
+            small: false,
+            tasks: [],
+          };
+          out.push(item);
+          if (id) byId.set(id, item);
+        }
+      }
       // This moment's actions and links, once its line is written (or it is past).
-      if (index < current || pointing === index) {
-        (moment.doodleDo ?? []).forEach((op, k) => {
-          byId.get(op.id)?.tasks.push({ key: `${index}:${k}`, op, live: index === current });
-        });
+      // Actions go in order: one held back holds back those after it (and the links), so a
+      // doodle's list of tasks only ever grows at its end.
+      const open = index < current || pointing === index;
+      let held = false;
+      (moment.doodleDo ?? []).forEach((op, k) => {
+        const rule = hold?.(index, "do", k) ?? null;
+        held ||= rule === true || (rule === null && !open);
+        if (held) return;
+        byId.get(op.id)?.tasks.push({ key: `${index}:${k}`, op, live: index === current });
+      });
+      if (open && !held) {
         for (const link of links.filter((one) => one.set === index)) {
           byId.get(link.doodle)?.tasks.push({
             key: `link:${link.key}`,
@@ -467,7 +528,7 @@ export function DoodleLayer({
       }
     });
     return out;
-  }, [artOf, itemsShown, links, moments, plans, pointing, shown]);
+  }, [artOf, hold, itemsShown, links, moments, plans, pointing, shown]);
 
   const [spots, setSpots] = useState<Map<string, Spot>>(() => new Map());
   const settled = useRef(new Map<string, Spot>());
@@ -581,7 +642,21 @@ export function DoodleLayer({
   }, [sheetRef, spots]);
 
   if (due.length === 0) return null;
-  const render = (doodle: Due, spot: Spot) => (
+  const render = (doodle: Due, spot: Spot) =>
+    doodle.mouth ? (
+      <Mouth
+        spec={doodle.mouth}
+        moment={doodle.moment}
+        tasks={doodle.tasks}
+        current={shown - 1}
+        moments={moments}
+        clipAt={clipAt}
+        width={Math.round(spot.w)}
+        height={Math.round(spot.h)}
+        caption={doodle.caption}
+        paused={paused}
+      />
+    ) : (
     <LiveDoodle
       drawKey={`${doodle.key}:${doodle.sourceKey.length}`}
       doodleId={doodle.id}
@@ -652,7 +727,7 @@ interface Across {
  * mark goes up and then let go, the numbered dots saying what goes with what; drawn again while
  * the pair is lit.
  */
-function DoodleLinks({
+export function DoodleLinks({
   sheetRef,
   links,
   lit,

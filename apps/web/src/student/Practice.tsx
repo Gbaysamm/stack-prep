@@ -14,6 +14,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { api, type PracticeState } from './api.js';
+import { readBoardPrefs } from './boardPrefs.js';
 import { Board } from './Board.js';
 import './theme.css';
 
@@ -90,7 +91,7 @@ export function Practice({
   useEffect(() => {
     if (!canHear || !hintedVersion || warmed.current === hintedVersion) return;
     warmed.current = hintedVersion;
-    api.practiceWarm(sessionId, hintedVersion).catch(() => undefined);
+    api.practiceWarm(sessionId, hintedVersion, readBoardPrefs().voice).catch(() => undefined);
   }, [canHear, hintedVersion, sessionId]);
 
   const send = useCallback(

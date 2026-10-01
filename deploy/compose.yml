@@ -75,6 +75,8 @@ services:
       # The lessons' audio, made once after each release and replayed from here. A volume,
       # so a restart or a new image does not throw it away and pay for it again.
       - speech-data:/srv/speech
+      # The free Kokoro voice's model, downloaded once (about 350 MB) and kept.
+      - kokoro-data:/srv/kokoro
     ports:
       # Host-local only. Caddy reaches this; the internet does not.
       - '127.0.0.1:8010:8000'
@@ -83,7 +85,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    mem_limit: 384m
+    # 384m plus about 0.7 GB for the Kokoro voice model while it speaks (measured peak
+    # 660-680 MB), agreed on 1 October 2026. Set AI_KOKORO=false in .env.local to turn the
+    # voice off and bring this back down.
+    mem_limit: 1152m
 
   worker:
     image: ${IMAGE:?IMAGE is not set — the deploy workflow passes the tag to publish}
@@ -112,3 +117,4 @@ services:
 volumes:
   postgres-data:
   speech-data:
+  kokoro-data:

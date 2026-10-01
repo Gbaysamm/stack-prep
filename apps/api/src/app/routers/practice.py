@@ -40,6 +40,7 @@ exists so that the day the pad lands, the attempts already recorded have the sha
 
 from __future__ import annotations
 
+import asyncio
 import base64
 import dataclasses
 import hashlib
@@ -66,11 +67,19 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import tutor, voice_store
+from app import kokoro_voice, tutor, voice_store
 from app.auth import require_session_owner, require_student
 from app.config import Settings, get_settings
 from app.db import connection, fetch_all
 from app.figures import QuestionFigure, figures_for, resolve
+from app.lesson_cues import LessonCue, cue_of
+from app.lesson_diagrams import (
+    DiagramOp,
+    LessonDiagram,
+    diagram_actions,
+    diagram_link,
+    diagram_of,
+)
 from app.lesson_doodles import (
     DoodleOp,
     DoodleRef,
@@ -81,6 +90,7 @@ from app.lesson_doodles import (
     doodle_refs,
     lesson_doodles,
 )
+from app.lesson_mouth import LessonMouth, mouth_of
 from app.routers.checkup import UnitWeight, _subtopics
 from engine.projection import UnitStanding, project
 from engine.version import ENGINE_VERSION
@@ -1647,7 +1657,7 @@ async def listen(
 #: an arrow back to where a line came from. `move` carries a piece from one place to another
 #: (the 2 in front of a log up into its power); `arc` and `label` are for the diagram only.
 PointKind = Literal[
-    "circle", "underline", "arrow", "box", "highlight", "strike", "move", "arc", "label"
+    "circle", "underline", "arrow", "box", "highlight", "strike", "move", "arc", "label", "travel"
 ]
 _POINT_KINDS = frozenset(get_args(PointKind))
 #: A mark on the working, and a mark on the diagram: the kinds each may be.
@@ -1661,8 +1671,14 @@ _PASSAGE_KINDS = frozenset({"highlight", "underline", "circle", "strike", "label
 
 class PointFrom(BaseModel):
     #: Where an arrow or a move starts: a moment (as `line` counts them) and a piece of it.
-    line: int
+    #: Always set for an arrow or a move; a `travel` may instead start at a doodle (`doodle`,
+    #: `part`) or a place on a diagram (`figure`, `target`), and then has no `line`.
+    line: int | None = None
     at: str | None = None
+    doodle: str | None = None
+    part: str | None = None
+    figure: int | Literal["sketch", "sketch_b", "sketch_c"] | None = None
+    target: str | list[str] | FigureSpot | None = None
 
 
 class FigureSpot(BaseModel):
@@ -1684,6 +1700,8 @@ class PointTo(BaseModel):
     #: Or a doodle on the board, by the id a moment gave it, and a part of its art.
     doodle: str | None = None
     part: str | None = None
+    #: Or a live diagram on the board, by its id (app/lesson_diagrams.py); `part` is its part.
+    diagram: str | None = None
 
 
 class LessonPoint(BaseModel):
@@ -1711,6 +1729,8 @@ class LessonPoint(BaseModel):
     #: (from 1) where they occur more than once (database/lesson_marks.py).
     passage: bool | None = None
     nth: int | None = None
+    #: The word it is drawn on, in the whiteboard style (app/lesson_cues.py).
+    on: LessonCue | None = None
 
 
 def _drawing(value: object) -> int | Literal["sketch", "sketch_b", "sketch_c"] | None:
@@ -1815,6 +1835,11 @@ def _points(raw: object) -> list[LessonPoint] | None:
                 mark.to = _across(item.get("to"), to_figure=False)
             kept.append(mark)
             continue
+        if kind == "travel":
+            travel = _travel(item, line, label)
+            if travel is not None:
+                kept.append(travel)
+            continue
         if line is None or kind not in _LINE_KINDS:
             continue
         start = item.get("from")
@@ -1832,9 +1857,51 @@ def _points(raw: object) -> list[LessonPoint] | None:
             point.to = PointTo(passage=True, target=linked[0], nth=linked[1])
         elif drawn is not None and kind != "move" and begin is None:
             point.to = PointTo(doodle=drawn[0], part=drawn[1])
+        elif (charted := diagram_link(item.get("to"))) and kind != "move" and begin is None:
+            point.to = PointTo(diagram=charted[0], part=charted[1])
         elif kind == "arrow" and begin is None:
             point.to = _across(item.get("to"), to_figure=True)
         kept.append(point)
+    return kept or None
+
+
+def _travel(item: dict[str, Any], line: int | None, label: str | None) -> LessonPoint | None:
+    """A `travel` mark (a value riding an arrow into a line), or None where it is not whole.
+
+    It needs the piece it lands on (`line`, `at`) and one place it comes from: a doodle and a
+    part of it, a place on a diagram, or a piece of a line (database/lesson_marks.py).
+    """
+    at = _words(item.get("at"))
+    start = item.get("from")
+    if line is None or at is None or not isinstance(start, dict):
+        return None
+    begin: PointFrom | None = None
+    drawn = doodle_link(start)
+    if drawn is not None:
+        begin = PointFrom(doodle=drawn[0], part=drawn[1])
+    elif "figure" in start:
+        drawing, target = _drawing(start.get("figure")), _target(start.get("target"))
+        if drawing is not None and target is not None:
+            begin = PointFrom(figure=drawing, target=target)
+    elif _whole(start.get("line")) is not None:
+        begin = PointFrom(line=start["line"], at=_words(start.get("at")))
+    if begin is None:
+        return None
+    point = LessonPoint(line=line, kind="travel", text=label, at=at)
+    point.from_ = begin
+    return point
+
+
+def _cued_points(raw: object) -> list[LessonPoint] | None:
+    """`_points`, with each mark's cue (`on`) kept on it, for the whiteboard style."""
+    if not isinstance(raw, list):
+        return None
+    kept: list[LessonPoint] = []
+    for item in raw:
+        found = _points([item])
+        if found:
+            found[0].on = cue_of(item)
+            kept.extend(found)
     return kept or None
 
 
@@ -1862,6 +1929,17 @@ class LessonBeat(BaseModel):
     #: Or the one or two it brings in (doodles v2), and what the pen does to earlier ones.
     doodles: list[DoodleRef] | None = None
     doodle_do: list[DoodleOp] | None = None
+    #: The word its `write` (and the sketch it brings in) lands on, in the whiteboard style.
+    on: LessonCue | None = None
+    #: The heading of the section of the working this beat starts (`section:` in the lesson
+    #: file), which the whiteboard style puts up as a heading chip; the classic one ignores it.
+    section: str | None = None
+    #: A talking mouth this beat brings in (app/lesson_mouth.py), for oral English.
+    mouth: LessonMouth | None = None
+    #: A live diagram this beat brings in, and what the pen does to diagrams already up
+    #: (app/lesson_diagrams.py; docs/plans/doodles-v2-contract.md section 8).
+    diagram: LessonDiagram | None = None
+    diagram_do: list[DiagramOp] | None = None
 
 
 class LessonSketch(BaseModel):
@@ -1907,6 +1985,11 @@ class _Beat:
     doodle: DoodleRef | None = None
     doodles: list[DoodleRef] | None = None
     doodle_do: list[DoodleOp] | None = None
+    on: LessonCue | None = None
+    section: str | None = None
+    mouth: LessonMouth | None = None
+    diagram: LessonDiagram | None = None
+    diagram_do: list[DiagramOp] | None = None
 
 
 async def _must_have_missed(conn: AsyncConnection, session_id: UUID, version_id: UUID) -> None:
@@ -2158,11 +2241,16 @@ async def _lesson_beats(
                 at=[0.0] if moment.get("write") else [],
                 say=str(moment["say"]),
                 answer=bool(moment.get("answer")),
-                point=_points(moment.get("point")),
+                point=_cued_points(moment.get("point")),
                 show_sketch=_show_sketch(moment.get("show_sketch")),
                 doodle=doodle_ref(moment.get("doodle")),
                 doodles=doodle_refs(moment.get("doodles")),
                 doodle_do=acting[index],
+                on=cue_of(moment),
+                section=_words(moment.get("section")),
+                mouth=mouth_of(moment.get("mouth")),
+                diagram=diagram_of(moment.get("diagram")),
+                diagram_do=diagram_actions(moment.get("diagram_do")),
             )
             for index, moment in enumerate(moments)
         ]
@@ -2224,6 +2312,11 @@ async def lesson(
                 doodle=beat.doodle,
                 doodles=beat.doodles,
                 doodle_do=beat.doodle_do,
+                on=beat.on,
+                section=beat.section,
+                mouth=beat.mouth,
+                diagram=beat.diagram,
+                diagram_do=beat.diagram_do,
             )
             for index, beat in enumerate(beats)
         ],
@@ -2261,19 +2354,60 @@ async def lesson_voice(
     session_id: UUID,
     question_version_id: UUID,
     beat: int,
+    engine: voice_store.Engine = "studio",
 ) -> Response:
+    """`engine=kokoro` asks for the free voice made on this server; where it is not offered,
+    the studio voice answers instead, and `X-Voice-Engine` says which one was heard."""
     await require_session_owner(request, conn, session_id)
     await _lesson_is_open(conn, session_id, question_version_id, whole=False)
     beats, _ = await _lesson_beats(conn, session_id, question_version_id, settings)
     if not 0 <= beat < len(beats):
         raise HTTPException(status_code=404, detail="no such beat")
-    path = await voice_store.voiced(beats[beat].say, settings)
+    path = await voice_store.voiced(beats[beat].say, settings, engine=engine)
     if path is None:
         # No voice to be had. The board reads this as silence and holds the beat instead.
         raise HTTPException(status_code=404, detail="no voice for this beat")
     return FileResponse(
-        path, media_type="audio/mpeg", headers={"Cache-Control": "private, max-age=86400"}
+        path,
+        media_type="audio/mpeg",
+        headers={
+            "Cache-Control": "private, max-age=86400",
+            "X-Voice-Engine": voice_store.engine_for(engine, settings),
+        },
     )
+
+
+@router.get(
+    "/{session_id}/lesson/{question_version_id}/voice/{beat}/words",
+    summary="When each word of one beat is said",
+)
+async def lesson_voice_words(
+    request: Request,
+    conn: Annotated[AsyncConnection, Depends(connection)],
+    settings: Annotated[Settings, Depends(get_settings)],
+    session_id: UUID,
+    question_version_id: UUID,
+    beat: int,
+    engine: voice_store.Engine = "studio",
+) -> dict[str, Any]:
+    """`{engine, duration, estimated, words: [{w, start, end}]}` for the beat's clip, in seconds.
+
+    The words are the line as spoken (its mathematics in words), not as written. Waits for the
+    clip if it is still being made. Only the Kokoro voice keeps timings, so a studio clip, or
+    no clip at all, is a 404 and the board reveals by its own clock instead.
+    """
+    await require_session_owner(request, conn, session_id)
+    await _lesson_is_open(conn, session_id, question_version_id, whole=False)
+    beats, _ = await _lesson_beats(conn, session_id, question_version_id, settings)
+    if not 0 <= beat < len(beats):
+        raise HTTPException(status_code=404, detail="no such beat")
+    said = beats[beat].say
+    if voice_store.engine_for(engine, settings) == "kokoro":
+        await voice_store.voiced(said, settings, engine=engine)
+    found = voice_store.timings(said, settings, engine)
+    if found is None:
+        raise HTTPException(status_code=404, detail="no word timings for this beat")
+    return found
 
 
 @router.post(
@@ -2288,6 +2422,7 @@ async def warm_lesson(
     session_id: UUID,
     question_version_id: UUID,
     background: BackgroundTasks,
+    engine: voice_store.Engine = "studio",
 ) -> dict[str, int]:
     """Called on the first wrong answer, so the board opens on a lesson already prepared.
 
@@ -2299,7 +2434,11 @@ async def warm_lesson(
     await _lesson_is_open(conn, session_id, question_version_id, whole=False)
     beats, _ = await _lesson_beats(conn, session_id, question_version_id, settings)
     lines = [beat.say for beat in beats]
-    if settings.ai_speak:
+    # Kokoro is free and independent of the paid voice's switch; it is made when asked for
+    # and offered here, and otherwise the studio voice is warmed as it always was.
+    if voice_store.engine_for(engine, settings) == "kokoro":
+        background.add_task(voice_store.voice_all, lines, settings, engine="kokoro")
+    elif settings.ai_speak:
         background.add_task(voice_store.voice_all, lines, settings)
     return {"beats": len(lines)}
 
@@ -2374,6 +2513,7 @@ async def speech(
     settings: Annotated[Settings, Depends(get_settings)],
     session_id: UUID,
     handle: str,
+    engine: voice_store.Engine = "studio",
 ) -> StreamingResponse:
     """Stream the audio for one spoken line.
 
@@ -2395,6 +2535,13 @@ async def speech(
     line = waiting[2]
 
     async def audio() -> AsyncIterator[bytes]:
+        if voice_store.engine_for(engine, settings) == "kokoro":
+            # Made whole rather than streamed, and not kept: a coach's line is said once.
+            said = tutor.for_the_voice(line)
+            clip = await asyncio.to_thread(kokoro_voice.synthesize, said, settings)
+            if clip is not None:
+                yield clip.mp3
+            return
         async for chunk in tutor.speak_streaming(line, settings):
             yield chunk
 

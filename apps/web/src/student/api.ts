@@ -7,6 +7,7 @@
  */
 
 import type { QuestionFigure } from '../Figures.js';
+import type { BoardVoice } from './boardPrefs.js';
 
 export interface SubjectOffer {
   subject_id: string;
@@ -227,6 +228,47 @@ export interface LessonBeat {
   /** Or the one or two it brings in (doodles v2), and what the pen does to earlier ones. */
   doodles?: LessonDoodleRef[] | null;
   doodle_do?: LessonDoodleOp[] | null;
+  /** The word its `write` (and the sketch it brings in) lands on, in the whiteboard style. */
+  on?: LessonCue | null;
+  /**
+   * The heading of the section of the working this moment starts (`section:` in the lesson
+   * file): a heading chip with room above it in the whiteboard style; the classic one ignores it.
+   */
+  section?: string | null;
+  /** A talking mouth this moment brings in (Mouth.tsx), for oral English. */
+  mouth?: LessonMouth | null;
+  /** A live diagram this beat brings in (LiveDiagram.tsx, doodles-v2-contract.md section 8). */
+  diagram?: LessonDiagram | null;
+  /** What the pen does to diagrams already on the board. */
+  diagram_do?: LessonDiagramOp[] | null;
+}
+
+/**
+ * A talking mouth (docs/plans/doodles-v2-contract.md section 7): it says `word` in time with the
+ * voice, holding `sound` (IPA) with the symbol written beside it; with `syllables` and `stress`
+ * the stressed syllable grows as it is said. `view: side` is a cut-away of the tongue's place.
+ */
+export interface LessonMouth {
+  id?: string | null;
+  word: string;
+  sound?: string | null;
+  syllables?: string[] | null;
+  /** Which syllable is stressed, from 1. */
+  stress?: number | null;
+  view?: 'front' | 'side' | null;
+  /** The word of `say` that starts it (its `word` by default). */
+  on?: LessonCue | null;
+  caption?: string | null;
+}
+
+/**
+ * The word of its moment's `say` an item lands on in the whiteboard style (`on:` in the
+ * lesson file, database/lesson_cues.py): a word or a few in a row, and which time they are
+ * said. The classic style ignores it.
+ */
+export interface LessonCue {
+  word: string;
+  nth: number;
 }
 
 /**
@@ -245,6 +287,8 @@ export interface LessonDoodleRef {
   /** A community of small figures drawn one by one: how many of `name`, or of each kind. */
   repeat?: number | { name: string; n: number }[] | null;
   layout?: 'row' | 'grid' | 'cluster' | null;
+  /** The word it is drawn on, in the whiteboard style. */
+  on?: LessonCue | null;
 }
 
 /** Something the pen does to a doodle already on the board (docs/plans/doodles-v2-contract.md). */
@@ -265,7 +309,9 @@ export interface LessonDoodleOp {
     | 'shrink'
     | 'count'
     | 'group'
-    | 'split';
+    | 'split'
+    /** A talking mouth says `word` (its own word without it). */
+    | 'say';
   part?: string | null;
   n?: number | null;
   text?: string | null;
@@ -277,6 +323,11 @@ export interface LessonDoodleOp {
   path?: string | null;
   fill?: string | null;
   by?: number | null;
+  /** The word a talking mouth says (`say`), and the sound it holds as it does (IPA). */
+  word?: string | null;
+  sound?: string | null;
+  /** The word it is done on, in the whiteboard style. */
+  on?: LessonCue | null;
 }
 
 /** A picture drawn for this question's lesson, in the board's art format (Doodle.tsx). */
@@ -285,6 +336,152 @@ export interface LessonDoodle {
   name: string;
   svg: string;
   alt_text?: string | null;
+}
+
+/* ---- Live diagrams (docs/plans/doodles-v2-contract.md section 8; student/diagram/) ---- */
+
+export type DiagramKind =
+  | 'graph'
+  | 'venn'
+  | 'pie'
+  | 'bar'
+  | 'histogram'
+  | 'numberline'
+  | 'tree'
+  | 'table'
+  | 'ogive';
+
+/** The colours a diagram may use, each with its meaning (docs/lesson-style-guide.md 5). */
+export type DiagramColour = 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'pink' | 'yellow' | 'grey';
+
+/** A graph's curve or line: a function of x, or points joined. */
+export interface DiagramPlot {
+  fn?: string | null;
+  points?: [number, number][] | null;
+  join?: 'smooth' | 'straight' | 'none' | null;
+  domain?: [number, number] | null;
+  label?: string | null;
+  colour?: DiagramColour | null;
+  later?: boolean | null;
+}
+
+/** A dot on a graph or a number line. */
+export interface DiagramDot {
+  x: number;
+  y?: number | null;
+  text?: string | null;
+  open?: boolean | null;
+  colour?: DiagramColour | null;
+}
+
+export interface DiagramSet {
+  key: string;
+  name: string;
+  total?: number | string | null;
+  colour?: DiagramColour | null;
+  later?: boolean | null;
+}
+
+export interface DiagramSector {
+  label: string;
+  value?: number | null;
+  angle?: number | null;
+  text?: string | null;
+  colour?: DiagramColour | null;
+  later?: boolean | null;
+}
+
+export interface DiagramBar {
+  label: string;
+  value: number;
+  colour?: DiagramColour | null;
+  later?: boolean | null;
+}
+
+export interface DiagramBin {
+  from: number;
+  to: number;
+  value: number;
+  colour?: DiagramColour | null;
+  later?: boolean | null;
+}
+
+export interface DiagramBranch {
+  label: string;
+  p?: string | number | null;
+  then?: DiagramBranch[] | null;
+  later?: boolean | null;
+}
+
+/** A live diagram: what the pen draws when it arrives, in teaching order (section 8). */
+export interface LessonDiagram {
+  id: string;
+  kind: DiagramKind;
+  caption?: string | null;
+  size?: 'medium' | 'scene' | null;
+  near?: number | null;
+  on?: LessonCue | null;
+  // Axes (graph, ogive, bar, histogram).
+  x?: [number, number] | null;
+  y?: [number, number] | null;
+  step?: number | null;
+  x_step?: number | null;
+  y_step?: number | null;
+  x_label?: string | null;
+  y_label?: string | null;
+  grid?: boolean | null;
+  // graph
+  plots?: DiagramPlot[] | null;
+  /** graph and numberline: dots; ogive: [x, cumulative frequency] pairs. */
+  points?: (DiagramDot | [number, number])[] | null;
+  // venn
+  universal?: { name: string; total?: number | string | null } | null;
+  sets?: DiagramSet[] | null;
+  counts?: Record<string, string | number> | null;
+  // pie
+  sectors?: DiagramSector[] | null;
+  show?: 'value' | 'angle' | 'percent' | 'none' | null;
+  // bar, histogram
+  bars?: DiagramBar[] | null;
+  bins?: DiagramBin[] | null;
+  // numberline
+  range?: [number, number] | null;
+  // tree
+  root?: string | null;
+  levels?: string[] | null;
+  branches?: DiagramBranch[] | null;
+  // table
+  columns?: string[] | null;
+  rows?: (string | number | null)[][] | null;
+  // ogive
+  start?: [number, number] | null;
+  later?: boolean | null;
+}
+
+/** Something the pen does to a diagram already on the board (section 8). */
+export interface LessonDiagramOp {
+  id: string;
+  op: string;
+  part?: string | null;
+  to_part?: string | null;
+  text?: string | null;
+  colour?: DiagramColour | null;
+  /** This is the answer: drawn in green, with the ding. */
+  answer?: boolean | null;
+  x?: number | [number, number] | null;
+  y?: number | null;
+  from?: number | null;
+  to?: number | null;
+  from_open?: boolean | null;
+  to_open?: boolean | null;
+  open?: boolean | null;
+  m?: number | null;
+  c?: number | null;
+  through?: [[number, number], [number, number]] | null;
+  axis?: 'x' | 'y' | 'both' | null;
+  into?: string | null;
+  label?: string | null;
+  on?: LessonCue | null;
 }
 
 /**
@@ -350,11 +547,18 @@ export interface LessonPoint {
    */
   passage?: boolean | null;
   nth?: number | null;
+  /** The word it is drawn on, in the whiteboard style. */
+  on?: LessonCue | null;
   /**
    * Board-internal, never sent: a link the board found for itself (a quote on a line of the
    * working that is in the passage). Drawn in the passage only, paired with its line.
    */
   auto?: boolean;
+  /**
+   * Board-internal, never sent: the arrow stands for a `travel`, and this is the value's words
+   * (travel.ts), which the whiteboard style carries along it on a chip.
+   */
+  travel?: string;
 }
 
 /** Where an arrow across goes: a place on a diagram, or a piece of a line of the working. */
@@ -369,6 +573,8 @@ export interface LessonPointTo {
   /** Or a doodle on the board, by its id, and a part of its art. */
   doodle?: string | null;
   part?: string | null;
+  /** Or a live diagram on the board, by its id; `part` is then one of its parts. */
+  diagram?: string | null;
 }
 
 export type LessonPointKind =
@@ -380,11 +586,30 @@ export type LessonPointKind =
   | 'strike'
   | 'move'
   | 'arc'
-  | 'label';
+  | 'label'
+  /**
+   * A value riding an arrow into a line, from a doodle, a diagram or another line: its `from`
+   * is a `LessonTravelFrom`. The board draws it as an arrow (travel.ts), and the whiteboard
+   * style sends a chip with the value along it.
+   */
+  | 'travel';
 
 export interface LessonPointFrom {
   line: number;
   at?: string | null;
+}
+
+/**
+ * Where a `travel` starts: a doodle on the board (`doodle`, `part`), a place on a diagram
+ * (`figure`, `target`), or a piece of a line (`line`, `at`). Exactly one of the three.
+ */
+export interface LessonTravelFrom {
+  line?: number | null;
+  at?: string | null;
+  doodle?: string | null;
+  part?: string | null;
+  figure?: number | 'sketch' | 'sketch_b' | 'sketch_c' | null;
+  target?: string | string[] | FigureSpot | null;
 }
 
 /** A place on a figure, in the units of its SVG's viewBox. */
@@ -426,6 +651,59 @@ export interface Features {
   coach_voice: boolean;
   /** The student may ask by speaking. Off until the legal review rules on recording a minor. */
   student_voice: boolean;
+  /** The free Kokoro voice can be asked for. Absent from an older server. */
+  kokoro_voice?: boolean;
+}
+
+/**
+ * A voice URL asking for the chosen voice. The studio voice is the server's default, so its
+ * URLs are left as they were; where Kokoro is not offered the server answers with the studio
+ * voice (or silence, if that is off too), so the board needs no fallback of its own.
+ */
+export function withVoice(url: string, voice: BoardVoice): string {
+  return voice === 'kokoro' ? `${url}${url.includes('?') ? '&' : '?'}engine=kokoro` : url;
+}
+
+/** One spoken word of a beat and when it is said, in seconds from the clip's start. */
+export interface VoiceWord {
+  w: string;
+  start: number;
+  end: number;
+}
+
+export interface VoiceWords {
+  engine: 'kokoro';
+  duration: number;
+  /** True when the times were shared out by length rather than read from the voice. */
+  estimated: boolean;
+  /** The line as spoken, so its mathematics is in words ("x squared"), not as written. */
+  words: VoiceWord[];
+}
+
+/** One sound of a spoken line (IPA) and when it is said, in seconds from the clip's start. */
+export interface VoicePhone {
+  p: string;
+  start: number;
+  end: number;
+}
+
+/** A beat's sounds, for the talking mouth: the voice's own (Kokoro) or estimated (studio). */
+export interface VoicePhones {
+  engine: 'kokoro' | 'studio';
+  duration: number;
+  estimated: boolean;
+  words: VoiceWord[];
+  phones: VoicePhone[];
+}
+
+/** A short word said slowly by the free voice, when the mouth is tapped. */
+export interface MouthWord {
+  engine: 'kokoro';
+  word: string;
+  duration: number;
+  phones: VoicePhone[];
+  /** The mp3, as a data URL. */
+  audio: string;
 }
 
 export interface StudentIdentity {
@@ -494,10 +772,33 @@ export const api = {
   practiceLesson: (sessionId: string, questionVersionId: string) =>
     call<NarratedLesson>(`/practice/${sessionId}/lesson/${questionVersionId}`),
   /** Start making the lesson on the first wrong answer, so the board opens on it ready. */
-  practiceWarm: (sessionId: string, questionVersionId: string) =>
-    call<{ beats: number }>(`/practice/${sessionId}/lesson/${questionVersionId}/warm`, {
-      method: 'POST',
-    }),
+  practiceWarm: (sessionId: string, questionVersionId: string, voice: BoardVoice = 'studio') =>
+    call<{ beats: number }>(
+      withVoice(`/practice/${sessionId}/lesson/${questionVersionId}/warm`, voice),
+      { method: 'POST' },
+    ),
+  /**
+   * When each word of a lesson beat is said, from the beat's `voice_url` (with or without
+   * `engine=`). Null when there are none: only the Kokoro voice keeps them.
+   */
+  lessonVoiceWords: async (voiceUrl: string): Promise<VoiceWords | null> => {
+    const [path, query] = voiceUrl.split('?');
+    const response = await fetch(`${path}/words${query ? `?${query}` : ''}`);
+    return response.ok ? ((await response.json()) as VoiceWords) : null;
+  },
+  /** A beat's sounds and their times, for the talking mouth. Null when there are none yet. */
+  lessonVoicePhones: async (voiceUrl: string): Promise<VoicePhones | null> => {
+    const [path, query] = voiceUrl.split('?');
+    const response = await fetch(`${path}/phones${query ? `?${query}` : ''}`);
+    return response.ok ? ((await response.json()) as VoicePhones) : null;
+  },
+  /** A word said slowly by the free voice (never the paid one); null where it is not offered. */
+  mouthSay: async (sessionId: string, word: string): Promise<MouthWord | null> => {
+    const response = await fetch(
+      `/v1/practice/${sessionId}/mouth/say?word=${encodeURIComponent(word)}`,
+    );
+    return response.ok ? ((await response.json()) as MouthWord) : null;
+  },
   sittings: (studentId: string) => call<Sitting[]>(`/student/${studentId}/sittings`),
   start: (studentId: string, subjectId: string) =>
     call<CheckupState>('/checkup/start', {

@@ -12,7 +12,8 @@ WORKDIR /srv
 COPY pyproject.toml uv.lock ./
 COPY packages/engine packages/engine
 COPY apps/api apps/api
-RUN uv sync --frozen --no-dev --no-editable
+# With the free Kokoro voice (app/kokoro_voice.py): onnxruntime and a bundled espeak, no apt.
+RUN uv sync --frozen --no-dev --no-editable --extra kokoro
 
 # The migration SQL ships with the image so `app.cli migrate` can run against it.
 COPY database database
@@ -22,6 +23,9 @@ RUN useradd --create-home --uid 10001 app
 # Where the lessons' audio is kept. Made here and owned by the app user, so the volume
 # mounted over it starts out writable by the process that fills it.
 RUN mkdir -p /srv/speech && chown app:app /srv/speech
+# Where the Kokoro voice's model (about 350 MB) is downloaded on first use, also a volume so a
+# new image does not fetch it again.
+RUN mkdir -p /srv/kokoro && chown app:app /srv/kokoro
 WORKDIR /srv
 COPY --from=builder --chown=app:app /srv/.venv /srv/.venv
 COPY --from=builder --chown=app:app /srv/database /srv/database
@@ -29,7 +33,7 @@ COPY --from=builder --chown=app:app /srv/database /srv/database
 # path under /srv, which ASSET_ROOT then names as the root.
 COPY --chown=app:app docs/questions/utme/mathematics/figures/svg /srv/docs/questions/utme/mathematics/figures/svg
 ENV PATH="/srv/.venv/bin:$PATH" PYTHONUNBUFFERED=1 MIGRATIONS_DIR=/srv/database/migrations \
-    ASSET_ROOT=/srv SPEECH_CACHE_DIR=/srv/speech
+    ASSET_ROOT=/srv SPEECH_CACHE_DIR=/srv/speech KOKORO_DIR=/srv/kokoro
 USER app
 EXPOSE 8000
 

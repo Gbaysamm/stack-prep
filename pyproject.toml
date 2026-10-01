@@ -8,8 +8,14 @@ dependencies = [
     "score-pilot-engine",
 ]
 
+[project.optional-dependencies]
+# The free Kokoro voice. Development has it through the dev group; an image opts in with
+# `uv sync --frozen --no-dev --extra kokoro`.
+kokoro = ["score-pilot-api[kokoro]"]
+
 [dependency-groups]
 dev = [
+    "score-pilot-api[kokoro]",
     "pytest>=8.3",
     "pytest-asyncio>=0.24",
     "httpx>=0.27",
@@ -47,7 +53,7 @@ module = "engine.*"
 strict = true
 
 [[tool.mypy.overrides]]
-module = ["asyncpg.*", "arq.*"]
+module = ["asyncpg.*", "arq.*", "kokoro_onnx.*", "lameenc.*", "phonemizer.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

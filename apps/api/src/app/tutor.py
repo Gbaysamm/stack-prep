@@ -336,7 +336,8 @@ child could follow the words even where the mathematics is beyond them.
 
 A SAY LINE NEVER CONTAINS A DOLLAR SIGN OR A BACKSLASH. Not one, not ever, not even around a \
 single letter. This is read aloud by a voice, and it will say the punctuation. You are \
-talking, so talk the mathematics the way your mouth would:
+talking, so talk the mathematics the way your mouth would, the way a Nigerian teacher \
+says it and in the order it is written ("8 minus 7 is 1", never "7 from 8"):
 
   $h$            ->  h
   $d + 8$        ->  d plus eight
@@ -1184,8 +1185,10 @@ multiply both sides by 49."
 - Short sentences. Plain spoken English for a 16-year-old. Say mathematics in words ("x \
 squared", "k over V", "a half"): no LaTeX, no dollar signs, no symbols such as = or ^ in \
 what you SAY.
+- Say it the way a Nigerian teacher says it, in the order it is written: "8 minus 7 is 1", \
+never "7 from 8" or "take 7 from 8". Money is naira and kobo.
 
-What you write:
+Whatyou write:
 - Each "write" is either a piece of that step's mathematics copied EXACTLY as it appears in \
 the step, dollar signs included (for example "$P = \\dfrac{k}{V}$"), optionally after a \
 label of at most four words ("So $K = 98$"); or a label of at most five words with no \

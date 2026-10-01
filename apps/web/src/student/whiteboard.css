@@ -1,0 +1,685 @@
+/*
+ * THE WHITEBOARD STYLE of the lesson board (boardPrefs.ts, docs/lesson-style-guide.md §5).
+ *
+ * Everything here hangs off `.pb.wb`, the board's root with the style chosen, so the classic
+ * board is untouched by it. What it does, in the style guide's words:
+ *
+ * - Handwriting everywhere the pen writes, the maths included: KaTeX still lays the maths out
+ *   (fractions, powers, roots, brackets) and its glyphs are drawn in the handwriting font;
+ *   a fraction bar is a stroke drawn by hand and a root sign is roughened.
+ * - Paper: warm off-white with a faint grain and a soft vignette, fixed behind the working.
+ * - Room to breathe: a larger hand, more space between lines, sections with a heading chip.
+ * - Colours that mean the same thing every time (SternHost's markers): green right, red a trap,
+ *   purple the key idea, blue what the question gives (and a value on the move), orange "?".
+ * - Spring pops: chips, pair dots, the answer and the doodles arrive with an overshoot.
+ * - The shimmer ("line boil", Whiteboard.tsx) and the travelling values' chips.
+ *
+ * The board's style switch (`.wb-switch`) is styled here too; it shows in both styles.
+ */
+
+/* `.sj.pb.wb`: one class more than board.css's `.sj.pb`, which sets the marker colours. */
+.sj.pb.wb {
+  --wb-paper: #fbfaf6;
+  --wb-card: #fffdf8;
+  --wb-edge: #e9e3d3;
+  --wb-ink: #1f2328;
+  --wb-blue: #2f6fde;
+  --wb-red: #e2483d;
+  --wb-green: #2e9e5b;
+  --wb-orange: #f08a24;
+  --wb-purple: #7a4fd6;
+  --wb-yellow: #ffd23f;
+  --wb-hand: 'Patrick Hand', 'Caveat', 'Segoe Print', 'Bradley Hand', 'Comic Sans MS', cursive;
+  /* Letters, digits and operators in the hand; anything it has no glyph for (Greek, ≤, ∩, ∪)
+     falls back to KaTeX's own upright face, still in the hand's weight and colour. */
+  --wb-hand-maths: 'Patrick Hand', KaTeX_Main, KaTeX_Math, 'Times New Roman', serif;
+  --wb-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* The classic marker colours, re-pointed at the colour grammar: a circle, an underline or a
+     box picks out the key idea (purple); an arrow carries a value (blue). */
+  --mark-pink: var(--wb-purple);
+  --mark-purple: var(--wb-blue);
+  background: var(--wb-paper);
+}
+
+/* ---------------------------------------------------------------- the paper */
+/* The grain (one static noise tile, about 5% strong) and the vignette sit on the stage, which
+   does not scroll: the working moves over the paper as it would over a real board. */
+.pb.wb .pb-stage {
+  background-color: var(--wb-paper);
+  background-image:
+    radial-gradient(ellipse 85% 80% at 50% 42%, rgb(0 0 0 / 0) 68%, rgb(60 44 20 / 0.075) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.05'/%3E%3C/svg%3E");
+  background-size: 100% 100%, 220px 220px;
+}
+.pb.wb .pb-dock,
+.pb.wb .pb-bar {
+  background: rgb(251 250 246 / 0.86);
+}
+
+/* Cards on the board (the diagram, the passage, a doodle's scene) are sheets pinned to it. */
+.pb.wb .pb-figpanel,
+.pb.wb .pb-side,
+.pb.wb .pp,
+.pb.wb .dd-panelspot {
+  background-color: var(--wb-card);
+  border-color: var(--wb-edge);
+}
+@media (max-width: 1079px) {
+  /* Pinned over the working on a narrower screen: the paper, so the writing under it hides. */
+  .pb.wb .pb-figpanel,
+  .pb.wb .pb-side {
+    background-color: var(--wb-paper);
+  }
+}
+
+/* ---------------------------------------------------------------- the hand */
+.pb.wb .pb-sheet {
+  font-family: var(--wb-hand);
+  font-size: clamp(22px, 0.9vw + 15px, 30px);
+  line-height: 1.7;
+  color: var(--wb-ink);
+}
+.pb.wb .pb-item,
+.pb.wb .pb-question-text,
+.pb.wb .pb-coachline {
+  font-family: var(--wb-hand);
+}
+
+/* The question: a note pinned at the top, in the blue of what the question gives us. */
+.pb.wb .pb-question {
+  margin-bottom: 40px;
+  padding: 16px 22px 18px;
+  background: rgb(47 111 222 / 0.06);
+  border: 2px solid rgb(47 111 222 / 0.32);
+  border-radius: 18px 12px 20px 14px / 14px 20px 12px 18px;
+}
+.pb.wb .pb-question > .sj-eyebrow {
+  font-family: var(--wb-hand);
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: var(--wb-blue);
+}
+.pb.wb .pb-question-text {
+  font-size: 0.84em;
+  line-height: 1.5;
+}
+
+/* Room between the moments' lines: one thing, then air, then the next. */
+.pb.wb .pb-line {
+  margin-bottom: 28px;
+}
+.pb.wb .pb-item {
+  padding-block: 4px;
+}
+.pb.wb .pb-item + .pb-item {
+  margin-top: 10px;
+}
+
+/* ---- the maths, in the hand */
+.pb.wb .katex {
+  font-family: var(--wb-hand-maths);
+  font-size: 1.06em;
+}
+.pb.wb .katex .mathnormal,
+.pb.wb .katex .mathit,
+.pb.wb .katex .mathrm,
+.pb.wb .katex .textrm,
+.pb.wb .katex .mathsf,
+.pb.wb .katex .textsf,
+.pb.wb .katex .mathbf,
+.pb.wb .katex .textbf,
+.pb.wb .katex .boldsymbol,
+.pb.wb .katex .amsrm,
+.pb.wb .katex .mainrm,
+.pb.wb .katex .mop {
+  font-family: var(--wb-hand-maths);
+  font-style: normal;
+  font-weight: 400;
+}
+/* A struck-through relation (≠, ∉) is built from a slash laid over the sign: both stay in
+   KaTeX's face, or the slash misses a sign drawn in the hand. */
+.pb.wb .katex .mrel:has(.rlap) {
+  font-family: KaTeX_Main, 'Times New Roman', serif;
+}
+/* A fraction's bar: a stroke drawn by hand, a touch past the numbers either side, not ruled. */
+.pb.wb .katex .frac-line {
+  position: relative;
+  border-bottom-color: transparent !important;
+}
+.pb.wb .katex .frac-line::after {
+  content: "";
+  position: absolute;
+  left: -0.1em;
+  right: -0.1em;
+  top: 0;
+  height: 0.34em;
+  transform: translateY(-38%);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Cpath d='M1.5 5.8 C 14 4.4, 30 5.9, 47 5.1 S 80 4.2, 98.5 5.4' fill='none' stroke='%231f2328' stroke-width='1.9' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E")
+    center / 100% 100% no-repeat;
+}
+.pb.wb .pb-line.answer .katex .frac-line::after {
+  filter: none;
+}
+/* A root sign, an over-line, a big bracket drawn as a picture: roughened, as by hand. */
+.pb.wb .katex .hide-tail svg,
+.pb.wb .katex .stretchy svg {
+  filter: url(#wb-rough);
+}
+
+/* ---------------------------------------------------------------- sections */
+.pb.wb .wb-section {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 44px 0 20px;
+  min-width: 0;
+}
+.pb.wb .pb-lesson > .wb-section:first-child {
+  margin-top: 4px;
+}
+.wb-section-chip {
+  flex: none;
+  max-width: 70%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 3px 15px 5px;
+  border-radius: 14px 10px 15px 9px / 11px 14px 9px 13px;
+  background: var(--wb-purple);
+  box-shadow: 2px 3px 0 rgb(122 79 214 / 0.24);
+  color: #fff;
+  font-family: var(--wb-hand);
+  font-size: 19px;
+  line-height: 1.25;
+  letter-spacing: 0.01em;
+  transform: rotate(-1.6deg);
+  animation: wb-pop 640ms linear both;
+}
+.wb-section-rule {
+  flex: 1 1 auto;
+  min-width: 30px;
+  height: 12px;
+  overflow: visible;
+}
+.wb-section-rule path {
+  fill: none;
+  stroke: rgb(122 79 214 / 0.5);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: pb-draw 720ms cubic-bezier(0.45, 0.05, 0.3, 1) 260ms forwards;
+}
+
+/* ---------------------------------------------------------------- the marks */
+.pb.wb .pb-mark path {
+  stroke-width: 3;
+}
+.pb.wb .pb-mark.arrow path {
+  stroke-width: 2.7;
+}
+.pb.wb .pb-mark.strike path {
+  stroke: var(--wb-red);
+  stroke-width: 3.2;
+}
+.pb.wb .pb-mark.highlight path {
+  stroke: var(--wb-yellow);
+  stroke-opacity: 0.5;
+}
+.pb.wb .pb-mark.move path {
+  stroke: var(--wb-blue);
+}
+
+/* A mark's few words: a chip written by hand, springing in from nothing. */
+.pb.wb .pb-mark-label {
+  padding: 1px 10px 2px;
+  border: 1.5px solid rgb(122 79 214 / 0.45);
+  border-radius: 10px 7px 11px 8px / 8px 11px 7px 10px;
+  background: #f2ecfd;
+  color: #5530b5;
+  font-family: var(--wb-hand);
+  font-size: 16.5px;
+  font-weight: 400;
+  line-height: 1.15;
+  animation: wb-pop 600ms linear calc(var(--delay, 0s) + 380ms) both;
+}
+.pb.wb .pb-mark-label.arrow,
+.pb.wb .pb-mark-label.move {
+  border-color: rgb(47 111 222 / 0.45);
+  background: #e9f0fd;
+  color: #1d4fb8;
+}
+.pb.wb .pb-mark-label.move {
+  animation-delay: calc(var(--delay, 0s) + var(--draw, 900ms) + 120ms);
+}
+.pb.wb .pb-mark-label.strike {
+  border-color: rgb(226 72 61 / 0.45);
+  background: #fdecea;
+  color: #b3281f;
+}
+.pb.wb .pb-mark-label.highlight {
+  border-color: rgb(214 168 0 / 0.5);
+  background: #fff4c7;
+  color: var(--wb-ink);
+}
+.pb.wb .pb-figure .pb-mark-label,
+.pb.wb .pp-note {
+  font-family: var(--wb-hand);
+}
+
+/* A pair's numbered dot, popped in. */
+.pb.wb .pb-pairdot {
+  font-family: var(--wb-hand);
+  font-size: 12.5px;
+  font-weight: 400;
+  animation: wb-pop 560ms linear calc(var(--delay, 0s) + 300ms) both;
+}
+
+/* ---------------------------------------------------------------- the answer */
+/* The sticker is a sheet behind the writing that springs in from nothing while the pen writes
+   the answer on it. Only the sheet moves: the writing is never scaled, so the pen's measure of
+   where each letter goes holds. */
+.pb.wb .pb-line.answer {
+  position: relative;
+  isolation: isolate;
+  margin-top: 22px;
+  padding: 14px 26px 16px;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  animation: none;
+  overflow: visible;
+}
+.pb.wb .pb-line.answer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: 2.5px solid var(--wb-ink);
+  border-radius: 16px 22px 14px 20px / 20px 14px 22px 16px;
+  background: #e2f4e8;
+  box-shadow: 5px 6px 0 #9bd6b0;
+  transform-origin: 30% 60%;
+  animation: wb-pop 680ms linear both;
+}
+.pb.wb .pb-answer-tag {
+  font-family: var(--wb-hand);
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--wb-green);
+  transform-origin: left center;
+  animation: wb-pop 600ms linear 160ms both;
+}
+.pb.wb .pb-line.answer.lit::before {
+  border-color: var(--pair, var(--wb-ink));
+}
+
+/* The sparkle round it: rays drawn on in green and yellow, one after another. */
+.wb-sparkle {
+  position: absolute;
+  z-index: 1;
+  width: 76px;
+  height: 76px;
+  overflow: visible;
+  pointer-events: none;
+}
+.wb-sparkle.a {
+  top: -50px;
+  right: -52px;
+}
+.wb-sparkle.b {
+  bottom: -38px;
+  left: -40px;
+  width: 50px;
+  height: 50px;
+}
+.wb-sparkle path {
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: pb-draw 220ms ease-out both;
+}
+.wb-sparkle path.long {
+  stroke: var(--wb-green);
+}
+.wb-sparkle path.short {
+  stroke: var(--wb-yellow);
+}
+
+/* ---------------------------------------------------------------- doodles */
+.pb.wb .dd-caption {
+  font-family: var(--wb-hand);
+  font-weight: 400;
+  animation: wb-pop 600ms linear 120ms both;
+}
+/* Drawn by the pen, so a doodle cannot grow from nothing while it is drawn (the pen would lose
+   it): once it is finished, it lands with a bounce. */
+.pb.wb .dd-layer .dd.alive .dd-art,
+.pb.wb .dd-panelspot .dd.alive .dd-art {
+  animation: wb-land-doodle 620ms linear both;
+}
+
+/* ---------------------------------------------------------------- the shimmer */
+/* The doodles and the diagrams are seen through one of three turbulence filters, stepped every
+   130ms by Whiteboard.tsx (`data-boil` on the stage); nothing is set while it is still. */
+.pb.wb .pb-stage[data-boil="0"] .dd.alive .dd-svg,
+.pb.wb .pb-stage[data-boil="0"] .pb-figure:not(.drawing) > img {
+  filter: url(#wb-boil-0);
+}
+.pb.wb .pb-stage[data-boil="1"] .dd.alive .dd-svg,
+.pb.wb .pb-stage[data-boil="1"] .pb-figure:not(.drawing) > img {
+  filter: url(#wb-boil-1);
+}
+.pb.wb .pb-stage[data-boil="2"] .dd.alive .dd-svg,
+.pb.wb .pb-stage[data-boil="2"] .pb-figure:not(.drawing) > img {
+  filter: url(#wb-boil-2);
+}
+.wb-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* ---------------------------------------------------------------- a value on the move */
+.wb-travels {
+  position: fixed;
+  inset: 0;
+  z-index: 7;
+  overflow: hidden;
+  pointer-events: none;
+}
+.wb-travel-way {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.wb-travel-way path {
+  fill: none;
+  stroke: var(--wb-blue, #2f6fde);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+}
+.wb-travel-way.landed {
+  animation: wb-fade 1500ms linear forwards;
+}
+@keyframes wb-fade {
+  0%,
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.wb-travels.paused .wb-travel-way {
+  animation-play-state: paused;
+}
+.wb-travel {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+}
+.wb-travel-chip {
+  display: block;
+  padding: 2px 11px 4px;
+  border: 2px solid var(--wb-blue);
+  border-radius: 12px 9px 13px 8px / 9px 12px 8px 13px;
+  background: #eaf1fe;
+  box-shadow: 2px 3px 0 rgb(47 111 222 / 0.22);
+  color: #1d4fb8;
+  font-family: var(--wb-hand);
+  font-size: 20px;
+  line-height: 1.1;
+  white-space: nowrap;
+  transform: translate(-50%, -50%) rotate(-3deg);
+  animation: wb-pop 520ms linear both;
+}
+.wb-travel.landed .wb-travel-chip {
+  animation: wb-land 1500ms linear forwards;
+}
+.wb-travels.paused .wb-travel-chip {
+  animation-play-state: paused;
+}
+
+/* ---------------------------------------------------------------- springs */
+/* A spring (stiffness 180, damping 11, as SternHost's Pop): from nothing, past its size, back,
+   a little past, settled. */
+@keyframes wb-pop {
+  0% {
+    scale: 0;
+    opacity: 0;
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1);
+  }
+  12% {
+    opacity: 1;
+  }
+  42% {
+    scale: 1.17;
+    animation-timing-function: ease-in-out;
+  }
+  64% {
+    scale: 0.94;
+    animation-timing-function: ease-in-out;
+  }
+  83% {
+    scale: 1.025;
+    animation-timing-function: ease-in-out;
+  }
+  100% {
+    scale: 1;
+    opacity: 1;
+  }
+}
+@keyframes wb-land {
+  0% {
+    scale: 1;
+    opacity: 1;
+  }
+  12% {
+    scale: 1.24;
+  }
+  26% {
+    scale: 0.94;
+  }
+  40% {
+    scale: 1;
+    opacity: 1;
+  }
+  100% {
+    scale: 0.9;
+    opacity: 0;
+  }
+}
+@keyframes wb-land-doodle {
+  0% {
+    transform: scale(1);
+    animation-timing-function: ease-out;
+  }
+  35% {
+    transform: scale(1.1, 1.08);
+    animation-timing-function: ease-in-out;
+  }
+  62% {
+    transform: scale(0.96);
+    animation-timing-function: ease-in-out;
+  }
+  82% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ---------------------------------------------------------------- phone */
+@media (max-width: 640px) {
+  .pb.wb .pb-sheet {
+    font-size: 21px;
+    line-height: 1.6;
+  }
+  .pb.wb .pb-line {
+    margin-bottom: 22px;
+  }
+  .pb.wb .pb-question {
+    margin-bottom: 30px;
+    padding: 12px 14px 14px;
+  }
+  .pb.wb .wb-section {
+    margin: 34px 0 16px;
+  }
+  .wb-section-chip {
+    font-size: 17px;
+  }
+  .pb.wb .pb-line.answer {
+    padding: 10px 16px 12px;
+  }
+  .wb-sparkle.a {
+    top: -40px;
+    right: -26px;
+    width: 60px;
+    height: 60px;
+  }
+  .wb-sparkle.b {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------- less movement */
+@media (prefers-reduced-motion: reduce) {
+  .pb.wb .pb-mark-label,
+  .pb.wb .pb-pairdot,
+  .pb.wb .pb-line.answer::before,
+  .pb.wb .pb-answer-tag,
+  .pb.wb .dd-caption,
+  .pb.wb .dd.alive .dd-art,
+  .wb-section-chip,
+  .wb-travel-chip {
+    animation: none;
+  }
+  .wb-section-rule path,
+  .wb-sparkle path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ---------------------------------------------------------------- the switch (both styles) */
+.wb-switch {
+  position: relative;
+  flex: none;
+}
+.sj .wb-switch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 13px 0 10px;
+  border: 1px solid var(--gray-200, #e2dfe9);
+  border-radius: var(--r-pill, 999px);
+  background: var(--white, #fff);
+  color: var(--gray-700, #4a4458);
+  font: 600 12.5px/1 var(--f-body);
+  cursor: pointer;
+  transition:
+    border-color 160ms var(--ease),
+    color 160ms var(--ease),
+    background 160ms var(--ease);
+}
+.sj .wb-switch-btn:hover,
+.sj .wb-switch-btn.open {
+  border-color: var(--purple-300, #c4a6ff);
+  color: var(--purple-600, #6b0bff);
+}
+.sj .wb-switch-btn:focus-visible {
+  outline: 2px solid var(--purple-500, #8b3dff);
+  outline-offset: 2px;
+}
+.wb-switch-pop {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  display: grid;
+  gap: 12px;
+  width: 252px;
+  padding: 14px;
+  border: 1px solid var(--gray-100, #efecf4);
+  border-radius: var(--r-lg, 16px);
+  background: var(--white, #fff);
+  box-shadow:
+    0 12px 32px -8px rgb(20 12 40 / 0.22),
+    0 2px 6px rgb(20 12 40 / 0.06);
+  transform-origin: top right;
+  animation: pb-label 200ms var(--ease-spring) both;
+}
+.wb-seg-row {
+  display: grid;
+  gap: 6px;
+}
+.wb-seg-label {
+  font-family: var(--f-mono, 'Space Mono', monospace);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--purple-600, #6b0bff);
+}
+.wb-seg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 11px;
+  background: var(--gray-100, #efecf4);
+}
+.sj .wb-seg button {
+  height: 32px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--gray-600, #6b6578);
+  font: 600 13px/1 var(--f-body);
+  cursor: pointer;
+  transition:
+    background 160ms var(--ease),
+    color 160ms var(--ease);
+}
+.sj .wb-seg button:hover {
+  color: var(--ink-900, #1f0050);
+}
+.sj .wb-seg button.on {
+  background: var(--white, #fff);
+  color: var(--purple-700, #5b00d6);
+  box-shadow: 0 1px 3px rgb(20 12 40 / 0.14);
+}
+.sj .wb-seg button:focus-visible {
+  outline: 2px solid var(--purple-500, #8b3dff);
+  outline-offset: 1px;
+}
+@media (max-width: 640px) {
+  .sj .wb-switch-btn {
+    width: 36px;
+    height: 34px;
+    padding: 0;
+    justify-content: center;
+  }
+  .wb-switch-text {
+    display: none;
+  }
+  .wb-switch-pop {
+    right: -52px;
+    width: min(252px, calc(100vw - 32px));
+  }
+}

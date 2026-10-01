@@ -156,3 +156,85 @@ def test_a_line_of_the_working_links_to_the_passage() -> None:
     for mark in bad:
         with pytest.raises(SystemExit):
             marks.clean_points([mark], 1, "here", passage=PASSAGE)
+
+
+def test_a_value_travels_from_a_doodle_a_diagram_or_a_line() -> None:
+    sketches = {"sketch": SKETCH}
+    doodles = {"cls": {"total", "both"}}
+    point = [
+        {"line": 2, "kind": "travel", "at": "40", "from": {"doodle": "cls", "part": "total"}},
+        {"line": 2, "kind": "travel", "at": "7", "from": {"figure": "sketch", "target": "A"}},
+        {
+            "line": -1,
+            "kind": "travel",
+            "at": "[[2]]x",
+            "from": {"line": 0, "at": "x = 2"},
+            "text": "x = 2",
+        },
+    ]
+    assert marks.clean_points(point, 2, "here", [], sketches, doodles=doodles) == [
+        {"line": 2, "kind": "travel", "at": "40", "from": {"doodle": "cls", "part": "total"}},
+        {"line": 2, "kind": "travel", "at": "7", "from": {"figure": "sketch", "target": "A"}},
+        {
+            "line": -1,
+            "kind": "travel",
+            "text": "x = 2",
+            "at": "[[2]]x",
+            "from": {"line": 0, "at": "x = 2"},
+        },
+    ]
+    bad: list[tuple[dict[str, object], str]] = [
+        ({"line": 2, "kind": "travel", "from": {"doodle": "cls"}}, "needs at"),
+        ({"line": 2, "kind": "travel", "at": "40"}, "needs from"),
+        ({"line": 3, "kind": "travel", "at": "40", "from": {"doodle": "cls"}}, "earlier one"),
+        ({"line": 2, "kind": "travel", "at": "40", "from": {"doodle": "jar"}}, "not a doodle"),
+        (
+            {"line": 2, "kind": "travel", "at": "4", "from": {"doodle": "cls", "part": "x"}},
+            "no part",
+        ),
+        (
+            {"line": 2, "kind": "travel", "at": "4", "from": {"figure": "sketch"}},
+            "figure: …, target",
+        ),
+        (
+            {"line": 2, "kind": "travel", "at": "4", "from": {"figure": "sketch", "target": "Z"}},
+            "not made of",
+        ),
+        ({"line": 2, "kind": "travel", "at": "4", "from": {"line": 3}}, "earlier one"),
+        ({"line": 2, "kind": "travel", "at": "4", "from": {"word": "x"}}, "travel's from is"),
+        (
+            {"line": 2, "kind": "travel", "at": "4", "from": {"line": 0}, "to": {"doodle": "cls"}},
+            "not to",
+        ),
+    ]
+    for mark, message in bad:
+        with pytest.raises(SystemExit, match=message):
+            marks.clean_points([mark], 2, "here", [], sketches, doodles=doodles)
+
+
+def test_a_section_is_a_short_heading() -> None:
+    assert marks.clean_section("  Find   the union ", "here") == "Find the union"
+    for value, message in [("", "short heading"), (3, "short heading"), ("x" * 41, "at most 40")]:
+        with pytest.raises(SystemExit, match=message):
+            marks.clean_section(value, "here")
+
+
+def test_the_board_is_sent_a_travel_whole_or_not_at_all() -> None:
+    from app.routers.practice import _points
+
+    sent = _points(
+        [
+            {"line": 2, "kind": "travel", "at": "40", "from": {"doodle": "cls", "part": "total"}},
+            {"line": 2, "kind": "travel", "at": "7", "from": {"figure": "sketch", "target": "A"}},
+            {"line": 2, "kind": "travel", "at": "2", "from": {"line": 0, "at": "x"}, "text": "x"},
+            # Not whole: nothing to land on, or nowhere to come from.
+            {"line": 2, "kind": "travel", "from": {"line": 0}},
+            {"line": 2, "kind": "travel", "at": "2", "from": {"figure": "sketch"}},
+        ]
+    )
+    assert sent is not None
+    assert [p.model_dump(by_alias=True, exclude_none=True) for p in sent] == [
+        {"line": 2, "kind": "travel", "at": "40", "from": {"doodle": "cls", "part": "total"}},
+        {"line": 2, "kind": "travel", "at": "7", "from": {"figure": "sketch", "target": "A"}},
+        {"line": 2, "kind": "travel", "text": "x", "at": "2", "from": {"line": 0, "at": "x"}},
+    ]

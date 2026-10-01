@@ -1291,6 +1291,7 @@ def test_a_lessons_marks_pass_through_and_a_bad_one_is_dropped() -> None:
         "to": None,
         "passage": None,
         "nth": None,
+        "on": None,
     }
     assert [point.model_dump() for point in points] == [
         {"line": 0, "kind": "circle", "text": "the limits", "at": "0 <= y <= 3", **blank},

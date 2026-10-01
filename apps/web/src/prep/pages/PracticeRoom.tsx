@@ -38,6 +38,7 @@ import {
   type PracticeQuestion,
   type PracticeState,
 } from "../../student/api.js";
+import { readBoardPrefs } from "../../student/boardPrefs.js";
 import {
   IconArrowRight,
   IconBook,
@@ -337,7 +338,7 @@ export function PracticeRoom() {
   useEffect(() => {
     if (!canHear || !hintedVersion || warmed.current === hintedVersion) return;
     warmed.current = hintedVersion;
-    api.practiceWarm(sessionId, hintedVersion).catch(() => undefined);
+    api.practiceWarm(sessionId, hintedVersion, readBoardPrefs().voice).catch(() => undefined);
   }, [canHear, hintedVersion, sessionId]);
   // On a doubted right answer too, where the working is the recommended next step. A sure answer's
   // lesson is optional, so its voice is made only if the student opens it: warming every right
@@ -347,7 +348,7 @@ export function PracticeRoom() {
   useEffect(() => {
     if (!canHear || !rightVersion || warmed.current === rightVersion) return;
     warmed.current = rightVersion;
-    api.practiceWarm(sessionId, rightVersion).catch(() => undefined);
+    api.practiceWarm(sessionId, rightVersion, readBoardPrefs().voice).catch(() => undefined);
   }, [canHear, rightVersion, sessionId]);
 
   // Dev only: `?demo=confidence|correct|hinted|guessed|unsure|twice|saved` jumps straight to that moment on

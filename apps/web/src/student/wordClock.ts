@@ -1,0 +1,244 @@
+/**
+ * WHEN A WORD IS SAID: the time into a moment's voice clip at which the words a cue names
+ * (`on:` in the lesson file, database/lesson_cues.py) begin, so the whiteboard style can bring
+ * an item up as it is named (docs/lesson-style-guide.md section 6).
+ *
+ * Two sources, best first:
+ *
+ * 1. Word timings, where the voice comes with them (`[{w, start, end}]` in seconds: the Kokoro
+ *    voice keeps them, fetched by the board with `api.lessonVoiceWords` and handed in with
+ *    `setSpokenWords`; or on the lesson's beat as `words`). They are the line as SPOKEN, maths
+ *    in words, so the cue's words are found in them the same way, and where they are not
+ *    found the estimate is used.
+ * 2. An estimate from the text: where the words begin as a share of the whole line, counted in
+ *    characters as they are said, with a little extra for the pause a comma or a full stop
+ *    makes, spread across the clip's real duration. Maths in `$…$` is said in words ("x
+ *    squared"), so it counts for about four characters a sign.
+ *
+ * Matching is the server's: lower case, punctuation dropped, words inside maths not counted.
+ */
+
+import type { LessonCue } from "./api.js";
+
+/** A word as a voice that times itself reports it, in seconds into the clip. */
+export interface SpokenWord {
+  w: string;
+  start: number;
+  end: number;
+}
+
+const MATHS = /\$[^$]*\$/g;
+const BREAK = /[\s\-–—/]+/;
+
+/** A word as it is matched: lower case, letters and digits only. */
+export function foldWord(token: string): string {
+  return token.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+}
+
+/** The words of `text` as they are matched (no maths, no punctuation), in order. */
+export function spokenWords(text: string): string[] {
+  return text
+    .replace(MATHS, " ")
+    .split(BREAK)
+    .map(foldWord)
+    .filter(Boolean);
+}
+
+/** The run of `want` in `heard`, its `nth` time (from 1): the index it starts at, or -1. */
+function findRun(heard: string[], want: string[], nth: number): number {
+  if (!want.length) return -1;
+  let seen = 0;
+  for (let start = 0; start + want.length <= heard.length; start += 1) {
+    if (want.every((word, k) => heard[start + k] === word)) {
+      seen += 1;
+      if (seen === nth) return start;
+    }
+  }
+  return -1;
+}
+
+/** Roughly how many characters a piece of maths takes to say. */
+function mathsSpoken(latex: string): number {
+  const signs = latex.replace(/\\[a-zA-Z]+/g, "x").replace(/[{}$^_&\\\s]/g, "").length;
+  return Math.max(3, signs * 4);
+}
+
+const PAUSE: Record<string, number> = { ",": 3, ";": 4, ":": 4, ".": 6, "?": 6, "!": 6 };
+
+/**
+ * Each matchable word of `say`, with where it starts as a share (0 to 1) of the time the whole
+ * line takes to say.
+ */
+export function wordShares(say: string): { word: string; share: number }[] {
+  const out: { word: string; at: number }[] = [];
+  let at = 0;
+  const pieces = say.split(/(\$[^$]*\$)/g);
+  for (const piece of pieces) {
+    if (piece.startsWith("$") && piece.endsWith("$") && piece.length > 1) {
+      at += mathsSpoken(piece) + 1;
+      continue;
+    }
+    for (const token of piece.split(/(\s+)/)) {
+      if (!token) continue;
+      if (/^\s+$/.test(token)) {
+        at += 1;
+        continue;
+      }
+      for (const part of token.split(/[-–—/]/)) {
+        const word = foldWord(part);
+        if (word) out.push({ word, at });
+        at += part.length + 1;
+      }
+      const last = token[token.length - 1] ?? "";
+      at += PAUSE[last] ?? 0;
+    }
+  }
+  const total = Math.max(1, at);
+  return out.map(({ word, at: start }) => ({ word, share: start / total }));
+}
+
+/**
+ * When the cue's words begin, in seconds into the clip: from the word timings where there are
+ * some and the words are found in them, else estimated across `duration`. Null where the words
+ * are not said at all (the loader refuses that, so only a hand-edited lesson gets here).
+ */
+export function cueSeconds(
+  cue: LessonCue,
+  say: string,
+  duration: number,
+  words?: SpokenWord[] | null,
+): number | null {
+  const want = spokenWords(cue.word);
+  const nth = Math.max(1, cue.nth || 1);
+  const shares = wordShares(say);
+  const written = shares.map((one) => one.word);
+  const at = findRun(written, want, nth);
+  const estimate = at < 0 ? null : shares[at]!.share * duration;
+  if (words && words.length) {
+    // The voice's words are the line AS SPOKEN: its maths in words ("x cubed"), so a word the
+    // maths says too can be heard more often than it is written. Where the counts agree the
+    // nth is the nth; where they do not, the heard one nearest the estimate.
+    const heard = words.map((word) => foldWord(word.w));
+    const found: number[] = [];
+    for (let k = 1; ; k += 1) {
+      const start = findRun(heard, want, k);
+      if (start < 0) break;
+      found.push(start);
+    }
+    if (found.length) {
+      const inText = runCount(written, want);
+      if (found.length === inText && found[nth - 1] !== undefined) return words[found[nth - 1]!]!.start;
+      if (estimate !== null) {
+        const nearest = found.reduce((best, start) =>
+          Math.abs(words[start]!.start - estimate) < Math.abs(words[best]!.start - estimate) ? start : best,
+        );
+        return words[nearest]!.start;
+      }
+      return words[found[Math.min(nth, found.length) - 1]!]!.start;
+    }
+  }
+  return estimate;
+}
+
+/** How many times the run of `want` occurs in `heard`. */
+function runCount(heard: string[], want: string[]): number {
+  let count = 0;
+  while (findRun(heard, want, count + 1) >= 0) count += 1;
+  return count;
+}
+
+/* ---- Word timings handed in by the voice ------------------------------------------------- */
+
+const timings = new Map<string, SpokenWord[]>();
+
+/** Word timings for the clip at `url`, from a voice that times its own words. */
+export function setSpokenWords(url: string, words: SpokenWord[]): void {
+  timings.set(url, words);
+}
+
+/** The word timings known for the clip at `url`, if any. */
+export function spokenWordsFor(url: string | null | undefined): SpokenWord[] | null {
+  if (!url) return null;
+  return timings.get(url) ?? null;
+}
+
+/* ---- A moment's cues --------------------------------------------------------------------- */
+
+/** What a cue brings up: the write, the sketch, a mark, a doodle, or a doodle action. */
+export type CueKey =
+  | "write"
+  | "sketch"
+  | `point:${number}`
+  | `doodle:${number}`
+  | `do:${number}`
+  // A live diagram, and its actions (LiveDiagram.tsx).
+  | "diagram"
+  | `dia:${number}`;
+
+/** The cued pieces of a moment, as the board knows it. */
+export interface CuedMoment {
+  say: string;
+  on?: LessonCue | null;
+  showSketch?: string | null;
+  items: string[];
+  point: { on?: LessonCue | null }[];
+  doodle?: { on?: LessonCue | null } | null;
+  doodles?: { on?: LessonCue | null }[] | null;
+  doodleDo?: { on?: LessonCue | null }[] | null;
+  diagram?: { on?: LessonCue | null } | null;
+  diagramDo?: { on?: LessonCue | null }[] | null;
+}
+
+/**
+ * Every cue in a moment, by what it brings up. A doodle is counted as the layer counts them:
+ * its `doodle`, then its `doodles`.
+ */
+export function momentCues(moment: CuedMoment): { key: CueKey; cue: LessonCue }[] {
+  const out: { key: CueKey; cue: LessonCue }[] = [];
+  if (moment.on) {
+    if (moment.items.length) out.push({ key: "write", cue: moment.on });
+    if (moment.showSketch) out.push({ key: "sketch", cue: moment.on });
+  }
+  moment.point.forEach((point, k) => {
+    if (point.on) out.push({ key: `point:${k}`, cue: point.on });
+  });
+  [moment.doodle, ...(moment.doodles ?? [])]
+    .filter((doodle): doodle is { on?: LessonCue | null } => Boolean(doodle))
+    .forEach((doodle, k) => {
+      if (doodle.on) out.push({ key: `doodle:${k}`, cue: doodle.on });
+    });
+  (moment.doodleDo ?? []).forEach((action, k) => {
+    if (action.on) out.push({ key: `do:${k}`, cue: action.on });
+  });
+  if (moment.diagram?.on) out.push({ key: "diagram", cue: moment.diagram.on });
+  (moment.diagramDo ?? []).forEach((action, k) => {
+    if (action.on) out.push({ key: `dia:${k}`, cue: action.on });
+  });
+  return out;
+}
+
+/* ---- Firing them as the voice plays ------------------------------------------------------ */
+
+/**
+ * Watch `clip` on every animation frame and report each cue as the voice reaches it (its
+ * `at`, in seconds into the clip). Read from `clip.currentTime`, not a timer, so a paused voice
+ * holds every cue exactly where it is, and a slowed one (playbackRate) slows them with it.
+ * Cues already passed are reported at once. Returns the stop.
+ */
+export function startCueClock(
+  clip: HTMLAudioElement,
+  cues: { key: CueKey; at: number }[],
+  reached: (keys: CueKey[]) => void,
+): () => void {
+  const left = [...cues].sort((a, b) => a.at - b.at);
+  let frame = 0;
+  const look = () => {
+    const now = clip.currentTime;
+    const due: CueKey[] = [];
+    while (left.length && left[0]!.at <= now + 0.02) due.push(left.shift()!.key);
+    if (due.length) reached(due);
+    if (left.length) frame = requestAnimationFrame(look);
+  };
+  look();
+  return () => cancelAnimationFrame(frame);
+}

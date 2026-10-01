@@ -83,6 +83,8 @@ import asyncpg
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from lesson_cues import attach_cues, split_cues
+from lesson_diagrams import DiagramBook
 from lesson_doodles import (
     DoodleBook,
     check_all_used,
@@ -92,7 +94,7 @@ from lesson_doodles import (
     need_doodles_column,
     read_custom_doodles,
 )
-from lesson_marks import clean_points
+from lesson_marks import clean_points, clean_section
 from load_questions import content_hash, normalise, uuid_for
 from propose_levels_english import propose
 
@@ -346,11 +348,15 @@ def read_lessons(
             doodles = read_custom_doodles(DOODLE_DIR, year, int(number))
             # Followed through the moments: what each brings in and does (doodles v2).
             book = DoodleBook(library, doodles, year, int(number))
+            # And its live diagrams (lesson_diagrams.py, doodles-v2-contract.md section 8).
+            diagrams = DiagramBook()
             clean: list[dict[str, object]] = []
             for moment in moments:
                 say = moment.get("say") if isinstance(moment, dict) else None
                 if not isinstance(say, str) or not say.strip():
                     raise SystemExit(f"{where}: every moment needs something said")
+                # Cues (`on:`) come off first, checked against `say` (lesson_cues.py).
+                moment, cues = split_cues(moment, f"{where} moment {len(clean)}")
                 write = moment.get("write")
                 if write is not None and (not isinstance(write, str) or not write.strip()):
                     raise SystemExit(f"{where}: a moment's write is a line on the board or nothing")
@@ -359,8 +365,19 @@ def read_lessons(
                     entry["write"] = write.strip()
                 if moment.get("answer"):
                     entry["answer"] = True
+                if moment.get("section") is not None:
+                    # Starts a titled section of the working (whiteboard style).
+                    entry["section"] = clean_section(
+                        moment["section"], f"{where} moment {len(clean)}"
+                    )
                 # Its doodles first: a mark may link to one (to: {doodle, part}).
                 bringing, linkable = book.moment(
+                    moment,
+                    len(clean),
+                    [bool(m.get("write")) for m in clean] + [bool(write)],
+                    f"{where} moment {len(clean)}",
+                )
+                drawing = diagrams.moment(
                     moment,
                     len(clean),
                     [bool(m.get("write")) for m in clean] + [bool(write)],
@@ -377,8 +394,11 @@ def read_lessons(
                         f"{where} moment {len(clean)}",
                         passage=q["passage"]["body"] if q["passage"] else None,
                         doodles=linkable,
+                        diagrams=diagrams,
                     )
                 entry.update(bringing)
+                entry.update(drawing)
+                attach_cues(entry, cues)
                 clean.append(entry)
             check_all_used(doodles, clean, where)
             answers = [m for m in clean if m.get("answer")]

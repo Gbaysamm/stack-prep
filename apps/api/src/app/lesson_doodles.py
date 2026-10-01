@@ -18,6 +18,8 @@ from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
+from app.lesson_cues import LessonCue, cue_of
+
 #: As the loader allows: a caption is a few words.
 MAX_CAPTION = 40
 _NAME = re.compile(r"custom:\d{4}_q\d{2,3}_[a-z0-9][a-z0-9_-]*|[a-z0-9][a-z0-9_-]*")
@@ -47,6 +49,8 @@ DoodleOpName = Literal[
     "count",
     "group",
     "split",
+    # A talking mouth says a word again (app/lesson_mouth.py).
+    "say",
 ]
 _OPS = frozenset(get_args(DoodleOpName))
 #: What each action cannot go without.
@@ -85,6 +89,8 @@ class DoodleRef(BaseModel):
     repeat: int | list[RepeatKind] | None = None
     #: How a repeat is laid out (grid by default).
     layout: DoodleLayout | None = None
+    #: The word it is drawn on, in the whiteboard style (app/lesson_cues.py).
+    on: LessonCue | None = None
 
 
 class DoodleOp(BaseModel):
@@ -112,6 +118,12 @@ class DoodleOp(BaseModel):
     fill: str | None = None
     #: How much a grow or a shrink scales it.
     by: float | None = None
+    #: The word a talking mouth says (`say`); its own word without it.
+    word: str | None = None
+    #: The sound a talking mouth holds as it says it (IPA), where it is another than its own.
+    sound: str | None = None
+    #: The word it is done on, in the whiteboard style (app/lesson_cues.py).
+    on: LessonCue | None = None
 
 
 class LessonDoodle(BaseModel):
@@ -193,6 +205,7 @@ def doodle_ref(raw: object) -> DoodleRef | None:
         size=size if size in ("small", "medium", "scene") else None,
         repeat=repeat,
         layout=layout if repeat is not None and layout in ("row", "grid", "cluster") else None,
+        on=cue_of(raw),
     )
 
 
@@ -225,6 +238,9 @@ def _doodle_op(raw: object, known: set[str]) -> DoodleOp | None:
         path=_named(raw.get("path")),
         fill=_named(raw.get("fill")),
         by=_fraction(raw.get("by")),
+        word=_words(raw.get("word"), MAX_TEXT) if raw.get("op") == "say" else None,
+        sound=_words(raw.get("sound"), 6) if raw.get("op") == "say" else None,
+        on=cue_of(raw),
     )
     if op.to is not None:
         op.to = min(1.0, max(0.0, op.to))
@@ -254,6 +270,10 @@ def doodle_actions(moments: list[object]) -> list[list[DoodleOp] | None]:
             continue
         brought = [doodle_ref(moment.get("doodle"))] + (doodle_refs(moment.get("doodles")) or [])
         known.update(ref.id for ref in brought if ref is not None and ref.id)
+        # A talking mouth's id too, which `say` (and `pulse`) act on.
+        mouth = moment.get("mouth")
+        if isinstance(mouth, dict) and (handle := _named(mouth.get("id"), _ID)):
+            known.add(handle)
         raw = moment.get("doodle_do")
         found = (_doodle_op(item, known) for item in (raw if isinstance(raw, list) else []))
         acts = [op for op in found if op is not None][:MAX_OPS]

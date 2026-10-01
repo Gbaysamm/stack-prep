@@ -20,6 +20,14 @@ dependencies = [
     "argon2-cffi>=25.1.0",
 ]
 
+[project.optional-dependencies]
+# The free Kokoro voice (app/kokoro_voice.py): the model run on onnxruntime, phonemes from a
+# bundled espeak-ng, mp3 from LAME. Imported lazily; without it the voice is not offered.
+kokoro = [
+    "kokoro-onnx>=0.6.1",
+    "lameenc>=1.8",
+]
+
 [tool.uv.sources]
 score-pilot-engine = { workspace = true }
 

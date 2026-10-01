@@ -44,15 +44,36 @@ import {
 import type { CSSProperties, MutableRefObject, ReactNode, RefObject } from "react";
 
 import type {
+  LessonCue,
+  LessonDiagram,
+  LessonDiagramOp,
   LessonDoodleOp,
   LessonDoodleRef,
+  LessonMouth,
   LessonPoint,
   NarratedLesson,
   TutorReply,
 } from "./api.js";
+import { api, withVoice } from "./api.js";
+import { useBoardPrefs } from "./boardPrefs.js";
+import { drawnMarks } from "./travel.js";
+import { BoardStyleSwitch, SectionHeading, Sparkle, WhiteboardFx } from "./Whiteboard.js";
+import { useBoardSfx } from "./boardSfx.js";
+import { BoardTuningControls, useAnimationRate, useBoardTuning } from "./BoardTuning.js";
+import { sharedAudioContext } from "./sfx.js";
+import {
+  cueSeconds,
+  momentCues,
+  setSpokenWords,
+  spokenWordsFor,
+  startCueClock,
+  type CueKey,
+  type SpokenWord,
+} from "./wordClock.js";
 import { Buddy } from "./Buddy.js";
 import { Coach } from "./Coach.js";
 import { DoodleLayer, type DoodleLink } from "./DoodleLayer.js";
+import { DiagramLayer, type DiagramLink } from "./DiagramLayer.js";
 import { FigurePanel, type Drawing, type DrawingKey } from "./FigureBoard.js";
 import { PassagePanel, type PassageKind, type PassageMark } from "./PassagePanel.js";
 import { findInPassage, foldPassage, gapOf, quotedPieces } from "./passage.js";
@@ -122,6 +143,31 @@ interface Entry {
   /** Or the one or two it brings in, and what the pen does to earlier ones (doodles v2). */
   doodles?: LessonDoodleRef[] | null;
   doodleDo?: LessonDoodleOp[] | null;
+  /** A live diagram it brings in, and what the pen does to diagrams (DiagramLayer.tsx). */
+  diagram?: LessonDiagram | null;
+  diagramDo?: LessonDiagramOp[] | null;
+  /** Whiteboard style: the word its write (and sketch) lands on (wordClock.ts). */
+  on?: LessonCue | null;
+  /** Whiteboard style: the voice's own word timings, where it has them. */
+  words?: SpokenWord[] | null;
+  /** Whiteboard style: the heading of the section of the working this moment starts. */
+  section?: string | null;
+  /** A talking mouth it brings in, for oral English (Mouth.tsx). */
+  mouth?: LessonMouth | null;
+}
+
+/**
+ * WHITEBOARD STYLE: the breath after a moment's voice ends before the next begins, longer after
+ * a moment that writes a key result or brings in a picture, so it can land.
+ */
+function breathMs(entry: Entry): number {
+  const key =
+    entry.answer ||
+    Boolean(entry.showSketch) ||
+    Boolean(entry.doodle) ||
+    Boolean(entry.doodles?.length) ||
+    entry.point.some((point) => point.kind === "box");
+  return key ? 1200 : 600;
 }
 
 /**
@@ -346,6 +392,17 @@ export function Board({
 }) {
   const [shown, setShown] = useState(0);
   const [paused, setPaused] = useState(false);
+  // WHITEBOARD STYLE (boardPrefs.ts): sound effects, items landing on their words, a breath
+  // between moments and a speed. The classic style plays at 1x and ignores every cue.
+  const whiteboard = useBoardPrefs().style === "whiteboard";
+  //: Which voice says the lesson: the studio one, or the free Kokoro one made on our server.
+  const voice = useBoardPrefs().voice;
+  const tuning = useBoardTuning();
+  const speed = whiteboard ? tuning.speed : 1;
+  //: Which of the moment being said's cues (`on:`) its voice has reached; `all` once it is past.
+  const [cued, setCued] = useState<{ index: number; all: boolean; keys: ReadonlySet<CueKey> }>(
+    () => ({ index: -1, all: false, keys: new Set() }),
+  );
   const [draft, setDraft] = useState("");
   const [turn, setTurn] = useState<(TutorReply & { asked: string }) | null>(
     null,
@@ -420,7 +477,7 @@ export function Board({
         ],
       };
     });
-  }, [answerLine, folded, lesson, steps]);
+  }, [answerLine, folded, lesson, steps, voice]);
   /** The lesson as moments, before the passage is looked at. */
   function teach(): Entry[] {
     if (lesson && lesson.beats.length > 0) {
@@ -433,10 +490,11 @@ export function Board({
           items: bare ? [answerLine] : beat.write,
           at: bare ? [0] : beat.write_at,
           say: beat.say,
-          voice: beat.voice_url,
+          voice: withVoice(beat.voice_url, voice),
           step: beat.board_index !== null && !answer ? beat.board_index : null,
           answer,
-          point: beat.point ?? [],
+          // A `travel` is drawn as the arrow it rides (travel.ts).
+          point: drawnMarks(beat.point),
           showSketch:
             beat.show_sketch === true
               ? "sketch"
@@ -446,6 +504,12 @@ export function Board({
           doodle: beat.doodle ?? null,
           doodles: beat.doodles ?? null,
           doodleDo: beat.doodle_do ?? null,
+          diagram: beat.diagram ?? null,
+          diagramDo: beat.diagram_do ?? null,
+          on: beat.on ?? null,
+          words: (beat as { words?: SpokenWord[] | null }).words ?? null,
+          section: beat.section ?? null,
+          mouth: beat.mouth ?? null,
         };
       });
     }
@@ -509,7 +573,9 @@ export function Board({
   const listen = useCallback((audio: HTMLAudioElement) => {
     try {
       if (listener.current === null) {
-        const context = new AudioContext();
+        // The page's one context, which the whiteboard's sound effects play through too.
+        const context = sharedAudioContext();
+        if (!context) throw new Error("No Web Audio here");
         const analyser = context.createAnalyser();
         // Small window: the mouth should follow syllables, not the shape of a whole word.
         analyser.fftSize = 256;
@@ -811,6 +877,8 @@ export function Board({
   //: The lesson's own voice is sounding, so the coach's face shows it is talking.
   const [voicing, setVoicing] = useState(false);
   const clips = useRef(new Map<number, HTMLAudioElement>());
+  //: A moment's clip, if it has been fetched: the talking mouth keeps time with it (Mouth.tsx).
+  const clipAt = useCallback((index: number) => clips.current.get(index) ?? null, []);
   const narrating = useRef<number | null>(null);
   //: Beats whose voice could not be had even after a second try: read along for those alone.
   const failedBeats = useRef(new Set<number>());
@@ -839,11 +907,35 @@ export function Board({
       clipFor(index);
     }
   }, [clipFor, lines, shown]);
+  // WHITEBOARD: the voice's own word timings, for the same few beats, where it keeps them (the
+  // Kokoro voice; the studio voice has none and its cues are estimated, wordClock.ts).
+  const wordsAsked = useRef(new Set<string>());
+  useEffect(() => {
+    if (!whiteboard) return;
+    for (let index = Math.max(0, shown - 1); index < Math.min(lines.length, shown + 2); index += 1) {
+      const url = lines[index]?.voice;
+      if (!url || !url.includes("engine=kokoro") || wordsAsked.current.has(url)) continue;
+      wordsAsked.current.add(url);
+      void api
+        .lessonVoiceWords(url)
+        .then((timed) => {
+          if (timed?.words.length) setSpokenWords(url, timed.words);
+        })
+        .catch(() => undefined);
+    }
+  }, [lines, shown, whiteboard]);
   const missed = (index: number) => {
     failedBeats.current.add(index);
     misses.current += 1;
     if (misses.current >= 3) setSilent(true);
   };
+
+  // WHITEBOARD: a new moment's line starts unwritten before the board is painted, rather than
+  // flashing up for a frame with the last moment's count (the effect below resets it after
+  // paint), which shows when its write waits for a word.
+  useLayoutEffect(() => {
+    if (whiteboard && shown > 0) setItemsShown(0);
+  }, [shown, whiteboard]);
 
   useEffect(() => {
     if (paused || preparing || needsTap) return;
@@ -887,6 +979,8 @@ export function Board({
       setQuestionUp(true);
       setHandMs(READ_HAND_MS);
       setItemsShown(entry?.items.length ?? 0);
+      // No voice to time words by: every cue is due at once.
+      setCued({ index: at, all: true, keys: new Set() });
       later(() => setWantPoint(at), MARK_LEAD_MS);
       onward(entry ? readingMs(entry.say) : STEP_MS);
     };
@@ -911,6 +1005,7 @@ export function Board({
       setQuestionUp(true);
       setHandMs(READ_HAND_MS);
       setItemsShown(entry?.items.length ?? 0);
+      setCued({ index, all: true, keys: new Set() });
       later(() => setWantPoint(index), MARK_LEAD_MS);
       onward(STEP_MS);
       return stop;
@@ -922,9 +1017,27 @@ export function Board({
       setItemsShown(0);
       setPointing(null);
       setWantPoint(null);
+      setCued({ index, all: false, keys: new Set() });
     }
     narrating.current = index;
     const writeAll = () => setItemsShown(entry.items.length);
+    // The whiteboard's pace: the voice at the student's speed (pitch kept), and every timing
+    // below, which is in the clip's seconds, stretched to match. The classic style is 1x.
+    const rate = speed;
+    if (whiteboard || clip.playbackRate !== 1) {
+      clip.playbackRate = rate;
+      clip.preservesPitch = true;
+    }
+    const allCued = () => setCued({ index, all: true, keys: new Set() });
+    // Paused (or slowed) in the breath after the voice had finished: the breath is taken again,
+    // rather than the moment being said a second time.
+    if (whiteboard && clip.ended && clip.currentTime > 0) {
+      writeAll();
+      allCued();
+      onward(breathMs(entry) / rate);
+      return stop;
+    }
+    let stopClock: (() => void) | null = null;
     // THE VOICE LEADS. Nothing is written until the teacher has started saying it: each item
     // waits for its own words, and never less than a short lead after the voice begins. Its
     // writing then takes the rest of the time its words take, so the hand follows the voice
@@ -936,30 +1049,61 @@ export function Board({
           : 2.5;
       const lead = Math.min(0.7, seconds * 0.15);
       const count = Math.max(1, entry.items.length);
-      setHandMs(Math.max(450, ((seconds * 0.92 - lead) * 1000) / count));
+      // WHITEBOARD: each cued item at its word, read off the voice frame by frame
+      // (wordClock.ts). A mark is started early by its turn among its moment's marks, so that
+      // it is drawn, not begun, on the word.
+      const cues = whiteboard
+        ? momentCues(entry).map(({ key, cue }) => {
+            const said = cueSeconds(cue, entry.say, seconds, entry.words ?? spokenWordsFor(entry.voice));
+            const turn = key.startsWith("point:")
+              ? (markDelays(entry.point, index)[Number(key.slice(6))] ?? 0)
+              : 0;
+            return { key, at: Math.max(0, (said ?? 0) - turn), said: said ?? 0 };
+          })
+        : [];
+      const writeAt = cues.find((one) => one.key === "write")?.said ?? null;
+      setHandMs(
+        Math.max(450, ((seconds * 0.92 - Math.max(lead, writeAt ?? 0)) * 1000) / count / rate),
+      );
       if (index === 0) later(() => setQuestionUp(true), 0);
       // The marks go up once the line they start from has been written: the teacher writes,
       // then turns and points back at where it came from.
       later(
         () => setWantPoint(index),
-        Math.max(0, (lead + 0.75 - clip.currentTime) * 1000),
+        Math.max(0, ((lead + 0.75 - clip.currentTime) * 1000) / rate),
       );
       entry.items.forEach((_, item) => {
+        // A cued write's first piece goes up on its word (below), and the rest not before it.
+        if (writeAt !== null && item === 0) return;
         const fraction = entry.at[item] ?? item / count;
         const due =
-          (Math.max(fraction * seconds, lead) - clip.currentTime) * 1000;
+          ((Math.max(fraction * seconds, lead, writeAt ?? 0) - clip.currentTime) * 1000) / rate;
         const show = () =>
           setItemsShown((current) => Math.max(current, item + 1));
         if (due <= 0) show();
         else later(show, due);
       });
+      if (cues.length) {
+        stopClock?.();
+        stopClock = startCueClock(clip, cues, (keys) => {
+          if (cancelled) return;
+          if (keys.includes("write")) setItemsShown((current) => Math.max(current, 1));
+          setCued((was) =>
+            was.index === index
+              ? { index, all: was.all, keys: new Set([...was.keys, ...keys]) }
+              : { index, all: false, keys: new Set(keys) },
+          );
+        });
+      }
     };
     clip.onended = () => {
       unfollow();
       setVoicing(false);
       writeAll();
-      // A breath, not a pause: the next beat's voice is already here.
-      onward(250);
+      if (whiteboard) allCued();
+      // A breath, not a pause: the next beat's voice is already here. In the whiteboard style
+      // a longer one, and longer still after a key result or a picture, so it can land.
+      onward(whiteboard ? breathMs(entry) / rate : 250);
     };
     clip.onerror = () => {
       if (cancelled) return;
@@ -990,6 +1134,7 @@ export function Board({
       });
     return () => {
       stop();
+      stopClock?.();
       clip.onended = null;
       clip.onerror = null;
       clip.pause();
@@ -1008,7 +1153,9 @@ export function Board({
     replayed,
     shown,
     silent,
+    speed,
     unfollow,
+    whiteboard,
   ]);
 
   // Nothing left playing once the board is closed.
@@ -1087,7 +1234,7 @@ export function Board({
           },
           onVoice: (index, url) => {
             const beat = beatAt(index);
-            beat.voiceUrl = url;
+            beat.voiceUrl = url === null ? null : withVoice(url, voice);
             beat.ready = true;
             publish();
             // This beat can go up now — and if the player was waiting on it, the whole
@@ -1236,17 +1383,39 @@ export function Board({
   // the circle round the value they just used, and a student scrolling back should find every
   // arrow and underline the lesson made, not a board that forgets. The current beat's marks
   // wait for their line to be written (above); every earlier beat's stay as they were.
+  /** Whiteboard style: whether the cued item `key` of moment `index` has had its word said. */
+  const cueDue = useCallback(
+    (index: number, key: CueKey) =>
+      index < shown - 1 || (cued.index === index && (cued.all || cued.keys.has(key))),
+    [cued, shown],
+  );
   const markSets: MarkSet[] = useMemo(() => {
     const current = shown - 1;
     const sets: MarkSet[] = [];
     lines.forEach((line, index) => {
       if (!line.point.length || index > current) return;
+      // WHITEBOARD: a cued mark goes up on its word (and on the line being written, once it is
+      // written); the others with the moment's marks as always. One held back keeps its place
+      // as a mark drawn nowhere, so every mark keeps its key and its turn.
+      if (whiteboard && index === current && line.point.some((point) => point.on)) {
+        if (drawGate !== null && index >= drawGate) return;
+        const points = line.point.map((point, k): LessonPoint => {
+          const target = point.line == null ? null : point.line < 0 ? index + point.line : point.line;
+          const due = point.on
+            ? cueDue(index, `point:${k}`) && (target !== index || pointing === index)
+            : pointing === index;
+          return due ? point : { kind: point.kind, line: null, from: point.from };
+        });
+        if (points.every((point, k) => point !== line.point[k])) return;
+        sets.push({ index, points, state: "live" });
+        return;
+      }
       if (index === current && pointing !== index) return;
       if (drawGate !== null && index >= drawGate) return;
       sets.push({ index, points: line.point, state: "live" });
     });
     return sets;
-  }, [drawGate, lines, pointing, shown]);
+  }, [cueDue, drawGate, lines, pointing, shown, whiteboard]);
 
   // THE WORKING AND THE PICTURE, PAIRED. Every mark on a diagram belongs with a line of the
   // working (see `pairLinks`); the figure's copy of the marks draws an arrow across (`to`) as a
@@ -1275,6 +1444,20 @@ export function Board({
         const doodle = point?.to?.doodle;
         return doodle
           ? [{ key: link.key, number: link.number, set: link.set, doodle, part: point.to?.part ?? null, kind: point.kind }]
+          : [];
+      }),
+    [links, markSets],
+  );
+  //: The pairs with a live diagram's part (DiagramLayer.tsx).
+  const diagramLinks = useMemo(
+    () =>
+      links.flatMap((link): DiagramLink[] => {
+        if (link.figure !== "doodle") return [];
+        const k = Number(link.key.split("-")[1]);
+        const point = markSets.find((set) => set.index === link.set)?.points[k];
+        const diagram = point?.to?.diagram;
+        return diagram
+          ? [{ key: link.key, number: link.number, set: link.set, diagram, part: point.to?.part ?? null, kind: point.kind }]
           : [];
       }),
     [links, markSets],
@@ -1465,6 +1648,70 @@ export function Board({
     return () => observer.disconnect();
   }, [keepInView]);
 
+  // WHITEBOARD: ONE THING LANDS AT A TIME. A moment's doodle actions wait until its marks have
+  // been drawn, rather than going up with them; a cued doodle or action waits for its word.
+  const [actionsDue, setActionsDue] = useState<number | null>(null);
+  useEffect(() => {
+    if (!whiteboard || paused || pointing === null) return;
+    const delays = markDelays(lines[pointing]?.point ?? [], pointing);
+    const marksMs = delays.length ? ((delays[delays.length - 1] ?? 0) + 0.6) * 1000 : 0;
+    const at = pointing;
+    const timer = window.setTimeout(() => setActionsDue(at), marksMs / speed);
+    return () => window.clearTimeout(timer);
+  }, [lines, paused, pointing, speed, whiteboard]);
+  const doodleHold = useCallback(
+    (moment: number, what: "doodle" | "do", k: number): boolean | null => {
+      if (!whiteboard || moment !== shown - 1) return null;
+      const entry = lines[moment];
+      if (!entry) return null;
+      if (what === "doodle") {
+        const ref = [entry.doodle, ...(entry.doodles ?? [])].filter(Boolean)[k];
+        return ref?.on ? !cueDue(moment, `doodle:${k}`) : null;
+      }
+      if (entry.doodleDo?.[k]?.on) return !cueDue(moment, `do:${k}`);
+      return pointing === moment && actionsDue === moment ? false : true;
+    },
+    [actionsDue, cueDue, lines, pointing, shown, whiteboard],
+  );
+  //: The same for a live diagram: on its word, and its actions after the marks or on theirs.
+  const diagramHold = useCallback(
+    (moment: number, what: "diagram" | "do", k: number): boolean | null => {
+      if (!whiteboard || moment !== shown - 1) return null;
+      const entry = lines[moment];
+      if (!entry) return null;
+      if (what === "diagram") return entry.diagram?.on ? !cueDue(moment, "diagram") : null;
+      if (entry.diagramDo?.[k]?.on) return !cueDue(moment, `dia:${k}`);
+      return pointing === moment && actionsDue === moment ? false : true;
+    },
+    [actionsDue, cueDue, lines, pointing, shown, whiteboard],
+  );
+  // The voice's speed stretches the board's animations with it (BoardTuning.tsx).
+  const stageNow = useCallback(() => stageRef.current, []);
+  useAnimationRate(stageNow, speed, whiteboard);
+  // The sound effects (boardSfx.ts, sfx.ts).
+  const doodleDueNow = useCallback(
+    (k: number) => {
+      const index = shown - 1;
+      const entry = lines[index];
+      if (!entry) return false;
+      const near = (() => {
+        const ref = [entry.doodle, ...(entry.doodles ?? [])].filter(Boolean)[k];
+        return typeof ref?.near === "number" ? ref.near : index;
+      })();
+      if (near === index && itemsShown === 0 && entry.items.length) return false;
+      return doodleHold(index, "doodle", k) !== true;
+    },
+    [doodleHold, itemsShown, lines, shown],
+  );
+  const actionDueNow = useCallback(
+    (k: number) => {
+      const index = shown - 1;
+      const rule = doodleHold(index, "do", k);
+      return rule === null ? pointing === index : !rule;
+    },
+    [doodleHold, pointing, shown],
+  );
+
   const talking = speaking !== null || voicing;
   // THE DESK'S DIAGRAMS: the question's printed figures, up with the question, and the
   // sketches the lesson draws from the question's words, each brought in at the moment the
@@ -1486,20 +1733,41 @@ export function Board({
           height: sketch.height ?? null,
         },
         markup: sketch.svg,
-        shown: shown - 1 >= (drawStarts.get(sketch.name) ?? 0),
+        shown:
+          shown - 1 >= (drawStarts.get(sketch.name) ?? 0) &&
+          // Whiteboard: brought in on its moment's word, where the moment has one.
+          (!whiteboard ||
+            !lines[drawStarts.get(sketch.name) ?? 0]?.on ||
+            !lines[drawStarts.get(sketch.name) ?? 0]?.showSketch ||
+            cueDue(drawStarts.get(sketch.name) ?? 0, "sketch")),
         drawMs: drawMsAt(drawStarts.get(sketch.name) ?? 0),
       })),
     ],
-    [drawMsAt, drawStarts, figures, lesson, questionUp, shown],
+    [cueDue, drawMsAt, drawStarts, figures, lesson, lines, questionUp, shown, whiteboard],
   );
   const hasFigure = drawings.length > 0;
+  useBoardSfx({
+    active: whiteboard,
+    paused: paused || needsTap,
+    speed,
+    moments: lines,
+    shown,
+    itemsShown,
+    marks: markSets,
+    doodleDue: doodleDueNow,
+    actionDue: actionDueNow,
+    picturesUp: drawings.filter((drawing) => drawing.shown).length,
+    answerAt: lines.findIndex((line) => line.answer),
+  });
   //: A column beside the working (a pinned sheet on a phone): the figures, the passage, or both.
   const hasSide = hasFigure || hasPassage;
   //: With neither, a doodle scene takes that column on a wide screen (DoodleLayer.tsx).
   const sceneSide =
     !hasSide &&
     (lesson?.beats ?? []).some((beat) =>
-      [beat.doodle, ...(beat.doodles ?? [])].some((doodle) => doodle?.size === "scene"),
+      [beat.doodle, ...(beat.doodles ?? [])].some((doodle) => doodle?.size === "scene") ||
+      // A live diagram takes it too (DiagramLayer.tsx).
+      Boolean(beat.diagram),
     );
   // The marker puts itself down for each line and lifts off when it is done, so it is only
   // held back while the board is waiting for a tap or has stepped back for the student.
@@ -1516,7 +1784,7 @@ export function Board({
     <div
       className={`sj pb ${talking ? "is-talking" : ""} ${hasSide || sceneSide ? "has-fig" : ""} ${
         hasPassage ? "has-passage" : ""
-      }`}
+      }${whiteboard ? " wb" : ""}`}
     >
       <header className="pb-bar">
         <div className="pb-col pb-bar-in">
@@ -1533,6 +1801,7 @@ export function Board({
             <span className="sj-eyebrow pb-what-sub">{subtitle}</span>
             <strong className="pb-what-title">{title}</strong>
           </div>
+          <BoardStyleSwitch />
           <span
             className="pb-count sj-mono"
             aria-label={
@@ -1671,11 +1940,16 @@ export function Board({
                 const items = current
                   ? line.items.slice(0, itemsShown)
                   : line.items;
-                if (items.length === 0) return null;
+                // Whiteboard: a moment that starts a section puts its heading up first.
+                const heading =
+                  whiteboard && line.section ? (
+                    <SectionHeading key={`section-${index}`} text={line.section} />
+                  ) : null;
+                if (items.length === 0) return heading;
                 // The line of a lit pair lights with its marks: one explanation, lit together.
                 const litHere =
                   litPair !== null && links.some((link) => link.line === index && link.number === litPair);
-                return (
+                const lineDiv = (
                   <div
                     key={line.say + String(index)}
                     data-line={index}
@@ -1685,6 +1959,12 @@ export function Board({
                   >
                     {line.answer ? (
                       <span className="pb-answer-tag sj-mono">Answer</span>
+                    ) : null}
+                    {line.answer && whiteboard ? (
+                      <>
+                        <Sparkle className="a" />
+                        <Sparkle className="b" />
+                      </>
                     ) : null}
                     {items.map((item, piece) => (
                       <div
@@ -1706,6 +1986,7 @@ export function Board({
                     ))}
                   </div>
                 );
+                return heading ? [heading, lineDiv] : lineDiv;
               })}
             </div>
 
@@ -1814,6 +2095,22 @@ export function Board({
               lit={litPair}
               onLit={lightPair}
               panel={sceneSide ? scenePanel : null}
+              hold={whiteboard ? doodleHold : undefined}
+              clipAt={clipAt}
+            />
+            <DiagramLayer
+              sheetRef={sheetRef}
+              moments={lines}
+              shown={shown}
+              itemsShown={itemsShown}
+              pointing={pointing}
+              paused={paused}
+              speed={speed}
+              links={diagramLinks}
+              lit={litPair}
+              onLit={lightPair}
+              panel={sceneSide ? scenePanel : null}
+              hold={whiteboard ? diagramHold : undefined}
             />
             <Pen
               sheetRef={sheetRef}
@@ -1821,6 +2118,7 @@ export function Board({
               tick={inkTick}
               canSee={penCanSee}
             />
+            {whiteboard ? <WhiteboardFx stageRef={stageRef} paused={paused || needsTap} sets={markSets} /> : null}
           </div>
           {hasSide && figureLinks.length + links.filter((link) => link.figure === "passage").length ? (
             <Links
@@ -1948,6 +2246,7 @@ export function Board({
             >
               {finished ? <IconCheck /> : <IconNext />}
             </button>
+            {whiteboard ? <BoardTuningControls {...tuning} /> : null}
           </div>
 
           <form className="pb-ask" onSubmit={send}>
@@ -3139,7 +3438,7 @@ function pairLinks(sets: MarkSet[], writes: (index: number) => boolean): LinkPai
         line = back(moment(point.line));
         piece = point.at?.trim() || null;
         toFigure = true;
-      } else if (point.to?.doodle && point.line != null) {
+      } else if ((point.to?.doodle || point.to?.diagram) && point.line != null) {
         // A board line linked to a doodle, or to a part of one.
         figure = "doodle";
         line = back(moment(point.line));

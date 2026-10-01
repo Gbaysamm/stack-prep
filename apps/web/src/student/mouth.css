@@ -1,0 +1,144 @@
+/*
+ * The talking mouth (Mouth.tsx): drawn in by the pen as it comes in, its sound's symbol written
+ * beside it, its syllables under it with the stressed one growing as it is said.
+ */
+
+.mo {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  width: var(--dd-size, 160px);
+}
+.mo-tap {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  border-radius: 14px;
+  -webkit-tap-highlight-color: transparent;
+}
+.mo-tap:focus-visible {
+  outline: 3px solid var(--purple-500, #7c3aed);
+  outline-offset: 2px;
+}
+.mo-svg {
+  display: block;
+  overflow: visible;
+}
+
+/* Coming in: the outlines drawn by the pen, the colour washed in after. */
+.mo-draw path[pathLength] {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: mo-pen 0.7s ease-out forwards;
+}
+.mo-draw {
+  animation: mo-in 0.45s ease-out both;
+}
+@keyframes mo-pen {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes mo-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+}
+
+.mo-note {
+  font-family: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive;
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0.6;
+}
+
+/* The sound's symbol, written left to right by the pen as the mouth reaches it. */
+.mo-ipa {
+  /* IPA needs a face that has its letters (the handwriting face has few of them). */
+  font-family: 'Charis SIL', 'Doulos SIL', 'Gentium Plus', 'Noto Serif', 'Cambria', 'Times New Roman', serif;
+  font-size: 24px;
+  font-weight: 700;
+  fill: var(--purple-700, #5b21b6);
+}
+.mo-word {
+  font-family: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive;
+  font-size: 16px;
+  font-weight: 700;
+  fill: #1d1b3a;
+}
+.mo-symbol {
+  clip-path: inset(0 100% 0 0);
+  animation: mo-write 0.55s steps(14, end) forwards;
+}
+@keyframes mo-write {
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* The syllables: small and grey until said; the stressed one big and pulsing while said (by
+   its size: a transform on SVG text is not honoured everywhere). */
+.mo-syl {
+  font-family: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive;
+  font-size: 17px;
+  font-weight: 700;
+  fill: #8b87a3;
+  transition: font-size 0.15s ease-out, fill 0.15s;
+}
+.mo-syl.said {
+  fill: #1d1b3a;
+}
+.mo-syl.stress {
+  fill: var(--purple-700, #5b21b6);
+}
+.mo-syl.stress.said {
+  font-size: 22px;
+}
+.mo-syl.saying {
+  fill: #1d1b3a;
+}
+.mo-syl.stress.saying {
+  fill: #db2777;
+  font-size: 28px;
+  animation: mo-stress 0.3s ease-in-out infinite alternate;
+}
+@keyframes mo-stress {
+  from {
+    font-size: 27px;
+  }
+  to {
+    font-size: 33px;
+  }
+}
+
+.mo.pulsing .mo-svg {
+  animation: mo-pulse 0.7s ease-in-out 2;
+}
+@keyframes mo-pulse {
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+/* Paused with the lesson: nothing keeps moving. */
+.mo.paused * {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mo *,
+  .mo-draw path[pathLength] {
+    animation: none !important;
+    transition: none !important;
+    stroke-dashoffset: 0;
+    clip-path: none;
+  }
+  .mo-syl.stress {
+    font-size: 24px;
+  }
+}

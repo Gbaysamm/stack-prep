@@ -69,6 +69,19 @@ class Settings(BaseSettings):
     #: Where the spoken worked steps are kept once made. A step's words do not change, so its
     #: audio is made once and replayed free; empty means a folder in the system temp dir.
     speech_cache_dir: str = ""
+    #: A second, free voice for the lesson board: Kokoro, made on this server with no paid
+    #: service behind it (app/kokoro_voice.py). The board asks for it with `engine=kokoro`;
+    #: off, or without the optional `kokoro` dependencies, those requests get the studio voice.
+    ai_kokoro: bool = True
+    #: Where Kokoro's model and voices are kept (about 350 MB). Empty: `.local/kokoro` in the
+    #: checkout. Never committed; fetched on first use when `kokoro_download` allows it.
+    kokoro_dir: str = ""
+    kokoro_download: bool = True
+    #: The full-precision model. The int8 one is a third the size but ran about fifteen times
+    #: slower on a laptop CPU, which is the wrong trade for a voice someone is waiting on.
+    kokoro_model: str = "kokoro-v1.0.onnx"
+    kokoro_voice: str = "af_heart"
+    kokoro_speed: float = Field(default=1.0, ge=0.5, le=2.0)
 
     @field_validator("database_schema")
     @classmethod
