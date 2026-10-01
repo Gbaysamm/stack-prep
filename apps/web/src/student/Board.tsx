@@ -94,12 +94,16 @@ import {
   drawHighlight,
   drawStrike,
   markDelays,
+  markLands,
+  planMarks,
   seeded,
+  setDelays,
   stillMotion,
   through,
   unsteady,
   along,
   type Box,
+  type MarkPlan,
   type Label,
   type Pt,
   type Route,
@@ -110,6 +114,17 @@ import "../prep/prep.css";
 import "../prep/board.css";
 
 const STEP_MS = 5200;
+
+/**
+ * The board's timeline, for checking that the marks keep time with the voice: each moment, its
+ * voice starting and ending, each line started and finished, each mark started and landed.
+ * Kept only where a page has asked for it by setting `window.__pbTrace` to an array (the dev
+ * harness does with ?trace=1); otherwise nothing is recorded.
+ */
+function trace(event: string, data: Record<string, unknown> = {}): void {
+  const sink = (window as unknown as { __pbTrace?: unknown[] }).__pbTrace;
+  if (Array.isArray(sink)) sink.push({ t: Math.round(performance.now()), event, ...data });
+}
 
 /** How long a line waits for its voice before the board writes it unheard. Long enough for a
  *  line the server has to make on the spot (a few seconds); past that the voice has failed,
@@ -870,9 +885,13 @@ export function Board({
   //: Which line's marks are up: the circles and arrows a beat draws back over earlier lines.
   //: Set a moment after its voice starts, so the mark lands on the words that point at it.
   const [pointing, setPointing] = useState<number | null>(null);
-  //: The beat whose marks are due, once the line they belong to has been written out.
+  //: The beat whose marks are due, once the line they belong to is on its way.
   const [wantPoint, setWantPoint] = useState<number | null>(null);
-  //: Bumped each time the hand finishes a line, so the wait below looks again.
+  //: When the marks of the beat pointing start, fitted to the time it has (ink.ts, `planMarks`).
+  const [markPlan, setMarkPlan] = useState<(MarkPlan & { index: number }) | null>(null);
+  //: When a beat read along without a voice ends (performance.now), for its marks to fit in.
+  const readUntil = useRef<{ index: number; at: number } | null>(null);
+  //: Bumped each time the hand starts or finishes a line, so the wait below looks again.
   const [writtenTick, setWrittenTick] = useState(0);
   //: The lesson's own voice is sounding, so the coach's face shows it is talking.
   const [voicing, setVoicing] = useState(false);
@@ -936,6 +955,9 @@ export function Board({
   useLayoutEffect(() => {
     if (whiteboard && shown > 0) setItemsShown(0);
   }, [shown, whiteboard]);
+  useEffect(() => {
+    if (shown > 0) trace("moment", { index: shown - 1 });
+  }, [shown]);
 
   useEffect(() => {
     if (paused || preparing || needsTap) return;
@@ -982,7 +1004,9 @@ export function Board({
       // No voice to time words by: every cue is due at once.
       setCued({ index: at, all: true, keys: new Set() });
       later(() => setWantPoint(at), MARK_LEAD_MS);
-      onward(entry ? readingMs(entry.say) : STEP_MS);
+      const ms = entry ? readingMs(entry.say) : STEP_MS;
+      readUntil.current = { index: at, at: performance.now() + ms };
+      onward(ms);
     };
     const stop = () => {
       cancelled = true;
@@ -1007,6 +1031,7 @@ export function Board({
       setItemsShown(entry?.items.length ?? 0);
       setCued({ index, all: true, keys: new Set() });
       later(() => setWantPoint(index), MARK_LEAD_MS);
+      readUntil.current = { index, at: performance.now() + STEP_MS };
       onward(STEP_MS);
       return stop;
     }
@@ -1050,14 +1075,13 @@ export function Board({
       const lead = Math.min(0.7, seconds * 0.15);
       const count = Math.max(1, entry.items.length);
       // WHITEBOARD: each cued item at its word, read off the voice frame by frame
-      // (wordClock.ts). A mark is started early by its turn among its moment's marks, so that
-      // it is drawn, not begun, on the word.
+      // (wordClock.ts). A mark is started early by the time it takes to land, so that it is
+      // drawn — a carried piece set down — on the word, not begun on it.
       const cues = whiteboard
         ? momentCues(entry).map(({ key, cue }) => {
             const said = cueSeconds(cue, entry.say, seconds, entry.words ?? spokenWordsFor(entry.voice));
-            const turn = key.startsWith("point:")
-              ? (markDelays(entry.point, index)[Number(key.slice(6))] ?? 0)
-              : 0;
+            const point = key.startsWith("point:") ? entry.point[Number(key.slice(6))] : undefined;
+            const turn = point ? markLands(point, index) : 0;
             return { key, at: Math.max(0, (said ?? 0) - turn), said: said ?? 0 };
           })
         : [];
@@ -1066,12 +1090,9 @@ export function Board({
         Math.max(450, ((seconds * 0.92 - Math.max(lead, writeAt ?? 0)) * 1000) / count / rate),
       );
       if (index === 0) later(() => setQuestionUp(true), 0);
-      // The marks go up once the line they start from has been written: the teacher writes,
-      // then turns and points back at where it came from.
-      later(
-        () => setWantPoint(index),
-        Math.max(0, ((lead + 0.75 - clip.currentTime) * 1000) / rate),
-      );
+      // The marks are due as the line goes up: they go up once the hand is on its way to it,
+      // so a piece carried into it lands as the pen reaches it (below).
+      later(() => setWantPoint(index), Math.max(0, ((lead - clip.currentTime) * 1000) / rate));
       entry.items.forEach((_, item) => {
         // A cued write's first piece goes up on its word (below), and the rest not before it.
         if (writeAt !== null && item === 0) return;
@@ -1097,6 +1118,7 @@ export function Board({
       }
     };
     clip.onended = () => {
+      trace("voice-end", { index });
       unfollow();
       setVoicing(false);
       writeAll();
@@ -1116,6 +1138,7 @@ export function Board({
         if (cancelled) return;
         setVoiceBlocked(false);
         setVoicing(true);
+        trace("voice-start", { index, at: clip.currentTime, dur: clip.duration });
         misses.current = 0;
         pace();
         const analyser = listen(clip);
@@ -1306,33 +1329,108 @@ export function Board({
                 ? `Coach · no voice right now, read along · step ${shown} of ${lines.length}`
                 : `Coach · step ${shown} of ${lines.length}`;
 
-  // THE MARKS WAIT FOR THE WRITING. A beat's marks are due a moment after its voice starts, but
-  // they go up only once every piece of its line is on the board and the hand has finished it:
-  // a highlight under words not yet written, or a word crossed out before it exists, reads as
-  // the board knowing the answer before the teacher does. If the hand never reports (a line it
-  // could not measure), the marks go up anyway after a generous wait.
+  // THE MARKS KEEP TIME WITH THE WRITING. A beat's marks are due as its line goes up, and go
+  // up once the hand is on its way to the line (or has written it): a piece carried down into
+  // the line flies as the line is written and lands as the pen reaches the piece it becomes; a
+  // highlight under words not yet written, or a word crossed out before it exists, still waits
+  // for the words, which would otherwise read as the board knowing the answer before the
+  // teacher does. When each starts is planned then, once, to fit the time the beat has left
+  // (ink.ts, `planMarks`). If the hand never reports (a line it could not measure), the marks
+  // go up anyway after a generous wait.
   useEffect(() => {
     const sheet = sheetRef.current;
     if (!sheet) return;
     const bump = () => setWrittenTick((value) => value + 1);
     sheet.addEventListener(WRITTEN_EVENT, bump);
-    return () => sheet.removeEventListener(WRITTEN_EVENT, bump);
+    sheet.addEventListener(WRITING_EVENT, bump);
+    return () => {
+      sheet.removeEventListener(WRITTEN_EVENT, bump);
+      sheet.removeEventListener(WRITING_EVENT, bump);
+    };
   }, []);
+  /** The plan for beat `index`'s marks, made as they go up: in the board's own seconds (the
+   *  voice's, which the speed control stretches along with every animation). */
+  const planFor = useCallback(
+    (sheet: HTMLElement, index: number): MarkPlan | null => {
+      const entry = lines[index];
+      if (!entry?.point.length) return null;
+      const row = lineAt(sheet, index);
+      const items = row ? Array.from(row.querySelectorAll<HTMLElement>(".pb-item")) : [];
+      const timing = items.map((item) => penTiming(sheet, item, null));
+      // Hand time is real time; the plan is in the voice's time, which runs `speed` times as fast.
+      const seconds = (ms: number) => (ms / 1000) * speed;
+      const written = seconds(Math.max(0, ...timing.map((one) => one?.done ?? 0)));
+      const carries = entry.point.map(
+        (point) =>
+          point.line != null &&
+          point.figure == null &&
+          (point.line < 0 ? index + point.line : point.line) === index &&
+          (point.kind === "move" || point.kind === "arrow") &&
+          Boolean(point.from),
+      );
+      const reach = entry.point.map((point, k): number | null => {
+        if (!carries[k] || !row || written <= 0) return null;
+        const box = inkBox(row, point.at ?? null);
+        if (!box) return null;
+        const x = (box.left + box.right) / 2;
+        const y = (box.top + box.bottom) / 2;
+        const item =
+          items.find((one) => {
+            const r = one.getBoundingClientRect();
+            return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+          }) ?? items[items.length - 1];
+        const when = item ? penTiming(sheet, item, box) : null;
+        return when ? seconds(when.reach) : null;
+      });
+      // A mark that is not a piece carried in waits for the line, unless a carried piece comes
+      // after it in the lesson's order (that one must land as its line is written).
+      const after = entry.point.map(
+        (point, k) =>
+          written > 0 &&
+          point.line != null &&
+          !carries[k] &&
+          ((point.line < 0 ? index + point.line : point.line) === index ||
+            !carries.slice(k + 1).some(Boolean)),
+      );
+      // The time the beat has: what is left of its voice and half the breath after it.
+      const clip = clips.current.get(index);
+      const breath = whiteboard ? breathMs(entry) / 1000 : 0.25 * speed;
+      const read = readUntil.current?.index === index ? readUntil.current.at : null;
+      const voiced =
+        clip && Number.isFinite(clip.duration) && clip.duration > 0 && (!clip.paused || clip.ended);
+      const end =
+        clip && voiced
+          ? Math.max(0, clip.duration - clip.currentTime) + breath / 2
+          : read !== null
+            ? seconds(Math.max(0, read - performance.now()))
+            : null;
+      return planMarks(entry.point, index, { reach, after, written, end });
+    },
+    [lines, speed, whiteboard],
+  );
   useEffect(() => {
-    if (wantPoint === null || pointing === wantPoint) return;
+    if (wantPoint === null || pointing === wantPoint || paused) return;
+    const sheet = sheetRef.current;
     const entry = lines[wantPoint];
-    const row = sheetRef.current?.querySelector(`[data-line="${wantPoint}"]`);
+    const row = sheet?.querySelector(`[data-line="${wantPoint}"]`);
     const items = row ? Array.from(row.querySelectorAll<HTMLElement>(".pb-item")) : [];
-    const done =
-      !entry ||
-      (items.length >= entry.items.length &&
-        items.every((item) => item.dataset.written !== undefined));
+    const all = !entry || items.length >= entry.items.length;
+    const done = all && items.every((item) => item.dataset.written !== undefined);
+    // On its way: every piece of the line is up, and the hand is writing it or has it next.
+    const coming =
+      all && sheet !== null && items.length > 0 && items.every((item) => penTiming(sheet, item, null) !== null);
+    const at = wantPoint;
     const timer = window.setTimeout(
-      () => setPointing(wantPoint),
-      done ? MARK_AFTER_WRITE_MS : MARK_SAFETY_MS,
+      () => {
+        const plan = sheet ? planFor(sheet, at) : null;
+        trace("marks-up", { index: at, plan });
+        setMarkPlan(plan ? { ...plan, index: at } : null);
+        setPointing(at);
+      },
+      done ? MARK_AFTER_WRITE_MS : coming ? 0 : MARK_SAFETY_MS,
     );
     return () => window.clearTimeout(timer);
-  }, [wantPoint, pointing, writtenTick, itemsShown, lines]);
+  }, [wantPoint, pointing, writtenTick, itemsShown, lines, paused, planFor]);
 
   // THE DIAGRAMS COME IN DRAWN. Each is brought in at a moment — a printed figure with the
   // first, a sketch at the moment that says `show_sketch` (a sketch no moment names comes in
@@ -1394,6 +1492,21 @@ export function Board({
     const sets: MarkSet[] = [];
     lines.forEach((line, index) => {
       if (!line.point.length || index > current) return;
+      // The moment being said plays its marks to its plan; one a moment cued to a word starts
+      // on it. An earlier moment's marks are all due now: any still on their way when the
+      // moment ended are hurried to where they go (`useFlights`, `Carried`), never left to
+      // trail into the moments after.
+      const timed: Pick<MarkSet, "live" | "delays" | "pace"> =
+        index === current
+          ? {
+              live: true,
+              delays:
+                markPlan?.index === index
+                  ? markPlan.delays
+                  : markDelays(line.point, index).map((delay, k) => (line.point[k]?.on ? 0 : delay)),
+              pace: markPlan?.index === index ? markPlan.pace : 1,
+            }
+          : { live: false, delays: line.point.map(() => 0), pace: 1 };
       // WHITEBOARD: a cued mark goes up on its word (and on the line being written, once it is
       // written); the others with the moment's marks as always. One held back keeps its place
       // as a mark drawn nowhere, so every mark keeps its key and its turn.
@@ -1407,15 +1520,15 @@ export function Board({
           return due ? point : { kind: point.kind, line: null, from: point.from };
         });
         if (points.every((point, k) => point !== line.point[k])) return;
-        sets.push({ index, points, state: "live" });
+        sets.push({ index, points, state: "live", ...timed });
         return;
       }
       if (index === current && pointing !== index) return;
       if (drawGate !== null && index >= drawGate) return;
-      sets.push({ index, points: line.point, state: "live" });
+      sets.push({ index, points: line.point, state: "live", ...timed });
     });
     return sets;
-  }, [cueDue, drawGate, lines, pointing, shown, whiteboard]);
+  }, [cueDue, drawGate, lines, markPlan, pointing, shown, whiteboard]);
 
   // THE WORKING AND THE PICTURE, PAIRED. Every mark on a diagram belongs with a line of the
   // working (see `pairLinks`); the figure's copy of the marks draws an arrow across (`to`) as a
@@ -1653,12 +1766,16 @@ export function Board({
   const [actionsDue, setActionsDue] = useState<number | null>(null);
   useEffect(() => {
     if (!whiteboard || paused || pointing === null) return;
-    const delays = markDelays(lines[pointing]?.point ?? [], pointing);
-    const marksMs = delays.length ? ((delays[delays.length - 1] ?? 0) + 0.6) * 1000 : 0;
+    // Its marks as they are played (`planMarks`), which may be quicker than their natural turns.
+    const delays =
+      markPlan?.index === pointing
+        ? markPlan.delays
+        : markDelays(lines[pointing]?.point ?? [], pointing);
+    const marksMs = delays.length ? (Math.max(...delays) + 0.6) * 1000 : 0;
     const at = pointing;
     const timer = window.setTimeout(() => setActionsDue(at), marksMs / speed);
     return () => window.clearTimeout(timer);
-  }, [lines, paused, pointing, speed, whiteboard]);
+  }, [lines, markPlan, paused, pointing, speed, whiteboard]);
   const doodleHold = useCallback(
     (moment: number, what: "doodle" | "do", k: number): boolean | null => {
       if (!whiteboard || moment !== shown - 1) return null;
@@ -2076,6 +2193,7 @@ export function Board({
               sheetRef={sheetRef}
               sets={markSets}
               paused={paused}
+              speed={speed}
               band={viewBand}
               links={links}
               lit={litPair}
@@ -2339,6 +2457,13 @@ interface MarkSet {
   index: number;
   points: LessonPoint[];
   state: MarkState;
+  /** Its beat is the one being said: its marks play out in full. An earlier beat's are hurried
+   *  to the end of any that are still under way. */
+  live?: boolean;
+  /** When each mark starts, in seconds after it goes up (ink.ts, `planMarks`). */
+  delays?: number[];
+  /** How fast its moving pieces go, as a share of their natural time. */
+  pace?: number;
 }
 
 interface Shape {
@@ -2363,6 +2488,8 @@ interface Shape {
   flash?: { d: string; width: number };
   /** For a piece carried from far above: its flight, played once (see `useFlights`). */
   flight?: Flight;
+  /** Its moment is over: whatever of it is still moving is finished quickly. */
+  hurry?: boolean;
 }
 
 /** A piece carried from far up the board: what flies, from where, to where, and how. */
@@ -2373,6 +2500,8 @@ interface Flight {
   route: Route;
   /** The highlighter over the piece where it was written, lit as it lifts off. */
   flash?: { d: string; width: number };
+  /** How fast it goes, as a share of its natural time (`FLIGHT_SCROLL_MS` and on, ink.ts). */
+  pace: number;
 }
 
 /**
@@ -2467,11 +2596,17 @@ interface Ghost {
   land: number;
 }
 
-/** How long a moving piece is lifted, carried and set down: the carry scales with the way. */
-function moveTimes(route: Route): { lift: number; travel: number; land: number } {
+/** How long a moving piece is lifted, carried and set down: the carry scales with the way, and
+ *  the whole with its moment's pace (`planMarks`, ink.ts). */
+function moveTimes(route: Route, pace = 1): { lift: number; travel: number; land: number } {
   const lengths = distances(route);
   const way = lengths[lengths.length - 1] ?? 0;
-  return { lift: 320, travel: Math.round(Math.min(1500, Math.max(650, way * 2.2))), land: 700 };
+  const travel = Math.min(1500, Math.max(650, way * 2.2));
+  return {
+    lift: Math.round(320 * pace),
+    travel: Math.round(travel * pace),
+    land: Math.round(700 * pace),
+  };
 }
 
 /**
@@ -2907,14 +3042,17 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[], links: LinkPair[] = [
   const dotted = new Map<number, Pt>();
   const dotBoxes = new Map<number, Box>();
   let stagger = 0;
+  let hurry = false;
   const push = (shape: Shape) => {
-    shapes.push({ ...shape, delay: stagger });
+    shapes.push({ ...shape, delay: stagger, hurry });
   };
   // In the order the lesson made them, so a chip that went up early keeps its place when later
   // marks join it, and every later chip and route finds its way round the ones before.
   for (const set of [...sets].sort((a, b) => a.index - b.index)) {
-    // Each mark in a moment waits for the ones before it; a move, for its piece to land.
-    const delays = markDelays(set.points, set.index);
+    // Each mark in a moment waits its turn in the moment's plan; a move goes at its pace.
+    const delays = setDelays(set);
+    const pace = set.pace ?? 1;
+    hurry = set.live === false;
     const older = set.index !== newest;
     // This moment's pairs with a diagram: a numbered dot after the end of the line each pairs
     // with (one to a line, placed before the moment's words take the room), and where the
@@ -3080,14 +3218,17 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[], links: LinkPair[] = [
             // A move plays its flight (see `useFlights`): the piece lifted off where it was
             // written and carried down, the board following it. Where the student has asked
             // for less movement, and for an arrow, the source only lights up.
+            // An earlier moment's flight is kept, for one still under way to be hurried down
+            // (`useFlights`); one that had not set off by then is simply put where it goes.
             const flight: Flight | undefined =
-              moving && set.index === newest && !stillMotion()
+              moving && !stillMotion()
                 ? {
                     glyphs: inkGlyphs(fromLine, start.at, base),
                     from,
                     to: box,
                     route: flightRoute(from, box, maxX),
                     flash: lit,
+                    pace,
                   }
                 : undefined;
             const flash = !flight && set.index === newest ? lit : undefined;
@@ -3104,7 +3245,7 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[], links: LinkPair[] = [
                   from,
                   to: box,
                   route: way.route,
-                  ...moveTimes(way.route),
+                  ...moveTimes(way.route, pace),
                 }
               : undefined;
           // Words after the end of the row the piece lands in, where the board is clear; else
@@ -3244,6 +3385,7 @@ function markTiming(shape: Shape): CSSProperties {
 function Carried({ shape, ghost }: { shape: Shape; ghost: Ghost }) {
   const ref = useRef<HTMLDivElement>(null);
   const played = useRef(false);
+  const carry = useRef<Animation | null>(null);
   useLayoutEffect(() => {
     const element = ref.current;
     if (!element || played.current || typeof element.animate !== "function") return;
@@ -3290,13 +3432,25 @@ function Carried({ shape, ghost }: { shape: Shape; ghost: Ghost }) {
     ).toFixed(1)}px) scale(${grow.toFixed(3)})`;
     frames.push({ offset: (lift + travel + land * 0.35) / all, opacity: 1, transform: landed });
     frames.push({ offset: 1, opacity: 0, transform: landed });
-    element.animate(frames, {
+    carry.current = element.animate(frames, {
       duration: all,
       delay: (shape.delay ?? 0) * 1000,
       fill: "both",
       easing: "linear",
     });
   }, [ghost, shape.delay]);
+  // Its moment is over: a piece that had not set off is put where it goes, and one on its way
+  // is set down within a moment, rather than landing while the coach talks about the next step.
+  useEffect(() => {
+    const running = carry.current;
+    if (!shape.hurry || !running || running.playState === "finished") return;
+    const timing = running.effect?.getComputedTiming();
+    const now = Number(running.currentTime ?? 0);
+    const begins = Number(timing?.delay ?? 0);
+    const ends = Number(timing?.endTime ?? 0);
+    if (now < begins) running.finish();
+    else if (ends - now > 280) running.currentTime = ends - 280;
+  }, [shape.hurry]);
   const { from } = ghost;
   return (
     <div
@@ -3402,7 +3556,7 @@ function pairLinks(sets: MarkSet[], writes: (index: number) => boolean): LinkPai
     return -1;
   };
   for (const set of [...sets].sort((a, b) => a.index - b.index)) {
-    const delays = markDelays(set.points, set.index);
+    const delays = setDelays(set);
     const moment = (line: number) => (line < 0 ? set.index + line : line);
     set.points.forEach((point, k) => {
       let figure: DrawingKey | "passage" | "doodle";
@@ -3495,7 +3649,7 @@ function passageCopy(sets: MarkSet[], links: LinkPair[]): PassageMark[] {
   );
   const out: PassageMark[] = [];
   for (const set of [...sets].sort((a, b) => a.index - b.index)) {
-    const delays = markDelays(set.points, set.index);
+    const delays = setDelays(set);
     set.points.forEach((point, k) => {
       const key = `${set.index}-${k}`;
       const base = { key, delay: delays[k] ?? 0, number: numbers.get(key) ?? null };
@@ -3780,14 +3934,39 @@ function adding(keys: string[]) {
   };
 }
 
+/** Where a flight is: waiting its turn, then along its own (natural) time. */
+interface FlightState {
+  /** Of the board's time (the voice's seconds, in ms), how long it has been up. */
+  elapsed: number;
+  /** Its natural time since it set off, in ms (`FLIGHT_SCROLL_MS` and on). */
+  t: number;
+  /** How much faster than its pace it goes: more than 1 once its moment is over. */
+  rush: number;
+  done: boolean;
+  /** Where the board was when it set off, and how far up it goes to show the source. */
+  from?: number;
+  up?: number;
+  /** Whether it moves the board: only one flight at a time does. */
+  scrolls?: boolean;
+  traced?: number;
+}
+
+/** A flight still under way when its moment ends lands within about this long. */
+const FLIGHT_RUSH_MS = 300;
+
 /**
  * FLIGHTS: a piece carried from far up the board (see `FLIGHT_SCROLL_MS` in ink.ts), played
- * once, when its mark goes up. In turn with the moment's other marks (each waits its delay),
- * on a clock that stops while the lesson is paused — the piece stops mid-air and the board
- * where it is. The board scrolls up just far enough to show where the piece was written (not
- * at all if it is in view), lights it, lifts a copy off, and carries it down to where it goes,
- * the board following it back to where it was. Its trail is drawn behind it and gone once it
- * lands; what stays is the short hook into the piece and the words saying where it came from.
+ * once, when its mark goes up. At its turn in its moment's plan (each waits its delay) and at
+ * the plan's pace, on a clock that runs with the speed control and stops while the lesson is
+ * paused — the piece stops mid-air and the board where it is. The board scrolls up just far
+ * enough to show where the piece was written (not at all if it is in view, or while another
+ * flight has the board), lights it, lifts a copy off, and carries it down to where it goes, the
+ * board following it back to where it was. Its trail is drawn behind it and gone once it lands;
+ * what stays is the short hook into the piece and the words saying where it came from.
+ *
+ * NEVER LATE. Once its moment is over (`Shape.hurry`), a flight that had not set off is put
+ * straight where it goes, and one still in the air finishes within `FLIGHT_RUSH_MS`: a piece
+ * never lands while the coach is already talking about the step after.
  *
  * Returns the frame of each flight under way, and which have landed (their hook and words are
  * drawn from then on).
@@ -3795,35 +3974,34 @@ function adding(keys: string[]) {
 function useFlights(
   shapes: Shape[],
   paused: boolean,
+  speed: number,
   sheetRef: RefObject<HTMLDivElement>,
   band: () => ViewBand | null,
 ): { frames: Map<string, FlightFrame>; landed: Set<string> } {
   const [frames, setFrames] = useState<Map<string, FlightFrame>>(() => new Map());
   const [landed, setLanded] = useState<Set<string>>(() => new Set());
-  const clock = useRef(0);
-  const flights = useRef(
-    new Map<string, { seen: number; delay: number; done: boolean; from?: number; up?: number }>(),
-  );
-  const live = useRef({ shapes, paused, band });
-  live.current = { shapes, paused, band };
+  const flights = useRef(new Map<string, FlightState>());
+  const live = useRef({ shapes, paused, band, speed });
+  live.current = { shapes, paused, band, speed };
 
-  // Each new flight is noted with the time it was first seen; one no longer on the board (a
-  // replay, a newer beat) is forgotten, so it plays again if it comes back.
+  // Each new flight is noted; one no longer on the board (a replay) is forgotten, so it plays
+  // again if it comes back — and the board it had moved is put back.
   useEffect(() => {
     const now = new Set(shapes.filter((shape) => shape.flight).map((shape) => shape.key));
     let changed = false;
-    for (const key of Array.from(flights.current.keys()))
+    for (const [key, state] of Array.from(flights.current))
       if (!now.has(key)) {
+        if (state.scrolls && !state.done && state.from !== undefined) {
+          const ink = live.current.band()?.ink;
+          if (ink) ink.scrollTop = state.from;
+        }
         flights.current.delete(key);
         changed = true;
       }
     for (const shape of shapes)
       if (shape.flight && !flights.current.has(shape.key))
-        flights.current.set(shape.key, {
-          seen: clock.current,
-          delay: (shape.delay ?? 0) * 1000,
-          done: false,
-        });
+        // One first seen after its moment is over does not fly at all.
+        flights.current.set(shape.key, { elapsed: 0, t: 0, rush: 1, done: Boolean(shape.hurry) });
     if (changed)
       setLanded((was) => {
         const kept = new Set(Array.from(was).filter((key) => now.has(key)));
@@ -3836,13 +4014,16 @@ function useFlights(
     let last = performance.now();
     let drawn = false;
     const tick = (now: number) => {
-      const { shapes: current, paused: held, band: view } = live.current;
-      const step = Math.min(100, now - last);
+      const { shapes: current, paused: held, band: view, speed: rate } = live.current;
+      // Real time, not a frame's worth: on a slow phone frames come far apart, and a flight
+      // timed by frames would fall behind the voice. (A tab left in the background sends no
+      // frames at all; on its return a flight jumps on by at most a second.)
+      const step = held ? 0 : Math.min(1000, now - last) * rate;
       last = now;
-      if (!held) clock.current += step;
       const next = new Map<string, FlightFrame>();
       const down: string[] = [];
       const sheet = sheetRef.current;
+      const owner = Array.from(flights.current.values()).some((one) => one.scrolls && !one.done);
       for (const shape of current) {
         const flight = shape.flight;
         const state = flights.current.get(shape.key);
@@ -3851,40 +4032,74 @@ function useFlights(
           down.push(shape.key);
           continue;
         }
-        const t = clock.current - state.seen - state.delay;
-        if (t < 0) continue;
+        const delay = (shape.delay ?? 0) * 1000;
+        const pace = Math.max(0.1, flight.pace);
+        if (state.elapsed < delay) {
+          // Its moment ended before its turn came: put where it goes.
+          if (shape.hurry) {
+            state.done = true;
+            down.push(shape.key);
+            continue;
+          }
+          state.elapsed += step;
+          if (state.elapsed < delay) continue;
+          state.t = (state.elapsed - delay) / pace;
+        } else {
+          state.elapsed += step;
+          state.t += (step / pace) * state.rush;
+        }
         const seen = view();
         // Where the board was, and how far up it must go to show where the piece was written.
         if (state.from === undefined) {
           state.from = seen ? seen.ink.scrollTop : 0;
           state.up = state.from;
-          if (seen) {
+          if (seen && !owner) {
             const top = sheet.getBoundingClientRect().top + flight.from.top;
             if (top < seen.top + 12) state.up = Math.max(0, state.from - (seen.top + 28 - top));
+          }
+          state.scrolls = state.up !== state.from;
+          if (!state.traced) {
+            state.traced = 1;
+            trace("flight-start", { key: shape.key, pace: flight.pace, scrolls: state.scrolls });
           }
         }
         const from = state.from;
         const up = state.up ?? from;
-        const scrolling = up !== from ? FLIGHT_SCROLL_MS : 0;
+        const scrolling = state.scrolls ? FLIGHT_SCROLL_MS : 0;
         const lift = scrolling + FLIGHT_HOLD_MS;
         const arrive = lift + FLIGHT_TRAVEL_MS;
         const end = arrive + FLIGHT_LAND_MS;
-        if (t >= arrive) down.push(shape.key);
+        // Its moment is over and it is still in the air: it lands within FLIGHT_RUSH_MS.
+        if (shape.hurry && state.rush === 1) {
+          const left = ((end - state.t) * pace) / Math.max(0.1, rate);
+          if (left > FLIGHT_RUSH_MS) state.rush = left / FLIGHT_RUSH_MS;
+        }
+        const t = state.t;
+        if (t >= arrive) {
+          down.push(shape.key);
+          if (state.traced === 1) {
+            state.traced = 2;
+            trace("flight-land", { key: shape.key });
+          }
+        }
         if (t >= end) {
           state.done = true;
-          if (seen && Math.abs(seen.ink.scrollTop - from) > 1) seen.ink.scrollTop = from;
+          if (state.scrolls && seen && Math.abs(seen.ink.scrollTop - from) > 1) seen.ink.scrollTop = from;
           continue;
         }
-        // The board: up to the source, held there, then down with the piece.
-        const scroll =
-          t < scrolling
-            ? from + (up - from) * ease(t / scrolling)
-            : t < lift
-              ? up
-              : t < arrive
-                ? up + (from - up) * ease((t - lift) / FLIGHT_TRAVEL_MS)
-                : from;
-        if (seen && Math.abs(seen.ink.scrollTop - scroll) > 0.5) seen.ink.scrollTop = scroll;
+        // The board, if this flight has it: up to the source, held there, then down with the
+        // piece.
+        if (state.scrolls) {
+          const scroll =
+            t < scrolling
+              ? from + (up - from) * ease(t / scrolling)
+              : t < lift
+                ? up
+                : t < arrive
+                  ? up + (from - up) * ease((t - lift) / FLIGHT_TRAVEL_MS)
+                  : from;
+          if (seen && Math.abs(seen.ink.scrollTop - scroll) > 0.5) seen.ink.scrollTop = scroll;
+        }
         // The piece: lifted off, carried, set down.
         const { route } = flight;
         const lengths = distances(route);
@@ -3945,6 +4160,7 @@ function Marks({
   sheetRef,
   sets,
   paused,
+  speed,
   band,
   links,
   lit,
@@ -3954,8 +4170,10 @@ function Marks({
 }: {
   sheetRef: RefObject<HTMLDivElement>;
   sets: MarkSet[];
-  /** The lesson is paused: a piece in flight stops where it is. */
+  /** The lesson is paused: a piece in flight stops where it is, and every mark being drawn. */
   paused: boolean;
+  /** How fast the board goes (BoardTuning.tsx): flights keep pace with the voice. */
+  speed: number;
   /** The part of the board the student can see, for a flight to keep its piece in view. */
   band: () => ViewBand | null;
   /** The working's pairs with the diagram (see `pairLinks`). */
@@ -3971,6 +4189,7 @@ function Marks({
   const [shapes, setShapes] = useState<Shape[]>([]);
   const [dots, setDots] = useState<PairDot[]>([]);
   const [anchors, setAnchors] = useState<Map<string, Pt>>(() => new Map());
+  const traced = useRef(new Set<string>());
   const measure = useCallback(() => {
     const sheet = sheetRef.current;
     if (!sheet || sets.length === 0) {
@@ -3980,6 +4199,17 @@ function Marks({
       return;
     }
     const measured = measureMarks(sheet, sets, links);
+    for (const shape of measured.shapes)
+      if (!traced.current.has(shape.key)) {
+        traced.current.add(shape.key);
+        trace("mark", {
+          key: shape.key,
+          kind: shape.kind,
+          delay: shape.delay ?? 0,
+          flight: Boolean(shape.flight),
+          ghost: shape.ghost ? [shape.ghost.lift, shape.ghost.travel, shape.ghost.land] : null,
+        });
+      }
     setShapes(measured.shapes);
     setDots(measured.dots);
     setAnchors(measured.anchors);
@@ -4010,7 +4240,28 @@ function Marks({
     };
   }, [measure, sheetRef]);
 
-  const { frames, landed } = useFlights(shapes, paused, sheetRef, band);
+  const { frames, landed } = useFlights(shapes, paused, speed, sheetRef, band);
+  // Paused, every mark stops where it is — one being drawn, a piece being carried — and goes
+  // on from there. (Only those this stopped are started again: playing a finished one would
+  // draw it over from the start.)
+  const rootRef = useRef<HTMLDivElement>(null);
+  const stopped = useRef(new Set<Animation>());
+  useEffect(() => {
+    const root = rootRef.current;
+    if (paused) {
+      if (!root || typeof root.getAnimations !== "function") return;
+      for (const running of root.getAnimations({ subtree: true }))
+        if (running.playState === "running") {
+          running.pause();
+          stopped.current.add(running);
+        }
+    } else if (stopped.current.size) {
+      stopped.current.forEach((held) => {
+        if (held.playState === "paused") held.play();
+      });
+      stopped.current.clear();
+    }
+  });
   if (shapes.length === 0 && dots.length === 0) return null;
   // A piece still on its way: the hook it will land on, and its words, wait for it.
   const waiting = (shape: Shape) => Boolean(shape.flight) && !landed.has(shape.key);
@@ -4020,7 +4271,7 @@ function Marks({
   const flashes = shapes.filter((shape) => shape.flash);
   const flying = shapes.filter((shape) => shape.flight && frames.has(shape.key));
   return (
-    <div className="pb-marks" aria-hidden="true">
+    <div className="pb-marks" aria-hidden="true" ref={rootRef}>
       {/*
         Highlights on a layer of their own, multiplied into the board: the yellow goes behind
         the words, which stay black, the way a highlighter pen works on paper.
@@ -4350,6 +4601,7 @@ function Pen({
       return;
     }
     const state = hand.current;
+    hands.set(sheet, state);
     const lengths = fresh.map((line) => {
       const stroke =
         Number.parseFloat(window.getComputedStyle(line).getPropertyValue("--stroke")) || 600;
@@ -4466,12 +4718,73 @@ type Show = boolean | "wait";
  * A teacher writes the line, then turns and points at it — never the other way round.
  */
 function written(line: HTMLElement): void {
+  trace("line-written", { line: line.closest("[data-line]")?.getAttribute("data-line") });
   line.dataset.written = "";
   line.closest(".pb-sheet")?.dispatchEvent(new Event(WRITTEN_EVENT));
 }
 
-/** Sent on the sheet each time the hand finishes a line. */
+/** Sent on the sheet each time the hand finishes a line, and each time it starts one. */
 const WRITTEN_EVENT = "pb-written";
+const WRITING_EVENT = "pb-writing";
+
+/** The hand writing on each sheet, for the marks to keep time with (`penTiming`). */
+const hands = new WeakMap<HTMLElement, Hand>();
+
+/**
+ * When the hand will reach a piece of a line, and finish the line, in ms of real time from now:
+ * `item` is the line's element and `box` (on the screen) the piece, or null for the line's end.
+ * Read off the line being written, piece by piece as the hand will write it; a line still
+ * waiting its turn is estimated from its share of the line. Null when the hand does not have
+ * the line at all; nothing to wait for once it is written.
+ */
+function penTiming(
+  sheet: HTMLElement,
+  item: HTMLElement,
+  box: Box | null,
+): { reach: number; done: number } | null {
+  if (item.dataset.written !== undefined) return { reach: 0, done: 0 };
+  const hand = hands.get(sheet);
+  if (!hand) return null;
+  const frame = item.getBoundingClientRect();
+  // How far along the line a piece is, as a share of its writing (a line not read yet: by
+  // where the piece sits across it).
+  const share = (script: Script | null): number => {
+    if (!box) return 1;
+    if (script) {
+      let reach = 0;
+      for (const segment of script.segments) {
+        if (!segment.ink) continue;
+        const piece = script.pieces[segment.piece];
+        if (!piece) continue;
+        const x = frame.left + (piece.x0 + piece.x1) / 2;
+        const y = frame.top + (piece.y0 + piece.y1) / 2;
+        if (x >= box.left - 2 && x <= box.right + 2 && y >= box.top - 2 && y <= box.bottom + 2)
+          reach = Math.max(reach, segment.u1);
+      }
+      if (reach > 0) return reach / Math.max(1e-6, script.total);
+    }
+    return Math.min(1, Math.max(0, (box.right - frame.left) / Math.max(1, frame.width)));
+  };
+  const job = hand.job;
+  let wait = 0;
+  if (job?.script) {
+    const walk = Math.max(0, job.approach - job.walked);
+    const rest = walk + Math.max(0, job.script.total - job.units) / Math.max(job.rate, 1e-6);
+    if (job.line === item) {
+      const units = share(job.script) * job.script.total;
+      return { reach: walk + Math.max(0, units - job.units) / Math.max(job.rate, 1e-6), done: rest };
+    }
+    wait += rest;
+  }
+  for (const queued of hand.queue) {
+    // The trip to it, and its writing at the hand's pace for it.
+    const takes = STROKE_DELAY_MS + queued.stroke;
+    if (queued.line === item)
+      return { reach: wait + STROKE_DELAY_MS + share(null) * queued.stroke, done: wait + takes };
+    wait += takes;
+  }
+  return null;
+}
 
 /** A clip path that shows nothing: a line queued but not yet reached. */
 const NOTHING = 'path("M0 0Z")';
@@ -4612,6 +4925,11 @@ function advance(
       if (!next) break;
       if (!next.line.isConnected) continue;
       if (!begin(state, next, sheet, canSee)) continue;
+      sheet.dispatchEvent(new Event(WRITING_EVENT));
+      trace("line-start", {
+        line: next.line.closest("[data-line]")?.getAttribute("data-line"),
+        ms: Math.round(next.approach + next.script!.total / next.rate),
+      });
       // Only the part of this frame since the line went up is spent on it.
       spare = Math.min(spare, Math.max(0, state.clock - next.queued));
       state.job = next;

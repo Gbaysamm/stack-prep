@@ -20,7 +20,7 @@ import type { RefObject } from "react";
 
 import type { LessonPoint } from "./api.js";
 import { useBoardPrefs, writeBoardPrefs, type BoardStyle, type BoardVoice } from "./boardPrefs.js";
-import { arrowHead, bezierAt, drawStroke, markDelays, seeded, stillMotion, through, type Pt } from "./ink.js";
+import { arrowHead, bezierAt, drawStroke, seeded, setDelays, stillMotion, through, type Pt } from "./ink.js";
 import "./whiteboard.css";
 
 /* ---- The handwriting --------------------------------------------------------------------- */
@@ -328,6 +328,8 @@ interface LiveSet {
   index: number;
   points: LessonPoint[];
   state: string;
+  /** When each mark starts, as the board plays them (ink.ts, `planMarks`). */
+  delays?: number[];
 }
 
 /** How long a value takes to ride its arrow. */
@@ -500,7 +502,7 @@ function useTravels(
     const newest = Math.max(-1, ...sets.map((set) => set.index));
     for (const set of sets) {
       if (set.state !== "live" || set.index !== newest) continue;
-      const delays = markDelays(set.points, set.index);
+      const delays = setDelays(set);
       set.points.forEach((point, k) => {
         if (!point.travel || point.line == null) return;
         const key = `${set.index}-${k}`;

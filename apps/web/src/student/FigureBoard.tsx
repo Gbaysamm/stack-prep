@@ -55,8 +55,8 @@ import {
   drawStrike,
   drawStroke,
   chipWidth,
-  markDelays,
   seeded,
+  setDelays,
   stillMotion,
   through,
   unsteady,
@@ -69,6 +69,8 @@ export interface FigureMarkSet {
   index: number;
   points: LessonPoint[];
   state: "live" | "past" | "gone";
+  /** When each mark starts, as the board plays them (ink.ts, `planMarks`). */
+  delays?: number[];
 }
 
 /* ---- Reading a drawing ------------------------------------------------------------------- */
@@ -763,7 +765,7 @@ function figureShapes(
     return Math.hypot(v[0], v[1]) < 1 ? [0, -1] : unit(v);
   };
   for (const set of sets) {
-    const delays = markDelays(set.points, set.index);
+    const delays = setDelays(set);
     set.points.forEach((point, n) => {
       if (point.figure == null || !covers.includes(point.figure)) return;
       const found = places(geo, point.target);

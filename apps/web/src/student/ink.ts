@@ -316,18 +316,28 @@ export const MARK_STAGGER_S = 0.55;
 /** The time a `move` takes before the next mark: lifted, carried, set down. */
 const MOVE_TURN_S = 1.7;
 
+/** How long after it starts a moving piece has landed (its lift and a typical carry), and how
+ *  long until it has faded into the writing (Board.tsx, `moveTimes`). */
+const MOVE_LANDS_S = 1.3;
+const MOVE_ENDS_S = 2.0;
+
+/** How long any other mark takes to be drawn, with its words. */
+const MARK_DRAWN_S = 0.65;
+
 /**
  * A FLIGHT: a piece brought from further up the board than the line just above. The board
  * scrolls up to where it was written if it is out of sight (`FLIGHT_SCROLL_MS`), lights it up
  * and lifts it (`FLIGHT_HOLD_MS`), carries it down to where it goes with the board following
- * (`FLIGHT_TRAVEL_MS`) and sets it down (`FLIGHT_LAND_MS`). Board.tsx plays it.
+ * (`FLIGHT_TRAVEL_MS`) and sets it down (`FLIGHT_LAND_MS`). Board.tsx plays it, at the pace its
+ * moment's plan gives (`planMarks`): quicker when the moment is short.
  */
-export const FLIGHT_SCROLL_MS = 520;
-export const FLIGHT_HOLD_MS = 520;
-export const FLIGHT_TRAVEL_MS = 1300;
-export const FLIGHT_LAND_MS = 520;
-const FLIGHT_TURN_S =
-  (FLIGHT_SCROLL_MS + FLIGHT_HOLD_MS + FLIGHT_TRAVEL_MS + FLIGHT_LAND_MS) / 1000 + 0.3;
+export const FLIGHT_SCROLL_MS = 420;
+export const FLIGHT_HOLD_MS = 400;
+export const FLIGHT_TRAVEL_MS = 1100;
+export const FLIGHT_LAND_MS = 420;
+const FLIGHT_LANDS_S = (FLIGHT_SCROLL_MS + FLIGHT_HOLD_MS + FLIGHT_TRAVEL_MS) / 1000;
+const FLIGHT_ENDS_S = FLIGHT_LANDS_S + FLIGHT_LAND_MS / 1000;
+const FLIGHT_TURN_S = FLIGHT_ENDS_S + 0.3;
 
 /** The mark's moment, and where it comes from, as moments counted from 0. */
 function resolved(line: number, index: number): number {
@@ -347,28 +357,138 @@ export function fromFar(
   return Math.abs(resolved(point.line, index) - resolved(point.from.line, index)) >= 2;
 }
 
+/** What timing a mark needs to know about it. */
+interface TimedPoint {
+  kind: string;
+  line?: number | null;
+  from?: { line: number } | null;
+  on?: unknown;
+}
+
+/** How long a mark holds the next one back, at its natural pace. */
+function markTurn(point: TimedPoint, index: number): number {
+  if (point.kind !== "move") return MARK_STAGGER_S;
+  return index >= 0 && fromFar(point, index) ? FLIGHT_TURN_S : MOVE_TURN_S;
+}
+
 /**
- * When each of a moment's marks starts, in seconds: in the order the lesson lists them, each
- * after the one before — and after a moving piece has landed — whether it is drawn over the
- * working or over the figure, so the two stay in the one order the teacher points in. `index`
- * is the moment's own: a move from far up the board (a flight) takes longer.
+ * How long after it starts a mark has landed — a moving piece set down where it goes — or been
+ * drawn, at its natural pace. A mark cued to a word (`on:`) starts this long before its word,
+ * so that it lands on it.
  */
-export function markDelays(
-  points: { kind: string; line?: number | null; from?: { line: number } | null }[],
-  index = -1,
-): number[] {
+export function markLands(point: TimedPoint, index: number): number {
+  if (point.kind !== "move") return MARK_DRAWN_S;
+  return index >= 0 && fromFar(point, index) ? FLIGHT_LANDS_S : MOVE_LANDS_S;
+}
+
+/** How long a mark takes from its start until nothing of it is still moving. */
+function markEnds(point: TimedPoint, index: number): number {
+  if (point.kind !== "move") return MARK_DRAWN_S;
+  return index >= 0 && fromFar(point, index) ? FLIGHT_ENDS_S : MOVE_ENDS_S;
+}
+
+/**
+ * When each of a moment's marks starts, in seconds, at their natural pace: in the order the
+ * lesson lists them, each after the one before — and after a moving piece has landed — whether
+ * it is drawn over the working or over the figure, so the two stay in the one order the teacher
+ * points in. `index` is the moment's own: a move from far up the board (a flight) takes longer.
+ * The board plays a moment's marks to its plan (`planMarks`), which fits them into the moment;
+ * this is what the plan starts from, and what stands where there is none.
+ */
+export function markDelays(points: TimedPoint[], index = -1): number[] {
   const delays: number[] = [];
   points.reduce((wait, point) => {
     delays.push(wait);
-    const turn =
-      point.kind === "move"
-        ? index >= 0 && fromFar(point, index)
-          ? FLIGHT_TURN_S
-          : MOVE_TURN_S
-        : MARK_STAGGER_S;
-    return wait + turn;
+    return wait + markTurn(point, index);
   }, 0);
   return delays;
+}
+
+/** A moment's marks as the board plays them (`planMarks`). */
+export interface MarkPlan {
+  /** When each starts, in seconds after the marks go up. */
+  delays: number[];
+  /** How fast moving pieces go, as a share of their natural time: 1, or less to fit. */
+  pace: number;
+  /** When the last of them is finished, in seconds after the marks go up. */
+  finish: number;
+}
+
+/** What the board knows, as a moment's marks go up, about the time they have. In seconds. */
+export interface MarkTimes {
+  /** For each mark carrying a piece into the line being written, when the pen will reach the
+   *  piece it becomes; null for every other mark. */
+  reach?: (number | null)[];
+  /** For each mark drawn over the line being written that is not a piece carried into it:
+   *  true, and it waits until the line is written (a circle round words not yet there reads as
+   *  the board knowing the answer first). */
+  after?: boolean[];
+  /** When the line being written will be finished: 0 when it is. */
+  written?: number;
+  /** When the moment ends: its voice finished, and part of the breath after it. */
+  end?: number | null;
+}
+
+/** The least share of their natural time a moment's marks are squeezed into: the pauses between
+ *  them can shrink this far, a moving piece's own journey less, so it can still be followed. */
+const LEAST_STAGGER = 0.25;
+const LEAST_PACE = 0.45;
+
+/**
+ * THE MARKS KEEP TIME WITH THE MOMENT. A moment's marks in the lesson's order, each after the
+ * one before, fitted to the time the moment has:
+ *
+ *  - a piece carried into the line being written lands as the pen reaches the piece it
+ *    becomes, and no later than the line is finished;
+ *  - a mark over that line's own words waits until they are written;
+ *  - every mark is finished before the moment ends.
+ *
+ * Where they do not fit at their natural pace, the pauses between them and the journeys are
+ * shortened together (never below `LEAST_STAGGER` and `LEAST_PACE`), so a short moment with
+ * three pieces carried into it plays them briskly rather than letting them trail into the
+ * moments after; what still does not fit is hurried on as the next moment starts (Board.tsx).
+ * A mark cued to a word (`on:`) keeps its own time — it starts as its word comes — and is not
+ * part of this.
+ */
+export function planMarks(points: TimedPoint[], index: number, times: MarkTimes = {}): MarkPlan {
+  const written = Math.max(0, times.written ?? 0);
+  const end = times.end ?? null;
+  const lay = (stagger: number) => {
+    const pace = Math.max(LEAST_PACE, stagger);
+    const delays: number[] = [];
+    let next = 0;
+    let finish = 0;
+    let late = 0;
+    points.forEach((point, k) => {
+      if (point.on) {
+        delays.push(0);
+        return;
+      }
+      const moving = point.kind === "move";
+      const lands = markLands(point, index) * (moving ? pace : 1);
+      const reach = times.reach?.[k] ?? null;
+      let start = next;
+      if (reach !== null) start = Math.max(start, Math.min(reach, written) - lands);
+      else if (times.after?.[k]) start = Math.max(start, written + 0.1);
+      delays.push(start);
+      if (reach !== null && written > 0) late = Math.max(late, start + lands - written);
+      finish = Math.max(finish, start + markEnds(point, index) * (moving ? pace : 1));
+      next = start + markTurn(point, index) * stagger;
+    });
+    return { delays, pace, finish, late };
+  };
+  let stagger = 1;
+  let plan = lay(stagger);
+  while (stagger > LEAST_STAGGER && ((end !== null && plan.finish > end) || plan.late > 0.15)) {
+    stagger = Math.max(LEAST_STAGGER, stagger * 0.9);
+    plan = lay(stagger);
+  }
+  return { delays: plan.delays, pace: plan.pace, finish: plan.finish };
+}
+
+/** When each of a set of marks starts: its moment's plan, where it has one. */
+export function setDelays(set: { index: number; points: TimedPoint[]; delays?: number[] }): number[] {
+  return set.delays ?? markDelays(set.points, set.index);
 }
 
 /* ---- Chip layout: where a mark's words can go without landing on anything ----------------- */

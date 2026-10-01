@@ -19,7 +19,7 @@
 import { useEffect, useRef } from "react";
 
 import type { LessonDoodleOp, LessonDoodleRef, LessonPoint } from "./api.js";
-import { markDelays } from "./ink.js";
+import { setDelays } from "./ink.js";
 import { playSfx, sfxMoment, stopSfx, type SfxName } from "./sfx.js";
 
 /** What the hook needs of a moment. */
@@ -90,7 +90,7 @@ export function useBoardSfx({
   shown: number;
   itemsShown: number;
   /** The marks up on the board now, by moment, as Board.tsx draws them. */
-  marks: { index: number; points: LessonPoint[] }[];
+  marks: { index: number; points: LessonPoint[]; delays?: number[] }[];
   /** Whether the current moment's doodle k (its `doodle`, then its `doodles`) is due. */
   doodleDue: (k: number) => boolean;
   /** Whether the current moment's doodle action k is due. */
@@ -161,7 +161,7 @@ export function useBoardSfx({
 
     // Marks just up, each at its turn.
     for (const set of marks) {
-      const delays = markDelays(set.points, set.index);
+      const delays = setDelays(set);
       set.points.forEach((point, k) => {
         const key = `${set.index}-${k}`;
         if (isHeldMark(point) || before?.marks.has(key)) return;
