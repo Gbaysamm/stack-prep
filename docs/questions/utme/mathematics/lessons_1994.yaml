@@ -254,67 +254,91 @@ lessons:
       C: 'You went for 0.667. That is two thirds, a guess near the answer. Rationalise to root 2 over 2 and halve 1.414 to get 0.707.'
   7:
     moments:
-      - say: 'A class has 42 students, and each offers at least one of Mathematics and Physics. 22 offer Physics and 28 offer Mathematics. We want the number offering Physics only: picture three kinds of student, Maths only, both, and Physics only.'
-        write: '$n(E) = 42,\ n(P) = 22,\ n(M) = 28$'
-        doodle: {name: 'custom:1994_q07_a', id: kinds, caption: 'each student offers at least one'}
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - section: 'The question'
+        say: 'Here is a class of 42 students. Each one offers Maths, or Physics, or both. 28 offer Maths and 22 offer Physics. But 28 plus 22 is 50, and the class has only 42 students. Where did the extra 8 come from? Find that, and Physics only is easy.'
+        write: 'Physics only $= ?$'
+        doodle: {name: student-small, id: cls, repeat: 42, layout: grid, caption: 'the class of 42'}
+      - section: 'What we know'
+        say: 'Let''s write what we know. The whole class is 42 students. We call the whole class E, for everyone. n of E means the number in E.'
+        write: 'Class: $n(E) = 42$'
+        point:
+          - {line: 1, kind: travel, at: '42', from: {doodle: cls}, text: 'the class', 'on': 'whole class'}
+      - say: '28 students offer Mathematics. We call that set M, so n of M is 28.'
+        write: 'Maths: $n(M) = 28$'
+      - say: '22 students offer Physics. We call that set P, so n of P is 22.'
+        write: 'Physics: $n(P) = 22$'
+      - say: 'Now let me draw the class. The box is the whole class of 42. One circle holds the Maths students, and the other circle holds the Physics students.'
         show_sketch: true
-      - say: 'Every student offers at least one subject, so nobody is outside both groups. That means the union of the two groups is the whole class of 42: here they all are.'
-        write: '$n(M \cup P) = 42$'
-        doodle: {name: 'student-small', id: cls, repeat: 42, layout: grid, caption: 'the whole class of 42'}
         point:
-          - {figure: sketch, kind: circle, target: E, text: 'all 42'}
-      - say: 'The first thing we need is the overlap, the students who offer both. Why? If we just add 28 and 22, those students are counted twice. So the rule is: the union equals Maths plus Physics, minus both.'
-        write: '$n(M \cup P) = n(M) + n(P) - n(M \cap P)$'
+          - {figure: sketch, kind: circle, target: 'class of 42', text: 'everyone', 'on': 'box'}
+          - {figure: sketch, kind: underline, target: 'Maths 28', 'on': 'Maths students'}
+          - {figure: sketch, kind: underline, target: 'Physics 22', 'on': 'Physics students'}
+      - say: 'The two circles overlap. The overlap holds the students who offer both subjects. We write it n of M intersection P. Intersection simply means in both.'
+        write: 'Both: $n(M \cap P) = ?$'
         point:
-          - {figure: sketch, kind: circle, target: both, text: 'counted twice'}
-      - say: 'Now substitute what we know: 42 for the union, 28 for Maths and 22 for Physics.'
-        write: '$42 = 28 + 22 - n(M \cap P)$'
+          - {figure: sketch, kind: highlight, target: 'both', text: 'in both circles', 'on': 'overlap', on_nth: 2}
+      - section: 'Why 50 is too many'
+        say: 'Now watch what happens if we just add the two circles. Bring down the 28 from the Maths circle, and the 22 from the Physics circle. 28 plus 22 is 50.'
+        write: '$28 + 22 = 50$'
         point:
-          - {line: 4, kind: move, from: {line: 2, at: '= [[42]]'}, at: '42', text: 'union'}
-          - {line: 4, kind: move, from: {line: 0, at: 'n(M) = [[28]]'}, at: '28', text: 'Maths'}
-          - {line: 4, kind: move, from: {line: 0, at: 'n(P) = [[22]]'}, at: '22', text: 'Physics'}
-      - say: '28 plus 22 is 50.'
-        write: '$42 = 50 - n(M \cap P)$'
-      - say: 'So the overlap is 50 minus 42, which is 8. Eight students offer both subjects, like the middle student with both books.'
+          - {line: 6, kind: travel, at: '28', from: {figure: sketch, target: 'Maths 28'}, text: 'Maths', 'on': 'Maths circle'}
+          - {line: 6, kind: travel, at: '22', from: {figure: sketch, target: 'Physics 22'}, text: 'Physics', 'on': 'Physics circle'}
+      - say: 'But the class has only 42 students. So why did we get 50? Look at the overlap. A student who offers both is inside the Maths circle, and inside the Physics circle too. So we counted that student twice.'
+        write: 'Counted twice: the students in both'
+        point:
+          - {figure: sketch, kind: label, target: 'both', text: 'counted twice', 'on': 'counted that student twice'}
+      - say: 'Each student in both was counted one extra time. So the extra, 50 minus 42, is exactly the number in both. 50 minus 42 is 8.'
         write: '$n(M \cap P) = 50 - 42 = 8$'
-        doodle_do:
-          - {id: cls, op: group, n: 8, text: '8 do both'}
-          - {id: kinds, op: label, part: both, text: '8'}
         point:
-          - {line: 6, kind: move, from: {line: 5, at: '[[42]] ='}, at: '− 42', text: 'across the ='}
-          - {figure: sketch, kind: label, target: both, text: '8'}
-      - say: 'But careful: the question asks for Physics only. Of the 22 Physics students, the 8 we just found also do Maths, so we take them away.'
+          - {line: 8, kind: travel, at: '50', from: {line: 6, at: '= [[50]]'}, 'on': '50 minus 42'}
+          - {line: 8, kind: travel, at: '42', from: {line: 1, at: '42'}, text: 'the class', 'on': '50 minus 42'}
+          - {figure: sketch, kind: label, target: 'both', text: '8', 'on': 'is 8'}
+      - say: 'Let''s pause on that. 8 students offer both subjects. Let me gather those 8 together in the class.'
+        doodle_do:
+          - {id: cls, op: group, n: 8, text: '8 offer both', 'on': 'gather'}
+      - section: 'The rule'
+        say: 'What we just did has a name: the rule for two sets. In words: the number in either circle is Maths, plus Physics, minus both. The U sign, union, means in either circle.'
+        write: 'Rule: $n(M \cup P) = n(M) + n(P) - n(M \cap P)$'
+        'on': 'rule for two sets'
+      - say: 'Here every student offers at least one subject, so the union is the whole class, 42. Put in our numbers: 28 plus 22 is 50, and 50 minus 8 is 42. The rule agrees with us.'
+        write: '$42 = 28 + 22 - 8$'
+        point:
+          - {line: 11, kind: travel, at: '− 8', from: {line: 8, at: '= [[8]]'}, text: 'both', 'on': '50 minus 8'}
+      - section: 'Physics only'
+        say: 'Now the question itself. Physics only means students who offer Physics but not Maths. Start with all 22 in the Physics circle, then take away the 8 in the overlap, because they offer Maths as well.'
         write: 'Physics only $= n(P) - n(M \cap P)$'
-      - say: 'That is 22 minus 8.'
+        point:
+          - {figure: sketch, kind: circle, target: 'Physics only', text: 'Physics, not Maths', 'on': 'Physics but not Maths'}
+      - say: 'So Physics only is 22 minus 8.'
         write: '$= 22 - 8$'
         point:
-          - {line: 8, kind: move, from: {line: 0, at: 'n(P) = [[22]]'}, at: '22', text: 'Physics'}
-          - {line: 8, kind: move, from: {line: 6, at: '= [[8]]'}, at: '− 8', text: 'both'}
-      - say: '22 minus 8 is 14: the Physics-only students.'
+          - {line: 13, kind: travel, at: '22', from: {line: 3, at: '22'}, text: 'Physics', 'on': '22'}
+          - {line: 13, kind: travel, at: '8', from: {line: 8, at: '= [[8]]'}, text: 'both', 'on': '8'}
+      - say: '22 minus 8 is 14. 14 students offer Physics only. Watch the class split into its parts.'
         write: '$= 14$'
         doodle_do:
-          - {id: kinds, op: label, part: ponly, text: '14'}
+          - {id: cls, op: split, n: 28, text: 'Maths only | Physics only', 'on': 'split'}
         point:
-          - {figure: sketch, kind: label, target: '?', text: '14'}
-          - {line: 9, kind: highlight, at: '14', to: {doodle: kinds, part: ponly}}
-      - say: 'Let''s check with the whole class. Maths only, the first student in the picture, is 28 minus the same 8, which is 20.'
+          - {figure: sketch, kind: label, target: '?', text: '14', 'on': '14 students'}
+          - {line: 14, kind: highlight, at: '14', to: {doodle: cls}, 'on': 'split'}
+      - section: 'Check'
+        say: 'Let''s check that every student is counted once. Maths only is 28 minus the same 8, which is 20.'
         write: 'Maths only $= 28 - 8 = 20$'
-        doodle_do:
-          - {id: kinds, op: label, part: monly, text: '20'}
         point:
-          - {figure: sketch, kind: label, target: 'Maths only', text: '20'}
-      - say: 'Now Physics only, Maths only and both: 14 plus 20 plus 8 is 42, the whole class.'
-        write: 'Check: $14 + 20 + 8 = 42$'
+          - {figure: sketch, kind: label, target: 'Maths only', text: '20', 'on': 'is 20'}
+      - say: 'Now add the three parts of the picture: 20 Maths only, plus 8 in both, plus 14 Physics only. That is 42, the whole class.'
+        write: 'Check: $20 + 8 + 14 = 42$'
         doodle_do:
-          - {id: cls, op: pulse}
+          - {id: cls, op: pulse, 'on': 'whole class'}
+      - say: 'One more way to see it. Everyone not in the Maths circle must be Physics only. 42 minus 28 is 14 again.'
+        write: 'Another way: $42 - 28 = 14$'
       - say: 'So 14 students offer Physics only, which is answer choice D.'
         write: 'Physics only $= 14$'
         answer: true
     traps:
-      A: 'You went for 6. That is 28 minus 22, the gap between the two subjects, which doesn''t count anyone. Find the overlap first, 8, then Physics only is 22 minus 8, which is 14.'
-      B: 'You went for 8. That is the number offering both subjects, a step on the way. The word "only" means we take those 8 away from the 22 Physics students, leaving 14.'
-      C: 'You went for 12. Check the overlap again: 28 plus 22 is 50, and 50 minus 42 is 8. So Physics only is 22 minus 8, which is 14.'
+      A: 'You went for 6. That is 28 minus 22, the gap between the two subjects, which doesn''t count any group of students. Find the overlap first: 50 minus 42 is 8. Then Physics only is 22 minus 8, which is 14.'
+      B: 'You went for 8. That is the number who offer both subjects, a step on the way. The word "only" means we take those 8 away from the 22 Physics students, leaving 14.'
+      C: 'You went for 12. Check the overlap again: 28 plus 22 is 50, and 50 minus 42 is 8, not 10. So Physics only is 22 minus 8, which is 14.'
   8:
     moments:
       - say: 'We''re told $A$ is a subset of $B$, and we must simplify $A$ intersect the complement of, $A$ intersect $B$.'
@@ -520,7 +544,7 @@ lessons:
           - {line: 8, kind: move, from: {line: 7, at: '+ [[27]] = 0'}, at: '−27', text: 'across the ='}
       - say: 'Every number here divides by 9. 27 over 9 is 3, 9 over 9 is 1, and negative 27 over 9 is negative 3. Let''s call this equation 2.'
         write: '$3p + q = -3 \quad (2)$'
-      - say: 'Both equations have a single $q$: picture two baskets, one holding $p$ and $q$, the other three $p$ and $q$. So if we subtract equation 1 from equation 2, the $q$s cancel.'
+      - say: 'Both equations have a single $q$: picture two baskets, one holding $p$ and $q$, the other three $p$ and $q$. So if we take equation 2 minus equation 1, the $q$s cancel.'
         write: '(2) minus (1): $\ (3p + q) - (p + q) = -3 - (-5)$'
         doodle: {name: 'custom:1994_q12_a', id: baskets, caption: '(1) p + q and (2) 3p + q'}
         point:
@@ -793,48 +817,67 @@ lessons:
       D: 'You went for strictly greater than. The side is right, but the boundary line is solid, so the points on it count. That needs greater than or equal to.'
   19:
     moments:
-      - say: 'In an arithmetic progression, the 6th term is 11 and the first term is 1: picture a staircase whose first step is at height 1 and whose 6th step is at 11. We want the common difference.'
-        write: '$T_{6} = 11,\ a = 1$'
+      - section: 'The question'
+        say: 'A staircase starts at height 1, and its 6th step is at height 11. Every step rises by the same amount. How much? Count the rises carefully, because that is where most students slip.'
+        write: 'Common difference $d = ?$'
         doodle: {name: 'custom:1994_q19_a', id: stairs, caption: 'equal rises from 1 up to 11', size: scene}
-      - say: 'In an arithmetic progression, we add the same number, the common difference $d$, every time. The $n$th term is $a$ plus $n - 1$ times $d$.'
-        write: '$T_{n} = a + (n - 1)d$'
-      - say: 'Why $n - 1$? To get from the first term to the 6th, we take 5 steps of $d$, not 6: count the rises on the staircase. So put $n = 6$: 6 minus 1 is 5.'
-        write: '$T_{6} = a + (6 - 1)d = a + 5d$'
+      - section: 'What we know'
+        say: 'This is an arithmetic progression, an A P. In an A P, each term is the term before it plus the same number every time. That number is called the common difference, d.'
+        write: 'AP: add the same $d$ each time'
+        'on': 'common difference'
+      - say: 'The first term is 1. We call the first term a.'
+        write: 'First term: $a = 1$'
+        point:
+          - {line: 2, kind: travel, at: '1', from: {doodle: stairs, part: first}, text: 'first step', 'on': 'first term is 1'}
+      - say: 'The 6th term is 11. We write it as T 6, the 6th term.'
+        write: '6th term: $T_{6} = 11$'
+        point:
+          - {line: 3, kind: travel, at: '= 11', from: {doodle: stairs, part: last}, text: '6th step', 'on': '6th term is 11'}
+      - section: 'Count the rises'
+        say: 'From the first step to the 6th step, how many rises do we climb? Count them on the staircase: 1, 2, 3, 4, 5. Five rises, not six.'
+        write: 'From the 1st step to the 6th: 5 rises'
         doodle_do:
-          - {id: stairs, op: highlight, part: rises}
-      - say: 'Now put in what we were given: $a$ is 1, and the 6th term is 11.'
+          - {id: stairs, op: highlight, part: rises, text: '5 rises', 'on': 'Count them'}
+      - say: 'Each rise is d. So the 6th term is the first term, plus 5 lots of d.'
+        write: '$T_{6} = a + 5d$'
+      - say: 'This is the general rule for an A P. In words: the nth term is the first term, plus n minus 1 lots of d. The minus 1 is there because the first step has no rise before it. For the 6th term, 6 minus 1 is 5.'
+        write: 'Rule: $T_{n} = a + (n - 1)d$'
+        'on': 'general rule'
+      - section: 'Put in the numbers'
+        say: 'Now put in what we know. a is 1, and T 6 is 11. So 1 plus 5d equals 11.'
         write: '$1 + 5d = 11$'
         point:
-          - {line: 3, kind: arrow, from: {line: 2, at: '= [[a + 5d]]'}, at: '1 + 5d', text: 'a + 5d'}
-          - {line: 3, kind: move, from: {line: 0, at: 'a = [[1]]'}, at: '[[1]] + 5d', text: 'a'}
-          - {line: 3, kind: move, from: {line: 0, at: 'T6 = [[11]]'}, at: '= [[11]]', text: 'T₆'}
-      - say: 'Subtract 1 from both sides. 11 minus 1 is 10.'
-        write: '$5d = 11 - 1 = 10$'
-        point:
-          - {line: 4, kind: move, from: {line: 3, at: '[[1]] + 5d'}, at: '− 1', text: 'across the ='}
-      - say: 'Divide both sides by 5. 10 divided by 5 is 2: each rise is 2.'
-        write: '$d = \dfrac{10}{5} = 2$'
+          - {line: 7, kind: travel, at: '[[1]] +', from: {line: 2, at: '= [[1]]'}, text: 'a', 'on': 'a is 1'}
+          - {line: 7, kind: travel, at: '= 11', from: {line: 3, at: '= 11'}, text: 'T6', 'on': 'T 6 is 11'}
+      - say: 'We want 5d alone on the left. So subtract 1 from both sides.'
+        write: '$5d = 11 - 1$'
+      - say: '11 minus 1 is 10.'
+        write: '$5d = 10$'
+      - say: 'Now divide both sides by 5, to leave d by itself.'
+        write: '$d = \dfrac{10}{5}$'
+      - say: '10 divided by 5 is 2. So each rise is 2.'
+        write: '$d = 2$'
         doodle_do:
-          - {id: stairs, op: label, part: rises, text: 'each rise d = 2'}
+          - {id: stairs, op: label, part: rises, text: 'each rise d = 2', 'on': 'each rise is 2'}
         point:
-          - {line: 5, kind: move, from: {line: 4, at: '[[5]]d'}, at: '[[5]]10', text: 'divide by 5'}
-          - {line: 5, kind: highlight, at: '2', to: {doodle: stairs, part: rises}}
-      - say: 'Let''s check by listing the terms, starting from 1 and adding 2 each time. Watch the climber go up the steps.'
+          - {line: 11, kind: highlight, at: '2', to: {doodle: stairs, part: rises}, 'on': 'each rise is 2'}
+      - section: 'Check'
+        say: 'Let''s check by climbing. Start at 1 and add 2 each time: 1, 3, 5, 7, 9, 11. Watch the climber go up.'
         write: 'Terms: $1,\ 3,\ 5,\ 7,\ 9,\ 11$'
         doodle_do:
-          - {id: stairs, op: stage, stage: 'custom:1994_q19_a2'}
-          - {id: stairs, op: move, part: man, path: climb}
+          - {id: stairs, op: stage, stage: 'custom:1994_q19_a2', 'on': 'add 2 each time'}
+          - {id: stairs, op: move, part: man, path: climb, 'on': 'Watch the climber'}
       - say: 'The 6th term in that list is 11, the top step, just as the question says.'
         write: 'So $T_{6} = 11$'
         doodle_do:
-          - {id: stairs, op: circle, part: last}
+          - {id: stairs, op: circle, part: last, 'on': 'top step'}
       - say: 'So the common difference is 2, which is answer choice D.'
         write: '$d = 2$'
         answer: true
     traps:
-      A: 'You went for 12 over 5. That comes from $5d = 12$, adding 1 to 11 instead of subtracting it. $1 + 5d = 11$ gives $5d = 10$, so $d$ is 2.'
-      B: 'You went for 5 over 3. That comes from using $a + 6d$, which gives $6d = 10$. The 6th term is only 5 steps after the first, so it is $a + 5d$, and $d$ is 2.'
-      C: 'You went for negative 2. The terms go up from 1 to 11, so the difference must be positive. $5d = 10$ gives $d$ equals positive 2.'
+      A: 'You went for 12 over 5. That comes from 5d equals 12: adding 1 to 11 instead of taking it away. 1 plus 5d equals 11 gives 5d equals 10, so d is 2.'
+      B: 'You went for 5 over 3. That comes from using 6 rises, a plus 6d, which gives 6d equals 10. From the 1st step to the 6th there are only 5 rises, so it is a plus 5d, and d is 2.'
+      C: 'You went for negative 2. The terms go up, from 1 to 11, so each step must add a positive amount. 5d equals 10 gives d equals positive 2.'
   20:
     moments:
       - say: 'We need $r$ when the sum of these six logs is 63. Each log is of a power of $r$.'
@@ -1194,7 +1237,7 @@ lessons:
           - {figure: sketch, kind: circle, target: '(3y − x − z)°'}
           - {figure: sketch, kind: circle, target: '3x°'}
           - {figure: sketch, kind: circle, target: '(2z − 2y − x)°'}
-      - say: 'The angles of any quadrilateral add up to 360 degrees, because a diagonal splits it into two triangles, and 2 times 180 is 360. Picture its four corners torn off and laid round a point: they make one full turn. So we add the three angles and take the total away from 360.'
+      - say: 'The angles of any quadrilateral add up to 360 degrees, because a diagonal splits it into two triangles, and 2 times 180 is 360. Picture its four corners torn off and laid round a point: they make one full turn. So we add the three angles and take 360 minus the total.'
         write: 'Angles of a quadrilateral: $\ 2 \times 180^{\circ} = 360^{\circ}$'
         doodle: {name: 'custom:1994_q28_a', id: turn, caption: 'the four corners make a full turn'}
       - say: 'Add the three expressions together.'

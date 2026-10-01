@@ -2257,42 +2257,89 @@ lessons:
       E: 'You went for 60 degrees. That''s $4x$, not $2x$. From $4x = 60$, $x$ is 15, and angle $PTO$ is 2 times 15, which is 30.'
   50:
     moments:
-      - say: 'A man drove for 4 hours at some speed, then doubled his speed for 3 more hours. He covered 600 km in all. We want his speed in the last 3 hours. Picture the car on the road.'
+      - section: 'The question'
+        say: 'A man drives for 7 hours and covers 600 km. There are two speeds in this journey, and the exam hopes you give the wrong one. Let''s find the right one.'
+        write: 'Speed in the last 3 hours $= ?$'
         doodle: {name: 'custom:1983_q50_a', id: trip, caption: '4 h, then 3 h at double the speed', size: scene}
-        write: '4 h at the first speed, 3 h at double speed, 600 km in all'
-      - say: 'Let''s call his first speed $v$ km per hour. He doubled it, so his second speed is $2v$.'
-        write: 'First speed $= v$, second speed $= 2v$'
-      - say: 'For each part of the journey, distance is speed times time.'
+      - section: 'What we know'
+        say: 'Part one of the trip: he drives for 4 hours at some speed.'
+        write: 'Part 1: 4 hours at the first speed'
+        point:
+          - {line: 1, kind: travel, at: '4 hours', from: {doodle: trip, part: leg1}, text: '4 h', 'on': '4 hours'}
+      - say: 'Part two: he doubles his speed and drives for another 3 hours.'
+        write: 'Part 2: 3 hours at double that speed'
+        point:
+          - {line: 2, kind: travel, at: '3 hours', from: {doodle: trip, part: leg2}, text: '3 h', 'on': '3 hours'}
+      - say: 'Altogether, he covers 600 km.'
+        write: 'Whole trip: 600 km'
+        point:
+          - {line: 3, kind: travel, at: '600 km', from: {doodle: trip, part: total}, text: '600 km', 'on': '600 km'}
+      - section: 'Name the speeds'
+        say: 'We don''t know the first speed, so let''s give it a name: v kilometres per hour. v is just a letter standing for the number we are looking for.'
+        write: 'First speed $= v$ km/h'
+        doodle_do:
+          - {id: trip, op: circle, part: leg1, text: 'speed v', 'on': 'first speed'}
+      - say: 'He doubled it. Double means times 2. So the second speed is 2 times v, which we write as 2v.'
+        write: 'Second speed $= 2 \times v = 2v$ km/h'
+        doodle_do:
+          - {id: trip, op: circle, part: leg2, text: 'speed 2v', 'on': 'second speed'}
+      - section: 'Distance in each part'
+        say: 'Now the rule that links them. In words: distance equals speed times time.'
         write: 'Distance $=$ speed $\times$ time'
-      - say: 'Watch the car do the first part. In the first part, he went at $v$ for 4 hours, so he covered $4v$ km.'
-        doodle_do: [{id: trip, op: move, part: car, path: first}]
-        write: 'First part: $4 \times v = 4v$ km'
-      - say: 'Now the second part, twice as fast. In the second part, he went at $2v$ for 3 hours. 3 times $2v$ is $6v$ km.'
-        doodle_do: [{id: trip, op: move, part: car, path: second}]
-        write: 'Second part: $3 \times 2v = 6v$ km'
-      - say: 'The two parts add up to 600 km.'
-        doodle_do: [{id: trip, op: highlight, part: total}]
-        write: 'Total: $4v + 6v = 600$'
+        'on': 'distance equals speed times time'
+      - say: 'Part one. Watch the car drive it: speed v, for 4 hours. Speed times time is v times 4, which we write as 4v kilometres.'
+        write: 'Part 1: $v \times 4 = 4v$ km'
+        doodle_do:
+          - {id: trip, op: move, part: car, path: first, 'on': 'Watch the car'}
+          - {id: trip, op: label, part: leg1, text: '4v km', 'on': '4v kilometres'}
+      - say: 'Part two. Now the car goes twice as fast: speed 2v, for 3 hours. 2v times 3 is 6v kilometres.'
+        write: 'Part 2: $2v \times 3 = 6v$ km'
+        doodle_do:
+          - {id: trip, op: move, part: car, path: second, 'on': 'twice as fast'}
+          - {id: trip, op: label, part: leg2, text: '6v km', 'on': '6v kilometres'}
+      - say: 'Look at the road now. Part one is 4v km, part two is 6v km, and together they make the whole 600 km.'
+        doodle_do:
+          - {id: trip, op: highlight, part: total, 'on': 'whole 600 km'}
+      - section: 'Solve for v'
+        say: 'So 4v plus 6v equals 600.'
+        write: 'Whole trip: $4v + 6v = 600$'
         point:
-          - {line: 5, kind: move, from: {line: 3, at: '=4v'}, at: '4v'}
-          - {line: 5, kind: move, from: {line: 4, at: '=6v'}, at: '6v'}
-      - say: '$4v$ plus $6v$ is $10v$.'
+          - {line: 10, kind: travel, at: '4v', from: {line: 7, at: '= [[4v]]'}, text: 'part 1', 'on': '4v plus'}
+          - {line: 10, kind: travel, at: '6v', from: {line: 8, at: '= [[6v]]'}, text: 'part 2', 'on': 'plus 6v'}
+          - {line: 10, kind: travel, at: '600', from: {line: 3, at: '600'}, 'on': 'equals 600'}
+      - say: '4 lots of v plus 6 lots of v is 10 lots of v. So 10v equals 600.'
         write: '$10v = 600$'
-      - say: 'Divide both sides by 10. 600 divided by 10 is 60.'
-        write: '$v = \dfrac{600}{10} = 60$'
-      - say: 'Careful: 60 is his first speed. In the last 3 hours he drove at $2v$, which is 2 times 60, or 120 km per hour.'
-        doodle_do: [{id: trip, op: label, part: leg2, text: '120 km/h'}]
-        write: 'Last 3 hours: $2v = 2 \times 60 = 120$ km/h'
+      - say: 'To get v by itself, divide both sides by 10.'
+        write: '$\dfrac{10v}{10} = \dfrac{600}{10}$'
+      - say: '10v divided by 10 is v. 600 divided by 10 is 60. So v is 60 kilometres per hour.'
+        write: '$v = 60$ km/h'
+        doodle_do:
+          - {id: trip, op: label, part: leg1, text: 'v = 60 km/h', 'on': 'v is 60'}
+      - say: 'Careful! 60 is the first speed, for the first 4 hours. That is the trap answer. The question asks about the last 3 hours.'
+        write: 'Careful: $v$ is the first speed'
         point:
-          - {line: 1, kind: circle, at: '2v', text: 'last part'}
-          - {line: 8, kind: move, from: {line: 7, at: '=60'}, at: '2×[[60]]', text: 'v'}
-      - say: 'Let''s check: 4 times 60 is 240, and 3 times 120 is 360. 240 plus 360 is 600. Correct.'
-        write: 'Check: $4 \times 60 + 3 \times 120 = 240 + 360 = 600$'
-      - say: 'So in the last 3 hours he drove at 120 km per hour, which is answer choice A.'
+          - {line: 13, kind: circle, at: '60', text: 'first 4 hours only', 'on': 'first speed'}
+      - section: 'The last 3 hours'
+        say: 'In the last 3 hours he drove at 2v. 2 times 60 is 120. So his speed was 120 kilometres per hour.'
+        write: 'Last 3 hours: $2v = 2 \times 60 = 120$ km/h'
+        doodle_do:
+          - {id: trip, op: label, part: leg2, text: '2v = 120 km/h', 'on': '120 kilometres per hour'}
+        point:
+          - {line: 15, kind: travel, at: '× 60', from: {line: 13, at: '60'}, text: 'v', 'on': '2 times 60'}
+      - section: 'Check'
+        say: 'Let''s check the distances. Part one: 60 times 4 is 240 km.'
+        write: 'Part 1: $60 \times 4 = 240$ km'
+      - say: 'Part two: 120 times 3 is 360 km.'
+        write: 'Part 2: $120 \times 3 = 360$ km'
+      - say: '240 plus 360 is 600 km, the whole trip. It works.'
+        write: 'Check: $240 + 360 = 600$ km'
+        doodle_do:
+          - {id: trip, op: pulse, part: total, 'on': 'whole trip'}
+      - say: 'So in the last 3 hours he drove at 120 kilometres per hour, which is answer choice A.'
         write: 'Speed for the last 3 hours $= 120$ km/h'
         answer: true
     traps:
-      B: 'You went for 60 km per hour. That''s his first speed, $v$. For the last 3 hours he doubled it, so his speed was 120 km per hour.'
-      C: 'You went for 600 over 7. That''s his average speed over all 7 hours. The question asks for his speed in the last 3 hours, which was double the first speed: 120.'
-      D: 'You went for 50 km per hour. Check it: even at 50 the whole way for 7 hours he''d cover only 350 km. Solving $4v + 6v = 600$ gives $v = 60$, and the last part was at 120.'
+      B: 'You went for 60 km per hour. That is his first speed, v, for the first 4 hours. For the last 3 hours he doubled it, so his speed was 2 times 60, which is 120 km per hour.'
+      C: 'You went for 600 over 7. That is his average speed over all 7 hours: 600 km divided by 7 hours. The question asks for his speed in the last 3 hours, which was double the first speed: 120.'
+      D: 'You went for 50 km per hour. Check it: at 50 for 4 hours and 100 for 3 hours he covers 200 plus 300, which is only 500 km. Solving 4v plus 6v equals 600 gives v equals 60, and the last part was at 120.'
       E: 'You went for 100 km per hour. Then his first speed was 50, and 4 times 50 plus 3 times 100 is 500, not 600. The first speed is 60, so the last speed is 120.'

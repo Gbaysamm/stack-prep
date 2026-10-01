@@ -200,7 +200,7 @@ lessons:
           - {line: 1, kind: box, text: 'the rule'}
           - {line: 8, kind: move, from: {line: 7, at: '2160'}, at: '2160', text: 'selling price'}
           - {line: 8, kind: move, from: {line: 2, at: '1800'}, at: '1800', text: 'cost'}
-      - say: '2160 minus 1800 is 360. Take the ₦1800 on her tag from the ₦2160 she takes in: her profit is ₦360, which is answer choice B.'
+      - say: '2160 minus 1800 is 360. Take the ₦2160 she takes in, minus the ₦1800 on her tag: her profit is ₦360, which is answer choice B.'
         doodle_do:
           - {id: seller, op: label, part: takings, text: '₦2160 − ₦1800 = ₦360 profit'}
         write: 'Profit: ₦360.00'
@@ -391,58 +391,87 @@ lessons:
 
   9:
     moments:
-      - say: 'Picture the class: 40 students. 32 offer Mathematics, 24 offer Physics, and 4 offer neither. Each student is in one of four groups: Mathematics only, Physics only, both, or neither. We want how many offer both.'
-        doodle: {name: student-small, id: class, repeat: 40, layout: grid, caption: 'The class of 40'}
-        write: '$n(M) = 32,\ n(P) = 24,\ \text{neither} = 4,\ \text{class} = 40$'
-      - say: 'Let me draw a Venn diagram, so we can see where everything belongs.'
+      - section: 'The question'
+        say: 'Here is a class of 40 students. 32 offer Maths and 24 offer Physics. But 32 plus 24 is 56, which is more than the whole class! Some students are being counted twice. Let''s find out how many.'
+        write: 'Both subjects $= ?$'
+        doodle: {name: student-small, id: cls, repeat: 40, layout: grid, caption: 'the class of 40'}
+      - section: 'What we know'
+        say: 'First, what we know. The whole class is 40 students. We call the class E, for everyone, and n of E means the number in E.'
+        write: 'Class: $n(E) = 40$'
+        point:
+          - {line: 1, kind: travel, at: '40', from: {doodle: cls}, text: 'the class', 'on': 'whole class'}
+      - say: '32 students offer Mathematics. Call that set M, so n of M is 32.'
+        write: 'Maths: $n(M) = 32$'
+      - say: '24 students offer Physics. Call that set P, so n of P is 24.'
+        write: 'Physics: $n(P) = 24$'
+      - say: 'And 4 students offer neither subject. They are in the class, but in no circle.'
+        write: 'Neither: $4$'
+      - say: 'Let me draw the class. The box is all 40 students. One circle is Maths, one circle is Physics, and the 4 who take neither stand outside both circles.'
         show_sketch: true
         point:
-          - {figure: sketch, kind: circle, target: '32', text: 'Maths'}
-          - {figure: sketch, kind: circle, target: '24', text: 'Physics'}
-          - {figure: sketch, kind: circle, target: '4', text: 'neither'}
-      - say: 'First, move aside the 4 students in the class who offer neither subject, because they aren''t in either set. 40 minus 4 is 36, so 36 students offer at least one subject.'
-        doodle_do:
-          - {id: class, op: split, n: 4, text: '4 neither | 36 take a subject'}
-        write: 'At least one subject: $n(M \cup P) = 40 - 4 = 36$'
+          - {figure: sketch, kind: circle, target: 'class of 40', text: 'everyone', 'on': 'box'}
+          - {figure: sketch, kind: circle, target: 'neither 4', text: 'outside both circles', 'on': 'outside both circles'}
+      - say: 'Where the circles overlap are the students who offer both subjects. We write that as n of M intersection P. Intersection means in both. That is what we want.'
+        write: 'Both: $n(M \cap P) = ?$'
         point:
-          - {line: 2, kind: highlight, at: '= 36', to: {doodle: class}}
-      - say: 'Now, what happens if we simply add the two subjects? 32 plus 24 is 56.'
-        write: 'Adding the two: $32 + 24 = 56$'
-      - say: 'But only 36 students take anything. 56 is bigger than 36 because the students who take both subjects were counted twice: once in Mathematics and once in Physics.'
-      - say: 'That''s the addition rule for two sets: the union is the two sets added, minus the overlap, so that the overlap is only counted once.'
+          - {figure: sketch, kind: highlight, target: 'both', text: 'in both circles', 'on': 'overlap'}
+      - section: 'Step 1: inside the circles'
+        say: 'Step one. Take the 4 who offer neither out of the class, because they are not in any circle. Watch them step aside. 40 minus 4 is 36.'
+        write: 'Inside the circles: $40 - 4 = 36$'
+        doodle_do:
+          - {id: cls, op: split, n: 36, text: '36 in the circles | 4 neither', 'on': 'step aside'}
+        point:
+          - {line: 7, kind: travel, at: '40', from: {line: 1, at: '40'}, text: 'class', 'on': '40 minus 4'}
+          - {line: 7, kind: travel, at: '− 4', from: {line: 4, at: '4'}, text: 'neither', 'on': '40 minus 4'}
+      - say: 'So 36 students are inside the circles: in Maths, or Physics, or both. We call that the union, written with a U sign.'
+        write: '$n(M \cup P) = 36$'
+      - section: 'Step 2: the overlap'
+        say: 'Step two. Add the two circles. Bring down 32 from the Maths circle and 24 from the Physics circle. 32 plus 24 is 56.'
+        write: '$32 + 24 = 56$'
+        point:
+          - {line: 9, kind: travel, at: '32', from: {figure: sketch, target: 'Maths 32'}, text: 'Maths', 'on': 'Maths circle'}
+          - {line: 9, kind: travel, at: '24', from: {figure: sketch, target: 'Physics 24'}, text: 'Physics', 'on': 'Physics circle'}
+      - say: 'But only 36 students are inside the circles. Why do we get 56? A student who offers both is inside the Maths circle and inside the Physics circle, so we counted that student twice.'
+        write: 'Counted twice: the students in both'
+        point:
+          - {figure: sketch, kind: label, target: 'both', text: 'counted twice', 'on': 'counted that student twice'}
+      - say: 'Each student in both was counted one extra time. So the extra, 56 minus 36, is exactly the number in both. 56 minus 36 is 20.'
+        write: '$n(M \cap P) = 56 - 36 = 20$'
+        point:
+          - {line: 11, kind: travel, at: '56', from: {line: 9, at: '= [[56]]'}, 'on': '56 minus 36'}
+          - {line: 11, kind: travel, at: '36', from: {line: 8, at: '36'}, text: 'inside', 'on': '56 minus 36'}
+          - {figure: sketch, kind: label, target: '?', text: '20', 'on': 'is 20'}
+      - say: 'Let''s pause on that. 20 students offer both subjects, half the class. Let me gather those 20.'
+        doodle_do:
+          - {id: cls, op: group, n: 20, text: '20 in both', 'on': 'gather'}
+      - section: 'The rule'
+        say: 'What we did is the rule for two sets. In words: the number in either circle is Maths, plus Physics, minus both.'
         write: 'Rule: $n(M \cup P) = n(M) + n(P) - n(M \cap P)$'
-      - say: 'Now substitute. The union is the 36 we found at the start, $n(M)$ is 32, and $n(P)$ is 24.'
-        write: '$36 = 32 + 24 - n(M \cap P)$'
+        'on': 'rule for two sets'
+      - say: 'Put in our numbers: 32 plus 24 is 56, and 56 minus 20 is 36, the students inside the circles. The rule agrees.'
+        write: '$36 = 32 + 24 - 20$'
         point:
-          - {line: 6, kind: move, from: {line: 2, at: '= 36'}, at: '36', text: 'union'}
-          - {line: 6, kind: move, from: {line: 0, at: '32'}, at: '32'}
-          - {line: 6, kind: move, from: {line: 0, at: '24'}, at: '24'}
-      - say: '32 plus 24 is 56, the same 56 as before.'
-        write: '$36 = 56 - n(M \cap P)$'
+          - {line: 14, kind: travel, at: '− 20', from: {line: 11, at: '= [[20]]'}, text: 'both', 'on': '56 minus 20'}
+      - section: 'Check'
+        say: 'Now let''s check the whole class. Maths only is 32 minus 20, which is 12.'
+        write: 'Maths only $= 32 - 20 = 12$'
         point:
-          - {line: 7, kind: move, from: {line: 3, at: '56'}, at: '56', text: 'as before'}
-      - say: 'To get the overlap by itself, add it to both sides, then take 36 from both sides.'
-        write: '$n(M \cap P) = 56 - 36$'
+          - {figure: sketch, kind: label, target: 'Maths only', text: '12', 'on': 'is 12'}
+      - say: 'Physics only is 24 minus 20, which is 4.'
+        write: 'Physics only $= 24 - 20 = 4$'
         point:
-          - {line: 8, kind: move, from: {line: 7, at: 'n(M∩P)'}, at: 'n(M∩P)', text: 'across'}
-          - {line: 8, kind: move, from: {line: 7, at: '36'}, at: '− 36', text: 'across'}
-      - say: '56 minus 36 is 20. Look at the class again: 20 of those 36 students take both subjects.'
+          - {figure: sketch, kind: label, target: 'Physics only', text: '4', 'on': 'is 4'}
+      - say: 'Now every part of the picture: 12 Maths only, plus 20 both, plus 4 Physics only, plus 4 neither. That is 40, the whole class.'
+        write: 'Check: $12 + 20 + 4 + 4 = 40$'
         doodle_do:
-          - {id: class, op: pulse}
-        write: '$n(M \cap P) = 20$'
-        point:
-          - {figure: sketch, kind: label, target: '?', text: '20'}
-      - say: 'Let''s check by counting the whole class. Mathematics only is 32 minus 20, which is 12. Physics only is 24 minus 20, which is 4. Then 12, plus 4, plus the 20 who take both, plus the 4 who take neither, is 40.'
-        doodle_do:
-          - {id: class, op: count}
-        write: 'Check: $12 + 4 + 20 + 4 = 40$'
+          - {id: cls, op: pulse, 'on': 'whole class'}
       - say: 'So 20 students offer both Mathematics and Physics, which is answer choice C.'
-        write: 'Both subjects: 20 students'
+        write: 'Both subjects $= 20$'
         answer: true
     traps:
-      A: 'You went for 16. That comes from 56 minus 40, which forgets the 4 students who take neither subject. Only 36 students take anything, so the overlap is 56 minus 36.'
-      B: 'You went for 4. That''s the number who offer neither subject, given in the question. We want those who offer both.'
-      D: 'You went for 8. That''s 32 minus 24, the difference between the two subjects. The overlap comes from 32 plus 24, minus the 36 who take at least one.'
+      A: 'You went for 16. That is 56 minus 40, which forgets the 4 students who take neither subject. Only 36 students are inside the circles, so the overlap is 56 minus 36, which is 20.'
+      B: 'You went for 4. That is the number who offer neither subject, given in the question. We want those who offer both.'
+      D: 'You went for 8. That is 32 minus 24, the gap between the two subjects, which doesn''t count any group of students. The overlap is 32 plus 24, minus the 36 inside the circles: 20.'
 
   10:
     moments:
@@ -707,7 +736,7 @@ lessons:
         write: 'Equation (1) $\times 4$: $12x - 20y = -20 \quad (3)$'
       - say: 'And multiply every term of equation 2 by 3. 3 times $4x$ is $12x$, 3 times $7y$ is $21y$, and 3 times negative 8 is negative 24.'
         write: 'Equation (2) $\times 3$: $12x - 21y = -24 \quad (4)$'
-      - say: 'Now subtract equation 4 from equation 3, term by term. The $12x$ cancels, leaving the $y$ terms and the numbers.'
+      - say: 'Now take equation 3 minus equation 4, term by term. The $12x$ cancels, leaving the $y$ terms and the numbers.'
         write: '(3) minus (4): $-20y - (-21y) = -20 - (-24)$'
         point:
           - {line: 4, kind: strike, at: '12x', text: 'cancels'}
@@ -1830,62 +1859,102 @@ lessons:
 
   43:
     moments:
-      - say: 'Picture the bag: 5 black balls and 3 red balls. Two are picked without replacement. We want the probability of one black and one red.'
+      - section: 'The question'
+        say: 'A bag holds 5 black balls and 3 red balls. You pick two, without putting the first one back. What is the chance of one of each colour? Most students find one way to do it and forget the second. Let''s find both.'
+        write: 'P(one black, one red) $= ?$'
         doodle: {id: bag, repeat: [{name: ball-black, n: 5}, {name: ball-red, n: 3}], layout: cluster, caption: '5 black and 3 red'}
-        write: '5 black, 3 red; pick 2 without replacement'
-      - say: 'Count them: 5 plus 3, which is 8 balls. Without replacement means the first ball is not put back, so the second pick is from only 7 balls.'
+      - section: 'What we know'
+        say: 'Count the balls in the bag. 5 black plus 3 red is 8 balls.'
+        write: 'Balls in the bag: $5 + 3 = 8$'
         doodle_do:
-          - {id: bag, op: count}
-        write: 'Total $= 5 + 3 = 8$ balls; after one pick, 7 left'
-      - say: 'Let me draw a tree diagram, so we can see every outcome.'
+          - {id: bag, op: count, 'on': 'Count'}
+        point:
+          - {line: 1, kind: travel, at: '= 8', from: {doodle: bag}, text: '8 balls', 'on': 'is 8 balls'}
+      - say: 'Without replacement means the first ball is not put back. So when we pick the second ball, only 7 balls are left. 8 minus 1 is 7.'
+        write: 'Second pick: $8 - 1 = 7$ balls left'
+      - say: 'Now the meaning of probability, in words: the number of balls you want, over the number of balls in the bag.'
+        write: 'Probability $= \dfrac{\text{balls you want}}{\text{balls in the bag}}$'
+        'on': 'meaning of probability'
+      - say: 'Let me draw a tree of every way the two picks can go. The first pick branches to black or red. Then each branch splits again for the second pick.'
         show_sketch: true
-      - say: 'One black and one red can happen in two orders: black then red, or red then black. The question doesn''t say which comes first, so we count both.'
-        write: '$P = P(\text{B then R}) + P(\text{R then B})$'
         point:
-          - {figure: sketch, kind: circle, target: 'BR'}
-          - {figure: sketch, kind: circle, target: 'RB', text: 'two orders'}
-      - say: 'Black then red. The chance the first ball is black is 5 over 8, because 5 of the 8 balls are black.'
-        doodle_do:
-          - {id: bag, op: group, n: 5, text: '5 black of 8'}
+          - {figure: sketch, kind: circle, target: 'Black', text: 'first pick', 'on': 'first pick'}
+      - say: 'One black and one red can happen in two orders: black then red, or red then black. Both give one of each, so we must count both paths.'
+        write: 'Two orders: B then R, or R then B'
+        point:
+          - {figure: sketch, kind: circle, target: 'BR', text: 'black, then red', 'on': 'black then red'}
+          - {figure: sketch, kind: circle, target: 'RB', text: 'red, then black', 'on': 'red then black'}
+      - section: 'Order 1: black, then red'
+        say: 'The first order. The first ball is black. 5 of the 8 balls are black, so the chance is 5 over 8.'
         write: 'First black: $\dfrac{5}{8}$'
-        point:
-          - {figure: sketch, kind: circle, target: '5/8', text: 'first black'}
-      - say: 'Watch that black ball leave the bag: 7 balls remain, and all 3 reds are still there. So the chance the second is red is 3 over 7.'
         doodle_do:
-          - {id: bag, op: split, n: 1, text: 'first pick | 7 left'}
+          - {id: bag, op: group, n: 5, text: '5 black of 8', 'on': '5 of the 8'}
+        point:
+          - {line: 6, kind: travel, at: '85', from: {figure: sketch, target: '5/8'}, text: '5 of 8', 'on': '5 over 8'}
+      - say: 'That black ball now leaves the bag. Watch: 7 balls are left, 4 black and all 3 red.'
+        write: 'Left: 4 black, 3 red, 7 in all'
+        doodle_do:
+          - {id: bag, op: split, n: 1, text: 'picked: black | 7 left', 'on': 'leaves the bag'}
+      - say: 'So the chance that the second ball is red is 3 over 7: 3 reds out of the 7 left.'
         write: 'Then red: $\dfrac{3}{7}$'
         point:
-          - {figure: sketch, kind: circle, target: '3/7', text: 'then red'}
-      - say: 'For one event and then another, multiply: the chance of the first, times the chance of the second once the first has happened.'
-        write: 'And rule: $P(\text{first, then second}) = P(\text{first}) \times P(\text{second after first})$'
-      - say: 'For one thing and then another, we multiply. 5 times 3 is 15, and 8 times 7 is 56.'
-        write: '$P(\text{B then R}) = \dfrac{5}{8} \times \dfrac{3}{7} = \dfrac{15}{56}$'
+          - {line: 8, kind: travel, at: '73', from: {figure: sketch, target: '3/7'}, text: '3 of 7', 'on': '3 over 7'}
+      - say: 'Now a rule. When we want one thing and then another, we multiply their chances. We call it the and rule.'
+        write: 'And rule: multiply the chances'
+        'on': 'and rule'
+      - say: 'So black then red is 5 over 8 times 3 over 7.'
+        write: '$P(\text{B then R}) = \dfrac{5}{8} \times \dfrac{3}{7}$'
         point:
-          - {line: 7, kind: move, from: {line: 4, at: '85'}, at: '85'}
-          - {line: 7, kind: move, from: {line: 5, at: '73'}, at: '× 73', text: 'multiply'}
-      - say: 'Now red then black. The chance the first is red is 3 over 8. Then 5 of the 7 left are black, so 5 over 7.'
-        write: 'First red, then black: $\dfrac{3}{8}$, then $\dfrac{5}{7}$'
+          - {line: 10, kind: travel, at: '85', from: {line: 6, at: '85'}, 'on': '5 over 8'}
+          - {line: 10, kind: travel, at: '73', from: {line: 8, at: '73'}, 'on': '3 over 7'}
+      - say: 'Multiply the tops: 5 times 3 is 15. Multiply the bottoms: 8 times 7 is 56. So black then red is 15 over 56.'
+        write: '$= \dfrac{5 \times 3}{8 \times 7} = \dfrac{15}{56}$'
         point:
-          - {figure: sketch, kind: circle, target: '3/8'}
-          - {figure: sketch, kind: circle, target: '5/7'}
-      - say: '3 times 5 is 15, and 8 times 7 is 56. The same as before.'
+          - {figure: sketch, kind: label, target: 'BR', text: '15/56', 'on': '15 over 56'}
+      - section: 'Order 2: red, then black'
+        say: 'Now the other order. Start again with the bag full, all 8 balls. This time the first ball is red. 3 of the 8 are red, so the chance is 3 over 8.'
+        write: 'First red: $\dfrac{3}{8}$'
+        doodle: {id: bag2, repeat: [{name: ball-red, n: 3}, {name: ball-black, n: 5}], layout: cluster, caption: 'the same bag, full again', 'on': 'bag full'}
+        point:
+          - {line: 12, kind: travel, at: '83', from: {figure: sketch, target: '3/8'}, text: '3 of 8', 'on': '3 over 8'}
+      - say: 'The red ball leaves the bag. 7 are left, and all 5 blacks are still there. So the chance of black next is 5 over 7.'
+        write: 'Then black: $\dfrac{5}{7}$'
+        doodle_do:
+          - {id: bag2, op: split, n: 1, text: 'picked: red | 7 left', 'on': 'leaves the bag'}
+        point:
+          - {line: 13, kind: travel, at: '75', from: {figure: sketch, target: '5/7'}, text: '5 of 7', 'on': '5 over 7'}
+      - say: 'Use the and rule again. 3 times 5 is 15, and 8 times 7 is 56. The same 15 over 56.'
         write: '$P(\text{R then B}) = \dfrac{3}{8} \times \dfrac{5}{7} = \dfrac{15}{56}$'
-      - say: 'Now back to our plan: the two orders are separate outcomes, so we add them. 15 plus 15 is 30.'
+        point:
+          - {figure: sketch, kind: label, target: 'RB', text: '15/56', 'on': 'same 15 over 56'}
+      - section: 'Either order'
+        say: 'We are happy with either order. When either of two separate outcomes will do, we add their chances. We call it the or rule.'
+        write: 'Or rule: add the chances'
+        'on': 'or rule'
+      - say: 'So add the two paths: 15 over 56 plus 15 over 56. 15 plus 15 is 30, over the same 56.'
         write: '$P = \dfrac{15}{56} + \dfrac{15}{56} = \dfrac{30}{56}$'
         point:
-          - {line: 10, kind: move, from: {line: 7, at: '= 5615'}, at: '= [[5615]] +', text: 'B then R'}
-          - {line: 10, kind: move, from: {line: 9, at: '= 5615'}, at: '+ 5615', text: 'R then B'}
-      - say: 'Divide the top and the bottom by 2. 30 over 2 is 15, and 56 over 2 is 28.'
-        write: '$= \dfrac{15}{28}$'
-      - say: 'So the probability of one black and one red is 15 over 28, which is answer choice D.'
-        write: 'Answer: $\dfrac{15}{28}$'
+          - {line: 16, kind: travel, at: '= [[5615]] +', from: {line: 11, at: '= [[5615]]'}, text: 'B then R', 'on': 'two paths'}
+          - {line: 16, kind: travel, at: '+ 5615', from: {line: 14, at: '= [[5615]]'}, text: 'R then B', 'on': 'two paths'}
+      - say: 'Simplify. Divide the top and the bottom by 2. 30 divided by 2 is 15, and 56 divided by 2 is 28.'
+        write: '$= \dfrac{30 \div 2}{56 \div 2} = \dfrac{15}{28}$'
+      - section: 'Check'
+        say: 'A check: the four paths of the tree must add up to 1. Two blacks is 5 over 8 times 4 over 7, which is 20 over 56. Two reds is 3 over 8 times 2 over 7, which is 6 over 56.'
+        write: 'BB: $\dfrac{20}{56}$, RR: $\dfrac{6}{56}$, one of each: $\dfrac{30}{56}$'
+        point:
+          - {figure: sketch, kind: label, target: 'BB', text: '20/56', 'on': 'Two blacks'}
+          - {figure: sketch, kind: label, target: 'RR', text: '6/56', 'on': 'Two reds'}
+      - say: '20 plus 6 plus 30 is 56, and 56 over 56 is 1. Every path is counted once.'
+        write: '$\dfrac{20 + 6 + 30}{56} = \dfrac{56}{56} = 1$'
+      - say: 'So the chance of one black and one red is 15 over 28, which is answer choice D.'
+        write: 'P(one black, one red) $= \dfrac{15}{28}$'
         answer: true
         point:
-          - {figure: sketch, kind: label, target: 'P(one of each) = ?', text: '15/28'}
+          - {figure: sketch, kind: label, target: 'P(one of each) = ?', text: '15/28', 'on': '15 over 28'}
     traps:
-      A: 'You went for 5 over 14. That''s the chance both balls are black: 5 over 8 times 4 over 7 is 20 over 56, which is 5 over 14. We want one of each colour.'
-      B: 'You went for 13 over 28. That''s the chance of two balls the same colour: two blacks is 20 over 56 and two reds is 6 over 56, making 26 over 56. We want one of each.'
-      C: 'You went for 3 over 14. Remember there are two orders, black then red and red then black. Each is 15 over 56, so together they make 30 over 56, which is 15 over 28.'
+      A: 'You went for 5 over 14. That is the chance that both balls are black: 5 over 8 times 4 over 7 is 20 over 56, which is 5 over 14. We want one of each colour.'
+      B: 'You went for 13 over 28. That is the chance of two balls of the same colour: two blacks is 20 over 56 and two reds is 6 over 56, making 26 over 56. We want one of each.'
+      C: 'You went for 3 over 14, which is 12 over 56. No path of the tree gives that. Black then red is 15 over 56, red then black is another 15 over 56, and together they make 30 over 56, which is 15 over 28.'
 
   44:
     moments:
@@ -2210,7 +2279,7 @@ lessons:
         write: '$= \dfrac{87}{2} = 43.5$'
         point:
           - {line: 7, kind: highlight, at: '43.5', to: {doodle: towers, part: middle}}
-      - say: 'The question asks how much the mean is less than the median. So we subtract the mean from the median.'
+      - say: 'The question asks how much the mean is less than the median. So we take the median minus the mean.'
         write: 'Difference $= 43.5 - 43.17$'
         point:
           - {line: 8, kind: move, from: {line: 7, at: '= 43.5'}, at: '43.5', text: 'median'}

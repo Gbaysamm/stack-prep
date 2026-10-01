@@ -1172,7 +1172,7 @@ lessons:
     moments:
       - say: 'Garuba''s performance was horrid. Nearest in meaning?'
         write: 'horrid = ?'
-      - say: 'Horrid is related to horror. It means very bad, unpleasant: nought out of ten.'
+      - say: 'Horrid is related to horror. It means very bad, unpleasant: zero out of ten.'
         write: 'horrid = very bad'
         doodle: {name: 'custom:2015_q59_a', id: score, caption: 'horrid = very bad'}
       - say: 'The nearest option is terrible.'
@@ -1840,26 +1840,34 @@ lessons:
       D: 'You went for fell at. At does not show movement into the water.'
   86:
     moments:
-      - say: 'Bore, with the ore marked. Say it: bore.'
+      - say: 'Watch my lips: bore. Bore. The ore is marked.'
         write: 'b-ORE'
+        mouth: {id: mouth, word: 'bore', sound: 'ɔː', caption: 'long aw: lips in a big round O'}
         point:
           - {line: 0, kind: circle, at: 'ORE', text: '/ɔː/'}
-      - say: 'That is the long, round o sound, as in door and saw: push your lips into a big round O.'
+      - say: 'That is the long, round o sound, as in door and saw: push your lips into a big round O, and hold it.'
         write: 'ore = /ɔː/ (as in door, saw)'
-        doodle: {name: 'custom:2015_q86_a', id: lips, caption: 'round lips for the long or sound'}
-      - say: 'Call has that same long /ɔː/.'
+        doodle_do:
+          - {id: mouth, op: say, word: 'door', sound: 'ɔː', 'on': 'door'}
+      - say: 'Now watch: call. Call. The same long, round aw.'
         write: 'call = /ɔː/ ✓'
         doodle_do:
-          - {id: lips, op: circle, part: call}
+          - {id: mouth, op: say, word: 'call', sound: 'ɔː', 'on': 'call'}
         point:
           - {line: 2, kind: circle, at: 'all', text: '/ɔː/'}
-          - {line: 2, kind: highlight, at: call, to: {doodle: lips, part: call}}
-      - say: 'Slot has the short o /ɒ/, as in hot. Curl has /ɜː/ as in bird. Hum has /ʌ/ as in cup.'
+      - say: 'Now the traps. Slot: a short o, as in hot. Curl: er, as in bird. Hum: the short u of cup.'
         write: 'slot /ɒ/, curl /ɜː/, hum /ʌ/ ✗'
+        doodle_do:
+          - {id: mouth, op: say, word: 'slot', sound: 'ɒ', 'on': 'slot'}
+          - {id: mouth, op: say, word: 'curl', sound: 'ɜː', 'on': 'curl'}
+          - {id: mouth, op: say, word: 'hum', sound: 'ʌ', 'on': 'hum'}
         point:
           - {line: 3, kind: strike}
-      - say: 'So the answer is call, which is answer choice A.'
+      - say: 'Bore, call: the same round aw. So the answer is call, which is answer choice A.'
         write: 'A · call'
+        doodle_do:
+          - {id: mouth, op: say, word: 'bore', sound: 'ɔː', 'on': 'bore'}
+          - {id: mouth, op: say, word: 'call', sound: 'ɔː', 'on': 'call'}
         answer: true
     traps:
       B: 'You went for curl. Curl has the /ɜː/ sound of bird, not the round /ɔː/ of bore.'
@@ -1867,26 +1875,34 @@ lessons:
       D: 'You went for hum. Hum has /ʌ/, as in cup.'
   87:
     moments:
-      - say: 'Head, with the ea marked. Say it: head.'
+      - say: 'Watch my lips: head. Head. The ea is marked.'
         write: 'h-EA-d'
+        mouth: {id: mouth, word: 'head', sound: 'e', caption: 'short e: mouth half open, quick'}
         point:
           - {line: 0, kind: circle, at: 'EA', text: '/e/'}
       - say: 'That ea is the short e sound, as in bed: a quick eh.'
         write: 'ea = /e/ (as in bed)'
-        doodle: {name: 'custom:2015_q87_a', id: eh, caption: 'a short eh, as in bed'}
-      - say: 'Said is spelt with ai but pronounced sed, with /e/.'
+        doodle_do:
+          - {id: mouth, op: say, word: 'bed', sound: 'e', 'on': 'bed'}
+      - say: 'Now watch: said. Said. It is spelt with ai, but we say sed, with the same short e.'
         write: 'said = /sed/ ✓'
         doodle_do:
-          - {id: eh, op: label, part: mouth, text: 'said: sed, the same eh'}
+          - {id: mouth, op: say, word: 'said', sound: 'e', 'on': 'said'}
         point:
-          - {line: 2, kind: circle, at: 'ai', text: '/e/'}
-          - {line: 2, kind: highlight, at: said, to: {doodle: eh, part: mouth}}
-      - say: 'Heard, herd and shirt all have /ɜː/, as in bird.'
+          - {line: 2, kind: circle, at: 'said', text: '/e/'}
+      - say: 'Now the traps. Heard. Herd. Shirt. The lips relax for a long er, as in bird.'
         write: 'heard, herd, shirt = /ɜː/ ✗'
+        doodle_do:
+          - {id: mouth, op: say, word: 'heard', sound: 'ɜː', 'on': 'heard'}
+          - {id: mouth, op: say, word: 'herd', sound: 'ɜː', 'on': 'herd'}
+          - {id: mouth, op: say, word: 'shirt', sound: 'ɜː', 'on': 'shirt'}
         point:
           - {line: 3, kind: strike}
-      - say: 'So the answer is said, which is answer choice A.'
+      - say: 'Head, said: the same quick eh. So the answer is said, which is answer choice A.'
         write: 'A · said'
+        doodle_do:
+          - {id: mouth, op: say, word: 'head', sound: 'e', 'on': 'head'}
+          - {id: mouth, op: say, word: 'said', sound: 'e', 'on': 'said'}
         answer: true
     traps:
       B: 'You went for heard. It is spelt with ea like head, but heard has the /ɜː/ sound of bird.'
@@ -1894,26 +1910,34 @@ lessons:
       D: 'You went for shirt. Shirt has /ɜː/ too.'
   88:
     moments:
-      - say: 'Sky, with the y marked. Say it: sky.'
+      - say: 'Watch my lips: sky. Sky. The y is marked.'
         write: 'sk-Y'
+        mouth: {id: mouth, word: 'sky', sound: 'aɪ', caption: 'eye: open wide, glide to a smile'}
         point:
           - {line: 0, kind: circle, at: 'Y', text: '/aɪ/'}
-      - say: 'That y is the eye sound, as in my: the mouth glides from open to a smile.'
+      - say: 'That y is the eye sound, as in my: the mouth glides from wide open to a smile.'
         write: 'y = /aɪ/ (as in my)'
-        doodle: {name: 'custom:2015_q88_a', id: eye, caption: 'y in sky says eye'}
-      - say: 'Cite sounds like site: /saɪt/. Same /aɪ/.'
+        doodle_do:
+          - {id: mouth, op: say, word: 'my', sound: 'aɪ', 'on': 'my'}
+      - say: 'Now watch: cite. Cite. It sounds like site: the same glide.'
         write: 'cite = /saɪt/ ✓'
         doodle_do:
-          - {id: eye, op: label, part: mouth, text: 'cite: the same eye'}
+          - {id: mouth, op: say, word: 'cite', sound: 'aɪ', 'on': 'cite'}
         point:
           - {line: 2, kind: circle, at: 'cite', text: '/aɪ/'}
-          - {line: 2, kind: highlight, at: cite, to: {doodle: eye, part: mouth}}
-      - say: 'Eats has /iː/, breaks has /eɪ/, coil has /ɔɪ/.'
+      - say: 'Now the traps. Eats: lips spread, ee. Breaks: ay. Coil: oy, from round lips to a smile.'
         write: 'eats /iː/, breaks /eɪ/, coil /ɔɪ/ ✗'
+        doodle_do:
+          - {id: mouth, op: say, word: 'eats', sound: 'iː', 'on': 'eats'}
+          - {id: mouth, op: say, word: 'breaks', sound: 'eɪ', 'on': 'breaks'}
+          - {id: mouth, op: say, word: 'coil', sound: 'ɔɪ', 'on': 'coil'}
         point:
           - {line: 3, kind: strike}
-      - say: 'So the answer is cite, which is answer choice A.'
+      - say: 'Sky, cite: the same glide. So the answer is cite, which is answer choice A.'
         write: 'A · cite'
+        doodle_do:
+          - {id: mouth, op: say, word: 'sky', sound: 'aɪ', 'on': 'sky'}
+          - {id: mouth, op: say, word: 'cite', sound: 'aɪ', 'on': 'cite'}
         answer: true
     traps:
       B: 'You went for eats. Eats has the long /iː/ of see, not the /aɪ/ of sky.'
@@ -1921,28 +1945,34 @@ lessons:
       D: 'You went for coil. Coil has /ɔɪ/, as in boy.'
   89:
     moments:
-      - say: 'Loath, with the th marked. Say it: loath.'
+      - say: 'Watch my tongue: loath. Loath. The th is marked.'
         write: 'loa-TH'
+        mouth: {id: mouth, word: 'loath', sound: 'θ', view: side, caption: 'th: tongue between teeth, air only'}
         point:
           - {line: 0, kind: circle, at: 'TH', text: '/θ/'}
-      - say: 'This th is voiceless /θ/, as in thin: just air, no buzz in the throat.'
+      - say: 'This th is the soft one, as in thin. The tongue tip peeps out between the teeth, and only air comes out. No buzz in the throat.'
         write: 'th = /θ/ (as in thin, no buzz)'
-        doodle: {name: 'custom:2015_q89_a', id: th, caption: 'th in thin: just air, no buzz'}
         doodle_do:
-          - {id: th, op: circle, part: tongue}
-      - say: 'Thaw begins with the same voiceless /θ/.'
+          - {id: mouth, op: say, word: 'thin', sound: 'θ', 'on': 'thin'}
+      - say: 'Now watch: thaw. Thaw. The same tongue, the same breathy air.'
         write: 'thaw = /θ/ ✓'
         doodle_do:
-          - {id: th, op: label, part: air, text: 'thaw: the same air'}
+          - {id: mouth, op: say, word: 'thaw', sound: 'θ', 'on': 'thaw'}
         point:
           - {line: 2, kind: circle, at: 'th', text: '/θ/'}
-          - {line: 2, kind: highlight, at: thaw, to: {doodle: th, part: air}}
-      - say: 'Breathe and that have the voiced /ð/, as in this: your throat buzzes. Tank has plain /t/.'
+      - say: 'Now the traps. Breathe. That. The tongue is in the same place, but the throat buzzes: the th of this. Tank: the tongue taps behind the teeth, a plain t.'
         write: 'breathe, that = /ð/; tank = /t/ ✗'
+        doodle_do:
+          - {id: mouth, op: say, word: 'breathe', sound: 'ð', 'on': 'breathe'}
+          - {id: mouth, op: say, word: 'that', sound: 'ð', 'on': 'that'}
+          - {id: mouth, op: say, word: 'tank', sound: 't', 'on': 'tank'}
         point:
           - {line: 3, kind: strike}
-      - say: 'So the answer is thaw, which is answer choice C.'
+      - say: 'Loath, thaw: just air, no buzz. So the answer is thaw, which is answer choice C.'
         write: 'C · thaw'
+        doodle_do:
+          - {id: mouth, op: say, word: 'loath', sound: 'θ', 'on': 'loath'}
+          - {id: mouth, op: say, word: 'thaw', sound: 'θ', 'on': 'thaw'}
         answer: true
     traps:
       A: 'You went for breathe. Breathe ends in the voiced /ð/, as in this; loath has the voiceless /θ/.'
@@ -1950,30 +1980,33 @@ lessons:
       D: 'You went for tank. Tank starts with plain /t/, not a th sound.'
   90:
     moments:
-      - say: 'Van. The sound is the v: top teeth on the lower lip, with a buzz.'
+      - say: 'Watch my lips: van. Van. The sound is the v: top teeth on the lower lip, with a buzz.'
         write: 'V-an: /v/'
-        doodle: {name: 'custom:2015_q90_a', id: v, caption: 'top teeth on lip, plus a buzz'}
-        doodle_do:
-          - {id: v, op: circle, part: teeth}
+        mouth: {id: mouth, word: 'van', sound: 'v', caption: 'v: top teeth on lip, with a buzz'}
         point:
           - {line: 0, kind: circle, at: 'V', text: '/v/'}
-      - say: 'Of is spelt with f but said ov: it ends in the same buzzing v.'
+      - say: 'Now watch: of. Of. It is spelt with f, but we say ov: it ends in the same buzzing v.'
         write: 'of = /ɒv/ ✓'
         doodle_do:
-          - {id: v, op: pulse, part: buzz}
+          - {id: mouth, op: say, word: 'of', sound: 'v', 'on': 'of'}
         point:
           - {line: 1, kind: circle, at: 'of', text: 'f said /v/'}
-          - {line: 1, kind: highlight, at: of, to: {doodle: v, part: buzz}}
-      - say: 'Often and off have the voiceless f: same teeth on lip, but no buzz.'
+      - say: 'Now the traps. Often. Off. The same teeth on the lip, but no buzz, just air. That is f.'
         write: 'often, off = /f/'
         doodle_do:
-          - {id: v, op: cross, part: buzz, text: 'no buzz: f'}
+          - {id: mouth, op: say, word: 'often', sound: 'f', 'on': 'often'}
+          - {id: mouth, op: say, word: 'off', sound: 'f', 'on': 'off'}
         point:
           - {line: 2, kind: strike}
-      - say: 'Physics begins with ph, which is also /f/.'
+      - say: 'Physics. It begins with ph, which is also f.'
         write: 'physics: ph = /f/ ✗'
-      - say: 'So the answer is of, which is answer choice A.'
+        doodle_do:
+          - {id: mouth, op: say, word: 'physics', sound: 'f', 'on': 'physics'}
+      - say: 'Van, of: the same buzzing v. So the answer is of, which is answer choice A.'
         write: 'A · of'
+        doodle_do:
+          - {id: mouth, op: say, word: 'van', sound: 'v', 'on': 'van'}
+          - {id: mouth, op: say, word: 'of', sound: 'v', 'on': 'of'}
         answer: true
     traps:
       B: 'You went for often. Often has /f/, the voiceless partner of /v/.'
@@ -1981,26 +2014,34 @@ lessons:
       D: 'You went for physics. The ph in physics is an /f/ sound.'
   91:
     moments:
-      - say: 'Lodge, with the dg marked. Say it: lodge.'
+      - say: 'Watch my lips: lodge. Lodge. The dg is marked.'
         write: 'lo-DG-e'
+        mouth: {id: mouth, word: 'lodge', sound: 'dʒ', caption: 'j: lips pushed forward, a buzz'}
         point:
           - {line: 0, kind: circle, at: 'DG', text: '/dʒ/'}
-      - say: 'That dg is the j sound in jam: lips pushed forward.'
+      - say: 'That dg is the j sound in jam: the tongue stops the air, then lets go, with the lips pushed forward.'
         write: 'dg = /dʒ/ (as in jam)'
-        doodle: {name: 'custom:2015_q91_a', id: j, caption: 'dg sounds like j, as in jam'}
-      - say: 'Soldier is said sol-jer. The di makes /dʒ/.'
+        doodle_do:
+          - {id: mouth, op: say, word: 'jam', sound: 'dʒ', 'on': 'jam'}
+      - say: 'Now watch: soldier. Soldier. It is said SOL-jer: the di makes the same j.'
         write: 'soldier = sol-jer: /dʒ/ ✓'
         doodle_do:
-          - {id: j, op: label, part: mouth, text: 'soldier: sol-jer'}
+          - {id: mouth, op: say, word: 'soldier', sound: 'dʒ', 'on': 'soldier'}
         point:
           - {line: 2, kind: circle, at: 'di', text: '/dʒ/'}
-          - {line: 2, kind: highlight, at: soldier, to: {doodle: j, part: mouth}}
-      - say: 'Rogue and go have a hard /g/. Measure has /ʒ/, as in pleasure.'
+      - say: 'Now the traps. Rogue. Go. The back of the tongue pops: a hard g. Measure: a softer buzz, with no stop first.'
         write: 'rogue, go = /g/; measure = /ʒ/ ✗'
+        doodle_do:
+          - {id: mouth, op: say, word: 'rogue', sound: 'g', 'on': 'rogue'}
+          - {id: mouth, op: say, word: 'go', sound: 'g', 'on': 'go'}
+          - {id: mouth, op: say, word: 'measure', sound: 'ʒ', 'on': 'measure'}
         point:
           - {line: 3, kind: strike}
-      - say: 'So the answer is soldier, which is answer choice A.'
+      - say: 'Lodge, soldier: the same j. So the answer is soldier, which is answer choice A.'
         write: 'A · soldier'
+        doodle_do:
+          - {id: mouth, op: say, word: 'lodge', sound: 'dʒ', 'on': 'lodge'}
+          - {id: mouth, op: say, word: 'soldier', sound: 'dʒ', 'on': 'soldier'}
         answer: true
     traps:
       B: 'You went for rogue. Rogue has a hard /g/ at the end, not /dʒ/.'
@@ -2008,25 +2049,35 @@ lessons:
       D: 'You went for measure. Measure has /ʒ/, the softer sound in pleasure, not the /dʒ/ of jam.'
   92:
     moments:
-      - say: 'Which option rhymes with suite? First, say it right: suite is said like sweet. Ring its bell.'
+      - say: 'Watch my mouth: suite. Suite. First, say it right: suite is said like sweet. Ring its bell.'
         write: 'suite = /swiːt/ (like sweet)'
-        doodle: {name: 'custom:2015_q92_a', id: bells, caption: 'suite = /swiːt/'}
-      - say: 'So the rhyme we need ends in /iːt/.'
+        mouth: {id: mouth, word: 'suite', sound: 'iː', caption: 'rhyme part: -eet, long ee + t'}
+        doodle: {name: 'custom:2015_q92_a', id: bells, caption: 'suite = /swiːt/', 'on': 'bell'}
+      - say: 'So the rhyme we need ends in a long ee, then t.'
         write: 'ending: /iːt/'
         point:
           - {line: 1, kind: box, text: 'rhyme'}
-      - say: 'Sweet ends in the same sound; in fact it rings exactly the same note as suite.'
+      - say: 'Now watch: sweet. Sweet. It ends in the same sound; in fact it rings exactly the same note as suite.'
         write: 'sweet = /swiːt/ ✓'
         doodle_do:
-          - {id: bells, op: stage, stage: 'custom:2015_q92_a2'}
+          - {id: mouth, op: say, word: 'sweet', sound: 'iː', 'on': 'sweet'}
+          - {id: bells, op: stage, stage: 'custom:2015_q92_a2', 'on': 'same note'}
         point:
           - {line: 2, kind: highlight, at: sweet, to: {doodle: bells, part: bell2}}
-      - say: 'Tree has no t at the end. Breath has the short e and th. Bleat ends /iːt/ too, but sweet matches the whole word.'
+      - say: 'Now the traps. Tree: no t at the end. Breath: a short e, and th. Bleat: it ends in eet too, but sweet matches the whole word.'
         write: 'tree, breath ✗; sweet matches best'
+        doodle_do:
+          - {id: mouth, op: say, word: 'tree', sound: 'iː', 'on': 'tree'}
+          - {id: mouth, op: say, word: 'breath', sound: 'e', 'on': 'breath'}
+          - {id: mouth, op: say, word: 'bleat', sound: 'iː', 'on': 'bleat'}
         point:
           - {line: 3, kind: strike, at: 'tree, breath'}
-      - say: 'So the answer is sweet, which is answer choice D.'
+      - say: 'Suite, sweet: exactly the same sound. So the answer is sweet, which is answer choice D.'
         write: 'D · sweet'
+        doodle_do:
+          - {id: mouth, op: say, word: 'suite', sound: 'iː', 'on': 'suite'}
+          - {id: mouth, op: say, word: 'sweet', sound: 'iː', 'on': 'sweet'}
+          - {id: bells, op: pulse, part: rhyme}
         answer: true
     traps:
       A: 'You went for tree. It has the /iː/ vowel but no /t/ at the end, and a rhyme needs the whole ending.'
@@ -2034,25 +2085,35 @@ lessons:
       C: 'You went for bleat. Good ear: bleat does end in /iːt/. But sweet matches suite exactly, so it is the stronger choice.'
   93:
     moments:
-      - say: 'Which option rhymes with cart? Ring its bell.'
+      - say: 'Watch my mouth: cart. Cart. Which option rhymes with it? Ring its bell.'
         write: 'cart = /kɑːt/'
-        doodle: {name: 'custom:2015_q93_a', id: bells, caption: 'cart: long ah + t'}
-      - say: 'The a in cart is the long /ɑː/ of father, followed by t.'
+        mouth: {id: mouth, word: 'cart', sound: 'ɑː', caption: 'rhyme part: -art, long ah + t'}
+        doodle: {name: 'custom:2015_q93_a', id: bells, caption: 'cart: long ah + t', 'on': 'bell'}
+      - say: 'The a in cart is the long ah of father, then t.'
         write: 'ending: /ɑːt/'
         point:
           - {line: 1, kind: box, text: 'rhyme'}
-      - say: 'Part ends in exactly the same sound: the second bell rings the same note.'
+      - say: 'Now watch: part. Part. It ends in exactly the same sound: the second bell rings the same note.'
         write: 'part = /pɑːt/ ✓'
         doodle_do:
-          - {id: bells, op: stage, stage: 'custom:2015_q93_a2'}
+          - {id: mouth, op: say, word: 'part', sound: 'ɑː', 'on': 'part'}
+          - {id: bells, op: stage, stage: 'custom:2015_q93_a2', 'on': 'second bell'}
         point:
           - {line: 2, kind: highlight, at: part, to: {doodle: bells, part: bell2}}
-      - say: 'Cat has the short /æ/. Lash and pack have /æ/ and different endings.'
+      - say: 'Now the traps. Cat: a short a. Lash. Pack. A short a too, and different endings.'
         write: 'cat, lash, pack = short /æ/ ✗'
+        doodle_do:
+          - {id: mouth, op: say, word: 'cat', sound: 'æ', 'on': 'cat'}
+          - {id: mouth, op: say, word: 'lash', sound: 'æ', 'on': 'lash'}
+          - {id: mouth, op: say, word: 'pack', sound: 'æ', 'on': 'pack'}
         point:
           - {line: 3, kind: strike}
-      - say: 'So the answer is part, which is answer choice C.'
+      - say: 'Cart, part: the same ending. So the answer is part, which is answer choice C.'
         write: 'C · part'
+        doodle_do:
+          - {id: mouth, op: say, word: 'cart', sound: 'ɑː', 'on': 'cart'}
+          - {id: mouth, op: say, word: 'part', sound: 'ɑː', 'on': 'part'}
+          - {id: bells, op: pulse, part: rhyme}
         answer: true
     traps:
       A: 'You went for lash. Lash has the short /æ/ and ends in sh.'
@@ -2060,25 +2121,35 @@ lessons:
       D: 'You went for pack. Pack has the short /æ/ and ends in k.'
   94:
     moments:
-      - say: 'Which option rhymes with sight? Ring its bell.'
+      - say: 'Watch my mouth: sight. Sight. Which option rhymes with it? Ring its bell.'
         write: 'sight = /saɪt/'
-        doodle: {name: 'custom:2015_q94_a', id: bells, caption: 'sight: -ight'}
-      - say: 'The ending is /aɪt/, as in light.'
+        mouth: {id: mouth, word: 'sight', sound: 'aɪ', caption: 'rhyme part: -ight, said ait'}
+        doodle: {name: 'custom:2015_q94_a', id: bells, caption: 'sight: -ight', 'on': 'bell'}
+      - say: 'The ending is the eye sound and then t, as in light.'
         write: 'ending: /aɪt/'
         point:
           - {line: 1, kind: box, text: 'rhyme'}
-      - say: 'Cite is said just like sight: the second bell rings the same note.'
+      - say: 'Now watch: cite. Cite. It is said just like sight: the second bell rings the same note.'
         write: 'cite = /saɪt/ ✓'
         doodle_do:
-          - {id: bells, op: stage, stage: 'custom:2015_q94_a2'}
+          - {id: mouth, op: say, word: 'cite', sound: 'aɪ', 'on': 'cite'}
+          - {id: bells, op: stage, stage: 'custom:2015_q94_a2', 'on': 'second bell'}
         point:
           - {line: 2, kind: highlight, at: cite, to: {doodle: bells, part: bell2}}
-      - say: 'Skate ends /eɪt/. Short ends /ɔːt/. Plait is said plat, with /æ/.'
+      - say: 'Now the traps. Skate: ay. Short: aw. Plait: it is said plat, with a short a.'
         write: 'skate /eɪt/, short /ɔːt/, plait /æt/ ✗'
+        doodle_do:
+          - {id: mouth, op: say, word: 'skate', sound: 'eɪ', 'on': 'skate'}
+          - {id: mouth, op: say, word: 'short', sound: 'ɔː', 'on': 'short'}
+          - {id: mouth, op: say, word: 'plait', sound: 'æ', 'on': 'plait'}
         point:
           - {line: 3, kind: strike}
-      - say: 'So the answer is cite, which is answer choice C.'
+      - say: 'Sight, cite: the same sound. So the answer is cite, which is answer choice C.'
         write: 'C · cite'
+        doodle_do:
+          - {id: mouth, op: say, word: 'sight', sound: 'aɪ', 'on': 'sight'}
+          - {id: mouth, op: say, word: 'cite', sound: 'aɪ', 'on': 'cite'}
+          - {id: bells, op: pulse, part: rhyme}
         answer: true
     traps:
       A: 'You went for skate. Skate ends /eɪt/, as in late, not /aɪt/.'
@@ -2086,23 +2157,28 @@ lessons:
       D: 'You went for plait. It is spelt with ai, but it is said plat, with the short /æ/.'
   95:
     moments:
-      - say: 'Programmatic. Break it into syllables first: four little beats.'
+      - say: 'Watch my mouth: programmatic. Programmatic. Four little beats; listen for the loud one.'
         write: 'pro · gram · mat · ic'
-        doodle: {name: 'custom:2015_q95_a', id: word, caption: 'four beats'}
+        mouth: {id: mouth, word: 'programmatic', syllables: ['pro', 'gram', 'mat', 'ic'], stress: 3, caption: 'pro-gram-MAT-ic: mat is loud'}
+        doodle: {name: 'custom:2015_q95_a', id: word, caption: 'four beats', 'on': 'four little beats'}
       - say: 'Words ending in -ic put the stress on the syllable just before -ic.'
         write: 'rule: stress the syllable before -ic'
         point:
           - {line: 1, kind: box, text: 'rule'}
-      - say: 'Think of drama and dramatic: draMAtic. The same happens here: MAT swells up.'
+      - say: 'Think of drama and dramatic: dra-MAT-ic. The same happens here. Watch again: programmatic. MAT swells up.'
         write: 'dra-MAT-ic → pro-gram-MAT-ic'
         doodle_do:
-          - {id: word, op: stage, stage: 'custom:2015_q95_a2'}
+          - {id: mouth, op: say, word: 'dramatic', 'on': 'dramatic'}
+          - {id: mouth, op: say, word: 'programmatic', 'on': 'programmatic'}
+          - {id: word, op: stage, stage: 'custom:2015_q95_a2', 'on': 'swells'}
         point:
           - {line: 2, kind: highlight, at: 'pro-gram-MAT-ic', to: {doodle: word, part: stress}}
       - say: 'Option C is the one that puts the stress on mat. A and B stress too early. D stresses -ic, which is never stressed.'
         write: 'A, B too early; D on -ic ✗'
       - say: 'So the answer is programMATIC, which is answer choice C.'
         write: 'C · programMATIC'
+        doodle_do:
+          - {id: mouth, op: say, word: 'programmatic', 'on': 'programMATIC'}
         point:
           - {line: 4, kind: circle, at: 'MAT', text: 'stress'}
         answer: true
@@ -2112,26 +2188,34 @@ lessons:
       D: 'You went for programmatIC. The ending -ic itself is never stressed; the syllable before it is.'
   96:
     moments:
-      - say: 'Certification. Break it into syllables: five little beats.'
+      - say: 'Watch my mouth: certification. Certification. Five little beats; listen for the loud one.'
         write: 'cer · ti · fi · ca · tion'
-        doodle: {name: 'custom:2015_q96_a', id: word, caption: 'five beats'}
+        mouth: {id: mouth, word: 'certification', syllables: ['cer', 'ti', 'fi', 'ca', 'tion'], stress: 4, caption: 'cer-ti-fi-CA-tion: ca is loud'}
+        doodle: {name: 'custom:2015_q96_a', id: word, caption: 'five beats', 'on': 'five little beats'}
       - say: 'Words ending in -tion stress the syllable just before -tion.'
         write: 'rule: stress the syllable before -tion'
         point:
           - {line: 1, kind: box, text: 'rule'}
-      - say: 'Here the syllable before -tion is ca: certifi-CA-tion swells up, like education.'
+      - say: 'Here the syllable before -tion is ca. Watch again: certification. CA swells up, just like education.'
         write: 'cer-ti-fi-CA-tion'
         doodle_do:
-          - {id: word, op: stage, stage: 'custom:2015_q96_a2'}
+          - {id: mouth, op: say, word: 'certification', 'on': 'certification'}
+          - {id: word, op: stage, stage: 'custom:2015_q96_a2', 'on': 'swells'}
+          - {id: mouth, op: say, word: 'education', 'on': 'education'}
         point:
           - {line: 2, kind: circle, at: 'CA', text: 'stress'}
           - {line: 2, kind: highlight, at: 'cer-ti-fi-CA-tion', to: {doodle: word, part: stress}}
-      - say: 'A, B and D all put the stress too early, on fi, cer or ti.'
+      - say: 'A, B and D all put the stress too early. Certify is CER-ti-fy, and certificate is cer-TI-fi-cate, but -tion moves the stress to ca.'
         write: 'A, B, D: too early ✗'
+        doodle_do:
+          - {id: mouth, op: say, word: 'certify', 'on': 'certify'}
+          - {id: mouth, op: say, word: 'certificate', 'on': 'certificate'}
         point:
           - {line: 3, kind: strike}
       - say: 'So the answer is certifiCAtion, which is answer choice C.'
         write: 'C · certifiCAtion'
+        doodle_do:
+          - {id: mouth, op: say, word: 'certification', 'on': 'certifiCAtion'}
         answer: true
     traps:
       A: 'You went for certiFIcation. Certify is stressed near the front, but -tion moves the stress to ca.'
@@ -2139,26 +2223,33 @@ lessons:
       D: 'You went for cerTIfication. That is the stress of certificate; certification is stressed on ca.'
   97:
     moments:
-      - say: 'Motivation. Break it into syllables: four little beats.'
+      - say: 'Watch my mouth: motivation. Motivation. Four little beats; listen for the loud one.'
         write: 'mo · ti · va · tion'
-        doodle: {name: 'custom:2015_q97_a', id: word, caption: 'four beats'}
+        mouth: {id: mouth, word: 'motivation', syllables: ['mo', 'ti', 'va', 'tion'], stress: 3, caption: 'mo-ti-VA-tion: va is the loud beat'}
+        doodle: {name: 'custom:2015_q97_a', id: word, caption: 'four beats', 'on': 'four little beats'}
       - say: 'Same rule: -tion words stress the syllable just before -tion.'
         write: 'rule: stress the syllable before -tion'
         point:
           - {line: 1, kind: box, text: 'rule'}
-      - say: 'That syllable is va: moti-VA-tion swells up, like information.'
+      - say: 'That syllable is va. Watch again: motivation. VA swells up, just like information.'
         write: 'mo-ti-VA-tion'
         doodle_do:
-          - {id: word, op: stage, stage: 'custom:2015_q97_a2'}
+          - {id: mouth, op: say, word: 'motivation', 'on': 'motivation'}
+          - {id: word, op: stage, stage: 'custom:2015_q97_a2', 'on': 'swells'}
+          - {id: mouth, op: say, word: 'information', 'on': 'information'}
         point:
           - {line: 2, kind: circle, at: 'VA', text: 'stress'}
           - {line: 2, kind: highlight, at: 'mo-ti-VA-tion', to: {doodle: word, part: stress}}
-      - say: 'B stresses -tion itself, which is never stressed. A and D are too early.'
+      - say: 'B stresses -tion itself, which is never stressed. A and D are too early: motive is MO-tive, but motivation moves the stress.'
         write: 'B on -tion; A, D too early ✗'
+        doodle_do:
+          - {id: mouth, op: say, word: 'motive', 'on': 'motive'}
         point:
           - {line: 3, kind: strike}
       - say: 'So the answer is motiVAtion, which is answer choice C.'
         write: 'C · motiVAtion'
+        doodle_do:
+          - {id: mouth, op: say, word: 'motivation', 'on': 'motiVAtion'}
         answer: true
     traps:
       A: 'You went for moTIvation. The -tion ending moves the stress to va, the syllable just before it.'
@@ -2166,26 +2257,32 @@ lessons:
       D: 'You went for MOtivation. Motive is stressed on mo, but motivation is stressed on va.'
   98:
     moments:
-      - say: 'Bukola''s UNCLE is a strict teacher. The capital word is the one the speaker is correcting.'
+      - say: 'Listen: Bukola’s UNCLE is a strict teacher. The capital word is the one the speaker is correcting, so I say it loudest.'
         write: 'stressed word = the one being corrected'
+        mouth: {id: mouth, word: 'UNCLE', caption: 'UNCLE: said loudest'}
         point:
           - {line: 0, kind: box, text: 'rule'}
       - say: 'Stressing UNCLE means someone got the relative wrong: they asked about an aunt.'
         write: 'UNCLE → the relative was wrong'
-        doodle: {name: 'custom:2015_q98_a', id: talk, caption: 'someone got the relative wrong'}
-      - say: 'Which question has everything right except the relative? Is Bukola''s aunt a strict teacher? No, her UNCLE!'
+        doodle: {name: 'custom:2015_q98_a', id: talk, caption: 'someone got the relative wrong', 'on': 'asked about an aunt'}
+      - say: 'Which question has everything right except the relative? Is Bukola’s aunt a strict teacher? No, her UNCLE!'
         write: '"Is Bukola''s aunt ...?" → No, her UNCLE'
         doodle_do:
-          - {id: talk, op: stage, stage: 'custom:2015_q98_a2'}
+          - {id: talk, op: stage, stage: 'custom:2015_q98_a2', 'on': 'No'}
+          - {id: mouth, op: say, word: 'UNCLE', 'on': 'UNCLE'}
         point:
           - {line: 2, kind: circle, at: 'aunt', text: 'the error'}
           - {line: 1, kind: arrow}
           - {line: 2, kind: highlight, at: 'No, her UNCLE', to: {doodle: talk, part: uncle}}
-      - say: 'A questions the job, B the name, D the kind of teacher. Each would need a different word stressed.'
+      - say: 'If the question were about a cook, the loud word would be TEACHER. If it were about Tunde, BUKOLA’S. If it were easy-going, STRICT.'
         write: 'A = job, B = name, D = kind ✗'
+        doodle_do:
+          - {id: mouth, op: say, word: 'TEACHER', 'on': 'TEACHER'}
+          - {id: mouth, op: say, word: 'BUKOLA’S', 'on': 'BUKOLA’S'}
+          - {id: mouth, op: say, word: 'STRICT', 'on': 'STRICT'}
         point:
           - {line: 3, kind: strike}
-      - say: 'So the answer is the question about Bukola''s aunt, which is answer choice C.'
+      - say: 'So the answer is the question about Bukola’s aunt, which is answer choice C.'
         write: 'C · Is Bukola''s aunt a strict teacher?'
         answer: true
     traps:
@@ -2194,25 +2291,31 @@ lessons:
       D: 'You went for an easy-going teacher. That gets the kind of teacher wrong, so the answer would stress STRICT.'
   99:
     moments:
-      - say: 'She put the spoon on the CHAIR. The stress is on the place: the chair.'
+      - say: 'Listen: she put the spoon on the CHAIR. The stress is on the place, so I say CHAIR loudest.'
         write: 'CHAIR → the point is the place'
-        doodle: {name: 'custom:2015_q99_a', id: chair, caption: 'CHAIR: the point is the place'}
+        mouth: {id: mouth, word: 'CHAIR', caption: 'CHAIR: said loudest'}
+        doodle: {name: 'custom:2015_q99_a', id: chair, caption: 'CHAIR: the point is the place', 'on': 'the place'}
         point:
           - {line: 0, kind: circle, at: 'CHAIR', text: 'stress'}
       - say: 'So the question must be about where the spoon went.'
         write: 'question about where'
       - say: 'A is about the fork, so the answer would stress SPOON.'
         write: 'A: fork → SPOON ✗'
+        doodle_do:
+          - {id: mouth, op: say, word: 'SPOON', 'on': 'SPOON'}
         point:
           - {line: 2, kind: strike}
       - say: 'C and D ask who, so the answer would stress SHE.'
         write: 'C, D: who → SHE ✗'
+        doodle_do:
+          - {id: mouth, op: say, word: 'SHE', 'on': 'SHE'}
         point:
           - {line: 3, kind: strike}
       - say: 'Only B asks about the chair itself: did she put the spoon on the chair? Yes, on the CHAIR.'
         write: 'B asks about the chair'
         doodle_do:
-          - {id: chair, op: circle, part: chair, text: 'yes, on the CHAIR'}
+          - {id: chair, op: circle, part: chair, text: 'yes, on the CHAIR', 'on': 'Yes'}
+          - {id: mouth, op: say, word: 'CHAIR', 'on': 'CHAIR', on_nth: 3}
         point:
           - {line: 0, kind: arrow}
       - say: 'So the answer is did she put the spoon on the chair, which is answer choice B.'
@@ -2224,21 +2327,26 @@ lessons:
       D: 'You went for who took the spoon. That asks for a person and a different action, so SHE or PUT would be stressed.'
   100:
     moments:
-      - say: 'ASA is a lawyer. The stress is on the name, the person picked out.'
+      - say: 'Listen: ASA is a lawyer. The stress is on the name, the person picked out, so I say it loudest.'
         write: 'ASA → the point is the person'
-        doodle: {name: 'custom:2015_q100_a', id: who, caption: 'ASA: the point is the person'}
+        mouth: {id: mouth, word: 'ASA', caption: 'ASA: said loudest'}
+        doodle: {name: 'custom:2015_q100_a', id: who, caption: 'ASA: the point is the person', 'on': 'person picked out'}
         point:
           - {line: 0, kind: circle, at: 'ASA', text: 'stress'}
       - say: 'So the question must be asking which person.'
         write: 'question asks: who?'
         doodle_do:
-          - {id: who, op: circle, part: asa, text: 'who?'}
+          - {id: who, op: circle, part: asa, text: 'who?', 'on': 'which person'}
         point:
           - {line: 1, kind: highlight, at: who, to: {doodle: who, part: asa}}
       - say: 'Who is a lawyer? Answer: ASA is a lawyer.'
         write: '"Who is a lawyer?" → ASA is.'
-      - say: 'A questions the job, so LAWYER would be stressed. C and D ask whether Asa is the lawyer, which would stress IS or THE.'
+        doodle_do:
+          - {id: mouth, op: say, word: 'ASA', 'on': 'ASA'}
+      - say: 'If the question were is Asa a robber, the loud word would be LAWYER. C and D already name Asa, so the name would not need stress.'
         write: 'A = job; C, D = not "who" ✗'
+        doodle_do:
+          - {id: mouth, op: say, word: 'LAWYER', 'on': 'LAWYER'}
         point:
           - {line: 3, kind: strike}
       - say: 'So the answer is who is a lawyer, which is answer choice B.'

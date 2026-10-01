@@ -427,7 +427,7 @@ lessons:
           - {figure: sketch, kind: circle, target: '80'}
           - {figure: sketch, kind: circle, target: '20'}
           - {figure: sketch, kind: circle, target: '9', text: 'both'}
-      - say: 'The plan: first find how many speak at least one of the languages, then take that away from the 100.'
+      - say: 'The plan: first find how many speak at least one of the languages, then take 100 minus that.'
         write: 'Plan: neither $= 100 - n(H \cup I)$'
         point:
           - {figure: sketch, kind: underline, target: neither}
@@ -854,7 +854,7 @@ lessons:
     moments:
       - say: 'The sum of the first $n$ terms of a series is $n^{2} - 1$. We want the $n$th term.'
         write: '$S_{n} = n^{2} - 1$'
-      - say: 'Here''s the idea. Picture the terms stacked as a tower. The sum of the first $n$ terms is the tower with $n$ blocks, and the sum of the first $n - 1$ terms is the same tower without its top block. Take one from the other and only the $n$th term is left.'
+      - say: 'Here''s the idea. Picture the terms stacked as a tower. The sum of the first $n$ terms is the tower with $n$ blocks, and the sum of the first $n - 1$ terms is the same tower without its top block. Take the full tower minus the shorter one, and only the $n$th term is left.'
         write: '$U_{n} = S_{n} - S_{n-1}$'
         doodle: {name: 'custom:1997_q19_a', id: towers, caption: 'the nth term is the top block'}
       - say: 'To get $S_{n-1}$, replace every $n$ in the formula with $n - 1$.'
@@ -1295,53 +1295,87 @@ lessons:
       D: 'You went for 600. That is 625 minus 25, which subtracts the square of the sum of the radii. $XY$ is the hypotenuse, so we add the squares of the legs: $25^{2} + 1^{2} = 626$.'
   28:
     moments:
-      - say: 'A chord of a circle of diameter 42 cm subtends 60 degrees at the centre. We want the length of the minor arc, using $\pi$ as 22 over 7.'
-        write: 'Diameter $= 42$ cm, angle at centre $= 60^{\circ}$, $\pi = \dfrac{22}{7}$'
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - section: 'The question'
+        say: 'Cut a round cake into 6 equal slices. How long is the curved crust of one slice? This question is the same idea: a 60 degree slice of a circle. Find what fraction of the circle it is, and the rest is easy.'
+        write: 'Minor arc $= ?$'
+        doodle: {name: 'custom:1997_q28_a', id: cake, caption: 'one slice of a round cake'}
+      - section: 'What we know'
+        say: 'Let me draw the circle. Its diameter is 42 cm. The diameter is the line straight across the circle, through the centre O.'
+        write: 'Diameter $= 42$ cm'
         show_sketch: true
         point:
-          - {figure: sketch, kind: underline, target: 'diameter 42 cm'}
-      - say: 'Now let me join the centre $O$ to both ends of the chord. The angle between those two radii is 60 degrees, and the minor arc is the bit of the circle they cut off.'
+          - {figure: sketch, kind: underline, target: 'diameter 42 cm', 'on': 'diameter is 42 cm'}
+          - {line: 1, kind: travel, at: '42', from: {figure: sketch, target: 'diameter 42 cm'}, 'on': 'diameter is 42 cm'}
+      - say: 'A chord is a straight line joining two points on the circle. Here the chord joins A and B.'
+        write: 'Chord $AB$'
+        point:
+          - {figure: sketch, kind: highlight, target: 'AB', text: 'the chord', 'on': 'joins A and B'}
+      - say: 'Now join the centre O to A, and to B. The angle between those two lines is 60 degrees. The question says the chord subtends 60 degrees at the centre, and that is all it means.'
+        write: 'Angle at the centre $= 60^{\circ}$'
         show_sketch: sketch_b
         point:
-          - {figure: sketch_b, kind: arc, target: AOB, text: '60°'}
-          - {figure: sketch_b, kind: circle, target: 'arc = ?', text: 'minor arc'}
-      - say: 'An arc is a fraction of the whole circumference, and that fraction is the angle at the centre over 360.'
-        write: 'Arc length $= \dfrac{\theta}{360^{\circ}} \times 2\pi r$'
+          - {figure: sketch_b, kind: arc, target: AOB, text: '60°', 'on': '60 degrees'}
+      - say: 'The minor arc is the shorter piece of the circle''s edge between A and B. Minor means smaller. It is the crust of our slice, and it is what we want.'
+        write: 'Minor arc $AB = ?$'
+        doodle_do:
+          - {id: cake, op: highlight, part: crust, 'on': 'crust of our slice'}
         point:
-          - {figure: sketch_b, kind: arc, target: 'AB', text: 'the arc'}
-      - say: 'The formula needs the radius, not the diameter. Half of 42 is 21.'
+          - {figure: sketch_b, kind: circle, target: 'arc = ?', text: 'the minor arc', 'on': 'shorter piece'}
+      - say: 'The question tells us to use pi as 22 over 7.'
+        write: '$\pi = \dfrac{22}{7}$'
+      - section: 'What fraction of the circle?'
+        say: 'One full turn round the centre is 360 degrees. Our angle is 60 degrees. So our slice is 60 out of 360 of the whole circle.'
+        write: 'Fraction $= \dfrac{60}{360}$'
+        point:
+          - {line: 6, kind: travel, at: '36060', from: {line: 3, at: '60'}, text: '60°', 'on': '60 out of 360'}
+      - say: '60 goes into 360 six times. So 60 over 360 is 1 over 6: one slice of a cake cut into 6 equal slices.'
+        write: '$\dfrac{60}{360} = \dfrac{1}{6}$'
+        doodle_do:
+          - {id: cake, op: label, part: slice, text: '1 of 6 slices', 'on': 'one slice'}
+      - section: 'The whole circumference'
+        say: 'The circumference is the whole distance round the circle. The rule, in words: circumference equals 2, times pi, times the radius.'
+        write: 'Circumference $= 2 \times \pi \times r$'
+        'on': 'The rule'
+      - say: 'The rule needs the radius, not the diameter. The radius goes from the centre to the edge, so it is half the diameter. Half of 42 is 21.'
         write: '$r = \dfrac{42}{2} = 21$ cm'
         point:
-          - {figure: sketch_b, kind: circle, target: 'r = 21 cm'}
-      - say: 'First the full circumference, $2\pi r$, using the radius 21 and $\pi$ as 22 over 7.'
-        write: '$2\pi r = 2 \times \dfrac{22}{7} \times 21$'
+          - {line: 9, kind: travel, at: '242', from: {line: 1, at: '42'}, text: 'diameter', 'on': 'Half of 42'}
+          - {figure: sketch_b, kind: label, target: {x: 200, y: 102}, text: 'r = 21 cm', 'on': 'is 21'}
+      - say: 'Now put the radius and pi into the rule: 2, times 22 over 7, times 21.'
+        write: 'Circumference $= 2 \times \dfrac{22}{7} \times 21$'
         point:
-          - {line: 5, kind: move, from: {line: 4, at: '= 21'}, at: '× 21', text: 'radius'}
-          - {figure: sketch_b, kind: circle, target: 'r = 21 cm', text: 'r'}
-      - say: '7 goes into 21 three times, so the 7 and the 21 become a 3.'
+          - {line: 10, kind: travel, at: '× 21', from: {line: 9, at: '= [[21]]'}, text: 'radius', 'on': 'times 21'}
+          - {line: 10, kind: travel, at: '722', from: {line: 5, at: '722'}, text: 'pi', 'on': '22 over 7'}
+      - say: '21 divided by 7 is 3. So the 7 on the bottom and the 21 cancel, and leave a 3.'
         write: '$= 2 \times 22 \times 3$'
-      - say: '2 times 22 is 44, and 44 times 3 is 132.'
+      - say: '2 times 22 is 44, and 44 times 3 is 132. So the whole way round the circle is 132 cm.'
         write: '$= 132$ cm'
-      - say: 'Now the fraction. 60 goes into 360 six times, so 60 over 360 is 1 over 6.'
-        write: '$\dfrac{60}{360} = \dfrac{1}{6}$'
-      - say: 'So the arc is 1 over 6 of the circumference we found, 132 cm.'
-        write: 'Arc length $= \dfrac{1}{6} \times 132$'
+        doodle_do:
+          - {id: cake, op: label, part: cake, text: 'all the way round: 132 cm', 'on': 'whole way round'}
+      - section: 'The arc'
+        say: 'Our arc is 1 over 6 of that whole circumference. So the arc is 1 over 6 times 132.'
+        write: 'Arc $= \dfrac{1}{6} \times 132$'
         point:
-          - {line: 9, kind: move, from: {line: 8, at: '= 61'}, at: '61', text: 'fraction'}
-          - {line: 9, kind: move, from: {line: 7, at: '132'}, at: '132', text: 'circumference'}
-          - {figure: sketch_b, kind: arc, target: 'AB', text: '1/6 of 132'}
-      - say: '132 divided by 6 is 22.'
-        write: '$= 22$ cm'
+          - {line: 13, kind: travel, at: '61', from: {line: 7, at: '= [[61]]'}, text: 'fraction', 'on': '1 over 6 of'}
+          - {line: 13, kind: travel, at: '132', from: {line: 12, at: '132'}, text: 'circumference', 'on': 'times 132'}
+      - say: '1 over 6 of 132 means 132 divided by 6, which is 22. The arc is 22 cm.'
+        write: '$= 132 \div 6 = 22$ cm'
+        doodle_do:
+          - {id: cake, op: label, part: crust, text: '22 cm', 'on': 'arc is 22 cm'}
+        point:
+          - {figure: sketch_b, kind: label, target: 'arc = ?', text: '22 cm', 'on': 'arc is 22 cm'}
+      - section: 'Check'
+        say: 'Check with the cake: 6 slices, each with 22 cm of crust. 6 times 22 is 132, the whole circumference.'
+        write: 'Check: $6 \times 22 = 132$ cm'
+        doodle_do:
+          - {id: cake, op: pulse, part: cake, 'on': '6 slices'}
       - say: 'So the minor arc is 22 cm, which is answer choice A.'
         write: 'Minor arc $= 22$ cm'
         answer: true
-        point:
-          - {figure: sketch_b, kind: label, target: 'arc = ?', text: '22 cm'}
     traps:
-      B: 'You went for 44 cm. That uses 42 as the radius, which doubles the answer. The diameter is 42, so the radius is 21.'
-      C: 'You went for 110 cm. The arc is only 1 over 6 of the circumference, and the whole circumference is 132 cm. 132 divided by 6 is 22.'
-      D: 'You went for 220 cm. That''s bigger than the whole circumference of 132 cm, so it can''t be part of it. The arc is $\tfrac{60}{360} \times 132 = 22$.'
+      B: 'You went for 44 cm. That uses 42 as the radius, which doubles the answer. 42 is the diameter, straight across, so the radius is half of it, 21.'
+      C: 'You went for 110 cm. That is the major arc, the longer piece: the other 5 slices, 132 minus 22. Minor means the shorter piece, which is 1 slice: 22 cm.'
+      D: 'You went for 220 cm. That is longer than the whole circumference of 132 cm, so it can''t be part of it. The arc is 1 over 6 of 132, which is 22.'
   29:
     moments:
       - say: 'An arc subtends 70 degrees at the centre of a circle of radius 6 cm. We want the area of the sector, using $\pi$ as 22 over 7.'

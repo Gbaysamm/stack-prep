@@ -504,70 +504,88 @@ lessons:
       D: 'You went for 27. That''s half of the right answer, as if the half was used twice. A half times 12 times 9 is 54.'
   11:
     moments:
-      - say: 'Let''s find the midpoint of the $x$ and $y$ intercepts of the line $2y = 4x - 8$.'
+      - section: 'The question'
+        say: 'A straight line crosses the two axes at two points. We want the point exactly halfway between them. Find the two crossing points first. After that, halfway is just an average.'
+        write: 'Midpoint of the two intercepts $= ?$'
+        doodle: {name: 'custom:2002_q11_a', id: half, caption: 'halfway along each axis'}
+      - section: 'What we know'
+        say: 'Here is the line: 2y equals 4x minus 8. Let me draw it.'
         write: '$2y = 4x - 8$'
         show_sketch: true
         point:
-          - {figure: sketch, kind: underline, target: '2y = 4x − 8'}
-      - say: 'First, what is an intercept? It''s where the line crosses an axis. On the $x$-axis, $y$ is zero, and on the $y$-axis, $x$ is zero. So each intercept comes from setting the other letter to zero.'
+          - {figure: sketch, kind: underline, target: '2y = 4x − 8', 'on': 'draw it'}
+      - say: 'An intercept is where the line crosses an axis. A is where it crosses the x axis. B is where it crosses the y axis.'
+        write: 'Intercepts: A on the $x$-axis, B on the $y$-axis'
         point:
-          - {figure: sketch, kind: circle, target: A, text: 'x-intercept'}
-          - {figure: sketch, kind: circle, target: B, text: 'y-intercept'}
-      - say: 'To find the $x$-intercept, let''s replace $y$ with zero in the equation of the line.'
-        write: 'For the $x$-intercept, put $y = 0$: $2(0) = 4x - 8$'
+          - {figure: sketch, kind: circle, target: A, text: 'crosses the x-axis', 'on': 'A is where'}
+          - {figure: sketch, kind: circle, target: B, text: 'crosses the y-axis', 'on': 'B is where'}
+      - say: 'Here is the key fact. Anywhere on the x axis, the height y is 0. Anywhere on the y axis, x is 0.'
+        write: 'On the $x$-axis $y = 0$; on the $y$-axis $x = 0$'
+        'on': 'key fact'
+      - section: 'Point A, on the x-axis'
+        say: 'At A, y is 0. So put 0 in place of y in the line.'
+        write: '$2(0) = 4x - 8$'
         point:
-          - {figure: sketch, kind: arrow, target: A, text: 'y = 0 here'}
-      - say: 'Two times zero is zero, so we have zero equals $4x$ minus 8.'
+          - {figure: sketch, kind: arrow, target: A, text: 'y = 0 here', 'on': 'At A'}
+      - say: '2 times 0 is 0. So 0 equals 4x minus 8.'
         write: '$0 = 4x - 8$'
-      - say: 'Now add 8 to both sides. That gives us 8 equals $4x$.'
+      - say: 'We want 4x alone. So add 8 to both sides.'
+        write: '$0 + 8 = 4x - 8 + 8$'
+      - say: 'On the left, 0 plus 8 is 8. On the right, minus 8 plus 8 is 0, so only 4x is left.'
         write: '$8 = 4x$'
-        point:
-          - {line: 4, kind: move, from: {line: 3, at: '− 8'}, at: '8', text: 'across the ='}
-      - say: 'To get $x$ by itself, divide both sides by 4. 8 divided by 4 is 2.'
+      - say: 'Divide both sides by 4. 8 divided by 4 is 2.'
         write: '$x = \dfrac{8}{4} = 2$'
-      - say: 'So the line crosses the $x$-axis at the point 2, 0.'
-        write: '$x$-intercept: $(2,\ 0)$'
+      - say: 'So A is the point 2, 0: x is 2 and y is 0.'
+        write: 'A $= (2,\ 0)$'
         point:
-          - {line: 6, kind: arrow, at: '(2, 0)', to: {figure: sketch, target: A}, text: 'here'}
-          - {figure: sketch, kind: label, target: A, text: '(2, 0)'}
-      - say: 'Now the $y$-intercept. This time, we go back to the equation of the line and replace $x$ with zero.'
-        write: 'For the $y$-intercept, put $x = 0$: $2y = 4(0) - 8$'
+          - {line: 9, kind: travel, at: '([[2]]', from: {line: 8, at: '= [[2]]'}, text: 'x', 'on': 'point 2, 0'}
+          - {figure: sketch, kind: label, target: A, text: '(2, 0)', 'on': 'point 2, 0'}
+      - section: 'Point B, on the y-axis'
+        say: 'At B, x is 0. Go back to the line and put 0 in place of x.'
+        write: '$2y = 4(0) - 8$'
         point:
-          - {figure: sketch, kind: arrow, target: B, text: 'x = 0 here'}
-      - say: '4 times zero is zero, so $2y$ equals negative 8.'
+          - {figure: sketch, kind: arrow, target: B, text: 'x = 0 here', 'on': 'At B'}
+      - say: '4 times 0 is 0. So 2y equals negative 8.'
         write: '$2y = -8$'
       - say: 'Divide both sides by 2. Negative 8 divided by 2 is negative 4.'
         write: '$y = \dfrac{-8}{2} = -4$'
-      - say: 'So the line crosses the $y$-axis at the point 0, negative 4.'
-        write: '$y$-intercept: $(0,\ -4)$'
+      - say: 'So B is the point 0, negative 4: x is 0 and y is negative 4.'
+        write: 'B $= (0,\ -4)$'
         point:
-          - {line: 10, kind: arrow, at: '(0, −4)', to: {figure: sketch, target: B}, text: 'here'}
-          - {figure: sketch, kind: label, target: B, text: '(0, −4)'}
-      - say: 'Now we have our two points. The midpoint is halfway between them, so we average the $x$-values, and we average the $y$-values.'
+          - {line: 13, kind: travel, at: '−4', from: {line: 12, at: '= [[−4]]'}, text: 'y', 'on': 'point 0, negative 4'}
+          - {figure: sketch, kind: label, target: B, text: '(0, −4)', 'on': 'point 0, negative 4'}
+      - section: 'Halfway between them'
+        say: 'Now the midpoint rule. The midpoint is halfway between two points. In words: average the two x values, and average the two y values. To average two numbers, add them and divide by 2.'
         write: 'Midpoint $= \left(\dfrac{x_1 + x_2}{2},\ \dfrac{y_1 + y_2}{2}\right)$'
-        point:
-          - { line: 6, kind: arrow, at: '(2, 0)', text: 'point 1' }
-          - { line: 10, kind: arrow, at: '(0, −4)', text: 'point 2' }
-      - say: 'The $x$-values of our two intercepts are 2 and 0. 2 plus 0 is 2, and 2 divided by 2 is 1.'
+        'on': 'midpoint rule'
+      - say: 'The x values of A and B are 2 and 0. 2 plus 0 is 2, and 2 divided by 2 is 1. Look at the number line: 1 is halfway between 0 and 2.'
         write: 'Midpoint $x$: $\dfrac{2 + 0}{2} = \dfrac{2}{2} = 1$'
+        doodle_do:
+          - {id: half, op: label, part: xmid, text: 'halfway: 1', 'on': 'number line'}
         point:
-          - {figure: sketch, kind: circle, target: '2', text: 'x = 2'}
-          - {line: 12, kind: move, from: {line: 6, at: '2'}, at: '[[2]] + 0', text: 'x-values'}
-          - {line: 12, kind: move, from: {line: 10, at: '0'}, at: '+ [[0]]'}
-      - say: 'The $y$-values are 0 and negative 4. 0 plus negative 4 is negative 4, and negative 4 divided by 2 is negative 2.'
+          - {line: 15, kind: travel, at: '2[[2]] + 0', from: {line: 9, at: '([[2]]'}, text: 'from A', 'on': 'are 2 and 0'}
+          - {line: 15, kind: travel, at: '+ [[0]]', from: {line: 13, at: '([[0]]'}, text: 'from B', 'on': 'are 2 and 0'}
+      - say: 'The y values are 0 and negative 4. 0 plus negative 4 is negative 4, and negative 4 divided by 2 is negative 2. On the upright number line, negative 2 is halfway between 0 and negative 4.'
         write: 'Midpoint $y$: $\dfrac{0 + (-4)}{2} = \dfrac{-4}{2} = -2$'
+        doodle_do:
+          - {id: half, op: label, part: ymid, text: 'halfway: −2', 'on': 'upright number line'}
         point:
-          - {line: 13, kind: move, from: {line: 6, at: '[[0]])'}, at: '[[0]] +', text: 'y-values'}
-          - {line: 13, kind: move, from: {line: 10, at: '−4'}, at: '(−4)'}
+          - {line: 16, kind: travel, at: '[[0]] + (', from: {line: 9, at: '[[0]])'}, text: 'from A', 'on': 'are 0 and negative 4'}
+          - {line: 16, kind: travel, at: '(−4)', from: {line: 13, at: '−4'}, text: 'from B', 'on': 'are 0 and negative 4'}
+      - say: 'So the midpoint M is the point 1, negative 2.'
+        write: 'M $= (1,\ -2)$'
+        point:
+          - {figure: sketch, kind: label, target: M, text: '(1, −2)', 'on': 'midpoint M'}
+      - section: 'Check'
+        say: 'Check that M sits on the line. Put x as 1 and y as negative 2. The left side, 2 times negative 2, is negative 4. The right side, 4 times 1 minus 8, is also negative 4. They match.'
+        write: 'Check: $2(-2) = -4$ and $4(1) - 8 = -4$'
       - say: 'So the midpoint is 1, negative 2, which is answer choice D.'
         write: 'Midpoint $= (1,\ -2)$'
         answer: true
-        point:
-          - {figure: sketch, kind: label, target: M, text: '(1, −2)'}
     traps:
-      A: 'You went for negative 1, negative 2. The $y$-value is right, but the $x$-value is 1, not negative 1: 2 plus 0 is positive 2, and half of that is positive 1.'
-      B: 'You went for 1, 2. The $x$-value is right, but the $y$-intercept is negative 4, so the average of the $y$-values is negative 2, not 2. Watch the sign.'
-      C: 'You went for 2, 0. That''s the $x$-intercept on its own. The question wants the point halfway between both intercepts.'
+      A: 'You went for negative 1, negative 2. The y value is right, but the x value is 1, not negative 1: 2 plus 0 is positive 2, and half of that is positive 1.'
+      B: 'You went for 1, 2. The x value is right, but the y intercept is negative 4, so the average of the y values is negative 2, not 2. Watch the sign.'
+      C: 'You went for 2, 0. That is point A, the x intercept, on its own. The question wants the point halfway between both intercepts.'
   12:
     moments:
       - say: 'A chord makes an angle of 120 degrees at the centre of a circle of diameter $4\sqrt{3}$ cm. We want the area of the major sector.'

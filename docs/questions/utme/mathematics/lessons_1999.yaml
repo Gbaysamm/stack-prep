@@ -391,62 +391,102 @@ lessons:
 
   9:
     moments:
-      - say: 'Picture a market where every woman sells at least one of yam, plantain and maize. We know how many sell each item and each pair, and we want the total number of women.'
-        write: 'Yam, plantain, maize: each woman sells at least one'
-        doodle: {name: 'custom:1999_q09_a', id: stall, caption: 'Every woman sells at least one'}
-      - say: 'Let me draw a Venn diagram, so we can see where everything belongs.'
+      - section: 'The question'
+        say: 'These market women sell yam, plantain and maize, and many of them sell more than one. Add 10, 14 and 12 and you get 36 women. But the real group is much smaller. Let''s see why, by filling in a picture from the middle out.'
+        write: 'Number of women $= ?$'
+        doodle: {name: 'custom:1999_q09_a', id: stall, caption: 'every woman sells at least one'}
+      - section: 'What we know'
+        say: 'Every woman sells at least one item. 10 sell yam, 14 sell plantain, and 12 sell maize.'
+        write: 'Yam 10, plantain 14, maize 12'
+        point:
+          - {line: 1, kind: travel, at: '10', from: {doodle: stall, part: yam}, text: 'yam', 'on': '10 sell yam'}
+          - {line: 1, kind: travel, at: '14', from: {doodle: stall, part: plantain}, text: 'plantain', 'on': '14 sell plantain'}
+          - {line: 1, kind: travel, at: '12', from: {doodle: stall, part: maize}, text: 'maize', 'on': '12 sell maize'}
+      - say: 'Some sell two items. 5 sell plantain and maize, and 4 sell yam and maize. Careful: these 5 and 4 include the women who sell all three.'
+        write: 'Plantain and maize 5, yam and maize 4'
+      - say: '2 sell yam and plantain only. The word only matters: those 2 sell no maize. And 3 women sell all three items.'
+        write: 'Yam and plantain only 2; all three 3'
+        point:
+          - {line: 3, kind: underline, at: 'only', text: 'no maize', 'on': 'only', on_nth: 2}
+      - say: 'Let me draw one circle for each item. Where two circles overlap, a woman sells both items. In the very middle, where all three overlap, she sells all three.'
         show_sketch: true
-      - say: 'For three overlapping groups we use the inclusion-exclusion rule. Adding the three groups counts the overlaps too often, so we subtract each pair, then add back those in all three.'
-        write: '$n = n(Y) + n(P) + n(M) - n(Y \cap P) - n(Y \cap M) - n(P \cap M) + n(Y \cap P \cap M)$'
-      - say: 'The singles, from the stall: yam 10, plantain 14, maize 12.'
-        write: '$n(Y) = 10,\ n(P) = 14,\ n(M) = 12$'
         point:
-          - { figure: sketch, kind: circle, target: 'yam 10' }
-          - { figure: sketch, kind: circle, target: 'plantain 14' }
-          - { figure: sketch, kind: circle, target: 'maize 12' }
+          - {figure: sketch, kind: circle, target: {x: 170, y: 138}, text: 'all three', 'on': 'very middle'}
+      - say: 'Here is the plan. The picture has seven regions, and each woman stands in exactly one of them. So we fill each region with its own number, starting from the middle, and then add them up.'
+        write: 'Plan: fill each region, from the middle out'
+        'on': 'plan'
+      - section: 'The middle'
+        say: 'Start in the very middle. 3 women sell all three items.'
+        write: 'All three: $3$'
+        point:
+          - {line: 6, kind: travel, at: '3', from: {line: 3, at: '3'}, text: 'all three', 'on': '3 women'}
+          - {figure: sketch, kind: label, target: {x: 170, y: 138}, text: '3', 'on': '3 women'}
+      - section: 'The pairs'
+        say: 'Next, yam and plantain only. The question gave it to us with the word only, so it is just this region: 2.'
+        write: 'Yam and plantain only: $2$'
+        point:
+          - {figure: sketch, kind: label, target: {x: 170, y: 84}, text: '2', 'on': 'just this region'}
+      - say: 'Plantain and maize is 5 altogether. But 3 of those 5 are the women in the middle. So plantain and maize only is 5 minus 3, which is 2.'
+        write: 'Plantain and maize only: $5 - 3 = 2$'
+        point:
+          - {line: 8, kind: travel, at: '− 3', from: {line: 6, at: '3'}, text: 'the middle', 'on': '5 minus 3'}
+          - {figure: sketch, kind: label, target: {x: 197, y: 158}, text: '2', 'on': 'which is 2'}
+      - say: 'Yam and maize is 4 altogether. Take away the same 3 in the middle. 4 minus 3 is 1.'
+        write: 'Yam and maize only: $4 - 3 = 1$'
+        point:
+          - {line: 9, kind: travel, at: '− 3', from: {line: 6, at: '3'}, text: 'the middle', 'on': '4 minus 3'}
+          - {figure: sketch, kind: label, target: {x: 143, y: 158}, text: '1', 'on': '4 minus 3 is 1'}
+      - section: 'The singles'
+        say: 'Now yam only. Look at the yam on the stall: 10 women sell yam. Inside the yam circle we have already filled 2, 1 and 3. 2 plus 1 plus 3 is 6.'
+        write: 'Yam circle so far: $2 + 1 + 3 = 6$'
         doodle_do:
-          - {id: stall, op: circle, part: yam}
-          - {id: stall, op: circle, part: plantain}
-          - {id: stall, op: circle, part: maize}
-      - say: 'Plantain and maize is 5, and yam and maize is 4. These counts already include the women who sell all three.'
-        write: '$n(P \cap M) = 5,\ n(Y \cap M) = 4$'
-      - say: 'But careful: 2 sell yam and plantain only. The word only leaves out the 3 who sell all three. So the full yam and plantain overlap is 2 plus 3, which is 5.'
-        write: '$n(Y \cap P) = 2 + 3 = 5$'
+          - {id: stall, op: circle, part: yam, 'on': 'yam on the stall'}
+      - say: 'So yam only is 10 minus 6, which is 4.'
+        write: 'Yam only: $10 - 6 = 4$'
         point:
-          - { figure: sketch, kind: circle, target: 'only', text: 'leaves out the 3' }
-          - { figure: sketch, kind: circle, target: '2', text: 'plus 3' }
-      - say: 'And 3 women sell all three items.'
-        write: '$n(Y \cap P \cap M) = 3$'
+          - {line: 11, kind: travel, at: '10', from: {line: 1, at: '10'}, text: 'yam', 'on': '10 minus 6'}
+          - {line: 11, kind: travel, at: '− 6', from: {line: 10, at: '= [[6]]'}, text: 'filled', 'on': '10 minus 6'}
+          - {figure: sketch, kind: label, target: {x: 92, y: 92}, text: '4', 'on': 'which is 4'}
+      - say: 'The same for plantain. 14 women sell plantain, and its circle already holds 2, 2 and 3, which is 7. 14 minus 7 is 7.'
+        write: 'Plantain only: $14 - (2 + 2 + 3) = 14 - 7 = 7$'
+        doodle_do:
+          - {id: stall, op: circle, part: plantain, 'on': 'same for plantain'}
         point:
-          - { figure: sketch, kind: circle, target: '3', text: 'all three' }
-      - say: 'Now substitute all of these into the rule, using 5 for yam and plantain.'
-        write: '$n = 10 + 14 + 12 - 5 - 4 - 5 + 3$'
+          - {figure: sketch, kind: label, target: {x: 248, y: 92}, text: '7', 'on': '14 minus 7 is 7'}
+      - say: 'And maize. 12 women sell maize, and its circle already holds 2, 1 and 3, which is 6. 12 minus 6 is 6.'
+        write: 'Maize only: $12 - (2 + 1 + 3) = 12 - 6 = 6$'
+        doodle_do:
+          - {id: stall, op: circle, part: maize, 'on': 'And maize'}
         point:
-          - { line: 2, kind: box, text: 'the rule' }
-          - { line: 5, kind: circle, at: '= 2 + 3 = 5', text: 'not 2' }
-      - say: 'Add the singles first. 10 plus 14 is 24, and 24 plus 12 is 36.'
-        write: 'Singles: $10 + 14 + 12 = 36$'
-      - say: 'Now the pairs. 5 plus 4 plus 5 is 14.'
-        write: 'Pairs: $5 + 4 + 5 = 14$'
-      - say: 'So we have the 36 from the singles, minus the 14 from the pairs, plus the 3 in all three. 36 minus 14 is 22.'
-        write: '$n = 36 - 14 + 3 = 22 + 3$'
+          - {figure: sketch, kind: label, target: {x: 170, y: 228}, text: '6', 'on': '12 minus 6 is 6'}
+      - section: 'Add every region'
+        say: 'Look at the picture now. All seven regions have a number, and every woman is in exactly one of them. So nobody is counted twice when we add.'
+        doodle_do:
+          - {id: stall, op: pulse, part: table, 'on': 'every woman'}
+      - say: 'Add the seven regions: the middle 3, the pairs 2, 2 and 1, and the singles 4, 7 and 6.'
+        write: 'Total $= 3 + 2 + 2 + 1 + 4 + 7 + 6$'
+      - say: 'The middle and the pairs: 3 plus 2 plus 2 plus 1 is 8. The singles: 4 plus 7 plus 6 is 17. And 8 plus 17 is 25.'
+        write: '$= 8 + 17 = 25$'
         point:
-          - { line: 10, kind: move, from: { line: 8, at: '= [[36]]' }, at: '= [[36]]', text: 'singles' }
-          - { line: 10, kind: move, from: { line: 9, at: '= [[14]]' }, at: '− 14', text: 'pairs' }
-      - say: '22 plus 3 is 25. Everyone sells at least one item, so nobody is outside the three groups. Here are the 25 women, counted one by one, and 3 of them sell all three. The whole group is 25 women, which is answer choice A.'
-        write: '$n = 25$'
-        point:
-          - { figure: sketch, kind: label, target: 'total = ?', text: '25' }
-          - {line: 11, kind: highlight, at: 'n = 25', to: {doodle: women}}
+          - {figure: sketch, kind: label, target: 'total = ?', text: '25', 'on': '8 plus 17 is 25'}
+      - say: 'Here are the 25 women behind the stall, counted one by one.'
+        doodle: {name: person-small, id: women, repeat: 25, layout: grid, caption: 'the 25 women'}
+        doodle_do:
+          - {id: stall, op: arrow, part: table, to_id: women, 'on': 'behind the stall'}
+          - {id: women, op: count, 'on': 'counted one by one'}
+      - section: 'Check with the rule'
+        say: 'There is also a rule for three sets. In words: add the three circles, take away the three pairs, then add back the middle. The yam and plantain pair altogether is the 2 only, plus the 3 in the middle, which is 5.'
+        write: '$n = 10 + 14 + 12 - (5 + 4 + 5) + 3$'
+        'on': 'rule for three sets'
+      - say: '10 plus 14 plus 12 is 36. The pairs, 5 plus 4 plus 5, make 14. 36 minus 14 is 22, and 22 plus 3 is 25. The same answer.'
+        write: '$= 36 - 14 + 3 = 25$'
+      - say: 'So there are 25 women in the group, which is answer choice A.'
+        write: 'Women in the group $= 25$'
         answer: true
-        doodle: {name: person-small, id: women, caption: 'the 25 women', repeat: 25, layout: grid}
-        doodle_do:
-          - {id: women, op: count}
-          - {id: women, op: group, n: 3, text: '3 sell all three'}
     traps:
-      B: 'You went for 19. That comes from subtracting the 3 who sell all three instead of adding them back. The rule ends with plus the triple overlap: 22 plus 3 is 25.'
-      C: 'You went for 18. Re-check the rule: 10 plus 14 plus 12 is 36, minus the three pairs, 14, is 22, plus the 3 who sell everything is 25.'
-      D: 'You went for 17. That undercounts. Fill in the Venn diagram to see everyone: 3 sell all three; 2, 1 and 2 sell exactly two; and 4, 7 and 6 sell just one item. Those add up to 25.'
+      B: 'You went for 19. That comes from taking away the 3 who sell all three instead of adding them back: 36 minus 14 minus 3. Fill the regions instead: 3, then 2, 2 and 1, then 4, 7 and 6, which add up to 25.'
+      C: 'You went for 18. Some regions were left out or counted wrong. Fill the picture from the middle: 3 in the middle; 2, 2 and 1 in the pairs; 4, 7 and 6 alone. Those seven numbers add up to 25.'
+      D: 'You went for 17. That is only the women who sell one item: 4 plus 7 plus 6. The 8 women in the middle and the pairs also belong to the group, so the total is 25.'
 
   10:
     moments:
@@ -454,7 +494,7 @@ lessons:
         write: '$Q = \begin{pmatrix} 6 & 0 \\ 4 & 5 \end{pmatrix},\quad Q + P = \begin{pmatrix} 7 & 2 \\ 6 & 8 \end{pmatrix}$'
       - say: 'The first job is to find $P$ on its own. $Q + P$ minus $Q$ leaves only $P$.'
         write: '$P = (Q + P) - Q$'
-      - say: 'So we subtract the matrix $Q$ from the matrix $Q + P$. Picture each matrix as a block of four seats, two rows and two columns. We take away seat by seat.'
+      - say: 'So we take the matrix $Q + P$ minus the matrix $Q$. Picture each matrix as a block of four seats, two rows and two columns. We take away seat by seat.'
         write: '$= \begin{pmatrix} 7 & 2 \\ 6 & 8 \end{pmatrix} - \begin{pmatrix} 6 & 0 \\ 4 & 5 \end{pmatrix}$'
         doodle: {name: 'custom:1999_q10_a', id: seats, caption: 'seat by seat', size: scene}
       - say: 'Matrices subtract entry by entry: 7 minus 6, 2 minus 0, 6 minus 4, and 8 minus 5.'
@@ -766,7 +806,7 @@ lessons:
         write: 'Step 1: $4x^{3} \div 2x = 2x^{2}$'
       - say: 'Multiply back: $2x^{2}$ times $2x - 1$ is $4x^{3} - 2x^{2}$.'
         write: '$2x^{2}(2x - 1) = 4x^{3} - 2x^{2}$'
-      - say: 'Subtract that from the first two terms. The $4x^{3}$ cancels, and in the $x$ squared column, $0x^{2}$ minus negative $2x^{2}$ is plus $2x^{2}$.'
+      - say: 'Take the first two terms minus that. The $4x^{3}$ cancels, and in the $x$ squared column, $0x^{2}$ minus negative $2x^{2}$ is plus $2x^{2}$.'
         write: 'Subtract: $(4x^{3} + 0x^{2}) - (4x^{3} - 2x^{2}) = 2x^{2}$'
         doodle_do:
           - {id: cols, op: pulse, part: zero}
