@@ -109,15 +109,17 @@ interface Spot {
   roomUnder: number | null;
   /** In the right-hand panel rather than on the working. */
   panel: boolean;
+  /** The line it was placed by: a talking mouth follows the lines that make it speak. */
+  near?: number;
 }
 
 const GAP = 10;
 
 /** The art's widths to try, largest first, for a kind of doodle on this width of board. */
 function widths(due: Due, column: number, phone: boolean): number[] {
-  // A talking mouth's box holds its face, the symbol beside it and its syllables: about 130px of
-  // face on a laptop.
-  if (due.size === "mouth") return phone ? [150, 138, 126] : [176, 160, 146];
+  // A talking mouth is the lesson's main picture: its box holds the face (about two thirds of
+  // it), the symbol beside it and its syllables.
+  if (due.size === "mouth") return phone ? [176, 164, 152] : [236, 220, 204];
   if (due.size === "repeat") {
     const figure = due.small ? (phone ? [22, 20, 18] : [24, 21, 18]) : phone ? [24, 21, 18] : [30, 26, 23];
     return figure.map((px) => (due.units * px) / CELL);
@@ -233,7 +235,9 @@ function place(
   });
   for (const doodle of due) {
     const kept = settled.get(doodle.key);
-    if (kept && kept.panel === (doodle.size === "scene" && inPanel)) {
+    // A scene, or a talking mouth, takes the right-hand panel where there is one.
+    const panelled = (doodle.size === "scene" || doodle.size === "mouth") && inPanel;
+    if (kept && kept.panel === panelled && (kept.panel || kept.near === undefined || kept.near === doodle.near)) {
       spots.set(doodle.key, kept);
       if (!kept.panel) doodleBoxes.push(boxOf(kept));
       if (kept.roomUnder !== null) {
@@ -246,9 +250,9 @@ function place(
       }
       continue;
     }
-    if (doodle.size === "scene" && inPanel && panel) {
+    if (panelled && panel) {
       // The panel's own column: as wide as it is (up to a comfortable size), one under another.
-      const w = Math.min(400, panel.clientWidth - 28);
+      const w = Math.min(doodle.size === "mouth" ? 300 : 400, panel.clientWidth - 28);
       const print = footprint(doodle, w, w + 1, false);
       spots.set(doodle.key, { ...print, note: 0, outerW: w, left: 0, top: 0, roomUnder: null, panel: true });
       continue;
@@ -266,9 +270,10 @@ function place(
     const crowd = doodleBoxes.filter((box) => Math.abs(box.bottom - row.bottom) < screen).length;
     const all = widths(doodle, column, phone);
     const options = all.slice(Math.min(all.length - 1, crowd));
-    // On a phone a scene, or a group of figures wider than half the column, goes straight under
-    // its line, where it has the width.
-    const wide = phone && (doodle.size === "scene" || (options[0] ?? 0) > column * 0.5);
+    // On a phone a scene, a talking mouth, or a group of figures wider than half the column,
+    // goes straight under its line, where it has the width.
+    const wide =
+      phone && (doodle.size === "scene" || doodle.size === "mouth" || (options[0] ?? 0) > column * 0.5);
     let found: Spot | null = null;
     for (const artW of wide ? [] : options) {
       const print = footprint(doodle, Math.min(artW, column), column, phone);
@@ -290,7 +295,7 @@ function place(
         if (top < 0 || left < minX) continue;
         const box = { left, top, right: left + w, bottom: top + h };
         if (blocked.some((b) => meets(box, b, GAP)) || doodleBoxes.some((b) => meets(box, b, GAP))) continue;
-        found = { ...print, left, top, roomUnder: null, panel: false };
+        found = { ...print, left, top, roomUnder: null, panel: false, near: doodle.near };
         break;
       }
       if (found) break;
@@ -301,9 +306,11 @@ function place(
       const artW = Math.min(options[0] ?? 80, column);
       const print = footprint(doodle, artW, column, phone);
       const was = under.get(doodle.near);
-      const centred = print.outerW > column * 0.6;
+      // A mouth is centred under its line, where the eye goes next, not pushed to the edge.
+      const centred = print.outerW > column * 0.6 || doodle.size === "mouth";
       let left = centred ? minX + (column - print.outerW) / 2 : Math.max(minX, width - print.outerW);
-      let top = row.bottom + 8;
+      // Under the line's own box, where it is a card (the answer) taller than its words.
+      let top = Math.max(row.bottom, relative(line.getBoundingClientRect(), base).bottom) + 8;
       if (was) {
         // Beside the one already there, where it fits; else under it.
         if (was.left - GAP * 2 - print.outerW >= minX) {
@@ -311,7 +318,7 @@ function place(
           top = was.top;
         } else top = was.bottom + GAP;
       }
-      found = { ...print, left, top, roomUnder: doodle.near, panel: false };
+      found = { ...print, left, top, roomUnder: doodle.near, panel: false, near: doodle.near };
     }
     spots.set(doodle.key, found);
     doodleBoxes.push(boxOf(found));
@@ -476,11 +483,20 @@ export function DoodleLayer({
       const mouth = moment.mouth;
       if (mouth?.word) {
         // By its line, or (until that is written) the line before: the mouth comes in as its
-        // moment starts, so it is there for the first word said.
-        let near = index;
+        // moment starts, so it is there for the first word said. In the right-hand panel it
+        // needs no line, and comes in with its moment even when nothing is written yet. On the
+        // working (a phone), it moves down to each later line that makes it speak, so it is in
+        // view as it says its word rather than scrolled away above.
+        let speaks = index;
+        const mouthId = mouth.id?.trim();
+        if (mouthId)
+          moments.slice(index + 1, shown).forEach((later, k) => {
+            if ((later.doodleDo ?? []).some((op) => op.op === "say" && op.id === mouthId)) speaks = index + 1 + k;
+          });
+        let near = speaks;
         while (near >= 0 && (!moments[near]?.items.length || (near === shown - 1 && itemsShown === 0)))
           near -= 1;
-        const up = near >= 0;
+        const up = near >= 0 || panel !== null;
         if (up) {
           const id = mouth.id?.trim() || null;
           const box = mouthBox(mouth);
@@ -528,7 +544,7 @@ export function DoodleLayer({
       }
     });
     return out;
-  }, [artOf, hold, itemsShown, links, moments, plans, pointing, shown]);
+  }, [artOf, hold, itemsShown, links, moments, panel, plans, pointing, shown]);
 
   const [spots, setSpots] = useState<Map<string, Spot>>(() => new Map());
   const settled = useRef(new Map<string, Spot>());
@@ -560,14 +576,31 @@ export function DoodleLayer({
     (fresh: boolean) => {
       const sheet = sheetRef.current;
       if (!sheet) return;
-      if (fresh) {
-        // The board changed width: everything is found again, from the top.
+      // A talking mouth moving down to a later line: the room made for it under its old line
+      // goes, so the lines below move up; everything is found again from the top, as the lines
+      // are now, rather than placed by where they were.
+      const moved = due.some((doodle) => {
+        const kept = doodle.mouth ? settled.current.get(doodle.key) : undefined;
+        return kept !== undefined && !kept.panel && kept.near !== undefined && kept.near !== doodle.near;
+      });
+      const ink = sheet.closest(".pb-ink");
+      const screen = ink?.clientHeight ?? 700;
+      if (fresh || moved) {
+        // The board changed width: everything is found again, from the top. One at a time, in
+        // order, with the room each makes under its line made before the next is placed, so a
+        // doodle under a later line is placed where that line will be, not where it was.
         for (const [element, was] of room.current) element.style.marginBottom = was;
         room.current.clear();
         settled.current = new Map();
+        // In the order of their lines down the board (a mouth brought in early may now sit by a
+        // later line than a doodle brought in after it).
+        const downward = [...due].sort((a, b) => a.near - b.near);
+        for (let count = 1; count < downward.length; count += 1) {
+          settled.current = place(sheet, downward.slice(0, count), settled.current, screen, panel);
+          makeRoom(sheet, settled.current);
+        }
       }
-      const ink = sheet.closest(".pb-ink");
-      const placed = place(sheet, due, settled.current, ink?.clientHeight ?? 700, panel);
+      const placed = place(sheet, due, settled.current, screen, panel);
       settled.current = placed;
       makeRoom(sheet, placed);
       setSpots(placed);
@@ -615,8 +648,10 @@ export function DoodleLayer({
     if (!sheet || !ink) return;
     const timers = lookTimers.current;
     for (const [key, spot] of spots) {
-      if (shownKeys.current.has(key) || spot.roomUnder === null) continue;
-      shownKeys.current.add(key);
+      // By its key and its line: a mouth that moves down to a later line is looked at again.
+      const seen = `${key}@${spot.roomUnder}`;
+      if (shownKeys.current.has(seen) || spot.roomUnder === null) continue;
+      shownKeys.current.add(seen);
       const look = (tries: number) => {
         // The board has moved on to a later line: it is following that one now, not this.
         const lines = Array.from(sheet.querySelectorAll<HTMLElement>("[data-line]"));

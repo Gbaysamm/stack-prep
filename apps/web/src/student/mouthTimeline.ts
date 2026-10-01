@@ -7,9 +7,15 @@
  * among them (`findTarget`, which knows the papers' British IPA and the American forms espeak
  * gives), and its syllables placed over them (`syllableSpans`). `visemeAt` then reads the shape
  * for any time, holding the taught sound's shape for HOLD_S however briefly the voice says it.
+ *
+ * A moment's SCRIPT (`scriptFor`) is every time the mouth says a word in that moment's clip:
+ * each word it is given there (its own, or a later `say`), every time the voice says it after
+ * that word's cue and before the next one's, from the voice's sounds where there are some and
+ * from the spelling, fitted to where the word is said, where there are not. `partAt` reads it.
  */
 
 import { foldWord, spokenWords, type SpokenWord } from "./wordClock.js";
+import type { LessonCue } from "./api.js";
 
 /** A mouth shape. */
 export type Viseme =
@@ -34,8 +40,11 @@ export interface Phone {
   end: number;
 }
 
-/** How long the taught sound's shape is held, at least, in clip seconds. */
-export const HOLD_S = 0.4;
+/**
+ * How long the taught sound's shape is held, at least, in clip seconds: long enough to be seen
+ * however briefly the voice says it, short enough that the rest of the word still shows.
+ */
+export const HOLD_S = 0.25;
 
 const LONG = "ː";
 
@@ -347,4 +356,98 @@ export function guessedPhones(word: string): Phone[] {
     rest = rest.slice(taken.length);
   }
   return out;
+}
+
+/* ---- A moment's script: every word the mouth says in it -------------------------------- */
+
+/** A word the mouth is given in a moment: its own, or a later `say`. */
+export interface MouthSaying {
+  word: string;
+  sound: string | null;
+  cue: LessonCue | null;
+  /** The mouth's own word, whose syllables are written under it. */
+  own: boolean;
+}
+
+/** One time the mouth says a word, in clip seconds. */
+export interface Part {
+  word: string;
+  sound: string | null;
+  own: boolean;
+  speech: Speech;
+}
+
+/** At most this many times a word is said again in one moment ("gnash. Gnash.") are mouthed. */
+const MOST_TIMES = 3;
+
+/** A word's sounds guessed from its spelling, fitted into [start, end]. */
+export function fittedGuess(
+  word: string,
+  window: [number, number],
+  sound: string | null | undefined,
+  syllables: string[] | null | undefined,
+): Speech {
+  const guess = guessedPhones(word);
+  const length = guess[guess.length - 1]?.end ?? 0.4;
+  const base = speechFor(guess, [0, length], sound, syllables);
+  const span = Math.max(0.12, window[1] - window[0]);
+  return shifted(base, window[0], span / Math.max(0.05, length));
+}
+
+/** Where the cue's words start in `words` (their nth time, else the first), or null. */
+function cueStart(words: SpokenWord[], cue: LessonCue | null): number | null {
+  if (!cue || !cue.word) return null;
+  const found = runs(words, wanted(cue.word));
+  const hit = found[Math.max(1, cue.nth || 1) - 1] ?? found[0];
+  return hit ? words[hit[0]]!.start : null;
+}
+
+/**
+ * Every time the mouth says a word in a moment, in order. `words` are the clip's words (the
+ * voice's own timings, or estimated from the text); `phones` its sounds, where the voice gives
+ * them (else each word's sounds are guessed from its spelling and fitted to where it is said).
+ */
+export function scriptFor(
+  sayings: MouthSaying[],
+  words: SpokenWord[],
+  phones: Phone[] | null,
+  syllables: string[] | null | undefined,
+): Part[] {
+  const starts = sayings.map((one) => cueStart(words, one.cue));
+  const parts: Part[] = [];
+  let floor = -Infinity;
+  sayings.forEach((one, k) => {
+    const own = one.own ? syllables : null;
+    const from = Math.max(floor, starts[k] ?? floor);
+    const next = starts.slice(k + 1).find((at): at is number => at !== null && at > from) ?? Infinity;
+    const said = runs(words, wanted(one.word))
+      .filter(([first]) => words[first]!.start >= from - 0.01 && words[first]!.start < next - 0.01)
+      .slice(0, MOST_TIMES);
+    if (!said.length) {
+      // Not heard in the clip: said silently at its cue, or just after the word before.
+      const last = parts[parts.length - 1];
+      const at = starts[k] ?? (last ? finishedAt(last.speech) + 0.1 : words[0]?.start ?? 0.3);
+      const guess = guessedPhones(one.word);
+      const speech = fittedGuess(one.word, [at, at + (guess[guess.length - 1]?.end ?? 0.4)], one.sound, own);
+      parts.push({ word: one.word, sound: one.sound, own: one.own, speech });
+      floor = speech.end;
+      return;
+    }
+    for (const [first, last] of said) {
+      const window: [number, number] = [words[first]!.start, words[last]!.end];
+      let speech = phones?.length ? speechFor(phones, window, one.sound, own) : null;
+      if (!speech || !speech.phones.length) speech = fittedGuess(one.word, window, one.sound, own);
+      parts.push({ word: one.word, sound: one.sound, own: one.own, speech });
+      floor = window[1];
+    }
+  });
+  return parts;
+}
+
+/** The part being said at `t` (its taught sound's hold included), or null between words. */
+export function partAt(parts: Part[], t: number): Part | null {
+  for (const part of parts) {
+    if (t >= part.speech.start - 0.02 && t <= finishedAt(part.speech) + 0.06) return part;
+  }
+  return null;
 }

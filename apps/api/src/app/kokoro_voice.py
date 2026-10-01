@@ -64,6 +64,9 @@ class Clip:
     words: list[dict[str, Any]] = field(default_factory=list)
     #: True when the times are shared out by length rather than read from the model.
     estimated: bool = False
+    #: The model's own timed phoneme tokens, as said in the trimmed clip: kept beside it as the
+    #: talking mouth's sounds (app/mouth_voice.py), so they are never made again.
+    tokens: list[tuple[str, float, float]] = field(default_factory=list)
 
     def timings(self) -> dict[str, Any]:
         return {
@@ -295,6 +298,7 @@ def synthesize(said: str, settings: Settings) -> Clip | None:
             audio, moved = trim(audio, rate)
             duration = len(audio) / rate
             placed: list[dict[str, Any]] = []
+            shifted: list[tuple[str, float, float]] = []
             if timed:
                 shifted = [
                     (t.phoneme, max(0.0, t.start + moved), min(duration, t.end + moved))
@@ -304,7 +308,7 @@ def synthesize(said: str, settings: Settings) -> Clip | None:
             estimated = not placed
             if estimated:
                 placed = estimated_words(words, PAD_BEFORE_S, duration - PAD_AFTER_S)
-            return Clip(to_mp3(audio, rate), duration, placed, estimated)
+            return Clip(to_mp3(audio, rate), duration, placed, estimated, shifted)
     except Exception as failed:
         _log.warning("kokoro failed: %s: %s", type(failed).__name__, failed)
         return None

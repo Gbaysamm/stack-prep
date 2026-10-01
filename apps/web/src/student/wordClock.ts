@@ -66,11 +66,11 @@ function mathsSpoken(latex: string): number {
 const PAUSE: Record<string, number> = { ",": 3, ";": 4, ":": 4, ".": 6, "?": 6, "!": 6 };
 
 /**
- * Each matchable word of `say`, with where it starts as a share (0 to 1) of the time the whole
- * line takes to say.
+ * Each matchable word of `say`, with where it starts and ends as a share (0 to 1) of the time
+ * the whole line takes to say.
  */
-export function wordShares(say: string): { word: string; share: number }[] {
-  const out: { word: string; at: number }[] = [];
+export function wordSpans(say: string): { word: string; from: number; to: number; pause: boolean }[] {
+  const out: { word: string; at: number; end: number; pause: boolean }[] = [];
   let at = 0;
   const pieces = say.split(/(\$[^$]*\$)/g);
   for (const piece of pieces) {
@@ -86,15 +86,50 @@ export function wordShares(say: string): { word: string; share: number }[] {
       }
       for (const part of token.split(/[-–—/]/)) {
         const word = foldWord(part);
-        if (word) out.push({ word, at });
+        if (word) out.push({ word, at, end: at + part.replace(/[^\p{L}\p{N}]/gu, "").length, pause: false });
         at += part.length + 1;
       }
-      const last = token[token.length - 1] ?? "";
+      const last = token.replace(/["'”’)]+$/, "").slice(-1);
       at += PAUSE[last] ?? 0;
+      // The voice pauses after a word that ends a phrase (clipSpeech.ts places the pause).
+      if (PAUSE[last] !== undefined && out.length) out[out.length - 1]!.pause = true;
     }
   }
   const total = Math.max(1, at);
-  return out.map(({ word, at: start }) => ({ word, share: start / total }));
+  return out.map(({ word, at: start, end, pause }) => ({ word, from: start / total, to: end / total, pause }));
+}
+
+/**
+ * Each matchable word of `say`, with where it starts as a share (0 to 1) of the time the whole
+ * line takes to say.
+ */
+export function wordShares(say: string): { word: string; share: number }[] {
+  return wordSpans(say).map(({ word, from }) => ({ word, share: from }));
+}
+
+/** About how long the line takes to say aloud, in seconds, at an ordinary speaking pace. */
+export function typicalSeconds(say: string): number {
+  // The same count wordSpans shares out: letters, spaces and the pauses punctuation makes, at
+  // about fifteen a second.
+  let units = 0;
+  for (const piece of say.split(/(\$[^$]*\$)/g)) {
+    if (piece.startsWith("$") && piece.endsWith("$") && piece.length > 1) units += mathsSpoken(piece) + 1;
+    else for (const ch of piece) units += PAUSE[ch] !== undefined ? PAUSE[ch]! + 1 : 1;
+  }
+  return Math.max(0.6, units / 15);
+}
+
+/**
+ * The words of `say` as a voice with no word timings is estimated to say them: placed across
+ * [start, end] seconds by their share of the line.
+ */
+export function estimatedSpoken(say: string, start: number, end: number): SpokenWord[] {
+  const span = Math.max(0.1, end - start);
+  return wordSpans(say).map(({ word, from, to }) => ({
+    w: word,
+    start: start + from * span,
+    end: start + Math.max(to, from + 0.01) * span,
+  }));
 }
 
 /**

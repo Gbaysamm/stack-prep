@@ -154,6 +154,27 @@ Additions made while building the mouth (1 October 2026):
   own sound (/ɪ/ for "ship").
 - **`pulse`:** allowed on a mouth id.
 
+Fixed after testing on the live site (1 October 2026), where the mouth mostly stood still:
+- **It never waits for the network.** It used to start only once `/phones` answered, which for
+  Kokoro re-ran the model (1.7 s to 15 s, queued behind the voice), and for a studio clip not yet
+  heard was a 404 retried for 7.5 s: by then the word was said. Now each moment's script starts at
+  once from an estimate (the line's words spread over the clip, each word's sounds from its
+  spelling) and is replaced by the voice's own sounds when they come. Kokoro keeps its sounds
+  beside the clip as it is made (`<clip>.phones.json`), so asking for them is a file read.
+- **An estimate is fitted to the clip:** for the studio voice (no timings), the clip is decoded in
+  the browser and the text's pauses are put in its silences (`clipSpeech.ts`): word starts are
+  about 70 ms out against Kokoro's real timings, against about 150 ms spread evenly.
+- **Its clock is what is heard:** the playing clip's time; with no voice (none here, or it
+  failed), the time since the line came up, fitted to the board's reading time.
+- **Every word it is given is said, every time the voice says it:** all of a moment's `say` ops
+  (only the last was said before), and a word said twice ("gnash. Gnash.") is mouthed twice.
+- **Size and place:** about 300 px in the right-hand panel on a wide screen (a lesson with a
+  mouth and no figure or passage has the panel); elsewhere about 236 px (phone about 176 px),
+  centred under the line, moving down to each later line that makes it speak. The side view
+  names its parts (roof, teeth, tongue, lips) and rings where the tongue touches.
+- The taught sound is held for at least 0.25 s (it was 0.4 s, which hid the rest of the word),
+  and the shape is aimed 40 ms ahead of the sound so the eased drawing lands on it.
+
 ## 8. Live diagrams: graphs, Venn diagrams, charts, number lines, trees, tables, ogives
 
 Added 1 October 2026. A diagram is described as **data**, and the board draws it with the pen, in

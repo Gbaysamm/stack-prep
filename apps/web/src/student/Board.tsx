@@ -219,7 +219,8 @@ const MARK_AFTER_WRITE_MS = 260;
 /** Marks for a line the hand never reported finishing go up after this long regardless. */
 const MARK_SAFETY_MS = 9000;
 
-/** How long a line is left up to be read when there is no voice to hear it by. */
+/** How long a line is left up to be read when there is no voice to hear it by (Mouth.tsx says
+ *  its words within the same time: change both together). */
 function readingMs(said: string): number {
   return Math.min(9000, Math.max(2500, said.length * 55));
 }
@@ -1883,8 +1884,10 @@ export function Board({
     !hasSide &&
     (lesson?.beats ?? []).some((beat) =>
       [beat.doodle, ...(beat.doodles ?? [])].some((doodle) => doodle?.size === "scene") ||
-      // A live diagram takes it too (DiagramLayer.tsx).
-      Boolean(beat.diagram),
+      // A live diagram takes it too (DiagramLayer.tsx), and a talking mouth (Mouth.tsx), the
+      // picture an oral English lesson is about.
+      Boolean(beat.diagram) ||
+      Boolean(beat.mouth?.word),
     );
   // The marker puts itself down for each line and lifts off when it is done, so it is only
   // held back while the board is waiting for a tap or has stepped back for the student.

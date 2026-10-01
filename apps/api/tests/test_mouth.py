@@ -371,6 +371,26 @@ async def test_kokoro_phones_are_the_models_own_and_kept(
     assert len(model) == 1, "the second asking reads what was kept"
 
 
+async def test_kokoro_phones_are_kept_as_the_clip_is_made_so_never_made_again(
+    client: httpx.AsyncClient, model: list[str], paid: list[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def clip(text: str, settings: Settings) -> kokoro_voice.Clip:
+        tokens = [("s", 0.08, 0.18), ("ˈ", 0.18, 0.2), ("i", 0.2, 0.3), ("ː", 0.3, 0.35)]
+        return kokoro_voice.Clip(
+            b"kokoro-mp3", 2.0, [{"w": "Say", "start": 0.08, "end": 0.35}], False, tokens
+        )
+
+    monkeypatch.setattr(kokoro_voice, "synthesize", clip)
+    got = await client.get(f"{PHONES}?engine=kokoro")
+    assert got.status_code == 200
+    body = got.json()
+    assert [p["p"] for p in body["phones"]] == ["s", "iː"]
+    assert body["phones"][1]["start"] == pytest.approx(0.18), "the stress mark starts its vowel"
+    assert body["words"][0]["w"] == "Say"
+    assert model == [], "the sounds came from the synthesis that made the clip"
+    assert paid == []
+
+
 async def test_studio_phones_are_estimated_over_the_clip_without_paying(
     client: httpx.AsyncClient, paid: list[str], monkeypatch: pytest.MonkeyPatch
 ) -> None:

@@ -103,6 +103,11 @@ async def _made_by_kokoro(line: str, settings: Settings, cached: Path) -> Path |
         return None
     # The timings first: a clip found on disk is taken as finished, words and all.
     write_atomically(words_path(cached), kokoro_voice.dumps(clip))
+    # And the talking mouth's sounds, from this same synthesis: asking for them later is then
+    # a file read, never the model run again while the student is already hearing the line.
+    from app import mouth_voice
+
+    mouth_voice.keep_kokoro_phones(cached, clip)
     write_atomically(cached, clip.mp3)
     return cached
 

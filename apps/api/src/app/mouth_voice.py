@@ -5,8 +5,10 @@ of a word's sounds in time with the voice, so it needs the line's phonemes and t
 `phones: [{p, start, end}]`, in IPA, in seconds into the clip.
 
 * THE KOKORO VOICE knows them: the model reports how long it holds every phoneme. They are
-  read from the same synthesis that made the clip (the model is deterministic, so running it
-  again for a clip made before this existed gives the same times), merged from the model's
+  kept from the synthesis that makes the clip, as it is made, so asking for them is a file
+  read (a clip made before that has the model run again: it is deterministic, so the times
+  are the same, but it takes a second or more, which the board covers with an estimate),
+  merged from the model's
   one-character tokens into sounds (a stress mark goes with the vowel after it, a length mark
   with the vowel before it, t+ʃ is one sound), and kept beside the clip as
   `<name>.phones.json`.
@@ -271,6 +273,23 @@ def _read(path: Path) -> dict[str, Any] | None:
     except (OSError, ValueError):
         return None
     return kept
+
+
+def keep_kokoro_phones(clip_path: Path, clip: kokoro_voice.Clip) -> None:
+    """Keep a Kokoro clip's sounds beside it as it is made (voice_store._made_by_kokoro)."""
+    phones = merge_phones(clip.tokens)
+    if not phones:
+        return
+    found = {
+        "engine": "kokoro",
+        "duration": round(clip.duration, 3),
+        "estimated": False,
+        "words": clip.words,
+        "phones": phones,
+    }
+    voice_store.write_atomically(
+        phones_path(clip_path), json.dumps(found, ensure_ascii=False).encode()
+    )
 
 
 def beat_phones(line: str, settings: Settings, engine: voice_store.Engine) -> dict[str, Any] | None:
