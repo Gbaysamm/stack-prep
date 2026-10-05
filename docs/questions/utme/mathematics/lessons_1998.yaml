@@ -9,91 +9,101 @@ exam_year: 1998
 lessons:
   1:
     moments:
-      - say: 'We''re told that $1011_{2} + X_{7} = 25_{10}$, and we want $X$. Notice there are three different bases here: base 2, base 7 and base 10.'
-        write: '$1011_{2} + X_{7} = 25_{10}$'
-      - say: 'The safest plan is to change everything into base ten, solve there, and then change the answer back into base 7, because $X$ carries the little 7.'
-        write: 'Plan: work in base ten, then write $X$ in base 7'
-      - say: 'Start with $1011_{2}$. In base 2 the place values, from the right, are the powers of 2: 1, 2, 4 and 8. Picture sticks: a bundle of 8, no bundle of 4, a bundle of 2 and one loose stick.'
-        write: '$1011_{2} = 1 \times 2^{3} + 0 \times 2^{2} + 1 \times 2^{1} + 1 \times 2^{0}$'
-        doodle: {name: 'custom:1998_q01_a', id: sticks, caption: 'base 2: bundles of 8, 4, 2 and 1', size: scene}
-      - say: '2 cubed is 8, 2 squared is 4, 2 to the power 1 is 2, and 2 to the power 0 is 1.'
+      - section: 'The question'
+        say: 'One-zero-one-one base two, plus X base seven, equals 25 base ten. Three bases at once, so we work in base ten, then write X in base seven.'
+        write: 'If $1011_{2} + X_{7} = 25_{10}$, solve for $X$'
+      - say: 'First, change one-zero-one-one base two to base ten.'
+        write: 'Solution'
+      - section: 'Step 1: base 2 to base 10'
+        say: 'Write the index numbers over the digits, from nought on the right: nought, one, two, three.'
+        write: '$\overset{3}{1}\,\overset{2}{0}\,\overset{1}{1}\,\overset{0}{1}_{2}$'
+      - say: 'Each digit times two to the power of its index: 1 times 2 cubed, plus 0 times 2 squared, plus 1 times 2 to the 1, plus 1 times 2 to the nought.'
+        write: '$= 1 \times 2^{3} + 0 \times 2^{2} + 1 \times 2^{1} + 1 \times 2^{0}$'
+      - say: '2 cubed is 8, 2 squared is 4, 2 to the power 1 is 2, and 2 to the power nought is 1.'
         write: '$= 1 \times 8 + 0 \times 4 + 1 \times 2 + 1 \times 1$'
-      - say: 'Now multiply. 1 times 8 is 8, 0 times 4 is 0, 1 times 2 is 2, and 1 times 1 is 1.'
+      - say: '1 times 8 is 8, 0 times 4 is 0, 1 times 2 is 2, and 1 times 1 is 1.'
         write: '$= 8 + 0 + 2 + 1$'
-      - say: '8 plus 0 plus 2 plus 1 is 11. Count the sticks in the picture: 11. So $1011_{2}$ is worth 11 in base ten.'
+      - say: '8 plus 0 plus 2 plus 1 is 11, base ten.'
         write: '$= 11_{10}$'
-        doodle_do:
-          - {id: sticks, op: stage, stage: 'custom:1998_q01_a2'}
-      - say: 'Now go back to the equation. Put in the 11 we just found, and the 25 is already in base ten.'
-        write: 'In base ten: $11 + X = 25$'
+      - section: 'Step 2: find X in base ten'
+        say: 'Put 11 into the equation. 25 is already in base ten.'
+        write: '$11 + X = 25$'
         point:
-          - {line: 6, kind: move, from: {line: 5, at: '[[11]]10'}, at: '11', text: '1011 in base ten'}
-          - {line: 6, kind: move, from: {line: 0, at: '= 25'}, at: '25', text: 'given'}
-      - say: 'Subtract 11 from both sides. 25 minus 11 is 14. Those are the 14 loose sticks on the base 7 side.'
+          - {line: 7, kind: move, from: {line: 6, at: '=[[11]]10'}, at: '11'}
+      - say: 'Subtract 11 from both sides. 25 minus 11 is 14.'
         write: '$X = 25 - 11 = 14_{10}$'
-        point:
-          - {line: 7, kind: move, from: {line: 6, at: '11 +'}, at: '− 11', text: 'across the ='}
-          - {line: 7, kind: highlight, at: '25 - 11 = 14', to: {doodle: sticks, part: fourteen}}
-        doodle_do:
-          - {id: sticks, op: stage, stage: 'custom:1998_q01_a3'}
-      - say: 'But $X$ is written in base 7, so 14 must be changed into base 7. We divide by 7 and keep the remainder. 14 divided by 7 is 2, remainder 0.'
-        write: 'Into base 7: $14 \div 7 = 2 \text{ remainder } 0$'
-      - say: 'Now divide the 2 by 7. That is 0, remainder 2.'
-        write: '$2 \div 7 = 0 \text{ remainder } 2$'
-      - say: 'Read the remainders from the bottom up: 2, then 0. Watch the 14 sticks get tied into bundles of 7: two bundles and nothing left over. So 14 in base ten is 20 in base 7.'
+      - section: 'Step 3: base 10 to base 7'
+        say: 'But X carries the base seven label. So divide 14 by 7 on the ladder, and keep the remainders.'
+        diagram: {id: L, kind: ladder, divisor: 7, number: 14, 'on': 'ladder'}
+      - say: '14 divided by 7 is 2, remainder 0.'
+        diagram_do:
+          - {id: L, op: step}
+      - say: '2 divided by 7 is 0, remainder 2. We stop at 0.'
+        diagram_do:
+          - {id: L, op: step}
+      - say: 'Read the remainders from the bottom up: two, zero. So 14 is two-zero base seven.'
+        diagram_do:
+          - {id: L, op: read, 'on': 'bottom up'}
         write: '$14_{10} = 20_{7}$'
-        doodle_do:
-          - {id: sticks, op: stage, stage: 'custom:1998_q01_a4'}
-      - say: 'Let''s check. 20 in base 7 means 2 sevens and 0 units, which is 14. And 11 plus 14 is 25, just as the question says.'
-        write: 'Check: $20_{7} = 2 \times 7 + 0 = 14$, and $11 + 14 = 25$'
-      - say: 'So $X$ is 20, which is answer choice B.'
-        write: '$X = 20$'
+        point:
+          - {line: 12, kind: highlight, at: '207', to: {diagram: L, part: result}}
+      - section: 'Check'
+        say: 'Check by expanding two-zero base seven: 2 times 7, plus 0 times 1, is 14.'
+        write: '$\overset{1}{2}\,\overset{0}{0}_{7} = 2 \times 7^{1} + 0 \times 7^{0} = 14$'
+      - say: 'And 11 plus 14 is 25, just as the question says.'
+        write: '$11 + 14 = 25\ \checkmark$'
+      - section: 'Answer'
+        say: 'Therefore X is two-zero base seven, which is option B.'
+        write: '$\therefore X = 20_{7}$'
         answer: true
     traps:
-      A: 'You went for 14. That is the right value in base ten, but $X$ carries the subscript 7, so 14 must be changed to base 7: two sevens and no units, which is 20.'
-      C: 'You went for 24. In base 7 that means 2 sevens plus 4, which is 18, and 11 plus 18 is 29, not 25. Convert 14 carefully: 14 divided by 7 is exactly 2, remainder 0.'
-      D: 'You went for 25. That is the total on the right-hand side, not $X$. Take away the 11 that $1011_{2}$ is worth first, then convert what is left to base 7.'
+      A: 'You went for 14. That is the right value, but in base ten. X carries the base seven label, so 14 goes on the ladder: two-zero base seven.'
+      C: 'You went for two-four. In base seven that is 2 times 7 plus 4, which is 18, and 11 plus 18 is 29, not 25. 14 divided by 7 is 2, remainder 0.'
+      D: 'You went for 25. That is the total on the right, not X. Take away the 11 that one-zero-one-one base two is worth, then change 14 to base seven.'
 
   2:
     moments:
-      - say: 'We want the value of this bracket raised to the power negative 1, correct to 2 decimal places.'
-        write: '$\left[\dfrac{1}{0.03} \div \dfrac{1}{0.024}\right]^{-1}$'
-      - say: 'Let''s work from the inside out: first the division inside the bracket, then the power of negative 1 outside it.'
-        write: 'Step 1: the bracket'
-      - say: 'Dividing by a fraction is the same as multiplying by its reciprocal, the fraction turned upside down. So we flip 1 over 0.024 and multiply.'
-        write: '$\dfrac{1}{0.03} \div \dfrac{1}{0.024} = \dfrac{1}{0.03} \times \dfrac{0.024}{1}$'
-      - say: 'On top, 1 times 0.024 is 0.024. On the bottom, 0.03 times 1 is 0.03.'
+      - section: 'The question'
+        say: 'A square bracket with a power of negative 1 outside, correct to 2 decimal places. Two flips happen in this question. Miss one and you land on a trap.'
+        write: '$\left[\dfrac{1}{0.03} \div \dfrac{1}{0.024}\right]^{-1}$ (2 d.p.)'
+      - section: 'Solution'
+        say: 'Solution. By BODMAS, brackets first: we simplify inside the bracket, then use the power outside it.'
+        write: 'By BODMAS: the bracket first'
+      - section: 'Step 1: the bracket'
+        say: 'To divide by a fraction, multiply by its reciprocal: keep the first, change divide to times, turn the second upside down.'
+        write: 'Bracket: $\dfrac{1}{0.03} \div \dfrac{1}{0.024} = \dfrac{1}{0.03} \times \dfrac{0.024}{1}$'
+      - say: 'Top times top is 0.024. Bottom times bottom is 0.03.'
         write: '$= \dfrac{0.024}{0.03}$'
-      - say: 'To clear the decimals, multiply the top and the bottom by 1000. 0.024 becomes 24, and 0.03 becomes 30.'
-        write: '$= \dfrac{0.024 \times 1000}{0.03 \times 1000} = \dfrac{24}{30}$'
-      - say: 'Divide the top and bottom by 6. 24 divided by 6 is 4, and 30 divided by 6 is 5. Picture a bar cut into 5 equal pieces, with 4 of them shaded.'
-        write: '$= \dfrac{24 \div 6}{30 \div 6} = \dfrac{4}{5}$'
+      - say: 'Clear the decimals: multiply the top and the bottom by 1000. 0.024 becomes 24, and 0.03 becomes 30.'
+        write: '$= \dfrac{24}{30}$'
+      - say: 'Divide the top and the bottom by 6: 24 divided by 6 is 4, and 30 divided by 6 is 5. Picture a bar of 5 pieces with 4 shaded.'
+        write: '$= \dfrac{4}{5} = 0.8$'
         doodle: {name: 'custom:1998_q02_a', id: bar, caption: '4 pieces out of 5'}
-      - say: 'And 4 over 5 as a decimal is 0.8, the shaded part of the bar. So the whole bracket is worth 0.8.'
-        write: '$= 0.8$'
         point:
-          - {line: 6, kind: highlight, at: '0.8', to: {doodle: bar, part: row1}}
-        doodle_do:
-          - {id: bar, op: circle, part: row1}
-      - say: 'Step 2, the power of negative 1. A power of negative 1 means take the reciprocal, 1 over the number. So we put the 0.8 we just found under a 1.'
-        write: 'Step 2: $[0.8]^{-1} = \dfrac{1}{0.8}$'
-        point:
-          - {line: 7, kind: move, from: {line: 6, at: '0.8'}, at: '= [[0.8]]1', text: 'under a 1'}
-      - say: '0.8 is 4 over 5, and 1 over 4 over 5 is that fraction turned upside down, 5 over 4. Look at the bar again: now the 4 shaded pieces count as one whole, and the full bar is 5 of those pieces.'
-        write: '$= \dfrac{1}{\tfrac{4}{5}} = \dfrac{5}{4}$'
+          - {line: 5, kind: highlight, at: '0.8', to: {doodle: bar, part: row1}}
+      - section: 'Step 2: the power'
+        say: 'Now the power outside. A power of negative 1 means the reciprocal: x to the power negative 1 is 1 over x.'
+        write: '$x^{-1} = \dfrac{1}{x}$'
+      - say: 'So the bracket, 4 over 5, to the power negative 1 is that fraction turned upside down: 5 over 4.'
+        write: '$\left(\dfrac{4}{5}\right)^{-1} = \dfrac{5}{4}$'
         doodle_do:
           - {id: bar, op: stage, stage: 'custom:1998_q02_a2'}
-      - say: '5 divided by 4 is 1.25: one whole and a quarter more, just as the bar shows.'
+      - say: '5 divided by 4 is 1.25: one whole and a quarter more, as the bar shows.'
         write: '$= 1.25$'
         doodle_do:
           - {id: bar, op: label, part: row2, text: '1.25'}
-      - say: 'Correct to 2 decimal places, that is 1.25, which is answer choice B.'
-        write: 'Answer: $1.25$'
+      - say: 'To 2 decimal places, 1.25 already has exactly two digits after the point, so it stays 1.25.'
+        write: '$= 1.25$ (2 d.p.)'
+      - section: 'Check'
+        say: 'Check: 1.25 times the bracket, 0.8, should give 1. 1.25 times 0.8 is 1.00. It agrees.'
+        write: 'Check: $1.25 \times 0.8 = 1$ ✓'
+      - say: 'Therefore the value is 1.25: option B.'
+        write: '$\therefore$ value $= 1.25$ (B)'
         answer: true
     traps:
-      A: 'You went for 3.76. That doesn''t come from this working. The bracket simplifies to 0.024 over 0.03, which is 0.8, and flipping 0.8 gives 1.25.'
-      C: 'You went for 0.94. Check the division inside the bracket: dividing by 1 over 0.024 means multiplying by 0.024, which gives 0.8. Then the power of negative 1 flips that to 1.25.'
-      D: 'You went for 0.75. The bracket is 0.024 over 0.03, which is 0.8, not 0.75. Then the power of negative 1 turns it into 1 over 0.8, which is 1.25; don''t forget that final flip.'
+      A: 'You went for 3.76. That does not come from this working. The bracket simplifies to 0.024 over 0.03, which is 0.8, and its reciprocal is 1.25.'
+      C: 'You went for 0.94. Check the bracket: dividing by 1 over 0.024 means multiplying by 0.024, which gives 0.8. The power of negative 1 then turns it to 1.25.'
+      D: 'You went for 0.75. The bracket is 0.024 over 0.03, which is 0.8, not 0.75. And the power of negative 1 still has to turn it over: 1 over 0.8 is 1.25.'
 
   3:
     moments:
@@ -120,7 +130,7 @@ lessons:
           - {id: blocks, op: pulse, part: root}
       - say: 'The law of indices for multiplying: when we multiply powers of the same base, we add the indices.'
         write: '$a^{m} \times a^{n} = a^{m + n}$'
-      - say: 'When we multiply powers of the same base, we add the indices. So the new index is a half plus negative 1.'
+      - say: 'So the new index is a half plus negative 1.'
         write: '$c^{1/3} = a^{\frac{1}{2} + (-1)}$'
       - say: 'A half plus negative 1 is a half minus 1, which is negative a half.'
         write: '$c^{1/3} = a^{-1/2}$'
@@ -148,9 +158,9 @@ lessons:
         doodle: {name: 'custom:1998_q04_a', id: count, caption: 'a log counts the factors'}
       - section: 'What we know'
         say: 'The first equation has logs in base 4.'
-        write: '$\log_{4}(y - 1) + \log_{4}\left(\tfrac{1}{2}x\right) = 1$'
+        write: '$\log_{4}(y + 1) + \log_{4}\left(\tfrac{1}{2}x\right) = 1$'
       - say: 'The second equation has logs in base 2.'
-        write: '$\log_{2}(y + 1) + \log_{2}x = 2$'
+        write: '$\log_{2}(y - 1) + \log_{2}x = 2$'
       - say: 'The plan: turn each equation into one with no logs at all. Then solve the two equations together.'
         write: 'Plan: remove the logs, then solve'
         'on': 'plan'
@@ -163,59 +173,57 @@ lessons:
         write: 'Adding: $\log_{a}M + \log_{a}N = \log_{a}(M \times N)$'
         'on': 'adding logs'
       - section: 'The first equation'
-        say: 'Use fact two on the first equation. Both logs are base 4, so multiply what is inside: y minus 1, times a half x.'
-        write: '$\log_{4}\left[(y - 1) \times \tfrac{1}{2}x\right] = 1$'
+        say: 'Use fact two on the first equation. Both logs are base 4, so multiply what is inside: y plus 1, times a half x.'
+        write: '$\log_{4}\left[(y + 1) \times \tfrac{1}{2}x\right] = 1$'
         point:
           - {line: 6, kind: arrow, from: {line: 5, at: '(M×N)'}, at: '×', text: 'fact two', 'on': 'multiply what is inside'}
       - say: 'Now fact one. Log base 4 of that product is 1, so the product is 4 to the power 1, one 4, which is 4.'
-        write: '$(y - 1) \times \tfrac{1}{2}x = 4^{1} = 4$'
+        write: '$(y + 1) \times \tfrac{1}{2}x = 4^{1} = 4$'
         point:
           - {line: 7, kind: highlight, at: '41 = 4', to: {doodle: count, part: fours}, 'on': 'one 4'}
       - say: 'Multiply both sides by 2 to clear the half. 4 times 2 is 8. We call this equation 1.'
-        write: '$(y - 1)x = 8 \quad (1)$'
+        write: '$(y + 1)x = 8 \quad (1)$'
       - section: 'The second equation'
-        say: 'Now the second equation. Both logs are base 2, so by fact two, multiply what is inside: y plus 1, times x.'
-        write: '$\log_{2}\left[(y + 1)x\right] = 2$'
+        say: 'Now the second equation. Both logs are base 2, so by fact two, multiply what is inside: y minus 1, times x.'
+        write: '$\log_{2}\left[(y - 1)x\right] = 2$'
       - say: 'By fact one, log base 2 of that product is 2, so the product is 2 to the power 2: two 2s multiplied, which is 4. Watch the two 2s join the picture. We call this equation 2.'
-        write: '$(y + 1)x = 2^{2} = 4 \quad (2)$'
+        write: '$(y - 1)x = 2^{2} = 4 \quad (2)$'
         doodle_do:
           - {id: count, op: stage, stage: 'custom:1998_q04_a2', 'on': 'two 2s join the picture'}
         point:
           - {line: 10, kind: highlight, at: '22 = 4', to: {doodle: count, part: twos}, 'on': 'two 2s join the picture'}
       - section: 'Solve the pair'
-        say: 'Open the bracket in equation 1. y times x is xy, and minus 1 times x is minus x. So xy minus x equals 8.'
-        write: '(1): $xy - x = 8$'
-      - say: 'Open the bracket in equation 2 the same way: xy plus x equals 4.'
-        write: '(2): $xy + x = 4$'
+        say: 'Open the bracket in equation 1. y times x is xy, and 1 times x is x. So xy plus x equals 8.'
+        write: '(1): $xy + x = 8$'
+      - say: 'Open the bracket in equation 2 the same way: xy minus x equals 4.'
+        write: '(2): $xy - x = 4$'
       - say: 'Now take equation 2 away from equation 1. Watch the xy: xy minus xy is 0, so it disappears. That is why we subtract.'
-        write: '(1) $-$ (2): $(xy - x) - (xy + x) = 8 - 4$'
+        write: '(1) $-$ (2): $(xy + x) - (xy - x) = 8 - 4$'
         point:
-          - {line: 13, kind: travel, at: '(xy − x)', from: {line: 11, at: 'xy − x'}, text: '(1)', 'on': 'equation 1'}
-          - {line: 13, kind: travel, at: '(xy + x)', from: {line: 12, at: 'xy + x'}, text: '(2)', 'on': 'equation 2'}
-      - say: 'What is left: minus x, minus x, is minus 2x. On the right, 8 minus 4 is 4.'
-        write: '$-2x = 4$'
-      - say: 'Divide both sides by negative 2. 4 divided by negative 2 is negative 2.'
-        write: '$x = \dfrac{4}{-2} = -2$'
-      - say: 'Now put x equals negative 2 into equation 2.'
-        write: 'Into (2): $(y + 1)(-2) = 4$'
+          - {line: 13, kind: travel, at: '(xy + x)', from: {line: 11, at: 'xy + x'}, text: '(1)', 'on': 'equation 1'}
+          - {line: 13, kind: travel, at: '(xy − x)', from: {line: 12, at: 'xy − x'}, text: '(2)', 'on': 'equation 2'}
+      - say: 'What is left: x minus negative x is x plus x, which is 2x. On the right, 8 minus 4 is 4.'
+        write: '$2x = 4$'
+      - say: 'Divide both sides by 2. 4 divided by 2 is 2.'
+        write: '$x = \dfrac{4}{2} = 2$'
+      - say: 'Now put x equals 2 into equation 2.'
+        write: 'Into (2): $(y - 1)(2) = 4$'
         point:
-          - {line: 16, kind: travel, at: '(−2)', from: {line: 15, at: '4 = [[−2]]'}, text: 'x', 'on': 'x equals negative 2'}
-      - say: 'Divide both sides by negative 2. 4 divided by negative 2 is negative 2. So y plus 1 equals negative 2.'
-        write: '$y + 1 = \dfrac{4}{-2} = -2$'
-      - say: 'Subtract 1 from both sides. Negative 2 minus 1 is negative 3.'
-        write: '$y = -2 - 1 = -3$'
+          - {line: 16, kind: travel, at: '[[(2)]] = 4', from: {line: 15, at: '= [[2]]'}, text: 'x', 'on': 'x equals 2'}
+      - say: 'Divide both sides by 2. 4 divided by 2 is 2. So y minus 1 equals 2.'
+        write: '$y - 1 = \dfrac{4}{2} = 2$'
+      - say: 'Add 1 to both sides. 2 plus 1 is 3.'
+        write: '$y = 2 + 1 = 3$'
       - section: 'Check'
-        say: 'Let''s check in equation 1. y minus 1 is negative 3 minus 1, which is negative 4. Negative 4 times negative 2 is positive 8. It works.'
-        write: 'Check (1): $(-3 - 1)(-2) = (-4)(-2) = 8$'
-      - say: 'The question says x and y respectively. Respectively means in the order asked: x first, then y. So x is negative 2 and y is negative 3, which is answer choice C.'
-        write: '$x = -2,\ y = -3$'
+        say: 'Let''s check in equation 1. y plus 1 is 3 plus 1, which is 4, and 4 times 2 is 8. It works. Every number inside a log is positive too, as it must be.'
+        write: 'Check (1): $(3 + 1)(2) = 4 \times 2 = 8$'
+      - say: 'The question says x and y respectively. Respectively means in the order asked: x first, then y. So x is 2 and y is 3, which is answer choice A.'
+        write: '$\therefore x = 2,\ y = 3$'
         answer: true
-      - say: 'One honest note before you go. In the first equations, x and y minus 1 sit inside logs, and a log only works on a positive number. So, strictly, x equals negative 2 would not fit there. The answer C comes from the two plain equations, and it is the answer the exam expects, so choose C. But remember the rule: what is inside a log must be positive.'
-        write: 'Remember: inside a log, the number must be positive'
     traps:
-      A: 'You went for 2, 3. The signs have been lost. Subtracting the equations gives negative 2x equals 4, so x is negative 2, and then y is negative 3.'
-      B: 'You went for 3, 2. That loses both signs and also swaps the order. Solving gives x equals negative 2 and y equals negative 3, and "respectively" means x comes first.'
-      D: 'You went for negative 3, negative 2. Those are the right numbers in the wrong order. The question asks for x and y respectively, so x, which is negative 2, comes first.'
+      B: 'You went for 3, 2. Those are the right numbers in the wrong order. The question asks for x and y respectively, so x, which is 2, comes first.'
+      C: 'You went for negative 2, negative 3. That is what you get if y plus 1 and y minus 1 are swapped between the two equations. Also, a log only takes a positive number, so negative values can''t fit. Here x is 2 and y is 3.'
+      D: 'You went for negative 3, negative 2. A log only takes a positive number, so x and y minus 1 can''t be negative here. Solving gives x equals 2 and y equals 3, with x first.'
 
   5:
     moments:
@@ -270,7 +278,7 @@ lessons:
     moments:
       - say: 'A market woman buys a full jug of oil for ₦50 and sells the oil in small tins at ₦15 each. We want how much she makes.'
         write: 'Jug costs ₦50.00; each tin sells for ₦15.00'
-      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+      - say: 'Let me draw the jug and the tin.'
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: 'jug: ₦50'}
@@ -336,48 +344,51 @@ lessons:
 
   7:
     moments:
-      - say: 'A man earns $r$ naira an hour for normal work and double that for overtime. He works 35 hours in a week, and $q$ of those hours are overtime. We want his weekly pay.'
-      - say: 'The key point: the 35 hours already include the overtime. Look at the week bar under the clocks: $q$ hours are overtime, so the normal hours are 35 minus $q$.'
+      - section: 'The question'
+        say: 'A man earns r naira an hour for normal work, and double the rate for overtime. He works a 35-hour week, and q of those hours are overtime. What does he earn in the week?'
+        write: 'Rate $= r$ naira/hour; overtime rate $= 2r$; 35 hours, $q$ of them overtime'
+      - section: 'Solution'
+        say: 'Solution. The key words are "which includes". The 35 hours already include the q overtime hours. Look at the week bar under the clocks.'
         write: 'Normal hours $= 35 - q$'
         doodle: {name: 'custom:1998_q07_a', id: clocks, caption: 'a 35-hour week: normal + overtime'}
-      - say: 'Normal hours are paid at $r$ naira each, the left-hand clock, so we multiply those hours by $r$.'
+      - say: 'Pay is rate times hours. Weekly earning is normal pay plus overtime pay.'
+        write: 'Earning $=$ normal pay $+$ overtime pay'
+      - section: 'Each part'
+        say: 'Normal pay: 35 minus q hours at r naira each, the left-hand clock. That is r times bracket 35 minus q.'
         write: 'Normal pay $= r(35 - q)$'
         point:
-          - {line: 2, kind: highlight, at: 'r(35 - q)', to: {doodle: clocks, part: week-normal}}
+          - {line: 3, kind: highlight, at: 'r(35 - q)', to: {doodle: clocks, part: week-normal}}
         doodle_do:
           - {id: clocks, op: highlight, part: week-normal, text: '35 − q at ₦r'}
-      - say: 'Multiply out the bracket. $r$ times 35 is $35r$, and $r$ times $q$ is $rq$.'
-        write: '$= 35r - rq$'
-      - say: 'Overtime pays double the rate. Look at the right-hand clock: double $r$ is $2r$ naira an hour.'
-        write: 'Overtime rate $= 2 \times r = 2r$'
-        doodle_do:
-          - {id: clocks, op: circle, part: overtime}
-      - say: 'He does $q$ hours of overtime at that rate, the pink end of the week.'
+      - say: 'Overtime pay: q hours at 2r naira each, the right-hand clock. 2r times q is 2rq.'
         write: 'Overtime pay $= 2r \times q = 2rq$'
         point:
-          - {line: 5, kind: highlight, at: '2r × q', to: {doodle: clocks, part: week-over}}
+          - {line: 4, kind: highlight, at: '2r × q', to: {doodle: clocks, part: week-over}}
         doodle_do:
-          - {id: clocks, op: label, part: week-over, text: '2r × q = 2rq'}
-      - say: 'His weekly pay is the normal pay plus the overtime pay we just found.'
-        write: 'Total $= (35r - rq) + 2rq$'
+          - {id: clocks, op: circle, part: overtime}
+      - section: 'Add and simplify'
+        say: 'Substitute both into the earning line.'
+        write: 'Earning $= r(35 - q) + 2rq$'
         point:
-          - {line: 6, kind: move, from: {line: 3, at: '35r − rq'}, at: '(35r − rq)', text: 'normal'}
-          - {line: 6, kind: move, from: {line: 5, at: '= 2rq'}, at: '+ 2rq', text: 'overtime'}
-      - say: 'Negative $rq$ plus $2rq$ is positive $rq$.'
+          - {line: 5, kind: move, from: {line: 4, at: '= [[2rq]]'}, at: '+ [[2rq]]', text: 'overtime'}
+      - say: 'Open the bracket: r times 35 is 35r, and r times negative q is negative rq.'
+        write: '$= 35r - rq + 2rq$'
+      - say: 'Collect like terms: negative rq plus 2rq is positive rq.'
         write: '$= 35r + rq$'
-      - say: 'Both terms have an $r$, so take $r$ out as a common factor. $35r$ divided by $r$ is 35, and $rq$ divided by $r$ is $q$.'
+      - say: 'r is a common factor of both terms. Take it out: 35r divided by r is 35, and rq divided by r is q.'
         write: '$= r(35 + q)$'
-      - say: 'Let''s check with numbers. Say $r$ is 100 and $q$ is 5. Then 30 normal hours at 100 earn 3000, and 5 overtime hours at 200 earn 1000. That is 4000 in all.'
-        write: 'Check, $r = 100,\ q = 5$: $30 \times 100 + 5 \times 200 = 3000 + 1000 = 4000$'
-      - say: 'And our formula gives 100 times 35 plus 5, which is 100 times 40, also 4000. It agrees.'
-        write: '$r(35 + q) = 100 \times 40 = 4000$'
-      - say: 'So his weekly earning is $r(35 + q)$ naira, which is answer choice A.'
-        write: 'Weekly earning $= r(35 + q)$'
+      - section: 'Check'
+        say: 'Check with numbers. Let r be 100 and q be 5. 30 normal hours at 100 is 3000, and 5 overtime hours at 200 is 1000. That is 4000.'
+        write: 'Check, $r = 100,\ q = 5$: $30 \times 100 + 5 \times 200 = 4000$'
+      - say: 'The formula gives 100 times 35 plus 5, which is 100 times 40, also 4000. It agrees.'
+        write: '$r(35 + q) = 100 \times 40 = 4000$ ✓'
+      - say: 'Therefore his weekly earning is r times bracket 35 plus q, naira: option A.'
+        write: '$\therefore$ weekly earning $= r(35 + q)$ naira (A)'
         answer: true
     traps:
-      B: 'You went for $q(35r - q)$. Here $q$ has been taken out as a factor, but $q$ is not in every term. The pay is $35r + rq$, and the common factor is $r$.'
-      C: 'You went for $q(35r + r)$. That multiplies everything by $q$, the overtime hours. Only the overtime part involves $q$: the total is $35r + rq$, which factorises as $r(35 + q)$.'
-      D: 'You went for $r(35r - q)$. Taking $r$ out of $35r$ leaves 35, not $35r$, and the overtime adds $rq$ rather than taking it away. The total is $r(35 + q)$.'
+      B: 'You went for q(35r − q). Here q is taken out as a factor, but q is not in every term. The earning is 35r plus rq, and the common factor is r.'
+      C: 'You went for q(35r + r). That multiplies everything by q, the overtime hours. Only the overtime pay has q in it: the earning is 35r plus rq, which is r(35 + q).'
+      D: 'You went for r(35r − q). Taking r out of 35r leaves 35, not 35r, and the overtime adds rq rather than taking it away. The earning is r(35 + q).'
 
   8:
     moments:
@@ -472,450 +483,479 @@ lessons:
 
   10:
     moments:
-      - say: 'When $pm^{2} + qm + 1$ is divided by $m - 1$ the remainder is 2, and when it is divided by $m + 1$ the remainder is 4. We want $p$ and $q$.'
-        write: '$f(m) = pm^{2} + qm + 1$'
-      - say: 'We use the remainder theorem: when $f(m)$ is divided by $m - a$, the remainder is $f(a)$. So we substitute the value that makes the divisor zero.'
-      - say: 'Think of $f$ as a machine: put in the value that makes the divisor zero, and out comes the remainder. $m - 1$ is zero when $m$ is 1. So for the first remainder, we feed $m = 1$ into $f(m)$.'
-        write: 'Divisor $m - 1$: $f(1) = p(1)^{2} + q(1) + 1$'
+      - section: 'The question'
+        say: 'Two divisions, two remainders, two unknowns. The remainder theorem turns each division into an equation, and then it is simultaneous equations you already know.'
+        write: 'Remainder 2 on dividing by $(m - 1)$; remainder 4 by $(m + 1)$'
+      - section: 'Solution'
+        say: 'Solution. Let $f$ of $m$ be the expression. The remainder theorem: when $f(m)$ is divided by $m - a$, the remainder is $f$ of $a$.'
+        write: 'Let $f(m) = pm^{2} + qm + 1$'
+      - section: 'First remainder'
+        say: 'Set the first divisor equal to zero: $m - 1 = 0$, so $m$ is 1. Picture a machine: feed in 1, and out comes the remainder.'
+        write: 'Let $m - 1 = 0$, $\ \therefore m = 1$'
         doodle: {name: 'custom:1998_q10_a', id: machine, caption: 'feed in the zero of the divisor'}
-      - say: '1 squared is 1, so this is $p$ plus $q$ plus 1.'
-        write: '$= p + q + 1$'
-      - say: 'The machine gave out 2, so we set it equal to 2.'
+      - say: 'The remainder is $f$ of 1. Replace every $m$ with 1, in brackets.'
+        write: 'Remainder $= f(1) = p(1)^{2} + q(1) + 1$'
+      - say: '1 squared is 1, so $f$ of 1 is $p$ plus $q$ plus 1. The remainder is 2, so this equals 2.'
         write: '$p + q + 1 = 2$'
-        point:
-          - {line: 4, kind: highlight, at: 'p + q + 1 = 2', to: {doodle: machine, part: run1}}
         doodle_do:
           - {id: machine, op: circle, part: run1}
-      - say: 'Subtract 1 from both sides. 2 minus 1 is 1. Let''s call this equation 1.'
-        write: '$p + q = 1 \quad (1)$'
-      - say: 'Now the second divisor. $m + 1$ is zero when $m$ is negative 1. So we feed $m = -1$ into the machine.'
-        write: 'Divisor $m + 1$: $f(-1) = p(-1)^{2} + q(-1) + 1$'
+      - say: 'Subtract 1 from both sides. 2 minus 1 is 1. Label this equation 1.'
+        write: '$p + q = 1 \quad \ldots\ldots (1)$'
+      - section: 'Second remainder'
+        say: 'Now the second divisor. $m + 1 = 0$, so $m$ is minus 1. Feed minus 1 into the machine.'
+        write: 'Let $m + 1 = 0$, $\ \therefore m = -1$'
         doodle_do:
           - {id: machine, op: stage, stage: 'custom:1998_q10_a2'}
-      - say: 'Negative 1 squared is positive 1, and $q$ times negative 1 is negative $q$.'
-        write: '$= p - q + 1$'
-      - say: 'This time the machine gave out 4, so we set it equal to 4.'
+      - say: 'The remainder is $f$ of minus 1. Replace every $m$ with minus 1, in brackets.'
+        write: 'Remainder $= f(-1) = p(-1)^{2} + q(-1) + 1$'
+      - say: 'Minus 1 squared is plus 1, and $q$ times minus 1 is minus $q$. The remainder is 4, so this equals 4.'
         write: '$p - q + 1 = 4$'
-        point:
-          - {line: 8, kind: highlight, at: 'p - q + 1 = 4', to: {doodle: machine, part: run2}}
         doodle_do:
           - {id: machine, op: circle, part: run2}
-      - say: 'Subtract 1 from both sides. 4 minus 1 is 3. This is equation 2.'
-        write: '$p - q = 3 \quad (2)$'
-      - say: 'Now add equations 1 and 2. The $q$ and the negative $q$ cancel, and 1 plus 3 is 4.'
-        write: '(1) + (2): $2p = 1 + 3 = 4$'
-        point:
-          - {line: 5, kind: arrow, at: 'p + q = 1', text: '(1)'}
-          - {line: 9, kind: arrow, at: 'p − q = 3', text: '(2)'}
-      - say: 'Divide both sides by 2. 4 divided by 2 is 2.'
+      - say: 'Subtract 1 from both sides. 4 minus 1 is 3. Label this equation 2.'
+        write: '$p - q = 3 \quad \ldots\ldots (2)$'
+      - section: 'Solve (1) and (2)'
+        say: 'The coefficients of $q$ are plus 1 and minus 1, so add the two equations and $q$ cancels. $p$ plus $p$ is $2p$, and 1 plus 3 is 4.'
+        write: '(1) + (2): $\ 2p = 4$'
+      - say: 'Divide both sides by 2. 4 over 2 is 2.'
         write: '$p = \dfrac{4}{2} = 2$'
-      - say: 'Put $p = 2$ back into equation 1. 2 plus $q$ is 1, so $q$ is 1 minus 2, which is negative 1.'
-        write: 'Into (1): $2 + q = 1$, so $q = 1 - 2 = -1$'
-        point:
-          - {line: 12, kind: move, from: {line: 11, at: '4 = [[2]]'}, at: '[[2]] + q', text: 'p'}
-          - {line: 5, kind: arrow, text: 'into (1)'}
-      - say: 'Let''s check. $f(1)$ is 2 plus negative 1 plus 1, which is 2. $f(-1)$ is 2 minus negative 1 plus 1, which is 4. Both remainders work.'
-        write: 'Check: $f(1) = 2 - 1 + 1 = 2$, $f(-1) = 2 + 1 + 1 = 4$'
-      - say: 'So $p$ is 2 and $q$ is negative 1, which is answer choice A.'
-        write: '$p = 2, \ q = -1$'
+      - say: 'Substitute $p = 2$ in equation 1.'
+        write: 'Sub. $p = 2$ in (1): $\ 2 + q = 1$'
+      - say: 'Subtract 2 from both sides. 1 minus 2 is minus 1.'
+        write: '$q = 1 - 2 = -1$'
+      - section: 'Check'
+        say: 'Check. $f$ of 1 is 2 minus 1 plus 1, which is 2. $f$ of minus 1 is 2 plus 1 plus 1, which is 4. Both remainders work.'
+        write: 'Check: $f(1) = 2 - 1 + 1 = 2$, $\ f(-1) = 2 + 1 + 1 = 4$'
+      - say: 'Therefore $p$ is 2 and $q$ is minus 1, in that order, which is answer choice A.'
+        write: '$\therefore p = 2,\ q = -1$'
         answer: true
     traps:
-      B: 'You went for negative 1, 2. Those are the right numbers in the wrong order. The question asks for $p$ and $q$ respectively, and $p$ is 2.'
-      C: 'You went for 3, negative 2. Those fit $p + q = 1$, but not the second remainder: $f(-1)$ would be 3 plus 2 plus 1, which is 6, not 4. For $m + 1$ we substitute negative 1 and get $p - q = 3$.'
-      D: 'You went for negative 2, 3. That fits the first remainder, but $f(-1)$ would be negative 2 minus 3 plus 1, which is negative 4, not 4. Solve both equations together: $p = 2$, $q = -1$.'
+      B: 'You went for minus 1, 2. Those are the right numbers in the wrong order. The question asks for $p$ and $q$ respectively, and $p$ is 2.'
+      C: 'You went for 3, minus 2. Those fit $p + q = 1$, but not the second remainder: $f(-1)$ would be 3 plus 2 plus 1, which is 6, not 4. For $m + 1$ we substitute minus 1 and get $p - q = 3$.'
+      D: 'You went for minus 2, 3. That fits the first remainder, but $f(-1)$ would be minus 2 minus 3 plus 1, which is minus 4, not 4. Solve both equations together: $p = 2$, $q = -1$.'
 
   11:
     moments:
-      - say: 'We want to factorise $r^{2} - r(2p + q) + 2pq$.'
-        write: '$r^{2} - r(2p + q) + 2pq$'
-      - say: 'The first thing we need to do is expand the bracket, so that we have four separate terms to work with.'
-      - say: '$r$ times $2p$ is $2pr$, and $r$ times $q$ is $qr$. The minus sign in front goes onto both.'
-        write: '$= r^{2} - 2pr - qr + 2pq$'
-      - say: 'Now group the four terms into two pairs that share a factor. Take the first with the third, and the second with the fourth.'
-        write: '$= (r^{2} - qr) + (-2pr + 2pq)$'
-      - say: 'From the first pair, take out $r$. $r^{2}$ divided by $r$ is $r$, and $qr$ divided by $r$ is $q$.'
-        write: '$r^{2} - qr = r(r - q)$'
-      - say: 'From the second pair, take out negative $2p$. Negative $2pr$ divided by negative $2p$ is $r$, and $2pq$ divided by negative $2p$ is negative $q$.'
-        write: '$-2pr + 2pq = -2p(r - q)$'
-      - say: 'Now put the two pairs we just factorised back together. Both have the same bracket, $r - q$, which tells us the grouping worked.'
-        write: 'So the expression $= r(r - q) - 2p(r - q)$'
+      - section: 'The question'
+        say: 'Letters where you expect numbers. But this is just a quadratic in $r$, and the product and sum method works exactly as it does with numbers.'
+        write: 'Factorise $r^{2} - r(2p + q) + 2pq$'
+      - section: 'Solution'
+        say: 'Solution. Read it as a quadratic in $r$. The coefficient of $r^{2}$ is 1, the coefficient of $r$ is minus, bracket, $2p + q$, and the constant is $2pq$.'
+        write: '$a = 1,\ b = -(2p + q),\ c = 2pq$'
+      - section: 'Product and sum'
+        say: 'The product is $a$ times $c$: 1 times $2pq$ is $2pq$. The sum is $b$: open the bracket to get minus $2p$ minus $q$.'
+        write: 'Product $= ac = 2pq$, Sum $= b = -2p - q$'
+      - say: 'Find two terms that multiply to $2pq$ and add up to minus $2p$ minus $q$. Minus $2p$ times minus $q$ is plus $2pq$, and they add up correctly.'
+        write: 'Factors: $-2p,\ -q$'
+      - say: 'Use the two terms to split the middle term. Minus $r$ times $2p + q$ becomes minus $2pr$ minus $qr$.'
+        write: 'Expression $= r^{2} - 2pr - qr + 2pq$'
         point:
-          - {line: 6, kind: move, from: {line: 4, at: '= r(r − q)'}, at: '= r(r − q)', text: 'first pair'}
-          - {line: 6, kind: move, from: {line: 5, at: '−2p(r − q)'}, at: '−2p(r − q)', text: 'second pair'}
-      - say: 'Take out the common bracket $r - q$. What''s left from the two pairs is $r$ minus $2p$.'
-        write: '$= (r - q)(r - 2p)$'
+          - {line: 4, kind: move, from: {line: 3, at: '[[−2p]], −q'}, at: '−2pr', text: 'split'}
+          - {line: 4, kind: move, from: {line: 3, at: '−2p, [[−q]]'}, at: '−qr'}
+      - section: 'Group in pairs'
+        say: 'From the first pair take out $r$, leaving $r - 2p$. From the second pair take out minus $q$, leaving $r - 2p$ again.'
+        write: '$= r(r - 2p) - q(r - 2p)$'
+      - say: 'The two brackets are the same, so the grouping is right. Take out the common bracket, $r - 2p$. What is left over is $r - q$.'
+        write: '$= (r - 2p)(r - q)$'
         point:
-          - {line: 7, kind: move, from: {line: 6, at: '2p[[(r−q)]]'}, at: '(r−q)', text: 'common bracket'}
-      - say: 'Let''s check by expanding. $r$ times $r$ is $r^{2}$, $r$ times negative $2p$ is negative $2pr$, negative $q$ times $r$ is negative $qr$, and negative $q$ times negative $2p$ is $2pq$.'
+          - {line: 6, kind: underline, at: '(r − 2p)', text: 'common bracket'}
+      - section: 'Check'
+        say: 'Check by expanding: $r$ times $r$, then minus $2pr$, minus $qr$, and minus $q$ times minus $2p$, which is plus $2pq$. The same four terms.'
         write: 'Check: $(r - q)(r - 2p) = r^{2} - 2pr - qr + 2pq \ \checkmark$'
-      - say: 'That is exactly the expanded expression we started from. So the factors are $r - q$ and $r - 2p$, which is answer choice C.'
-        write: '$r^{2} - r(2p + q) + 2pq = (r - q)(r - 2p)$'
+      - say: 'Therefore the factors are $r - q$ and $r - 2p$, in either order, which is answer choice C.'
+        write: '$\therefore r^{2} - r(2p + q) + 2pq = (r - q)(r - 2p)$'
         answer: true
     traps:
-      A: 'You went for $(r - 2q)(2r - p)$. Expanding it gives $2r^{2}$ at the front, but our expression starts with just $r^{2}$. Expanding a choice back is a quick way to test it.'
-      B: 'You went for $(r - q)(r + p)$. Expanding gives a last term of negative $pq$, but we need positive $2pq$. The second bracket must be $r - 2p$.'
+      A: 'You went for $(r - 2q)(2r - p)$. Expanding it gives $2r^{2}$ at the front, but our expression starts with just $r^{2}$. The two factors from product and sum are minus $2p$ and minus $q$.'
+      B: 'You went for $(r - q)(r + p)$. Expanding gives a last term of minus $pq$, but we need plus $2pq$. The product is $2pq$, so the second bracket must be $r - 2p$.'
       D: 'You went for $(2r - q)(r + p)$. That expands to start with $2r^{2}$, and our expression starts with $r^{2}$. The correct factors are $(r - q)(r - 2p)$.'
 
   12:
     moments:
-      - say: 'We want to solve $\sqrt{x} - \sqrt{x - 2} - 1 = 0$.'
-        write: '$\sqrt{x} - \sqrt{x - 2} - 1 = 0$'
-      - say: 'Two square roots can''t be squared away in one go. The plan is to get one root alone on one side first, and then square.'
-        write: 'Plan: one root on each side, then square'
-      - say: 'Add $\sqrt{x - 2}$ and 1 to both sides. Picture two squares: one of area $x$, and a smaller one of area $x - 2$. The equation says the big side is exactly 1 longer than the small side.'
+      - section: 'The question'
+        say: 'Two square roots in one equation. Square it as it stands and you get a mess. Put one root on each side first, and squaring clears them one at a time.'
+        write: 'Solve $\sqrt{x} - \sqrt{x - 2} - 1 = 0$'
+      - section: 'Solution'
+        say: 'Solution. Add root $x - 2$ and 1 to both sides, so one root stands alone on the left. Picture two squares: the big side is 1 longer than the small side.'
         write: '$\sqrt{x} = 1 + \sqrt{x - 2}$'
         point:
-          - {line: 2, kind: move, from: {line: 0, at: 'x[[−x−2]]'}, at: '+ x−2', text: 'across'}
-          - {line: 2, kind: move, from: {line: 0, at: '[[−1]] = 0'}, at: '= [[1]] +', text: 'across'}
+          - {line: 1, kind: move, from: {line: 0, at: '[[−1]] = 0'}, at: '= [[1]] +', text: 'across'}
         doodle: {name: 'custom:1998_q12_a', id: squares, caption: 'side √x is 1 longer than √(x − 2)'}
-      - say: 'Now square both sides. The left becomes $x$. The right is a two-term bracket, so we must square the whole bracket.'
+      - section: 'Square both sides'
+        say: 'Square both sides. The left becomes $x$. The right is a two-term bracket, so we square the whole bracket, not each term.'
         write: '$x = \left(1 + \sqrt{x - 2}\right)^{2}$'
-      - say: 'The square of a sum: $a$ plus $b$, all squared, is $a$ squared plus $2ab$ plus $b$ squared.'
-        write: '$(a + b)^{2} = a^{2} + 2ab + b^{2}$'
-      - say: 'A bracket squared is the first squared, plus twice the first times the second, plus the second squared.'
-        write: '$\left(1 + \sqrt{x - 2}\right)^{2} = 1^{2} + 2 \times 1 \times \sqrt{x - 2} + \left(\sqrt{x - 2}\right)^{2}$'
-      - say: '1 squared is 1. Twice 1 times $\sqrt{x - 2}$ is $2\sqrt{x - 2}$. And $\sqrt{x - 2}$ squared is just $x - 2$. Put that back into our equation.'
-        write: 'So $x = 1 + 2\sqrt{x - 2} + x - 2$'
-      - say: 'On the right, 1 minus 2 is negative 1.'
+      - say: 'Expand like $a$ plus $b$, all squared: 1 squared, plus 2 times 1 times root $x - 2$, plus root $x - 2$, squared, which is just $x - 2$.'
+        write: '$x = 1 + 2\sqrt{x - 2} + (x - 2)$'
+      - say: 'Collect the numbers on the right. 1 minus 2 is minus 1.'
         write: '$x = x - 1 + 2\sqrt{x - 2}$'
-      - say: 'Subtract $x$ from both sides. The $x$ cancels, and that is what makes this solvable.'
-        write: '$0 = -1 + 2\sqrt{x - 2}$'
-        point:
-          - {line: 7, kind: strike, at: 'x = x', text: 'x cancels'}
-      - say: 'Add 1 to both sides.'
-        write: '$2\sqrt{x - 2} = 1$'
-        point:
-          - {line: 9, kind: move, from: {line: 8, at: '−1'}, at: '= 1', text: 'across the ='}
-      - say: 'Divide both sides by 2. So the small square in the picture has side a half.'
+      - say: 'Subtract $x$ from both sides and add 1 to both sides. The $x$ terms cancel, and that is what makes this solvable.'
+        write: '$1 = 2\sqrt{x - 2}$'
+      - say: 'Divide both sides by 2. So the small square has side a half.'
         write: '$\sqrt{x - 2} = \dfrac{1}{2}$'
-        point:
-          - {line: 10, kind: move, from: {line: 9, at: '[[2]]x'}, at: '= [[2]]1', text: 'divide it over'}
-          - {line: 10, kind: highlight, at: 'x - 2', to: {doodle: squares, part: small}}
         doodle_do:
           - {id: squares, op: label, part: small, text: 'side ½'}
-      - say: 'Square both sides again. A half squared is a quarter, 1 over 4.'
+      - section: 'Square again'
+        say: 'Square both sides again to remove the last root. A half, squared, is 1 over 4.'
         write: '$x - 2 = \left(\dfrac{1}{2}\right)^{2} = \dfrac{1}{4}$'
-      - say: 'Add 2 to both sides. 2 is 8 over 4, and 8 over 4 plus 1 over 4 is 9 over 4. The big square''s side is then 3 over 2, which is indeed 1 more than a half.'
-        write: '$x = 2 + \dfrac{1}{4} = \dfrac{8}{4} + \dfrac{1}{4} = \dfrac{9}{4}$'
-        point:
-          - {line: 12, kind: move, from: {line: 11, at: 'x[[−2]] ='}, at: '= [[2]] +', text: 'across the ='}
+      - say: 'Add 2 to both sides. 2 is 8 over 4, and 8 over 4 plus 1 over 4 is 9 over 4.'
+        write: '$x = 2 + \dfrac{1}{4} = \dfrac{9}{4}$'
         doodle_do:
           - {id: squares, op: stage, stage: 'custom:1998_q12_a2'}
-      - say: 'Squaring can bring in false answers, so let''s check in the original equation. The square root of 9 over 4 is 3 over 2, which is 1.5.'
-        write: 'Check: $\sqrt{\tfrac{9}{4}} = \tfrac{3}{2} = 1.5$'
-      - say: 'And 9 over 4 minus 2 is 1 over 4, whose square root is a half, 0.5.'
-        write: '$\sqrt{\tfrac{9}{4} - 2} = \sqrt{\tfrac{1}{4}} = 0.5$'
-      - say: 'So the left side is 1.5 minus 0.5 minus 1, which is 0. It works.'
-        write: '$1.5 - 0.5 - 1 = 0 \ \checkmark$'
-      - say: 'So $x$ is 9 over 4, which is answer choice D.'
-        write: '$x = \dfrac{9}{4}$'
+      - section: 'Check'
+        say: 'Squaring can bring in false roots, so check in the question. The square root of 9 over 4 is 3 over 2, and the square root of 1 over 4 is a half.'
+        write: 'Check: $\sqrt{\dfrac{9}{4}} = \dfrac{3}{2}$, $\ \sqrt{\dfrac{9}{4} - 2} = \sqrt{\dfrac{1}{4}} = \dfrac{1}{2}$'
+      - say: '3 over 2 minus 1 over 2 is 1, and 1 minus 1 is 0. It works.'
+        write: '$\dfrac{3}{2} - \dfrac{1}{2} - 1 = 0 \ \checkmark$'
+      - say: 'Therefore $x$ is 9 over 4, which is answer choice D.'
+        write: '$\therefore x = \dfrac{9}{4}$'
         answer: true
     traps:
-      A: 'You went for 3 over 2. That is $\sqrt{x}$, not $x$. Since $\sqrt{x}$ is 1.5, $x$ is 1.5 squared, which is 2.25, or 9 over 4.'
+      A: 'You went for 3 over 2. That is $\sqrt{x}$, not $x$. Since $\sqrt{x}$ is 3 over 2, $x$ is 3 over 2, squared, which is 9 over 4.'
       B: 'You went for 2 over 3. That is less than 2, so $x - 2$ would be negative and $\sqrt{x - 2}$ would not exist. The answer must be bigger than 2: it is 9 over 4.'
-      C: 'You went for 4 over 9. That is the answer upside down, and it is less than 2, so $\sqrt{x - 2}$ would not exist. From $x - 2 = \tfrac{1}{4}$, $x$ is 9 over 4.'
+      C: 'You went for 4 over 9. That is the reciprocal of the answer, and it is less than 2, so $\sqrt{x - 2}$ would not exist. From $x - 2 = \tfrac{1}{4}$, $x$ is 9 over 4.'
 
   13:
     moments:
-      - say: 'We want the values of $m$ for which this quadratic has real roots.'
+      - section: 'The question'
+        say: 'For which values of $m$ does this quadratic have real roots? The answer is a range, and one rule gets us there: the discriminant.'
         write: '$3x^{2} - 3mx + (m^{2} - m - 3) = 0$'
-      - say: 'Let me draw this on a number line, so we can see the values.'
-        show_sketch: true
-      - say: 'A quadratic has real roots when its discriminant, $b^{2} - 4ac$, is greater than or equal to zero.'
-        write: '$b^{2} - 4ac \ge 0$'
-      - say: 'Read off $a$, $b$ and $c$. $a$ is 3, $b$ is negative $3m$, and $c$ is the whole bracket.'
-        write: '$a = 3, \ b = -3m, \ c = m^{2} - m - 3$'
-      - say: 'Substitute them in.'
+      - section: 'Solution'
+        say: 'Solution. The discriminant is $b^{2} - 4ac$, the part under the square root in the formula. The roots are real when it is greater than or equal to zero.'
+        write: 'For real roots: $b^{2} - 4ac \ge 0$'
+      - say: 'List $a$, $b$ and $c$. $a$, the coefficient of $x^{2}$, is 3. $b$, the coefficient of $x$, is minus $3m$. $c$ is the whole bracket.'
+        write: '$a = 3,\ b = -3m,\ c = m^{2} - m - 3$'
+      - say: 'Substitute them, each in brackets. Minus $3m$ in brackets, squared, minus 4 times 3 times the bracket for $c$.'
         write: '$(-3m)^{2} - 4(3)(m^{2} - m - 3) \ge 0$'
         point:
-          - {line: 4, kind: move, from: {line: 3, at: 'b = −3m'}, at: '(−3m)', text: 'b'}
-          - {line: 4, kind: move, from: {line: 3, at: 'a = 3'}, at: '4[[(3)]]', text: 'a'}
-          - {line: 4, kind: move, from: {line: 3, at: 'c = m2 − m − 3'}, at: '(m2 − m − 3)', text: 'c'}
-      - say: 'Negative $3m$ squared is $9m^{2}$, and 4 times 3 is 12.'
+          - {line: 3, kind: move, from: {line: 2, at: 'b = −3m'}, at: '(−3m)', text: 'b'}
+          - {line: 3, kind: move, from: {line: 2, at: 'a = 3'}, at: '4[[(3)]]', text: 'a'}
+          - {line: 3, kind: move, from: {line: 2, at: 'c = m2 − m − 3'}, at: '(m2 − m − 3)', text: 'c'}
+      - say: 'Minus $3m$, squared, is $9m^{2}$: a minus times a minus is a plus. And 4 times 3 is 12.'
         write: '$9m^{2} - 12(m^{2} - m - 3) \ge 0$'
-      - say: 'Multiply out. Negative 12 times $m^{2}$ is negative $12m^{2}$, negative 12 times negative $m$ is $12m$, and negative 12 times negative 3 is 36.'
+      - say: 'Open the bracket. Minus 12 times $m^{2}$ is minus $12m^{2}$, minus 12 times minus $m$ is plus $12m$, and minus 12 times minus 3 is plus 36.'
         write: '$9m^{2} - 12m^{2} + 12m + 36 \ge 0$'
-      - say: '$9m^{2}$ minus $12m^{2}$ is negative $3m^{2}$.'
+      - say: 'Collect like terms. $9m^{2}$ minus $12m^{2}$ is minus $3m^{2}$.'
         write: '$-3m^{2} + 12m + 36 \ge 0$'
-      - say: 'Divide every term by negative 3, to make the numbers smaller. Watch this: dividing by a negative number reverses the inequality sign.'
-        write: 'Divide by $-3$, sign flips: $\dfrac{-3m^{2}}{-3} + \dfrac{12m}{-3} + \dfrac{36}{-3} \le 0$'
-      - say: 'Negative $3m^{2}$ over negative 3 is $m^{2}$. $12m$ over negative 3 is negative $4m$. And 36 over negative 3 is negative 12.'
-        write: '$m^{2} - 4m - 12 \le 0$'
-      - say: 'Factorise. We need two numbers that multiply to negative 12 and add to negative 4. Those are negative 6 and 2.'
+      - say: 'Divide every term by minus 3 to make the numbers small. Dividing by a negative number reverses the inequality sign, so greater than or equal becomes less than or equal.'
+        write: 'Divide by $-3$: $\ m^{2} - 4m - 12 \le 0$'
+        point:
+          - {line: 7, kind: circle, at: '≤', text: 'sign reversed'}
+      - section: 'Factorise: product and sum'
+        say: 'Now factorise. The product is $a$ times $c$, 1 times minus 12, which is minus 12. The sum is $b$, minus 4.'
+        write: 'Product $= ac = -12$, Sum $= b = -4$'
+      - say: 'Two numbers that multiply to minus 12 and add up to minus 4: minus 6 and 2. Minus 6 times 2 is minus 12, and minus 6 plus 2 is minus 4.'
+        write: 'Factors: $-6,\ 2$'
+      - say: 'Split the middle term. Minus $4m$ becomes minus $6m$ plus $2m$.'
+        write: '$m^{2} - 6m + 2m - 12 \le 0$'
+        point:
+          - {line: 10, kind: move, from: {line: 9, at: '[[−6]], 2'}, at: '−6m', text: 'split'}
+          - {line: 10, kind: move, from: {line: 9, at: '−6, [[2]]'}, at: '+2m'}
+      - say: 'Group in pairs. From the first pair take out $m$, leaving $m - 6$. From the second pair take out 2, leaving $m - 6$ again.'
+        write: '$m(m - 6) + 2(m - 6) \le 0$'
+      - say: 'The brackets match, so take out the common bracket, $m - 6$. What is left is $m + 2$.'
         write: '$(m - 6)(m + 2) \le 0$'
-      - say: 'The bracket product is zero at $m = 6$ and $m = -2$. Where is it negative? Try a value in between, like 0: negative 6 times 2 is negative 12, which is below zero. Good.'
-        write: 'Test $m = 0$: $(0 - 6)(0 + 2) = -12 \le 0$'
         point:
-          - {figure: sketch, kind: circle, target: '6', text: 'zero'}
-          - {figure: sketch, kind: circle, target: '−2', text: 'zero'}
-      - say: 'Now try a value outside, like 7: 1 times 9 is 9, which is positive. So the product is only negative between the two roots.'
-        write: 'Test $m = 7$: $(7 - 6)(7 + 2) = 9 > 0$'
-      - say: 'So $m$ lies between negative 2 and 6.'
-        write: '$-2 \le m \le 6$'
+          - {line: 12, kind: underline, at: '(m − 6)', text: 'common bracket'}
+      - section: 'Sign table'
+        say: 'The critical values are where the product is zero. Either $m - 6$ is zero or $m + 2$ is zero. Look at them on the number line.'
+        write: 'Critical values: $m = 6$ or $m = -2$'
+        show_sketch: true
         point:
-          - {line: 13, kind: arrow, from: {line: 10, at: '(m + 2)'}, at: '−2', text: 'root'}
-          - {line: 13, kind: arrow, from: {line: 10, at: '(m − 6)'}, at: '≤ 6', text: 'root'}
+          - {figure: sketch, kind: circle, target: '−2', 'on': 'number line'}
+          - {figure: sketch, kind: circle, target: '6', 'on': 'number line'}
+      - say: 'The two values cut the line into three regions. In a sign table, write the sign of each bracket in each region.'
+        write: 'Sign table:'
+        diagram:
+          id: signs
+          kind: table
+          columns: ['Factor', 'm < −2', '−2 < m < 6', 'm > 6']
+          rows: [['m + 2', '−', '+', '+'], ['m − 6', '−', '−', '+'], ['(m + 2)(m − 6)', '', '', '']]
+          'on': 'sign table'
+      - say: 'Multiply the signs down each column. Minus times minus is plus, plus times minus is minus, and plus times plus is plus.'
+        write: 'Product: $+,\ -,\ +$'
+        diagram_do:
+          - {id: signs, op: fill, part: 'cell:3,2', text: '+'}
+          - {id: signs, op: fill, part: 'cell:3,3', text: '−', colour: green}
+          - {id: signs, op: fill, part: 'cell:3,4', text: '+'}
+      - say: 'We want the product less than or equal to zero. It is negative only between the critical values, and zero at the two ends.'
+        write: '$\therefore -2 \le m \le 6$'
+        point:
           - {figure: sketch, kind: highlight, target: ['−2', '6'], text: 'real roots'}
-      - say: 'Matching the options, that is negative 2 less than $m$ less than 6, which is answer choice B.'
-        write: '$-2 < m < 6$'
+        diagram_do:
+          - {id: signs, op: highlight, part: 'col:3', text: 'negative here'}
+      - section: 'Check'
+        say: 'Check a value inside, $m = 0$. Then $b$ is zero, $a$ is 3 and $c$ is minus 3. 0 minus 4 times 3 times minus 3 is 36, which is positive. Real roots.'
+        write: 'Check $m = 0$: $\ 0 - 4(3)(-3) = 36 \ge 0$'
+      - say: 'Check a value outside, $m = 7$. Minus 3 times 49, plus 12 times 7, plus 36 is minus 27. Negative, so no real roots there.'
+        write: '$m = 7$: $\ -3(49) + 12(7) + 36 = -27 < 0$'
+      - say: 'At $m = -2$ and $m = 6$ the discriminant is zero, so the two roots are equal, and equal roots are real. Both ends are included. That is answer choice B.'
+        write: 'Option B: $\ -2 \le m \le 6$'
         answer: true
         point:
           - {figure: sketch, kind: underline, target: 'real roots: m from −2 to 6'}
     traps:
-      A: 'You went for negative 1 to 7. Check the factorising: the numbers that multiply to negative 12 and add to negative 4 are negative 6 and 2, so the ends of the range are negative 2 and 6.'
-      C: 'You went for negative 3 to 9. Those end numbers would multiply to negative 27, not negative 12. From $m^{2} - 4m - 12$ the roots are 6 and negative 2.'
-      D: 'You went for negative 4 to 8. Those end numbers would multiply to negative 32, not negative 12. From $m^{2} - 4m - 12$ the roots are 6 and negative 2.'
+      A: 'You went for minus 1 to 7. Those ends come from $m^{2} - 6m - 7$, where the sum is minus 6. Our quadratic is $m^{2} - 4m - 12$: product minus 12, sum minus 4, so the factors are minus 6 and 2.'
+      C: 'You went for minus 3 to 9. Those ends multiply to minus 27, not minus 12. From $m^{2} - 4m - 12$, the factors are minus 6 and 2, so the critical values are 6 and minus 2.'
+      D: 'You went for minus 4 to 8. Their sum is right, but minus 4 times 8 is minus 32, not minus 12. The product is minus 12, so the critical values are minus 2 and 6.'
 
   14:
     moments:
-      - say: 'We want to make $\dfrac{a}{x}$ the subject of this formula.'
+      - section: 'The question'
+        say: 'The new subject here is not one letter but a fraction, $a$ over $x$. The plan: collect $a$ on one side, $x$ on the other, then divide.'
+        write: 'Make $\dfrac{a}{x}$ the subject of $\dfrac{x + a}{x - a} = m$'
+      - section: 'Solution'
+        say: 'Solution. Write the formula down first.'
         write: '$\dfrac{x + a}{x - a} = m$'
-      - say: 'The plan: get all the $a$ terms on one side and all the $x$ terms on the other, then divide.'
-      - say: 'First, clear the fraction by multiplying both sides by $x - a$.'
+      - say: 'Cross multiply to clear the fraction: $x + a$ equals $m$ times $x - a$.'
         write: '$x + a = m(x - a)$'
         point:
-          - {line: 2, kind: move, from: {line: 0, at: 'x − a'}, at: '(x − a)', text: 'times both sides'}
-      - say: 'Expand the bracket. $m$ times $x$ is $mx$, and $m$ times negative $a$ is negative $ma$.'
+          - {line: 2, kind: move, from: {line: 1, at: 'x − a'}, at: '(x − a)', text: 'cross multiply'}
+      - say: 'Open the bracket. $m$ times $x$ is $mx$, and $m$ times minus $a$ is minus $ma$.'
         write: '$x + a = mx - ma$'
-      - say: 'Now gather the $a$ terms on the left. Add $ma$ to both sides.'
+      - section: 'Collect the terms'
+        say: 'Collect the terms in $a$ on the left. Add $ma$ to both sides.'
         write: '$x + a + ma = mx$'
         point:
-          - {line: 4, kind: move, from: {line: 3, at: '− ma'}, at: '+ ma', text: 'across the ='}
-      - say: 'And move the $x$ terms to the right: subtract $x$ from both sides.'
+          - {line: 4, kind: move, from: {line: 3, at: '− ma'}, at: '+ ma', text: 'add ma'}
+      - say: 'Now the terms in $x$ go on the right. Subtract $x$ from both sides.'
         write: '$a + ma = mx - x$'
         point:
-          - {line: 5, kind: move, from: {line: 4, at: '[[x]] + a'}, at: '− x', text: 'across the ='}
-      - say: 'Factorise each side. The left has $a$ as a common factor, and the right has $x$.'
+          - {line: 5, kind: move, from: {line: 4, at: '[[x]] + a'}, at: '− x', text: 'subtract x'}
+      - say: 'Factorise each side. On the left, take out $a$, leaving 1 plus $m$. On the right, take out $x$, leaving $m$ minus 1.'
         write: '$a(1 + m) = x(m - 1)$'
-      - say: 'Divide both sides by $x$, so that we have $a$ over $x$ on the left.'
+      - section: 'Divide'
+        say: 'Divide both sides by $x$. Now the left side has $a$ over $x$, the fraction we want.'
         write: '$\dfrac{a}{x}(1 + m) = m - 1$'
-      - say: 'Then divide both sides by $1 + m$, which is the same as $m + 1$.'
-        write: '$\dfrac{a}{x} = \dfrac{m - 1}{m + 1}$'
+      - say: 'Divide both sides by 1 plus $m$. That leaves $a$ over $x$ alone.'
+        write: '$\dfrac{a}{x} = \dfrac{m - 1}{1 + m}$'
         point:
-          - {line: 8, kind: move, from: {line: 7, at: '(1 + m)'}, at: 'm + 1', text: 'divide it over'}
-      - say: 'Let''s check with numbers. Say $a$ is 1 and $x$ is 3. Then $m$ is 3 plus 1 over 3 minus 1, which is 4 over 2, or 2.'
-        write: 'Check, $a = 1,\ x = 3$: $m = \dfrac{3 + 1}{3 - 1} = \dfrac{4}{2} = 2$'
-      - say: 'Now put $m = 2$ into our answer. 2 minus 1 over 2 plus 1 is 1 over 3, and that is exactly $a$ over $x$.'
-        write: '$\dfrac{m - 1}{m + 1} = \dfrac{2 - 1}{2 + 1} = \dfrac{1}{3} = \dfrac{a}{x}\ \checkmark$'
-      - say: 'So $\dfrac{a}{x}$ equals $m - 1$ over $m + 1$, which is answer choice A.'
-        write: '$\dfrac{a}{x} = \dfrac{m - 1}{m + 1}$'
+          - {line: 8, kind: move, from: {line: 7, at: '(1 + m)'}, at: '1 + m', text: 'divide'}
+      - section: 'Check'
+        say: 'Check with numbers. Take $a = 1$ and $x = 3$. Then $m$ is 3 plus 1 over 3 minus 1, which is 4 over 2, which is 2.'
+        write: 'Check $a = 1,\ x = 3$: $\ m = \dfrac{4}{2} = 2$'
+      - say: 'Put $m = 2$ into our answer. 2 minus 1 over 1 plus 2 is 1 over 3. And $a$ over $x$ is 1 over 3. It works.'
+        write: '$\dfrac{2 - 1}{1 + 2} = \dfrac{1}{3} = \dfrac{a}{x}$'
+      - say: '1 plus $m$ is the same as $m$ plus 1. Therefore $a$ over $x$ is $m$ minus 1 over $m$ plus 1, which is answer choice A.'
+        write: '$\therefore \dfrac{a}{x} = \dfrac{m - 1}{m + 1}$'
         answer: true
     traps:
-      B: 'You went for $\dfrac{1 + m}{1 - m}$. Test it with $a = 1$ and $x = 3$: then $m$ is 2, and this gives 3 over negative 1, which is negative 3, not one third.'
-      C: 'You went for $\dfrac{1 - m}{1 + m}$. The top has the wrong sign. When $x$ moves to the right it becomes $mx - x$, which is $x(m - 1)$, not $x(1 - m)$.'
-      D: 'You went for $\dfrac{m + 1}{m - 1}$. That is $\dfrac{x}{a}$, the reciprocal. The question asks for $a$ over $x$, so $m + 1$ goes on the bottom.'
+      B: 'You went for 1 plus $m$ over 1 minus $m$. Test it with $a = 1$ and $x = 3$, so $m = 2$: it gives 3 over minus 1, which is minus 3, not 1 over 3.'
+      C: 'You went for 1 minus $m$ over 1 plus $m$. The top has the wrong sign. Subtracting $x$ from both sides gives $mx - x$, which is $x(m - 1)$, not $x(1 - m)$.'
+      D: 'You went for $m$ plus 1 over $m$ minus 1. That is $x$ over $a$, the reciprocal. The question wants $a$ over $x$, so $m$ minus 1 is on top.'
 
   15:
     moments:
-      - say: 'We want to divide $2x^{3} + 11x^{2} + 17x + 6$ by $2x + 1$.'
+      - section: 'The question'
+        say: 'Dividing a polynomial is long division, set out like long division of numbers. Picture a rectangle: height $2x + 1$, area the whole expression. We are finding its length.'
         write: '$(2x^{3} + 11x^{2} + 17x + 6) \div (2x + 1)$'
-      - say: 'We''ll use long division. Picture a rectangle whose height is $2x + 1$ and whose area is the whole expression: we build its length one strip at a time. In each round, we divide the leading term by $2x$, multiply back, and subtract.'
-        write: 'Each round: divide, multiply back, subtract'
-        doodle: {name: 'custom:1998_q15_a', id: rect, caption: 'height 2x + 1, length to be found', size: scene}
-      - say: 'Round 1. Divide the leading terms: $2x^{3}$ divided by $2x$ is $x^{2}$. That is the first term of the answer.'
-        write: 'Round 1: $2x^{3} \div 2x = x^{2}$'
-      - say: 'Multiply back: $x^{2}$ times $2x + 1$ is $2x^{3} + x^{2}$. That is the first strip of the rectangle.'
+        doodle: {name: 'custom:1998_q15_a', id: rect, caption: 'height 2x + 1, length to be found', size: scene, 'on': 'rectangle'}
+      - section: 'Long division'
+        say: 'Solution. The divisor, $2x + 1$, goes outside the bracket. The dividend, the expression being divided, goes inside, in descending powers of $x$.'
+        write: 'Set out: $\ 2x + 1\ \big)\ \overline{2x^{3} + 11x^{2} + 17x + 6}$'
+      - say: 'Divide the first term inside by the first term outside. $2x^{3}$ divided by $2x$ is $x^{2}$. Write $x^{2}$ on top: the first term of the quotient.'
+        write: '$2x^{3} \div 2x = x^{2}$'
+      - say: 'Multiply back. $x^{2}$ times $2x + 1$ is $2x^{3}$ plus $x^{2}$. Write it under the first two terms. That is the first strip of the rectangle.'
         write: '$x^{2}(2x + 1) = 2x^{3} + x^{2}$'
         point:
           - {line: 3, kind: highlight, at: '= 2x3 + x2', to: {doodle: rect, part: round1}}
         doodle_do:
-          - {id: rect, op: stage, stage: 'custom:1998_q15_a2'}
-      - say: 'Take the first two terms minus that. The $2x^{3}$ cancels, and $11x^{2}$ minus $x^{2}$ is $10x^{2}$.'
-        write: 'Subtract: $(2x^{3} + 11x^{2}) - (2x^{3} + x^{2}) = 10x^{2}$'
-      - say: 'Bring down the rest, $17x$ plus 6.'
-        write: 'Left: $10x^{2} + 17x + 6$'
-      - say: 'Round 2. $10x^{2}$ divided by $2x$ is $5x$. That is the second term of the answer.'
-        write: 'Round 2: $10x^{2} \div 2x = 5x$'
-      - say: 'Multiply back: $5x$ times $2x + 1$ is $10x^{2} + 5x$, the second strip.'
+          - {id: rect, op: stage, stage: 'custom:1998_q15_a2', 'on': 'strip'}
+      - say: 'Subtract. $2x^{3}$ minus $2x^{3}$ is zero, and $11x^{2}$ minus $x^{2}$ is $10x^{2}$. Then bring down the next term, plus $17x$.'
+        write: 'Subtract, bring down: $\ 10x^{2} + 17x$'
+        point:
+          - {line: 4, kind: move, from: {line: 1, at: '17x'}, at: '17x', text: 'bring down'}
+      - say: 'Divide again. $10x^{2}$ divided by $2x$ is $5x$. Write plus $5x$ on top.'
+        write: '$10x^{2} \div 2x = 5x$'
+      - say: 'Multiply back. $5x$ times $2x + 1$ is $10x^{2}$ plus $5x$. Write it under. That is the second strip.'
         write: '$5x(2x + 1) = 10x^{2} + 5x$'
         doodle_do:
-          - {id: rect, op: stage, stage: 'custom:1998_q15_a3'}
-      - say: 'Subtract. The $10x^{2}$ cancels, and $17x$ minus $5x$ is $12x$. Bring down the 6.'
-        write: 'Subtract: $(10x^{2} + 17x) - (10x^{2} + 5x) = 12x$; left: $12x + 6$'
-      - say: 'Round 3. $12x$ divided by $2x$ is 6. That is the last term of the answer.'
-        write: 'Round 3: $12x \div 2x = 6$'
-      - say: 'Multiply back: 6 times $2x + 1$ is $12x + 6$, the third and last strip.'
+          - {id: rect, op: stage, stage: 'custom:1998_q15_a3', 'on': 'strip'}
+      - say: 'Subtract. $10x^{2}$ minus $10x^{2}$ is zero, and $17x$ minus $5x$ is $12x$. Bring down the last term, plus 6.'
+        write: 'Subtract, bring down: $\ 12x + 6$'
+        point:
+          - {line: 7, kind: move, from: {line: 1, at: '+ 6'}, at: '+ 6', text: 'bring down'}
+      - say: 'Divide again. $12x$ divided by $2x$ is 6. Write plus 6 on top.'
+        write: '$12x \div 2x = 6$'
+      - say: 'Multiply back. 6 times $2x + 1$ is $12x$ plus 6. Write it under. That is the third strip.'
         write: '$6(2x + 1) = 12x + 6$'
         point:
-          - {line: 10, kind: highlight, at: '= 12x + 6', to: {doodle: rect, part: round3}}
+          - {line: 9, kind: highlight, at: '= 12x + 6', to: {doodle: rect, part: round3}}
         doodle_do:
-          - {id: rect, op: stage, stage: 'custom:1998_q15_a4'}
-      - say: 'Subtract, and nothing is left. The remainder is 0, so $2x + 1$ divides exactly.'
-        write: 'Remainder: $(12x + 6) - (12x + 6) = 0$'
-      - say: 'The answer is the length of the rectangle, made of the three terms we found in the three rounds: $x^{2}$, then $5x$, then 6.'
+          - {id: rect, op: stage, stage: 'custom:1998_q15_a4', 'on': 'strip'}
+      - say: 'Subtract. $12x + 6$ minus $12x + 6$ is zero. The remainder is zero, so $2x + 1$ divides exactly.'
+        write: 'Remainder $= 0$'
+      - say: 'The quotient is what we wrote on top: $x^{2}$, then plus $5x$, then plus 6. It is the length of the rectangle.'
         write: 'Quotient $= x^{2} + 5x + 6$'
         point:
-          - {line: 12, kind: move, from: {line: 2, at: '= x2'}, at: 'x2', text: 'round 1'}
-          - {line: 12, kind: move, from: {line: 6, at: '= 5x'}, at: '+ 5x', text: 'round 2'}
-          - {line: 12, kind: move, from: {line: 9, at: '= 6'}, at: '+ 6', text: 'round 3'}
+          - {line: 11, kind: move, from: {line: 2, at: '= x2'}, at: 'x2', text: 'first'}
+          - {line: 11, kind: move, from: {line: 5, at: '= 5x'}, at: '+ 5x', text: 'second'}
+          - {line: 11, kind: move, from: {line: 8, at: '= 6'}, at: '+ 6', text: 'third'}
         doodle_do:
           - {id: rect, op: underline, part: round1}
           - {id: rect, op: underline, part: round2}
           - {id: rect, op: underline, part: round3}
-      - say: 'Let''s check by multiplying back. $2x$ times each term gives $2x^{3}$, $10x^{2}$ and $12x$. Then 1 times each term gives $x^{2}$, $5x$ and 6.'
-        write: 'Check: $(2x + 1)(x^{2} + 5x + 6) = 2x^{3} + 10x^{2} + 12x + x^{2} + 5x + 6$'
-      - say: '$10x^{2}$ plus $x^{2}$ is $11x^{2}$, and $12x$ plus $5x$ is $17x$. That is exactly what we started with.'
-        write: '$= 2x^{3} + 11x^{2} + 17x + 6\ \checkmark$'
-      - say: 'So the quotient is $x^{2} + 5x + 6$, which is answer choice A.'
-        write: '$(2x^{3} + 11x^{2} + 17x + 6) \div (2x + 1) = x^{2} + 5x + 6$'
+      - section: 'Check'
+        say: 'Check by multiplying back: the divisor times the quotient should give the dividend.'
+        write: 'Check: $(2x + 1)(x^{2} + 5x + 6)$'
+      - say: '$2x$ times each term gives $2x^{3}$, $10x^{2}$ and $12x$. Then 1 times each term gives $x^{2}$, $5x$ and 6.'
+        write: '$= 2x^{3} + 10x^{2} + 12x + x^{2} + 5x + 6$'
+      - say: 'Collect like terms. $10x^{2}$ plus $x^{2}$ is $11x^{2}$, and $12x$ plus $5x$ is $17x$. That is the dividend we started with.'
+        write: '$= 2x^{3} + 11x^{2} + 17x + 6$'
+      - say: 'Therefore the quotient is $x^{2} + 5x + 6$, which is answer choice A.'
+        write: '$\therefore$ the quotient is $x^{2} + 5x + 6$'
         answer: true
     traps:
       B: 'You went for $2x^{2} + 5x + 6$. The first term is $2x^{3}$ divided by $2x$, which is $x^{2}$, not $2x^{2}$. The 2s cancel.'
-      C: 'You went for $2x^{2} - 5x + 6$. Every term in this division is positive, and the first term is $x^{2}$, since $2x^{3}$ divided by $2x$ is $x^{2}$.'
-      D: 'You went for $x^{2} - 5x + 6$. The first term is right, but $10x^{2}$ divided by $2x$ is positive $5x$. There are no minus signs in this division.'
+      C: 'You went for $2x^{2} - 5x + 6$. The first term is $x^{2}$, since $2x^{3}$ divided by $2x$ is $x^{2}$. And $10x^{2}$ divided by $2x$ is plus $5x$.'
+      D: 'You went for $x^{2} - 5x + 6$. The first term is right, but after the first subtraction we have plus $10x^{2}$, and $10x^{2}$ divided by $2x$ is plus $5x$.'
 
   16:
     moments:
-      - say: 'We want to split this fraction into partial fractions. Picture it as a whole pizza that was made by putting two simpler slices together; we want the slices back.'
-        write: '$\dfrac{11x + 2}{6x^{2} - x - 1}$'
-        doodle: {name: 'custom:1998_q16_a', id: pizza, caption: 'one fraction, made of two slices', size: scene}
-      - say: 'First, factorise the denominator. We need two numbers that multiply to 6 times negative 1, which is negative 6, and add to negative 1. Those are negative 3 and 2. So split the middle term.'
-        write: 'Split the middle: $6x^{2} - x - 1 = 6x^{2} - 3x + 2x - 1$'
-      - say: 'Group in pairs. From the first pair take out $3x$, and from the second take out 1.'
-        write: '$= 3x(2x - 1) + 1(2x - 1)$'
-      - say: 'The common bracket is $2x - 1$.'
-        write: '$= (3x + 1)(2x - 1)$'
+      - section: 'The question'
+        say: 'This one fraction was made by adding two simpler fractions, like two slices making one pizza. Partial fractions means finding the two slices again.'
+        write: 'Express $\dfrac{11x + 2}{6x^{2} - x - 1}$ in partial fractions'
+        doodle: {name: 'custom:1998_q16_a', id: pizza, caption: 'one fraction, made of two slices', size: scene, 'on': 'pizza'}
+      - section: 'Factorise the denominator'
+        say: 'Solution. First factorise the denominator. The product is $a$ times $c$, 6 times minus 1, which is minus 6. The sum is $b$, minus 1.'
+        write: 'Product $= ac = -6$, Sum $= b = -1$'
+      - say: 'Two numbers that multiply to minus 6 and add up to minus 1: minus 3 and 2.'
+        write: 'Factors: $-3,\ 2$'
+      - say: 'Split the middle term. Minus $x$ becomes minus $3x$ plus $2x$.'
+        write: '$6x^{2} - x - 1 = 6x^{2} - 3x + 2x - 1$'
         point:
-          - {line: 3, kind: move, from: {line: 2, at: '+1[[(2x − 1)]]'}, at: '(2x − 1)', text: 'taken out'}
-      - say: 'Each factor gets its own slice: a fraction with a constant on top. Let''s call them $A$ and $B$.'
-        write: '$\dfrac{11x + 2}{(3x + 1)(2x - 1)} = \dfrac{A}{3x + 1} + \dfrac{B}{2x - 1}$'
+          - {line: 3, kind: move, from: {line: 2, at: '[[−3]], 2'}, at: '−3x', text: 'split'}
+          - {line: 3, kind: move, from: {line: 2, at: '−3, [[2]]'}, at: '+2x'}
+      - say: 'Group in pairs. From the first pair take out $3x$, leaving $2x - 1$. From the second pair take out 1, leaving $2x - 1$ again.'
+        write: '$= 3x(2x - 1) + 1(2x - 1)$'
+      - say: 'The brackets match. Take out the common bracket, $2x - 1$. What is left is $3x + 1$.'
+        write: '$= (3x + 1)(2x - 1)$'
+      - section: 'Set up the fractions'
+        say: 'Each factor gets its own fraction, with a constant on top: $A$ and $B$. The sign with three lines means identically equal, true for every $x$.'
+        write: 'Let $\dfrac{11x + 2}{(3x + 1)(2x - 1)} \equiv \dfrac{A}{3x + 1} + \dfrac{B}{2x - 1}$'
         doodle_do:
-          - {id: pizza, op: stage, stage: 'custom:1998_q16_a2'}
-      - say: 'Multiply both sides by $(3x + 1)(2x - 1)$ to clear the fractions.'
-        write: '$11x + 2 = A(2x - 1) + B(3x + 1)$'
-      - say: 'Now choose values of $x$ that make one bracket zero. $2x - 1$ is zero when $x$ is a half, and that wipes out the $A$ term. Put $x$ equals a half into both sides.'
-        write: 'Put $x = \tfrac{1}{2}$: $11\left(\tfrac{1}{2}\right) + 2 = A(0) + B\left(3 \times \tfrac{1}{2} + 1\right)$'
-      - say: 'On the left, 11 times a half is 11 over 2, and 2 is 4 over 2, so together they make 15 over 2. On the right, 3 times a half is 3 over 2, and 1 is 2 over 2, so the bracket is 5 over 2.'
-        write: '$\tfrac{11}{2} + \tfrac{4}{2} = B\left(\tfrac{3}{2} + \tfrac{2}{2}\right)$, so $\tfrac{15}{2} = \tfrac{5}{2}B$'
-      - say: 'Divide both sides by 5 over 2. Both fractions are over 2, so that cancels, leaving 15 divided by 5, which is 3. That is the top of the $B$ slice.'
-        write: '$B = \tfrac{15}{2} \div \tfrac{5}{2} = 15 \div 5 = 3$'
+          - {id: pizza, op: stage, stage: 'custom:1998_q16_a2', 'on': 'own'}
+      - say: 'Multiply through by $(3x + 1)(2x - 1)$. Each fraction keeps the bracket it did not have.'
+        write: '$11x + 2 \equiv A(2x - 1) + B(3x + 1)$'
+      - section: 'Find B'
+        say: 'Put $x$ equal to a half, because it makes $2x - 1$ zero. That wipes out the $A$ term.'
+        write: 'Put $x = \tfrac{1}{2}$: $\ 11\left(\tfrac{1}{2}\right) + 2 = A(0) + B\left(\tfrac{3}{2} + 1\right)$'
+      - say: 'On the left, 11 over 2 plus 2 is 15 over 2. On the right, 3 over 2 plus 1 is 5 over 2.'
+        write: '$\tfrac{15}{2} = \tfrac{5}{2}B$'
+      - say: 'Divide both sides by 5 over 2. Both are over 2, so it is 15 divided by 5, which is 3. That is the top of the $B$ slice.'
+        write: '$B = \tfrac{15}{2} \div \tfrac{5}{2} = 3$'
         doodle_do:
           - {id: pizza, op: label, part: slice-b, text: 'B = 3'}
-      - say: 'Now make $3x + 1$ zero. That happens when $x$ is negative a third, and it wipes out the $B$ term.'
-        write: 'Put $x = -\tfrac{1}{3}$: $11\left(-\tfrac{1}{3}\right) + 2 = A\left(2\left(-\tfrac{1}{3}\right) - 1\right) + B(0)$'
-      - say: 'On the left, negative 11 over 3 plus 2, which is 6 over 3, makes negative 5 over 3. On the right, negative 2 over 3 minus 1, which is 3 over 3, also makes negative 5 over 3.'
-        write: '$-\tfrac{11}{3} + \tfrac{6}{3} = A\left(-\tfrac{2}{3} - \tfrac{3}{3}\right)$, so $-\tfrac{5}{3} = -\tfrac{5}{3}A$'
-      - say: 'Divide both sides by negative 5 over 3. A number divided by itself is 1. That is the top of the $A$ slice.'
+      - section: 'Find A'
+        say: 'Now put $x$ equal to minus 1 over 3, because it makes $3x + 1$ zero. That wipes out the $B$ term.'
+        write: 'Put $x = -\tfrac{1}{3}$: $\ 11\left(-\tfrac{1}{3}\right) + 2 = A\left(-\tfrac{2}{3} - 1\right) + B(0)$'
+      - say: 'On the left, minus 11 over 3 plus 2 is minus 5 over 3. On the right, minus 2 over 3 minus 1 is also minus 5 over 3.'
+        write: '$-\tfrac{5}{3} = -\tfrac{5}{3}A$'
+      - say: 'Divide both sides by minus 5 over 3. So $A$ is 1, the top of the $A$ slice.'
         write: '$A = 1$'
         doodle_do:
           - {id: pizza, op: label, part: slice-a, text: 'A = 1'}
-      - say: 'Now put $A = 1$ and $B = 3$ back into the two slices we set up.'
-        write: 'So $\dfrac{11x + 2}{6x^{2} - x - 1} = \dfrac{1}{3x + 1} + \dfrac{3}{2x - 1}$'
+      - say: 'Put $A = 1$ and $B = 3$ back into the two fractions we set up.'
+        write: '$\dfrac{11x + 2}{6x^{2} - x - 1} = \dfrac{1}{3x + 1} + \dfrac{3}{2x - 1}$'
         point:
-          - {line: 12, kind: move, from: {line: 11, at: '= 1'}, at: '3x+1[[1]]', text: 'A'}
-          - {line: 12, kind: move, from: {line: 8, at: '= 3'}, at: '2x−1[[3]]', text: 'B'}
-        doodle_do:
-          - {id: pizza, op: pulse, part: slice-b}
-      - say: 'Quick check with $x = 0$. The left side is 2 over negative 1, which is negative 2. The right side is 1 over 1, plus 3 over negative 1, which is 1 minus 3, also negative 2.'
-        write: 'Check $x = 0$: $\dfrac{2}{-1} = -2$ and $\dfrac{1}{1} + \dfrac{3}{-1} = 1 - 3 = -2$'
-      - say: 'So the partial fractions are 1 over $3x + 1$, plus 3 over $2x - 1$, which is answer choice D.'
-        write: 'Answer: $\dfrac{1}{3x + 1} + \dfrac{3}{2x - 1}$'
+          - {line: 14, kind: move, from: {line: 13, at: '= 1'}, at: '3x+1[[1]]', text: 'A'}
+          - {line: 14, kind: move, from: {line: 10, at: '= 3'}, at: '2x−1[[3]]', text: 'B'}
+      - section: 'Check'
+        say: 'Check with $x = 0$. The left side is 2 over minus 1, which is minus 2. The right side is 1 over 1 plus 3 over minus 1: 1 minus 3, also minus 2.'
+        write: 'Check $x = 0$: $\ \dfrac{2}{-1} = -2$; $\ \dfrac{1}{1} + \dfrac{3}{-1} = -2$'
+      - say: 'Therefore the partial fractions are 1 over $3x + 1$, plus 3 over $2x - 1$, which is answer choice D.'
+        write: '$\therefore \dfrac{1}{3x + 1} + \dfrac{3}{2x - 1}$'
         answer: true
+        doodle_do:
+          - {id: pizza, op: pulse, part: whole}
     traps:
-      A: 'You went for $\dfrac{1}{3x - 1} + \dfrac{3}{2x + 1}$. The numerators are right, but the signs in the denominators are swapped. Multiply back: $(3x - 1)(2x + 1)$ is $6x^{2} + x - 1$, not $6x^{2} - x - 1$.'
-      B: 'You went for $\dfrac{3}{3x + 1} - \dfrac{1}{2x - 1}$. The denominators are right, but the numerators are not. Putting $x = \tfrac{1}{2}$ gives $B = 3$, so the 3 belongs over $2x - 1$, and 1 goes over $3x + 1$.'
-      C: 'You went for $\dfrac{3}{3x - 1} - \dfrac{1}{2x + 1}$. The denominators have the wrong signs, since $(3x - 1)(2x + 1)$ is $6x^{2} + x - 1$. The factors are $(3x + 1)(2x - 1)$, with 1 over the first and 3 over the second.'
+      A: 'You went for 1 over $3x - 1$ plus 3 over $2x + 1$. The tops are right, but the signs in the brackets are swapped: $(3x - 1)(2x + 1)$ is $6x^{2} + x - 1$, not $6x^{2} - x - 1$.'
+      B: 'You went for 3 over $3x + 1$ minus 1 over $2x - 1$. The brackets are right, but the tops are not. Putting $x = \tfrac{1}{2}$ gives $B = 3$, so the 3 goes over $2x - 1$.'
+      C: 'You went for 3 over $3x - 1$ minus 1 over $2x + 1$. Product minus 6 and sum minus 1 give the factors minus 3 and 2, so the denominator is $(3x + 1)(2x - 1)$.'
 
   17:
     moments:
-      - say: 'We''re told $x$ is a positive real number, and we want the values of $x$ for which this inequality is true.'
-        write: '$\dfrac{1}{3x} + \dfrac{1}{2} > \dfrac{1}{4x}$'
-      - say: 'Let me draw this on a number line, so we can see the values.'
-        show_sketch: true
-      - say: 'To clear the fractions, we multiply every term by the lowest common multiple of $3x$, 2 and $4x$, which is $12x$.'
-        write: 'LCM of $3x,\ 2,\ 4x$ is $12x$'
-      - say: 'But can we multiply an inequality by $12x$ without flipping the sign? Yes, because the question says $x$ is positive, so $12x$ is positive too.'
-        write: 'Since $x > 0$: $12x > 0$, so the sign stays'
-      - say: 'Multiply each term by $12x$.'
+      - section: 'The question'
+        say: '$x$ is a positive real number. The algebra will give one answer, but that word "positive" changes the final range. Keep it in mind.'
+        write: '$\dfrac{1}{3x} + \dfrac{1}{2} > \dfrac{1}{4x},\quad x > 0$'
+      - say: 'Solution. The L.C.M. of $3x$, 2 and $4x$ is $12x$. Since $x$ is positive, $12x$ is positive, so multiplying by it keeps the sign.'
+        write: 'Solution: L.C.M. $= 12x > 0$, so the sign stays'
+      - say: 'Multiply every term by $12x$.'
         write: '$12x \times \dfrac{1}{3x} + 12x \times \dfrac{1}{2} > 12x \times \dfrac{1}{4x}$'
-        point:
-          - {line: 2, kind: arrow, at: '12x', text: 'the LCM'}
-          - {line: 3, kind: underline, at: '12x > 0', text: 'no flip'}
       - say: '$12x$ over $3x$ is 4. $12x$ times a half is $6x$. And $12x$ over $4x$ is 3.'
         write: '$4 + 6x > 3$'
-      - say: 'Subtract 4 from both sides. 3 minus 4 is negative 1.'
-        write: '$6x > 3 - 4$, so $6x > -1$'
-        point:
-          - {line: 6, kind: move, from: {line: 5, at: '4 +'}, at: '− 4', text: 'across'}
-      - say: 'Divide both sides by 6. That is a positive number, so the sign stays.'
+      - say: 'Subtract 4 from both sides. 3 minus 4 is minus 1.'
+        write: '$6x > 3 - 4 = -1$'
+      - say: 'Divide both sides by 6. It is positive, so the sign stays.'
         write: '$x > -\dfrac{1}{6}$'
-        point:
-          - {line: 7, kind: move, from: {line: 6, at: '[[6]]x > −1'}, at: '−[[6]]1', text: 'divide it over'}
-          - {figure: sketch, kind: circle, target: '−⅙'}
-      - say: 'But now we must bring back the condition in the question: $x$ is positive. So $x$ must satisfy both.'
-        write: '$x > 0$ and $x > -\dfrac{1}{6}$'
-      - say: 'Every positive number is already bigger than negative 1 over 6. So the second condition adds nothing, and we are left with just $x > 0$.'
-        write: 'Both hold exactly when $x > 0$'
-        point:
-          - {figure: sketch, kind: circle, target: '0', text: 'x > 0'}
-          - {figure: sketch, kind: underline, target: 'x > 0', text: 'the answer'}
-      - say: 'Here''s another way to see it. For positive $x$, 1 over $3x$ is already bigger than 1 over $4x$, because we divide by less. Adding a half only makes the left side bigger still.'
-        write: '$\dfrac{1}{3x} > \dfrac{1}{4x}$ for every $x > 0$'
-      - say: 'Let''s test a number, say $x = 1$. The left side is 1 over 3 plus a half, about 0.83. The right side is 1 over 4, which is 0.25. True.'
-        write: 'Test $x = 1$: $\tfrac{1}{3} + \tfrac{1}{2} \approx 0.83 > \tfrac{1}{4} = 0.25$'
-      - say: 'So the inequality holds for every positive $x$: $x > 0$, which is answer choice B.'
-        write: 'Answer: $x > 0$'
+      - section: 'Use the condition'
+        say: 'But the question says $x$ is positive. So $x$ must satisfy both: greater than minus a sixth, and greater than 0.'
+        write: '$x > -\dfrac{1}{6}$ and $x > 0$'
+      - say: 'On a number line, the first is an open circle at minus a sixth, arrow to the right. The second starts at 0. Both hold from 0 onwards.'
+        diagram: {id: n, kind: numberline, range: [-1, 2], step: 0.5}
+        diagram_do:
+          - {id: n, op: interval, from: -0.167, from_open: true, text: 'x > −1/6', colour: blue}
+          - {id: n, op: interval, from: 0, from_open: true, text: 'x > 0', answer: true, 'on': 'starts at 0'}
+      - say: 'Every positive number is already bigger than minus a sixth. So both hold exactly when $x$ is greater than 0.'
+        write: '$\therefore\ x > 0$'
+      - section: 'Check'
+        say: 'Check with $x$ equals 1. A third plus a half is about 0.83, and a quarter is 0.25. 0.83 is greater than 0.25.'
+        write: 'Check $x = 1$: $\ \tfrac{1}{3} + \tfrac{1}{2} \approx 0.83 > \tfrac{1}{4}\ \checkmark$'
+      - say: 'So the inequality holds for every positive $x$: option B.'
+        write: '$x > 0$'
         answer: true
     traps:
-      A: 'You went for $x > -\tfrac{1}{6}$. The algebra gives that, but the question says $x$ is positive, so negative values are not allowed. Inside that domain, the answer is simply $x > 0$.'
-      C: 'You went for 0 to 4. Nothing in the working puts an upper limit on $x$. After multiplying by $12x$ we get $4 + 6x > 3$, which every positive $x$ satisfies.'
-      D: 'You went for 0 to 1 over 6. The 1 over 6 comes from $6x > -1$, but that says $x$ is greater than negative 1 over 6, not less than 1 over 6. Every positive $x$ works.'
+      A: 'You went for $x > -\tfrac{1}{6}$. The algebra gives that, but the question says $x$ is positive, so negative values are not allowed. Together, the answer is $x > 0$.'
+      C: 'You went for 0 to 4. Nothing in the working puts an upper limit on $x$. Multiplying by $12x$ gives $4 + 6x > 3$, which every positive $x$ satisfies.'
+      D: 'You went for 0 to 1 over 6. The 1 over 6 comes from $6x > -1$, but that says $x$ is greater than minus 1 over 6, not less than 1 over 6. Every positive $x$ works.'
 
   18:
     moments:
-      - say: 'The graph shows a shaded region bounded by the two axes and a slanting line. We want the inequalities that describe it.'
+      - section: 'The question'
+        say: 'The shaded region has three edges: the two axes and a slanting line. Each edge gives one inequality. Two options even share the right line, so the sign decides it.'
+        write: 'Shaded region: three boundaries'
         point:
           - {figure: 0, kind: highlight, target: {x: 250, y: 110}, text: 'shaded'}
-      - say: 'There are three boundaries, so let''s take them one at a time. First, the shading is to the right of the $y$-axis, where $x$ is 0 or more.'
-        write: 'Boundary 1, the $y$-axis: $x \ge 0$'
+      - say: 'Solution. The shading lies to the right of the $y$-axis, where $x$ is 0 or more.'
+        write: 'Solution: $\ y$-axis: $\ x \ge 0$'
         point:
           - {figure: 0, kind: circle, target: 'y', text: 'x ≥ 0'}
-      - say: 'Second, the shading is above the $x$-axis, where $y$ is 0 or more.'
-        write: 'Boundary 2, the $x$-axis: $y \ge 0$'
+      - say: 'It lies above the $x$-axis, where $y$ is 0 or more.'
+        write: '$x$-axis: $\ y \ge 0$'
         point:
           - {figure: 0, kind: circle, target: 'x', text: 'y ≥ 0'}
-      - say: 'Third, the slanting line. From the diagram, it cuts the $y$-axis at 0, 3 and the $x$-axis at 2, 0. We need its equation.'
-        write: 'Boundary 3 passes through $(0,\ 3)$ and $(2,\ 0)$'
+      - section: 'The slanting line'
+        say: 'The slanting line cuts the axes at 0, 3 and 2, 0. Its gradient is the change in $y$ over the change in $x$.'
+        write: '$m = \dfrac{y_{2} - y_{1}}{x_{2} - x_{1}} = \dfrac{0 - 3}{2 - 0} = -\dfrac{3}{2}$'
         point:
           - {figure: 0, kind: circle, target: '(0, 3)'}
           - {figure: 0, kind: circle, target: '(2, 0)'}
-      - say: 'The gradient of a line is the change in $y$ over the change in $x$.'
-        write: 'Gradient $= \dfrac{y_{2} - y_{1}}{x_{2} - x_{1}}$'
-      - say: 'Its gradient is the change in $y$ over the change in $x$. 0 minus 3 is negative 3, and 2 minus 0 is 2.'
-        write: 'Gradient $= \dfrac{0 - 3}{2 - 0} = -\dfrac{3}{2}$'
-      - say: 'The equation of a straight line: $y$ equals $m$ $x$ plus $c$, where $m$ is the gradient and $c$ is where it cuts the $y$-axis.'
-        write: '$y = mx + c$'
-      - say: 'The line crosses the $y$-axis at 3, so $y$ equals the gradient we just found times $x$, plus 3. That is negative 3 over 2 $x$, plus 3.'
-        write: '$y = -\dfrac{3}{2}x + 3$'
+      - say: 'The equation of a line is $y$ equals $mx$ plus $c$, where $c$ is the $y$-intercept, 3.'
+        write: '$y = mx + c = -\dfrac{3}{2}x + 3$'
         point:
-          - {line: 7, kind: move, from: {line: 5, at: '= −23'}, at: '−23', text: 'gradient'}
-          - {figure: 0, kind: circle, target: '(0, 3)', text: 'y-intercept 3'}
-      - say: 'Multiply every term by 2 to clear the fraction. 2 times negative 3 over 2 is negative 3, and 2 times 3 is 6.'
-        write: '$2y = -3x + 6$'
-      - say: 'Add $3x$ to both sides.'
-        write: '$3x + 2y = 6$'
-        point:
-          - {line: 9, kind: move, from: {line: 8, at: '−3x'}, at: '3x + 2y', text: 'across the ='}
-      - say: 'Let''s check it with the two points. At 0, 3: 0 plus 6 is 6. At 2, 0: 6 plus 0 is 6. Both lie on the line.'
-        write: 'Check: $3(0) + 2(3) = 6$, $3(2) + 2(0) = 6$'
-        point:
-          - {figure: 0, kind: label, target: '(0, 3)', text: '0 + 6 = 6'}
-          - {figure: 0, kind: label, target: '(2, 0)', text: '6 + 0 = 6'}
-      - say: 'Now, which side of the line is shaded? Test the origin. At 0, 0, $3x + 2y$ is 0, which is less than 6.'
-        write: 'Test $(0,\ 0)$: $3(0) + 2(0) = 0 < 6$'
+          - {figure: 0, kind: label, target: '(0, 3)', text: 'c = 3'}
+      - say: 'Multiply every term by 2 to clear the fraction, then add $3x$ to both sides.'
+        write: '$2y = -3x + 6 \Rightarrow 3x + 2y = 6$'
+      - section: 'Which side?'
+        say: 'Test the origin, 0, 0. $3x$ plus $2y$ is 0, which is less than 6.'
+        write: 'Test $(0,\ 0)$: $\ 3(0) + 2(0) = 0 < 6$'
         point:
           - {figure: 0, kind: circle, target: {x: 70, y: 190}, text: 'origin'}
-      - say: 'In the diagram, the origin is not in the shaded region. So the shaded side is the other side, where $3x + 2y$ is 6 or more.'
-        write: 'Origin not shaded, so $3x + 2y \ge 6$'
+      - say: 'The origin is not in the shaded part. So the shaded side is the other side, where $3x$ plus $2y$ is 6 or more. The line is solid, so equal to is allowed.'
+        write: 'Origin not shaded: $\ 3x + 2y \ge 6$'
         point:
-          - {figure: 0, kind: label, target: {x: 70, y: 190}, text: 'not shaded'}
           - {figure: 0, kind: label, target: {x: 250, y: 110}, text: '3x + 2y ≥ 6'}
-      - say: 'Putting the three together: $x \ge 0$, $y \ge 0$ and $3x + 2y \ge 6$, which is answer choice D.'
-        write: '$x \ge 0, \ y \ge 0, \ 3x + 2y \ge 6$'
+      - say: 'Exam tip. In a JAMB diagram like this, the shaded part is the region asked for. In your own graph work, many textbooks shade the unwanted part instead, so always state which.'
+      - section: 'Answer'
+        say: 'Put the three together.'
+        write: '$\therefore\ x \ge 0,\ \ y \ge 0,\ \ 3x + 2y \ge 6$'
+        point:
+          - {line: 9, kind: move, from: {line: 7, at: '3x + 2y ≥ 6'}, at: '3x + 2y ≥ 6', text: 'line'}
+      - say: 'So the shaded area is $x \ge 0$, $y \ge 0$ and $3x + 2y \ge 6$: option D.'
+        write: '$x \ge 0,\ y \ge 0,\ 3x + 2y \ge 6$'
         answer: true
     traps:
-      A: 'You went for $x \ge 0$ with $3y + 2x \ge 6$. The coefficients are swapped: $3y + 2x = 6$ crosses the axes at 3, 0 and 0, 2, but our line meets them at 2, 0 and 0, 3. It also leaves out $y \ge 0$.'
-      B: 'You went for the choice with $y \ge 3$. That would cut off everything below height 3, but the shading comes right down to the $x$-axis. The condition should be $y \ge 0$.'
+      A: 'You went for $x \ge 0$ with $3y + 2x \ge 6$. The coefficients are swapped: $3y + 2x = 6$ cuts the axes at 3, 0 and 0, 2, but our line cuts them at 2, 0 and 0, 3. It also leaves out $y \ge 0$.'
+      B: 'You went for the choice with $y \ge 3$. That would cut off everything below height 3, but the shading comes right down to the $x$-axis. The condition is $y \ge 0$.'
       C: 'You went for $x \ge 2$ with $3x + 2y \le 6$. The less-than sign describes the origin''s side, which is not shaded. Testing 0, 0 gives 0, less than 6, so the shaded side is $3x + 2y \ge 6$.'
 
   19:
@@ -1096,12 +1136,12 @@ lessons:
     moments:
       - say: 'We want the determinant of this 3 by 3 matrix, in terms of $x$.'
         write: '$\begin{vmatrix} x & 1 & 0 \\ 1 - x & 2 & 3 \\ 1 & 1 + x & 4 \end{vmatrix}$'
-      - say: 'We expand along the top row, because it has a zero in it. Picture the matrix as a seat plan: each entry in the top row is multiplied by the small 2 by 2 determinant left when we cover that entry''s row and column.'
+      - say: 'We expand along the top row, because it has a zero in it. Picture the matrix as a grid: each entry in the top row is multiplied by the small 2 by 2 determinant left when we cover that entry''s row and column.'
         write: 'Expand along row 1: $x,\ 1,\ 0$'
         doodle: {name: 'custom:1998_q23_a', id: seats, caption: 'cover a row and a column'}
       - say: 'The signs along the top row go plus, minus, plus. And the last entry is 0, so its term vanishes and only two terms survive.'
         write: '$= x\begin{vmatrix} 2 & 3 \\ 1 + x & 4 \end{vmatrix} - 1\begin{vmatrix} 1 - x & 3 \\ 1 & 4 \end{vmatrix} + 0$'
-      - say: 'First small determinant, for the $x$. Cover its row and column in the seat plan: it leaves 2, 3, $1 + x$ and 4. Cross-multiply: 2 times 4, minus 3 times $1 + x$.'
+      - say: 'First small determinant, for the $x$. Cover its row and column in the grid: it leaves 2, 3, $1 + x$ and 4. Cross-multiply: 2 times 4, minus 3 times $1 + x$.'
         write: 'For $x$: $\begin{vmatrix} 2 & 3 \\ 1 + x & 4 \end{vmatrix} = 2 \times 4 - 3(1 + x)$'
         doodle_do:
           - {id: seats, op: stage, stage: 'custom:1998_q23_a2'}
@@ -1135,20 +1175,20 @@ lessons:
       - say: 'We have matrices $P$ and $Q$, and $PQ$ equals the identity matrix $I$. We want $u$ and $v$.'
         write: '$\begin{pmatrix} 2 & 3 \\ 4 & 5 \end{pmatrix}\begin{pmatrix} u & 4 + u \\ -2v & v \end{pmatrix} = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$'
       - say: 'To multiply matrices, we take a row of the first times a column of the second. We have two unknowns, so the first column of $Q$ gives us enough equations.'
-      - say: 'Top-left entry: row 1 of $P$ walks along column 1 of $Q$, seat by seat. That is 2 times $u$, plus 3 times negative $2v$, and it must equal the 1 in the top-left seat of $I$.'
+      - say: 'Top-left entry: row 1 of $P$ walks along column 1 of $Q$, entry by entry. That is 2 times $u$, plus 3 times negative $2v$, and it must equal the 1 in the top-left entry of $I$.'
         write: '$2u + 3(-2v) = 1$'
         point:
           - {line: 2, kind: highlight, at: '2u + 3(-2v) = 1', to: {doodle: seats, part: row1}}
         doodle: {name: 'custom:1998_q24_a', id: seats, caption: 'row 1 of P meets column 1 of Q', size: scene}
       - say: '3 times negative $2v$ is negative $6v$.'
         write: '$2u - 6v = 1$'
-      - say: 'Bottom-left entry: now row 2 walks along column 1. That is 4 times $u$, plus 5 times negative $2v$, and it must equal the 0 in that seat of $I$.'
+      - say: 'Bottom-left entry: now row 2 walks along column 1. That is 4 times $u$, plus 5 times negative $2v$, and it must equal the 0 in that position of $I$.'
         write: '$4u + 5(-2v) = 0$'
         doodle_do:
           - {id: seats, op: stage, stage: 'custom:1998_q24_a2'}
       - say: '5 times negative $2v$ is negative $10v$.'
         write: '$4u - 10v = 0$'
-      - say: 'This second equation, from the 0 seat, is easier, because it equals zero. Add $10v$ to both sides.'
+      - say: 'This second equation, from the 0 entry, is easier, because it equals zero. Add $10v$ to both sides.'
         write: '$4u = 10v$'
         point:
           - {line: 6, kind: move, from: {line: 5, at: '−10v'}, at: '10v', text: 'across the ='}
@@ -1299,7 +1339,7 @@ lessons:
           - {figure: 0, kind: circle, target: {x: 222, y: 180}, text: 'triangle'}
       - say: 'The area of a triangle is half the base times the height.'
         write: 'Area of a triangle $= \dfrac{1}{2} \times \text{base} \times \text{height}$'
-      - say: 'The area of a triangle is half the base times the height. The base $SR$ is 8.'
+      - say: 'The base $SR$ is 8, and the area is 20.'
         write: '$20 = \tfrac{1}{2} \times 8 \times h$'
         point:
           - {line: 3, kind: move, from: {line: 0, at: '= 20'}, at: '20 =', text: 'area'}
@@ -1353,7 +1393,7 @@ lessons:
         point:
           - {figure: 0, kind: arc, target: YXT, text: '32°'}
           - {figure: 0, kind: arc, target: RTQ, text: '40°'}
-      - say: 'The key tool is the alternate segment theorem: the angle between a tangent and a chord equals the angle that chord makes in the other segment of the circle.'
+      - say: 'The key tool is the alternate segment theorem.'
         point:
           - {figure: 0, kind: highlight, target: 'TQ', text: 'tangent'}
           - {figure: 0, kind: highlight, target: 'TR', text: 'chord'}
@@ -1374,7 +1414,7 @@ lessons:
           - {figure: 0, kind: arc, target: YXR, text: '72°'}
       - say: 'Opposite angles of a cyclic quadrilateral add up to 180 degrees.'
         write: 'Cyclic quadrilateral: opposite angles add to $180^{\circ}$'
-      - say: '$X$, $Y$, $T$ and $R$ all lie on the circle, so $XYTR$ is a cyclic quadrilateral. Opposite angles of a cyclic quadrilateral add to 180.'
+      - say: '$X$, $Y$, $T$ and $R$ all lie on the circle, so $XYTR$ is a cyclic quadrilateral, and its opposite angles add to 180.'
         write: '$\angle YXR + \angle YTR = 180^{\circ}$'
       - say: 'The angle at $X$ and the angle at $T$ are opposite each other, so put in the 72 degrees we just found for angle $YXR$.'
         write: '$72^{\circ} + \angle YTR = 180^{\circ}$'
@@ -1400,7 +1440,7 @@ lessons:
     moments:
       - say: 'A chord of a circle of radius $\sqrt{3}$ cm makes an angle of 60 degrees at the circumference. We want the length of the chord.'
         write: '$r = \sqrt{3}, \quad \text{angle at circumference} = 60^{\circ}$'
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - say: 'Let me draw the circle with the chord $AB$ and the 60-degree angle at the circumference.'
         show_sketch: true
         point:
           - {figure: sketch, kind: underline, target: 'radius √3 cm'}
@@ -1411,7 +1451,7 @@ lessons:
           - {figure: sketch_b, kind: arc, target: AOB, text: 'angle at centre'}
       - say: 'The angle at the centre is twice the angle at the circumference standing on the same arc.'
         write: 'Angle at centre $= 2 \times$ angle at circumference'
-      - say: 'The chord''s length depends on the angle at the centre. The angle at the centre is twice the angle at the circumference on the same chord.'
+      - say: 'The chord''s length depends on the angle at the centre, and that is twice the 60 degrees at the circumference.'
         write: '$\text{angle at centre} = 2 \times 60^{\circ} = 120^{\circ}$'
         point:
           - {line: 4, kind: move, from: {line: 0, at: '60'}, at: '× 60', text: 'double it'}
@@ -1457,7 +1497,7 @@ lessons:
     moments:
       - say: 'A cylindrical drum of diameter 56 cm holds 123.2 litres of oil when full. We want its height in centimetres.'
         write: '$d = 56 \text{ cm}, \quad V = 123.2 \text{ litres}$'
-      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+      - say: 'Let me draw the drum.'
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: '56 cm'}
@@ -1475,7 +1515,7 @@ lessons:
           - {figure: sketch, kind: circle, target: '56 cm', text: 'r = 28'}
       - say: 'The volume of a cylinder is pi r squared h.'
         write: 'Volume of a cylinder $= \pi r^{2}h$'
-      - say: 'The volume of a cylinder is $\pi r^{2}h$, and the drum''s volume is the 123,200 we just found: 123.2 of those litre cartons.'
+      - say: 'The drum''s volume is the 123,200 we just found: 123.2 of those litre cartons.'
         write: '$\pi r^{2}h = 123{,}200$'
         point:
           - {line: 5, kind: move, from: {line: 2, at: '123,200'}, at: '123,200', text: 'in cm³'}
@@ -1508,7 +1548,7 @@ lessons:
   31:
     moments:
       - say: 'The locus of all points 8 cm from a point $N$ passes through $T$ and $S$, and $S$ is the same distance from $T$ as from $N$. We want the area of triangle $STN$.'
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - say: 'Let me draw the points 8 cm from $N$, with $S$ and $T$ among them.'
         show_sketch: true
       - say: 'The locus of points 8 cm from $N$ is a circle with centre $N$ and radius 8 cm. $T$ and $S$ are on it, so both are 8 cm from $N$.'
         write: '$NT = 8, \quad NS = 8$'
@@ -1531,7 +1571,7 @@ lessons:
           - {figure: sketch, kind: arc, target: 'STN', text: '60°'}
       - say: 'The area of a triangle is half times two sides times the sine of the angle between them.'
         write: 'Area $= \dfrac{1}{2}ab\sin C$'
-      - say: 'The area of a triangle is half times two sides times the sine of the angle between them. Here that''s 8, 8 and 60 degrees.'
+      - say: 'Here that''s 8, 8 and 60 degrees.'
         write: '$\text{Area} = \tfrac{1}{2} \times 8 \times 8 \times \sin 60^{\circ}$'
         point:
           - {line: 5, kind: arrow, at: 'equilateral', text: '60° angles'}
@@ -1556,7 +1596,7 @@ lessons:
     moments:
       - say: 'The distance between the points $(x, 3)$ and $(-x, 2)$ is 5. We want $x$.'
         write: '$(x,\ 3), \quad (-x,\ 2), \quad d = 5$'
-      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+      - say: 'Let me plot the two points.'
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: '(x, 3)'}
@@ -1602,7 +1642,7 @@ lessons:
     moments:
       - say: 'We want the midpoint of the part of the line $y = 4x + 3$ that lies between the two axes. That part runs from one intercept to the other.'
         write: '$y = 4x + 3$'
-      - say: 'Let me sketch the graph, so we can see its shape.'
+      - say: 'Let me draw the line $y = 4x + 3$, cutting the two axes.'
         show_sketch: true
         point:
           - {figure: sketch, kind: underline, target: 'y = 4x + 3'}
@@ -1801,7 +1841,7 @@ lessons:
     moments:
       - say: 'From the top of a 150 m mast, one hut is seen due east at an angle of depression of 60 degrees, and another due west at 45 degrees. We want the distance between the huts.'
         write: '$\text{height} = 150 \text{ m}, \quad \text{east: } 60^{\circ}, \quad \text{west: } 45^{\circ}$'
-      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+      - say: 'Let me draw the mast and the angle of depression.'
         show_sketch: true
         point:
           - {figure: sketch, kind: highlight, target: TF, text: '150 m'}
@@ -2395,14 +2435,14 @@ lessons:
         write: '$\dfrac{2}{5} = \dfrac{2 \times 3}{5 \times 3} = \dfrac{6}{15}$'
       - say: 'For 1 over 3, multiply top and bottom by 5: 1 times 5 is 5, so that is 5 over 15.'
         write: '$\dfrac{1}{3} = \dfrac{1 \times 5}{3 \times 5} = \dfrac{5}{15}$'
-      - say: 'Now add the two fractions we just made. 6 plus 5 is 11, so the chance the medal goes to $X$ or $Y$ is 11 over 15.'
+      - say: 'Now add the two fractions we just made. 6 plus 5 is 11, so the probability the medal goes to $X$ or $Y$ is 11 over 15.'
         write: 'So $P(X \text{ or } Y) = \dfrac{6}{15} + \dfrac{5}{15} = \dfrac{11}{15}$'
         point:
           - {line: 6, kind: move, from: {line: 4, at: '= 156'}, at: '156 +', text: 'first'}
           - {line: 6, kind: move, from: {line: 5, at: '= 155'}, at: '+ 155', text: 'second'}
         doodle_do:
           - {id: gold, op: label, part: medal, text: 'X or Y: 11/15'}
-      - say: 'Sense check: 11 over 15 is between 0 and 1, and it is bigger than each team''s chance on its own, as an "either" probability should be.'
+      - say: 'Sense check: 11 over 15 is between 0 and 1, and it is bigger than each team''s probability on its own, as an "either" probability should be.'
         write: 'Check: $\dfrac{6}{15} < \dfrac{11}{15} < 1$'
       - say: 'Notice that the 10 teams in the question weren''t needed; only $X$ and $Y$ matter, and their probabilities were given directly.'
         doodle: {name: person-small, id: teams, caption: 'the 10 teams', repeat: 10, layout: row}
@@ -2412,7 +2452,7 @@ lessons:
         write: '$P(X \text{ or } Y) = \dfrac{11}{15}$'
         answer: true
     traps:
-      A: 'You went for 2 over 15. That is 2 over 5 times 1 over 3, the chance of both winning, which can''t happen here. For "either", when only one can win, we add: 11 over 15.'
+      A: 'You went for 2 over 15. That is 2 over 5 times 1 over 3, the probability of both winning, which can''t happen here. For "either", when only one can win, we add: 11 over 15.'
       B: 'You went for 7 over 15. Check the conversion: 2 over 5 is 6 over 15 and 1 over 3 is 5 over 15, so the sum is 11 over 15.'
       D: 'You went for 13 over 15. Check the conversion: 1 over 3 is 5 over 15, not 7 over 15. 6 over 15 plus 5 over 15 is 11 over 15.'
 
@@ -2421,7 +2461,7 @@ lessons:
       - say: '$x$ and $y$ can each be 1, 2, 3 or 4, like two spinners marked 1 to 4. We want the probability that their product is not greater than 6.'
         write: '$x, \ y \in \{1, 2, 3, 4\}$'
         doodle: {name: 'custom:1998_q50_a', id: spinners, caption: 'x and y: each 1, 2, 3 or 4'}
-      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+      - say: 'Let me draw the table of products.'
         show_sketch: true
       - say: 'First, count all the possible pairs. Spinner $x$ has 4 choices and, for each one, spinner $y$ has 4 choices. 4 times 4 is 16, all equally likely.'
         write: 'All pairs: $4 \times 4 = 16$'

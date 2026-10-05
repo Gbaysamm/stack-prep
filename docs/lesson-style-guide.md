@@ -150,3 +150,97 @@ Say it the way a Nigerian teacher says it in class, in the order it's written:
 - [ ] **Colours keep their meaning.**
 - [ ] **The working is in sections,** with room between them.
 - [ ] **The answer is checked,** and every trap option is explained.
+
+---
+
+## 9. Maths: the Nigerian classroom method
+
+A Maths lesson teaches the solution a good Nigerian SS3 student writes in the exam, in the
+order they write it. The board is their exercise book: nothing on it should be something they
+would not write, and nothing they must write should be missing. The full reasoning is in the
+[Maths content review](content-review/maths-review.md) (§1, §4, §8.2), drawn from three research
+notes: [number and algebra](content-review/nigerian-methods/number-and-algebra.md),
+[geometry and trigonometry](content-review/nigerian-methods/geometry-and-trigonometry.md) and
+[calculus and statistics](content-review/nigerian-methods/calculus-and-statistics.md).
+
+### 9.1 The habits on the board
+
+| Habit | What the board shows |
+|---|---|
+| **"Solution"**, then a sketch or table with the givens on it | "Solution", the sketch, the given values written on it |
+| **Givens listed** | "P = ₦800, R = 12½%, T = ?"; "a = 1, d = ?, n = 6"; "r = 21 cm, θ = 60°, π = 22/7" |
+| **"Let …" for the unknown** | "Let the number of students offering both be x"; "Let n(M ∩ P) = x" |
+| **The formula in general first**, then substitute, then simplify, one line each | "L = θ/360 × 2πr", "= 60/360 × 2 × 22/7 × 21", "= 22 cm" |
+| **∴ before the answer**, with units and accuracy | "∴ minor arc = 22 cm"; bearings in three figures, "085°" |
+| **A check** after the answer | put the answer back in, or a second route |
+| **Reasons in brackets** on geometry lines | "∠PQS = 50° (base ∠s of isos. △)" |
+| **Named procedures** | BODMAS; SOH CAH TOA; CAST; "Product = ac, Sum = b"; "Either … = 0 or … = 0"; "equate indices"; "expand along the first row"; "at turning point, dy/dx = 0" |
+| **Numbered equations** | "… (1)", "… (2)", "(2) − (1):" |
+| **The standard tables** for any data | x \| f \| fx \| cf; the deviation table; Item \| Frequency \| Sectoral angle; the 6 × 6 dice table; the sign table for inequalities; the Venn diagram with region expressions (32 − x \| x \| 24 − x) |
+| **North lines** on every bearings sketch | a North line at each point a bearing is taken from |
+| **Place-value indices above the digits** for base conversions | 241₅ with the indices 2, 1, 0 written over the digits, then 2 × 5² + 4 × 5¹ + 1 × 5⁰ |
+| **The division ladder** for bases, prime factors, LCM and HCF | repeated division down the page, remainders at the side, read upwards |
+| **Vertical arithmetic** | long multiplication and long division, not mental splits |
+
+### 9.2 Restructuring rules
+
+1. **Write the exercise-book solution first.** Each of its lines becomes one moment's `write`,
+   in the same order and with the same symbols.
+2. **The voice teaches the line:** it reads it as a Nigerian teacher would ("one-zero-seven
+   base eight", "A union B", "by BODMAS") and says *why* in one sentence.
+3. **Pictures support, never replace.** A doodle sits beside a written line to show why it
+   works (bundles beside the ladder, counted-twice beside the n(A ∪ B) formula). No step is
+   done by the picture alone, and metaphor words stay out of the working ("the remainder", not
+   "the loose sticks").
+4. **The standard method first, shortcuts second.** Option testing, −b/2a, "counted twice",
+   the cover-up rule and special-case formulas come after it, labelled "Exam tip" or "Check".
+5. **Use the standard tables and diagrams** (§9.1) as live diagrams.
+6. **Say each rule once.** Name it on its own line, then use it; don't restate it in the next
+   moment.
+7. **Sketch lines name the picture.** "Let me draw the sector", "Let me plot $P$ and $Q$",
+   never a stock line ("Let me draw a diagram of the circle first…") that may not match.
+8. **Re-work the maths independently.** A taught answer must be exact, or the question and its
+   key are corrected at the source; a lesson never says the question or the key is wrong.
+
+### 9.3 Words and notation
+
+| Use | Avoid |
+|---|---|
+| ε (or U) for the universal set, read "epsilon, the universal set"; n(A) | "E, for everyone" |
+| A ∪ B "A union B"; A ∩ B "A intersection B"; A′ "A complement" | "the U sign", "the cup / cap sign", "the upside-down U", "Y with a small c" |
+| {x : …} "the set of x such that …" | the colon left unread |
+| probability; P(E) = n(E)/n(S), "favourable outcomes over total possible outcomes" | "chance", "balls you want", "and rule" on the board |
+| entries (elements), rows and columns, cofactor, adjoint | "seats" for matrix entries |
+| ∴, ∝ ("y ∝ x ⇒ y = kx"), C.P. and S.P., L.C.M., H.C.F. | "So the answer is …" in place of ∴ |
+| Σ, x̄, cf, S.D. (one symbol throughout a lesson) | "sum of distances", "running totals" for cf |
+| du/dx, dy/dx, "differentiate with respect to x" | "u dash" |
+| BODMAS | "order of operations" |
+| numerals in other bases read digit by digit: "one-zero-one base two" | "one thousand in base 2" |
+| \|AB\|, ∠ABC, △ABC \|\|\| △PQR | |
+| "times", "multiplied by" | "lots of" |
+
+### 9.4 Topic templates
+
+Each topic follows its outline in the review's
+[§3 topic outlines](content-review/maths-review.md#3-topic-by-topic-the-standard-method-our-departures-and-the-fix):
+the standard method, the known departures, and a line-by-line model board. Number bases have a
+full worked example in §2.4. Until the content expert agrees each template, the §3 outline is
+the template.
+
+### 9.5 Maths review checklist (add to §8)
+
+- [ ] **Exercise-book test:** a student could copy the board, line for line, as their exam
+      answer; every line is one they would write, and nothing they must write is missing.
+- [ ] **Method test:** it is the textbook method in the review's §3; any shortcut or picture
+      comes only after it.
+- [ ] **Notation and wording:** ∴, "Let x be", ∝, C.P./S.P., ε, n(A), A′, ∪/∩ read as
+      union/intersection, P(E), Σ, du/dx, |AB|; reasons in brackets; other bases read digit by
+      digit.
+- [ ] **Picture test:** every picture sits beside a written step and explains why it works; no
+      step is done by the picture alone.
+- [ ] **One move per line:** a student can redo each line from the one before.
+- [ ] **Check and traps:** a check after the answer; each wrong option traced to its slip, in
+      the same vocabulary.
+- [ ] **Maths re-worked independently:** the taught answer is exact and matches the key.
+- [ ] **Phone test:** no written line wider than the screen; no voice moment over about 30
+      words.

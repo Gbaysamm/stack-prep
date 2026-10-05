@@ -115,55 +115,53 @@ lessons:
 
   3:
     moments:
-      - say: 'A trader bought 100 oranges at 5 for ₦1.20. 20 got spoilt, and he sold the rest at 4 for ₦1.50. We want the percentage gain or loss.'
+      - section: 'The question'
+        say: 'A trader bought 100 oranges at 5 for ₦1.20. 20 got spoilt, and he sold the rest at 4 for ₦1.50. Gain or loss, and what percentage? Spoilt oranges still cost money.'
         write: 'Bought 100 at 5 for ₦1.20; 20 spoilt; rest sold at 4 for ₦1.50'
         doodle: {name: 'custom:1999_q03_a', id: stall, caption: '20 of the 100 oranges spoilt'}
-      - say: 'The plan: find what he spent, find what he received, and compare. Gain or loss is always measured against the cost, so the cost goes on the bottom.'
-        write: 'Gain % $= \dfrac{\text{gain}}{\text{cost}} \times 100\%$'
-      - say: 'First the cost. He buys in lots of 5. How many lots of 5 are in 100? 100 divided by 5 is 20.'
-        write: 'Lots bought: $100 \div 5 = 20$'
-      - say: 'Each lot costs ₦1.20, so 20 lots cost 20 times 1.20, which is 24. Look at the buying tag: he spent ₦24. Notice he paid for all 100 oranges, even the ones that spoilt.'
-        write: 'Cost: $20 \times 1.20 = 24$, so ₦24'
-        point:
-          - {line: 3, kind: highlight, at: 'so ₦24', to: {doodle: stall, part: tag-buy}}
+      - section: 'Cost price'
+        say: 'Solution. First the cost price, C.P., what he paid. 5 oranges cost 1 naira 20 kobo, so 100 oranges cost 100 over 5, times 1.20.'
+        write: 'C.P. $= \dfrac{100}{5} \times 1.20$'
+      - say: '100 over 5 is 20, and 20 times 1.20 is 24. He paid ₦24.00, for all 100 oranges, spoilt ones included.'
+        write: '$= 20 \times 1.20 = 24$, so C.P. = ₦24.00'
         doodle_do:
-          - {id: stall, op: label, part: tag-buy, text: '20 lots = ₦24'}
-      - say: 'Now the selling side. Cross out the spoilt ones in the basket: 100 minus 20 leaves 80 to sell.'
-        write: 'Left to sell: $100 - 20 = 80$'
+          - {id: stall, op: label, part: tag-buy, text: 'C.P. = ₦24'}
+      - section: 'Selling price'
+        say: 'Now the selling price, S.P. Cross out the spoilt ones: 100 minus 20 leaves 80 oranges to sell.'
+        write: 'Oranges sold $= 100 - 20 = 80$'
         doodle_do:
           - {id: stall, op: cross, part: spoilt, text: '80 left'}
-      - say: 'He sells in lots of 4. 80 divided by 4 is 20 lots.'
-        write: 'Lots sold: $80 \div 4 = 20$'
-      - say: 'Each lot sells for ₦1.50, the selling tag. 20 times 1.50 is 30. He received ₦30.'
-        write: 'Sales: $20 \times 1.50 = 30$, so ₦30'
-        point:
-          - {line: 6, kind: highlight, at: 'so ₦30', to: {doodle: stall, part: tag-sell}}
+      - say: '4 oranges sell for 1 naira 50 kobo, so 80 oranges sell for 80 over 4, times 1.50.'
+        write: 'S.P. $= \dfrac{80}{4} \times 1.50$'
+      - say: '80 over 4 is 20, and 20 times 1.50 is 30. He received ₦30.00.'
+        write: '$= 20 \times 1.50 = 30$, so S.P. = ₦30.00'
         doodle_do:
-          - {id: stall, op: label, part: tag-sell, text: '20 lots = ₦30'}
-      - say: 'Now compare the ₦30 he received with the ₦24 he spent. 30 is more than 24, so it is a gain. 30 minus 24 is 6.'
-        write: 'Gain $= 30 - 24 = 6$, so ₦6'
+          - {id: stall, op: label, part: tag-sell, text: 'S.P. = ₦30'}
+      - section: 'Gain'
+        say: 'S.P. is more than C.P., so he made a gain. The gain is S.P. minus C.P.'
+        write: 'Gain $=$ S.P. $-$ C.P.'
+      - say: 'Substitute: 30 minus 24 is 6. The gain is ₦6.00.'
+        write: '$= 30 - 24 = 6$, so gain = ₦6.00'
         point:
-          - { line: 7, kind: move, from: { line: 6, at: '₦[[30]]' }, at: '30', text: 'received' }
-          - { line: 7, kind: move, from: { line: 3, at: '₦[[24]]' }, at: '24', text: 'spent' }
-        doodle_do:
-          - {id: stall, op: pulse, part: tag-sell}
-      - say: 'Now the percentage. Put the gain of 6 over the cost of 24, and multiply by 100.'
-        write: 'Gain % $= \dfrac{6}{24} \times 100\%$'
-        point:
-          - { line: 1, kind: box, text: 'the rule' }
-          - { line: 8, kind: move, from: { line: 7, at: '= [[6]]' }, at: '24[[6]]', text: 'gain' }
-          - { line: 8, kind: move, from: { line: 7, at: '− [[24]]' }, at: '[[24]]6', text: 'cost' }
-      - say: '6 over 24 simplifies. Divide the top and the bottom by 6, and we get 1 over 4, a quarter.'
-        write: '$= \dfrac{1}{4} \times 100\%$'
-      - say: 'A quarter of 100 is 25.'
-        write: '$= 25\%$'
-      - say: 'So the trader made a 25% gain, which is answer choice B.'
-        write: 'Result: $25\%$ gain'
+          - {line: 7, kind: move, from: {line: 5, at: '= [[30]], so'}, at: '= [[30]] −', text: 'S.P.'}
+          - {line: 7, kind: move, from: {line: 2, at: '= [[24]], so'}, at: '− [[24]] =', text: 'C.P.'}
+      - section: 'Gain per cent'
+        say: 'Gain per cent is the gain over the cost price, times 100 percent. We always measure against the C.P.'
+        write: 'Gain $\% = \dfrac{\text{gain}}{\text{C.P.}} \times 100\%$'
+      - say: 'Substitute: the gain, 6, over the C.P., 24, times 100 percent.'
+        write: '$= \dfrac{6}{24} \times 100\%$'
+      - say: 'Cancel: 6 over 24 is 1 over 4, and 1 over 4 of 100 is 25.'
+        write: '$= \dfrac{1}{4} \times 100\% = 25\%$'
+      - section: 'Check'
+        say: 'Check: 25 percent of the C.P., 24, is 6. 24 plus 6 is 30, the S.P. It agrees.'
+        write: 'Check: $24 + 25\%$ of $24 = 24 + 6 = 30$ ✓'
+      - say: 'Therefore the trader made a 25 percent gain: option B.'
+        write: '$\therefore 25\%$ gain (B)'
         answer: true
     traps:
-      A: 'You went for 30% gain. The 30 is the ₦30 he received, not his gain. The gain is 30 minus 24, which is ₦6, and 6 over 24 is a quarter, which is 25%.'
-      C: 'You went for 30% loss. He received ₦30 and spent only ₦24, so he made money: it is a gain, not a loss. And 6 over 24 is 25%.'
-      D: 'You went for 25% loss. The size is right, but the direction is wrong: ₦30 back on ₦24 spent is a gain.'
+      A: 'You went for 30% gain. The 30 is the S.P., ₦30, not the gain. The gain is 30 minus 24, which is ₦6, and 6 over 24 is 25%.'
+      C: 'You went for 30% loss. S.P., ₦30, is more than C.P., ₦24, so it is a gain, not a loss. And 6 over 24 is 25%.'
+      D: 'You went for 25% loss. The size is right, but S.P. is more than C.P., so it is a gain.'
 
   4:
     moments:
@@ -209,51 +207,58 @@ lessons:
 
   5:
     moments:
-      - say: 'We want to divide $2434_{6}$ by $42_{6}$. The easiest way is to convert both to base ten, divide there, then convert back to base six.'
-        write: '$2434_{6} \div 42_{6}$'
-      - say: 'In base six we bundle in sixes. Picture the sticks: one stick is 1, six sticks tied together make 6, six bundles make 36, and a crate of six 36s makes 216. So the place values from the right are 1, 6, 36 and 216.'
-        write: 'Place values: $6^{3} = 216,\ 6^{2} = 36,\ 6^{1} = 6,\ 6^{0} = 1$'
-        doodle: {name: 'custom:1999_q05_a', id: sticks, caption: '1, 6, 36, 216: bundles of six', size: scene}
-      - say: 'So $2434_{6}$ is 2 crates of 216, 4 lots of 36, 3 bundles of 6 and 4 single sticks. Watch the digits go under the columns.'
-        write: '$2434_{6} = 2 \times 216 + 4 \times 36 + 3 \times 6 + 4 \times 1$'
-        doodle_do:
-          - {id: sticks, op: stage, stage: 'custom:1999_q05_a2'}
-      - say: '2 times 216 is 432. 4 times 36 is 144. 3 times 6 is 18. And 4 times 1 is 4.'
+      - section: 'The question'
+        say: 'Divide two-four-three-four base six by four-two base six. Long division in base six is hard, so we change both to base ten, divide, and change the answer back.'
+        write: 'Divide $2434_{6}$ by $42_{6}$'
+      - say: 'First, each base six numeral goes to base ten.'
+        write: 'Solution'
+      - section: 'Step 1: base 6 to base 10'
+        say: 'Write the index numbers over two-four-three-four: three, two, one, nought. Each digit times six to the power of its index.'
+        write: '$\overset{3}{2}\,\overset{2}{4}\,\overset{1}{3}\,\overset{0}{4}_{6} = 2 \times 6^{3} + 4 \times 6^{2} + 3 \times 6^{1} + 4 \times 6^{0}$'
+      - say: 'Six cubed is 216, six squared is 36, six to the power 1 is 6, and six to the power nought is 1.'
+        write: '$= 2 \times 216 + 4 \times 36 + 3 \times 6 + 4 \times 1$'
+      - say: '2 times 216 is 432. 4 times 36 is 144. 3 times 6 is 18. 4 times 1 is 4.'
         write: '$= 432 + 144 + 18 + 4$'
-      - say: '432 plus 144 is 576. Plus 18 is 594. Plus 4 is 598.'
+      - say: '432 plus 144 is 576, plus 18 is 594, plus 4 is 598.'
         write: '$= 598$'
-      - say: 'Now the divisor, $42_{6}$. That is 4 bundles of 6, plus 2 single sticks. 24 plus 2 is 26.'
-        write: '$42_{6} = 4 \times 6 + 2 \times 1 = 24 + 2 = 26$'
-        doodle_do:
-          - {id: sticks, op: circle, part: col6, text: '4 bundles of 6'}
-      - say: 'Now we divide in base ten, using the 598 and the 26 we just found.'
-        write: 'In base ten: $598 \div 26$'
+      - say: 'Now four-two base six: index numbers one, nought. 4 times 6, plus 2 times 1.'
+        write: '$\overset{1}{4}\,\overset{0}{2}_{6} = 4 \times 6^{1} + 2 \times 6^{0}$'
+      - say: '24 plus 2 is 26.'
+        write: '$= 24 + 2 = 26$'
+      - section: 'Step 2: divide in base ten'
+        say: 'Now divide 598 by 26. 26 times 20 is 520, and 26 times 3 is 78. 520 plus 78 is 598, so 26 goes into 598 exactly 23 times.'
+        write: '$598 \div 26 = 23$'
         point:
-          - { line: 6, kind: move, from: { line: 4, at: '598' }, at: '598', text: '598' }
-          - { line: 6, kind: move, from: { line: 5, at: '= [[26]]' }, at: '26', text: '26' }
-      - say: '26 times 20 is 520, and 26 times 3 is 78. 520 plus 78 is 598, so 26 goes into 598 exactly 23 times.'
-        write: '$26 \times 23 = 520 + 78 = 598$, so $598 \div 26 = 23$'
-      - say: 'But 23 is a base ten number, and we must convert it back to base six. Divide 23 by 6: 6 goes in 3 times, which is 18, remainder 5.'
-        write: '$23 \div 6 = 3$ remainder $5$'
-      - say: 'Then divide that 3 by 6. It goes 0 times, remainder 3.'
-        write: '$3 \div 6 = 0$ remainder $3$'
-      - say: 'Read the remainders from the bottom up: 3, then 5. So 23 in base ten is $35_{6}$: 3 bundles of 6 and 5 single sticks.'
-        write: 'So $23 = 35_{6}$'
+          - {line: 8, kind: move, from: {line: 5, at: '598'}, at: '598'}
+          - {line: 8, kind: move, from: {line: 7, at: '=[[26]]'}, at: '26'}
+      - section: 'Step 3: base 10 to base 6'
+        say: '23 is in base ten, so change it to base six on the ladder: divide by 6 again and again, keeping the remainders.'
+        diagram: {id: L, kind: ladder, divisor: 6, number: 23, 'on': 'ladder'}
+      - say: '23 divided by 6 is 3, remainder 5, because 3 times 6 is 18.'
+        diagram_do:
+          - {id: L, op: step}
+      - say: '3 divided by 6 is 0, remainder 3. We stop at 0.'
+        diagram_do:
+          - {id: L, op: step}
+      - say: 'Read the remainders from the bottom up: three, five. So 23 is three-five base six.'
+        diagram_do:
+          - {id: L, op: read, 'on': 'bottom up'}
+        write: '$23_{10} = 35_{6}$'
         point:
-          - { line: 10, kind: move, from: { line: 9, at: 'remainder [[3]]' }, at: '= [[3]]5', text: 'first digit' }
-          - { line: 10, kind: move, from: { line: 8, at: 'remainder [[5]]' }, at: '= 3[[5]]', text: 'last digit' }
-          - {line: 10, kind: highlight, at: '23 = 35', to: {doodle: sticks, part: answer}}
-        doodle_do:
-          - {id: sticks, op: stage, stage: 'custom:1999_q05_a3'}
-      - say: 'Check: $35_{6}$ is 3 times 6, plus 5. That is 18 plus 5, which is 23. It matches.'
-        write: 'Check: $35_{6} = 3 \times 6 + 5 = 18 + 5 = 23$'
-      - say: 'So $2434_{6}$ divided by $42_{6}$ is $35_{6}$, which is answer choice B.'
-        write: '$2434_{6} \div 42_{6} = 35_{6}$'
+          - {line: 12, kind: highlight, at: '356', to: {diagram: L, part: result}}
+      - section: 'Check'
+        say: 'Check by expanding three-five base six: 3 times 6, plus 5, is 23.'
+        write: '$\overset{1}{3}\,\overset{0}{5}_{6} = 3 \times 6^{1} + 5 \times 6^{0} = 23$'
+      - say: 'And 23 times 26 is 598, the number we divided. It agrees.'
+        write: '$23 \times 26 = 598\ \checkmark$'
+      - section: 'Answer'
+        say: 'Therefore two-four-three-four base six divided by four-two base six is three-five base six, which is option B.'
+        write: '$\therefore 2434_{6} \div 42_{6} = 35_{6}$'
         answer: true
     traps:
-      A: 'You went for $23_{6}$. 23 is the answer in base ten, written with a base six label. It still has to be converted: 23 is 3 sixes and 5, which is $35_{6}$.'
-      C: 'You went for $52_{6}$. That is 5 sixes and 2, which is 32 in base ten. The quotient is 598 divided by 26, which is 23, and that is $35_{6}$.'
-      D: 'You went for $55_{6}$. That is 35 in base ten. The quotient in base ten is 23, and 23 in base six is $35_{6}$.'
+      A: 'You went for two-three base six. 23 is the answer in base ten, with a base six label stuck on. On the ladder, 23 becomes three-five base six.'
+      C: 'You went for five-two base six. That is 5 times 6 plus 2, which is 32 in base ten, not 23. Read the ladder from the bottom up: three-five.'
+      D: 'You went for five-five base six. That is 35 in base ten, not 23. The quotient in base ten is 23, which is three-five base six.'
 
   6:
     moments:
@@ -309,43 +314,47 @@ lessons:
 
   7:
     moments:
-      - say: 'We want to simplify this square root. The plan: work out the whole fraction under the root first, then take the square root at the end.'
+      - section: 'The question'
+        say: 'A square root over four awkward decimals. Multiplying them all out is slow. Clear the decimals and cancel first, and it comes out to a whole number.'
         write: '$\sqrt{\dfrac{0.0023 \times 750}{0.00345 \times 1.25}}$'
-      - say: 'Start with the top: 0.0023 times 750.'
-        write: 'Top: $0.0023 \times 750$'
-      - say: 'Forget the decimal points for a moment: 23 times 75 is 1725.'
-        write: '$23 \times 75 = 1725$'
-      - say: '0.0023 has four decimal places, so 0.0023 times 75 is 0.1725. And 750 is 75 times 10, so we multiply by 10 more and get 1.725.'
-        write: '$0.0023 \times 750 = 0.1725 \times 10 = 1.725$'
-      - say: 'The bottom is 0.00345 times 1.25. We keep it as two pieces for now, because it divides neatly one piece at a time.'
-        write: 'Bottom: $0.00345 \times 1.25$'
-      - say: 'So the fraction under the root is the 1.725 we just found, over 0.00345 times 1.25.'
-        write: 'Under the root: $\dfrac{1.725}{0.00345 \times 1.25}$'
+      - section: 'Solution'
+        say: 'Solution. Work out the fraction under the root first. Pair each top number with a bottom number, so each pair can be cancelled.'
+        write: '$\dfrac{0.0023 \times 750}{0.00345 \times 1.25} = \dfrac{0.0023}{0.00345} \times \dfrac{750}{1.25}$'
+      - section: 'First pair'
+        say: 'Clear the decimals: multiply the top and the bottom by 100,000. 0.0023 becomes 230, and 0.00345 becomes 345.'
+        write: '$\dfrac{0.0023}{0.00345} = \dfrac{230}{345}$'
+      - say: 'Cancel. Both divide by 5: 46 over 69. Both divide by 23: 2 over 3.'
+        write: '$= \dfrac{46}{69} = \dfrac{2}{3}$'
+      - section: 'Second pair'
+        say: 'Multiply the top and the bottom by 100: 75,000 over 125.'
+        write: '$\dfrac{750}{1.25} = \dfrac{75000}{125}$'
+      - say: '125 times 8 is 1000, so 125 times 600 is 75,000. The pair is 600.'
+        write: '$= 600$'
+      - section: 'Under the root'
+        say: 'Therefore the fraction under the root is 2 over 3 times 600. 600 divided by 3 is 200, and 200 times 2 is 400.'
+        write: '$\therefore \dfrac{2}{3} \times 600 = 400$'
         point:
-          - { line: 5, kind: move, from: { line: 3, at: '= [[1.725]]' }, at: '1.725', text: 'the top' }
-      - say: 'Let''s divide 1.725 by 0.00345 first. Multiply the top and the bottom by 1000 to move both decimal points three places. That gives 1725 over 3.45.'
-        write: '$\dfrac{1.725}{0.00345} = \dfrac{1725}{3.45}$'
-      - say: 'What times 3.45 gives 1725? 3.45 times 100 is 345, and 345 times 5 is 1725. So 3.45 times 500 is 1725, and this division gives 500.'
-        write: '$3.45 \times 500 = 1725$, so $\dfrac{1725}{3.45} = 500$'
-      - say: 'Now divide that 500 by the 1.25 still waiting on the bottom. 1.25 times 4 is 5, so 1.25 times 400 is 500. That gives 400.'
-        write: '$\dfrac{500}{1.25} = 400$, since $1.25 \times 400 = 500$'
-        point:
-          - { line: 8, kind: move, from: { line: 7, at: '= [[500]]' }, at: '[[500]] = 400', text: 'from here' }
-      - say: 'So the whole fraction under the root is 400, and the expression is the square root of 400. Picture 400 small tiles laid out as one big square: the square root is the length of its side.'
+          - {line: 6, kind: move, from: {line: 5, at: '= [[600]]'}, at: '[[600]] =', text: 'second pair'}
+      - say: 'So the expression is the square root of 400. Picture 400 tiles laid out as one big square: the square root is the length of its side.'
         write: '$\sqrt{\dfrac{0.0023 \times 750}{0.00345 \times 1.25}} = \sqrt{400}$'
         doodle: {name: 'custom:1999_q07_a', id: tiles, caption: '400 tiles in one square'}
         doodle_do:
           - {id: tiles, op: circle, part: block, text: '5 × 5 = 25 tiles'}
-      - say: '20 times 20 is 400, so the side of the square is 20 tiles. The square root of 400 is 20, which is answer choice B.'
+      - say: '20 times 20 is 400, so the square root of 400 is 20: the side of the square is 20 tiles.'
         write: '$= 20$'
-        answer: true
         point:
-          - {line: 10, kind: highlight, at: '= 20', to: {doodle: tiles, part: side}}
+          - {line: 8, kind: highlight, at: '= 20', to: {doodle: tiles, part: side}}
         doodle_do:
           - {id: tiles, op: stage, stage: 'custom:1999_q07_a2'}
+      - section: 'Check'
+        say: 'Check the first pair: 2 over 3 of 0.00345 should give 0.0023. 0.00345 divided by 3 is 0.00115, and times 2 is 0.0023. It agrees.'
+        write: 'Check: $\dfrac{2}{3} \times 0.00345 = 0.0023$ ✓'
+      - say: 'Therefore the value is 20: option B.'
+        write: '$\therefore$ value $= 20$ (B)'
+        answer: true
     traps:
-      A: 'You went for 15. 15 squared is 225, but the fraction under the root works out to 400, and the square root of 400 is 20.'
-      C: 'You went for 40. 40 squared is 1600. The fraction under the root is 400, whose square root is 20. Check the decimal places when multiplying 0.00345 by 1.25.'
+      A: 'You went for 15. 15 squared is 225, but the fraction under the root is 400, and the square root of 400 is 20.'
+      C: 'You went for 40. 40 squared is 1600. The fraction under the root is 2 over 3 times 600, which is 400, and its square root is 20.'
       D: 'You went for 75. That number sits inside the 750 in the question, but it is not the result. The fraction under the root is 400, and its square root is 20.'
 
   8:
@@ -494,12 +503,12 @@ lessons:
         write: '$Q = \begin{pmatrix} 6 & 0 \\ 4 & 5 \end{pmatrix},\quad Q + P = \begin{pmatrix} 7 & 2 \\ 6 & 8 \end{pmatrix}$'
       - say: 'The first job is to find $P$ on its own. $Q + P$ minus $Q$ leaves only $P$.'
         write: '$P = (Q + P) - Q$'
-      - say: 'So we take the matrix $Q + P$ minus the matrix $Q$. Picture each matrix as a block of four seats, two rows and two columns. We take away seat by seat.'
+      - say: 'So we take the matrix $Q + P$ minus the matrix $Q$. Picture each matrix as a block of four entries, two rows and two columns. We take away entry by entry.'
         write: '$= \begin{pmatrix} 7 & 2 \\ 6 & 8 \end{pmatrix} - \begin{pmatrix} 6 & 0 \\ 4 & 5 \end{pmatrix}$'
-        doodle: {name: 'custom:1999_q10_a', id: seats, caption: 'seat by seat', size: scene}
+        doodle: {name: 'custom:1999_q10_a', id: seats, caption: 'entry by entry', size: scene}
       - say: 'Matrices subtract entry by entry: 7 minus 6, 2 minus 0, 6 minus 4, and 8 minus 5.'
         write: '$= \begin{pmatrix} 7 - 6 & 2 - 0 \\ 6 - 4 & 8 - 5 \end{pmatrix}$'
-      - say: '7 minus 6 is 1, 2 minus 0 is 2, 6 minus 4 is 2, and 8 minus 5 is 3. Those fill the empty seats of $P$.'
+      - say: '7 minus 6 is 1, 2 minus 0 is 2, 6 minus 4 is 2, and 8 minus 5 is 3. Those fill the empty entries of $P$.'
         write: '$= \begin{pmatrix} 1 & 2 \\ 2 & 3 \end{pmatrix}$'
         doodle_do:
           - {id: seats, op: stage, stage: 'custom:1999_q10_a2'}
@@ -509,7 +518,7 @@ lessons:
           - { line: 4, kind: arrow, text: 'P' }
       - say: 'Next, add $Q$ and $2P$, entry by entry.'
         write: '$Q + 2P = \begin{pmatrix} 6 + 2 & 0 + 4 \\ 4 + 4 & 5 + 6 \end{pmatrix}$'
-      - say: '6 plus 2 is 8, 0 plus 4 is 4, 4 plus 4 is 8, and 5 plus 6 is 11. Here is the new block of seats.'
+      - say: '6 plus 2 is 8, 0 plus 4 is 4, 4 plus 4 is 8, and 5 plus 6 is 11. Here is the new block of entries.'
         write: '$= \begin{pmatrix} 8 & 4 \\ 8 & 11 \end{pmatrix}$'
         doodle_do:
           - {id: seats, op: stage, stage: 'custom:1999_q10_a3'}
@@ -534,7 +543,7 @@ lessons:
     traps:
       A: 'You went for 90. Build the matrix first: $Q + 2P$ has entries 8, 4, 8 and 11, and 8 times 11 minus 4 times 8 is 88 minus 32, which is 56.'
       C: 'You went for 102. Check the matrix $P$: it is $Q + P$ minus $Q$, entry by entry, giving 1, 2, 2, 3. Then $Q + 2P$ gives the determinant 56.'
-      D: 'You went for 120. That is the size of $|Q|$ times $|2P|$, 30 times 4. Determinants do not combine like that. Add the matrices first, then take one determinant.'
+      D: 'You went for 120. That comes from $|Q|$ times $|2P|$ with the sign dropped: $|Q|$ is 30, $|2P|$ is negative 4, and 30 times negative 4 is negative 120. Determinants do not combine like that. Add the matrices first, then take one determinant.'
 
   11:
     moments:
@@ -752,10 +761,10 @@ lessons:
         write: 'So $T = S^{-1}$'
       - say: 'For a 2 by 2 matrix, the inverse is 1 over the determinant, times the matrix with $a$ and $d$ swapped and $b$ and $c$ made negative.'
         write: 'Inverse: $\begin{pmatrix} a & b \\ c & d \end{pmatrix}^{-1} = \dfrac{1}{ad - bc}\begin{pmatrix} d & -b \\ -c & a \end{pmatrix}$'
-      - say: 'In our matrix $S$, $a$ is negative 1, $b$ is 1, $c$ is 1, and $d$ is negative 2. Picture $S$ as four seats. $T$ is the block of seats that undoes it, still empty.'
+      - say: 'In our matrix $S$, $a$ is negative 1, $b$ is 1, $c$ is 1, and $d$ is negative 2. Picture $S$ as four entries. $T$ is the block of entries that undoes it, still empty.'
         write: '$S = \begin{pmatrix} -1 & 1 \\ 1 & -2 \end{pmatrix}:\ a = -1,\ b = 1,\ c = 1,\ d = -2$'
         doodle: {name: 'custom:1999_q15_a', id: seats, caption: 'T undoes S', size: scene}
-      - say: 'First the determinant: $ad$ minus $bc$. The leading diagonal of seats gives $ad$. Put in the four values.'
+      - say: 'First the determinant: $ad$ minus $bc$. The leading diagonal of entries gives $ad$. Put in the four values.'
         write: 'Determinant: $ad - bc = (-1)(-2) - (1)(1)$'
         doodle_do:
           - {id: seats, op: highlight, part: lead, text: 'a × d'}
@@ -763,7 +772,7 @@ lessons:
         write: '$= 2 - 1 = 1$'
         point:
           - {line: 5, kind: highlight, at: '2 - 1 = 1', to: {doodle: seats, part: lead}}
-      - say: 'Now fill $T$''s seats. Swap $a$ and $d$: negative 2 goes top left, negative 1 goes bottom right. Then change the signs of $b$ and $c$: each 1 becomes negative 1.'
+      - say: 'Now fill $T$''s entries. Swap $a$ and $d$: negative 2 goes top left, negative 1 goes bottom right. Then change the signs of $b$ and $c$: each 1 becomes negative 1.'
         write: '$\begin{pmatrix} d & -b \\ -c & a \end{pmatrix} = \begin{pmatrix} -2 & -1 \\ -1 & -1 \end{pmatrix}$'
         point:
           - { line: 2, kind: box, text: 'the recipe' }
@@ -781,7 +790,7 @@ lessons:
         write: 'Bottom left: $(1)(-2) + (-2)(-1) = -2 + 2 = 0$'
       - say: 'Bottom right: 1 times negative 1, plus negative 2 times negative 1. That is negative 1 plus 2, which is 1. So $S$ times $T$ is the identity.'
         write: 'Bottom right: $(1)(-1) + (-2)(-1) = -1 + 2 = 1$'
-      - say: 'So $T$ is the block of seats negative 2, negative 1, negative 1, negative 1, which is answer choice B.'
+      - say: 'So $T$ is the block of entries negative 2, negative 1, negative 1, negative 1, which is answer choice B.'
         write: '$T = \begin{pmatrix} -2 & -1 \\ -1 & -1 \end{pmatrix}$'
         answer: true
         doodle_do:
@@ -793,102 +802,113 @@ lessons:
 
   16:
     moments:
-      - say: 'We divide $4x^{3} - 3x + 1$ by $2x - 1$ using long division.'
+      - section: 'The question'
+        say: 'One power of $x$ is missing here: there is no $x^{2}$ term. Forget to hold its place, and every column slips. Let''s set it out as long division.'
         write: '$(4x^{3} - 3x + 1) \div (2x - 1)$'
-      - say: 'First, picture a column for each power of $x$. There is no $x$ squared term, so we put $0x^{2}$ in that column as a placeholder. That keeps the columns lined up when we subtract.'
-        write: 'Dividend: $4x^{3} + 0x^{2} - 3x + 1$'
+      - section: 'Fill the gap'
+        say: 'Solution. Write the dividend in descending powers of $x$, a column for each power. There is no $x^{2}$, so put $0x^{2}$ in its place.'
+        write: '$4x^{3} - 3x + 1 = 4x^{3} + 0x^{2} - 3x + 1$'
+        doodle: {name: 'custom:1999_q16_a', id: cols, caption: 'a column for each power', size: scene, 'on': 'column'}
         point:
           - {line: 1, kind: highlight, at: '0x2', to: {doodle: cols, part: zero}}
-        doodle: {name: 'custom:1999_q16_a', id: cols, caption: 'a column for each power', size: scene}
         doodle_do:
-          - {id: cols, op: circle, part: zero, text: placeholder}
-      - say: 'Step 1. Divide the leading terms: $4x^{3}$ divided by $2x$. 4 over 2 is 2, and $x$ cubed over $x$ is $x$ squared. So we get $2x^{2}$, the first term of the answer.'
-        write: 'Step 1: $4x^{3} \div 2x = 2x^{2}$'
-      - say: 'Multiply back: $2x^{2}$ times $2x - 1$ is $4x^{3} - 2x^{2}$.'
+          - {id: cols, op: circle, part: zero, text: 'placeholder'}
+      - section: 'Long division'
+        say: 'The divisor, $2x - 1$, goes outside the bracket. The dividend, with its $0x^{2}$, goes inside.'
+        write: 'Set out: $\ 2x - 1\ \big)\ \overline{4x^{3} + 0x^{2} - 3x + 1}$'
+      - say: 'Divide the first term inside by the first term outside. $4x^{3}$ divided by $2x$ is $2x^{2}$. Write it on top: the first term of the quotient.'
+        write: '$4x^{3} \div 2x = 2x^{2}$'
+      - say: 'Multiply back. $2x^{2}$ times $2x - 1$ is $4x^{3}$ minus $2x^{2}$. Write it under the first two terms.'
         write: '$2x^{2}(2x - 1) = 4x^{3} - 2x^{2}$'
-      - say: 'Take the first two terms minus that. The $4x^{3}$ cancels, and in the $x$ squared column, $0x^{2}$ minus negative $2x^{2}$ is plus $2x^{2}$.'
-        write: 'Subtract: $(4x^{3} + 0x^{2}) - (4x^{3} - 2x^{2}) = 2x^{2}$'
+      - say: 'Subtract: change the signs and add. $0x^{2}$ minus minus $2x^{2}$ is plus $2x^{2}$. Then bring down the next term, minus $3x$.'
+        write: 'Subtract, bring down: $\ 2x^{2} - 3x$'
+        point:
+          - {line: 5, kind: move, from: {line: 2, at: '− 3x'}, at: '− 3x', text: 'bring down'}
         doodle_do:
           - {id: cols, op: pulse, part: zero}
-      - say: 'Bring down the rest of the dividend, negative $3x$ plus 1.'
-        write: 'Bring down: $2x^{2} - 3x + 1$'
-        point:
-          - { line: 5, kind: move, from: { line: 1, at: '[[− 3x + 1]]' }, at: '− 3x + 1', text: 'bring down' }
-      - say: 'Step 2. Divide the new leading term: $2x^{2}$ divided by $2x$ is $x$. That is the next term of the answer.'
-        write: 'Step 2: $2x^{2} \div 2x = x$'
-      - say: 'Multiply back: $x$ times $2x - 1$ is $2x^{2} - x$.'
+      - say: 'Divide again. $2x^{2}$ divided by $2x$ is $x$. Write plus $x$ on top.'
+        write: '$2x^{2} \div 2x = x$'
+      - say: 'Multiply back. $x$ times $2x - 1$ is $2x^{2}$ minus $x$. Write it under.'
         write: '$x(2x - 1) = 2x^{2} - x$'
-      - say: 'Subtract. The $2x^{2}$ cancels, and negative $3x$ minus negative $x$ is negative $2x$.'
-        write: 'Subtract: $(2x^{2} - 3x) - (2x^{2} - x) = -2x$'
-      - say: 'Bring down the 1.'
-        write: 'Bring down: $-2x + 1$'
+      - say: 'Subtract: change the signs and add. Minus $3x$ plus $x$ is minus $2x$. Bring down the last term, plus 1.'
+        write: 'Subtract, bring down: $\ -2x + 1$'
         point:
-          - { line: 9, kind: move, from: { line: 1, at: '3x [[+ 1]]' }, at: '+ 1', text: 'bring down' }
-      - say: 'Step 3. Negative $2x$ divided by $2x$ is negative 1. That is the last term of the answer.'
-        write: 'Step 3: $-2x \div 2x = -1$'
-      - say: 'Multiply back: negative 1 times $2x - 1$ is negative $2x$ plus 1.'
+          - {line: 8, kind: move, from: {line: 2, at: '+ 1'}, at: '+ 1', text: 'bring down'}
+      - say: 'Divide again. Minus $2x$ divided by $2x$ is minus 1. Write minus 1 on top.'
+        write: '$-2x \div 2x = -1$'
+      - say: 'Multiply back. Minus 1 times $2x - 1$ is minus $2x$ plus 1. Write it under.'
         write: '$-1(2x - 1) = -2x + 1$'
       - say: 'Subtract, and nothing is left. The remainder is zero, so $2x - 1$ divides exactly.'
-        write: 'Remainder: $(-2x + 1) - (-2x + 1) = 0$'
-      - say: 'The three steps gave $2x^{2}$, plus $x$, minus 1. Let''s check by multiplying back: $2x - 1$ times that answer should give the original.'
-        write: 'Check: $(2x - 1)(2x^{2} + x - 1) = 4x^{3} + 2x^{2} - 2x - 2x^{2} - x + 1$'
-      - say: 'The $2x^{2}$ terms cancel, and negative $2x$ minus $x$ is negative $3x$. That is exactly what we started with.'
+        write: 'Remainder $= 0$'
+      - say: 'The quotient is what we wrote on top: $2x^{2}$, then plus $x$, then minus 1.'
+        write: 'Quotient $= 2x^{2} + x - 1$'
+        point:
+          - {line: 12, kind: move, from: {line: 3, at: '= 2x2'}, at: '2x2', text: 'first'}
+          - {line: 12, kind: move, from: {line: 6, at: '= x'}, at: '+ x', text: 'second'}
+          - {line: 12, kind: move, from: {line: 9, at: '= −1'}, at: '− 1', text: 'third'}
+        doodle_do:
+          - {id: cols, op: stage, stage: 'custom:1999_q16_a2', 'on': 'quotient'}
+      - section: 'Check'
+        say: 'Check by multiplying back: the divisor times the quotient should give the dividend.'
+        write: 'Check: $(2x - 1)(2x^{2} + x - 1)$'
+      - say: '$2x$ times each term gives $4x^{3}$, $2x^{2}$ and minus $2x$. Minus 1 times each term gives minus $2x^{2}$, minus $x$ and plus 1.'
+        write: '$= 4x^{3} + 2x^{2} - 2x - 2x^{2} - x + 1$'
+      - say: 'Plus $2x^{2}$ and minus $2x^{2}$ cancel, and minus $2x$ minus $x$ is minus $3x$. That is the dividend we started with.'
         write: '$= 4x^{3} - 3x + 1$'
         point:
-          - { line: 13, kind: strike, at: '+ 2x2', text: 'cancels' }
-          - { line: 13, kind: strike, at: '− 2x2', text: 'cancels' }
-      - say: 'So the quotient is $2x^{2} + x - 1$: 2 in the $x$ squared column, 1 in the $x$ column and negative 1 in the units. That is answer choice D.'
-        write: 'Quotient $= 2x^{2} + x - 1$'
+          - {line: 14, kind: strike, at: '+ 2x2', text: 'cancel'}
+          - {line: 14, kind: strike, at: '− 2x2'}
+      - say: 'Therefore the quotient is $2x^{2} + x - 1$, which is answer choice D.'
+        write: '$\therefore$ the quotient is $2x^{2} + x - 1$'
         answer: true
-        doodle_do:
-          - {id: cols, op: stage, stage: 'custom:1999_q16_a2'}
     traps:
-      A: 'You went for $2x^{2} - x + 1$. Both signs after the first term are off. Put in the $0x^{2}$ placeholder: subtracting $-2x^{2}$ gives plus $2x^{2}$, so the next term is plus $x$.'
-      B: 'You went for $2x^{2} - x - 1$. The middle sign is off. After the first subtraction you have $+2x^{2}$, and $2x^{2}$ divided by $2x$ is plus $x$.'
-      C: 'You went for $2x^{2} + x + 1$. The last sign is off. Negative $2x$ divided by $2x$ is negative 1, so the last term is minus 1.'
+      A: 'You went for $2x^{2} - x + 1$. Both signs after the first term are off. With the $0x^{2}$ in place, $0x^{2}$ minus minus $2x^{2}$ is plus $2x^{2}$, so the next term is plus $x$.'
+      B: 'You went for $2x^{2} - x - 1$. The middle sign is off. After the first subtraction we have plus $2x^{2}$, and $2x^{2}$ divided by $2x$ is plus $x$.'
+      C: 'You went for $2x^{2} + x + 1$. The last sign is off. Minus $2x$ divided by $2x$ is minus 1, so the last term is minus 1.'
 
   17:
     moments:
-      - say: 'Three consecutive positive integers $k$, $l$ and $m$ are such that $l$ squared is 3 times $k$ plus $m$. We want $m$.'
+      - section: 'The question'
+        say: 'Three consecutive positive integers, $k$, $l$ and $m$, with $l^{2}$ equal to 3 times $k$ plus $m$. Three unknowns, but one letter is enough.'
         write: '$l^{2} = 3(k + m)$'
-      - say: 'Consecutive integers go up by 1, like house numbers next door to each other. Let''s call the middle one $n$. Then the one before it is $n - 1$ and the one after it is $n + 1$.'
-        write: '$k = n - 1,\ l = n,\ m = n + 1$'
-        doodle: {name: 'custom:1999_q17_a', id: houses, caption: 'next-door numbers: n − 1, n, n + 1'}
-      - say: 'Work out $k$ plus $m$ first: the two end houses. The minus 1 and the plus 1 cancel, leaving $2n$.'
-        write: '$k + m = (n - 1) + (n + 1) = 2n$'
+      - section: 'Solution'
+        say: 'Solution. Consecutive integers go up by 1, like house numbers next door. Let the middle one be $n$. The one before is $n - 1$ and the one after is $n + 1$.'
+        write: 'Let $k = n - 1,\ l = n,\ m = n + 1$'
+        doodle: {name: 'custom:1999_q17_a', id: houses, caption: 'next-door numbers: n − 1, n, n + 1', 'on': 'house'}
+      - say: 'Substitute into $l^{2} = 3(k + m)$. $l$ becomes $n$, and $k + m$ becomes $n - 1$ plus $n + 1$.'
+        write: 'Sub.: $\ n^{2} = 3(n - 1 + n + 1)$'
         doodle_do:
-          - {id: houses, op: highlight, part: hk, text: '−1'}
-          - {id: houses, op: highlight, part: hm, text: '+1'}
-      - say: 'Now go back to the equation. Put $n$ in place of $l$, and the $2n$ we just found in place of $k + m$.'
+          - {id: houses, op: highlight, part: hk}
+          - {id: houses, op: highlight, part: hm}
+      - say: 'Collect like terms in the bracket. Minus 1 and plus 1 cancel, and $n$ plus $n$ is $2n$.'
         write: '$n^{2} = 3(2n)$'
-        point:
-          - { line: 3, kind: move, from: { line: 2, at: '= [[2n]]' }, at: '2n', text: 'sub in' }
       - say: '3 times $2n$ is $6n$.'
         write: '$n^{2} = 6n$'
-      - say: 'Bring everything to one side by subtracting $6n$.'
+      - say: 'Subtract $6n$ from both sides, so the right side is zero. Do not divide by $n$: that would lose a root.'
         write: '$n^{2} - 6n = 0$'
         point:
-          - { line: 5, kind: move, from: { line: 4, at: '= [[6n]]' }, at: '− 6n', text: 'across' }
-      - say: 'Both terms have an $n$, so factor it out.'
+          - {line: 5, kind: move, from: {line: 4, at: '= [[6n]]'}, at: '− 6n', text: 'across'}
+      - say: 'Both terms have $n$, so factorise: take out $n$, leaving $n - 6$.'
         write: '$n(n - 6) = 0$'
+      - say: 'Two factors multiply to give zero, so one of them is zero.'
+        write: 'Either $n = 0$ or $n - 6 = 0$'
+      - say: 'Add 6 to both sides of the second.'
+        write: '$\therefore n = 0$ or $n = 6$'
+      - say: 'The integers are positive. $n = 0$ would make $k$ minus 1, so we reject it. $n$ is 6.'
+        write: 'Positive integers: $\ n = 6$'
         point:
-          - { line: 6, kind: move, from: { line: 5, at: '[[n]]2' }, at: '[[n]](', text: 'out front' }
-      - say: 'A product is zero only when one of its factors is zero. So either $n$ is 0, or $n$ minus 6 is 0, which makes $n$ equal to 6.'
-        write: '$n = 0$ or $n - 6 = 0 \Rightarrow n = 6$'
-      - say: 'The integers are positive, and $n$ equal to 0 would make $k$ negative 1. So $n$ is 6.'
-        write: 'Positive integers, so $n = 6$'
+          - {line: 8, kind: strike, at: 'n = 0', text: 'not positive'}
+      - say: 'Now the three numbers. $k$ is 6 minus 1, which is 5. $l$ is 6. $m$ is 6 plus 1, which is 7.'
+        write: '$k = 5,\ l = 6,\ m = 6 + 1 = 7$'
         point:
-          - { line: 7, kind: strike, at: 'n = 0', text: 'not positive' }
-      - say: 'Now find all three houses. $k$ is 6 minus 1, which is 5. $l$ is 6. And $m$ is 6 plus 1, which is 7.'
-        write: '$k = 6 - 1 = 5,\quad l = 6,\quad m = 6 + 1 = 7$'
-        point:
-          - {line: 9, kind: highlight, at: 'm = 6 + 1 = 7', to: {doodle: houses, part: hm}}
+          - {line: 10, kind: highlight, at: 'm = 6 + 1 = 7', to: {doodle: houses, part: hm}}
         doodle_do:
-          - {id: houses, op: stage, stage: 'custom:1999_q17_a2'}
-      - say: 'Check them in the original condition. $l$ squared is 6 squared, which is 36. And 3 times 5 plus 7 is 3 times 12, which is also 36.'
-        write: 'Check: $6^{2} = 36$ and $3(5 + 7) = 3 \times 12 = 36$'
-      - say: 'So $m$, the last house and the largest of the three, is 7. That is answer choice D.'
-        write: '$m = 7$'
+          - {id: houses, op: stage, stage: 'custom:1999_q17_a2', 'on': 'numbers'}
+      - section: 'Check'
+        say: 'Check in the condition. $l^{2}$ is 6 squared, 36. And 3 times 5 plus 7 is 3 times 12, also 36.'
+        write: 'Check: $6^{2} = 36$; $\ 3(5 + 7) = 3 \times 12 = 36$'
+      - say: 'Therefore $m$, the largest of the three, is 7, which is answer choice D.'
+        write: '$\therefore m = 7$'
         answer: true
         doodle_do:
           - {id: houses, op: circle, part: hm, text: 'm = 7'}
@@ -899,224 +919,203 @@ lessons:
 
   18:
     moments:
-      - say: 'In the graph, a region is shaded between a straight line and a curve. We want the pair of inequalities that describes it. First, let''s find the equation of each boundary.'
+      - section: 'The question'
+        say: 'The shaded wedge sits between a straight line and a curve. Find each boundary''s equation, then decide which side of each the shading lies.'
         write: 'Boundaries: a straight line and a cubic curve'
         point:
-          - { figure: 0, kind: circle, target: { x: 235, y: 108 }, text: 'shaded region' }
-      - say: 'The line passes through the origin at 45 degrees. Its gradient is tan 45 degrees, which is 1.'
-        write: 'Line: gradient $m = \tan 45^{\circ} = 1$'
+          - {figure: 0, kind: circle, target: {x: 235, y: 108}, text: 'shaded region'}
+      - section: 'The line'
+        say: 'Solution. The line passes through the origin at 45 degrees. Its gradient is tan 45 degrees, which is 1.'
+        write: 'Solution: line: $\ m = \tan 45^{\circ} = 1$'
         point:
-          - { figure: 0, kind: circle, target: '45°', text: 'tan 45° = 1' }
-      - say: 'A line through the origin has no constant term, so with gradient 1 it is $y$ equals $x$.'
-        write: 'Line: $y = 1 \times x = x$'
+          - {figure: 0, kind: circle, target: '45°', text: 'tan 45° = 1'}
+      - say: 'A line through the origin has $c$ equal to 0. So $y$ equals 1 times $x$, which is $y$ equals $x$.'
+        write: '$y = mx + c = 1x + 0$, $\ $so $y = x$'
         point:
-          - { line: 2, kind: move, from: { line: 1, at: '= [[1]]' }, at: '= [[1]] ×', text: 'gradient' }
-          - { figure: 0, kind: circle, target: '0', text: 'origin' }
-      - say: 'Now the curve. In the diagram it crosses the $x$-axis at negative 1, 0 and 1.'
-        write: 'Curve crosses at $x = -1,\ x = 0,\ x = 1$'
+          - {figure: 0, kind: circle, target: '0', text: 'origin'}
+      - section: 'The curve'
+        say: 'The curve crosses the $x$-axis at minus 1, 0 and 1. Each crossing gives a factor: $x$ plus 1, $x$, and $x$ minus 1.'
+        write: 'Curve: $\ y = x(x - 1)(x + 1)$'
         point:
-          - { figure: 0, kind: circle, target: '-1' }
-          - { figure: 0, kind: circle, target: '0' }
-          - { figure: 0, kind: circle, target: '1' }
-      - say: 'Each crossing point gives a factor: $x = -1$ gives $x + 1$, $x = 0$ gives $x$, and $x = 1$ gives $x - 1$. So the curve is their product.'
-        write: 'Curve: $y = x(x - 1)(x + 1)$'
-        point:
-          - { figure: 0, kind: label, target: '-1', text: 'x + 1' }
-          - { figure: 0, kind: label, target: '0', text: 'x' }
-          - { figure: 0, kind: label, target: '1', text: 'x − 1' }
-      - say: '$x - 1$ times $x + 1$ is a difference of two squares: $x$ squared minus 1.'
-        write: '$(x - 1)(x + 1) = x^{2} - 1$'
-      - say: 'Then $x$ times $x$ squared minus 1 is $x$ cubed minus $x$.'
+          - {figure: 0, kind: label, target: '-1', text: 'x + 1'}
+          - {figure: 0, kind: label, target: '0', text: 'x'}
+          - {figure: 0, kind: label, target: '1', text: 'x − 1'}
+      - say: '$x$ minus 1 times $x$ plus 1 is a difference of two squares: $x$ squared minus 1. Times $x$ gives $x$ cubed minus $x$.'
         write: '$y = x(x^{2} - 1) = x^{3} - x$'
-      - say: 'Now the shading. In the diagram it lies below the line, so $y$ is less than or equal to $x$.'
-        write: 'Below the line: $y \le x$'
+      - section: 'Which side?'
+        say: 'The shading lies below the line, so $y$ is at most $x$. Subtract $x$ from both sides.'
+        write: 'Below the line: $\ y \le x \Rightarrow y - x \le 0$'
         point:
-          - { figure: 0, kind: arrow, target: { x: 250, y: 71 }, text: 'line y = x: shading below' }
-      - say: 'Subtract $x$ from both sides.'
-        write: '$y - x \le 0$'
+          - {figure: 0, kind: arrow, target: {x: 250, y: 71}, text: 'line y = x: shading below'}
+      - say: 'The shading lies above the curve, so $y$ is at least $x$ cubed minus $x$. Add $x$ and subtract $x$ cubed on both sides.'
+        write: 'Above the curve: $\ y \ge x^{3} - x \Rightarrow y + x - x^{3} \ge 0$'
         point:
-          - { line: 8, kind: move, from: { line: 7, at: '≤ [[x]]' }, at: '− x', text: 'across' }
-      - say: 'The shading also lies above the curve we found, so $y$ is greater than or equal to $x$ cubed minus $x$.'
-        write: 'Above the curve: $y \ge x^{3} - x$'
+          - {figure: 0, kind: arrow, target: {x: 215, y: 151}, text: 'curve: shading above'}
+      - section: 'Check'
+        say: 'Test a shaded point, 0.5, 0. $y$ plus $x$ minus $x$ cubed is 0 plus 0.5 minus 0.125, which is 0.375: at least 0. And $y$ minus $x$ is minus 0.5: at most 0.'
+        write: 'Test $(0.5,\ 0)$: $\ 0.375 \ge 0\ \checkmark,\ \ -0.5 \le 0\ \checkmark$'
         point:
-          - { line: 9, kind: move, from: { line: 6, at: '= [[x3 − x]]' }, at: 'x3 − x', text: 'the curve' }
-          - { figure: 0, kind: arrow, target: { x: 215, y: 151 }, text: 'curve: shading above' }
-      - say: 'To match the options, add $x$ to both sides and subtract $x$ cubed from both sides.'
-        write: '$y + x - x^{3} \ge 0$'
-        point:
-          - { line: 10, kind: move, from: { line: 9, at: '[[− x]]' }, at: '+ x', text: 'across' }
-          - { line: 10, kind: move, from: { line: 9, at: '≥ [[x3]]' }, at: '− x3', text: 'across' }
-      - say: 'Let''s test a point inside the shading: $x$ is 0.5 and $y$ is 0. 0.5 cubed is 0.125, so $y + x - x^{3}$ is 0 plus 0.5 minus 0.125, which is 0.375. That is at least 0.'
-        write: 'Test $(0.5,\ 0)$: $y + x - x^{3} = 0 + 0.5 - 0.125 = 0.375 \ge 0$'
-        point:
-          - { figure: 0, kind: circle, target: { x: 207, y: 130 }, text: '(0.5, 0)' }
-      - say: 'And $y - x$ is 0 minus 0.5, which is negative 0.5. That is at most 0. Both inequalities hold.'
-        write: '$y - x = 0 - 0.5 = -0.5 \le 0$'
-      - say: 'So the region is $y + x - x^{3} \ge 0$ and $y - x \le 0$, which is answer choice A.'
-        write: 'Region: $y + x - x^{3} \ge 0,\; y - x \le 0$'
-        point:
-          - { figure: 0, kind: circle, target: { x: 235, y: 108 }, text: 'A' }
+          - {figure: 0, kind: circle, target: {x: 207, y: 130}, text: '(0.5, 0)'}
+      - say: 'So the shaded portion is $y + x - x^{3} \ge 0$ and $y - x \le 0$: option A.'
+        write: '$\therefore\ y + x - x^{3} \ge 0,\ \ y - x \le 0$'
         answer: true
     traps:
-      B: 'You went for B. Its first inequality says $y \ge x - x^{3}$, which is the curve turned upside down. The curve here is $y = x^{3} - x$, so rearranging $y \ge x^{3} - x$ gives $y + x - x^{3} \ge 0$.'
+      B: 'You went for B. Its first inequality says $y \ge x - x^{3}$, which is the curve turned upside down. The curve here is $y = x^{3} - x$, so $y \ge x^{3} - x$ rearranges to $y + x - x^{3} \ge 0$.'
       C: 'You went for C. Its first sign is the wrong way round, and its line is $y = -x$, not $y = x$. Test the point 0.5, 0: $y + x - x^{3}$ is 0.375, which is not at most 0.'
-      D: 'You went for D. It uses the curve $y = x - x^{3}$ and the line $y = -x$, which are the mirror images of the boundaries in the diagram. Our boundaries are $y = x^{3} - x$ and $y = x$, giving $y + x - x^{3} \ge 0$ and $y - x \le 0$.'
+      D: 'You went for D. It uses the curve $y = x - x^{3}$ and the line $y = -x$, the mirror images of the boundaries in the diagram. Ours are $y = x^{3} - x$ and $y = x$.'
 
   19:
     moments:
-      - say: 'We want to factorise this expression completely.'
-        write: '$x^{2} + 2xy + y^{2} + 3x + 3y - 18$'
-      - say: 'Five terms is a lot to factorise directly, so let''s look for structure. Remember that $x + y$, all squared, expands to $x$ squared plus $2xy$ plus $y$ squared.'
+      - section: 'The question'
+        say: 'Six terms, two letters. It looks too long to factorise, but hidden inside is a quadratic you already know how to do.'
+        write: 'Factorise $x^{2} + 2xy + y^{2} + 3x + 3y - 18$'
+      - section: 'Solution'
+        say: 'Solution. Recall the perfect square: $x + y$, all squared, is $x^{2}$ plus $2xy$ plus $y^{2}$.'
         write: 'Recall: $(x + y)^{2} = x^{2} + 2xy + y^{2}$'
-      - say: 'So the first three terms of our expression are exactly $x + y$, all squared.'
-        write: 'First three terms: $x^{2} + 2xy + y^{2} = (x + y)^{2}$'
-      - say: 'The next two terms share a factor of 3. Take it out, and what is left is $x + y$ again.'
-        write: 'Next two terms: $3x + 3y = 3(x + y)$'
-        point:
-          - { line: 3, kind: move, from: { line: 3, at: '[[3]]x +' }, at: '= [[3]](', text: 'take out 3' }
-      - say: 'So the whole expression is $x + y$ squared, plus 3 times $x + y$, minus 18. Picture the bracket $x + y$ as a parcel: the same parcel appears twice.'
-        write: 'Expression $= (x + y)^{2} + 3(x + y) - 18$'
-        point:
-          - { line: 4, kind: move, from: { line: 2, at: '= [[(x + y)2]]' }, at: '= [[(x + y)2]]' }
-          - { line: 4, kind: move, from: { line: 3, at: '= [[3(x + y)]]' }, at: '+ [[3(x + y)]]' }
-        doodle: {name: 'custom:1999_q19_a', id: parcel, caption: 'the same parcel twice', size: scene}
-      - say: 'Let''s put a tag on the parcel and call it $u$. Then we have an ordinary quadratic in $u$.'
+      - say: 'Group the terms. The first three make the perfect square. The next two share a factor of 3.'
+        write: '$= (x^{2} + 2xy + y^{2}) + (3x + 3y) - 18$'
+      - say: 'So the first group is $x + y$, all squared. From the second group take out 3, leaving $x + y$. The same bracket appears twice, like the same parcel.'
+        write: '$= (x + y)^{2} + 3(x + y) - 18$'
+        doodle: {name: 'custom:1999_q19_a', id: parcel, caption: 'the same parcel twice', size: scene, 'on': 'parcel'}
+      - say: 'Let $u$ stand for the bracket $x + y$. Then the expression is an ordinary quadratic in $u$.'
         write: 'Let $u = x + y$: $\ u^{2} + 3u - 18$'
         point:
-          - {line: 5, kind: highlight, at: 'u = x + y', to: {doodle: parcel, part: tags}}
+          - {line: 4, kind: highlight, at: 'u = x + y', to: {doodle: parcel, part: tags}}
         doodle_do:
-          - {id: parcel, op: stage, stage: 'custom:1999_q19_a2'}
-      - say: 'We need two numbers that multiply to negative 18 and add to 3. 6 times negative 3 is negative 18, and 6 plus negative 3 is 3.'
-        write: '$6 \times (-3) = -18,\quad 6 + (-3) = 3$'
-      - say: 'So the quadratic factorises as $u$ plus 6, times $u$ minus 3.'
-        write: '$u^{2} + 3u - 18 = (u + 6)(u - 3)$'
-      - say: 'Quick check: $u$ times $u$ is $u$ squared, $6u$ minus $3u$ is $3u$, and 6 times negative 3 is negative 18. That matches.'
-        write: 'Check: $(u + 6)(u - 3) = u^{2} - 3u + 6u - 18 = u^{2} + 3u - 18$'
-      - say: 'Now unwrap the parcels: put $x + y$ back in place of $u$ in each bracket.'
-        write: '$= \big((x + y) + 6\big)\big((x + y) - 3\big)$'
+          - {id: parcel, op: stage, stage: 'custom:1999_q19_a2', 'on': 'quadratic'}
+      - section: 'Factorise: product and sum'
+        say: 'The product is $a$ times $c$, 1 times minus 18, which is minus 18. The sum is $b$, 3.'
+        write: 'Product $= ac = -18$, Sum $= b = 3$'
+      - say: 'Two numbers that multiply to minus 18 and add up to 3: 6 and minus 3. 6 times minus 3 is minus 18, and 6 minus 3 is 3.'
+        write: 'Factors: $6,\ -3$'
+      - say: 'Split the middle term. $3u$ becomes $6u$ minus $3u$.'
+        write: '$u^{2} + 3u - 18 = u^{2} + 6u - 3u - 18$'
         point:
-          - { line: 9, kind: move, from: { line: 5, at: 'u = [[x + y]]' }, at: '([[(x + y)]] + 6', text: 'put back' }
-          - { line: 9, kind: move, from: { line: 5, at: 'u = [[x + y]]' }, at: '([[(x + y)]] − 3', text: 'put back' }
+          - {line: 7, kind: move, from: {line: 6, at: '[[6]], −3'}, at: '+6u', text: 'split'}
+          - {line: 7, kind: move, from: {line: 6, at: '6, [[−3]]'}, at: '−3u'}
+      - say: 'Group in pairs. From the first pair take out $u$, leaving $u + 6$. From the second take out minus 3, leaving $u + 6$ again.'
+        write: '$= u(u + 6) - 3(u + 6)$'
+      - say: 'The brackets match. Take out the common bracket, $u + 6$. What is left is $u - 3$.'
+        write: '$= (u + 6)(u - 3)$'
+      - section: 'Put back x + y'
+        say: 'Now put $x + y$ back in place of $u$ in each bracket.'
+        write: '$= (x + y + 6)(x + y - 3)$'
         doodle_do:
           - {id: parcel, op: label, part: p1, text: 'unwrap: u = x + y'}
-      - say: 'So the factorisation is $x + y + 6$, times $x + y - 3$, which is answer choice A.'
-        write: '$= (x + y + 6)(x + y - 3)$'
+      - section: 'Check'
+        say: 'Check with $x = 1$ and $y = 0$. The expression is 1 plus 3 minus 18, which is minus 14. The brackets give 7 times minus 2, also minus 14.'
+        write: 'Check $x = 1,\ y = 0$: $\ 1 + 3 - 18 = -14$; $\ (7)(-2) = -14$'
+      - say: 'Therefore the expression factorises as $x + y + 6$, times $x + y - 3$, which is answer choice A.'
+        write: '$\therefore (x + y + 6)(x + y - 3)$'
         answer: true
     traps:
       B: 'You went for B, which uses $x - y$. $(x - y)^{2}$ has middle term minus $2xy$, but here it is plus $2xy$, so the bracket is $x + y$.'
       C: 'You went for C, which uses $x - y$. The plus $2xy$ tells you the perfect square is $(x + y)^{2}$, not $(x - y)^{2}$.'
-      D: 'You went for D. The signs are swapped: negative 6 plus 3 is negative 3, which would give minus $3(x + y)$. We need plus 3, so it is plus 6 and minus 3.'
+      D: 'You went for D. The signs are swapped: minus 6 and 3 multiply to minus 18 but add up to minus 3. The sum must be plus 3, so the factors are 6 and minus 3.'
 
   20:
     moments:
-      - say: 'The sum of two numbers is twice their difference, and the difference is $P$. We want the larger of the two numbers.'
-        write: 'Sum $= 2 \times$ difference, difference $= P$'
-      - say: 'Let the larger number be $a$ and the smaller be $b$. Picture them as two bars. The piece of $a$ that sticks out beyond $b$ is their difference, $P$.'
-        write: '$a - b = P$'
-        doodle: {name: 'custom:1999_q20_a', id: bars, caption: 'the larger and the smaller', size: scene}
-      - say: 'The sum is twice the difference.'
-        write: '$a + b = 2(a - b)$'
-      - say: 'Expand the right side: 2 times $a$ is $2a$, and 2 times $b$ is $2b$.'
-        write: '$a + b = 2a - 2b$'
-      - say: 'Add $2b$ to both sides and subtract $a$ from both sides.'
-        write: '$b + 2b = 2a - a$'
-        point:
-          - { line: 4, kind: move, from: { line: 3, at: '[[− 2b]]' }, at: '+ 2b', text: 'across' }
-          - { line: 4, kind: move, from: { line: 3, at: '[[a]] + b' }, at: '− a', text: 'across' }
-      - say: '$b$ plus $2b$ is $3b$, and $2a$ minus $a$ is $a$. So the long bar is exactly three short bars.'
-        write: '$3b = a$'
-        point:
-          - {line: 5, kind: highlight, at: '3b = a', to: {doodle: bars, part: splits}}
+      - section: 'The question'
+        say: 'Two numbers we never see, only their sum and their difference. Two facts, two unknowns: that is a pair of simultaneous equations.'
+        write: 'Sum $= 2 \times$ difference; difference $= P$'
+      - section: 'Solution'
+        say: 'Solution. Let the larger number be $a$ and the smaller be $b$. Picture them as two bars; the piece of $a$ that sticks out beyond $b$ is the difference.'
+        write: 'Let the larger be $a$ and the smaller be $b$'
+        doodle: {name: 'custom:1999_q20_a', id: bars, caption: 'the larger and the smaller', size: scene, 'on': 'bars'}
+      - say: 'The difference is $P$. Larger minus smaller: $a$ minus $b$ equals $P$. Call it equation 1.'
+        write: '$a - b = P \quad \ldots\ldots (1)$'
         doodle_do:
-          - {id: bars, op: stage, stage: 'custom:1999_q20_a2'}
-      - say: 'So the larger number is 3 times the smaller. Now go back to the difference, $a - b = P$, and replace $a$ with $3b$.'
-        write: '$3b - b = P$'
+          - {id: bars, op: highlight, part: diff, text: 'difference P'}
+      - say: 'The sum is twice the difference, and the difference is $P$. So $a$ plus $b$ equals $2P$. Call it equation 2.'
+        write: '$a + b = 2P \quad \ldots\ldots (2)$'
+      - section: 'Eliminate b'
+        say: 'Minus $b$ in equation 1 and plus $b$ in equation 2: add the equations, and $b$ cancels. $P$ plus $2P$ is $3P$.'
+        write: '(1) + (2): $\ 2a = 3P$'
         point:
-          - { line: 1, kind: arrow, text: 'back here' }
-          - { line: 6, kind: move, from: { line: 5, at: '3b' }, at: '3b', text: 'a = 3b' }
-      - say: '$3b$ minus $b$ is $2b$. So the difference, the part sticking out, is two short bars.'
-        write: '$2b = P$'
-        doodle_do:
-          - {id: bars, op: highlight, part: diff, text: '2 pieces = P'}
+          - {line: 2, kind: strike, at: '− b'}
+          - {line: 3, kind: strike, at: '+ b'}
       - say: 'Divide both sides by 2.'
-        write: '$b = \dfrac{P}{2}$'
+        write: '$a = \dfrac{3P}{2}$'
+      - say: 'Now find the smaller number too. Substitute $a = \dfrac{3P}{2}$ in equation 2.'
+        write: 'Sub. in (2): $\ \dfrac{3P}{2} + b = 2P$'
         point:
-          - { line: 8, kind: move, from: { line: 7, at: '[[2]]b' }, at: 'b = [[2]]', text: 'divide' }
-      - say: 'That is the smaller number. The larger one is 3 times it: 3 times $P$ over 2 is $3P$ over 2. Every piece of the bars is $P$ over 2.'
-        write: '$a = 3b = 3 \times \dfrac{P}{2} = \dfrac{3P}{2}$'
-        point:
-          - { line: 9, kind: move, from: { line: 8, at: '= [[2P]]' }, at: '3 × [[2P]]', text: 'b' }
-          - {line: 9, kind: highlight, at: 'a = 3b', to: {doodle: bars, part: halves}}
+          - {line: 6, kind: move, from: {line: 5, at: '23P'}, at: '23P +', text: 'sub in'}
+      - say: 'Subtract $3P$ over 2 from both sides. $2P$ is $4P$ over 2, and $4P$ over 2 minus $3P$ over 2 is $P$ over 2.'
+        write: '$b = 2P - \dfrac{3P}{2} = \dfrac{P}{2}$'
+      - say: 'Look at the bars: the larger, $3P$ over 2, is exactly three times the smaller, $P$ over 2.'
+        write: '$a = 3b$'
         doodle_do:
-          - {id: bars, op: stage, stage: 'custom:1999_q20_a3'}
-      - say: 'Check: the sum is $3P$ over 2 plus $P$ over 2, which is $4P$ over 2, or $2P$. The difference is $2P$ over 2, which is $P$, and twice that is $2P$. It matches.'
-        write: 'Check: $\dfrac{3P}{2} + \dfrac{P}{2} = 2P = 2\left(\dfrac{3P}{2} - \dfrac{P}{2}\right)$'
-      - say: 'So the larger number is $3P$ over 2, which is answer choice B.'
-        write: 'Larger number $= \dfrac{3P}{2}$'
+          - {id: bars, op: stage, stage: 'custom:1999_q20_a2', 'on': 'bars'}
+      - section: 'Check'
+        say: 'Check. The sum is $3P$ over 2 plus $P$ over 2, which is $2P$. The difference is $P$, and twice $P$ is $2P$. It matches.'
+        write: 'Check: $\ \dfrac{3P}{2} + \dfrac{P}{2} = 2P = 2 \times P$'
+        doodle_do:
+          - {id: bars, op: stage, stage: 'custom:1999_q20_a3', 'on': 'sum'}
+      - say: 'Therefore the larger number is $3P$ over 2, which is answer choice B.'
+        write: '$\therefore$ the larger number is $\dfrac{3P}{2}$'
         answer: true
     traps:
-      A: 'You went for $P$ over 2. That is the smaller number, $b$. The question wants the larger, which is 3 times it: $3P$ over 2.'
-      C: 'You went for $5P$ over 2. Check it: the smaller would then be $3P$ over 2, and the sum would be $4P$, not twice the difference. The larger is $3P$ over 2.'
-      D: 'You went for $3P$. That comes from taking the smaller number as $P$. The difference is $P$, and $2b = P$ gives $b = P$ over 2, so the larger is $3P$ over 2.'
+      A: 'You went for $P$ over 2. That is the smaller number, $b$. The question wants the larger, $a$, which is $3P$ over 2.'
+      C: 'You went for $5P$ over 2. That is the sum, $2P$, plus the smaller number. From (1) + (2), $2a = 3P$, so the larger is $3P$ over 2.'
+      D: 'You went for $3P$. That is $2a$, from (1) + (2). Divide both sides by 2: the larger number is $3P$ over 2.'
 
   21:
     moments:
-      - say: 'We want to express 1 over $x^{3} - 1$ in partial fractions.'
-        write: '$\dfrac{1}{x^{3} - 1}$'
-      - say: 'Partial fractions always start by factorising the denominator. $x^{3} - 1$ is a difference of two cubes, and it factorises like this.'
-        write: 'Difference of cubes: $x^{3} - 1 = (x - 1)(x^{2} + x + 1)$'
-      - say: 'Let''s check by expanding. $x$ times the quadratic gives $x^{3} + x^{2} + x$. Negative 1 times it gives negative $x^{2}$, negative $x$, negative 1. Everything cancels except $x^{3} - 1$.'
-        write: 'Check: $x^{3} + x^{2} + x - x^{2} - x - 1 = x^{3} - 1$'
-      - say: 'Does the quadratic factor break down further? Its discriminant is 1 squared minus 4 times 1 times 1, which is 1 minus 4, negative 3. That is negative, so no.'
-        write: 'Discriminant: $b^{2} - 4ac = 1^{2} - 4(1)(1) = 1 - 4 = -3 < 0$'
-      - say: 'So the linear factor gets a constant $A$ on top, and the quadratic factor gets a linear top, $Bx + C$. Picture the fraction as a pizza that we split back into two slices.'
-        write: '$\dfrac{1}{x^{3} - 1} = \dfrac{A}{x - 1} + \dfrac{Bx + C}{x^{2} + x + 1}$'
-        doodle: {name: 'custom:1999_q21_a', id: pizza, caption: 'one pizza, two slices'}
-      - say: 'Multiply every term by $x^{3} - 1$ to clear the fractions. Each fraction keeps the factor it did not have.'
-        write: '$1 = A(x^{2} + x + 1) + (Bx + C)(x - 1)$'
-      - say: 'Now a neat move: put $x$ equal to 1. That makes $x - 1$ zero, so the second part vanishes.'
-        write: 'Put $x = 1$: $\ 1 = A(1^{2} + 1 + 1) + (B + C)(1 - 1)$'
-        point:
-          - { line: 6, kind: strike, at: '(B + C)(1 − 1)', text: 'vanishes' }
-      - say: '1 squared plus 1 plus 1 is 3, and anything times zero is zero. So $3A$ is 1, and $A$ is 1 over 3. That is the top of the small slice.'
-        write: '$1 = 3A + 0 \Rightarrow A = \dfrac{1}{3}$'
-        point:
-          - {line: 7, kind: highlight, at: '3A + 0', to: {doodle: pizza, part: slice1}}
+      - section: 'The question'
+        say: 'One small fraction, but its denominator is a cube. Factorise the cube first, and the partial fractions follow.'
+        write: 'Express $\dfrac{1}{x^{3} - 1}$ in partial fractions'
+      - section: 'Factorise the denominator'
+        say: 'Solution. $x^{3} - 1$ is $x$ cubed minus 1 cubed, a difference of two cubes. Recall how it factorises.'
+        write: 'Recall: $a^{3} - b^{3} = (a - b)(a^{2} + ab + b^{2})$'
+      - say: 'Here $a$ is $x$ and $b$ is 1. So $x^{3} - 1$ is $x - 1$, times $x^{2}$ plus $x$ plus 1.'
+        write: '$x^{3} - 1 = (x - 1)(x^{2} + x + 1)$'
+      - say: 'Can $x^{2} + x + 1$ factorise further? Its discriminant, $b^{2} - 4ac$, is 1 minus 4, minus 3. Negative, so no.'
+        write: '$b^{2} - 4ac = 1^{2} - 4(1)(1) = -3 < 0$'
+      - section: 'Set up the fractions'
+        say: 'The linear factor gets a constant on top, $A$. The quadratic factor gets a linear top, $Bx + C$. Picture splitting one pizza into two slices.'
+        write: 'Let $\dfrac{1}{x^{3} - 1} \equiv \dfrac{A}{x - 1} + \dfrac{Bx + C}{x^{2} + x + 1}$'
+        doodle: {name: 'custom:1999_q21_a', id: pizza, caption: 'one pizza, two slices', 'on': 'pizza'}
+      - say: 'Multiply through by $(x - 1)(x^{2} + x + 1)$. Each fraction keeps the factor it did not have.'
+        write: '$1 \equiv A(x^{2} + x + 1) + (Bx + C)(x - 1)$'
+      - section: 'Find A'
+        say: 'Put $x = 1$, because it makes $x - 1$ zero. That wipes out the $Bx + C$ term.'
+        write: 'Put $x = 1$: $\ 1 = A(1 + 1 + 1) + (B + C)(0)$'
+      - say: '1 plus 1 plus 1 is 3, and anything times zero is zero.'
+        write: '$1 = 3A$'
+      - say: 'Divide both sides by 3. $A$ is 1 over 3, the top of the first slice.'
+        write: '$A = \dfrac{1}{3}$'
         doodle_do:
           - {id: pizza, op: label, part: slice1, text: 'A = 1/3'}
-      - say: 'To find $B$ and $C$, let''s expand the second part: $Bx + C$ times $x - 1$.'
-        write: 'Expand: $(Bx + C)(x - 1) = Bx^{2} - Bx + Cx - C$'
-      - say: 'Now compare the $x$ squared terms on both sides. On the left there are none. On the right we get $A$ from the first part and $B$ from the part we just expanded.'
-        write: '$x^{2}$ terms: $0 = A + B$'
-        point:
-          - { line: 5, kind: circle, at: 'A(x2' }
-          - { line: 8, kind: circle, at: '= Bx2' }
-      - say: 'So $B$ is negative $A$, which is negative 1 over 3.'
+      - section: 'Equate coefficients'
+        say: 'No other value wipes out a term, so we equate coefficients. Expand the second part first.'
+        write: '$(Bx + C)(x - 1) = Bx^{2} - Bx + Cx - C$'
+      - say: 'Equate the coefficients of $x^{2}$. The left side, 1, has no $x^{2}$. On the right, $A$ from the first part and $B$ from the second.'
+        write: 'Coefficient of $x^{2}$: $\ 0 = A + B$'
+      - say: 'So $B$ is minus $A$, which is minus 1 over 3.'
         write: '$B = -A = -\dfrac{1}{3}$'
-        point:
-          - { line: 10, kind: move, from: { line: 7, at: 'A = [[31]]' }, at: '= −[[31]]', text: 'A' }
-          - {line: 10, kind: highlight, at: 'B = -A', to: {doodle: pizza, part: slice2}}
-      - say: 'Now compare the constant terms. On the left it is 1. On the right, $A$ from the first part, and negative $C$ from the expanded part.'
-        write: 'Constants: $1 = A - C$'
-      - say: 'So $C$ is $A$ minus 1. 1 over 3 minus 1 is negative 2 over 3. Now we know the top of the big slice too.'
+      - say: 'Equate the constant terms. On the left, 1. On the right, $A$ from the first part and minus $C$ from the second.'
+        write: 'Constant terms: $\ 1 = A - C$'
+      - say: 'So $C$ is $A$ minus 1. 1 over 3 minus 1 is minus 2 over 3.'
         write: '$C = A - 1 = \dfrac{1}{3} - 1 = -\dfrac{2}{3}$'
-        point:
-          - { line: 12, kind: move, from: { line: 7, at: 'A = [[31]]' }, at: '= [[31]] − 1', text: 'A' }
         doodle_do:
           - {id: pizza, op: label, part: slice2, text: 'B = −1/3, C = −2/3'}
-      - say: 'So the top of the second fraction is negative 1 over 3 times $x$, minus 2 over 3. Take out negative 1 over 3, and that is negative $x + 2$ over 3.'
+      - section: 'Put them together'
+        say: 'The top of the second fraction is minus 1 over 3 $x$, minus 2 over 3. Take out minus 1 over 3: that is minus $x + 2$, over 3.'
         write: '$Bx + C = -\dfrac{1}{3}x - \dfrac{2}{3} = -\dfrac{x + 2}{3}$'
-      - say: 'Put $A$ and this top back into the two fractions. The 3s move down into the denominators.'
-        write: '$\dfrac{1}{x^{3} - 1} = \dfrac{\tfrac{1}{3}}{x - 1} - \dfrac{\tfrac{x + 2}{3}}{x^{2} + x + 1}$'
-      - say: 'So the two slices are 1 over $3(x - 1)$, minus $x + 2$ over $3(x^{2} + x + 1)$. Put back together, they make the whole pizza. That is answer choice C.'
-        write: '$= \dfrac{1}{3(x - 1)} - \dfrac{x + 2}{3(x^{2} + x + 1)}$'
+      - say: 'Put $A$ and this top into the two fractions. The 3s move down into the denominators.'
+        write: '$\dfrac{1}{x^{3} - 1} = \dfrac{1}{3(x - 1)} - \dfrac{x + 2}{3(x^{2} + x + 1)}$'
+      - section: 'Check'
+        say: 'Check with $x = 0$. The left side is 1 over minus 1, minus 1. The right side is minus 1 over 3, minus 2 over 3: also minus 1.'
+        write: 'Check $x = 0$: $\ -1$; $\ \dfrac{1}{-3} - \dfrac{2}{3} = -1$'
+      - say: 'Therefore the partial fractions are 1 over $3(x - 1)$, minus $x + 2$ over $3(x^{2} + x + 1)$, which is answer choice C.'
+        write: '$\therefore \dfrac{1}{3(x - 1)} - \dfrac{x + 2}{3(x^{2} + x + 1)}$'
         answer: true
         doodle_do:
           - {id: pizza, op: pulse, part: whole}
     traps:
-      A: 'You went for A. It drops the factor of 3 everywhere, which happens if $A$ is taken as 1. Putting $x = 1$ gives $3A = 1$, so $A$ is 1 over 3.'
-      B: 'You went for B. The sign between the fractions is wrong. $B$ is negative 1 over 3 and $C$ is negative 2 over 3, so the second fraction is subtracted.'
-      D: 'You went for D. The top of the second fraction should be $x + 2$, not $x - 2$: $C$ is negative 2 over 3, so $Bx + C$ is negative 1 over 3 times $x + 2$.'
+      A: 'You went for A. It drops the factor of 3, as if $A$ were 1. Putting $x = 1$ gives $3A = 1$, so $A$ is 1 over 3.'
+      B: 'You went for B. The sign between the fractions is wrong. $B$ is minus 1 over 3 and $C$ is minus 2 over 3, so the second fraction is subtracted.'
+      D: 'You went for D. The top of the second fraction should be $x + 2$, not $x - 2$: $C$ is minus 2 over 3, so $Bx + C$ is minus 1 over 3 times $x + 2$.'
 
   22:
     moments:
@@ -1124,7 +1123,7 @@ lessons:
         write: 'Triangle $MNO$: $MN = 9,\ MO = 6,\ NO = 12$'
         point:
           - { figure: sketch, kind: circle, target: 'P', text: 'bisector meets NO' }
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - say: 'Let me draw triangle $MNO$ with the bisector of angle $M$.'
         show_sketch: true
       - say: 'The key fact is the angle bisector theorem: the bisector from a vertex splits the opposite side in the ratio of the two sides that meet at that vertex.'
         write: 'Angle bisector theorem: $\dfrac{NP}{PO} = \dfrac{MN}{MO}$'
@@ -1177,7 +1176,7 @@ lessons:
         point:
           - { figure: sketch, kind: circle, target: 'V' }
           - { figure: sketch, kind: circle, target: 'W' }
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - say: 'Let me plot $V$ and $W$ on the axes.'
         show_sketch: true
       - say: 'A point that is always the same distance from two fixed points lies on a straight line: the perpendicular bisector of $VW$. Equal distances have equal squares, so let''s square both. That removes the square roots.'
         write: 'Equal distances: $PV = PW \Rightarrow PV^{2} = PW^{2}$'
@@ -1346,7 +1345,7 @@ lessons:
         point:
           - { figure: sketch, kind: circle, target: 'C', text: 'centre (a, −2)' }
           - { figure: sketch, kind: circle, target: 'r = 4', text: 'radius' }
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - say: 'Let me draw the circle on the axes, with its centre below the $x$-axis.'
         show_sketch: true
       - say: 'Compare it with the general equation of a circle, which has $2gx$, $2fy$ and a constant $c$.'
         write: 'General circle: $x^{2} + y^{2} + 2gx + 2fy + c = 0$'
@@ -1505,7 +1504,7 @@ lessons:
         point:
           - { figure: sketch, kind: circle, target: '2x + y = 3' }
           - { figure: sketch, kind: circle, target: '3x − 2y = 5' }
-      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+      - say: 'Let me draw the two lines on the axes.'
         show_sketch: true
       - say: 'The angle between two lines depends only on their gradients. So first rewrite each line as $y = mx + c$. For the first, subtract $2x$ from both sides.'
         write: 'First line: $2x + y = 3 \Rightarrow y = -2x + 3$'
@@ -1562,7 +1561,7 @@ lessons:
         write: 'From $P$: $Q$ is $N67^{\circ}W$, $R$ is $N23^{\circ}E$; $\ PQ = 150$ m'
         point:
           - { figure: sketch, kind: highlight, target: PQ, text: '150 m' }
-      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+      - say: 'Let me draw the bearings of $Q$ and $R$ from $P$.'
         show_sketch: true
       - say: 'A bearing like N67°W means: face north, then turn 67 degrees towards west. Let''s find the angles of triangle $PQR$ one at a time, starting at $P$.'
         write: '$N67^{\circ}W$: from north, turn $67^{\circ}$ towards west'
@@ -1891,7 +1890,7 @@ lessons:
         write: '$y = x(2 - x)$'
         point:
           - { figure: sketch, kind: circle, target: 'y = x(2 − x)' }
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - say: 'Let me sketch the curve, and shade the area under it.'
         show_sketch: true
       - say: 'The area between a curve and the $x$-axis is the definite integral of the curve between the limits, here from 0 to 2.'
         write: 'Area $= \displaystyle\int_{0}^{2} x(2 - x)\,dx$'
@@ -1988,7 +1987,7 @@ lessons:
         write: 'Region: $y = 0$, $y = 2x$, $x = 3$, turned about the $x$-axis'
         point:
           - { figure: sketch, kind: circle, target: 'turn about x-axis' }
-      - say: 'Let me sketch the graph, so we can see its shape.'
+      - say: 'Let me draw the region: the triangle under $y = 2x$, from 0 to 3.'
         show_sketch: true
       - say: 'When the region spins round the $x$-axis, each thin slice becomes a circular disc, like a coin standing on its edge. Its radius is the height of the region, $y$, so its area is pi times $y$ squared.'
         write: 'Area of each disc $= \pi y^{2}$'
@@ -2138,14 +2137,14 @@ lessons:
 
   41:
     moments:
-      - say: 'Three boys play a game, and their chances of winning are a half, a third and a quarter. We want the probability that one and only one of them wins.'
-        write: 'Chances of winning: $\tfrac{1}{2},\ \tfrac{1}{3},\ \tfrac{1}{4}$'
+      - say: 'Three boys play a game, and their probabilities of winning are a half, a third and a quarter. We want the probability that one and only one of them wins.'
+        write: 'Probabilities of winning: $\tfrac{1}{2},\ \tfrac{1}{3},\ \tfrac{1}{4}$'
         doodle: {name: 'custom:1999_q41_a', id: boys, caption: 'Exactly one of the three wins'}
       - say: 'One and only one means exactly one boy wins and the other two lose. There are three ways that can happen, so we work out each one and add.'
         write: 'Exactly one wins: first only, or second only, or third only'
-      - say: 'First, the chances of losing. 1 minus a half is a half, 1 minus a third is two thirds, and 1 minus a quarter is three quarters.'
+      - say: 'First, the probabilities of losing. 1 minus a half is a half, 1 minus a third is two thirds, and 1 minus a quarter is three quarters.'
         write: 'Losing: $1 - \tfrac{1}{2} = \tfrac{1}{2},\quad 1 - \tfrac{1}{3} = \tfrac{2}{3},\quad 1 - \tfrac{1}{4} = \tfrac{3}{4}$'
-      - say: 'The boys play independently, so within each case we multiply the three chances together.'
+      - say: 'The boys play independently, so within each case we multiply the three probabilities together.'
         write: 'Each case: $P(\text{A and B and C}) = P(A) \times P(B) \times P(C)$'
       - say: 'First boy only: picture him winning, a half, while the other two lose, two thirds and three quarters. On top, 1 times 2 times 3 is 6. On the bottom, 2 times 3 times 4 is 24.'
         write: 'First only: $\tfrac{1}{2} \times \tfrac{2}{3} \times \tfrac{3}{4} = \tfrac{1 \times 2 \times 3}{2 \times 3 \times 4} = \tfrac{6}{24}$'
@@ -2176,9 +2175,9 @@ lessons:
         write: 'P(exactly one wins) $= \dfrac{11}{24}$'
         answer: true
     traps:
-      A: 'You went for 1 over 24. That is the chance that all three win: a half times a third times a quarter. We want exactly one winner, which has three cases adding to 11 over 24.'
+      A: 'You went for 1 over 24. That is the probability that all three win: a half times a third times a quarter. We want exactly one winner, which has three cases adding to 11 over 24.'
       B: 'You went for 1 over 12. That is only one of the three cases, the third boy winning alone. Add all three cases: 6 over 24, 3 over 24 and 2 over 24 make 11 over 24.'
-      D: 'You went for 23 over 24. That is 1 minus the chance that all three win. We want exactly one winner, which is 6 plus 3 plus 2 over 24, which is 11 over 24.'
+      D: 'You went for 23 over 24. That is 1 minus the probability that all three win. We want exactly one winner, which is 6 plus 3 plus 2 over 24, which is 11 over 24.'
 
   42:
     moments:

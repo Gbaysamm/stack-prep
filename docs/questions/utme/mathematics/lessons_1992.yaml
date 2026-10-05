@@ -9,63 +9,57 @@ exam_year: 1992
 lessons:
   1:
     moments:
-      - say: 'We''re told that 34 in base $n$ equals 10011 in base 2, and we want to find the base $n$.'
-        write: '$34_{n} = 10011_{2}$'
-      - say: 'Two numbers in different bases can only be compared once both are written in base ten. So the plan is to convert each side to base ten, then set them equal.'
-        write: 'Plan: change both sides to base ten'
-      - say: 'Let''s start with the binary side, because it has no unknown. Picture it as bundles of sticks: reading from the right, the place values in base 2 are 1, 2, 4, 8 and 16.'
-        write: 'Place values in base 2: $16,\ 8,\ 4,\ 2,\ 1$'
-        doodle: {name: 'custom:1992_q01_a', id: sticks, caption: '10011 in base 2, and 34 in base n'}
-        doodle_do:
-          - {id: sticks, op: circle, part: binary}
-      - say: 'Now multiply each digit by its place value: 1 times 16, 0 times 8, 0 times 4, 1 times 2, and 1 times 1.'
-        write: '$10011_{2} = 1 \times 16 + 0 \times 8 + 0 \times 4 + 1 \times 2 + 1 \times 1$'
-      - say: '1 times 16 is 16. The two zeros give nothing. 1 times 2 is 2, and 1 times 1 is 1.'
+      - section: 'The question'
+        say: 'Three-four base n equals one-zero-zero-one-one base two. Find n. We change both sides to base ten and make an equation in n.'
+        write: 'Find $n$ if $34_{n} = 10011_{2}$'
+      - say: 'Start with the base two side, because it has no unknown.'
+        write: 'Solution'
+      - section: 'Right side: base 2 to base 10'
+        say: 'Write the index numbers over the digits, from nought on the right up to four on the left.'
+        write: '$\overset{4}{1}\,\overset{3}{0}\,\overset{2}{0}\,\overset{1}{1}\,\overset{0}{1}_{2}$'
+      - say: 'Each digit times two to the power of its index: 1 times 2 to the power 4, plus 0 times 2 cubed, plus 0 times 2 squared.'
+        write: '$= 1 \times 2^{4} + 0 \times 2^{3} + 0 \times 2^{2}$'
+      - say: 'Then plus 1 times 2 to the power 1, plus 1 times 2 to the power nought.'
+        write: '$\quad + 1 \times 2^{1} + 1 \times 2^{0}$'
+      - say: '2 to the power 4 is 16. The two 0 digits give 0. Then 2, and 1.'
         write: '$= 16 + 0 + 0 + 2 + 1$'
-      - say: '16 plus 2 is 18, and 18 plus 1 is 19. So the binary side is 19 in base ten: the bundle, the pair and the single stick make 19 sticks.'
-        write: '$= 19$'
-        doodle_do:
-          - {id: sticks, op: label, part: total, text: '19 sticks'}
-        point:
-          - {line: 5, kind: highlight, at: '19', to: {doodle: sticks, part: total}}
-      - say: 'Now the left side, 34 in base $n$. Look at the second row of sticks: the 4 is in the units place, and the 3 is in the $n$ place. So it means 3 lots of $n$, plus 4 units.'
-        write: '$34_{n} = 3 \times n + 4 \times 1$'
-        doodle_do:
-          - {id: sticks, op: highlight, part: bundles}
-          - {id: sticks, op: highlight, part: loose}
-      - say: 'That is simply $3n$ plus 4.'
+      - say: '16 plus 2 plus 1 is 19, base ten.'
+        write: '$= 19_{10}$'
+      - section: 'Left side: base n to base 10'
+        say: 'Now three-four base n. Index numbers one, nought. 3 times n to the power 1, plus 4 times n to the power nought.'
+        write: '$\overset{1}{3}\,\overset{0}{4}_{n} = 3 \times n^{1} + 4 \times n^{0}$'
+      - say: 'n to the power 1 is n, and n to the power nought is 1. So it is 3n plus 4.'
         write: '$= 3n + 4$'
-      - say: 'Both sides are the same number. So the $3n$ plus 4 we just found must equal the 19 from the binary side.'
+      - section: 'Solve for n'
+        say: 'The two sides are the same number, so 3n plus 4 equals 19.'
         write: '$3n + 4 = 19$'
         point:
-          - {line: 8, kind: move, from: {line: 7, at: '3n + 4'}, at: '3n + 4', text: 'left side'}
-          - {line: 8, kind: move, from: {line: 5, at: '19'}, at: '19', text: 'right side'}
-      - say: 'Subtract 4 from both sides. 19 minus 4 is 15.'
-        write: '$3n = 19 - 4 = 15$'
-        point:
-          - {line: 9, kind: move, from: {line: 8, at: '+ 4'}, at: '− 4', text: 'across the ='}
-      - say: 'Now divide both sides by 3. 15 divided by 3 is 5. So each bundle in the second row holds 5 sticks.'
+          - {line: 9, kind: move, from: {line: 8, at: '3n+4'}, at: '3n+4'}
+          - {line: 9, kind: move, from: {line: 6, at: '1910'}, at: '19'}
+      - say: 'Subtract 4 from both sides.'
+        write: '$3n = 19 - 4$'
+      - say: '19 minus 4 is 15.'
+        write: '$3n = 15$'
+      - say: 'Divide both sides by 3. 15 divided by 3 is 5.'
         write: '$n = \dfrac{15}{3} = 5$'
-        doodle_do:
-          - {id: sticks, op: label, part: bundles, text: 'n = 5 sticks each'}
-        point:
-          - {line: 10, kind: move, from: {line: 9, at: '[[3]]n'}, at: '3', text: 'divide by 3'}
-      - say: 'One quick check: in base 5 you may only use the digits 0 to 4. Our digits are 3 and 4, both less than 5, so base 5 is allowed.'
-        write: 'Digits: $3 < 5$ and $4 < 5$'
-      - say: 'And putting 5 back in, 34 in base 5 is 3 times 5 plus 4, which is 19. That matches the binary side.'
-        write: 'Check: $34_{5} = 3 \times 5 + 4 = 19\ \checkmark$'
-      - say: 'So $n$ is 5, which is answer choice A.'
-        write: '$n = 5$'
+      - say: 'A base must be bigger than every digit it uses. The digits 3 and 4 are both less than 5, so base five is allowed.'
+        write: 'Digits $3 < 5$ and $4 < 5$'
+      - section: 'Check'
+        say: 'Check by expanding three-four base five: 3 times 5, plus 4, is 19. That matches the base two side.'
+        write: '$\overset{1}{3}\,\overset{0}{4}_{5} = 3 \times 5^{1} + 4 \times 5^{0} = 19\ \checkmark$'
+      - section: 'Answer'
+        say: 'Therefore n is 5, which is option A.'
+        write: '$\therefore n = 5$'
         answer: true
     traps:
-      B: 'You went for 6. Check it: $34_{6}$ is 3 times 6 plus 4, which is 22, not 19. Solve $3n + 4 = 19$ and you get 5.'
-      C: 'You went for 7. $34_{7}$ is 3 times 7 plus 4, which is 25, not 19. The 3 counts lots of $n$, so $3n + 4 = 19$ gives $n = 5$.'
-      D: 'You went for 8. $34_{8}$ is 3 times 8 plus 4, which is 28, not 19. Convert $10011_{2}$ to 19 first, then solve $3n + 4 = 19$.'
+      B: 'You went for 6. Check it: three-four base six is 3 times 6 plus 4, which is 22, not 19. Solving 3n plus 4 equals 19 gives 5.'
+      C: 'You went for 7. Three-four base seven is 3 times 7 plus 4, which is 25, not 19. The 3 stands for 3 times n, so 3n plus 4 equals 19.'
+      D: 'You went for 8. Three-four base eight is 3 times 8 plus 4, which is 28, not 19. Change one-zero-zero-one-one base two to 19 first, then solve 3n plus 4 equals 19.'
   2:
     moments:
       - say: 'The radius of a circle is 5 centimetres, but it may be out by 0.1 centimetres. We want the percentage error this causes in the area.'
         write: '$r = 5\text{ cm},\quad \text{error in } r = 0.1\text{ cm}$'
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - say: 'Let me draw the circle of radius 5 cm, and a slightly bigger one for the error.'
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: 'r = 5 cm', text: 'radius'}
@@ -220,47 +214,42 @@ lessons:
       D: 'You went for 2. That''s the right-hand side of the equation, not $x$. Write both sides in base 2: negative $2x$ equals 1, so $x$ is negative a half.'
   5:
     moments:
-      - say: 'We need to simplify this standard form fraction: 1.25 times 10 to the 4, times 2.0 times 10 to the negative 1, all over 6.25 times 10 to the 5.'
-        write: '$\dfrac{(1.25 \times 10^{4}) \times (2.0 \times 10^{-1})}{6.25 \times 10^{5}}$'
-      - say: 'The tidy way is to handle the ordinary numbers and the powers of ten separately, because each follows its own simple rule.'
-        write: 'Plan: numbers and powers of ten separately'
-      - say: 'Start with the top. Multiply the numbers: 1.25 times 2.0 is 2.5.'
-        write: 'Top numbers: $1.25 \times 2.0 = 2.5$'
-      - say: 'The rule for multiplying powers of the same base: add the indices.'
-        write: 'Multiplication law: $a^{m} \times a^{n} = a^{m + n}$'
-      - say: 'Now the powers of ten on the top. When we multiply powers, we add the indices. 4 plus negative 1 is 3.'
-        write: 'Top powers: $10^{4} \times 10^{-1} = 10^{4 + (-1)} = 10^{3}$'
-      - say: 'Putting those two results together, the top is 2.5 times 10 cubed, and the bottom is still 6.25 times 10 to the 5.'
-        write: '$= \dfrac{2.5 \times 10^{3}}{6.25 \times 10^{5}}$'
-        point:
-          - {line: 5, kind: move, from: {line: 2, at: '= [[2.5]]'}, at: '[[2.5]] × 103', text: 'numbers'}
-          - {line: 5, kind: move, from: {line: 4, at: '103'}, at: '103', text: 'powers'}
-      - say: 'Now divide the numbers. 2.5 divided by 6.25 is 0.4. You can see it because 6.25 times 0.4 is 2.5.'
-        write: 'Numbers: $2.5 \div 6.25 = 0.4$'
-      - say: 'The rule for dividing powers of the same base: subtract the indices.'
-        write: 'Division law: $\dfrac{a^{m}}{a^{n}} = a^{m - n}$'
-      - say: 'Then the powers of ten. When we divide powers, we subtract the indices. 3 minus 5 is negative 2.'
-        write: 'Powers: $10^{3} \div 10^{5} = 10^{3 - 5} = 10^{-2}$'
-      - say: 'Putting the 0.4 and the 10 to the negative 2 together, we have 0.4 times 10 to the negative 2.'
+      - section: 'The question'
+        say: 'Numbers in standard form, multiplied and divided. The answer must also be in standard form, and that last step, getting the number between 1 and 10, is where marks are lost.'
+        write: 'Simplify $\dfrac{(1.25 \times 10^{4}) \times (2.0 \times 10^{-1})}{6.25 \times 10^{5}}$'
+      - say: 'We deal with the numbers and the powers of ten separately, each with its own rule.'
+        write: 'Solution'
+      - say: 'Write the numbers in one fraction and the powers of ten in another.'
+        write: '$= \dfrac{1.25 \times 2.0}{6.25} \times \dfrac{10^{4} \times 10^{-1}}{10^{5}}$'
+      - section: 'The numbers'
+        say: '1.25 times 2 is 2.5. So the numbers give 2.5 over 6.25.'
+        write: '$\dfrac{1.25 \times 2.0}{6.25} = \dfrac{2.5}{6.25}$'
+      - say: 'Clear the decimals: multiply the top and bottom by 100. 250 over 625. Both divide by 125: 2 over 5, which is 0.4.'
+        write: '$= \dfrac{250}{625} = \dfrac{2}{5} = 0.4$'
+      - section: 'The powers'
+        say: 'The laws of indices: to multiply powers, add the indices; to divide, subtract. 4 plus minus 1 is 3, and 3 minus 5 is minus 2.'
+        write: '$\dfrac{10^{4} \times 10^{-1}}{10^{5}} = \dfrac{10^{3}}{10^{5}} = 10^{3 - 5} = 10^{-2}$'
+      - section: 'Standard form'
+        say: 'Put them together: 0.4 times 10 to the minus 2. But standard form needs a number from 1 up to 10, and 0.4 is less than 1.'
         write: '$= 0.4 \times 10^{-2}$'
         point:
-          - {line: 9, kind: move, from: {line: 6, at: '0.4'}, at: '0.4'}
-          - {line: 9, kind: move, from: {line: 8, at: '10−2'}, at: '10−2'}
-      - say: 'But that is not standard form yet. In standard form, the number in front must be at least 1 and less than 10, and 0.4 is less than 1.'
-        write: 'Standard form needs $1 \le \text{number} < 10$'
-      - say: '0.4 is the same as 4.0 times 10 to the negative 1. So we replace the 0.4 with that.'
-        write: '$= 4.0 \times 10^{-1} \times 10^{-2}$'
-        point:
-          - {line: 11, kind: move, from: {line: 9, at: '0.4'}, at: '4.0 × 10−1', text: 'same as 0.4'}
-      - say: 'Multiplying powers of ten, add the indices: negative 1 plus negative 2 is negative 3.'
-        write: '$= 4.0 \times 10^{-1 + (-2)} = 4.0 \times 10^{-3}$'
-      - say: 'So the answer is 4.0 times 10 to the negative 3, which is answer choice A.'
-        write: 'Answer: $4.0 \times 10^{-3}$'
+          - {line: 6, kind: move, from: {line: 4, at: '= 0.4'}, at: '0.4', text: 'numbers'}
+          - {line: 6, kind: move, from: {line: 5, at: '= 10−2'}, at: '10−2', text: 'powers'}
+      - say: 'Move the point one place to the right: 0.4 is 4.0 times 10 to the minus 1. Then add the indices: minus 1 plus minus 2 is minus 3.'
+        write: '$= 4.0 \times 10^{-1} \times 10^{-2} = 4.0 \times 10^{-3}$'
+      - say: 'Therefore the value is 4.0 times 10 to the minus 3.'
+        write: '$\therefore$ Value $= 4.0 \times 10^{-3}$'
+      - section: 'Check'
+        say: 'Check with ordinary numbers: 12,500 times 0.2 is 2,500, and 2,500 divided by 625,000 is 0.004. That is 4.0 times 10 to the minus 3.'
+        write: 'Check: $\dfrac{12500 \times 0.2}{625000} = \dfrac{2500}{625000} = 0.004 \ \checkmark$'
+      - section: 'Answer'
+        say: 'So the answer is 4.0 times 10 to the minus 3, which is option A.'
+        write: '$\therefore 4.0 \times 10^{-3}$'
         answer: true
     traps:
-      B: 'You went for 5.0 times 10 to the negative 2. Check the division of the numbers: 2.5 divided by 6.25 is 0.4, not 5. Then 0.4 times 10 to the negative 2 becomes 4.0 times 10 to the negative 3.'
-      C: 'You went for 2.0 times 10 to the negative 1. That''s just the second number in the question. Multiply the top out to 2.5 times 10 cubed first, then divide by 6.25 times 10 to the 5.'
-      D: 'You went for 5.0 times 10 cubed. The power of ten should come out negative: 10 cubed divided by 10 to the 5 is 10 to the negative 2. The final answer is 4.0 times 10 to the negative 3.'
+      B: 'You went for 5.0 times 10 to the minus 2. Check the numbers: 2.5 divided by 6.25 is 0.4, not 5. Then 0.4 times 10 to the minus 2 is 4.0 times 10 to the minus 3.'
+      C: 'You went for 2.0 times 10 to the minus 1. That is just the second number in the question. Work out the numbers and the powers: 0.4 times 10 to the minus 2.'
+      D: 'You went for 5.0 times 10 cubed. The index must be negative: 10 cubed divided by 10 to the 5 is 10 to the minus 2. The answer is 4.0 times 10 to the minus 3.'
   6:
     moments:
       - say: 'We need to simplify 5 root 18, minus 3 root 72, plus 4 root 50.'
@@ -369,7 +358,7 @@ lessons:
       - say: 'Start with 44. Picture it as a tree that breaks into smaller pieces: 44 is 2 times 22, and 22 is 2 times 11.'
         write: '$44 = 2 \times 22 = 2 \times 2 \times 11$'
         doodle: {name: 'custom:1992_q08_a', id: trees, caption: 'breaking 44 and 60 into primes', size: scene}
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - say: 'Let me also draw the Venn diagram: one circle for $x$ and one for $y$.'
         show_sketch: true
       - say: 'The branches stop at primes, circled at the ends. So the different primes in 44 are 2 and 11.'
         write: '$x = \{2,\ 11\}$'
@@ -389,14 +378,14 @@ lessons:
           - {figure: sketch, kind: circle, target: y, text: '2, 3 and 5'}
       - say: 'Notice that 4 divides both numbers, but 4 is 2 times 2, so it is not prime. It never belongs in these sets.'
         write: '$4 = 2 \times 2$, so 4 is not prime'
-      - say: 'The union, the cup sign, collects everything that is in either set. Let''s write our two sets side by side.'
+      - say: 'The union, read $x$ union $y$, collects everything that is in either set. Let''s write our two sets side by side.'
         write: '$x \cup y = \{2,\ 11\} \cup \{2,\ 3,\ 5\}$'
         point:
           - {line: 8, kind: move, from: {line: 4, at: '{2, 11}'}, at: '{2, 11}', text: 'x'}
           - {line: 8, kind: move, from: {line: 6, at: '{2, 3, 5}'}, at: '{2, 3, 5}', text: 'y'}
       - say: 'From $x$ we get 2 and 11, and from $y$ we get 2, 3 and 5. The 2 appears in both, but we write it only once.'
         write: '$= \{2,\ 3,\ 5,\ 11\}$'
-      - say: 'The intersection, the cap sign, keeps only what is in both sets. Looking at our two lists, and at the two trees, the only number in both is 2.'
+      - say: 'The intersection, read $x$ intersection $y$, keeps only what is in both sets. Looking at our two lists, and at the two trees, the only number in both is 2.'
         write: '$x \cap y = \{2,\ 11\} \cap \{2,\ 3,\ 5\} = \{2\}$'
         doodle_do:
           - {id: trees, op: highlight, part: two44}
@@ -468,335 +457,329 @@ lessons:
       D: 'You went for the empty set. That''s $E$ intersection $F$ itself. Don''t forget the dash: the complement of the empty set is the whole universal set $U$.'
   10:
     moments:
-      - say: 'We need to make $t$ the subject of $s$ equals $ut$ plus a half $a t$ squared. Picture a car that starts at speed $u$ and speeds up at $a$: after time $t$ it has gone a distance $s$.'
+      - section: 'The question'
+        say: 'A car starts at speed $u$ and speeds up at $a$. After time $t$ it has gone $s$. Make $t$ the subject: the four options differ only in two signs.'
         write: '$s = ut + \tfrac{1}{2}at^{2}$'
         doodle: {name: 'custom:1992_q10_a', id: car, caption: 's: how far the car goes in time t'}
         doodle_do:
           - {id: car, op: move, part: car, path: drive}
-      - say: '$t$ appears squared and also on its own, so this is a quadratic in $t$. We are asking how long the car takes. The plan is to arrange it in the standard form and use the quadratic formula.'
-        write: 'Plan: write it as $At^{2} + Bt + C = 0$'
+      - section: 'Solution'
+        say: '$t$ appears squared and also on its own, so this is a quadratic in $t$. We arrange it equal to zero, then use the almighty formula.'
+        write: 'Solution'
         doodle_do:
           - {id: car, op: circle, part: time}
-      - say: 'First, clear the fraction. Multiply every term by 2: $s$ becomes $2s$, $ut$ becomes $2ut$, and a half $at$ squared becomes $at$ squared.'
+      - say: 'Clear the fraction: multiply every term by 2. $s$ becomes $2s$, $ut$ becomes $2ut$, and a half $at$ squared becomes $at$ squared.'
         write: '$2s = 2ut + at^{2}$'
-      - say: 'Now bring everything to one side, highest power of $t$ first. Subtract $2s$ from both sides.'
+      - say: 'Subtract $2s$ from both sides, and write the terms in descending powers of $t$.'
         write: '$at^{2} + 2ut - 2s = 0$'
-        point:
-          - {line: 3, kind: move, from: {line: 2, at: '2s'}, at: '− 2s', text: 'across the ='}
-      - say: 'Compare with $A t$ squared plus $B t$ plus $C$. The number in front of $t$ squared is $a$, in front of $t$ it is $2u$, and the constant is negative $2s$.'
-        write: '$A = a,\quad B = 2u,\quad C = -2s$'
-      - say: 'The quadratic formula says $t$ is negative $B$, plus or minus the root of $B$ squared minus $4AC$, all over $2A$.'
+      - section: 'The formula'
+        say: 'The almighty formula. We use capital $A$, $B$, $C$, because small $a$ is already in the question.'
         write: '$t = \dfrac{-B \pm \sqrt{B^{2} - 4AC}}{2A}$'
-      - say: 'Let''s work out the part under the root first, putting in $B$ as $2u$, $A$ as $a$, and $C$ as negative $2s$.'
-        write: 'Under the root: $B^{2} - 4AC = (2u)^{2} - 4(a)(-2s)$'
+      - say: 'Read them off: $A$ is the number in front of $t$ squared, $a$. $B$ is in front of $t$, $2u$. $C$ is the constant, negative $2s$.'
+        write: '$A = a,\ B = 2u,\ C = -2s$'
         point:
-          - {line: 6, kind: move, from: {line: 4, at: '2u'}, at: '(2u)', text: 'B'}
-          - {line: 6, kind: move, from: {line: 4, at: '−2s'}, at: '(−2s)', text: 'C'}
-      - say: '$2u$ squared is $4u$ squared. And 4 times $a$ times negative $2s$ is negative $8as$; minus a negative is plus. So we get $4u$ squared plus $8as$.'
-        write: '$= 4u^{2} + 8as$'
-      - say: 'Both terms have a factor of 4, so take the 4 out.'
-        write: '$= 4(u^{2} + 2as)$'
-      - say: 'So the square root is root 4 times the root of $u$ squared plus $2as$. And root 4 is 2.'
-        write: '$\sqrt{B^{2} - 4AC} = \sqrt{4}\sqrt{u^{2} + 2as} = 2\sqrt{u^{2} + 2as}$'
-      - say: 'Now put everything into the formula. Negative $B$ is negative $2u$, the root is the one we just found, and $2A$ is $2a$.'
-        write: '$t = \dfrac{-2u \pm 2\sqrt{u^{2} + 2as}}{2a}$'
+          - {line: 5, kind: underline, at: 'C = −2s', text: 'negative'}
+      - say: 'Substitute, keeping every value in brackets.'
+        write: '$t = \dfrac{-2u \pm \sqrt{(2u)^{2} - 4(a)(-2s)}}{2(a)}$'
         point:
-          - {line: 5, kind: box, text: 'the rule'}
-          - {line: 10, kind: move, from: {line: 9, at: '2u2 + 2as'}, at: '2u2 + 2as', text: 'the root'}
-      - say: 'Every term has a factor of 2, so cancel the 2 from the top and the bottom.'
-        write: '$t = \dfrac{-u \pm \sqrt{u^{2} + 2as}}{a}$'
-      - say: 'Written the way the options have it, that is 1 over $a$ times the bracket: the time the car takes, which is answer choice D.'
-        write: '$t = \tfrac{1}{a}\left[-u \pm \sqrt{u^{2} + 2as}\right]$'
+          - {line: 4, kind: box, text: 'the formula'}
+      - say: '$2u$ squared is $4u$ squared. 4 times $a$ times negative $2s$ is negative $8as$, and minus negative $8as$ is plus $8as$.'
+        write: '$= \dfrac{-2u \pm \sqrt{4u^{2} + 8as}}{2a}$'
+      - say: 'Under the root, take out the common factor 4.'
+        write: '$= \dfrac{-2u \pm \sqrt{4(u^{2} + 2as)}}{2a}$'
+      - say: 'The square root of 4 is 2, so 2 comes out in front of the root.'
+        write: '$= \dfrac{-2u \pm 2\sqrt{u^{2} + 2as}}{2a}$'
+      - say: 'Every term has a factor of 2. Divide the top and the bottom by 2.'
+        write: '$= \dfrac{-u \pm \sqrt{u^{2} + 2as}}{a}$'
+      - say: 'Therefore $t$ is 1 over $a$, times negative $u$ plus or minus the root of $u$ squared plus $2as$.'
+        write: '$\therefore t = \tfrac{1}{a}\left[-u \pm \sqrt{u^{2} + 2as}\right]$'
         doodle_do:
           - {id: car, op: label, part: time, text: 't = (−u ± √(u² + 2as))/a'}
+      - section: 'Check'
+        say: 'Check with numbers. Take $u$ equals 1, $a$ equals 2 and $t$ equals 1. Then $s$ is 1 plus a half of 2, which is 2.'
+        write: '$u = 1,\ a = 2,\ t = 1$: $s = 1 + 1 = 2$'
+      - say: 'Our formula, with the plus sign: negative 1 plus the root of 1 plus 8, over 2. Root 9 is 3, and negative 1 plus 3 is 2. 2 over 2 is 1.'
+        write: '$t = \dfrac{-1 + \sqrt{1 + 8}}{2} = \dfrac{2}{2} = 1\ \checkmark$'
+      - say: 'We get back $t$ equals 1. So the answer is option D.'
+        write: '$t = \tfrac{1}{a}\left[-u \pm \sqrt{u^{2} + 2as}\right]$ (D)'
         answer: true
     traps:
-      A: 'You went for option A. Two signs are off. The formula starts with negative $B$, so it''s negative $u$; and because $C$ is negative $2s$, the root holds $u$ squared plus $2as$.'
-      B: 'You went for option B. The negative $u$ is right, but the sign under the root isn''t. 4 times $a$ times negative $2s$ is negative $8as$, and subtracting that makes it plus.'
-      C: 'You went for option C. The root is right, but the formula begins with negative $B$, and $B$ is $2u$. So the front should be negative $u$, not $u$.'
+      A: 'You went for option A. Two signs are off. The formula starts with negative $B$, so it is negative $u$; and because $C$ is negative $2s$, the root holds $u$ squared plus $2as$.'
+      B: 'You went for option B. The negative $u$ is right, but the sign under the root is not. 4 times $a$ times negative $2s$ is negative $8as$, and subtracting that makes it plus.'
+      C: 'You went for option C. The root is right, but the formula begins with negative $B$, and $B$ is $2u$. So the front is negative $u$, not $u$.'
   11:
     moments:
-      - say: 'We need to factorise $9p$ squared minus $q$ squared plus $6qr$ minus $9r$ squared.'
+      - section: 'The question'
+        say: 'Four terms and no common factor. But look closely: the last three terms hold only $q$ and $r$. That is the clue that unlocks the whole thing.'
         write: '$9p^{2} - q^{2} + 6qr - 9r^{2}$'
-      - say: 'Four terms, and no common factor. But notice that the last three terms involve only $q$ and $r$. That is a hint to group them together.'
-        write: 'Group the last three terms:'
-      - say: 'Put the last three in a bracket with a minus sign in front. Taking out a minus flips every sign inside, so the plus $6qr$ becomes minus $6qr$ inside the bracket.'
-        write: '$9p^{2} - q^{2} + 6qr - 9r^{2} = 9p^{2} - \left(q^{2} - 6qr + 9r^{2}\right)$'
-      - say: 'Let''s check by opening the bracket again: minus $q$ squared, plus $6qr$, minus $9r$ squared. That is exactly what we started with.'
-        write: 'Check: $-\left(q^{2} - 6qr + 9r^{2}\right) = -q^{2} + 6qr - 9r^{2}\ \checkmark$'
-      - say: 'Now, the bracket is a perfect square. $q$ minus $3r$, all squared, is $q$ squared, minus 2 times $q$ times $3r$, plus $3r$ squared.'
-        write: '$(q - 3r)^{2} = q^{2} - 2(q)(3r) + (3r)^{2}$'
-      - say: '2 times $q$ times $3r$ is $6qr$, and $3r$ squared is $9r$ squared. That is exactly the bracket we made.'
-        write: '$= q^{2} - 6qr + 9r^{2}$'
-      - say: 'So we replace the bracket with $q$ minus $3r$, all squared.'
-        write: '$9p^{2} - q^{2} + 6qr - 9r^{2} = 9p^{2} - (q - 3r)^{2}$'
-        point:
-          - {line: 6, kind: move, from: {line: 4, at: '(q − 3r)2'}, at: '(q − 3r)2', text: 'perfect square'}
-      - say: 'And $9p$ squared is $3p$, all squared, because 3 squared is 9. Picture a big square of side $3p$, with a small square of side $q$ minus $3r$ cut from its corner.'
+      - section: 'Solution'
+        say: 'We group the last three terms in one bracket, look for a perfect square, then use the difference of two squares.'
+        write: 'Solution'
+      - say: 'Put the last three terms in a bracket with a minus sign in front. The minus changes every sign inside: minus $q$ squared becomes plus, plus $6qr$ becomes minus, minus $9r$ squared becomes plus.'
+        write: '$= 9p^{2} - (q^{2} - 6qr + 9r^{2})$'
+      - say: 'The bracket is a perfect square. $q$ minus $3r$, squared, is $q$ squared, minus 2 times $q$ times $3r$, which is $6qr$, plus $9r$ squared.'
+        write: '$q^{2} - 6qr + 9r^{2} = (q - 3r)^{2}$'
+      - say: 'Replace the bracket with $q$ minus $3r$, squared.'
+        write: '$= 9p^{2} - (q - 3r)^{2}$'
+      - say: '$9p$ squared is $3p$, squared, because 3 squared is 9. Picture a big square of side $3p$ with a small square of side $q$ minus $3r$ cut from its corner.'
         write: '$= (3p)^{2} - (q - 3r)^{2}$'
         doodle: {name: 'custom:1992_q11_a', id: sq, caption: 'a square with a square cut out', size: scene}
         point:
-          - {line: 7, kind: move, from: {line: 6, at: '=[[9p2]]'}, at: '(3p)2'}
-          - {line: 7, kind: highlight, at: '(3p)2', to: {doodle: sq, part: big}}
-      - say: 'Now this is a difference of two squares. Watch the L-shape that is left: it rearranges into a rectangle. $A$ squared minus $B$ squared factorises as $A$ minus $B$, times $A$ plus $B$.'
-        write: 'Difference of two squares: $A^{2} - B^{2} = (A - B)(A + B)$'
+          - {line: 5, kind: highlight, at: '(3p)2', to: {doodle: sq, part: big}}
+      - say: 'This is a difference of two squares. $A$ squared minus $B$ squared equals $A$ minus $B$, times $A$ plus $B$: the L-shape that is left re-cuts into a rectangle.'
+        write: '$A^{2} - B^{2} = (A - B)(A + B)$'
         doodle_do:
           - {id: sq, op: stage, stage: 'custom:1992_q11_a2'}
-      - say: 'Here $A$ is $3p$ and $B$ is $q$ minus $3r$, the sides of the two squares. Put them in, keeping $B$ inside its own bracket.'
-        write: '$= \left[3p - (q - 3r)\right]\left[3p + (q - 3r)\right]$'
+      - say: 'Here $A$ is $3p$ and $B$ is $q$ minus $3r$. Substitute, keeping $B$ in its own bracket.'
+        write: '$= [3p - (q - 3r)][3p + (q - 3r)]$'
         doodle_do:
           - {id: sq, op: circle, part: big}
           - {id: sq, op: circle, part: small}
         point:
-          - {line: 8, kind: box, text: 'the rule'}
-      - say: 'In the first bracket, the minus sign in front flips both signs: minus $q$, plus $3r$.'
-        write: 'First bracket: $3p - (q - 3r) = 3p - q + 3r$'
-      - say: 'In the second bracket, the plus sign changes nothing: plus $q$, minus $3r$.'
-        write: 'Second bracket: $3p + (q - 3r) = 3p + q - 3r$'
-      - say: 'So the factors are $3p$ minus $q$ plus $3r$, times $3p$ plus $q$ minus $3r$: the two sides of the rectangle, which is answer choice C.'
+          - {line: 6, kind: box, text: 'the rule'}
+      - say: 'Open the inner brackets. In the first, the minus sign changes both signs: minus $q$, plus $3r$. In the second, the plus sign changes nothing.'
         write: '$= (3p - q + 3r)(3p + q - 3r)$'
         doodle_do:
           - {id: sq, op: highlight, part: rect}
+      - section: 'Check'
+        say: 'Check with $p$, $q$ and $r$ all equal to 1. The question gives 9 minus 1 plus 6 minus 9, which is 5.'
+        write: '$p = q = r = 1$: $9 - 1 + 6 - 9 = 5$'
+      - say: 'Our factors give 3 minus 1 plus 3, which is 5, times 3 plus 1 minus 3, which is 1. 5 times 1 is 5. It matches.'
+        write: '$(3 - 1 + 3)(3 + 1 - 3) = 5\ \checkmark$'
+      - say: 'Therefore the factors are $3p$ minus $q$ plus $3r$, and $3p$ plus $q$ minus $3r$: option C.'
+        write: '$\therefore (3p - q + 3r)(3p + q - 3r)$ (C)'
         answer: true
     traps:
       A: 'You went for option A. Multiply its $q$ terms: negative $3q$ times negative $q$ is plus $3q$ squared, but the expression has minus $q$ squared. The grouping gives $3p$ minus $q$ plus $3r$, times $3p$ plus $q$ minus $3r$.'
-      B: 'You went for option B. Multiply its first terms: $6p$ times $3p$ is $18p$ squared, not $9p$ squared. The expression is $3p$ squared minus the square of $q$ minus $3r$.'
-      D: 'You went for option D. It has minus $q$ in both brackets, so multiplying gives plus $q$ squared, the wrong sign. The second bracket must reverse every sign: plus $q$ minus $3r$.'
+      B: 'You went for option B. Multiply its first terms: $6p$ times $3p$ is $18p$ squared, not $9p$ squared. The expression is $3p$, squared, minus $q$ minus $3r$, squared.'
+      D: 'You went for option D. It has minus $q$ in both brackets, so it multiplies to plus $q$ squared, the wrong sign. In $A$ plus $B$, the bracket $q$ minus $3r$ keeps its signs: plus $q$ minus $3r$.'
   12:
     moments:
-      - say: 'We need to solve $y$ minus 11 root $y$ plus 24 equals zero.'
+      - section: 'The question'
+        say: 'This does not look like a quadratic, but it is one in disguise. Picture $y$ as the area of a square: its side is root $y$.'
         write: '$y - 11\sqrt{y} + 24 = 0$'
-      - say: 'This isn''t a quadratic in $y$, but it is a quadratic in root $y$. Picture $y$ as the area of a square: its side is root $y$. That''s because $y$ itself is root $y$, squared.'
-        write: '$y = \left(\sqrt{y}\right)^{2}$'
         doodle: {name: 'custom:1992_q12_a', id: sq, caption: 'y is a square; root y is its side'}
-      - say: 'So let''s make a substitution to see it clearly. Let $u$ stand for root $y$, the side of the square. Then $y$ is $u$ squared.'
-        write: 'Let $u = \sqrt{y}$, so $y = u^{2}$'
+      - section: 'Solution'
+        say: '$y$ is root $y$, squared. So we let a new letter stand for root $y$, and the equation becomes an ordinary quadratic.'
+        write: 'Solution'
+      - say: 'Let $u$ be root $y$, the side of the square. Then $y$ is $u$ squared.'
+        write: 'Let $u = \sqrt{y}$, $\therefore y = u^{2}$'
         doodle_do:
           - {id: sq, op: circle, part: side}
-      - say: 'Now replace the $y$ with $u$ squared, and the root $y$ with $u$. The equation becomes $u$ squared minus $11u$ plus 24 equals zero.'
+      - say: 'Substitute: $y$ becomes $u$ squared, and root $y$ becomes $u$.'
         write: '$u^{2} - 11u + 24 = 0$'
-        point:
-          - {line: 3, kind: move, from: {line: 2, at: 'y = [[u2]]'}, at: 'u2', text: 'y is u²'}
-          - {line: 3, kind: move, from: {line: 2, at: '[[u]] = y'}, at: '11[[u]]', text: '√y is u'}
-      - say: 'To factorise, we need two numbers that multiply to 24 and add to negative 11. Negative 3 times negative 8 is 24, and negative 3 plus negative 8 is negative 11.'
-        write: 'Numbers: $(-3) \times (-8) = 24,\quad (-3) + (-8) = -11$'
-      - say: 'So the quadratic factorises as $u$ minus 3, times $u$ minus 8.'
+      - section: 'Factorise'
+        say: 'Here $a$ is 1, $b$ is negative 11, $c$ is 24. The product is $ac$, 24. The sum is $b$, negative 11.'
+        write: 'Product $= ac = 24$, Sum $= b = -11$'
+      - say: 'Two numbers that multiply to 24 and add to negative 11: negative 3 and negative 8.'
+        write: 'Factors: $-3$ and $-8$'
+      - say: 'Replace negative $11u$ with negative $3u$ minus $8u$.'
+        write: '$u^{2} - 3u - 8u + 24 = 0$'
+      - say: 'Group in pairs. From the first take out $u$; from the second take out negative 8. Both brackets are $u$ minus 3.'
+        write: '$u(u - 3) - 8(u - 3) = 0$'
+      - say: 'Take out the common bracket, $u$ minus 3. What is left is $u$ minus 8.'
         write: '$(u - 3)(u - 8) = 0$'
-      - say: 'For a product to be zero, one of the brackets must be zero. So $u$ is 3, or $u$ is 8.'
-        write: '$u = 3$ or $u = 8$'
-      - say: 'But we want $y$, not $u$. So go back to our substitution: $y$ is $u$ squared.'
-        write: 'Undo the substitution: $y = u^{2}$'
-      - say: 'When $u$ is 3, $y$ is 3 squared, which is 9: a square of side 3 holds 9.'
-        write: '$u = 3:\quad y = 3^{2} = 9$'
+      - say: 'Either the first bracket is zero or the second one is.'
+        write: 'Either $u - 3 = 0$ or $u - 8 = 0$'
+      - say: 'Therefore $u$ is 3 or $u$ is 8. But these are values of $u$, root $y$. The question wants $y$.'
+        write: '$\therefore u = 3$ or $u = 8$'
+      - section: 'Back to y'
+        say: 'Since $y$ is $u$ squared: when $u$ is 3, $y$ is 3 squared, which is 9. A square of side 3 holds 9.'
+        write: '$u = 3$: $y = 3^{2} = 9$'
         doodle_do:
           - {id: sq, op: stage, stage: 'custom:1992_q12_a2'}
-        point:
-          - {line: 8, kind: move, from: {line: 6, at: 'u = [[3]]'}, at: '32', text: 'square it'}
-      - say: 'When $u$ is 8, $y$ is 8 squared, which is 64: a square of side 8 holds 64.'
-        write: '$u = 8:\quad y = 8^{2} = 64$'
+      - say: 'When $u$ is 8, $y$ is 8 squared, which is 64. A square of side 8 holds 64.'
+        write: '$u = 8$: $y = 8^{2} = 64$'
         doodle_do:
           - {id: sq, op: stage, stage: 'custom:1992_q12_a3'}
-        point:
-          - {line: 9, kind: move, from: {line: 6, at: 'u = [[8]]'}, at: '82', text: 'square it'}
-      - say: 'Let''s check 64 in the original equation. Root 64 is 8, and 11 times 8 is 88. 64 minus 88 plus 24 is zero.'
-        write: 'Check $y = 64$: $64 - 11(8) + 24 = 64 - 88 + 24 = 0\ \checkmark$'
-      - say: 'And check 9. Root 9 is 3, and 11 times 3 is 33. 9 minus 33 plus 24 is zero.'
-        write: 'Check $y = 9$: $9 - 11(3) + 24 = 9 - 33 + 24 = 0\ \checkmark$'
-      - say: 'So $y$ is 64 or 9, which is answer choice B.'
-        write: '$y = 64$ or $y = 9$'
+      - say: 'Therefore $y$ is 9 or 64.'
+        write: '$\therefore y = 9$ or $y = 64$'
+      - section: 'Check'
+        say: 'Check 64. Root 64 is 8, and 11 times 8 is 88. 64 minus 88 plus 24 is zero.'
+        write: '$y = 64$: $64 - 11(8) + 24 = 0\ \checkmark$'
+      - say: 'Check 9. Root 9 is 3, and 11 times 3 is 33. 9 minus 33 plus 24 is zero.'
+        write: '$y = 9$: $9 - 11(3) + 24 = 0\ \checkmark$'
+      - say: 'So $y$ is 64 or 9: option B.'
+        write: '$\therefore y = 64, 9$ (B)'
         answer: true
     traps:
-      A: 'You went for 8 and 3. Those are the values of $u$, which is root $y$. You still need to square them back: 8 squared is 64, and 3 squared is 9.'
-      C: 'You went for 6 and 4. Those multiply to 24, but add to 10, not 11. The factors of $u$ squared minus $11u$ plus 24 are $u$ minus 3 and $u$ minus 8.'
-      D: 'You went for 9 and negative 8. Root $y$ can''t be negative, and 8 is a value of $u$, not $y$. Square both values of $u$ to get 9 and 64.'
+      A: 'You went for 8 and 3. Those are the values of $u$, which is root $y$. Square them back: 8 squared is 64, and 3 squared is 9.'
+      C: 'You went for 6 and 4. They multiply to 24, but add to 10, not 11. The factors of $u$ squared minus $11u$ plus 24 are $u$ minus 3 and $u$ minus 8.'
+      D: 'You went for 9 and negative 8. Root $y$ cannot be negative, and 8 is a value of $u$, not $y$. Square both values of $u$ to get 9 and 64.'
   13:
     moments:
-      - say: 'Picture the man''s sack of money. He invests ₦280 partly at 5% and partly at 4%: the sack splits into two jars. The total interest for one year is ₦12.80, and we want the amount invested at 5%.'
-        write: 'Total ₦280, at $5\%$ and $4\%$; total interest ₦12.80'
+      - section: 'The question'
+        say: 'A man splits ₦280 between a 5 percent investment and a 4 percent one, and earns ₦12.80 a year. Splitting it half and half gives ₦12.60, so the 5 percent part must be bigger.'
         doodle: {name: 'custom:1992_q13_a', id: jars, caption: '₦280 split: part at 5%, rest at 4%'}
-      - say: 'Let''s give the unknown a name. Let $x$ be the amount in the 5% jar.'
-        write: 'Amount at $5\%$: $x$'
-        doodle_do:
-          - {id: jars, op: label, part: jar5, text: 'x'}
-      - say: 'The rest of the ₦280 goes into the 4% jar, so that part is 280 minus $x$.'
-        write: 'Amount at $4\%$: $280 - x$'
-        doodle_do:
-          - {id: jars, op: label, part: jar4, text: '280 − x'}
-      - say: 'Simple interest is the principal times the rate times the time, all over 100. Here the time is 1 year.'
-        write: 'Simple interest: $I = \dfrac{PRT}{100}$'
-      - say: 'Interest for one year is the rate times the amount, and 5% is 0.05. So the 5% part earns 0.05 times $x$.'
-        write: 'Interest at $5\% = 0.05 \times x = 0.05x$'
-      - say: 'In the same way, the 4% part earns 0.04 times the amount at 4%, which is 280 minus $x$.'
-        write: 'Interest at $4\% = 0.04(280 - x)$'
+        write: '₦280 partly at 5%, partly at 4%; total interest ₦12.80 p.a.'
+      - say: 'When one sum is split two ways, name one part and write the other as what is left.'
+        write: 'Solution'
+      - section: 'Let x be'
+        say: 'Let the amount invested at 5 percent be x naira.'
+        doodle_do: [{id: jars, op: label, part: jar5, text: 'x'}]
+        write: 'Let the amount at 5% be ₦$x$'
+      - say: 'Then the amount at 4 percent is 280 minus x.'
+        doodle_do: [{id: jars, op: label, part: jar4, text: '280 − x'}]
+        write: 'Amount at 4% $= $₦$(280 - x)$'
+      - section: 'The formula'
+        say: 'Simple interest is P times R times T over 100. Here T is 1 year.'
+        write: '$I = \dfrac{PRT}{100}$'
+      - say: 'Interest on the 5 percent part: x times 5 times 1, over 100, which is 5x over 100.'
+        write: '$I_{1} = \dfrac{x \times 5 \times 1}{100} = \dfrac{5x}{100}$'
+      - say: 'Interest on the 4 percent part: 280 minus x, times 4 times 1, over 100.'
+        write: '$I_{2} = \dfrac{(280 - x) \times 4 \times 1}{100} = \dfrac{4(280 - x)}{100}$'
+      - section: 'Form the equation'
+        say: 'The two interests together make ₦12.80.'
+        doodle_do: [{id: jars, op: circle, part: interest}]
+        write: '$\dfrac{5x}{100} + \dfrac{4(280 - x)}{100} = 12.80$'
+      - say: 'Multiply every term by 100 to clear the fractions. 12.80 times 100 is 1,280.'
+        write: '$5x + 4(280 - x) = 1280$'
+      - say: 'Open the bracket. 4 times 280 is 1,120, and 4 times minus x is minus 4x.'
+        write: '$5x + 1120 - 4x = 1280$'
+      - say: 'Collect like terms. 5x minus 4x is x. Then subtract 1,120 from both sides: 1,280 minus 1,120 is 160.'
+        write: '$x = 1280 - 1120 = 160$'
+      - say: 'Therefore ₦160 was invested at 5 percent.'
+        doodle_do: [{id: jars, op: label, part: jar5, text: '₦160'}]
+        write: '$\therefore$ Amount at 5% $=$ ₦160'
         point:
-          - {line: 5, kind: move, from: {line: 2, at: '280 − x'}, at: '(280 − x)', text: 'amount at 4%'}
-      - say: 'Open the bracket. 0.04 times 280 is 11.20, and 0.04 times $x$ is $0.04x$.'
-        write: '$= 0.04 \times 280 - 0.04x = 11.20 - 0.04x$'
-      - say: 'The two interests together make ₦12.80, the interest at the top of the picture. So we add the $0.05x$ from the first jar to the 11.20 minus $0.04x$ from the second jar.'
-        write: '$0.05x + 11.20 - 0.04x = 12.80$'
-        doodle_do:
-          - {id: jars, op: circle, part: interest}
-        point:
-          - {line: 7, kind: move, from: {line: 4, at: '0.05x'}, at: '0.05x', text: 'first part'}
-          - {line: 7, kind: move, from: {line: 6, at: '11.20 − 0.04x'}, at: '11.20 − 0.04x', text: 'second part'}
-          - {line: 7, kind: move, from: {line: 0, at: '12.80'}, at: '12.80', text: 'total'}
-      - say: 'Collect the $x$ terms. $0.05x$ minus $0.04x$ is $0.01x$.'
-        write: '$0.01x + 11.20 = 12.80$'
-      - say: 'Subtract 11.20 from both sides. 12.80 minus 11.20 is 1.60.'
-        write: '$0.01x = 12.80 - 11.20 = 1.60$'
-        point:
-          - {line: 9, kind: move, from: {line: 8, at: '+ 11.20'}, at: '− 11.20', text: 'across the ='}
-      - say: 'Divide both sides by 0.01, which is the same as multiplying by 100. 1.60 times 100 is 160. So ₦160 sits in the 5% jar.'
-        write: '$x = \dfrac{1.60}{0.01} = 160$'
-        doodle_do:
-          - {id: jars, op: label, part: jar5, text: '₦160'}
-        point:
-          - {line: 10, kind: highlight, at: '1.60 = 160', to: {doodle: jars, part: jar5}}
-      - say: 'Let''s check. ₦160 at 5% is 0.05 times 160, which is ₦8.'
-        write: 'Check: $0.05 \times 160 = 8.00$'
-      - say: 'The rest is 280 minus 160, which is ₦120 in the 4% jar, and 4% of 120 is 0.04 times 120, which is ₦4.80. Beside it, the 5% jar earns its ₦8.'
-        write: '$280 - 160 = 120,\quad 0.04 \times 120 = 4.80$'
-        doodle_do:
-          - {id: jars, op: label, part: jar4, text: '₦120'}
-          - {id: jars, op: stage, stage: 'custom:1992_q13_a2'}
-      - say: '8 plus 4.80 is 12.80: the two jars together earn exactly the total interest.'
-        write: '$8.00 + 4.80 = 12.80\ \checkmark$'
-        doodle_do:
-          - {id: jars, op: circle, part: interest}
-      - say: 'So ₦160 was invested at 5%, which is answer choice D.'
-        write: 'Amount at 5%: ₦160.00'
+          - {line: 11, kind: highlight, at: '₦160', to: {doodle: jars, part: jar5}}
+      - section: 'Check'
+        say: 'Check. 5 percent of 160 is ₦8. The rest is 280 minus 160, which is ₦120, and 4 percent of 120 is ₦4.80.'
+        doodle_do: [{id: jars, op: label, part: jar4, text: '₦120'}, {id: jars, op: stage, stage: 'custom:1992_q13_a2'}]
+        write: 'Check: $\tfrac{5}{100} \times 160 = 8$; $\tfrac{4}{100} \times 120 = 4.80$'
+      - say: '8 plus 4.80 is 12.80: the two jars earn exactly the total interest.'
+        doodle_do: [{id: jars, op: circle, part: interest}]
+        write: '$8 + 4.80 = 12.80 \ \checkmark$'
+      - section: 'Answer'
+        say: 'So ₦160 was invested at 5 percent, which is option D.'
+        write: '$\therefore$ Amount at 5% $=$ ₦160.00'
         answer: true
     traps:
-      A: 'You went for ₦14.00. That''s far too small to earn most of ₦12.80 in interest. Set $0.05x$ plus $0.04$ times 280 minus $x$ equal to 12.80, and you get 160.'
-      B: 'You went for ₦120.00. That''s the other part of the money, the amount invested at 4%. The question asks for the 5% part, which is ₦160.'
-      C: 'You went for ₦140.00. That''s half of 280, as if the money were split equally. But then the interest would be 7 plus 5.60, which is 12.60, not 12.80. The 5% part is ₦160.'
+      A: 'You went for ₦14.00. That is far too small to earn most of ₦12.80. The equation 5x plus 4 times 280 minus x equals 1,280 gives x equals 160.'
+      B: 'You went for ₦120.00. That is the other part of the money, the amount at 4 percent. The question asks for the 5 percent part, which is ₦160.'
+      C: 'You went for ₦140.00. That is half of 280, as if the money were split equally. Then the interest would be ₦7 plus ₦5.60, which is ₦12.60, not ₦12.80.'
   14:
     moments:
-      - say: 'We''re told that $x$ plus 1 is a factor of $x$ cubed plus $3x$ squared plus $kx$ plus 4, and we want $k$.'
-        write: '$f(x) = x^{3} + 3x^{2} + kx + 4$'
-      - say: 'The factor theorem says: if $x$ minus $c$ is a factor of $f(x)$, then $f(c)$ is zero. Putting that value in makes the whole polynomial vanish.'
-        write: 'Factor theorem: $x - c$ is a factor $\Rightarrow f(c) = 0$'
-      - say: 'Here the factor is $x$ plus 1, which is $x$ minus negative 1. So the value to put in is negative 1, not positive 1.'
-        write: 'From $x + 1 = 0$: $x = -1$'
-      - say: 'So we put negative 1 in place of every $x$.'
+      - section: 'The question'
+        say: '$x$ plus 1 is a factor, and we want $k$. The common slip is to put in positive 1. Let''s see why it must be negative 1.'
+        write: '$x^{3} + 3x^{2} + kx + 4$; factor $x + 1$'
+      - section: 'Solution'
+        say: 'The factor theorem: if $x$ minus $c$ is a factor of $f$ of $x$, then $f$ of $c$ is zero. The remainder on division is zero.'
+        write: 'Solution'
+      - say: 'Name the polynomial $f$ of $x$.'
+        write: 'Let $f(x) = x^{3} + 3x^{2} + kx + 4$'
+      - say: 'Put the factor equal to zero to find the value of $x$. $x$ plus 1 equals zero, therefore $x$ is negative 1.'
+        write: 'Let $x + 1 = 0$, $\therefore x = -1$'
+      - say: 'Substitute negative 1 for every $x$, in brackets.'
         write: '$f(-1) = (-1)^{3} + 3(-1)^{2} + k(-1) + 4$'
         point:
-          - {line: 3, kind: move, from: {line: 2, at: '= [[−1]]'}, at: '= [[(−1)]]3', text: 'sub in'}
-      - say: 'Negative 1 cubed is negative 1 times negative 1 times negative 1, which is negative 1. An odd power of a negative stays negative.'
-        write: '$(-1)^{3} = -1$'
-      - say: 'Negative 1 squared is positive 1, so 3 times that is 3.'
-        write: '$3(-1)^{2} = 3 \times 1 = 3$'
-      - say: '$k$ times negative 1 is negative $k$. And the 4 stays as it is.'
-        write: '$k(-1) = -k$'
-      - say: 'Now put those three pieces back into $f(-1)$: negative 1, plus 3, minus $k$, plus 4.'
-        write: '$f(-1) = -1 + 3 - k + 4$'
-        point:
-          - {line: 7, kind: move, from: {line: 4, at: '= −1'}, at: '= [[−1]] +', text: 'cubed'}
-          - {line: 7, kind: move, from: {line: 5, at: '1 = [[3]]'}, at: '+ 3', text: 'squared'}
-          - {line: 7, kind: move, from: {line: 6, at: '−k'}, at: '− k'}
-      - say: 'Negative 1 plus 3 is 2, and 2 plus 4 is 6. So we have 6 minus $k$.'
+          - {line: 4, kind: move, from: {line: 3, at: 'x = −1'}, at: '(−1)3', text: 'x = −1'}
+      - say: 'Negative 1 cubed is negative 1. Negative 1 squared is 1, so 3 times it is 3. $k$ times negative 1 is negative $k$.'
+        write: '$= -1 + 3 - k + 4$'
+      - say: 'Negative 1 plus 3 is 2, and 2 plus 4 is 6.'
         write: '$= 6 - k$'
-      - say: 'Since $x$ plus 1 is a factor, the factor theorem says $f(-1)$ must be zero.'
-        write: '$6 - k = 0$'
-        point:
-          - {line: 1, kind: box, at: 'f(c) = 0', text: 'the rule'}
-      - say: 'Add $k$ to both sides, and $k$ is 6.'
-        write: '$k = 6$'
-        point:
-          - {line: 10, kind: move, from: {line: 9, at: '− k'}, at: 'k', text: 'across the ='}
-      - say: 'Let''s check. With $k$ as 6, $f$ of negative 1 is negative 1 plus 3 minus 6 plus 4, which is zero.'
-        write: 'Check: $f(-1) = -1 + 3 - 6 + 4 = 0\ \checkmark$'
-      - say: 'So $k$ is 6, which is answer choice A.'
-        write: '$k = 6$'
+      - say: '$x$ plus 1 is a factor, so by the factor theorem $f$ of negative 1 is zero.'
+        write: '$6 - k = 0$ (factor theorem)'
+      - say: 'Add $k$ to both sides. Therefore $k$ is 6.'
+        write: '$\therefore k = 6$'
+      - section: 'Check'
+        say: 'Check: with $k$ equals 6, $f$ of negative 1 is negative 1 plus 3 minus 6 plus 4, which is zero. So $x$ plus 1 is a factor.'
+        write: '$f(-1) = -1 + 3 - 6 + 4 = 0\ \checkmark$'
+      - say: 'So $k$ is 6: option A.'
+        write: '$\therefore k = 6$ (A)'
         answer: true
     traps:
       B: 'You went for negative 6. You had 6 minus $k$ equals zero; adding $k$ to both sides gives $k$ equals positive 6, not negative 6.'
-      C: 'You went for 8. Check the signs: at $x$ equals negative 1, the terms are negative 1, plus 3, minus $k$, plus 4. That gives 6 minus $k$, so $k$ is 6.'
-      D: 'You went for negative 8. That comes from substituting positive 1 instead of negative 1. The factor $x$ plus 1 means $x$ equals negative 1, which gives $k$ equals 6.'
+      C: 'You went for 8. Check the signs: at $x$ equals negative 1 the terms are negative 1, plus 3, minus $k$, plus 4. That is 6 minus $k$, so $k$ is 6.'
+      D: 'You went for negative 8. That comes from putting in positive 1: 1 plus 3 plus $k$ plus 4 equals zero. But $x$ plus 1 equals zero gives $x$ equals negative 1.'
   15:
     moments:
-      - say: 'We need to split 3 over $x$ squared plus $x$ minus 2 into partial fractions.'
+      - section: 'The question'
+        say: 'Split one fraction into two simpler ones. All four options look alike; the bottoms and the signs decide it.'
         write: '$\dfrac{3}{x^{2} + x - 2}$'
-      - say: 'The first step is always to factorise the denominator, because each factor becomes the bottom of one of the pieces.'
-        write: 'Step 1: factorise $x^{2} + x - 2$'
-      - say: 'We need two numbers that multiply to negative 2 and add to positive 1. 2 times negative 1 is negative 2, and 2 plus negative 1 is 1.'
-        write: 'Numbers: $2 \times (-1) = -2,\quad 2 + (-1) = 1$'
-      - say: 'So the denominator factorises as $x$ plus 2, times $x$ minus 1.'
-        write: '$x^{2} + x - 2 = (x + 2)(x - 1)$'
-      - say: 'Step 2: each factor gets its own fraction, with an unknown number on top. Call them $A$ and $B$.'
-        write: 'Step 2: $\dfrac{3}{(x + 2)(x - 1)} = \dfrac{A}{x + 2} + \dfrac{B}{x - 1}$'
-      - say: 'Multiply every term by $x$ plus 2 times $x$ minus 1. Under $A$, the $x$ plus 2 cancels, leaving $x$ minus 1. Under $B$, the $x$ minus 1 cancels, leaving $x$ plus 2.'
+      - section: 'Solution'
+        say: 'First factorise the denominator, because each factor becomes the bottom of one partial fraction.'
+        write: 'Solution'
+      - say: 'In $x$ squared plus $x$ minus 2, $a$ is 1, $b$ is 1, $c$ is negative 2. The product is $ac$, negative 2. The sum is $b$, 1.'
+        write: 'Product $= ac = -2$, Sum $= b = 1$'
+      - say: 'Two numbers that multiply to negative 2 and add to 1: plus 2 and negative 1.'
+        write: 'Factors: $+2$ and $-1$'
+      - say: 'Replace the middle term $x$ with $2x$ minus $x$.'
+        write: '$x^{2} + 2x - x - 2$'
+      - say: 'Group in pairs. Take out $x$ from the first, and negative 1 from the second. Both brackets are $x$ plus 2.'
+        write: '$= x(x + 2) - 1(x + 2)$'
+      - say: 'Take out the common bracket.'
+        write: '$= (x + 2)(x - 1)$'
+      - section: 'Partial fractions'
+        say: 'Each factor gets its own fraction with an unknown on top. Call them $A$ and $B$. The triple bar means this is true for every $x$.'
+        write: 'Let $\dfrac{3}{(x + 2)(x - 1)} \equiv \dfrac{A}{x + 2} + \dfrac{B}{x - 1}$'
+      - say: 'Multiply through by $x$ plus 2 times $x$ minus 1. Under $A$, $x$ plus 2 cancels, leaving $x$ minus 1. Under $B$, $x$ minus 1 cancels, leaving $x$ plus 2.'
         write: '$3 = A(x - 1) + B(x + 2)$'
-      - say: 'This is true for every value of $x$, so we can choose values that make one bracket zero and knock out one letter at a time.'
-        write: 'Choose $x$ to make a bracket zero:'
-      - say: 'Let $x$ be 1. Then $x$ minus 1 is zero, so the $A$ term vanishes, and $x$ plus 2 is 1 plus 2, which is 3.'
-        write: '$x = 1:\quad 3 = A(0) + B(3)$'
-      - say: 'So 3 equals $3B$. Divide by 3, and $B$ is 1.'
-        write: '$3 = 3B \Rightarrow B = 1$'
-      - say: 'Now let $x$ be negative 2. Then $x$ plus 2 is zero, so the $B$ term vanishes, and $x$ minus 1 is negative 2 minus 1, which is negative 3.'
-        write: '$x = -2:\quad 3 = A(-3) + B(0)$'
-      - say: 'So 3 equals negative $3A$. Divide by negative 3, and $A$ is negative 1.'
-        write: '$3 = -3A \Rightarrow A = -1$'
-      - say: 'Now put the $A$ and $B$ we just found back into step 2: negative 1 over $x$ plus 2, plus 1 over $x$ minus 1.'
-        write: '$\dfrac{3}{x^{2} + x - 2} = \dfrac{-1}{x + 2} + \dfrac{1}{x - 1}$'
-        point:
-          - {line: 11, kind: move, from: {line: 10, at: 'A = [[−1]]'}, at: 'x + 2[[−1]]', text: 'A'}
-          - {line: 11, kind: move, from: {line: 8, at: 'B = [[1]]'}, at: 'x − 1[[1]]', text: 'B'}
-      - say: 'Written with the positive piece first, that is 1 over $x$ minus 1, minus 1 over $x$ plus 2, which is answer choice A.'
-        write: '$= \dfrac{1}{x - 1} - \dfrac{1}{x + 2}$'
+      - say: 'Put $x$ equals 1, which makes $x$ minus 1 zero, so the $A$ term disappears. 1 plus 2 is 3.'
+        write: 'Put $x = 1$: $3 = A(0) + B(3)$'
+      - say: '3 equals $3B$. Divide both sides by 3: $B$ is 1.'
+        write: '$3 = 3B$, $\therefore B = 1$'
+      - say: 'Now put $x$ equals negative 2, which makes $x$ plus 2 zero, so the $B$ term disappears. Negative 2 minus 1 is negative 3.'
+        write: 'Put $x = -2$: $3 = A(-3) + B(0)$'
+      - say: '3 equals negative $3A$. Divide both sides by negative 3: $A$ is negative 1.'
+        write: '$3 = -3A$, $\therefore A = -1$'
+      - say: 'Put $A$ and $B$ back. Writing the positive fraction first: 1 over $x$ minus 1, minus 1 over $x$ plus 2.'
+        write: '$\therefore \dfrac{3}{x^{2} + x - 2} = \dfrac{1}{x - 1} - \dfrac{1}{x + 2}$'
+      - section: 'Check'
+        say: 'Check with $x$ equals 2. The question gives 3 over 4 plus 2 minus 2, which is 3 over 4.'
+        write: '$x = 2$: $\dfrac{3}{4 + 2 - 2} = \dfrac{3}{4}$'
+      - say: 'Our answer gives 1 over 1, minus 1 over 4, which is 3 over 4. It matches.'
+        write: '$\dfrac{1}{1} - \dfrac{1}{4} = \dfrac{3}{4}\ \checkmark$'
+      - say: 'So the partial fractions are option A.'
+        write: '$\dfrac{1}{x - 1} - \dfrac{1}{x + 2}$ (A)'
         answer: true
     traps:
-      B: 'You went for option B. The denominators are right, but both signs are positive. We found $A$ is negative 1, so the piece over $x$ plus 2 must be subtracted.'
-      C: 'You went for option C. The denominators are wrong. $x$ squared plus $x$ minus 2 factorises as $x$ plus 2 times $x$ minus 1, not $x$ plus 1 times $x$ minus 2.'
+      B: 'You went for option B. The denominators are right, but both signs are plus. We found $A$ is negative 1, so the fraction over $x$ plus 2 is subtracted.'
+      C: 'You went for option C. The denominators are wrong. $x$ squared plus $x$ minus 2 factorises as $x$ plus 2, times $x$ minus 1, not $x$ plus 1, times $x$ minus 2.'
       D: 'You went for option D. Those denominators multiply to $x$ squared minus $x$ minus 2, not plus $x$. The factors are $x$ plus 2 and $x$ minus 1.'
   16:
     moments:
-      - say: 'We want all values of $x$ with negative 11, less than or equal to 4 minus $3x$, less than or equal to 28.'
+      - section: 'The question'
+        say: 'We want all $x$ that keep 4 minus $3x$ between minus 11 and 28, ends included. The minus sign in front of the $3x$ is where the trap lies.'
         write: '$-11 \le 4 - 3x \le 28$'
-      - say: 'With a double inequality, whatever we do, we do to all three parts at once. The goal is to get $x$ on its own in the middle.'
-        write: 'Do the same to all three parts'
-      - say: 'First, subtract 4 from every part, to clear the 4 out of the middle.'
-        write: '$-11 - 4 \le 4 - 3x - 4 \le 28 - 4$'
-      - say: 'Negative 11 minus 4 is negative 15. In the middle, the 4s cancel, leaving negative $3x$. And 28 minus 4 is 24.'
+      - say: 'Solution. A double inequality: whatever we do, we do to all three parts. First, subtract 4 from all three parts.'
+        write: 'Solution: $\ -11 - 4 \le 4 - 3x - 4 \le 28 - 4$'
+      - say: 'Minus 11 minus 4 is minus 15. In the middle, the 4s cancel, leaving minus $3x$. And 28 minus 4 is 24.'
         write: '$-15 \le -3x \le 24$'
-      - say: 'Next we divide by negative 3. Here is the key rule: dividing by a negative number reverses the inequality signs. For example, on the number line 2 is less than 3, but negative 2 is greater than negative 3.'
-        write: 'Dividing by a negative flips the signs: $2 < 3$ but $-2 > -3$'
+      - section: 'Divide by a negative'
+        say: 'Next we divide by minus 3, so the signs reverse. Why? On the number line 2 is less than 3, but a minus sign is a mirror at zero: minus 2 is greater than minus 3.'
         doodle: {name: 'custom:1992_q16_a', id: line, caption: 'a minus sign is a mirror at zero'}
         doodle_do:
           - {id: line, op: circle, part: pos}
-          - {id: line, op: stage, stage: 'custom:1992_q16_a2'}
-      - say: 'So divide each part by negative 3, and turn both signs round, from less than or equal to, into greater than or equal to, just as the dots flipped through zero.'
-        write: '$\dfrac{-15}{-3} \ge \dfrac{-3x}{-3} \ge \dfrac{24}{-3}$'
+          - {id: line, op: stage, stage: 'custom:1992_q16_a2', 'on': 'mirror'}
+        write: 'Rule: $2 < 3$ but $-2 > -3$'
+      - say: 'So divide all three parts by minus 3, and reverse both signs, from less than or equal to, into greater than or equal to.'
         doodle_do:
           - {id: line, op: circle, part: neg}
+        write: '$\dfrac{-15}{-3} \ge \dfrac{-3x}{-3} \ge \dfrac{24}{-3}$'
         point:
-          - {line: 4, kind: box, text: 'the rule'}
-      - say: 'Negative 15 over negative 3 is 5. Negative $3x$ over negative 3 is $x$. And 24 over negative 3 is negative 8.'
+          - {line: 3, kind: box, text: 'the rule'}
+      - say: 'Minus 15 over minus 3 is 5. And 24 over minus 3 is minus 8.'
         write: '$5 \ge x \ge -8$'
-      - say: 'Let me draw this on a number line, so we can see the values.'
-        show_sketch: true
-      - say: 'Let''s write that the usual way, smallest number first: $x$ lies between negative 8 and 5.'
+      - say: 'Write it the usual way, smallest first.'
+        write: '$\therefore\ -8 \le x \le 5$'
+      - section: 'The number line'
+        say: 'On a number line, both ends are included, so both get closed circles: minus 8 and 5.'
+        diagram: {id: n, kind: numberline, range: [-10, 7]}
+        diagram_do:
+          - {id: n, op: interval, from: -8, to: 5, from_open: false, to_open: false, text: '−8 ≤ x ≤ 5', answer: true, 'on': 'closed circles'}
+      - section: 'Check'
+        say: 'Check the ends. $x$ equals minus 8: 4 minus 3 times minus 8 is 4 plus 24, which is 28. That is the top limit.'
+        write: 'Check $x = -8$: $\ 4 - 3(-8) = 4 + 24 = 28\ \checkmark$'
+      - say: '$x$ equals 5: 4 minus 15 is minus 11. That is the bottom limit.'
+        write: '$x = 5$: $\ 4 - 3(5) = 4 - 15 = -11\ \checkmark$'
+      - say: 'So $x$ runs from minus 8 to 5: option C.'
         write: '$-8 \le x \le 5$'
-        point:
-          - {figure: sketch, kind: circle, target: '−8', text: 'from −8'}
-          - {figure: sketch, kind: circle, target: '5', text: 'to 5'}
-      - say: 'Let''s check the ends. When $x$ is negative 8, 4 minus 3 times negative 8 is 4 plus 24, which is 28. That''s the top limit.'
-        write: 'Check $x = -8$: $4 - 3(-8) = 4 + 24 = 28\ \checkmark$'
-        point:
-          - {figure: sketch, kind: circle, target: '−8', text: 'gives 28'}
-      - say: 'When $x$ is 5, 4 minus 3 times 5 is 4 minus 15, which is negative 11. That''s the bottom limit.'
-        write: 'Check $x = 5$: $4 - 3(5) = 4 - 15 = -11\ \checkmark$'
-        point:
-          - {figure: sketch, kind: circle, target: '5', text: 'gives −11'}
-      - say: 'So $x$ runs from negative 8 to 5, which is answer choice C.'
-        write: 'Answer: $-8 \le x \le 5$'
         answer: true
-        point:
-          - {figure: sketch, kind: circle, target: 'x = ?', text: '−8 ≤ x ≤ 5'}
     traps:
-      A: 'You went for negative 5 up to 18. After subtracting 4 you need to divide by negative 3: negative 15 over negative 3 is 5, and 24 over negative 3 is negative 8.'
-      B: 'You went for 5 up to 8. The 8 should be negative 8, since 24 divided by negative 3 is negative 8. And dividing by a negative flips the signs, giving negative 8 up to 5.'
-      D: 'You went for negative 5 up to 8. Both signs are the wrong way round. 24 divided by negative 3 is negative 8, and negative 15 divided by negative 3 is positive 5.'
+      A: 'You went for minus 5 up to 18. After subtracting 4, divide by minus 3: minus 15 over minus 3 is 5, and 24 over minus 3 is minus 8.'
+      B: 'You went for 5 up to 8. The 8 should be minus 8, since 24 divided by minus 3 is minus 8. And dividing by a negative reverses the signs, giving minus 8 up to 5.'
+      D: 'You went for minus 5 up to 8. Both signs of the numbers are wrong. 24 divided by minus 3 is minus 8, and minus 15 divided by minus 3 is positive 5.'
   17:
     moments:
       - say: 'The sketch shows a curve $y$ equals $ax$ squared plus $bx$ plus $c$. We want $a$, $b$ and $c$.'
@@ -1038,16 +1021,16 @@ lessons:
         write: '$P = \begin{pmatrix} x + 2 & 1 & 3 \\ 0 & y + 2 & 1 \\ 0 & 0 & z + 2 \end{pmatrix}$'
       - say: 'We want the determinant of $P$ transpose. The first fact that helps: transposing a matrix, which turns its rows into columns, never changes its determinant.'
         write: 'Fact 1: $\left|P^{T}\right| = |P|$'
-      - say: 'So we only need the determinant of $P$ itself. Picture the matrix as seats in rows and columns: every seat below the diagonal holds a 0. Let''s put in the values on the diagonal. With $x$ as 0, $x$ plus 2 is 0 plus 2, which is 2.'
+      - say: 'So we only need the determinant of $P$ itself. Picture the matrix as entries in rows and columns: every entry below the diagonal holds a 0. Let''s put in the values on the diagonal. With $x$ as 0, $x$ plus 2 is 0 plus 2, which is 2.'
         write: '$x + 2 = 0 + 2 = 2$'
-        doodle: {name: 'custom:1992_q22_a', id: seats, caption: 'the matrix as seats in rows and columns'}
+        doodle: {name: 'custom:1992_q22_a', id: seats, caption: 'the matrix: entries in rows and columns'}
         doodle_do:
           - {id: seats, op: label, part: d1, text: '2'}
-      - say: 'With $y$ as 1, $y$ plus 2 is 1 plus 2, which is 3, the middle seat of the diagonal.'
+      - say: 'With $y$ as 1, $y$ plus 2 is 1 plus 2, which is 3, the middle entry of the diagonal.'
         write: '$y + 2 = 1 + 2 = 3$'
         doodle_do:
           - {id: seats, op: label, part: d2, text: '3'}
-      - say: 'With $z$ as 2, $z$ plus 2 is 2 plus 2, which is 4, the last seat of the diagonal.'
+      - say: 'With $z$ as 2, $z$ plus 2 is 2 plus 2, which is 4, the last entry of the diagonal.'
         write: '$z + 2 = 2 + 2 = 4$'
         doodle_do:
           - {id: seats, op: label, part: d3, text: '4'}
@@ -1057,13 +1040,13 @@ lessons:
         write: '$|P| = 2\begin{vmatrix} 3 & 1 \\ 0 & 4 \end{vmatrix} - 0 + 0$'
       - say: 'The rule for a 2 by 2 determinant: $a$ times $d$, minus $b$ times $c$.'
         write: 'Determinant: $\begin{vmatrix} a & b \\ c & d \end{vmatrix} = ad - bc$'
-      - say: 'A 2 by 2 determinant is the product down the leading diagonal minus the product down the other diagonal: 3 times 4, minus 1 times 0.'
+      - say: 'Now apply $ad - bc$ to the small determinant: 3 times 4, minus 1 times 0.'
         write: '$= 2(3 \times 4 - 1 \times 0)$'
       - say: '3 times 4 is 12, and 1 times 0 is 0.'
         write: '$= 2(12 - 0) = 2 \times 12$'
       - say: '2 times 12 is 24.'
         write: '$= 24$'
-      - say: 'Notice that 24 is just 2 times 3 times 4, the product of the diagonal seats. That is the second fact: when every entry below the diagonal is zero, the determinant is the product of the diagonal.'
+      - say: 'Notice that 24 is just 2 times 3 times 4, the product of the diagonal entries. That is the second fact: when every entry below the diagonal is zero, the determinant is the product of the diagonal.'
         write: 'Fact 2: $|P| = 2 \times 3 \times 4 = 24$'
         doodle_do:
           - {id: seats, op: circle, part: d1}
@@ -1082,7 +1065,7 @@ lessons:
     moments:
       - say: 'We''re told that $Q$ is the transpose of a matrix $P$, and we''re asked what the product $PQ$ is equivalent to.'
         write: '$Q = P^{T},\quad PQ = \ ?$'
-      - say: 'First, what is a transpose? Picture a row of seats in $P$. The transpose is the matrix you get by turning the rows of $P$ into columns. We write it as $P$ with a small $T$.'
+      - say: 'First, what is a transpose? Picture a row of entries in $P$. The transpose is the matrix you get by turning the rows of $P$ into columns. We write it as $P$ with a small $T$.'
         write: 'Transpose: rows of $P$ become columns of $P^{T}$'
         doodle: {name: 'custom:1992_q23_a', id: seats, caption: 'rows turn into columns'}
         doodle_do:
@@ -1177,7 +1160,7 @@ lessons:
       - say: 'Three angles of a quadrilateral are $p$ plus 10, $p$ plus 20, and $4p$ degrees. The fourth is a right angle. Picture the quadrilateral cut from paper, each corner coloured. We want $p$.'
         write: 'Angles: $(p + 10)^{\circ},\ (p + 20)^{\circ},\ 4p^{\circ},\ 90^{\circ}$'
         doodle: {name: 'custom:1992_q25_a', id: paper, caption: 'a paper quadrilateral, corners coloured'}
-      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+      - say: 'Let me draw the quadrilateral with its four angles.'
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: '(p + 10)°'}
@@ -1297,7 +1280,7 @@ lessons:
       - say: 'Two towns, $P$ and $Q$, are both on latitude 60 degrees north. Picture them on the globe: $P$ is at 20 degrees east and $Q$ at 25 degrees west. We want the distance between them along the earth''s surface.'
         write: '$P(60^{\circ}\text{N},\ 20^{\circ}\text{E}),\quad Q(60^{\circ}\text{N},\ 25^{\circ}\text{W})$'
         doodle: {name: 'custom:1992_q27_a', id: globe, caption: 'two towns on latitude 60°N', size: scene}
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - say: 'Let me draw the earth, with the circle of latitude 60 degrees north and $P$ and $Q$ on it.'
         show_sketch: true
       - say: 'Both towns are on the same circle of latitude, the ring near the top of the globe, so the distance is an arc of that circle. We need two things: the angle between the towns, and the radius of that circle.'
         write: 'Distance $=$ arc of the circle of latitude $60^{\circ}\text{N}$'
@@ -1411,66 +1394,81 @@ lessons:
       D: 'You went for 125 degrees. That is too big. Piece 1 is 24, and piece 2 is 180 minus 109, which is 71, so $x$ is 24 plus 71, which is 95.'
   29:
     moments:
-      - say: '$X$ is due east of $Y$, and $Z$ is 6.3 kilometres due south of $Y$. $ZX$ is 12 kilometres. We want the bearing of $Z$ from $X$.'
-        write: '$YZ = 6.3\text{ km (south)},\quad ZX = 12\text{ km}$'
-      - say: 'A bearing is measured clockwise from north. Let''s picture the points first. East and south are at right angles, so triangle $XYZ$ has a right angle at $Y$.'
-        write: 'Right angle at $Y$: $\angle XYZ = 90^{\circ}$'
+      - section: 'The question'
+        say: 'Three points on a coast and a bearing to find. One right angle and one sine ratio settle it. Here is the sketch, with a North line at the points.'
+        write: '$|YZ| = 6$ km (due south of $Y$), $\ |XZ| = 12$ km'
         show_sketch: true
         point:
+          - {figure: sketch, kind: highlight, target: '6 km', text: 'YZ'}
+          - {figure: sketch, kind: highlight, target: '12 km', text: 'XZ'}
+      - section: 'Solution'
+        say: 'Solution. $X$ is due east of $Y$, and $Z$ is due south of $Y$. East and south are at right angles, so the angle at $Y$ is 90 degrees.'
+        write: 'Solution: $\ \angle XYZ = 90^{\circ}$ (east and south)'
+        point:
           - {figure: sketch, kind: arc, target: XYZ, text: '90°'}
-      - say: 'We want the angle at $X$. From $X$, the side $YZ$ is opposite that angle, and $ZX$ is the hypotenuse. So we use sine: opposite over hypotenuse.'
-        write: '$\sin \angle YXZ = \dfrac{\text{opposite}}{\text{hypotenuse}} = \dfrac{YZ}{ZX}$'
+      - say: 'A bearing is measured clockwise from North, in three figures. The bearing of $Z$ from $X$ is measured at $X$, the point after the word from.'
+        write: 'Bearing of $Z$ from $X$: at $X$, clockwise from N'
         point:
-          - {figure: sketch, kind: arc, target: YXZ}
-          - {figure: sketch, kind: highlight, target: YZ, text: 'opposite'}
-          - {figure: sketch, kind: highlight, target: ZX, text: 'hypotenuse'}
-      - say: 'Put in $YZ$ as 6.3 and $ZX$ as 12.'
-        write: '$\sin \angle YXZ = \dfrac{6.3}{12}$'
+          - {figure: sketch, kind: circle, target: X, text: 'measure here'}
+      - say: 'Let theta be the angle $YXZ$, the angle at $X$ inside the triangle.'
+        write: 'Let $\theta = \angle YXZ$'
         point:
-          - {line: 3, kind: move, from: {line: 0, at: '6.3'}, at: '6.3', text: 'YZ'}
-          - {line: 3, kind: move, from: {line: 0, at: '[[12]] km'}, at: '[[12]]6.3', text: 'ZX'}
-      - say: '6.3 divided by 12 is 0.525.'
-        write: '$= 0.525$'
-      - say: 'The angle whose sine is 0.525 is about 31.7 degrees. That is close to 30 degrees, whose sine is exactly 0.5, so we work with about 30 degrees.'
-        write: '$\angle YXZ \approx 31.7^{\circ} \approx 30^{\circ}$'
+          - {figure: sketch, kind: arc, target: YXZ, text: 'θ'}
+      - say: 'From $X$, the side $YZ$ is opposite theta, and $XZ$ is the hypotenuse. Opposite and hypotenuse: SOH, so we use sine.'
+        write: '$\sin\theta = \dfrac{\text{opp}}{\text{hyp}}$ (SOH)'
         point:
-          - {figure: sketch, kind: arc, target: YXZ, text: '≈ 30°'}
-      - say: 'Now the direction. Picture a compass at $X$. Standing at $X$, the point $Y$ is due west, because $X$ is east of $Y$. Due west is a bearing of 270 degrees.'
+          - {figure: sketch, kind: highlight, target: YZ, text: 'opp'}
+          - {figure: sketch, kind: highlight, target: XZ, text: 'hyp'}
+      - say: 'Substitute: the opposite is 6 and the hypotenuse is 12. 6 over 12 is 0.5.'
+        write: '$\sin\theta = \dfrac{6}{12} = 0.5$'
+        point:
+          - {line: 5, kind: move, from: {line: 0, at: '= 6'}, at: '12[[6]]', text: 'opp'}
+          - {line: 5, kind: move, from: {line: 0, at: '= 12'}, at: '[[12]]6', text: 'hyp'}
+      - say: 'The angle whose sine is 0.5 is 30 degrees, because sine 30 is a half.'
+        write: '$\theta = \sin^{-1} 0.5 = 30^{\circ}$'
+        point:
+          - {figure: sketch, kind: arc, target: YXZ, text: '30°'}
+      - section: 'The bearing'
+        say: 'Now the North line at $X$. Clockwise from North, East is 090, South is 180 and West is 270. $Y$ is due west of $X$.'
         write: 'Bearing of $Y$ from $X = 270^{\circ}$ (due west)'
         doodle: {name: 'custom:1992_q29_a', id: compass, caption: 'the compass at X'}
         doodle_do:
           - {id: compass, op: label, part: toy, text: '270°'}
         point:
-          - {figure: 'sketch', kind: 'highlight', target: 'XY', text: 'due west, 270°'}
-      - say: '$Z$ is south of $Y$, so from $X$ it lies below that westward line, towards the south. Turning from west towards south is anticlockwise, so the bearing gets smaller by our angle.'
-        write: 'From west, turn towards south by $\angle YXZ$'
+          - {figure: sketch, kind: highlight, target: XY, text: 'due west, 270°'}
+      - say: '$Z$ is on the south side of the line $XY$. So, turning clockwise from North, we stop theta short of West. Subtract theta.'
+        write: 'Bearing of $Z$ from $X = 270^{\circ} - \theta$'
+      - say: '270 minus 30 is 240.'
+        write: '$= 270^{\circ} - 30^{\circ}$'
         point:
-          - {figure: 'sketch', kind: 'arc', target: 'YXZ', text: 'turn towards south'}
-      - say: 'So the bearing is 270 minus 30, which is 240 degrees: on the compass, $Z$ is 30 degrees round from west, towards south.'
-        write: 'Bearing of $Z$ from $X = 270^{\circ} - 30^{\circ} = 240^{\circ}$'
+          - {line: 9, kind: move, from: {line: 6, at: '= [[30∘]]'}, at: '− [[30∘]]', text: 'θ'}
+      - say: 'Therefore the bearing of $Z$ from $X$ is 240 degrees. It is already three figures.'
+        write: '$\therefore$ Bearing of $Z$ from $X = 240^{\circ}$'
         doodle_do:
           - {id: compass, op: stage, stage: 'custom:1992_q29_a2'}
           - {id: compass, op: label, part: toz, text: '240°'}
         point:
-          - {line: 8, kind: move, from: {line: 6, at: '270∘'}, at: '270∘', text: 'due west'}
-          - {line: 8, kind: move, from: {line: 5, at: '≈ [[30∘]]'}, at: '30∘', text: 'the angle'}
           - {figure: sketch, kind: label, target: '?', text: '240°'}
-      - say: 'Check: $Z$ is south and west of $X$, so its bearing must be between 180 and 270 degrees. 240 is.'
-        write: 'Check: $180^{\circ} < 240^{\circ} < 270^{\circ}\ \checkmark$'
+      - section: 'Check'
+        say: 'Check with the back bearing. At $Z$, the North line runs along $ZY$. Angles in a triangle add up to 180, so the angle $YZX$ is 180 minus 90 minus 30.'
+        write: 'Check: $\angle YZX = 180^{\circ} - 90^{\circ} - 30^{\circ} = 60^{\circ}$'
         point:
-          - {figure: 'sketch', kind: 'circle', target: 'Z', text: 'south-west of X'}
-      - say: 'So the bearing of $Z$ from $X$ is 240 degrees, measured clockwise from north on the compass, which is answer choice A.'
-        write: 'Bearing $= 240^{\circ}$'
+          - {figure: sketch, kind: arc, target: YZX, text: '60°'}
+      - say: 'So the bearing of $X$ from $Z$ is 060. A back bearing differs by 180: 060 plus 180 is 240. It agrees.'
+        write: '$060^{\circ} + 180^{\circ} = 240^{\circ}\ \checkmark$'
+      - section: 'Answer'
+        say: 'So the bearing of $Z$ from $X$ is 240 degrees, which is option A.'
+        write: '$\therefore$ Bearing $= 240^{\circ}$'
+        answer: true
         doodle_do:
           - {id: compass, op: circle, part: north}
-        answer: true
         point:
-          - {figure: 'sketch', kind: 'circle', target: '?', text: '240°'}
-          - {line: 10, kind: highlight, at: '240', to: {doodle: compass, part: toz}}
+          - {figure: sketch, kind: circle, target: '?', text: '240°'}
+          - {line: 13, kind: highlight, at: '240', to: {doodle: compass, part: toz}}
     traps:
-      B: 'You went for 210 degrees. That''s 180 plus 30, measuring the angle from due south. But the angle at $X$ is measured from the westward line $XY$, so start at 270 and turn back by about 30, giving 240.'
-      C: 'You went for 150 degrees. That would put $Z$ south and east of $X$, but $Z$ is to the west of $X$. The bearing must lie between 180 and 270.'
-      D: 'You went for 60 degrees. That''s the bearing of $X$ from $Z$, the reverse direction. Reverse bearings differ by 180, so from $X$ it''s 240.'
+      B: 'You went for 210 degrees. That is 180 plus 30, turning the 30 degrees from South. But theta is the angle at $X$ from the line $XY$, which points West, so the bearing is 270 minus 30, which is 240.'
+      C: 'You went for 150 degrees. That points south-east of $X$, but $Z$ is south-west of $X$, so its bearing is between 180 and 270. It is 270 minus 30, which is 240.'
+      D: 'You went for 60 degrees. That is the bearing of $X$ from $Z$, the back bearing. "From $X$" means we stand at $X$: 060 plus 180 is 240.'
   30:
     moments:
       - say: 'The diagram is a circle with centre $O$ and two perpendicular radii of 6 centimetres. We want the area of the shaded part, between the chord and the arc.'
@@ -1523,7 +1521,7 @@ lessons:
     moments:
       - say: 'We want the locus of a point that is the same distance from two fixed points. A locus is simply the path traced by all the points that obey a rule.'
         write: 'Locus: all points the same distance from two fixed points'
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - say: 'Let me draw the two fixed points, and a point the same distance from both.'
         show_sketch: true
       - say: 'Let''s call the fixed points $A$ and $B$: picture two houses. The rule is that a point $X$ is as far from $A$ as it is from $B$.'
         write: 'Rule: $XA = XB$'
@@ -1584,7 +1582,7 @@ lessons:
     moments:
       - say: 'We want the perpendicular distance from the point 2, 3 to the line $2x$ minus $4y$ plus 3 equals zero.'
         write: '$(2,\ 3),\quad 2x - 4y + 3 = 0$'
-      - say: 'Let me sketch the graph, so we can see its shape.'
+      - say: 'Let me draw the line and the point 2, 3 on the axes.'
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: 'P', text: '(2, 3)'}
@@ -1631,7 +1629,7 @@ lessons:
     moments:
       - say: 'We want the equation of the line through 5, 7 that is parallel to $7x$ plus $5y$ equals 12.'
         write: '$(5,\ 7),\quad 7x + 5y = 12$'
-      - say: 'Let me sketch the graph, so we can see its shape.'
+      - say: 'Let me draw the given line, and the point 5, 7 on the axes.'
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: '7x + 5y = 12', text: 'given line'}

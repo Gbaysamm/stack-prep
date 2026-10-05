@@ -700,18 +700,16 @@ explanations:
   48:
     answer: B
     steps:
-      - 'This question builds on question 44, so we''ll borrow $y$ from there. Then it''s a variance calculation, step by step.'
-      - 'Here''s where we start. The value of $y$ comes from question 44, where the stated mean fixed it at $y = 2$.'
-      - 'So substituting into the frequencies: $y + 2 = 4$, $y - 1 = 1$, $2y - 3 = 1$, $y + 4 = 6$, $3y - 4 = 2$.'
-      - 'Now the distribution is $x = 1, 2, 3, 4, 5$ with frequencies $4, 1, 1, 6, 2$, and $\sum f = 14$.'
-      - 'Next, the mean is $\dfrac{\sum fx}{\sum f} = \dfrac{4 + 2 + 3 + 24 + 10}{14} = \dfrac{43}{14}$, as question 44 established.'
-      - 'Now for the variance, use $\dfrac{\sum fx^{2}}{\sum f} - \left(\text{mean}\right)^{2}$.'
-      - 'Let''s build it. First $\sum fx^{2} = 4(1) + 1(4) + 1(9) + 6(16) + 2(25) = 4 + 4 + 9 + 96 + 50 = 163$.'
-      - 'So the variance is $\dfrac{163}{14} - \left(\dfrac{43}{14}\right)^{2} = \dfrac{163}{14} - \dfrac{1849}{196}$.'
-      - 'Then over a common denominator of 196: $\dfrac{2282 - 1849}{196} = \dfrac{433}{196}$, which is about $2.21$.'
-      - 'Now look at the options. Of the four options, $\dfrac{9}{4} = 2.25$ is the nearest. The two questions share one table, and no whole-number $y$ makes any option come out exactly — so this is the intended answer rather than an exact match, and the working above is what the question is really testing. Don''t let the lack of an exact match shake you; trust good working and pick the nearest option.'
-    hint: 'Take $y = 2$ from question 44, list the frequencies, then use $\tfrac{\sum fx^2}{\sum f} - \text{mean}^2$.'
-
+      - 'Variance measures how far the values spread out from the mean. The standard way is one table that grows column by column, so let''s build it.'
+      - 'Here''s the plan: find the mean $\bar{x} = \dfrac{\sum fx}{\sum f}$, then each deviation $x - \bar{x}$, and finally $\sigma^{2} = \dfrac{\sum f(x - \bar{x})^{2}}{\sum f}$.'
+      - 'Start with the $fx$ column: $1 \times 2 = 2$, $2 \times 1 = 2$, $3 \times 2 = 6$, $4 \times 1 = 4$ and $5 \times 2 = 10$.'
+      - 'So $\sum f = 2 + 1 + 2 + 1 + 2 = 8$ and $\sum fx = 2 + 2 + 6 + 4 + 10 = 24$, which gives $\bar{x} = \dfrac{24}{8} = 3$.'
+      - 'Now the deviations from the mean, $x - \bar{x}$: $-2, -1, 0, 1, 2$. Their squares are $4, 1, 0, 1, 4$.'
+      - 'Multiply each square by its frequency: $2 \times 4 = 8$, $1 \times 1 = 1$, $2 \times 0 = 0$, $1 \times 1 = 1$ and $2 \times 4 = 8$. So $\sum f(x - \bar{x})^{2} = 18$.'
+      - 'Therefore $\sigma^{2} = \dfrac{18}{8} = \dfrac{9}{4}$, which is option B.'
+      - 'Check with the second formula: $\sum fx^{2} = 2 + 4 + 18 + 16 + 50 = 90$, and $\dfrac{90}{8} - 3^{2} = 11.25 - 9 = 2.25 = \dfrac{9}{4}$ ✓.'
+      - 'Now the traps. Option A, $\tfrac{3}{2}$, is the square root of $\tfrac{9}{4}$: that is the standard deviation, not the variance. Option D, 3, is the mean itself. The variance stops before the square root.'
+    hint: 'Find the mean (it is 3), then build the columns $x - \bar{x}$, $(x - \bar{x})^{2}$ and $f(x - \bar{x})^{2}$, and divide their total by $\sum f$.'
   49:
     answer: B
     steps:

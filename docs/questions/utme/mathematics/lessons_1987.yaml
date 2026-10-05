@@ -9,52 +9,56 @@ exam_year: 1987
 lessons:
   1:
     moments:
-      - say: 'We want to change 2, 4, 1 in base 5 into base 8. Picture it as bundles of sticks: blocks of 25, bundles of 5, and single sticks.'
-        doodle: {name: 'custom:1987_q01_a', id: sticks, caption: '241 in base 5, as bundles', size: scene}
-        write: '$241_{5} = ?_{8}$'
-      - say: 'There is no direct road from base 5 to base 8. So we go through base ten: first we change 2, 4, 1 into base ten, then we change that base-ten number into base 8.'
-        write: 'Plan: base 5 $\to$ base 10 $\to$ base 8'
-      - say: 'In base 5, each place is worth 5 times the place to its right. From the right, the places are worth 1, then 5, then 5 squared, which is 25.'
-        write: 'Place values in base 5: $25,\ 5,\ 1$'
-      - say: 'So 2, 4, 1 in base 5 means 2 twenty-fives, plus 4 fives, plus 1 one.'
-        write: '$241_{5} = 2 \times 25 + 4 \times 5 + 1 \times 1$'
-      - say: 'Count the sticks in each kind of bundle. 2 times 25 is 50. 4 times 5 is 20. And 1 times 1 is 1.'
-        doodle_do: [{id: sticks, op: label, part: p25, text: '2 × 25 = 50'}, {id: sticks, op: label, part: p5, text: '4 × 5 = 20'}, {id: sticks, op: label, part: p1, text: '1'}]
+      - section: 'The question'
+        say: 'Two-four-one base five, to base eight. There is no direct road from base five to base eight, so we go through base ten.'
+        write: 'Convert $241_{5}$ to base 8.'
+      - say: 'First, change two-four-one base five to base ten.'
+        write: 'Solution'
+      - section: 'Step 1: base 5 to base 10'
+        say: 'Write the index numbers over the digits, starting from nought on the right: nought, one, two.'
+        write: '$\overset{2}{2}\,\overset{1}{4}\,\overset{0}{1}_{5}$'
+      - say: 'Each digit times five to the power of its index: two times five squared, plus four times five to the power one, plus one times five to the power nought.'
+        write: '$= 2 \times 5^{2} + 4 \times 5^{1} + 1 \times 5^{0}$'
+      - say: 'Five squared is 25. Five to the power one is 5. Anything to the power nought is 1.'
+        write: '$= 2 \times 25 + 4 \times 5 + 1 \times 1$'
+      - say: '2 times 25 is 50. 4 times 5 is 20. 1 times 1 is 1.'
         write: '$= 50 + 20 + 1$'
-      - say: '50 plus 20 is 70, and 70 plus 1 is 71. So our number is 71 in base ten. Loosen every bundle and that is 71 single sticks.'
-        doodle_do: [{id: sticks, op: stage, stage: 'custom:1987_q01_a2'}]
+      - say: '50 plus 20 plus 1 is 71, base ten.'
         write: '$= 71_{10}$'
+      - section: 'Step 2: base 10 to base 8'
+        say: 'Now divide 71 by 8 again and again, and write the remainders by the side. This is the division ladder.'
+        diagram: {id: L, kind: ladder, divisor: 8, number: 71, 'on': 'division ladder'}
+      - say: '71 divided by 8 is 8, remainder 7. The remainder is what is left after making bundles of eight.'
+        diagram_do:
+          - {id: L, op: step, 'on': 'remainder 7'}
+        doodle: {name: 'custom:1987_q01_b', id: sticks, caption: '71 = 8 eights and 7 left', 'on': 'bundles of eight'}
+      - say: '8 divided by 8 is 1, remainder 0.'
+        diagram_do:
+          - {id: L, op: step}
+      - say: '1 divided by 8 is 0, remainder 1. We stop at 0.'
+        diagram_do:
+          - {id: L, op: step}
+      - say: 'Read the remainders from the bottom up: one, zero, seven. So 71 is one-zero-seven base eight.'
+        diagram_do:
+          - {id: L, op: read, 'on': 'bottom up'}
+        write: '$71_{10} = 107_{8}$'
         point:
-          - {line: 5, kind: highlight, at: '71', to: {doodle: sticks, part: total}}
-      - say: 'Now the second stage: we turn that 71 into base 8. We keep dividing by 8 and write down each remainder.'
-        write: 'Divide $71$ by $8$ repeatedly:'
+          - {line: 11, kind: highlight, at: '1078', to: {diagram: L, part: result}}
+      - section: 'Check'
+        say: 'Check by expanding back. Index numbers over the digits again: two, one, nought. Then each digit times eight to the power of its index.'
+        write: '$\overset{2}{1}\,\overset{1}{0}\,\overset{0}{7}_{8} = 1 \times 8^{2} + 0 \times 8^{1} + 7 \times 8^{0}$'
+      - say: 'Eight squared is 64, so we get 64 plus 0 plus 7, which is 71. It agrees.'
+        write: '$= 64 + 0 + 7 = 71\ \checkmark$'
         point:
-          - {line: 6, kind: move, from: {line: 5, at: '= [[71]]'}, at: '71', text: 'from here'}
-      - say: '8 eights are 64, and 71 minus 64 is 7. So 71 divided by 8 is 8, remainder 7.'
-        write: '$71 \div 8 = 8 \text{ remainder } 7$'
-      - say: 'Now divide that 8 by 8. That is 1, remainder 0.'
-        write: '$8 \div 8 = 1 \text{ remainder } 0$'
-      - say: 'Then 1 divided by 8 is 0, remainder 1. We stop once we reach zero.'
-        write: '$1 \div 8 = 0 \text{ remainder } 1$'
-      - say: 'Now read the remainders from the bottom up: 1, then 0, then 7. Regrouped in eights, the 71 sticks make one block of 64, no bundles of 8, and 7 loose sticks.'
-        doodle_do: [{id: sticks, op: stage, stage: 'custom:1987_q01_a3'}]
-        write: 'Remainders from the bottom: $71_{10} = 107_{8}$'
-        point:
-          - {line: 10, kind: move, from: {line: 9, at: 'remainder [[1]]'}, at: '= [[1]]078', text: 'read up'}
-          - {line: 10, kind: move, from: {line: 8, at: 'remainder [[0]]'}, at: '= 1[[0]]78'}
-          - {line: 10, kind: move, from: {line: 7, at: 'remainder [[7]]'}, at: '= 10[[7]]8'}
-      - say: 'Look at the new bundles. Let''s check. In base 8 the places are worth 64, 8 and 1. 1 times 64, plus 0 times 8, plus 7 times 1, is 71. It works.'
-        doodle_do: [{id: sticks, op: pulse, part: b64}]
-        write: 'Check: $107_{8} = 1 \times 64 + 0 \times 8 + 7 \times 1 = 71$'
-      - say: 'So 2, 4, 1 in base 5 is 1, 0, 7 in base 8, which is answer choice B.'
-        write: 'Therefore $241_{5} = 107_{8}$'
+          - {line: 13, kind: move, from: {line: 6, at: '7110'}, at: '71', text: 'what we started with'}
+      - section: 'Answer'
+        say: 'Therefore two-four-one base five is one-zero-seven base eight: option B.'
+        write: '$\therefore 241_{5} = 107_{8}$'
         answer: true
-        point:
-          - {line: 12, kind: highlight, at: '1078', to: {doodle: sticks, part: bottom}}
     traps:
-      A: 'You went for 71 in base 8. 71 is the value in base ten; you can''t just stick an 8 on it. Divide 71 by 8 again and again and read the remainders from the bottom up, and you get 1, 0, 7.'
-      C: 'You went for 176 in base 8. That''s worth 64 plus 56 plus 6, which is 126 in base ten, not 71. Divide 71 by 8 repeatedly and read the remainders from the last one up: 1, 0, 7.'
-      D: 'You went for 241 in base 8. That just relabels the digits. Changing the base changes the digits, so go through base ten first: 2, 4, 1 in base 5 is 71, and 71 is 1, 0, 7 in base 8.'
+      A: 'You went for seven-one base eight. 71 is the base-ten value: you stopped halfway. Divide 71 by 8 on the ladder and read the remainders from the bottom up: one-zero-seven.'
+      C: 'You went for one-seven-six base eight. You read the remainders from the top down, or slipped in a division. Read the remainders from the bottom up: one-zero-seven.'
+      D: 'You went for two-four-one base eight. You changed only the label. The digits change when the base changes: two-four-one base five is 71, which is one-zero-seven base eight.'
   2:
     moments:
       - say: 'We want the shortest rod that can be cut exactly into 40 centimetre strips, and also exactly into 48 centimetre strips. Picture the same rod, cut two different ways.'
@@ -94,7 +98,7 @@ lessons:
     moments:
       - say: 'A lawn has an area of 1815 square yards, and its length is 50 metres. We want its width in metres, using 1 metre equals 1.1 yards.'
         write: 'Area $= 1815\ \text{yd}^{2}$, length $= 50$ m'
-      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+      - say: 'Let me draw the lawn.'
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: 'Area 1815 yd²'}
@@ -143,53 +147,50 @@ lessons:
       C: 'You went for 33.00. That''s the width in yards. The question wants metres, so there''s one more step: 33 divided by 1.1 is 30.'
   4:
     moments:
-      - say: 'We must round each number to two significant figures first, and only then work out the fraction.'
-        write: '$\dfrac{0.02174 \times 1.2047}{0.023789}$'
-      - say: 'Significant figures start at the first digit that isn''t zero. We keep two of them, then look at the next digit: 5 or more rounds up, less than 5 leaves it alone. Picture each number with its first two figures boxed, and a cut just after.'
+      - section: 'The question'
+        say: 'Round first, then work it out. If you work it out first and round at the end, you can land on a different option. Let''s follow the order the question gives.'
         doodle: {name: 'custom:1987_q04_a', id: figs, caption: 'keep two figures'}
-        write: 'Rule: next digit $\ge 5$ rounds up'
-      - say: 'Look at the first box. Start with 0.02174. The leading zeros don''t count, so the first two significant figures are 2 and 1. The next digit is 7, which is 5 or more, so the 1 rounds up to 2.'
-        doodle_do: [{id: figs, op: label, part: cut1, text: 'next is 7: up'}]
-        write: '$0.02174 \approx 0.022$'
-        point:
-          - {line: 2, kind: highlight, at: '0.022', to: {doodle: figs, part: n1}}
-      - say: 'The second box. Next, 1.2047. The first two significant figures are 1 and 2. The next digit is 0, so we leave it alone.'
-        doodle_do: [{id: figs, op: label, part: cut2, text: 'next is 0: stays'}]
-        write: '$1.2047 \approx 1.2$'
-        point:
-          - {line: 3, kind: highlight, at: '≈ 1.2', to: {doodle: figs, part: n2}}
-      - say: 'The third box. Then 0.023789. The significant figures are 2 and 3, and the next digit is 7, so the 3 rounds up to 4.'
-        doodle_do: [{id: figs, op: label, part: cut3, text: 'next is 7: up'}]
-        write: '$0.023789 \approx 0.024$'
-        point:
-          - {line: 4, kind: highlight, at: '0.024', to: {doodle: figs, part: n3}}
-      - say: 'Now put the three rounded numbers into the fraction.'
-        write: 'Rounded: $\dfrac{0.022 \times 1.2}{0.024}$'
-        point:
-          - {line: 5, kind: move, from: {line: 2, at: '≈ 0.022'}, at: '[[0.022]] × 1.2', text: 'rounded'}
-          - {line: 5, kind: move, from: {line: 3, at: '≈ 1.2'}, at: '0.022 × [[1.2]]'}
-          - {line: 5, kind: move, from: {line: 4, at: '≈ 0.024'}, at: 'Rounded: [[0.024]]'}
-      - say: 'On top, 22 times 12 is 264. 0.022 has three decimal places and 1.2 has one, so the answer has four: 0.0264.'
-        write: '$= \dfrac{0.0264}{0.024}$'
-      - say: 'To clear the decimals, multiply the top and the bottom by 10,000. The top becomes 264 and the bottom becomes 240.'
-        write: '$= \dfrac{0.0264 \times 10000}{0.024 \times 10000} = \dfrac{264}{240}$'
-      - say: '240 goes into 264 once, with 24 left over. And 24 over 240 is 1 over 10, which is 0.1.'
-        write: '$= 1 + \dfrac{24}{240} = 1 + 0.1$'
-      - say: '1 plus 0.1 is 1.1.'
-        write: '$= 1.1$'
-      - say: 'So the value is 1.1, which is answer choice C.'
-        write: 'Value $= 1.1$'
+        write: 'Reduce each number to 2 s.f., then evaluate $\dfrac{0.02174 \times 1.2047}{0.023789}$'
+      - say: 'The rule for significant figures: start counting at the first digit that is not zero, mark a cut after the figures you keep, and look at the next digit.'
+        write: 'Solution'
+      - say: 'If the next digit is 5 or more, add 1 to the last digit kept. If it is less than 5, leave it.'
+        write: 'Next digit $\ge 5$: add 1. Next digit $< 5$: leave it.'
+      - section: 'Round each number'
+        say: '0.02174: the zeros in front do not count. The first two significant figures are 2 and 1. Cut after the 1. The next digit is 7, so add 1: 0.022.'
+        doodle_do: [{id: figs, op: label, part: cut1, text: 'next is 7: add 1'}]
+        write: '$0.021|74 \approx 0.022$'
+      - say: '1.2047: the first two significant figures are 1 and 2. The next digit is 0, so leave it: 1.2.'
+        doodle_do: [{id: figs, op: label, part: cut2, text: 'next is 0: leave it'}]
+        write: '$1.2|047 \approx 1.2$'
+      - say: '0.023789: the significant figures are 2 and 3. The next digit is 7, so add 1: 0.024.'
+        doodle_do: [{id: figs, op: label, part: cut3, text: 'next is 7: add 1'}]
+        write: '$0.023|789 \approx 0.024$'
+      - section: 'Evaluate'
+        say: 'Put the rounded numbers into the expression.'
+        write: '$\dfrac{0.022 \times 1.2}{0.024}$'
+      - say: 'Clear the decimals: multiply the numerator and the denominator by 10,000. On top, 0.022 becomes 22 and 1.2 becomes 12. Underneath, 0.024 becomes 240.'
+        write: '$= \dfrac{22 \times 12}{240}$'
+      - say: 'Cancel first. 12 goes into 240 twenty times. So we have 22 over 20.'
+        write: '$= \dfrac{22}{20}$'
+      - say: '22 divided by 20 is 1.1.'
+        write: '$\therefore$ Value $= 1.1$'
+      - section: 'Check'
+        say: 'Check by multiplying back: 0.024 times 1.1 is 0.0264, and 0.022 times 1.2 is also 0.0264. They agree.'
+        write: 'Check: $0.024 \times 1.1 = 0.0264 = 0.022 \times 1.2 \ \checkmark$'
+      - section: 'Answer'
+        say: 'So the value is 1.1, which is option C.'
+        write: '$\therefore$ Value $= 1.1$'
         answer: true
     traps:
-      A: 'You went for 0.8. The rounded values give 0.0264 over 0.024. The top is bigger than the bottom, so the answer must be more than 1. It works out to 1.1.'
-      B: 'You went for 0.9. That is the fraction upside down: 0.024 over 0.0264 is about 0.9. Keep 0.0264 on top and 0.024 underneath, and you get 1.1.'
-      D: 'You went for 1.2. That comes from rounding 0.02174 and 0.023789 to one significant figure, 0.02 each, so they cancel and leave 1.2. The question says two significant figures: 0.022 and 0.024, which give 1.1.'
+      A: 'You went for 0.8. The numerator, 0.022 times 1.2, is 0.0264, which is bigger than the denominator, 0.024. So the answer must be more than 1: it is 1.1.'
+      B: 'You went for 0.9. That is the fraction upside down: 0.024 over 0.0264 is about 0.9. Keep the numerator on top, and you get 1.1.'
+      D: 'You went for 1.2. That comes from rounding 0.02174 and 0.023789 to 1 significant figure, 0.02 each, so they cancel and leave 1.2. The question says 2 significant figures: 0.022 and 0.024 give 1.1.'
   5:
     moments:
       - say: 'A train goes from P to Q at 90 kilometres per hour and comes straight back at 45 kilometres per hour. We want the average speed for the whole journey. Picture the train waiting at P.'
         doodle: {name: 'custom:1987_q05_a', id: trip, caption: 'out fast, back slow', size: scene}
         write: 'Out at $90$ km/h, back at $45$ km/h'
-      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+      - say: 'Let me draw the journey there and back.'
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: '90 km/h'}
@@ -244,7 +245,7 @@ lessons:
     moments:
       - say: 'A square has its length increased by 20 percent and its width decreased by 20 percent, making a rectangle. We want the area of the rectangle compared with the area of the square.'
         write: 'Length $+20\%$, width $-20\%$'
-      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+      - say: 'Let me draw the square and the rectangle made from it.'
         show_sketch: true
       - say: 'Let the side of the square be $s$. Its area is $s$ times $s$, which is $s$ squared. Picture the square as 10 rows of 10 tiles: 100 tiles in all.'
         doodle: {name: 'custom:1987_q06_a', id: tiles, caption: 'the square as 100 tiles', size: scene}
@@ -293,47 +294,45 @@ lessons:
       C: 'You went for 5 : 6. That is 1 to 1.2, which only looks at the length. Multiply both factors, 1.2 times 0.8, to get 0.96, which is 24 : 25.'
   7:
     moments:
-      - say: 'Two brothers put ₦5,000 into a farm and sold the harvest for ₦15,000. The profit is shared in the ratio 2 to 3, and we want the difference between their shares. Picture the farm, and the sack of money the harvest brings.'
-        doodle: {name: 'custom:1987_q07_a', id: farm, caption: 'Put in ₦5,000, harvest sold ₦15,000', size: scene}
-        write: 'Invested ₦5,000, sold for ₦15,000, ratio $2 : 3$'
-      - say: 'The first thing we need is the profit. Profit is the money left over after getting back what was invested.'
-        write: 'Profit $=$ selling price $-$ money invested'
-      - say: 'The harvest sold for ₦15,000, and ₦5,000 was invested.'
-        write: '$= 15{,}000 - 5{,}000$'
-        point:
-          - {line: 2, kind: move, from: {line: 0, at: 'for ₦[[15,000]]'}, at: '15,000', text: 'sold for'}
-          - {line: 2, kind: move, from: {line: 0, at: 'Invested ₦[[5,000]]'}, at: '− [[5,000]]', text: 'invested'}
-      - say: '15,000 minus 5,000 is 10,000. So the profit is ₦10,000. That is the profit in the sack.'
+      - section: 'The question'
+        say: 'Two brothers put ₦5,000 into a farm and sell the harvest for ₦15,000. The profit is shared 2 to 3. We want the difference between their shares, not either share.'
+        doodle: {name: 'custom:1987_q07_a', id: farm, caption: 'put in ₦5,000, harvest sold ₦15,000', size: scene}
+        write: 'Invested ₦5,000; sold for ₦15,000; profit shared $2 : 3$'
+      - say: 'First the profit, then the sum of ratio, then each share as a fraction of the profit.'
+        write: 'Solution'
+      - section: 'The profit'
+        say: 'Profit is the selling price minus the cost price. Here the cost is the ₦5,000 they invested.'
+        write: 'Profit $=$ S.P. $-$ C.P.'
+      - say: '15,000 minus 5,000 is 10,000. So the profit in the sack is ₦10,000.'
         doodle_do: [{id: farm, op: label, part: sack, text: 'profit ₦10,000'}]
-        write: '$= 10{,}000$'
-      - say: 'Now share it in the ratio 2 to 3. 2 plus 3 is 5, so the profit is cut into 5 equal parts. Picture the profit as blocks: 2 for one brother, 3 for the other.'
+        write: '$= 15000 - 5000 = $₦$10000$'
+      - section: 'Share the profit'
+        say: 'Add the parts of the ratio: 2 plus 3 is 5. This is the sum of ratio. Picture the profit as 5 blocks.'
         doodle_do: [{id: farm, op: stage, stage: 'custom:1987_q07_a2'}]
-        write: 'Parts: $2 + 3 = 5$'
-      - say: 'Each part is the profit, 10,000, divided by 5, which is ₦2,000. So each block is worth ₦2,000.'
-        doodle_do: [{id: farm, op: label, part: first, text: 'each block ₦2,000'}]
-        write: '1 part $= 10{,}000 \div 5 = 2{,}000$'
+        write: 'Sum of ratio $= 2 + 3 = 5$'
+      - say: 'The first brother has 2 parts, so his share is 2 over 5 of 10,000. 10,000 divided by 5 is 2,000, times 2 is 4,000.'
+        write: 'First share $= \dfrac{2}{5} \times 10000 = $₦$4000$'
         point:
-          - {line: 5, kind: move, from: {line: 3, at: '= 10,000'}, at: '10,000', text: 'profit'}
-      - say: 'One brother gets 2 parts: 2 times 2,000 is ₦4,000.'
-        write: 'First share $= 2 \times 2{,}000 = 4{,}000$'
-      - say: 'The other gets 3 parts: 3 times 2,000 is ₦6,000.'
-        write: 'Second share $= 3 \times 2{,}000 = 6{,}000$'
-      - say: 'Look at the one extra block. The difference is 6,000 minus 4,000, which is ₦2,000.'
+          - {line: 5, kind: move, from: {line: 3, at: '₦10000'}, at: '10000', text: 'profit'}
+      - say: 'The second brother has 3 parts: 3 over 5 of 10,000. 2,000 times 3 is 6,000.'
+        write: 'Second share $= \dfrac{3}{5} \times 10000 = $₦$6000$'
+      - section: 'The difference'
+        say: 'Look at the one extra block. The difference is the bigger share minus the smaller: 6,000 minus 4,000, which is 2,000.'
         doodle_do: [{id: farm, op: circle, part: extra}]
-        write: 'Difference $= 6{,}000 - 4{,}000 = 2{,}000$'
+        write: '$\therefore$ Difference $= 6000 - 4000 = $₦$2000$'
         point:
-          - {line: 8, kind: move, from: {line: 7, at: '= 6,000'}, at: '6,000'}
-          - {line: 8, kind: move, from: {line: 6, at: '= 4,000'}, at: '4,000'}
-          - {line: 8, kind: highlight, at: '= 2,000', to: {doodle: farm, part: extra}}
-      - say: 'Notice that''s exactly one part, because 3 parts minus 2 parts is 1 part.'
-        write: 'Check: $3 - 2 = 1$ part $= 2{,}000$'
-      - say: 'So the difference is ₦2,000, which is answer choice A.'
-        write: 'Difference: ₦2,000'
+          - {line: 7, kind: highlight, at: '₦2000', to: {doodle: farm, part: extra}}
+      - section: 'Check'
+        say: 'Check. The two shares add up to 4,000 plus 6,000, which is 10,000, the whole profit.'
+        write: 'Check: $4000 + 6000 = 10000 \ \checkmark$'
+      - section: 'Answer'
+        say: 'So the difference in the profit received is ₦2,000, which is option A.'
+        write: '$\therefore$ Difference $=$ ₦2,000.00'
         answer: true
     traps:
-      B: 'You went for ₦4,000. That''s the smaller brother''s share, not the difference. The shares are ₦4,000 and ₦6,000, so the difference is ₦2,000.'
-      C: 'You went for ₦6,000. That''s the bigger brother''s share. Subtract the smaller share, ₦4,000, to get the difference: ₦2,000.'
-      D: 'You went for ₦10,000. That''s the whole profit. The question wants the difference between the two shares, which is one of the five parts: ₦2,000.'
+      B: 'You went for ₦4,000. That is the smaller brother''s share, 2 over 5 of the profit. Take it from the bigger share, ₦6,000, to get the difference: ₦2,000.'
+      C: 'You went for ₦6,000. That is the bigger brother''s share. Subtract the smaller share, ₦4,000, to get the difference: ₦2,000.'
+      D: 'You went for ₦10,000. That is the whole profit. The question wants the difference between the two shares, which is ₦2,000.'
   8:
     moments:
       - say: 'Peter earns ₦20 a week for 20 weeks, then ₦36 a week for 24 weeks. His average for the whole year is ₦30. We want his average for the last 8 weeks. Picture his year as three wage envelopes.'
@@ -385,149 +384,140 @@ lessons:
       D: 'You went for ₦5. That''s far too small to lift the average to ₦30. The last 8 weeks earn ₦296 in total, which is ₦37 a week.'
   9:
     moments:
-      - say: 'Money is invested at 4 percent simple interest. After 3 years the amount is ₦7,000. We want the sum first invested, the principal. Picture the money going into a piggy bank.'
-        doodle: {name: 'custom:1987_q09_a', id: pig, caption: 'After 3 years at 4%: ₦7,000', size: scene}
-        write: 'Rate $4\%$, time $3$ years, amount ₦7,000'
-      - say: 'With simple interest, the amount at the end is the principal plus the interest. The interest is $P$ times $R$ times $T$, over 100.'
-        write: '$A = P + \dfrac{PRT}{100}$'
-      - say: 'Put in the rate, 4, and the time, 3 years. Each year drops in another 4 percent: three coins of interest.'
+      - section: 'The question'
+        say: 'Money is invested at 4 percent simple interest, and after 3 years it amounts to ₦7,000. What was invested? The ₦7,000 already includes the interest, so we work backwards.'
+        doodle: {name: 'custom:1987_q09_a', id: pig, caption: 'after 3 years at 4%: ₦7,000', size: scene}
+        write: 'Simple interest at 4% p.a.; amount after 3 years ₦7,000. $P = ?$'
+      - say: 'Write the givens first. A is 7,000 naira, R is 4 percent, T is 3 years, and P is what we want.'
+        write: 'Solution: $A = $₦$7000,\ R = 4\%,\ T = 3$ years, $P = ?$'
+      - section: 'The formulas'
+        say: 'The amount is the principal plus the interest.'
+        write: '$A = P + I$'
+      - say: 'Simple interest is the principal times the rate times the time, over 100.'
+        write: '$I = \dfrac{PRT}{100}$'
+      - section: 'Substitute'
+        say: 'Substitute R equals 4 and T equals 3. P times 4 times 3 is 12P, over 100: three coins of 4 percent. Divide top and bottom by 4: 3P over 25.'
         doodle_do: [{id: pig, op: stage, stage: 'custom:1987_q09_a2'}]
-        write: '$A = P + \dfrac{P \times 4 \times 3}{100}$'
-        point:
-          - {line: 1, kind: box, text: 'the rule'}
-          - {line: 2, kind: move, from: {line: 0, at: '4%'}, at: '× 4 ×', text: 'R'}
-          - {line: 2, kind: move, from: {line: 0, at: '3 years'}, at: '× 3', text: 'T'}
-      - say: '4 times 3 is 12, so the interest is 12 over 100 of $P$, which is 0.12 $P$.'
-        write: '$= P + \dfrac{12P}{100} = P + 0.12P$'
-      - say: '$P$ plus 0.12 $P$ is 1.12 $P$.'
-        write: '$= 1.12P$'
-      - say: 'Look at what the pig holds at the end. The amount is ₦7,000, so 1.12 $P$ equals 7,000.'
+        write: '$I = \dfrac{P \times 4 \times 3}{100} = \dfrac{12P}{100} = \dfrac{3P}{25}$'
+      - say: 'Now put I into A equals P plus I, with A equal to 7,000.'
         doodle_do: [{id: pig, op: circle, part: amount}]
-        write: '$1.12P = 7000$'
+        write: '$\therefore P + \dfrac{3P}{25} = 7000$'
         point:
-          - {line: 5, kind: move, from: {line: 4, at: '= 1.12P'}, at: '1.12P', text: 'amount'}
-          - {line: 5, kind: move, from: {line: 0, at: '₦7,000'}, at: '7000', text: 'given'}
           - {line: 5, kind: highlight, at: '7000', to: {doodle: pig, part: amount}}
-      - say: 'To get $P$ by itself, divide both sides by 1.12.'
-        write: '$P = \dfrac{7000}{1.12}$'
-        point:
-          - {line: 6, kind: move, from: {line: 5, at: '[[1.12]]P'}, at: '= [[1.12]]7000', text: 'divide'}
-      - say: 'Multiply the top and the bottom by 100 to clear the decimal: 700,000 over 112.'
-        write: '$= \dfrac{700{,}000}{112}$'
-      - say: '112 times 6,000 is 672,000. That leaves 700,000 minus 672,000, which is 28,000.'
-        write: '$112 \times 6000 = 672{,}000$, remainder $28{,}000$'
-      - say: 'And 112 times 250 is 28,000. So altogether 112 goes in 6,000 plus 250 times, which is 6,250. That is the coin that went in.'
+      - section: 'Solve for P'
+        say: 'The L.C.M. is 25. P is 25P over 25, and 25P plus 3P is 28P.'
+        write: '$\dfrac{28P}{25} = 7000$ (L.C.M. $= 25$)'
+      - say: 'Multiply both sides by 25 over 28.'
+        write: '$P = 7000 \times \dfrac{25}{28}$'
+      - say: 'Cancel first: 28 goes into 7,000 two hundred and fifty times. Then 250 times 25 is 6,250. That is the coin that went in.'
         doodle_do: [{id: pig, op: label, part: coin, text: 'P = ₦6,250'}]
-        write: '$112 \times 250 = 28{,}000$, so $P = 6000 + 250 = 6250$'
-      - say: 'Let''s check. The interest is 6,250 times 0.12, which is 750. And 6,250 plus 750 is 7,000. It works. The three interest coins hold 750.'
+        write: '$P = 250 \times 25 = 6250$'
+      - section: 'Check'
+        say: 'Check with the formula. I is 6,250 times 4 times 3, over 100. That is 75,000 over 100, which is 750 naira.'
         doodle_do: [{id: pig, op: label, part: coins, text: '₦750'}]
-        write: 'Check: $6250 \times 0.12 = 750,\ 6250 + 750 = 7000$'
-      - say: 'So the sum invested was ₦6,250, which is answer choice B.'
-        write: 'Principal: ₦6,250.00'
+        write: 'Check: $I = \dfrac{6250 \times 4 \times 3}{100} = $₦$750$'
+      - say: 'And A is 6,250 plus 750, which is 7,000 naira, the amount in the question.'
+        write: '$A = 6250 + 750 = $₦$7000 \ \checkmark$'
+      - section: 'Answer'
+        say: 'Therefore the sum invested was ₦6,250, which is option B.'
+        write: '$\therefore P =$ ₦6,250.00'
         answer: true
-        point:
-          - {line: 11, kind: highlight, at: '6,250', to: {doodle: pig, part: coin}}
     traps:
-      A: 'You went for ₦7,840. That''s 7,000 plus 12 percent of 7,000. But ₦7,000 is already the final amount; we need to go backwards, dividing by 1.12, to get ₦6,250.'
-      C: 'You went for ₦6,160. That''s 7,000 minus 12 percent of 7,000. The interest is 12 percent of the principal, not of the final amount, so divide 7,000 by 1.12 instead.'
-      D: 'You went for ₦5,833.33. That''s 7,000 divided by 1.2, as if the interest were 20 percent. 4 percent for 3 years is 12 percent, so divide by 1.12.'
+      A: 'You went for ₦7,840. That adds 12 percent of 7,000 to 7,000. But ₦7,000 is already the amount; the interest is on the unknown principal, so solve P plus 3P over 25 equals 7,000.'
+      C: 'You went for ₦6,160. That takes 12 percent of 7,000 away from 7,000. The interest is 12 percent of the principal, not of the amount, so solve 28P over 25 equals 7,000.'
+      D: 'You went for ₦5,833.33. That is 7,000 divided by 1.2, as if the interest were 20 percent. 4 percent for 3 years is 12 percent, and the equation gives ₦6,250.'
   10:
     moments:
-      - say: 'A trader sells 20 oranges for ₦1.35 and makes 8 percent profit. We want his percentage gain or loss if he sells them for ₦1.10 instead. Picture the tray of oranges with its two price tags.'
+      - section: 'The question'
+        say: 'A trader sells 20 oranges for ₦1.35 and gains 8 percent. At ₦1.10, is it a gain or a loss, and how much? First we need what the oranges cost him.'
         doodle: {name: 'custom:1987_q10_a', id: oranges, caption: '20 oranges: ₦1.35, then ₦1.10'}
-        write: 'Sold at ₦1.35 for $8\%$ profit; now sold at ₦1.10'
-      - say: 'Profit and loss percentages are always measured against the cost price. So first we find the cost price. Let''s call it $C$.'
-        write: 'Let cost price $= C$'
-      - say: 'An 8 percent profit means he sold at 100 percent plus 8 percent, which is 108 percent of the cost. As a decimal, that is 1.08.'
-        write: '$100\% + 8\% = 108\% = 1.08$'
-      - say: 'Look at the first price tag. So 1.08 times $C$ is the selling price, 1.35.'
+        write: 'S.P. ₦1.35 gives 8% profit. New S.P. ₦1.10: gain or loss $\%$?'
+      - say: 'C.P. is the cost price and S.P. the selling price. Profit or loss percent is always measured against the C.P.'
+        write: 'Solution'
+      - section: 'Find the C.P.'
+        say: 'For a gain, the C.P. is 100 over 100 plus the gain percent, times the S.P.'
+        write: 'C.P. $= \dfrac{100}{100 + \text{gain}\%} \times$ S.P.'
+      - say: 'Substitute: the gain is 8 percent and the S.P. is 1.35. 100 plus 8 is 108.'
         doodle_do: [{id: oranges, op: highlight, part: tag1}]
-        write: '$1.08C = 1.35$'
+        write: 'C.P. $= \dfrac{100}{108} \times 1.35$'
+      - say: '100 times 1.35 is 135. So the C.P. is 135 over 108.'
+        write: '$= \dfrac{100 \times 1.35}{108} = \dfrac{135}{108}$'
+      - say: 'Cancel: 135 is 5 times 27, and 108 is 4 times 27. That leaves 5 over 4, which is 1.25. So the oranges cost him ₦1.25.'
+        doodle_do: [{id: oranges, op: label, part: tray, text: 'C.P. ₦1.25'}]
+        write: 'C.P. $= \dfrac{5}{4} = $₦$1.25$'
         point:
-          - {line: 3, kind: move, from: {line: 2, at: '108% = [[1.08]]'}, at: '1.08', text: '108%'}
-          - {line: 3, kind: move, from: {line: 0, at: '₦1.35'}, at: '1.35', text: 'selling price'}
-      - say: 'Divide both sides by 1.08.'
-        write: '$C = \dfrac{1.35}{1.08}$'
-        point:
-          - {line: 4, kind: move, from: {line: 3, at: '[[1.08]]C'}, at: '= [[1.08]]1.35', text: 'divide'}
-      - say: 'Multiply the top and the bottom by 100 to clear the decimals. That gives 135 over 108.'
-        write: '$= \dfrac{135}{108}$'
-      - say: 'Both numbers divide by 27. 135 divided by 27 is 5, and 108 divided by 27 is 4.'
-        write: '$= \dfrac{135 \div 27}{108 \div 27} = \dfrac{5}{4}$'
-      - say: '5 over 4 is 1.25. So the cost price is ₦1.25. That is what the tray of oranges cost him.'
-        doodle_do: [{id: oranges, op: label, part: tray, text: 'cost ₦1.25'}]
-        write: '$C = 1.25$'
-        point:
-          - {line: 7, kind: highlight, at: '1.25', to: {doodle: oranges, part: tray}}
-      - say: 'Look at the second tag. Now he sells for ₦1.10. That''s less than the cost, ₦1.25, so it''s a loss. 1.25 minus 1.10 is 0.15.'
+          - {line: 5, kind: highlight, at: '₦1.25', to: {doodle: oranges, part: tray}}
+      - section: 'The new sale'
+        say: 'Now the new S.P. is ₦1.10. That is less than the C.P. of ₦1.25, so this time it is a loss.'
         doodle_do: [{id: oranges, op: circle, part: tag2}]
-        write: 'Loss $= 1.25 - 1.10 = 0.15$'
+        write: 'S.P. $= $₦$1.10 <$ C.P., so a loss'
+      - say: 'Loss is C.P. minus S.P.: 1.25 minus 1.10, which is 0.15.'
+        write: 'Loss $=$ C.P. $-$ S.P. $= 1.25 - 1.10 = $₦$0.15$'
+      - section: 'Loss percent'
+        say: 'Loss percent is the loss over the C.P., times 100 percent.'
+        write: 'Loss $\% = \dfrac{\text{loss}}{\text{C.P.}} \times 100\%$'
+      - say: 'Substitute: the loss is 0.15 and the C.P. is 1.25.'
+        write: '$= \dfrac{0.15}{1.25} \times 100\%$'
         point:
-          - {line: 8, kind: move, from: {line: 7, at: '= 1.25'}, at: '1.25', text: 'cost'}
-          - {line: 8, kind: move, from: {line: 0, at: '₦1.10'}, at: '1.10', text: 'new price'}
-      - say: 'Loss percent is the loss divided by the cost price, times 100 percent.'
-        write: 'Loss $\% = \dfrac{\text{loss}}{\text{cost price}} \times 100\%$'
-      - say: 'As a percentage, we divide the loss by the cost price and multiply by 100.'
-        write: 'Loss $\% = \dfrac{0.15}{1.25} \times 100\%$'
-        point:
-          - {line: 10, kind: move, from: {line: 8, at: '= 0.15'}, at: '0.15', text: 'loss'}
-          - {line: 10, kind: move, from: {line: 7, at: '= 1.25'}, at: '1.25', text: 'cost'}
-      - say: 'Multiply the top and the bottom of the fraction by 100, giving 15 over 125. Both divide by 5: 15 divided by 5 is 3, and 125 divided by 5 is 25.'
-        write: '$= \dfrac{15}{125} \times 100\% = \dfrac{3}{25} \times 100\%$'
-      - say: '100 divided by 25 is 4, and 3 times 4 is 12. Write that loss on the second tag.'
+          - {line: 9, kind: move, from: {line: 7, at: '₦0.15'}, at: '0.15', text: 'loss'}
+          - {line: 9, kind: move, from: {line: 5, at: '₦1.25'}, at: '1.25', text: 'C.P.'}
+      - say: 'Clear the decimals: 15 over 125. Cancel by 5: 3 over 25. Then 100 divided by 25 is 4, and 3 times 4 is 12.'
+        write: '$= \dfrac{15}{125} \times 100\% = \dfrac{3}{25} \times 100\% = 12\%$'
+      - say: 'Therefore he makes a loss of 12 percent.'
         doodle_do: [{id: oranges, op: label, part: tag2, text: '12% loss'}]
-        write: '$= 3 \times 4\% = 12\%$'
-        point:
-          - {line: 12, kind: highlight, at: '12%', to: {doodle: oranges, part: tag2}}
-      - say: 'So he makes a loss of 12 percent, which is answer choice C.'
-        write: 'Loss $= 12\%$'
+        write: '$\therefore$ Loss $= 12\%$'
+      - section: 'Check'
+        say: 'Check: 12 percent of ₦1.25 is 0.15, and 1.25 minus 0.15 is 1.10, the new selling price.'
+        write: 'Check: $\dfrac{12}{100} \times 1.25 = 0.15$; $1.25 - 0.15 = 1.10 \ \checkmark$'
+      - section: 'Answer'
+        say: 'So he makes a loss of 12 percent, which is option C.'
+        write: '$\therefore$ Loss of $12\%$'
         answer: true
     traps:
-      A: 'You went for 8 percent. That''s the profit on the first sale. At ₦1.10 he sells below the cost of ₦1.25, so it''s a loss, and 0.15 over 1.25 is 12 percent.'
-      B: 'You went for 10 percent. The loss of ₦0.15 has to be compared with the cost price, ₦1.25, not with a selling price. 0.15 over 1.25 is 12 percent.'
-      D: 'You went for 15 percent. That''s the 15 kobo loss read straight as a percentage. We must divide it by the cost price, ₦1.25, which gives 12 percent.'
+      A: 'You went for 8 percent. That is the profit on the first sale. At ₦1.10 he sells below the C.P. of ₦1.25, so it is a loss, and 0.15 over 1.25 is 12 percent.'
+      B: 'You went for 10 percent. The loss of ₦0.15 must be measured against the C.P., ₦1.25, not against a selling price. 0.15 over 1.25 times 100 is 12 percent.'
+      D: 'You went for 15 percent. That is the 15 kobo loss read as a percentage. Divide it by the C.P., ₦1.25, and multiply by 100: 12 percent.'
   11:
     moments:
-      - say: 'Four boys and eight girls cut a field in 5 hours. Boys work at a quarter of the rate of girls. We want how many boys alone would cut the field in 3 hours. Picture the team in the field.'
+      - section: 'The question'
+        say: 'Four boys and eight girls cut a field in 5 hours, and a boy works at a quarter of a girl''s rate. How many boys alone cut it in 3 hours?'
         doodle: {name: 'custom:1987_q11_a', id: team, caption: '4 boys + 8 girls cut it in 5 hours'}
-        write: '$4$ boys $+ 8$ girls take $5$ hours'
-      - say: 'Boys and girls work at different speeds, so let''s measure all the work in one unit: the work one boy does in one hour. We''ll call it a boy-hour.'
-        write: 'Unit of work: 1 boy-hour'
-      - say: 'Look at the girls. A boy works at a quarter of a girl''s rate. Turned around, that means one girl does as much work as 4 boys.'
+        write: '4 boys + 8 girls take 5 hours. Boy''s rate $= \tfrac{1}{4}$ girl''s rate.'
+      - say: 'Boys and girls work at different rates, so we first change everyone into boys. Then we use proportion.'
+        write: 'Solution'
+      - section: 'Change girls to boys'
+        say: 'A boy does a quarter of a girl''s work. So one girl does the work of 4 boys.'
         doodle_do: [{id: team, op: label, part: girls, text: 'each = 4 boys'}]
-        write: '$1$ girl $= 4$ boys'
-      - say: 'So 8 girls are worth 8 times 4 boys, which is 32 boys. So the row of girls is worth 32 boys.'
+        write: '1 girl $= 4$ boys'
+      - say: 'So 8 girls do the work of 8 times 4, which is 32 boys.'
         doodle_do: [{id: team, op: stage, stage: 'custom:1987_q11_a2'}]
-        write: '$8$ girls $= 8 \times 4 = 32$ boys'
-        point:
-          - {line: 2, kind: arrow, text: 'swap'}
-      - say: 'Add the 4 real boys: 4 plus 32 is 36. So the whole team works like 36 boys. Picture the whole team as 36 boys.'
+        write: '8 girls $= 8 \times 4 = 32$ boys'
+      - say: 'Add the 4 real boys: 4 plus 32 is 36. The whole team works like 36 boys.'
         doodle: {name: 'person-small', id: crew, caption: 'the team, counted as boys', repeat: 36, layout: grid}
         write: 'Team $= 4 + 32 = 36$ boys'
-        point:
-          - {line: 4, kind: move, from: {line: 3, at: '= 32 boys'}, at: '32', text: 'girls as boys'}
-      - say: 'Every one of those 36 boys works 5 hours. 36 boys take 5 hours, so the field needs 36 times 5, which is 180 boy-hours of work.'
+      - section: 'Inverse proportion'
+        say: 'More boys finish in less time, so the number of boys and the time are in inverse proportion. Their product stays the same: boys times hours is the same work.'
+        write: 'Boys $\times$ hours $=$ constant'
+      - say: '36 boys take 5 hours, so the field needs 36 times 5, which is 180 boy-hours of work.'
         doodle_do: [{id: crew, op: group, n: 36, text: '5 hours each: 180 boy-hours'}]
-        write: 'Work $= 36 \times 5 = 180$ boy-hours'
+        write: '$36 \times 5 = 180$ boy-hours'
+      - say: 'Let the number of boys needed for 3 hours be n. Then n times 3 must also be 180.'
+        write: 'Let the number of boys be $n$: $\ n \times 3 = 180$'
         point:
-          - {line: 5, kind: move, from: {line: 4, at: '= 36 boys'}, at: '36'}
-      - say: 'Now we want those same 180 boy-hours done in only 3 hours. Let the number of boys be $b$. $b$ boys working for 3 hours do $b$ times 3 boy-hours.'
-        write: '$b \times 3 = 180$'
-        point:
-          - {line: 6, kind: move, from: {line: 5, at: '= 180'}, at: '180', text: 'same work'}
-      - say: 'Divide both sides by 3. 180 divided by 3 is 60. A crew of 60 boys does the same 180 boy-hours in 3 hours.'
+          - {line: 7, kind: move, from: {line: 6, at: '= 180'}, at: '180', text: 'same work'}
+      - say: 'Divide both sides by 3. 180 divided by 3 is 60.'
         doodle_do: [{id: crew, op: label, text: '60 boys for 3 hours'}]
-        write: '$b = \dfrac{180}{3} = 60$'
-        point:
-          - {line: 7, kind: move, from: {line: 6, at: 'b × [[3]]'}, at: '= [[3]]180', text: 'divide by 3'}
-      - say: 'Does that make sense? Boys are slow, and we have less time than before, so we''d expect a lot of them. And 60 boys for 3 hours is 60 times 3, which is 180 boy-hours. It fits.'
-        write: 'Check: $60 \times 3 = 180$ boy-hours'
-      - say: 'So 60 boys are needed, which is answer choice B.'
-        write: 'Boys needed $= 60$'
+        write: '$\therefore n = \dfrac{180}{3} = 60$'
+      - section: 'Check'
+        say: 'Check: 60 boys for 3 hours is 60 times 3, which is 180 boy-hours, the same work as the team''s. And less time needs more boys, as expected.'
+        write: 'Check: $60 \times 3 = 180 = 36 \times 5 \ \checkmark$'
+      - section: 'Answer'
+        say: 'So 60 boys are needed, which is option B.'
+        write: '$\therefore$ Number of boys $= 60$'
         answer: true
     traps:
-      A: 'You went for 180. That''s the total work in boy-hours. It still has to be shared over the 3 hours: 180 divided by 3 is 60 boys.'
-      C: 'You went for 25. That''s too few. A girl is worth 4 boys, so the team is worth 36 boys, the work is 180 boy-hours, and 180 over 3 hours is 60 boys.'
+      A: 'You went for 180. That is the total work in boy-hours. It is shared over the 3 hours: 180 divided by 3 is 60 boys.'
+      C: 'You went for 25. That is too few. A girl is worth 4 boys, so the team is worth 36 boys, the work is 180 boy-hours, and 180 over 3 hours is 60 boys.'
       D: 'You went for 20. That treats a girl as worth just one boy: 12 workers times 5 hours is 60, divided by 3 is 20. But each girl does the work of 4 boys, so the answer is 60.'
   12:
     moments:
@@ -711,42 +701,49 @@ lessons:
       C: 'You went for 3 root 14 over 28. The number part is right, but the surds cancel further. The top gives root 6 and the bottom root 3, and root 6 over root 3 is root 2.'
   16:
     moments:
-      - say: 'We have $p$ equals 2 over 3, times 1 minus $r$ squared, over $n$ squared. We want $n$ when $r$ is the square root of 1 over 3 and $p$ is 1.'
+      - section: 'The question'
+        say: 'A formula with a square root inside it. It looks heavy, but once we put in what we know, it shrinks fast and only $n$ is left.'
         write: '$p = \dfrac{2}{3} \cdot \dfrac{1 - r^{2}}{n^{2}}$'
-      - say: 'The plan: work out the pieces we know, put them in, then solve for $n$. First, $r$ squared. Squaring a square root just undoes it. Picture 1 as a bar of three thirds; r squared is one of them.'
+      - section: 'Solution'
+        say: 'We are given $p$ and $r$, and we want $n$. First we list the givens, then work out the pieces, then substitute and solve.'
+        write: 'Solution'
+      - say: '$p$ is 1, $r$ is the square root of 1 over 3, and $n$ is what we want.'
+        write: '$p = 1,\ r = \sqrt{\tfrac{1}{3}},\ n = ?$'
+      - say: 'First, $r$ squared. Squaring a square root undoes it, so $r$ squared is 1 over 3. Picture 1 as a bar of three thirds; $r$ squared is one of them.'
         doodle: {name: 'custom:1987_q16_a', id: bar, caption: '1 as three thirds'}
         write: '$r^{2} = \left(\sqrt{\tfrac{1}{3}}\right)^{2} = \tfrac{1}{3}$'
-      - say: 'Take the pink third off the bar. Then 1 minus $r$ squared is 1 minus 1 over 3. Write the 1 as 3 over 3; then 3 over 3 minus 1 over 3 is 2 over 3.'
+      - say: 'Take that third off the bar. 1 minus 1 over 3 leaves 2 over 3.'
         doodle_do: [{id: bar, op: cross, part: r2}, {id: bar, op: label, part: left, text: '⅔ left'}]
-        write: '$1 - r^{2} = \tfrac{3}{3} - \tfrac{1}{3} = \tfrac{2}{3}$'
-      - say: 'Now put $p$ equals 1, and the 2 over 3 we just found, into the formula.'
-        write: '$1 = \dfrac{2}{3} \cdot \dfrac{\tfrac{2}{3}}{n^{2}}$'
-        point:
-          - {line: 3, kind: move, from: {line: 2, at: '= 32'}, at: 'n2[[32]]', text: '1 − r²'}
-      - say: '2 over 3 times 2 over 3: 2 times 2 is 4 on top, and 3 times 3 is 9 underneath. So it is 4 over 9.'
-        write: '$1 = \dfrac{\tfrac{4}{9}}{n^{2}}$'
-      - say: 'Multiply both sides by $n$ squared to get it out of the bottom. Picture a square of 9 tiles with 4 of them shaded.'
+        write: '$1 - r^{2} = 1 - \tfrac{1}{3} = \tfrac{2}{3}$'
+      - section: 'Substitute'
+        say: 'Now substitute: $p$ is 1, and 1 minus $r$ squared is 2 over 3.'
+        write: '$1 = \dfrac{2}{3} \times \dfrac{\tfrac{2}{3}}{n^{2}}$'
+      - say: '2 over 3 times 2 over 3: 2 times 2 is 4 on top, 3 times 3 is 9 below. So the right-hand side is 4 over 9 $n$ squared.'
+        write: '$1 = \dfrac{4}{9n^{2}}$'
+      - say: 'Cross multiply: 1 times 9 $n$ squared equals 4 times 1.'
+        write: '$9n^{2} = 4$'
+      - say: 'Divide both sides by 9 to leave $n$ squared alone. Picture a square of 9 tiles with 4 of them shaded.'
         doodle: {name: 'custom:1987_q16_b', id: square, caption: 'n² as 4 of 9 tiles'}
-        write: '$n^{2} = \tfrac{4}{9}$'
+        write: '$n^{2} = \dfrac{4}{9}$'
         point:
-          - {line: 5, kind: move, from: {line: 4, at: '[[n2]]94'}, at: 'n2 =', text: 'times n²'}
-          - {line: 5, kind: highlight, at: 'n2', to: {doodle: square, part: shade}}
-      - say: 'Take the square root of both sides. The square root of 4 is 2, and the square root of 9 is 3. We take the positive root. The shaded square is 2 tiles of 3 along each side.'
+          - {line: 8, kind: highlight, at: 'n2', to: {doodle: square, part: shade}}
+      - say: 'Take the square root of both sides. The square root of 4 is 2 and the square root of 9 is 3. On the picture, the shaded square is 2 tiles of 3 along each side.'
         doodle_do: [{id: square, op: label, part: side, text: '⅔'}]
-        write: '$n = \sqrt{\tfrac{4}{9}} = \tfrac{2}{3}$'
-      - say: 'Let''s check by putting $n$ equals 2 over 3 back in. Then $n$ squared is 4 over 9, and the formula becomes 2 over 3, times 2 over 3 divided by 4 over 9.'
-        write: 'Check: $p = \dfrac{2}{3} \cdot \dfrac{\tfrac{2}{3}}{\tfrac{4}{9}}$'
-      - say: '2 over 3 divided by 4 over 9 is 2 over 3 times 9 over 4. That is 18 over 12, which is 3 over 2.'
-        write: '$\dfrac{2}{3} \div \dfrac{4}{9} = \dfrac{2}{3} \times \dfrac{9}{4} = \dfrac{18}{12} = \dfrac{3}{2}$'
-      - say: 'And 2 over 3 times 3 over 2 is 1, which is exactly the value of $p$ we were given.'
-        write: '$p = \dfrac{2}{3} \times \dfrac{3}{2} = 1$'
-      - say: 'So $n$ is 2 over 3, which is answer choice D.'
-        write: 'Therefore $n = \tfrac{2}{3}$'
+        write: '$n = \sqrt{\dfrac{4}{9}} = \dfrac{2}{3}$'
+      - say: 'Therefore $n$ is 2 over 3. We take the positive root, since every option is positive.'
+        write: '$\therefore n = \dfrac{2}{3}$'
+      - section: 'Check'
+        say: 'Check by putting $n$ equals 2 over 3 back. $n$ squared is 4 over 9, so the formula gives 2 over 3, times 2 over 3, divided by 4 over 9.'
+        write: '$p = \dfrac{2}{3} \times \dfrac{2}{3} \div \dfrac{4}{9}$'
+      - say: '2 over 3 times 2 over 3 is 4 over 9. Dividing by 4 over 9 is multiplying by 9 over 4, which gives 1. That is the $p$ we were given.'
+        write: '$= \dfrac{4}{9} \times \dfrac{9}{4} = 1\ \checkmark$'
+      - say: 'So $n$ is 2 over 3: option D.'
+        write: '$\therefore n = \tfrac{2}{3}$ (D)'
         answer: true
     traps:
-      A: 'You went for 3 over 2. That''s the reciprocal of the answer, from getting $n$ squared as 9 over 4. Multiplying both sides by $n$ squared gives $n$ squared equals 4 over 9, so $n$ is 2 over 3.'
-      B: 'You went for 3. That would make $n$ squared 9, and then the right side would be 4 over 9, divided by 9, far less than 1. $n$ squared is 4 over 9, so $n$ is 2 over 3.'
-      C: 'You went for 1 over 3. That squares to 1 over 9, not 4 over 9. Take the square root of 4 over 9: 2 over 3.'
+      A: 'You went for 3 over 2. That is the reciprocal of the answer, from getting $n$ squared as 9 over 4. Cross multiplying gives 9 $n$ squared equals 4, so $n$ squared is 4 over 9 and $n$ is 2 over 3.'
+      B: 'You went for 3. That would make $n$ squared 9, and then the right-hand side is 4 over 81, far less than 1. $n$ squared is 4 over 9, so $n$ is 2 over 3.'
+      C: 'You went for 1 over 3. That squares to 1 over 9, not 4 over 9. The square root of 4 over 9 is 2 over 3.'
   17:
     moments:
       - say: 'We have $a$ equals $u$ squared minus 3 $v$ squared, and $b$ equals 2 $u v$ plus $v$ squared. We want 2 $a$ minus $b$, times $a$ minus $b$ squared, when $u$ is 1 and $v$ is minus 1. Picture two machines, one making a and one making b, both fed the same two values.'
@@ -839,43 +836,46 @@ lessons:
       C: 'You went for 150k. That mixes in the fixed 15. The extra cost is just the number in front of $n$: 0.5 naira, which is 50 kobo.'
   19:
     moments:
-      - say: '$P$ varies inversely as $V$, and $V$ varies directly as $R$ squared. We want an equation linking $P$ straight to $R$, given that $R$ is 7 when $P$ is 2. Picture a chain from R through V to P.'
+      - section: 'The question'
+        say: '$P$ varies inversely as $V$, and $V$ varies directly as $R$ squared. We want one equation linking $P$ straight to $R$. Picture a chain from $R$ through $V$ to $P$.'
         doodle: {name: 'custom:1987_q19_a', id: chain, caption: 'R to V to P'}
-        write: '$P \propto \dfrac{1}{V},\quad V \propto R^{2}$'
-      - say: 'Look at the second link of the chain. First we turn each sentence into an equation. Inversely means that as $V$ goes up, $P$ goes down, so $P$ is a constant, $k$, over $V$.'
+        write: 'Given: $R = 7$ when $P = 2$'
+      - say: 'Solution. Write each statement with the sign of proportionality, then bring in a constant for each.'
+        write: 'Solution'
+      - section: 'The two variations'
+        say: '$P$ varies inversely as $V$: $P$ is proportional to 1 over $V$. So $P$ equals $k$ one over $V$. Number it equation one.'
         doodle_do: [{id: chain, op: highlight, part: flip}]
-        write: '$P = \dfrac{k}{V}$'
-      - say: 'Now the first link. Directly means $V$ grows in step with $R$ squared, so $V$ is another constant, $c$, times $R$ squared.'
+        write: '$P \propto \dfrac{1}{V}$ $\ \therefore\ P = \dfrac{k_{1}}{V} \quad \ldots (1)$'
+      - say: '$V$ varies directly as $R$ squared: $V$ equals $k$ two times $R$ squared. That is equation two.'
         doodle_do: [{id: chain, op: highlight, part: sq}]
-        write: '$V = cR^{2}$'
-      - say: 'Now we cut out $V$. Wherever the first equation has $V$, we put $c R$ squared instead. On the chain, we jump straight from R to P.'
+        write: '$V \propto R^{2}$ $\ \therefore\ V = k_{2}R^{2} \quad \ldots (2)$'
+      - section: 'Remove V'
+        say: 'Substitute equation two into equation one, to remove $V$. On the chain, we jump straight from $R$ to $P$.'
         doodle_do: [{id: chain, op: cross, part: vb}, {id: chain, op: stage, stage: 'custom:1987_q19_a2'}]
-        write: '$P = \dfrac{k}{cR^{2}}$'
+        write: 'Sub. (2) in (1): $\ P = \dfrac{k_{1}}{k_{2}R^{2}}$'
         point:
-          - {line: 3, kind: move, from: {line: 2, at: 'cR2'}, at: 'cR2', text: 'in place of V'}
-      - say: 'The two constants always appear together, so let''s call $k$ over $c$ one new constant, $K$.'
-        write: 'Let $K = \dfrac{k}{c}$: $\ P = \dfrac{K}{R^{2}}$'
-      - say: 'To find $K$, use the pair we are given: $R$ is 7 when $P$ is 2.'
-        write: '$2 = \dfrac{K}{7^{2}}$'
-      - say: '7 squared is 49.'
-        write: '$2 = \dfrac{K}{49}$'
+          - {line: 4, kind: move, from: {line: 3, at: '= [[k2R2]]'}, at: 'k2R2', text: 'V from (2)'}
+      - say: '$k$ one over $k$ two is a single constant. Let it be $k$.'
+        write: 'Let $k = \dfrac{k_{1}}{k_{2}}$: $\ P = \dfrac{k}{R^{2}}$'
+      - section: 'Find k'
+        say: 'Now use the given pair: $R$ is 7 when $P$ is 2.'
+        write: 'When $R = 7,\ P = 2$: $\ 2 = \dfrac{k}{7^{2}} = \dfrac{k}{49}$'
       - say: 'Multiply both sides by 49. 2 times 49 is 98.'
-        write: '$K = 2 \times 49 = 98$'
+        write: '$\therefore\ k = 2 \times 49 = 98$'
+      - section: 'The equation'
+        say: 'So the equation connecting $P$ and $R$ is $P$ equals 98 over $R$ squared.'
+        write: '$\therefore\ P = \dfrac{98}{R^{2}}$'
         point:
-          - {line: 7, kind: move, from: {line: 6, at: '[[49]]K'}, at: '× 49', text: 'times 49'}
-      - say: 'Put $K$ equals 98 back into our equation.'
-        write: '$P = \dfrac{98}{R^{2}}$'
-        point:
-          - {line: 8, kind: move, from: {line: 7, at: '= 98'}, at: '98', text: 'K found'}
-      - say: 'Multiply both sides by $R$ squared to tidy it up.'
+          - {line: 8, kind: move, from: {line: 7, at: '= 98'}, at: '98', text: 'k'}
+      - say: 'Multiply both sides by $R$ squared to clear the fraction.'
         write: '$PR^{2} = 98$'
         point:
-          - {line: 9, kind: move, from: {line: 8, at: '[[R2]]98'}, at: 'PR2', text: 'times R²'}
           - {line: 9, kind: highlight, at: 'PR2 = 98', to: {doodle: chain, part: rp}}
-      - say: 'Quick check: with $R$ equals 7, $P$ times 49 is 98, so $P$ is 2. It works.'
-        write: 'Check: $P \times 49 = 98 \Rightarrow P = 2$'
-      - say: 'So the relationship is $P R$ squared equals 98, which is answer choice B.'
-        write: 'Therefore $PR^{2} = 98$'
+      - section: 'Check'
+        say: 'Check with the given pair: 2 times 7 squared is 2 times 49, which is 98.'
+        write: 'Check: $\ 2 \times 7^{2} = 2 \times 49 = 98\ \checkmark$'
+      - say: 'So the relationship is $P R$ squared equals 98: option B.'
+        write: '$\therefore\ PR^{2} = 98$'
         answer: true
     traps:
       A: 'You went for $P$ equals 98 $R$ squared. That makes $P$ grow as $R$ grows, but an inverse link followed by a direct link makes $P$ shrink as $R$ grows. It''s 98 over $R$ squared.'
@@ -883,176 +883,204 @@ lessons:
       D: 'You went for $P$ equals $R$ squared over 98. That''s a direct link, with $P$ growing as $R$ grows. Also, with $R$ as 7 it gives a half, not 2. The answer is $P R$ squared equals 98.'
   20:
     moments:
-      - say: 'We want to make $y$ the subject of $Z$ equals $x$ squared plus 1 over $y$ cubed.'
+      - section: 'The question'
+        say: 'Make $y$ the subject. Here $y$ is wrapped like a parcel: it was cubed, put under 1, then added to $x$ squared. We unwrap it from the outside in.'
         write: '$Z = x^{2} + \dfrac{1}{y^{3}}$'
-      - say: 'To make $y$ the subject, we get the term with $y$ by itself, then undo what has been done to $y$, one layer at a time. Here $y$ was cubed, then put underneath a 1, then added to $x$ squared. Picture y wrapped in layers, like a parcel.'
         doodle: {name: 'custom:1987_q20_a', id: layers, caption: 'y is wrapped in layers'}
-        write: 'Layers on $y$: cube it, put it under $1$, add $x^{2}$'
-      - say: 'Peel the outer layer. So we peel the outside layer first: subtract $x$ squared from both sides.'
+      - section: 'Solution'
+        say: 'To change the subject, we undo the operations on $y$ in reverse order, one per line, doing the same thing to both sides.'
+        write: 'Solution'
+      - say: 'The outside layer is plus $x$ squared. Subtract $x$ squared from both sides.'
         doodle_do: [{id: layers, op: cross, part: outer}]
         write: '$Z - x^{2} = \dfrac{1}{y^{3}}$'
         point:
           - {line: 2, kind: move, from: {line: 0, at: '[[x2]] +'}, at: '− x2', text: 'across the ='}
-      - say: 'Next layer. Now $y$ cubed is on the bottom. If two things are equal, their reciprocals are equal too, so we flip both sides upside down.'
+      - say: 'Now $y$ cubed is under 1. Cross multiply: $y$ cubed times $Z$ minus $x$ squared equals 1.'
         doodle_do: [{id: layers, op: cross, part: mid}]
-        write: '$\dfrac{1}{Z - x^{2}} = y^{3}$'
-      - say: 'Let''s write it the other way round, with $y$ cubed on the left.'
+        write: '$y^{3}(Z - x^{2}) = 1$'
+      - say: 'Divide both sides by the bracket, $Z$ minus $x$ squared, so $y$ cubed is alone.'
         write: '$y^{3} = \dfrac{1}{Z - x^{2}}$'
-      - say: 'The last layer. Last, take the cube root of both sides. The cube root of a fraction is the cube root of the top over the cube root of the bottom, and the cube root of 1 is 1. Now y is out of its wrapping.'
-        doodle_do: [{id: layers, op: cross, part: cube}, {id: layers, op: circle, part: core}]
-        write: '$y = \dfrac{\sqrt[3]{1}}{\sqrt[3]{Z - x^{2}}} = \dfrac{1}{\sqrt[3]{Z - x^{2}}}$'
-      - say: 'A cube root is the same as the power 1 over 3. Notice that we take the cube root of the whole bracket, $Z$ minus $x$ squared, together.'
-        write: '$= \dfrac{1}{(Z - x^{2})^{\frac{1}{3}}}$'
-      - say: 'Let''s check with numbers: $x$ equals 1 and $Z$ equals 9. Then 9 equals 1 plus 1 over $y$ cubed, so 1 over $y$ cubed is 8.'
-        write: 'Check: $9 = 1 + \dfrac{1}{y^{3}} \Rightarrow \dfrac{1}{y^{3}} = 8$'
-      - say: 'Flip it: $y$ cubed is 1 over 8. And 2 cubed is 8, so $y$ is 1 over 2.'
-        write: '$y^{3} = \dfrac{1}{8} \Rightarrow y = \dfrac{1}{2}$'
-      - say: 'Our formula gives 1 over the cube root of 9 minus 1. 9 minus 1 is 8, and the cube root of 8 is 2, so we get 1 over 2. It matches.'
-        write: 'Formula: $\dfrac{1}{(9 - 1)^{\frac{1}{3}}} = \dfrac{1}{8^{\frac{1}{3}}} = \dfrac{1}{2}$'
-      - say: 'So $y$ equals 1 over the bracket $Z$ minus $x$ squared, to the power 1 over 3, which is answer choice C.'
-        write: 'Therefore $y = \dfrac{1}{(Z - x^{2})^{\frac{1}{3}}}$'
+      - say: 'The last layer is the cube. Take the cube root of both sides.'
+        doodle_do: [{id: layers, op: cross, part: cube}]
+        write: '$y = \sqrt[3]{\dfrac{1}{Z - x^{2}}}$'
+      - say: 'The cube root of 1 is 1. Notice that we take the cube root of the whole bracket, $Z$ minus $x$ squared, together. Now $y$ is out of its wrapping.'
+        doodle_do: [{id: layers, op: circle, part: core}]
+        write: '$y = \dfrac{1}{\sqrt[3]{Z - x^{2}}}$'
+      - say: 'A cube root is the same as the power 1 over 3. Therefore $y$ equals 1 over the bracket to the power 1 over 3.'
+        write: '$\therefore y = \dfrac{1}{(Z - x^{2})^{\frac{1}{3}}}$'
+      - section: 'Check'
+        say: 'Check with numbers. Take $x$ equals 1 and $Z$ equals 9. Our formula gives 1 over 9 minus 1, to the power 1 over 3. The cube root of 8 is 2, so $y$ is a half.'
+        write: '$y = \dfrac{1}{(9 - 1)^{\frac{1}{3}}} = \dfrac{1}{2}$'
+      - say: 'Put $y$ equals a half into the question. A half cubed is 1 over 8, and 1 over that is 8. 1 plus 8 is 9, which is $Z$.'
+        write: '$1^{2} + \dfrac{1}{(\frac{1}{2})^{3}} = 1 + 8 = 9\ \checkmark$'
+      - say: 'So $y$ is 1 over $Z$ minus $x$ squared, to the power 1 over 3: option C.'
+        write: '$\therefore y = \dfrac{1}{(Z - x^{2})^{\frac{1}{3}}}$ (C)'
         answer: true
     traps:
       A: 'You went for the bracket cubed. To undo $y$ cubed you take the cube root, which is the power 1 over 3, not the power 3.'
-      B: 'You went for $Z$ plus $x$ cubed. Moving $x$ squared across makes it minus $x$ squared, and it stays squared. The answer has $Z$ minus $x$ squared.'
-      D: 'You went for the cube root of $Z$ minus the cube root of $x$ squared. Roots don''t split over a subtraction: the cube root of 9 minus 1 is 2, but the cube root of 9 minus the cube root of 1 is about 1.08. Keep the bracket whole.'
+      B: 'You went for $Z$ plus $x$ cubed. Moving $x$ squared across makes it minus $x$ squared, and it stays squared. The bracket is $Z$ minus $x$ squared.'
+      D: 'You went for the cube root of $Z$ minus the cube root of $x$ squared. Roots do not split over a subtraction: the cube root of 9 minus 1 is 2, but the cube root of 9 minus the cube root of 1 is about 1.08. Keep the bracket whole.'
   21:
     moments:
-      - say: 'We want the values of $m$ that make $x$ squared plus 2 times $m$ plus 1 times $x$, plus $m$ plus 3, a perfect square.'
+      - section: 'The question'
+        say: 'Which values of $m$ turn this into a perfect square? It looks like guesswork, but one rule settles it: the discriminant must be zero.'
         write: '$x^{2} + 2(m + 1)x + m + 3$'
-      - say: 'A quadratic is a perfect square when it has just one repeated root. That happens exactly when the discriminant, $b$ squared minus 4 $a c$, is zero. Picture its graph: it just touches the axis, once.'
         doodle: {name: 'custom:1987_q21_a', id: curve, caption: 'a perfect square touches once'}
-        write: 'Perfect square: $b^{2} - 4ac = 0$'
-      - say: 'Let''s read off $a$, $b$ and $c$. $a$ is the number in front of $x$ squared, which is 1. $b$ is the number in front of $x$: 2 times, $m$ plus 1. And $c$ is the rest: $m$ plus 3.'
-        write: '$a = 1,\ b = 2(m + 1),\ c = m + 3$'
-      - say: 'We want the curve to touch, not cross. Put them into the discriminant.'
+      - section: 'Solution'
+        say: 'A perfect square has two equal roots. Its graph just touches the $x$-axis once. For equal roots, $b$ squared minus 4 $a c$ equals zero.'
+        write: 'Solution'
         doodle_do: [{id: curve, op: circle, part: touch}]
+      - say: 'So we write the condition first: $b$ squared minus 4 $a c$ equals zero.'
+        write: 'Perfect square: $b^{2} - 4ac = 0$'
+      - say: 'Read off $a$, $b$ and $c$. $a$ is the coefficient of $x$ squared, 1. $b$ is the coefficient of $x$: 2 times, $m$ plus 1. $c$ is the rest: $m$ plus 3.'
+        write: '$a = 1,\ b = 2(m + 1),\ c = m + 3$'
+      - say: 'Substitute them, each in brackets.'
         write: '$[2(m + 1)]^{2} - 4(1)(m + 3) = 0$'
         point:
-          - {line: 1, kind: box, text: 'the rule'}
-          - {line: 3, kind: move, from: {line: 2, at: 'b = 2(m + 1)'}, at: '[2(m + 1)]2', text: 'b'}
-          - {line: 3, kind: move, from: {line: 2, at: 'c = m + 3'}, at: '(m + 3)', text: 'c'}
+          - {line: 4, kind: move, from: {line: 3, at: 'b = 2(m + 1)'}, at: '[2(m + 1)]2', text: 'b'}
       - say: '2 times $m$ plus 1, all squared, is 2 squared, which is 4, times $m$ plus 1 squared.'
         write: '$4(m + 1)^{2} - 4(m + 3) = 0$'
       - say: 'Every term has a 4, so divide both sides by 4.'
         write: '$(m + 1)^{2} - (m + 3) = 0$'
-      - say: 'Expand. $m$ plus 1, all squared, is $m$ squared plus 2 $m$ plus 1. And the minus sign turns $m$ plus 3 into minus $m$ minus 3.'
+      - say: 'Open the brackets. $m$ plus 1, all squared, is $m$ squared plus 2 $m$ plus 1. The minus sign makes $m$ plus 3 into minus $m$ minus 3.'
         write: '$m^{2} + 2m + 1 - m - 3 = 0$'
-        point:
-          - {line: 6, kind: move, from: {line: 5, at: '− (m + 3)'}, at: '− m − 3', text: 'signs flip'}
-      - say: 'Collect like terms. 2 $m$ minus $m$ is $m$, and 1 minus 3 is minus 2.'
+      - say: 'Collect like terms. 2 $m$ minus $m$ is $m$, and 1 minus 3 is negative 2.'
         write: '$m^{2} + m - 2 = 0$'
-      - say: 'Now factorise. We need two numbers that multiply to minus 2 and add to 1. Those are 2 and minus 1.'
+      - section: 'Factorise'
+        say: 'Now factorise. The product is $a$ times $c$: 1 times negative 2, which is negative 2. The sum is $b$, which is 1.'
+        write: 'Product $= ac = -2$, Sum $= b = 1$'
+      - say: 'Two numbers that multiply to negative 2 and add to 1: plus 2 and negative 1.'
+        write: 'Factors: $+2$ and $-1$'
+      - say: 'Replace the middle term, $m$, with 2 $m$ minus $m$.'
+        write: '$m^{2} + 2m - m - 2 = 0$'
+      - say: 'Group in pairs. From the first pair take out $m$; from the second take out negative 1. Both brackets are $m$ plus 2.'
+        write: '$m(m + 2) - 1(m + 2) = 0$'
+      - say: 'Take out the common bracket, $m$ plus 2. What is left is $m$ minus 1.'
         write: '$(m + 2)(m - 1) = 0$'
-      - say: 'Either $m$ plus 2 is zero, so $m$ is minus 2, or $m$ minus 1 is zero, so $m$ is 1.'
-        write: '$m + 2 = 0 \Rightarrow m = -2;\quad m - 1 = 0 \Rightarrow m = 1$'
-      - say: 'Let''s check $m$ equals 1. Then 2 times, $m$ plus 1, is 4, and $m$ plus 3 is 4. That gives $x$ squared plus 4 $x$ plus 4, which is $x$ plus 2, all squared. Picture it as tiles: they fit into one square, with the 4 small squares filling the corner.'
+      - say: 'Either $m$ plus 2 is zero or $m$ minus 1 is zero.'
+        write: 'Either $m + 2 = 0$ or $m - 1 = 0$'
+      - say: 'Therefore $m$ is negative 2 or $m$ is 1.'
+        write: '$\therefore m = -2$ or $m = 1$'
+      - section: 'Check'
+        say: 'Check $m$ equals 1. Then $b$ is 2 times 2, which is 4, and $c$ is 4. We get $x$ squared plus 4 $x$ plus 4: the tiles fit into one square of side $x$ plus 2.'
         doodle: {name: 'custom:1987_q21_b', id: tiles, caption: 'x² + 4x + 4 as tiles'}
         doodle_do: [{id: tiles, op: highlight, part: units}]
-        write: 'Check $m = 1$: $x^{2} + 4x + 4 = (x + 2)^{2}$'
-      - say: 'And $m$ equals minus 2: 2 times minus 1 is minus 2, and minus 2 plus 3 is 1. That gives $x$ squared minus 2 $x$ plus 1, which is $x$ minus 1, all squared.'
-        write: 'Check $m = -2$: $x^{2} - 2x + 1 = (x - 1)^{2}$'
-      - say: 'So the values are 1 and minus 2, which is answer choice C.'
-        write: 'Therefore $m = 1$ or $m = -2$'
+        write: '$m = 1$: $x^{2} + 4x + 4 = (x + 2)^{2}\ \checkmark$'
+      - say: 'Check $m$ equals negative 2. $b$ is 2 times negative 1, which is negative 2, and $c$ is 1. That is $x$ minus 1, all squared.'
+        write: '$m = -2$: $x^{2} - 2x + 1 = (x - 1)^{2}\ \checkmark$'
+      - say: 'So $m$ is 1 or negative 2: option C.'
+        write: '$\therefore m = 1, -2$ (C)'
         answer: true
     traps:
-      A: 'You went for minus 1 and 1. Try $m$ equals minus 1: it gives $x$ squared plus 2, which is not a perfect square. Setting the discriminant to zero gives $m$ squared plus $m$ minus 2 equals zero, so $m$ is 1 or minus 2.'
-      B: 'You went for minus 1 and 2. Those are the right numbers with the signs reversed. From $m$ plus 2 times $m$ minus 1 equals zero, $m$ is minus 2 or plus 1.'
-      D: 'You went for 2 and minus 2. The equation is $m$ squared plus $m$ minus 2 equals zero, which factorises as $m$ plus 2 times $m$ minus 1, giving minus 2 and 1.'
+      A: 'You went for negative 1 and 1. Try $m$ equals negative 1: the expression becomes $x$ squared plus 2, which is not a perfect square. The equation $m$ squared plus $m$ minus 2 equals zero gives 1 and negative 2.'
+      B: 'You went for negative 1 and 2. Those are the right numbers with the signs reversed. From $m$ plus 2 times $m$ minus 1 equals zero, $m$ is negative 2 or 1.'
+      D: 'You went for 2 and negative 2. Only negative 2 is right. The factors are $m$ plus 2 and $m$ minus 1, so the other value is 1, not 2.'
   22:
     moments:
-      - say: 'We want to factorise 6 to the power 2 $x$ plus 1, minus 7 times 6 to the $x$, minus 5.'
+      - section: 'The question'
+        say: 'Powers of 6 everywhere, yet this is really a quadratic wearing a costume. Take the costume off and it factorises like any other.'
         write: '$6^{2x + 1} - 7(6^{x}) - 5$'
-      - say: 'The law of indices: when we multiply powers of the same base, we add the indices.'
-        write: '$a^{m} \times a^{n} = a^{m + n}$'
-      - say: 'This is really a quadratic in disguise. The first step is to rewrite 6 to the power 2 $x$ plus 1 using the laws of indices. Adding powers comes from multiplying, so it splits into 6 to the 1 times 6 to the 2 $x$. Picture it as cards: a 6, times two cards of 6 to the x.'
         doodle: {name: 'custom:1987_q22_a', id: cards, caption: 'a quadratic in disguise', size: scene}
+      - section: 'Solution'
+        say: 'First we rewrite 6 to the power 2 $x$ plus 1 with the laws of indices, so that only 6 to the $x$ appears.'
+        write: 'Solution'
+      - say: 'When we multiply powers of the same base, we add the indices. So 6 to the 2 $x$ plus 1 is 6 to the 1, times 6 to the 2 $x$.'
         write: '$6^{2x + 1} = 6^{1} \times 6^{2x}$'
-      - say: 'The law of indices: a power raised to another power multiplies the indices.'
-        write: '$(a^{m})^{n} = a^{mn}$'
-      - say: 'Look at the two blue cards. And 6 to the 2 $x$ is 6 to the $x$, squared, because squaring a power doubles the index.'
+      - say: 'And 6 to the 2 $x$ is 6 to the $x$, squared, because a power of a power multiplies the indices. Look at the two blue cards.'
         doodle_do: [{id: cards, op: highlight, part: cards}]
-        write: '$= 6 \times (6^{x})^{2}$'
-      - say: 'Put a u tag on each blue card. Now let $u$ stand for 6 to the $x$. Then the whole expression becomes 6 $u$ squared minus 7 $u$ minus 5.'
+        write: '$= 6(6^{x})^{2}$'
+      - say: 'Now let $u$ stand for 6 to the $x$. Put a $u$ tag on each blue card.'
         doodle_do: [{id: cards, op: stage, stage: 'custom:1987_q22_a2'}]
-        write: 'Let $u = 6^{x}$: $\ 6u^{2} - 7u - 5$'
+        write: 'Let $u = 6^{x}$'
+      - say: 'The whole expression becomes 6 $u$ squared, minus 7 $u$, minus 5. An ordinary quadratic in $u$.'
+        write: '$6u^{2} - 7u - 5$'
         point:
           - {line: 5, kind: highlight, at: '6u2 − 7u − 5', to: {doodle: cards, part: quad}}
-      - say: 'To factorise, multiply the first and last numbers: 6 times minus 5 is minus 30.'
-        write: '$6 \times (-5) = -30$'
-      - say: 'We need two numbers that multiply to minus 30 and add to minus 7. Minus 10 and 3 work: minus 10 times 3 is minus 30, and minus 10 plus 3 is minus 7.'
-        write: '$-10 \times 3 = -30,\quad -10 + 3 = -7$'
-      - say: 'So split the middle term, minus 7 $u$, into minus 10 $u$ plus 3 $u$.'
-        write: '$6u^{2} - 7u - 5 = 6u^{2} - 10u + 3u - 5$'
-      - say: 'Take 2 $u$ out of the first pair: 6 $u$ squared minus 10 $u$ is 2 $u$ times, 3 $u$ minus 5. From the second pair, take out 1.'
-        write: '$= 2u(3u - 5) + 1(3u - 5)$'
-      - say: 'Both parts share the bracket 3 $u$ minus 5, so take it out. Write the two brackets under the cards.'
+      - section: 'Factorise'
+        say: 'Product is $a$ times $c$: 6 times negative 5, which is negative 30. Sum is $b$: negative 7.'
+        write: 'Product $= ac = -30$, Sum $= b = -7$'
+      - say: 'Two numbers that multiply to negative 30 and add to negative 7: negative 10 and plus 3. Negative 10 plus 3 is negative 7.'
+        write: 'Factors: $-10$ and $+3$'
+      - say: 'Replace the middle term, negative 7 $u$, with negative 10 $u$ plus 3 $u$.'
+        write: '$6u^{2} - 10u + 3u - 5$'
+      - say: 'Group in pairs. From the first pair take out 2 $u$; from the second take out 1. Both brackets are 3 $u$ minus 5, so we are on track.'
+        write: '$2u(3u - 5) + 1(3u - 5)$'
+      - say: 'Take out the common bracket, 3 $u$ minus 5. What is left is 2 $u$ plus 1. Write the two brackets under the cards.'
         doodle_do: [{id: cards, op: stage, stage: 'custom:1987_q22_a3'}]
-        write: '$= (3u - 5)(2u + 1)$'
-        point:
-          - {line: 10, kind: highlight, at: '(3u - 5)(2u + 1)', to: {doodle: cards, part: fact}}
-      - say: 'Let''s check by expanding. 3 $u$ times 2 $u$ is 6 $u$ squared, 3 $u$ times 1 is 3 $u$, minus 5 times 2 $u$ is minus 10 $u$, and minus 5 times 1 is minus 5.'
-        write: 'Check: $(3u - 5)(2u + 1) = 6u^{2} + 3u - 10u - 5$'
-      - say: '3 $u$ minus 10 $u$ is minus 7 $u$, so we get back exactly what we started with.'
-        write: '$= 6u^{2} - 7u - 5$'
-      - say: 'Take the u tags off again. Finally put 6 to the $x$ back in place of $u$. That gives 3 times 6 to the $x$, minus 5, times 2 times 6 to the $x$, plus 1, which is answer choice A.'
+        write: '$(3u - 5)(2u + 1)$'
+      - say: 'Now put 6 to the $x$ back in place of $u$. Therefore we get 3 times 6 to the $x$ minus 5, times 2 times 6 to the $x$ plus 1.'
         doodle_do: [{id: cards, op: pulse, part: us}]
-        write: 'Therefore $\{3(6^{x}) - 5\}\{2(6^{x}) + 1\}$'
+        write: '$\therefore \{3(6^{x}) - 5\}\{2(6^{x}) + 1\}$'
         point:
-          - {line: 5, kind: arrow, at: 'u = 6x', text: 'put back'}
+          - {line: 4, kind: arrow, at: 'u = 6x', text: 'put back'}
+      - section: 'Check'
+        say: 'Check by opening the brackets. 3 $u$ times 2 $u$ is 6 $u$ squared, 3 $u$ times 1 is 3 $u$, negative 5 times 2 $u$ is negative 10 $u$, negative 5 times 1 is negative 5.'
+        write: '$6u^{2} + 3u - 10u - 5$'
+      - say: '3 $u$ minus 10 $u$ is negative 7 $u$. That is exactly what we started with.'
+        write: '$= 6u^{2} - 7u - 5\ \checkmark$'
+      - say: 'So the factors are 3 times 6 to the $x$ minus 5, and 2 times 6 to the $x$ plus 1: option A.'
+        write: '$\therefore \{3(6^{x}) - 5\}\{2(6^{x}) + 1\}$ (A)'
         answer: true
     traps:
-      B: 'You went for minus 1 in the second bracket. That expands to 6 $u$ squared minus 13 $u$ plus 5, which has the wrong middle and last terms. We need plus 1.'
-      C: 'You went for 2 times 6 to the $x$ minus 5, times 3 times 6 to the $x$ plus 1. That expands to 6 $u$ squared minus 13 $u$ minus 5. The middle term must be minus 7 $u$, so it''s 3 $u$ minus 5 times 2 $u$ plus 1.'
-      D: 'You went for 2 $u$ minus 5 times 3 $u$ minus 1. That expands to 6 $u$ squared minus 17 $u$ plus 5. Expanding your answer is a quick way to check.'
+      B: 'You went for negative 1 in the second bracket. 3 $u$ minus 5, times 2 $u$ minus 1, opens to 6 $u$ squared minus 13 $u$ plus 5: wrong middle and last terms. We need plus 1.'
+      C: 'You went for 2 $u$ minus 5, times 3 $u$ plus 1. That opens to 6 $u$ squared minus 13 $u$ minus 5. The factors negative 10 and 3 give 3 $u$ minus 5, times 2 $u$ plus 1.'
+      D: 'You went for 2 $u$ minus 5, times 3 $u$ minus 1. That opens to 6 $u$ squared minus 17 $u$ plus 5. Open your brackets to check before you choose.'
   23:
     moments:
-      - say: 'We have $x$ plus $y$ equals 5 and $x$ squared minus 2 $y$ squared equals 1. We want the two values of $y$.'
-        write: '$x + y = 5, \quad x^{2} - 2y^{2} = 1$'
-      - say: 'One equation is a straight line and the other has squares. The plan: make $x$ the subject of the simple one, then substitute it into the other.'
-        write: 'From $x + y = 5$:'
-      - say: 'Subtract $y$ from both sides. Picture 5 minus y written on a card.'
+      - section: 'The question'
+        say: 'One equation is simple and one has squares. The simple one is our way in: it hands us $x$ in terms of $y$.'
+        write: '$x + y = 5,\ x^{2} - 2y^{2} = 1$'
         doodle: {name: 'custom:1987_q23_a', id: swap, caption: 'x is the same as 5 − y', size: scene}
-        write: '$x = 5 - y$'
-        point:
-          - {line: 2, kind: move, from: {line: 0, at: 'x [[+ y]] = 5'}, at: '− y', text: 'across the ='}
-      - say: 'Watch the card drop into the x slot. Now replace $x$ in the second equation with this 5 minus $y$.'
+      - section: 'Solution'
+        say: 'We use substitution: make $x$ the subject of the linear equation, then put it into the quadratic one. First, number the equations.'
+        write: 'Solution'
+      - say: 'Equation 1: $x$ plus $y$ equals 5.'
+        write: '$x + y = 5 \quad \text{......(1)}$'
+      - say: 'Equation 2: $x$ squared minus 2 $y$ squared equals 1.'
+        write: '$x^{2} - 2y^{2} = 1 \quad \text{......(2)}$'
+      - say: 'From equation 1, subtract $y$ from both sides. Call this equation 3. It is written on the card.'
+        write: 'From (1): $x = 5 - y \quad \text{......(3)}$'
+      - say: 'Substitute equation 3 into equation 2. Watch the card drop into the $x$ slot.'
         doodle_do: [{id: swap, op: move, part: card, path: drop}]
+        write: 'Substitute (3) in (2):'
+      - say: 'In place of $x$ we write 5 minus $y$, in brackets.'
         write: '$(5 - y)^{2} - 2y^{2} = 1$'
-        point:
-          - {line: 3, kind: move, from: {line: 2, at: '5 − y'}, at: '(5 − y)', text: 'in place of x'}
-      - say: 'The rule for squaring a difference: a minus b, all squared, is a squared, minus 2 a b, plus b squared.'
-        write: '$(a - b)^{2} = a^{2} - 2ab + b^{2}$'
-      - say: 'Expand 5 minus $y$, all squared: 5 squared is 25, twice 5 times minus $y$ is minus 10 $y$, and minus $y$ squared is plus $y$ squared.'
-        write: '$(5 - y)^{2} = 25 - 10y + y^{2}$'
-      - say: 'Put that back into the equation.'
+      - say: 'Open the brackets. 5 minus $y$, all squared: 25, minus 10 $y$, plus $y$ squared.'
         write: '$25 - 10y + y^{2} - 2y^{2} = 1$'
-        point:
-          - {line: 6, kind: move, from: {line: 5, at: '25 − 10y + y2'}, at: '25 − 10y + y2', text: 'expanded'}
-      - say: '$y$ squared minus 2 $y$ squared is minus $y$ squared.'
+      - say: 'Collect like terms. $y$ squared minus 2 $y$ squared is negative $y$ squared.'
         write: '$25 - 10y - y^{2} = 1$'
-      - say: 'Subtract 1 from both sides. 25 minus 1 is 24.'
+      - say: 'Subtract 1 from both sides, so the right-hand side is zero. 25 minus 1 is 24.'
         write: '$24 - 10y - y^{2} = 0$'
-        point:
-          - {line: 8, kind: move, from: {line: 7, at: '= [[1]]'}, at: '24', text: '25 − 1'}
-      - say: 'Multiply every term by minus 1 so the $y$ squared is positive, and put the terms in order.'
+      - say: 'Multiply through by negative 1 so that $y$ squared is positive, and write the terms in order.'
         write: '$y^{2} + 10y - 24 = 0$'
-      - say: 'Now factorise. We need two numbers that multiply to minus 24 and add to 10: 12 and minus 2.'
+      - section: 'Factorise'
+        say: 'Product is $a$ times $c$: negative 24. Sum is $b$: 10.'
+        write: 'Product $= ac = -24$, Sum $= b = 10$'
+      - say: 'Two numbers that multiply to negative 24 and add to 10: plus 12 and negative 2.'
+        write: 'Factors: $+12$ and $-2$'
+      - say: 'Replace the middle term, 10 $y$, with 12 $y$ minus 2 $y$.'
+        write: '$y^{2} + 12y - 2y - 24 = 0$'
+      - say: 'Group in pairs. Take out $y$ from the first pair and negative 2 from the second. Both brackets are $y$ plus 12.'
+        write: '$y(y + 12) - 2(y + 12) = 0$'
+      - say: 'Take out the common bracket, $y$ plus 12. What is left is $y$ minus 2.'
         write: '$(y + 12)(y - 2) = 0$'
-      - say: 'Either $y$ plus 12 is zero, so $y$ is minus 12, or $y$ minus 2 is zero, so $y$ is 2. Both fit the slot.'
+      - say: 'Either $y$ plus 12 is zero or $y$ minus 2 is zero.'
+        write: 'Either $y + 12 = 0$ or $y - 2 = 0$'
+      - say: 'Therefore $y$ is negative 12 or 2.'
         doodle_do: [{id: swap, op: label, part: eq, text: 'y = −12 or y = 2'}]
-        write: '$y = -12$ or $y = 2$'
-      - say: 'Let''s check $y$ equals 2. From $x$ equals 5 minus $y$, $x$ is 3. Then 3 squared minus 2 times 2 squared is 9 minus 8, which is 1.'
-        write: 'Check $y = 2$: $x = 3,\ 3^{2} - 2(2^{2}) = 9 - 8 = 1$'
-      - say: 'And $y$ equals minus 12 gives $x$ equals 5 plus 12, which is 17. 17 squared is 289, and 2 times 144 is 288. 289 minus 288 is 1.'
-        write: 'Check $y = -12$: $x = 17,\ 289 - 288 = 1$'
-      - say: 'So the values of $y$ are minus 12 and 2, which is answer choice C.'
-        write: 'Therefore $y = -12,\ 2$'
+        write: '$\therefore y = -12$ or $y = 2$'
+      - section: 'Check'
+        say: 'Check $y$ equals 2. From equation 3, $x$ is 5 minus 2, which is 3. 3 squared is 9, and 2 times 2 squared is 8. 9 minus 8 is 1.'
+        write: '$y = 2$: $x = 3$, $9 - 8 = 1\ \checkmark$'
+      - say: 'Check $y$ equals negative 12. $x$ is 5 plus 12, which is 17. 17 squared is 289, and 2 times 144 is 288. 289 minus 288 is 1.'
+        write: '$y = -12$: $x = 17$, $289 - 288 = 1\ \checkmark$'
+      - say: 'So the values of $y$ are negative 12 and 2: option C.'
+        write: '$\therefore y = -12, 2$ (C)'
         answer: true
     traps:
-      A: 'You went for 12 and minus 2. Those are the right numbers with both signs flipped. From $y$ plus 12 times $y$ minus 2 equals zero, $y$ is minus 12 or 2.'
-      B: 'You went for minus 12 and 12. Try $y$ equals 12: then $x$ is minus 7, and 49 minus 288 is not 1. The values are minus 12 and 2.'
-      D: 'You went for 2 and minus 2. 2 works, but $y$ equals minus 2 gives $x$ equals 7, and 49 minus 8 is 41, not 1. The other value is minus 12.'
+      A: 'You went for 12 and negative 2. Those are the right numbers with both signs reversed. From $y$ plus 12 times $y$ minus 2 equals zero, $y$ is negative 12 or 2.'
+      B: 'You went for negative 12 and 12. Try $y$ equals 12: $x$ is negative 7, and 49 minus 288 is not 1. The values are negative 12 and 2.'
+      D: 'You went for 2 and negative 2. 2 works, but $y$ equals negative 2 gives $x$ equals 7, and 49 minus 8 is 41, not 1. The other value is negative 12.'
   24:
     moments:
       - say: 'We''re told that a figure with $n$ minus 2, all squared, sides has $n$ diagonals. We want the number of diagonals, $n$, for a 25-sided figure.'
@@ -1135,88 +1163,86 @@ lessons:
       D: 'You went for $x$ greater than 1. There the curve is above the axis, so the function is positive, not zero. It vanishes only at minus 1, 0 and 1.'
   26:
     moments:
-      - say: 'We want to solve the inequality $x$ minus 1 is greater than 4 times $x$ plus 2.'
+      - section: 'The question'
+        say: 'Solve $x$ minus 1 is greater than 4 times $x$ plus 2. Two options differ only in the direction of the sign, so the step to watch is the division at the end.'
         write: '$x - 1 > 4(x + 2)$'
-      - say: 'We solve an inequality like an equation, with one special rule: if we multiply or divide both sides by a negative number, the sign turns round.'
-        write: 'Rule: dividing by a negative turns $>$ into $<$'
-      - say: 'First expand the bracket. 4 times $x$ is 4 $x$, and 4 times 2 is 8.'
+      - say: 'Solution. Solve it like an equation, with one rule: multiplying or dividing both sides by a negative number reverses the sign.'
+        write: 'Solution'
+      - say: 'Open the bracket. 4 times $x$ is $4x$, and 4 times 2 is 8.'
         write: '$x - 1 > 4x + 8$'
-      - say: 'Subtract 4 $x$ from both sides, to bring the $x$ terms together on the left.'
-        write: '$x - 4x - 1 > 8$'
-        point:
-          - {line: 3, kind: move, from: {line: 2, at: '> [[4x]]'}, at: '− 4x', text: 'across'}
-      - say: '$x$ minus 4 $x$ is minus 3 $x$.'
-        write: '$-3x - 1 > 8$'
-      - say: 'Add 1 to both sides. 8 plus 1 is 9.'
+      - say: 'Collect like terms: $x$ terms on the left, numbers on the right. Subtract $4x$ from both sides, and add 1 to both sides.'
+        write: '$x - 4x > 8 + 1$'
+      - say: '$x$ minus $4x$ is minus $3x$, and 8 plus 1 is 9.'
         write: '$-3x > 9$'
+      - section: 'Divide by a negative'
+        say: 'Now divide both sides by minus 3. It is negative, so the greater-than sign reverses to less-than.'
+        write: 'Divide by $-3$, reverse the sign: $\ x < \dfrac{9}{-3}$'
         point:
-          - {line: 5, kind: move, from: {line: 4, at: '− 1 >'}, at: '9', text: '8 + 1'}
-      - say: 'Now here''s the moment to watch. We divide both sides by minus 3, a negative number, so the greater-than sign flips to less-than.'
-        write: '$x < \dfrac{9}{-3}$'
-        point:
-          - {line: 1, kind: box, text: 'the rule'}
-          - {line: 6, kind: move, from: {line: 5, at: '[[−3]]x'}, at: '< [[−3]]9', text: 'divide by −3'}
-      - say: 'Let me draw this on a number line, so we can see the values.'
-        show_sketch: true
+          - {line: 5, kind: move, from: {line: 4, at: '[[−3]]x'}, at: 'by [[−3]]', text: 'negative'}
       - say: '9 divided by minus 3 is minus 3.'
+        write: '$\therefore\ x < -3$'
+      - section: 'The number line'
+        say: 'On a number line: an open circle at minus 3, because minus 3 is not included, and an arrow to the left.'
+        diagram: {id: n, kind: numberline, range: [-7, 2]}
+        diagram_do:
+          - {id: n, op: interval, to: -3, to_open: true, text: 'x < −3', answer: true, 'on': 'open circle'}
+      - section: 'Check'
+        say: 'Check with minus 4, on the arrow. The left side is minus 4 minus 1, which is minus 5. The right side is 4 times minus 2, which is minus 8.'
+        write: 'Check $x = -4$: $\ -4 - 1 = -5,\ \ 4(-4 + 2) = -8$'
+        diagram_do:
+          - {id: n, op: point, x: -4, text: 'test −4'}
+      - say: 'Minus 5 is greater than minus 8, so it works.'
+        write: '$-5 > -8\ \checkmark$'
+      - say: 'So the solution is $x$ less than minus 3: option B.'
         write: '$x < -3$'
-        point:
-          - {figure: sketch, kind: circle, target: '−3'}
-          - {figure: sketch, kind: circle, target: 'x < −3'}
-      - say: 'Let''s check with a number below minus 3, say minus 4. The left side is minus 4 minus 1, which is minus 5. The right side is 4 times, minus 4 plus 2, which is 4 times minus 2, or minus 8.'
-        write: 'Check $x = -4$: $-4 - 1 = -5$, $4(-4 + 2) = -8$'
-        point:
-          - {figure: sketch, kind: circle, target: '−4'}
-      - say: 'Minus 5 is greater than minus 8, so it works. And a number above minus 3, like 0, fails: minus 1 is not greater than 8.'
-        write: '$-5 > -8$ true; $x = 0$: $-1 > 8$ false'
-        point:
-          - {figure: sketch, kind: circle, target: '0'}
-      - say: 'So the solution is $x$ is less than minus 3, which is answer choice B.'
-        write: 'Therefore $x < -3$'
         answer: true
     traps:
-      A: 'You went for $x$ greater than minus 3. That comes from dividing by minus 3 without flipping the sign. Dividing by a negative reverses the inequality, so it''s $x$ less than minus 3.'
+      A: 'You went for $x$ greater than minus 3. That divides by minus 3 without reversing the sign. Dividing by a negative reverses the inequality, so it''s $x$ less than minus 3.'
       C: 'You went for 2 less than $x$ less than 3. This inequality has only one boundary, at minus 3. Solving gives $x$ less than minus 3.'
-      D: 'You went for minus 3 less than $x$ less than minus 2. There''s no second boundary at minus 2. Solving step by step gives $x$ less than minus 3.'
+      D: 'You went for minus 3 less than $x$ less than minus 2. There is no second boundary at minus 2. Solving step by step gives $x$ less than minus 3.'
   27:
     moments:
-      - say: 'We want to simplify $x$ squared minus $y$ squared, over 2 $x$ squared plus $x y$ minus $y$ squared.'
+      - section: 'The question'
+        say: 'You cannot cancel the $x$ squared terms here. A fraction like this only simplifies by cancelling whole brackets, so first we make the brackets.'
         write: '$\dfrac{x^{2} - y^{2}}{2x^{2} + xy - y^{2}}$'
-      - say: 'To simplify a fraction like this, we factorise the top and the bottom completely, then cancel anything they share.'
-      - say: 'The difference of two squares: a squared minus b squared is a minus b, times a plus b.'
-        write: 'Difference of two squares: $a^{2} - b^{2} = (a - b)(a + b)$'
-      - say: 'The top is a difference of two squares. $x$ squared minus $y$ squared is $x$ minus $y$, times $x$ plus $y$.'
-        write: 'Top: $x^{2} - y^{2} = (x - y)(x + y)$'
-      - say: 'Now the bottom. It starts with 2 $x$ squared, so try 2 $x$ in one bracket and $x$ in the other. It ends in minus $y$ squared, so one $y$ is plus and the other is minus.'
-        write: 'Bottom: $2x^{2} + xy - y^{2} = (2x \pm y)(x \mp y)$'
-      - say: 'We need the middle term to come out as plus $x y$. Let''s try 2 $x$ minus $y$, times $x$ plus $y$.'
-        write: 'Try $(2x - y)(x + y)$'
-      - say: 'Expand it. 2 $x$ times $x$ is 2 $x$ squared. 2 $x$ times $y$ is 2 $x y$. Minus $y$ times $x$ is minus $x y$. Minus $y$ times $y$ is minus $y$ squared.'
+      - section: 'Solution'
+        say: 'We factorise the numerator and the denominator completely, then cancel any common factor.'
+        write: 'Solution'
+      - say: 'The numerator is a difference of two squares: $x$ squared minus $y$ squared is $x$ minus $y$, times $x$ plus $y$.'
+        write: 'Numerator: $x^{2} - y^{2} = (x - y)(x + y)$'
+      - section: 'Factorise the denominator'
+        say: 'Now the denominator, 2 $x$ squared plus $x y$ minus $y$ squared. We factorise it by product and sum, just like a quadratic in $x$.'
+        write: 'Denominator: $2x^{2} + xy - y^{2}$'
+      - say: 'The product is 2 times negative 1, the first and last coefficients: negative 2. The sum is the middle coefficient, 1.'
+        write: 'Product $= 2 \times (-1) = -2$, Sum $= 1$'
+      - say: 'Two numbers that multiply to negative 2 and add to 1: plus 2 and negative 1.'
+        write: 'Factors: $+2$ and $-1$'
+      - say: 'Replace the middle term, $x y$, with 2 $x y$ minus $x y$.'
         write: '$= 2x^{2} + 2xy - xy - y^{2}$'
-      - say: '2 $x y$ minus $x y$ is $x y$. That''s exactly the bottom, so these factors are right.'
-        write: '$= 2x^{2} + xy - y^{2}$'
-      - say: 'Now write the fraction with the top and the bottom both factorised. Picture each factor as a tile.'
+      - say: 'Group in pairs. From the first pair take out 2 $x$; from the second take out negative $y$. Both brackets are $x$ plus $y$.'
+        write: '$= 2x(x + y) - y(x + y)$'
+      - say: 'Take out the common bracket, $x$ plus $y$. What is left is 2 $x$ minus $y$.'
+        write: '$= (x + y)(2x - y)$'
+      - section: 'Cancel'
+        say: 'Now write the fraction with both parts factorised. Picture each factor as a tile.'
         doodle: {name: 'custom:1987_q27_a', id: tiles, caption: 'factor tiles', size: scene}
-        write: '$\dfrac{x^{2} - y^{2}}{2x^{2} + xy - y^{2}} = \dfrac{(x - y)(x + y)}{(2x - y)(x + y)}$'
-        point:
-          - {line: 8, kind: move, from: {line: 3, at: '= (x − y)(x + y)'}, at: '(x − y)(x + y)', text: 'top'}
-          - {line: 8, kind: move, from: {line: 5, at: '(2x − y)(x + y)'}, at: '(2x − y)(x + y)', text: 'bottom'}
-      - say: 'The bracket $x$ plus $y$ is on the top and on the bottom, so it cancels. Cross out the green pair of tiles.'
+        write: '$\dfrac{(x - y)(x + y)}{(2x - y)(x + y)}$'
+      - say: 'The bracket $x$ plus $y$ is on top and below, so cancel the common factor. Cross out that pair of tiles.'
         doodle_do: [{id: tiles, op: cross, part: t2}, {id: tiles, op: cross, part: b2}]
         write: '$= \dfrac{x - y}{2x - y}$'
-        point:
-          - {line: 8, kind: strike, at: '(x − y)[[(x + y)]]', text: 'cancel'}
-          - {line: 8, kind: strike, at: '(2x − y)[[(x + y)]]'}
-      - say: 'Check with $x$ equals 2 and $y$ equals 1. The original is 4 minus 1, over 8 plus 2 minus 1, which is 3 over 9, or 1 over 3. Our answer is 2 minus 1, over 4 minus 1, which is also 1 over 3.'
-        write: 'Check: $\dfrac{4 - 1}{8 + 2 - 1} = \dfrac{3}{9} = \dfrac{1}{3}$ and $\dfrac{2 - 1}{4 - 1} = \dfrac{1}{3}$'
-      - say: 'Two tiles are left. So the fraction simplifies to $x$ minus $y$, over 2 $x$ minus $y$, which is answer choice C.'
+      - section: 'Check'
+        say: 'Check with $x$ equals 2 and $y$ equals 1. The question gives 4 minus 1, over 8 plus 2 minus 1: 3 over 9, which is 1 over 3.'
+        write: '$x = 2, y = 1$: $\dfrac{4 - 1}{8 + 2 - 1} = \dfrac{1}{3}$'
+      - say: 'Our answer gives 2 minus 1, over 4 minus 1: also 1 over 3.'
+        write: '$\dfrac{2 - 1}{4 - 1} = \dfrac{1}{3}\ \checkmark$'
+      - say: 'The two tiles left are the answer: $x$ minus $y$, over 2 $x$ minus $y$. Option C.'
         doodle_do: [{id: tiles, op: circle, part: t1}, {id: tiles, op: circle, part: b1}]
-        write: 'Therefore $\dfrac{x - y}{2x - y}$'
+        write: '$\therefore \dfrac{x - y}{2x - y}$ (C)'
         answer: true
     traps:
-      A: 'You went for $x$ plus $y$ over 2 $x$ plus $y$. The common factor is $x$ plus $y$, and that''s what cancels. What''s left on top is $x$ minus $y$, and on the bottom 2 $x$ minus $y$.'
-      B: 'You went for $x$ plus $y$ over 2 $x$ minus $y$. That keeps the bracket that should cancel. $x$ plus $y$ is on the top and bottom, so it goes, leaving $x$ minus $y$ on top.'
-      D: 'You went for $x$ minus $y$ over 2 $x$ plus $y$. That factorises the bottom as 2 $x$ plus $y$ times $x$ minus $y$, which expands with minus $x y$ in the middle. The bottom is 2 $x$ minus $y$ times $x$ plus $y$.'
+      A: 'You went for $x$ plus $y$ over 2 $x$ plus $y$. The common factor is $x$ plus $y$, and that is what cancels. What is left on top is $x$ minus $y$, and below, 2 $x$ minus $y$.'
+      B: 'You went for $x$ plus $y$ over 2 $x$ minus $y$. That keeps the bracket that cancels. $x$ plus $y$ is on top and below, so it goes, leaving $x$ minus $y$ on top.'
+      D: 'You went for $x$ minus $y$ over 2 $x$ plus $y$. That factorises the denominator as 2 $x$ plus $y$, times $x$ minus $y$, which opens with negative $x y$ in the middle. The factors are $x$ plus $y$ and 2 $x$ minus $y$.'
   28:
     moments:
       - say: 'We want the minimum value of $y$ when $y$ equals $x$ squared minus 6 $x$ plus 8.'
@@ -1330,7 +1356,7 @@ lessons:
           - {line: 6, kind: move, from: {line: 5, at: '= [[4]] ×'}, at: '= [[22]] ×', text: '4 = 2²'}
       - say: 'The law of indices: when we multiply powers of the same base, we add the indices.'
         write: '$a^{m} \times a^{n} = a^{m + n}$'
-      - say: 'When we multiply powers of the same base, we add the indices. 2 plus 10 is 12. Write each tower as a power of 2.'
+      - say: 'So we add the indices. 2 plus 10 is 12. Write each tower as a power of 2.'
         doodle_do: [{id: towers, op: stage, stage: 'custom:1987_q30_a2'}]
         write: '$= 2^{2 + 10} = 2^{12}$'
         point:
@@ -1383,7 +1409,7 @@ lessons:
           - {figure: 0, kind: arc, target: PR, text: 'arc PR'}
       - say: 'The circle theorem: the angle at the centre is twice the angle at the circumference standing on the same arc.'
         write: 'Angle at the centre $= 2 \times$ angle at the circumference'
-      - say: 'The second fact: the angle at the centre is twice the angle at the circumference standing on the same arc. So $x$ is half of angle $P O R$.'
+      - say: 'That is the second fact. So $x$ is half of angle $POR$.'
         write: '$x = \tfrac{1}{2} \times \angle POR$'
         point:
           - {figure: 0, kind: circle, target: 'x', text: 'half of POR'}
@@ -1457,7 +1483,7 @@ lessons:
     moments:
       - say: 'A nonagon has three equal angles, and its other six angles add up to 1110 degrees. We want the size of one of the equal angles.'
         write: 'Nonagon: $3$ equal angles, other $6$ total $1110^{\circ}$'
-      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+      - say: 'Let me draw the nonagon with its angles.'
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: {x: 170, y: 76}}
@@ -1558,7 +1584,7 @@ lessons:
     moments:
       - say: 'Chords $Q R$ and $N P$ cross inside a circle at $X$. We''re given angle $R Q P$ is 37 degrees, angle $R Q N$ is 49 degrees, and angle $Q P N$ is 35 degrees. We want angle $P R Q$.'
         write: '$\angle RQP = 37^{\circ},\ \angle RQN = 49^{\circ},\ \angle QPN = 35^{\circ}$'
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - say: 'Let me draw the circle with the chords $QR$ and $NP$ crossing at $X$, and mark the angles we are given.'
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: '37°'}
@@ -1645,7 +1671,7 @@ lessons:
           - {figure: 0, kind: circle, target: x}
       - say: 'The angles in a triangle add up to 180 degrees.'
         write: 'Angles in a triangle add up to $180^{\circ}$'
-      - say: 'The angles of a triangle add up to 180 degrees.'
+      - say: 'So the three angles $x$, $y$ and $z$ add up to 180 degrees.'
         write: '$x + y + z = 180^{\circ}$'
         point:
           - {figure: 0, kind: circle, target: 'x'}
@@ -1743,7 +1769,7 @@ lessons:
         write: '$\sin 210^{\circ},\ \cos 210^{\circ},\ \tan 210^{\circ}$'
       - say: 'For an angle bigger than 90 degrees, we need two things: the size, which comes from a reference angle, and the sign, which comes from the quadrant.'
         write: 'Size from the reference angle, sign from the quadrant'
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - say: 'Let me draw the angle: 210 degrees, turned from the positive $x$-axis into the third quadrant.'
         show_sketch: true
       - say: '210 degrees is between 180 and 270, so it is in the third quadrant. It is 210 minus 180, which is 30 degrees past 180.'
         write: 'Reference angle $= 210^{\circ} - 180^{\circ} = 30^{\circ}$'
@@ -1794,7 +1820,7 @@ lessons:
           - {figure: sketch, kind: highlight, target: AB}
       - say: 'Pythagoras: the hypotenuse squared equals the opposite squared plus the adjacent squared.'
         write: 'Pythagoras: $\text{hypotenuse}^{2} = \text{opposite}^{2} + \text{adjacent}^{2}$'
-      - say: 'We will need the hypotenuse. By Pythagoras, the hypotenuse squared is the opposite squared plus the adjacent squared.'
+      - say: 'We will need the hypotenuse. Put the opposite and adjacent sides into Pythagoras.'
         write: '$\text{hyp}^{2} = (m^{2} - n^{2})^{2} + (2mn)^{2}$'
         point:
           - {figure: sketch, kind: highlight, target: AC}
@@ -1834,7 +1860,7 @@ lessons:
         write: '$XY = 8$ m, elevations $30^{\circ}$ and $60^{\circ}$'
         point:
           - {figure: sketch, kind: circle, target: '60°'}
-      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+      - say: 'Let me draw the pole and the angle of elevation.'
         show_sketch: true
       - say: 'The nearer point sees the top at the steeper angle, so $Y$, with 60 degrees, is nearer the pole, and $X$, with 30 degrees, is 8 metres farther back. Let the height be $h$, and the distance from $Y$ to the foot of the pole be $d$.'
         write: 'Let height $= h$, distance from $Y$ to foot $= d$'
@@ -1898,7 +1924,7 @@ lessons:
           - {figure: sketch, kind: circle, target: '12 m', text: 'long'}
           - {figure: sketch, kind: circle, target: '9 m', text: 'wide'}
           - {figure: sketch, kind: circle, target: '8 m', text: 'high'}
-      - say: 'Let me draw the shape, so we can see its measurements.'
+      - say: 'Let me draw the room as a cuboid.'
         show_sketch: true
       - say: 'Now let me draw in the two diagonals: the floor diagonal $BD$, and the room diagonal $BH$ rising above it.'
         show_sketch: sketch_b
@@ -2006,7 +2032,7 @@ lessons:
     moments:
       - say: 'A pyramid has a square base of side 8 centimetres, with its vertex directly above the centre. Each slant edge is 4 root 3 centimetres. We want the height.'
         write: 'Base side $= 8$ cm, slant edge $= 4\sqrt{3}$ cm'
-      - say: 'Let me draw the shape, so we can see its measurements.'
+      - say: 'Let me draw the pyramid.'
         show_sketch: true
         point:
           - {figure: sketch, kind: highlight, target: VC, text: 'slant edge'}
@@ -2108,7 +2134,7 @@ lessons:
     moments:
       - say: 'We want the locus of the midpoints of all chords 6 centimetres long, in a circle of radius 5 centimetres with centre $O$.'
         write: 'Chords of length $6$ cm, circle radius $5$ cm, centre $O$'
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - say: 'Let me draw the circle, radius 5 cm, with one chord 6 cm long.'
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: 'O', text: 'centre'}
@@ -2353,7 +2379,7 @@ lessons:
       - say: 'We have five shapes: a square, a rectangle, a rhombus, a kite and a trapezium. We want the probability that one picked at random is a parallelogram. Picture the five shapes written on slips in a box.'
         doodle: {name: 'custom:1987_q50_a', id: box, caption: 'five shapes on slips', size: scene}
         write: 'Shapes: square, rectangle, rhombus, kite, trapezium'
-      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+      - say: 'Let me draw the five shapes.'
         show_sketch: true
       - say: 'A parallelogram is a four-sided shape with both pairs of opposite sides parallel. Let''s test each shape against that.'
         write: 'Parallelogram: both pairs of opposite sides parallel'

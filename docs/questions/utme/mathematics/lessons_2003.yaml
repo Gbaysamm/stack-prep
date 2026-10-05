@@ -9,206 +9,208 @@ exam_year: 2003
 lessons:
   1:
     moments:
-      - say: 'Let''s simplify 1 minus the bracket, $2\tfrac{1}{3}$ times $1\tfrac{1}{4}$, plus 3 over 5. The bracket comes first.'
+      - section: 'The question'
+        say: '1 minus a bracket of two mixed numbers, plus 3 over 5. The answer comes out negative, and the options are close together. Keep every sign.'
         write: '$1 - \left(2\tfrac{1}{3} \times 1\tfrac{1}{4}\right) + \tfrac{3}{5}$'
-      - say: 'To multiply mixed numbers, we must first turn each one into an improper fraction: a single fraction whose top is bigger than its bottom. We can''t multiply the whole parts and the fraction parts separately.'
-      - say: 'Start with 2 and 1 over 3. Picture it as bars cut into thirds. The whole number 2 is 6 over 3, because 2 times 3 is 6.'
+      - section: 'Solution'
+        say: 'Solution. BODMAS: Brackets, Of, Division, Multiplication, Addition, Subtraction. The bracket comes first.'
+        write: 'By BODMAS: the bracket first'
+      - section: 'The bracket'
+        say: 'To multiply mixed numbers, first change each to an improper fraction. 2 and 1 over 3: 2 times 3 is 6, plus 1 is 7. So 7 over 3. Picture the thirds.'
+        write: '$2\tfrac{1}{3} = \dfrac{2 \times 3 + 1}{3} = \dfrac{7}{3}$'
         doodle: {name: 'custom:2003_q01_a', id: bars, caption: 'Mixed numbers as bars'}
-        write: 'First number: $2\tfrac{1}{3} = \dfrac{6}{3} + \dfrac{1}{3}$'
-      - say: 'Count the shaded thirds: 6 over 3 plus 1 over 3 is 7 over 3.'
         doodle_do:
           - {id: bars, op: label, part: thirds, text: '7 thirds = 7/3'}
-        write: '$= \dfrac{7}{3}$'
-      - say: 'Now 1 and 1 over 4, drawn as bars cut into quarters. The whole number 1 is 4 over 4, and adding 1 over 4 gives 5 over 4.'
+      - say: '1 and 1 over 4: 1 times 4 is 4, plus 1 is 5. So 5 over 4.'
+        write: '$1\tfrac{1}{4} = \dfrac{1 \times 4 + 1}{4} = \dfrac{5}{4}$'
         doodle_do:
           - {id: bars, op: stage, stage: 'custom:2003_q01_a2'}
           - {id: bars, op: label, part: quarters, text: '5 quarters = 5/4'}
-        write: 'Second number: $1\tfrac{1}{4} = \dfrac{4}{4} + \dfrac{1}{4} = \dfrac{5}{4}$'
-      - say: 'So the bracket is 7 over 3 times 5 over 4. To multiply fractions, we multiply the tops and multiply the bottoms.'
-        write: 'The bracket: $\dfrac{7}{3} \times \dfrac{5}{4} = \dfrac{7 \times 5}{3 \times 4}$'
-        point:
-          - {line: 5, kind: move, from: {line: 3, at: '= 37'}, at: '37', text: 'first'}
-          - {line: 5, kind: move, from: {line: 4, at: '= 45'}, at: '× 45', text: 'second'}
-      - say: '7 times 5 is 35, and 3 times 4 is 12. So the bracket is 35 over 12.'
-        write: '$= \dfrac{35}{12}$'
-      - say: 'Now put 35 over 12 back in place of the bracket. The whole expression becomes 1 minus 35 over 12, plus 3 over 5.'
-        write: 'So the expression $= 1 - \dfrac{35}{12} + \dfrac{3}{5}$'
-        point:
-          - {line: 7, kind: move, from: {line: 6, at: '1235'}, at: '1235', text: 'the bracket'}
-      - say: 'To add and subtract fractions, they need the same bottom number. 12 and 5 share no factor, so the common denominator is 12 times 5, which is 60.'
-        write: 'Common denominator: $12 \times 5 = 60$'
-      - say: 'Rewrite each term over 60. 1 is 60 over 60. For 35 over 12, multiply top and bottom by 5 to get 175 over 60. For 3 over 5, multiply top and bottom by 12 to get 36 over 60.'
-        write: '$= \dfrac{60}{60} - \dfrac{175}{60} + \dfrac{36}{60}$'
-      - say: 'With the same bottom, we only work with the tops: 60 minus 175 plus 36, all over 60.'
+      - say: 'Now multiply: top times top, 7 times 5 is 35. Bottom times bottom, 3 times 4 is 12.'
+        write: 'Bracket $= \dfrac{7}{3} \times \dfrac{5}{4} = \dfrac{35}{12}$'
+      - section: 'Add and subtract'
+        say: 'Put 35 over 12 in place of the bracket.'
+        write: '$= 1 - \dfrac{35}{12} + \dfrac{3}{5}$'
+      - say: 'To add and subtract fractions we need a common denominator. The L.C.M. of 12 and 5 is 60.'
+        write: 'L.C.M. of $12$ and $5 = 60$'
+      - say: '1 is 60 over 60. 60 divided by 12 is 5, and 5 times 35 is 175. 60 divided by 5 is 12, and 12 times 3 is 36.'
         write: '$= \dfrac{60 - 175 + 36}{60}$'
       - say: '60 minus 175 is negative 115, and negative 115 plus 36 is negative 79.'
-        write: '$= \dfrac{-115 + 36}{60} = -\dfrac{79}{60}$'
-      - say: 'The options are mixed numbers, so let''s convert back. 60 goes into 79 once, with 19 left over. So 79 over 60 is 1 and 19 over 60.'
+        write: '$= \dfrac{-79}{60}$'
+      - say: 'Change back to a mixed number: 60 goes into 79 once, remainder 19. So negative 1 and 19 over 60.'
         write: '$= -1\tfrac{19}{60}$'
-      - say: 'So the value is negative 1 and 19 over 60, which is answer choice C.'
-        write: 'Answer: $-1\tfrac{19}{60}$'
+      - section: 'Check'
+        say: 'Check with decimals: 35 over 12 is about 2.917, and 3 over 5 is 0.6. 1 minus 2.917 plus 0.6 is about negative 1.317, and 79 over 60 is about 1.317. It agrees.'
+        write: 'Check: $1 - 2.917 + 0.6 \approx -1.317 \approx -\dfrac{79}{60}$ ✓'
+      - say: 'Therefore the value is negative 1 and 19 over 60: option C.'
+        write: '$\therefore$ value $= -1\tfrac{19}{60}$ (C)'
         answer: true
     traps:
-      A: 'You went for negative 2 and 31 over 60. That comes from subtracting the 3 over 5 instead of adding it: 60 minus 175 minus 36 is negative 151, which is negative 2 and 31 over 60. The 3 over 5 has a plus sign in front of it.'
-      B: 'You went for negative 2 and 7 over 15. Something slipped in the bracket. Turn both mixed numbers into improper fractions first: 7 over 3 times 5 over 4 is 35 over 12. Then over 60 the tops are 60 minus 175 plus 36, which is negative 79.'
-      D: 'You went for negative 1 and 11 over 15, which is negative 104 over 60. Recheck the tops over 60: 60 minus 175 plus 36 is negative 79, so the answer is negative 79 over 60, or negative 1 and 19 over 60.'
+      A: 'You went for negative 2 and 31 over 60. That subtracts the 3 over 5 instead of adding it: 60 minus 175 minus 36 is negative 151. The 3 over 5 has a plus sign in front.'
+      B: 'You went for negative 2 and 7 over 15. Something slipped in the bracket. Change both mixed numbers to improper fractions first: 7 over 3 times 5 over 4 is 35 over 12.'
+      D: 'You went for negative 1 and 11 over 15, which is negative 104 over 60. Over the L.C.M., 60, the tops are 60 minus 175 plus 36, which is negative 79.'
 
   2:
     moments:
-      - say: 'Picture the cinema hall, and under it one strip for everyone in it: children, men and women. $22\tfrac{1}{2}\%$ are children, $47\tfrac{1}{2}\%$ are men, and 84 are women. We want the number of men.'
+      - section: 'The question'
+        say: 'Children are 22 and a half percent of a cinema hall, men 47 and a half percent, and there are 84 women. How many men? Picture the hall as one strip.'
+        write: 'Children $22\tfrac{1}{2}\%$, men $47\tfrac{1}{2}\%$, women 84'
         doodle: {name: 'custom:2003_q02_a', id: hall, caption: 'Children, men and 84 women'}
-        write: 'Children $22\tfrac{1}{2}\%$, men $47\tfrac{1}{2}\%$, women 84 people'
-      - say: 'Everyone in the hall is a child, a man or a woman. So the three percentages together make the whole hall, which is 100 percent: the whole strip.'
+      - section: 'Solution'
+        say: 'Solution. Let the number of people in the hall be N.'
+        write: 'Let the number of people in the hall $= N$'
+      - say: 'Everyone is a child, a man or a woman, so the three percentages make 100 percent, the whole strip.'
+        write: 'Children $+$ men $+$ women $= 100\%$'
         doodle_do:
           - {id: hall, op: highlight, part: strip}
-        write: '$\text{children} + \text{men} + \text{women} = 100\%$'
-      - say: 'We know two of the percentages, so let''s add them. 22 plus 47 is 69, and a half plus a half is 1 more, so together they make 70 percent of the strip.'
+      - section: 'The women'
+        say: 'Children and men: 22 and a half plus 47 and a half is 70 percent.'
+        write: '$22\tfrac{1}{2}\% + 47\tfrac{1}{2}\% = 70\%$'
         doodle_do:
           - {id: hall, op: stage, stage: 'custom:2003_q02_a2'}
-        write: 'Children and men: $22\tfrac{1}{2}\% + 47\tfrac{1}{2}\% = 69\% + 1\% = 70\%$'
-      - say: 'So the women are whatever is left of the strip. 100 minus 70 is 30.'
+      - say: 'So the women are 100 minus 70, which is 30 percent of the hall.'
+        write: 'Women $= 100\% - 70\% = 30\%$'
         doodle_do:
           - {id: hall, op: stage, stage: 'custom:2003_q02_a3'}
-        write: 'Women: $100\% - 70\% = 30\%$'
         point:
-          - {line: 3, kind: highlight, at: '= 30%', to: {doodle: hall, part: women-pct}}
-      - say: 'Now bring in the number. The women are 84 people, and we''ve just found they are 30 percent of the hall. Let''s call the number of people in the whole hall $N$.'
-        write: '$30\% \text{ of } N = 84$'
-        point:
-          - {line: 4, kind: move, from: {line: 3, at: '= 30%'}, at: '30%', text: 'women'}
-          - {line: 4, kind: move, from: {line: 0, at: '84'}, at: '84', text: 'given'}
-      - say: '30 percent is 30 over 100, which is 0.3. So 0.3 times $N$ equals 84.'
-        write: '$0.3 \times N = 84$'
-      - say: 'To get $N$ by itself, divide both sides by 0.3.'
-        write: '$N = \dfrac{84}{0.3}$'
-        point:
-          - {line: 6, kind: move, from: {line: 5, at: '0.3'}, at: '0.3', text: 'divide across'}
-      - say: 'Multiply the top and the bottom by 10 to clear the decimal. That gives 840 over 3, and 840 divided by 3 is 280.'
+          - {line: 4, kind: highlight, at: '= 30%', to: {doodle: hall, part: women-pct}}
+      - section: 'The whole hall'
+        say: '30 percent of N is the 84 women. 30 percent of N means 30 over 100 times N.'
+        write: '$\dfrac{30}{100} \times N = 84$'
+      - say: 'Multiply both sides by 100 over 30: N is 84 times 100, over 30.'
+        write: '$N = \dfrac{84 \times 100}{30}$'
+      - say: 'Cancel: 84 over 30 is 14 over 5, and 14 times 100 over 5 is 14 times 20, which is 280.'
+        write: '$= 14 \times 20 = 280$'
         doodle_do:
           - {id: hall, op: label, part: hall, text: '280 people in the hall'}
-        write: '$= \dfrac{840}{3} = 280$'
         point:
           - {line: 7, kind: highlight, at: '280', to: {doodle: hall, part: hall}}
-      - say: 'Let''s check: 30 percent of 280 is 3 times 28, which is 84. Good, that''s exactly the number of women.'
-        write: 'Check: $0.3 \times 280 = 3 \times 28 = 84$'
-      - say: 'Now the men. They are $47\tfrac{1}{2}$ percent of the 280 people we just found. As a decimal, 47 and a half percent is 0.475.'
-        write: 'Men $= 0.475 \times 280$'
+      - section: 'The men'
+        say: 'The men are 47 and a half percent of 280. 47 and a half is 95 over 2, so that is 95 over 2, over 100, times 280.'
+        write: 'Men $= \dfrac{95}{2 \times 100} \times 280$'
         point:
-          - {line: 9, kind: move, from: {line: 0, at: '4721%'}, at: '0.475', text: 'as a decimal'}
-          - {line: 9, kind: move, from: {line: 7, at: '= 280'}, at: '280', text: 'whole hall'}
-      - say: 'Let''s split 0.475 into 0.4 plus 0.075, and multiply each part by 280.'
-        write: '$= 0.4 \times 280 + 0.075 \times 280$'
-      - say: '0.4 times 280 is 112. And 0.075 times 280 is 21.'
-        write: '$= 112 + 21$'
-      - say: '112 plus 21 is 133. So the men''s part of the strip is 133 people, which is answer choice A.'
+          - {line: 8, kind: move, from: {line: 7, at: '= [[280]]'}, at: '× [[280]]', text: 'N'}
+      - say: 'Cancel: 280 over 200 is 7 over 5. So 95 times 7 over 5: 95 over 5 is 19, and 19 times 7 is 133.'
+        write: '$= \dfrac{95 \times 7}{5} = 19 \times 7 = 133$'
         doodle_do:
           - {id: hall, op: label, part: men, text: '133 men'}
-        write: '$= 133$'
+      - section: 'Check'
+        say: 'Check: children are 22 and a half percent of 280, which is 63. 63 plus 133 plus 84 is 280, the whole hall. It agrees.'
+        write: 'Check: $63 + 133 + 84 = 280$ ✓'
+      - say: 'Therefore there are 133 men in the hall: option A.'
+        write: '$\therefore$ number of men $= 133$ (A)'
         answer: true
-        point:
-          - {line: 12, kind: highlight, at: '133', to: {doodle: hall, part: men}}
     traps:
-      B: 'You went for 113. That''s very close, so check the arithmetic: 0.4 times 280 is 112, and 0.075 times 280 is 21, and together they make 133.'
-      C: 'You went for 63. That''s $22\tfrac{1}{2}\%$ of 280, which is the number of children. The question asks for the men, who are $47\tfrac{1}{2}\%$ of the hall.'
-      D: 'You went for 84. That''s the number of women, handed to you in the question. Use it to find the whole hall, 280, and then find the men.'
+      B: 'You went for 113. That is a slip in the arithmetic. 47 and a half percent of 280 is 19 times 7, which is 133.'
+      C: 'You went for 63. That is 22 and a half percent of 280, the number of children. The question asks for the men, who are 47 and a half percent.'
+      D: 'You went for 84. That is the number of women, given in the question. Use it to find N, 280, and then find the men.'
 
   3:
     moments:
-      - say: 'We need to multiply $213_4$ by $23_4$. The small 4 tells us these are base-four numbers, so their digits don''t mean what they do in ordinary base ten.'
-        write: '$213_4 \times 23_4$'
-      - say: 'The plan: change both numbers into base ten, multiply there, and then change the answer back into base four.'
-      - say: 'In base four, each place is worth four times the place to its right. From the right, the place values are 1, 4, 16, 64 and 256.'
-        write: 'Place values: $256,\ 64,\ 16,\ 4,\ 1$'
-      - say: 'So $213_4$ means 2 sixteens, 1 four and 3 ones. Picture them as blocks: the digits count the blocks.'
-        doodle: {name: 'custom:2003_q03_a', id: blocks, caption: '213 in base four, as blocks'}
-        write: 'First number: $213_4 = 2 \times 16 + 1 \times 4 + 3 \times 1$'
-      - say: 'The two big blocks are 2 times 16, which is 32, 1 times 4 is 4, and 3 times 1 is 3.'
-        doodle_do:
-          - {id: blocks, op: label, part: sixteens, text: '2 × 16 = 32'}
-        write: '$= 32 + 4 + 3$'
-      - say: '32 plus 4 plus 3 is 39.'
-        doodle_do:
-          - {id: blocks, op: label, part: value, text: '39 in base ten'}
-        write: '$= 39$'
-        point:
-          - {line: 5, kind: highlight, at: '39', to: {doodle: blocks, part: value}}
-      - say: 'Next, $23_4$ means 2 fours and 3 ones. That''s 8 plus 3, which is 11.'
-        write: 'Second number: $23_4 = 2 \times 4 + 3 \times 1 = 8 + 3 = 11$'
-      - say: 'Now multiply the two base-ten numbers we just found. 39 times 11 is 39 times 10, plus 39. That''s 390 plus 39, which is 429.'
-        write: 'Multiply: $39 \times 11 = 390 + 39 = 429$'
-        point:
-          - {line: 7, kind: move, from: {line: 5, at: '= 39'}, at: '39 ×', text: 'first'}
-          - {line: 7, kind: move, from: {line: 6, at: '= 11'}, at: '× 11', text: 'second'}
-      - say: 'Now change 429 back into base four. Start with the biggest place value that fits, 256. It goes into 429 once, leaving 429 minus 256, which is 173.'
-        write: '$429 = 1 \times 256 + 173$'
-        point:
-          - {line: 2, kind: circle, at: '256', text: 'biggest'}
-      - say: 'Next place value, 64. It goes into 173 twice. 2 times 64 is 128, and 173 minus 128 leaves 45.'
-        write: '$173 = 2 \times 64 + 45$'
-      - say: 'Next, 16 goes into 45 twice. 2 times 16 is 32, and 45 minus 32 leaves 13.'
-        write: '$45 = 2 \times 16 + 13$'
-      - say: 'Then 4 goes into 13 three times. 3 times 4 is 12, leaving 1, and that 1 is the ones digit.'
-        write: '$13 = 3 \times 4 + 1$'
-      - say: 'Putting those pieces together, 429 is one 256, two 64s, two 16s, three 4s and one 1.'
-        write: 'So $429 = 1 \times 256 + 2 \times 64 + 2 \times 16 + 3 \times 4 + 1$'
-        point:
-          - {line: 12, kind: move, from: {line: 8, at: '1 × 256'}, at: '1 × 256'}
-          - {line: 12, kind: move, from: {line: 9, at: '2 × 64'}, at: '2 × 64'}
-          - {line: 12, kind: move, from: {line: 10, at: '2 × 16'}, at: '2 × 16', text: 'the pieces'}
-      - say: 'Reading the digits in order: 1, 2, 2, 3, 1. So the product is $12231_4$, which is answer choice D.'
-        write: '$213_4 \times 23_4 = 12231_4$'
+      - section: 'The question'
+        say: 'Two-one-three base four times two-three base four. We multiply in base four itself, the long way, exactly as in base ten.'
+        write: 'Simplify $213_{4} \times 23_{4}$'
+      - say: 'One rule for base four: when a product reaches 4 or more, divide it by 4. Write the remainder and carry the quotient.'
+        write: 'Solution'
+      - say: 'Set out the multiplication, units under units.'
+        write: '$\begin{array}{rrrr} & 2 & 1 & 3 \\ \times & & 2 & 3 \\ \hline & & & \end{array}$'
+      - section: 'First row: 213₄ × 3'
+        say: 'Start with the units digit, 3. 3 times 3 is 9. 9 is two fours and 1 over: write 1, carry 2.'
+        write: '$3 \times 3 = 9 = 2 \times 4 + 1$: write 1, carry 2'
+      - say: '3 times 1 is 3, plus the carried 2, is 5. That is one four and 1 over: write 1, carry 1.'
+        write: '$3 \times 1 + 2 = 5 = 1 \times 4 + 1$: write 1, carry 1'
+      - say: '3 times 2 is 6, plus 1, is 7. That is one four and 3 over: write 3, carry 1.'
+        write: '$3 \times 2 + 1 = 7 = 1 \times 4 + 3$: write 3, carry 1'
+      - say: 'Nothing is left to multiply, so the carried 1 goes in front. The first row is one-three-one-one.'
+        write: 'First row: $1311_{4}$'
+      - section: 'Second row: 213₄ × 2'
+        say: 'The 2 in two-three stands for 2 fours, so this row moves one place left. Write a nought in the units to hold the place.'
+        write: 'Write 0 in the units'
+      - say: '2 times 3 is 6. 6 is one four and 2 over: write 2, carry 1.'
+        write: '$2 \times 3 = 6 = 1 \times 4 + 2$: write 2, carry 1'
+      - say: '2 times 1 is 2, plus the carried 1, is 3. 3 is less than 4: write 3, nothing to carry.'
+        write: '$2 \times 1 + 1 = 3$: write 3'
+      - say: '2 times 2 is 4. That is one four and nought over: write 0, carry 1.'
+        write: '$2 \times 2 = 4 = 1 \times 4 + 0$: write 0, carry 1'
+      - say: 'The carried 1 goes in front. The second row is one-zero-three-two-zero.'
+        write: 'Second row: $10320_{4}$'
+      - section: 'Add the two rows in base 4'
+        say: 'Now add the two rows in base four. Units: 1 plus 0 is 1. Fours: 1 plus 2 is 3.'
+        write: 'Units: $1 + 0 = 1$;  fours: $1 + 2 = 3$'
+      - say: 'Next column: 3 plus 3 is 6. 6 is one four and 2 over: write 2, carry 1.'
+        write: '$3 + 3 = 6 = 1 \times 4 + 2$: write 2, carry 1'
+      - say: 'Next: 1 plus 0, plus the carried 1, is 2. Last column: just the 1.'
+        write: '$1 + 0 + 1 = 2$;  last: $1$'
+      - say: 'Here is the whole working, as you would write it in the exam. The product is one-two-two-three-one base four.'
+        write: '$\begin{array}{rrrrrr} & & & 2 & 1 & 3 \\ \times & & & & 2 & 3 \\ \hline & & 1 & 3 & 1 & 1 \\ + & 1 & 0 & 3 & 2 & 0 \\ \hline & 1 & 2 & 2 & 3 & 1 \end{array}$'
+      - section: 'Check: change to base ten'
+        say: 'Check in base ten. Two-one-three base four is 2 times 16, plus 1 times 4, plus 3, which is 39.'
+        write: '$\overset{2}{2}\,\overset{1}{1}\,\overset{0}{3}_{4} = 2 \times 4^{2} + 1 \times 4^{1} + 3 \times 4^{0} = 39$'
+      - say: 'Two-three base four is 2 times 4, plus 3, which is 11. And 39 times 11 is 429.'
+        write: '$\overset{1}{2}\,\overset{0}{3}_{4} = 2 \times 4 + 3 = 11,\quad 39 \times 11 = 429$'
+      - say: 'Now expand our answer. Index numbers four, three, two, one, nought over one-two-two-three-one.'
+        write: '$\overset{4}{1}\,\overset{3}{2}\,\overset{2}{2}\,\overset{1}{3}\,\overset{0}{1}_{4} = 1 \times 4^{4} + 2 \times 4^{3} + 2 \times 4^{2}$'
+      - say: 'Then plus 3 times 4, plus 1.'
+        write: '$\quad + 3 \times 4^{1} + 1 \times 4^{0}$'
+      - say: '256 plus 128 plus 32 plus 12 plus 1 is 429. It agrees.'
+        write: '$= 256 + 128 + 32 + 12 + 1 = 429\ \checkmark$'
+      - section: 'Answer'
+        say: 'Therefore two-one-three base four times two-three base four is one-two-two-three-one base four, which is option D.'
+        write: '$\therefore 213_{4} \times 23_{4} = 12231_{4}$'
         answer: true
     traps:
-      A: 'You went for $13211_4$. In base ten that numeral is 485, not 429. Convert 429 back one place value at a time: one 256, two 64s, two 16s, three 4s and one 1.'
-      B: 'You went for $10311_4$. In base ten that is only 309, but 39 times 11 is 429. Convert back carefully, starting from 256.'
-      C: 'You went for $10321_4$. In base ten that is 313, not 429. The digits come from dividing by 256, then 64, 16, 4 and 1 in turn.'
+      A: 'You went for one-three-two-one-one base four. That is 485 in base ten, not 429. Carry in fours: whenever a product reaches 4, write the remainder and carry the quotient.'
+      B: 'You went for one-zero-three-one-one base four. That is 309 in base ten, not 429. Check each carry: 3 times 3 is 9, which is two fours and 1 over.'
+      C: 'You went for one-zero-three-two-one base four. That is 313 in base ten, not 429. Remember the second row moves one place left, with a nought in the units.'
 
   4:
     moments:
-      - say: 'Picture a market woman. She buys 270 oranges for ₦1800 and sells them at 5 for ₦40. We want her profit.'
+      - section: 'The question'
+        say: 'A market woman buys 270 oranges for ₦1800 and sells them at 5 for ₦40. What is her profit? One option is just the money she took in.'
+        write: 'C.P. of 270 oranges = ₦1800; sells at 5 for ₦40'
         doodle: {name: 'custom:2003_q04_a', id: seller, caption: 'Bought 270 for ₦1800'}
-        write: 'Buys 270 oranges for ₦1800; sells 5 for ₦40'
-      - say: 'Profit is the money she receives from selling, minus the money she paid.'
-        write: 'Profit $=$ selling price $-$ cost price'
-      - say: 'We already know the cost, from her tag: she paid ₦1800. So what we need first is the selling price.'
+      - section: 'Solution'
+        say: 'Solution. Profit is the selling price, S.P., minus the cost price, C.P.'
+        write: 'Profit $=$ S.P. $-$ C.P.'
+      - say: 'The C.P. is on her tag: ₦1800. So we need the S.P.'
+        write: 'C.P. = ₦1800.00'
         doodle_do:
           - {id: seller, op: highlight, part: cost}
-        write: 'Cost price: ₦1800.00'
-      - say: 'She doesn''t sell the oranges one at a time. She sells them in groups of 5. So how many groups of 5 are there in 270?'
-        write: 'Number of groups $= 270 \div 5$'
-      - say: '270 divided by 5 is 54. Watch the oranges go into 54 bundles of 5. You can see it as 250 divided by 5, which is 50, plus 20 divided by 5, which is 4.'
+      - section: 'Selling price'
+        say: 'She sells in fives. 5 oranges sell for ₦40, so 270 oranges sell for 270 over 5, times 40.'
+        write: 'S.P. $= \dfrac{270}{5} \times 40$'
+      - say: '270 divided by 5 is 54: 54 groups of 5. Watch them go into bundles.'
+        write: '$= 54 \times 40$'
         doodle_do:
           - {id: seller, op: stage, stage: 'custom:2003_q04_a2'}
-        write: '$= 250 \div 5 + 20 \div 5 = 50 + 4 = 54$'
         point:
-          - {line: 4, kind: highlight, at: '= 54', to: {doodle: seller, part: bundles}}
-      - say: 'Each group brings in ₦40. So the 54 groups bring in 54 times 40.'
-        write: 'Selling price $= 54 \times 40$'
-        point:
-          - {line: 5, kind: move, from: {line: 4, at: '= 54'}, at: '54', text: 'groups'}
-      - say: 'Let''s split it up. 50 times 40 is 2000, and 4 times 40 is 160.'
-        write: '$= 2000 + 160$'
-      - say: '2000 plus 160 is 2160. So she receives ₦2160 from selling: that''s the money in her hand.'
+          - {line: 4, kind: highlight, at: '54', to: {doodle: seller, part: bundles}}
+      - say: '54 times 4 is 216, so 54 times 40 is 2160. She takes in ₦2160.'
+        write: '$= 2160$, so S.P. = ₦2160.00'
         doodle_do:
           - {id: seller, op: stage, stage: 'custom:2003_q04_a3'}
-        write: '$= 2160$'
         point:
-          - {line: 7, kind: highlight, at: '2160', to: {doodle: seller, part: takings}}
-      - say: 'Now go back to the profit formula and put in the two figures: ₦2160 from selling, minus the ₦1800 she paid.'
+          - {line: 5, kind: highlight, at: '₦2160', to: {doodle: seller, part: takings}}
+      - section: 'Profit'
+        say: 'Substitute into the profit line: 2160 minus 1800.'
         write: 'Profit $= 2160 - 1800$'
         point:
-          - {line: 1, kind: box, text: 'the rule'}
-          - {line: 8, kind: move, from: {line: 7, at: '2160'}, at: '2160', text: 'selling price'}
-          - {line: 8, kind: move, from: {line: 2, at: '1800'}, at: '1800', text: 'cost'}
-      - say: '2160 minus 1800 is 360. Take the ₦2160 she takes in, minus the ₦1800 on her tag: her profit is ₦360, which is answer choice B.'
+          - {line: 1, kind: box, text: 'the formula'}
+          - {line: 6, kind: move, from: {line: 5, at: '= [[2160]], so'}, at: '[[2160]] −', text: 'S.P.'}
+      - say: '2160 minus 1800 is 360. Her profit is ₦360.'
+        write: '$= 360$, so profit = ₦360.00'
         doodle_do:
-          - {id: seller, op: label, part: takings, text: '₦2160 − ₦1800 = ₦360 profit'}
-        write: 'Profit: ₦360.00'
+          - {id: seller, op: label, part: takings, text: '₦2160 − ₦1800 = ₦360'}
+      - section: 'Check'
+        say: 'Check: C.P. plus profit should give S.P. 1800 plus 360 is 2160. It agrees.'
+        write: 'Check: $1800 + 360 = 2160$ ✓'
+      - say: 'Therefore her profit is ₦360.00: option B.'
+        write: '$\therefore$ profit = ₦360.00 (B)'
         answer: true
     traps:
-      A: 'You went for ₦630. Check the selling price: 270 oranges make 54 groups of 5, and 54 times ₦40 is ₦2160. Then ₦2160 minus ₦1800 is ₦360.'
-      C: 'You went for ₦1620. The profit is the money in minus the money out: 54 groups at ₦40 is ₦2160, and ₦2160 minus the ₦1800 cost is ₦360.'
-      D: 'You went for ₦2160. That''s the money she took in from selling. The ₦1800 she paid still has to come off to leave the profit.'
+      A: 'You went for ₦630. Check the S.P.: 270 over 5 is 54 groups, and 54 times ₦40 is ₦2160. Then ₦2160 minus ₦1800 is ₦360.'
+      C: 'You went for ₦1620. Profit is S.P. minus C.P.: 54 groups at ₦40 is ₦2160, and ₦2160 minus the ₦1800 C.P. is ₦360.'
+      D: 'You went for ₦2160. That is the S.P., the money she took in. The C.P., ₦1800, still has to come off to leave the profit.'
 
   5:
     moments:
@@ -255,48 +257,58 @@ lessons:
 
   6:
     moments:
-      - say: 'The sum of four numbers is $1214_5$. We want their average, written in base five.'
-        write: '$\text{sum} = 1214_5$'
-      - say: 'The plan: change the sum into base ten, divide by 4 there, then change the answer back into base five.'
-      - say: 'In base five, each place is worth five times the place to its right. From the right, the place values are 1, 5, 25 and 125.'
-        write: 'Place values: $125,\ 25,\ 5,\ 1$'
-      - say: 'Picture it as bundles of sticks. $1214_5$ means 1 one-hundred-and-twenty-five, 2 twenty-fives, 1 five and 4 ones.'
-        doodle: {name: 'custom:2003_q06_a', id: bundles, caption: '1214 in base five, as bundles'}
-        write: '$1214_5 = 1 \times 125 + 2 \times 25 + 1 \times 5 + 4 \times 1$'
-      - say: '1 times 125 is 125, 2 times 25 is 50, 1 times 5 is 5, and 4 times 1 is 4.'
+      - section: 'The question'
+        say: 'Four numbers add up to one-two-one-four base five. We want their average, in base five. We change the sum to base ten, divide by 4, then change back.'
+        write: 'Sum of four numbers $= 1214_{5}$; average in base 5 $= ?$'
+      - say: 'First, change one-two-one-four base five to base ten.'
+        write: 'Solution'
+      - section: 'Step 1: base 5 to base 10'
+        say: 'Write the index numbers over the digits: three, two, one, nought. Each digit times five to the power of its index.'
+        write: '$\overset{3}{1}\,\overset{2}{2}\,\overset{1}{1}\,\overset{0}{4}_{5} = 1 \times 5^{3} + 2 \times 5^{2} + 1 \times 5^{1} + 4 \times 5^{0}$'
+      - say: 'Five cubed is 125, five squared is 25, five to the power 1 is 5, and five to the power nought is 1.'
+        write: '$= 1 \times 125 + 2 \times 25 + 1 \times 5 + 4 \times 1$'
+      - say: '125, plus 50, plus 5, plus 4.'
         write: '$= 125 + 50 + 5 + 4$'
-      - say: '125 plus 50 is 175, plus 5 is 180, plus 4 is 184. So the four numbers add up to 184.'
-        doodle_do:
-          - {id: bundles, op: label, part: sum, text: '184 sticks in all'}
-        write: '$= 175 + 5 + 4 = 184$'
+      - say: '125 plus 50 is 175, plus 5 is 180, plus 4 is 184.'
+        write: '$= 184$'
+      - section: 'Step 2: the average'
+        say: 'The average, or mean, is the sum of the numbers divided by how many numbers there are.'
+        write: 'Average $= \dfrac{\text{sum}}{\text{number of numbers}}$'
+      - say: 'The sum is 184 and there are 4 numbers. 184 divided by 4 is 46.'
+        write: '$= \dfrac{184}{4} = 46$'
         point:
-          - {line: 5, kind: highlight, at: '184', to: {doodle: bundles, part: sum}}
-      - say: 'The mean is the sum of the values divided by how many values there are.'
-        write: 'Mean $= \dfrac{\text{sum of the values}}{\text{number of values}}$'
-      - say: 'The average of four numbers is their sum divided by 4. Share the 184 into 4 equal parts: 184 divided by 4 is 46.'
-        doodle_do:
-          - {id: bundles, op: stage, stage: 'custom:2003_q06_a2'}
-        write: 'Average $= 184 \div 4 = 46$'
+          - {line: 7, kind: move, from: {line: 5, at: '184'}, at: '184'}
+      - section: 'Step 3: base 10 to base 5'
+        say: 'The answer is wanted in base five. Divide 46 by 5 again and again on the ladder, keeping the remainders.'
+        diagram: {id: L, kind: ladder, divisor: 5, number: 46, 'on': 'ladder'}
+      - say: '46 divided by 5 is 9, remainder 1.'
+        diagram_do:
+          - {id: L, op: step}
+      - say: '9 divided by 5 is 1, remainder 4.'
+        diagram_do:
+          - {id: L, op: step}
+      - say: '1 divided by 5 is 0, remainder 1. We stop at 0.'
+        diagram_do:
+          - {id: L, op: step}
+      - say: 'Read the remainders from the bottom up: one, four, one. So 46 is one-four-one base five.'
+        diagram_do:
+          - {id: L, op: read, 'on': 'bottom up'}
+        write: '$46_{10} = 141_{5}$'
         point:
-          - {line: 7, kind: move, from: {line: 5, at: '= 184'}, at: '184', text: 'the sum'}
-      - say: 'But the question wants the average in base five, so let''s change 46 back. The biggest place value that fits is 25. It goes in once, leaving 46 minus 25, which is 21.'
-        write: '$46 = 1 \times 25 + 21$'
-      - say: 'Next, 5 goes into 21 four times. 4 times 5 is 20, leaving 1.'
-        write: '$21 = 4 \times 5 + 1$'
-      - say: 'That last 1 is the ones digit. So 46 is 1 twenty-five, 4 fives and 1 one.'
-        write: 'So $46 = 1 \times 25 + 4 \times 5 + 1 \times 1$'
-        point:
-          - {line: 10, kind: move, from: {line: 8, at: '1 × 25'}, at: '1 × 25'}
-          - {line: 10, kind: move, from: {line: 9, at: '4 × 5'}, at: '4 × 5', text: 'the pieces'}
-      - say: 'Reading the digits in order: 1, 4, 1. The average is $141_5$, which is answer choice C.'
-        doodle_do:
-          - {id: bundles, op: label, part: share, text: '46 = 141 in base five'}
-        write: '$= 141_5$'
+          - {line: 12, kind: highlight, at: '1415', to: {diagram: L, part: result}}
+      - section: 'Check'
+        say: 'Check by expanding one-four-one base five: 1 times 25, plus 4 times 5, plus 1. That is 25 plus 20 plus 1, which is 46.'
+        write: '$\overset{2}{1}\,\overset{1}{4}\,\overset{0}{1}_{5} = 1 \times 5^{2} + 4 \times 5^{1} + 1 \times 5^{0} = 46$'
+      - say: 'And 4 times 46 is 184, the sum we started with. It agrees.'
+        write: '$4 \times 46 = 184\ \checkmark$'
+      - section: 'Answer'
+        say: 'Therefore the average is one-four-one base five, which is option C.'
+        write: '$\therefore$ average $= 141_{5}$'
         answer: true
     traps:
-      A: 'You went for 411. Those are the right digits in the wrong order. The 1 twenty-five comes first, then the 4 fives, then the 1 unit, giving 141.'
-      B: 'You went for 401. In base five that''s 101 in base ten, far too big. The average is 46, which is one 25, four 5s and one 1.'
-      D: 'You went for 114. In base five that''s only 34. The average is 184 divided by 4, which is 46, and 46 is $141_5$.'
+      A: 'You went for four-one-one. In base five that is 106, not 46. On the ladder, 46 gives remainders 1, 4, 1, read from the bottom up: one-four-one.'
+      B: 'You went for four-zero-one. In base five that is 101, far too big. The average is 184 divided by 4, which is 46, and that is one-four-one base five.'
+      D: 'You went for one-one-four. In base five that is only 34. The average is 46, which on the ladder is one-four-one base five.'
 
   7:
     moments:
@@ -364,7 +376,7 @@ lessons:
         point:
           - {figure: sketch, kind: circle, target: '12'}
           - {figure: sketch, kind: circle, target: '24', text: 'in both'}
-      - say: 'The small c means the complement: everything in $U$ that is not in the union. Only members of $U$ can be in it.'
+      - say: 'The c means the complement, read P union Q, complement: everything in $U$ that is not in the union. Only members of $U$ can be in it.'
         write: '$(P \cup Q)^{c} = \{x \in U : x \notin P \cup Q\}$'
       - say: 'So let''s go through $U$, using the union we just wrote. 2 is not in the union, so it stays. 4, 6 and 8 are in the union, so they go.'
         write: 'Keep 2; remove 4, 6, 8'
@@ -396,8 +408,8 @@ lessons:
         write: 'Both subjects $= ?$'
         doodle: {name: student-small, id: cls, repeat: 40, layout: grid, caption: 'the class of 40'}
       - section: 'What we know'
-        say: 'First, what we know. The whole class is 40 students. We call the class E, for everyone, and n of E means the number in E.'
-        write: 'Class: $n(E) = 40$'
+        say: 'First, what we know. The whole class is 40 students. The whole class is the universal set, written epsilon, and n of epsilon means the number in it.'
+        write: 'Class: $n(\varepsilon) = 40$'
         point:
           - {line: 1, kind: travel, at: '40', from: {doodle: cls}, text: 'the class', 'on': 'whole class'}
       - say: '32 students offer Mathematics. Call that set M, so n of M is 32.'
@@ -423,7 +435,7 @@ lessons:
         point:
           - {line: 7, kind: travel, at: '40', from: {line: 1, at: '40'}, text: 'class', 'on': '40 minus 4'}
           - {line: 7, kind: travel, at: '− 4', from: {line: 4, at: '4'}, text: 'neither', 'on': '40 minus 4'}
-      - say: 'So 36 students are inside the circles: in Maths, or Physics, or both. We call that the union, written with a U sign.'
+      - say: 'So 36 students are inside the circles: in Maths, or Physics, or both. That is M union P, the union of the two sets.'
         write: '$n(M \cup P) = 36$'
       - section: 'Step 2: the overlap'
         say: 'Step two. Add the two circles. Bring down 32 from the Maths circle and 24 from the Physics circle. 32 plus 24 is 56.'
@@ -475,48 +487,53 @@ lessons:
 
   10:
     moments:
-      - say: 'We need 1 over 0.06, divided by 1 over 0.042, with the whole bracket raised to the power negative 1, correct to two decimal places.'
-        write: '$\left(\dfrac{1}{0.06} \div \dfrac{1}{0.042}\right)^{-1}$'
-      - say: 'The rule here: simplify the bracket to a single number first, and only then use the power outside it.'
-      - say: 'Inside the bracket we divide by the fraction 1 over 0.042. Dividing by a fraction is the same as multiplying by its reciprocal, the fraction turned upside down, like flipping the card: 0.042 over 1.'
+      - section: 'The question'
+        say: 'A bracket with a power of negative 1 outside, correct to two decimal places. There are two flips in this question. Miss one and you land on a trap.'
+        write: '$\left(\dfrac{1}{0.06} \div \dfrac{1}{0.042}\right)^{-1}$ (2 d.p.)'
+      - section: 'Solution'
+        say: 'Solution. By BODMAS, brackets first: simplify inside the bracket, then use the power outside it.'
+        write: 'By BODMAS: the bracket first'
+      - section: 'Step 1: the bracket'
+        say: 'To divide by a fraction, multiply by its reciprocal: keep the first, change divide to times, turn the second upside down, like flipping the card.'
+        write: 'Bracket: $\dfrac{1}{0.06} \div \dfrac{1}{0.042} = \dfrac{1}{0.06} \times \dfrac{0.042}{1}$'
         doodle: {name: 'custom:2003_q10_a', id: card, caption: 'Dividing by a fraction: flip it'}
-        write: 'Inside the bracket: $\dfrac{1}{0.06} \div \dfrac{1}{0.042} = \dfrac{1}{0.06} \times \dfrac{0.042}{1}$'
-      - say: 'Multiply the tops and the bottoms. That gives 0.042 over 0.06.'
+      - say: 'Top times top is 0.042, bottom times bottom is 0.06.'
         write: '$= \dfrac{0.042}{0.06}$'
-      - say: 'To clear the decimals, multiply the top and the bottom by 1000. 0.042 becomes 42, and 0.06 becomes 60.'
-        write: '$= \dfrac{0.042 \times 1000}{0.06 \times 1000} = \dfrac{42}{60}$'
-      - say: 'Now divide the top and the bottom by 6. 42 divided by 6 is 7, and 60 divided by 6 is 10.'
-        write: '$= \dfrac{7}{10}$'
-      - say: '7 over 10 is 0.7. So the whole bracket is just 0.7.'
-        write: '$= 0.7$'
-      - say: 'A law of indices: $a$ to the power negative 1 is 1 over $a$.'
-        write: 'Law of indices: $a^{-1} = \dfrac{1}{a}$'
-      - say: 'Now go back to the power outside the bracket, negative 1. A power of negative 1 means take the reciprocal, flip it over like the card: 1 over the number.'
+      - say: 'Clear the decimals: multiply top and bottom by 1000. That gives 42 over 60.'
+        write: '$= \dfrac{42}{60}$'
+      - say: 'Divide top and bottom by 6: 7 over 10, which is 0.7.'
+        write: '$= \dfrac{7}{10} = 0.7$'
+      - section: 'Step 2: the power'
+        say: 'Now the power outside. A power of negative 1 means the reciprocal: x to the power negative 1 is 1 over x.'
+        write: '$x^{-1} = \dfrac{1}{x}$'
         doodle_do:
-          - {id: card, op: label, part: flip, text: 'power −1: flip the card again'}
-        write: 'Power $-1$: $(0.7)^{-1} = \dfrac{1}{0.7}$'
-        point:
-          - {line: 8, kind: move, from: {line: 6, at: '0.7'}, at: '(0.7)', text: 'the bracket'}
-      - say: 'Multiply the top and the bottom by 10 to clear the decimal. That gives 10 over 7.'
-        write: '$= \dfrac{10}{7}$'
-      - say: '10 divided by 7 is 1 point 4 2 8 5, and so on.'
-        write: '$= 1.4285\ldots$'
-      - say: 'Picture 1.4285 on a number line between 1.42 and 1.43. To round to two decimal places, look at the third decimal place. It''s 8, which is 5 or more, so the second place rounds up from 2 to 3.'
+          - {id: card, op: label, part: flip, text: 'power −1: flip again'}
+      - say: 'So 7 over 10 to the power negative 1 is 10 over 7.'
+        write: '$\left(\dfrac{7}{10}\right)^{-1} = \dfrac{10}{7}$'
+      - say: 'Long division: 10 divided by 7 is 1.428 and so on.'
+        write: '$= 10 \div 7 = 1.428\ldots$'
+      - section: 'Correct to 2 d.p.'
+        say: 'Count two digits after the point: 4 and 2. Mark the cut after the 2. Picture the value on a line from 1.42 to 1.43.'
+        write: 'Cut after 2 d.p.: $1.42\,|\,8$'
         doodle: {name: 'custom:2003_q10_b', id: numline, caption: '1.4285… sits between 1.42 and 1.43'}
+      - say: 'The next digit is 8. The rule: 5 or more, add 1 to the last digit kept. So the 2 becomes 3: 1.43. The dot is past halfway.'
+        write: 'Next digit $8$: add $1$, so $1.428\ldots = 1.43$ (2 d.p.)'
         doodle_do:
-          - {id: numline, op: label, part: dot, text: 'past halfway: round up'}
-        write: '$\approx 1.43$'
-      - say: 'The dot is nearer 1.43. So the answer, correct to two decimal places, is 1.43, which is answer choice D.'
+          - {id: numline, op: label, part: dot, text: 'past halfway: add 1'}
+      - section: 'Check'
+        say: 'Check: 10 over 7 times the bracket, 0.7, should give 1. 10 over 7 times 7 over 10 is 1. It agrees.'
+        write: 'Check: $\dfrac{10}{7} \times 0.7 = \dfrac{10}{7} \times \dfrac{7}{10} = 1$ ✓'
+      - say: 'Therefore the value is 1.43, correct to two decimal places: option D.'
+        write: '$\therefore$ value $= 1.43$ (2 d.p.) (D)'
+        answer: true
         doodle_do:
           - {id: numline, op: circle, part: right-end}
-        write: 'Answer: $1.43$'
-        answer: true
         point:
           - {line: 12, kind: highlight, at: '1.43', to: {doodle: numline, part: right-end}}
     traps:
-      A: 'You went for 4.42. Work the bracket out first: 1 over 0.06 times 0.042 is 0.042 over 0.06, which is 0.7. The power of negative 1 then flips it to 10 over 7, about 1.43.'
-      B: 'You went for 3.14. That''s the value of pi, which has nothing to do with this question. The bracket is 0.7, and its reciprocal is 10 over 7, about 1.43.'
-      C: 'You went for 1.53. That''s close, so check the division: 10 divided by 7 is 1.4285, which rounds to 1.43.'
+      A: 'You went for 4.42. Work the bracket out first: 1 over 0.06 times 0.042 is 0.042 over 0.06, which is 0.7. The power of negative 1 then turns it to 10 over 7, about 1.43.'
+      B: 'You went for 3.14. That is the value of pi, which has nothing to do with this question. The bracket is 0.7, and its reciprocal is 10 over 7, which is 1.43.'
+      C: 'You went for 1.53. That is close, so check the division: 10 divided by 7 is 1.428 and so on, which is 1.43 to two decimal places.'
 
   11:
     moments:
@@ -581,52 +598,41 @@ lessons:
 
   12:
     moments:
-      - say: 'We need to factorize $4abx - 2axy - 12b^2x + 6bxy$ completely.'
+      - section: 'The question'
+        say: 'Four terms and four letters, but there is a factor hiding in all of them. Take it out first, then group the rest in pairs.'
         write: '$4abx - 2axy - 12b^{2}x + 6bxy$'
-      - say: 'Before grouping anything, look for a factor that is common to all four terms. Taking it out first makes everything after it simpler.'
-      - say: 'Every term has an $x$ in it. And the numbers 4, 2, 12 and 6 are all even. So $2x$ goes into all four terms.'
+      - section: 'Solution'
+        say: 'Solution. Every term has an $x$, and 4, 2, 12 and 6 are all even. So $2x$ is common to all four terms.'
         write: 'Common factor: $2x$'
-      - say: 'Divide each term by $2x$. $4abx$ gives $2ab$. $2axy$ gives $ay$. $12b^2x$ gives $6b^2$. And $6bxy$ gives $3by$.'
+      - say: 'Divide each term by $2x$. $4abx$ gives $2ab$, $2axy$ gives $ay$, $12b^{2}x$ gives $6b^{2}$, and $6bxy$ gives $3by$.'
         write: '$= 2x(2ab - ay - 6b^{2} + 3by)$'
-      - say: 'Picture the four terms as the cells of a multiplying grid. Now group the four terms in the bracket into two pairs: the first two, and the last two.'
-        doodle: {name: 'custom:2003_q12_a', id: grid, caption: 'The bracket as a multiplying grid'}
-        write: '$= 2x\left[(2ab - ay) + (-6b^{2} + 3by)\right]$'
-      - say: 'The first pair, $2ab$ minus $ay$, has $a$ in common. Take it out, and we''re left with $2b - y$. Those are the grid''s edges: $a$ down the side, $2b - y$ along the top.'
-        doodle_do:
-          - {id: grid, op: stage, stage: 'custom:2003_q12_a2'}
-        write: 'First pair: $2ab - ay = a(2b - y)$'
-        point:
-          - {line: 5, kind: highlight, at: 'a(2b-y)', to: {doodle: grid, part: row-a}}
-      - say: 'The second pair has $3b$ in common. Here''s the key move: we take out negative $3b$, so that the bracket left behind matches the top of the grid.'
-        doodle_do:
-          - {id: grid, op: stage, stage: 'custom:2003_q12_a3'}
-        write: 'Second pair: $-6b^{2} + 3by = -3b(2b - y)$'
-        point:
-          - {line: 6, kind: highlight, at: '-3b(2b-y)', to: {doodle: grid, part: row-b}}
-      - say: 'Let''s check it. Negative $3b$ times $2b$ is negative $6b^2$, and negative $3b$ times negative $y$ is plus $3by$. Good.'
-        write: 'Check: $-3b \times 2b = -6b^{2},\quad -3b \times (-y) = 3by$'
-      - say: 'Now put both pairs back into the big bracket. Notice both of them contain $2b - y$.'
+      - section: 'Group in pairs'
+        say: 'Group the four terms in pairs: the first two, and the last two. Take the minus out with the second pair, so its signs change inside the bracket.'
+        write: '$= 2x\left[(2ab - ay) - (6b^{2} - 3by)\right]$'
+        doodle: {name: 'custom:2003_q12_a', id: grid, caption: 'the bracket as a multiplying grid', 'on': 'Group'}
+      - say: 'From the first pair take out $a$, leaving $2b - y$. From the second pair take out $3b$, leaving $2b - y$ again. The brackets match, so the grouping is right.'
         write: '$= 2x\left[a(2b - y) - 3b(2b - y)\right]$'
-        point:
-          - {line: 8, kind: move, from: {line: 5, at: '= [[a(2b − y)]]'}, at: 'a(2b − y)', text: 'first pair'}
-          - {line: 8, kind: move, from: {line: 6, at: '−3b(2b − y)'}, at: '−3b(2b − y)', text: 'second pair'}
-      - say: 'Take out the common bracket $2b - y$, the grid''s top edge. What''s left over from the two pairs is $a$ minus $3b$.'
         doodle_do:
-          - {id: grid, op: highlight, part: top}
-        write: '$= 2x(2b - y)(a - 3b)$'
-        point:
-          - {line: 9, kind: move, from: {line: 8, at: 'a[[(2b − y)]]'}, at: '(2b − y)', text: 'common'}
-      - say: 'The order of multiplying doesn''t matter, so we can write the $a - 3b$ bracket first.'
+          - {id: grid, op: stage, stage: 'custom:2003_q12_a2', 'on': 'first pair'}
+          - {id: grid, op: stage, stage: 'custom:2003_q12_a3', 'on': 'second pair'}
+      - say: 'Take out the common bracket, $2b - y$, the top edge of the grid. What is left from the two pairs is $a$ minus $3b$.'
         write: '$= 2x(a - 3b)(2b - y)$'
+        doodle_do:
+          - {id: grid, op: highlight, part: top, 'on': 'top edge'}
         point:
-          - {line: 10, kind: move, from: {line: 9, at: '(a − 3b)'}, at: '(a − 3b)', text: 'to the front'}
-      - say: 'So the complete factorization is $2x$ times $a - 3b$ times $2b - y$, which is answer choice D.'
-        write: 'Answer: $2x(a - 3b)(2b - y)$'
+          - {line: 4, kind: underline, at: '[[(2b − y)]] − 3b', text: 'common bracket'}
+      - section: 'Check'
+        say: 'Check by expanding the two brackets: $a$ times $2b$, $a$ times minus $y$, minus $3b$ times $2b$, and minus $3b$ times minus $y$.'
+        write: 'Check: $(a - 3b)(2b - y) = 2ab - ay - 6b^{2} + 3by$'
+      - say: 'Multiply through by $2x$, and we are back to the expression in the question.'
+        write: '$2x(2ab - ay - 6b^{2} + 3by) = 4abx - 2axy - 12b^{2}x + 6bxy$'
+      - say: 'Therefore the complete factorisation is $2x$, times $a$ minus $3b$, times $2b$ minus $y$, which is answer choice D.'
+        write: '$\therefore$ the factors are $2x(a - 3b)(2b - y)$'
         answer: true
     traps:
-      A: 'You went for $2x(3b - a)(2b - y)$. The bracket $3b - a$ is the negative of $a - 3b$, so this multiplies out to the negative of the expression. Watch the sign when you take out the negative $3b$.'
-      B: 'You went for $2x(a - 3b)(b - 2y)$. The first bracket is right, but the other one is $2b - y$: taking $a$ out of $2ab - ay$ leaves $2b - y$.'
-      C: 'You went for $2x(2b - a)(3b - y)$. The common bracket from both pairs is $2b - y$, and what is left over is $a - 3b$. Group the terms in pairs and take out $a$ and negative $3b$.'
+      A: 'You went for $2x(3b - a)(2b - y)$. The bracket $3b - a$ is minus $(a - 3b)$, so this multiplies out to minus the expression. From the second pair we took out $3b$ with the minus in front, leaving $a - 3b$.'
+      B: 'You went for $2x(a - 3b)(b - 2y)$. The first bracket is right, but taking $a$ out of $2ab - ay$ leaves $2b - y$, not $b - 2y$.'
+      C: 'You went for $2x(2b - a)(3b - y)$. Group in pairs: the common bracket is $2b - y$, and what is left is $a - 3b$.'
 
   13:
     moments:
@@ -672,97 +678,85 @@ lessons:
 
   14:
     moments:
-      - say: 'The curve $y = x^2 + 4$ and a straight line $PQ$ are drawn to solve $x^2 - 3x + 2 = 0$. We want the equation of $PQ$.'
+      - section: 'The question'
+        say: 'The curve $y = x^{2} + 4$ is drawn, and a straight line $PQ$ is added to solve another equation. Which line? One subtraction tells us.'
         write: 'Curve: $y = x^{2} + 4$'
-      - say: 'Let me sketch the graph, so we can see its shape.'
         show_sketch: true
         point:
           - {figure: sketch, kind: underline, target: 'y = x² + 4'}
           - {figure: sketch, kind: circle, target: 'PQ: y = ?', text: 'line PQ'}
-      - say: 'Here''s the key idea. Where two graphs cross, both equations are true at the same time. So the line must be chosen so that, where it crosses the curve, $x^2 - 3x + 2 = 0$.'
-        write: 'To solve: $x^{2} - 3x + 2 = 0$'
-        point:
-          - {figure: sketch, kind: circle, target: '1', text: 'x = 1'}
-          - {figure: sketch, kind: circle, target: '2', text: 'x = 2'}
-      - say: 'The curve''s equation contains $x^2$. So let''s rearrange the equation we want to solve so that $x^2$ is by itself. First, add $3x$ to both sides.'
-        write: '$x^{2} + 2 = 3x$'
-        point:
-          - {line: 3, kind: move, from: {line: 2, at: '− 3x'}, at: '3x', text: 'across the ='}
-      - say: 'Then subtract 2 from both sides.'
-        write: '$x^{2} = 3x - 2$'
-        point:
-          - {line: 4, kind: move, from: {line: 3, at: '+ 2'}, at: '− 2', text: 'across the ='}
-      - say: 'Now go back to the curve. It says $y$ equals $x^2$ plus 4.'
-        write: 'From the curve: $y = x^{2} + 4$'
-      - say: 'At the crossing points, $x^2$ equals $3x - 2$, from the line we found a moment ago. So replace the $x^2$ in the curve''s equation with $3x - 2$.'
-        write: '$y = (3x - 2) + 4$'
-        point:
-          - {line: 6, kind: move, from: {line: 4, at: '3x − 2'}, at: '(3x − 2)', text: 'x² is this'}
-      - say: 'Remove the bracket.'
-        write: '$y = 3x - 2 + 4$'
-      - say: 'Negative 2 plus 4 is 2.'
+      - section: 'Solution'
+        say: 'Solution. Where two graphs cross, both equations are true at once. Label the curve equation 1.'
+        write: '$y = x^{2} + 4 \quad \ldots\ldots (1)$'
+      - say: 'The equation we want to solve is equation 2. Its roots are the $x$ values where the line meets the curve.'
+        write: '$0 = x^{2} - 3x + 2 \quad \ldots\ldots (2)$'
+      - say: 'Subtract equation 2 from equation 1, side by side. What is left is the line, because it agrees with the curve exactly where equation 2 is true.'
+        write: '(1) $-$ (2): $\ y - 0 = (x^{2} + 4) - (x^{2} - 3x + 2)$'
+      - say: 'Open the brackets. The minus in front of the second bracket changes every sign inside it.'
+        write: '$y = x^{2} + 4 - x^{2} + 3x - 2$'
+      - say: '$x$ squared minus $x$ squared is zero, so the $x$ squared terms cancel. 4 minus 2 is 2.'
         write: '$y = 3x + 2$'
-      - say: 'Let''s check that this line works. Where it meets the curve, $x^2$ plus 4 equals $3x$ plus 2.'
-        write: 'Check: $x^{2} + 4 = 3x + 2$'
-      - say: 'Subtract $3x$ and 2 from both sides, and we get back exactly the equation we wanted to solve.'
-        write: '$x^{2} - 3x + 2 = 0$'
         point:
-          - {line: 2, kind: arrow, text: 'same equation'}
-      - say: 'So the line $PQ$ is $y = 3x + 2$, which is answer choice A.'
-        write: '$PQ:\ y = 3x + 2$'
+          - {line: 4, kind: strike, at: '[[x2]] + 4', text: 'cancel'}
+          - {line: 4, kind: strike, at: '− [[x2]]'}
+      - section: 'Check'
+        say: 'Check. Where the line meets the curve, $x$ squared plus 4 equals $3x$ plus 2.'
+        write: 'Check: $x^{2} + 4 = 3x + 2$'
+      - say: 'Subtract $3x$ and subtract 2 from both sides. We get back exactly the equation we were asked to solve.'
+        write: '$x^{2} - 3x + 2 = 0\ \checkmark$'
+      - say: 'Therefore the line $PQ$ is $y$ equals $3x$ plus 2, which is answer choice A.'
+        write: '$\therefore PQ:\ y = 3x + 2$'
         answer: true
         point:
           - {figure: sketch, kind: label, target: 'PQ: y = ?', text: 'y = 3x + 2'}
     traps:
-      B: 'You went for $y = 3x - 4$. Replace $x^2$ in the curve with $3x - 2$: that gives $3x - 2 + 4$, and negative 2 plus 4 is positive 2.'
-      C: 'You went for $y = 3x + 4$. You kept the plus 4 from the curve but lost the minus 2. $x^2$ is $3x - 2$, so $y$ is $3x - 2 + 4$, which is $3x + 2$.'
-      D: 'You went for $y = 3x - 2$. That''s just $x^2$ rearranged, and it forgets the plus 4 in the curve. Add the 4 and you get $y = 3x + 2$.'
+      B: 'You went for $y = 3x - 4$. Subtracting (2) from (1) gives $y = x^{2} + 4 - x^{2} + 3x - 2$. 4 minus 2 is plus 2, not minus 4.'
+      C: 'You went for $y = 3x + 4$. You kept the 4 from the curve but forgot the minus 2. The minus in front of the bracket turns plus 2 into minus 2, and 4 minus 2 is 2.'
+      D: 'You went for $y = 3x - 2$. That forgets the plus 4 in the curve. Subtract (2) from (1) in full: $y = 3x - 2 + 4 = 3x + 2$.'
 
   16:
     moments:
-      - say: 'We need $x$ and $y$, in that order, from $3x - 5y + 5 = 0$ and $4x - 7y + 8 = 0$.'
-        write: '$3x - 5y + 5 = 0,\quad 4x - 7y + 8 = 0$'
-      - say: 'First, move the plain numbers to the right-hand side. In the first equation, subtract 5 from both sides. We''ll call this equation 1.'
-        write: '$3x - 5y = -5 \quad (1)$'
+      - section: 'The question'
+        say: 'Two equations, two unknowns. We make one letter disappear by elimination, then find the other. Watch the order: $x$ first, then $y$.'
+        write: 'Solve $3x - 5y + 5 = 0$ and $4x - 7y + 8 = 0$'
+      - section: 'Solution'
+        say: 'Solution. Take the number to the right-hand side: subtract 5 from both sides. Label it equation 1.'
+        write: '$3x - 5y = -5 \quad \ldots\ldots (1)$'
+      - say: 'Do the same with the second: subtract 8 from both sides. Label it equation 2.'
+        write: '$4x - 7y = -8 \quad \ldots\ldots (2)$'
+      - section: 'Eliminate x'
+        say: 'To eliminate $x$, make its coefficients, the numbers in front of $x$, the same. The LCM of 3 and 4 is 12, so multiply equation 1 by 4.'
+        write: '(1) $\times 4$: $\ 12x - 20y = -20 \quad \ldots\ldots (3)$'
+      - say: 'And multiply equation 2 by 3. 3 times $4x$ is $12x$, 3 times $7y$ is $21y$, and 3 times minus 8 is minus 24.'
+        write: '(2) $\times 3$: $\ 12x - 21y = -24 \quad \ldots\ldots (4)$'
+      - say: 'Now subtract equation 4 from equation 3. $12x$ minus $12x$ is zero, so $x$ is gone. Minus $20y$ minus minus $21y$ is minus $20y$ plus $21y$.'
+        write: '(3) $-$ (4): $\ -20y + 21y = -20 + 24$'
         point:
-          - {line: 1, kind: move, from: {line: 0, at: '+ 5'}, at: '= [[−5]]', text: 'across the ='}
-      - say: 'In the second equation, subtract 8 from both sides. That''s equation 2.'
-        write: '$4x - 7y = -8 \quad (2)$'
-        point:
-          - {line: 2, kind: move, from: {line: 0, at: '+ 8'}, at: '= [[−8]]', text: 'across the ='}
-      - say: 'The plan is to make $x$ disappear. For that, the $x$ terms need the same number in front. The lowest common multiple of 3 and 4 is 12.'
-        write: 'LCM of 3 and 4: $12$'
-      - say: 'So multiply every term of equation 1 by 4. 4 times $3x$ is $12x$, 4 times $5y$ is $20y$, and 4 times negative 5 is negative 20.'
-        write: 'Equation (1) $\times 4$: $12x - 20y = -20 \quad (3)$'
-      - say: 'And multiply every term of equation 2 by 3. 3 times $4x$ is $12x$, 3 times $7y$ is $21y$, and 3 times negative 8 is negative 24.'
-        write: 'Equation (2) $\times 3$: $12x - 21y = -24 \quad (4)$'
-      - say: 'Now take equation 3 minus equation 4, term by term. The $12x$ cancels, leaving the $y$ terms and the numbers.'
-        write: '(3) minus (4): $-20y - (-21y) = -20 - (-24)$'
-        point:
-          - {line: 4, kind: strike, at: '12x', text: 'cancels'}
-          - {line: 5, kind: strike, at: '12x'}
-      - say: 'Negative $20y$ minus negative $21y$ is negative $20y$ plus $21y$, which is $y$. Negative 20 minus negative 24 is negative 20 plus 24, which is 4.'
+          - {line: 3, kind: strike, at: '12x', text: 'cancel'}
+          - {line: 4, kind: strike, at: '12x'}
+      - say: 'Minus $20y$ plus $21y$ is $y$. Minus 20 plus 24 is 4.'
         write: '$y = 4$'
-      - say: 'Now put $y = 4$ back into equation 1 to find $x$.'
-        write: 'In (1): $3x - 5(4) = -5$'
+      - section: 'Find x'
+        say: 'Substitute $y = 4$ in equation 1 to find $x$.'
+        write: 'Sub. $y = 4$ in (1): $\ 3x - 5(4) = -5$'
         point:
-          - {line: 8, kind: move, from: {line: 7, at: '4'}, at: '5(4)', text: 'y'}
-          - {line: 1, kind: arrow, text: 'into (1)'}
+          - {line: 7, kind: move, from: {line: 6, at: '4'}, at: '5([[4]])', text: 'sub in'}
       - say: '5 times 4 is 20.'
         write: '$3x - 20 = -5$'
-      - say: 'Add 20 to both sides. Negative 5 plus 20 is 15.'
-        write: '$3x = 15$'
+      - say: 'Add 20 to both sides. Minus 5 plus 20 is 15.'
+        write: '$3x = -5 + 20 = 15$'
       - say: 'Divide both sides by 3. 15 over 3 is 5.'
-        write: '$x = 5$'
-      - say: 'Let''s check in equation 2. 4 times 5 is 20, 7 times 4 is 28, and 20 minus 28 is negative 8. It works.'
-        write: 'Check (2): $4(5) - 7(4) = 20 - 28 = -8$'
-      - say: 'The question wants $x$ and $y$ respectively, so $x$ first, then $y$: 5, then 4. That''s answer choice C.'
-        write: '$x = 5,\ y = 4$'
+        write: '$x = \dfrac{15}{3} = 5$'
+      - section: 'Check'
+        say: 'Check in equation 2. 4 times 5 is 20, 7 times 4 is 28, and 20 minus 28 is minus 8. It works.'
+        write: 'Check (2): $\ 4(5) - 7(4) = 20 - 28 = -8\ \checkmark$'
+      - say: 'Therefore $x$ is 5 and $y$ is 4. Respectively means $x$ first, then $y$: 5, 4, which is answer choice C.'
+        write: '$\therefore x = 5,\ y = 4$'
         answer: true
     traps:
-      A: 'You went for negative 4, negative 5. Both signs are wrong and the order is reversed. Check in equation 1: 3 times 5 minus 5 times 4 is negative 5, so $x = 5$ and $y = 4$.'
-      B: 'You went for negative 5, negative 4. The order is right but the signs are not. Put them in: 3 times negative 5 minus 5 times negative 4 is positive 5, not negative 5.'
-      D: 'You went for 4, 5. Those are the right numbers in the wrong order. The question asks for $x$ then $y$, and $x$ is 5.'
+      A: 'You went for minus 4, minus 5. The signs are wrong and the order is reversed. From (3) minus (4), $y = 4$, and then $3x = 15$, so $x = 5$.'
+      B: 'You went for minus 5, minus 4. The order is right but the signs are not. Put them in (1): 3 times minus 5 minus 5 times minus 4 is plus 5, not minus 5.'
+      D: 'You went for 4, 5. Those are the right numbers in the wrong order. Respectively means $x$ first, and $x$ is 5.'
 
   17:
     moments:
@@ -822,141 +816,136 @@ lessons:
 
   18:
     moments:
-      - say: 'We want the values of $x$ that satisfy both $5 + x \le 8$ and $13 + x \ge 7$.'
-        write: '$5 + x \le 8 \ \text{ and } \ 13 + x \ge 7$'
-      - say: 'The word and means both must be true at once. So we solve each inequality on its own, then find the values that fit both.'
-      - say: 'First inequality: 5 plus $x$ is at most 8. This sign means less than or equal to.'
-        write: 'First: $5 + x \le 8$'
-      - say: 'To get $x$ by itself, subtract 5 from both sides. Subtracting doesn''t change the direction of the sign.'
-        write: '$5 + x - 5 \le 8 - 5$'
+      - section: 'The question'
+        say: 'Two inequalities joined by "and": $x$ must satisfy both at once. Solve each one, then find where they overlap on the number line.'
+        write: '$5 + x \le 8$ and $13 + x \ge 7$'
+      - say: 'Solution. First inequality: subtract 5 from both sides. Subtracting does not change the direction of the sign.'
+        write: 'Solution: $\ 5 + x - 5 \le 8 - 5$'
       - say: '8 minus 5 is 3. So $x$ is at most 3.'
-        write: '$x \le 3$'
-      - say: 'Second inequality: 13 plus $x$ is at least 7. This sign means greater than or equal to.'
-        write: 'Second: $13 + x \ge 7$'
-      - say: 'Subtract 13 from both sides.'
+        write: '$x \le 3 \quad \ldots (1)$'
+      - say: 'Second inequality: subtract 13 from both sides.'
         write: '$13 + x - 13 \ge 7 - 13$'
-      - say: '7 minus 13 is negative 6. So $x$ is at least negative 6.'
-        write: '$x \ge -6$'
-      - say: 'Now put the two results together. From the first, $x$ is no more than 3. From the second, $x$ is no less than negative 6.'
-        write: 'Both: $x \ge -6$ and $x \le 3$'
+      - say: '7 minus 13 is minus 6. So $x$ is at least minus 6.'
+        write: '$x \ge -6 \quad \ldots (2)$'
+      - section: 'The number line'
+        say: 'Show both on one number line. Inequality one: a closed circle at 3, arrow to the left.'
+        diagram: {id: n, kind: numberline, range: [-9, 6]}
+        diagram_do:
+          - {id: n, op: interval, to: 3, to_open: false, text: 'x ≤ 3', colour: blue, 'on': 'closed circle'}
+      - say: 'Inequality two: a closed circle at minus 6, arrow to the right.'
+        diagram_do:
+          - {id: n, op: interval, from: -6, from_open: false, text: 'x ≥ −6', colour: purple, 'on': 'closed circle'}
+      - say: 'The values that satisfy both are where the two arrows overlap: from minus 6 up to 3, both ends included.'
+        write: '$\therefore\ -6 \le x \le 3$'
+        diagram_do:
+          - {id: n, op: interval, from: -6, to: 3, from_open: false, to_open: false, text: '−6 ≤ x ≤ 3', answer: true, 'on': 'overlap'}
         point:
-          - {line: 8, kind: move, from: {line: 7, at: 'x ≥ −6'}, at: 'x ≥ −6', text: 'second'}
-          - {line: 8, kind: move, from: {line: 4, at: 'x ≤ 3'}, at: 'x ≤ 3', text: 'first'}
-      - say: 'Picture a number line. One condition keeps everything to the left of 3, the other keeps everything to the right of negative 6. The overlap is the stretch from negative 6 up to 3.'
-        show_sketch: true
-        point:
-          - {figure: sketch, kind: circle, target: '3', text: 'left of 3'}
-          - {figure: sketch, kind: circle, target: '−6', text: 'right of −6'}
-      - say: 'Written as one statement: negative 6 is less than or equal to $x$, which is less than or equal to 3. That''s answer choice A.'
+          - {line: 7, kind: move, from: {line: 4, at: 'x ≥ [[−6]]'}, at: '[[−6]] ≤', text: '(2)'}
+          - {line: 7, kind: move, from: {line: 2, at: 'x ≤ [[3]]'}, at: 'x ≤ [[3]]', text: '(1)'}
+      - section: 'Check'
+        say: 'Check with 0, inside the overlap. 5 plus 0 is 5, at most 8. 13 plus 0 is 13, at least 7. Both hold.'
+        write: 'Check $x = 0$: $\ 5 \le 8,\ \ 13 \ge 7\ \checkmark$'
+      - say: 'So $x$ runs from minus 6 to 3: option A.'
         write: '$-6 \le x \le 3$'
         answer: true
-        point:
-          - {figure: sketch, kind: underline, target: 'x ≥ −6'}
-          - {figure: sketch, kind: underline, target: 'x ≤ 3'}
     traps:
-      B: 'You went for negative 6 to negative 3. The lower end is right, but the first inequality gives $x \le 3$, positive 3: 8 minus 5 is 3.'
-      C: 'You went for 3 to 6. The second inequality gives negative 6, not 6: 7 minus 13 is negative 6. And 3 is the top of the range, not the bottom.'
-      D: 'You went for negative 3 to 3. The top is right, but 13 plus $x$ at least 7 gives $x \ge -6$, because 7 minus 13 is negative 6.'
+      B: 'You went for minus 6 to minus 3. The lower end is right, but the first inequality gives $x \le 3$, positive 3: 8 minus 5 is 3.'
+      C: 'You went for 3 to 6. The second inequality gives minus 6, not 6: 7 minus 13 is minus 6. And 3 is the top of the range, not the bottom.'
+      D: 'You went for minus 3 to 3. The top is right, but 13 plus $x$ at least 7 gives $x \ge -6$, because 7 minus 13 is minus 6.'
 
   19:
     moments:
-      - say: '$x$ varies directly as the product of $U$ and $V$, and inversely as their sum. Picture a machine: $U$ and $V$ go in, $x$ comes out. We know $x = 3$ when $U = 3$ and $V = 1$. We want $x$ when $U = 3$ and $V = 3$.'
+      - section: 'The question'
+        say: '$x$ varies directly as the product of $U$ and $V$, and inversely as their sum. Picture a machine: $U$ and $V$ go in, $x$ comes out. We know one case, and want another.'
         doodle: {name: 'custom:2003_q19_a', id: machine, caption: 'U and V in, x out'}
-        write: 'Given: $x = 3$ when $U = 3,\ V = 1$'
-      - say: 'First, turn the sentence into a formula, one phrase at a time. Directly as the product puts $U$ times $V$ on top. Inversely as their sum puts $U$ plus $V$ underneath.'
-      - say: 'And every variation needs a constant, $k$, the machine''s fixed setting, which stays the same in every case.'
+        write: '$x = 3$ when $U = 3,\ V = 1$; $\ x = ?$ when $U = 3,\ V = 3$'
+      - say: 'Solution. The variation statement, one phrase at a time. Directly as the product puts $UV$ on top. Inversely as their sum puts $U$ plus $V$ underneath.'
+        write: 'Solution: $\ x \propto \dfrac{UV}{U + V}$'
+      - say: 'Replace the sign with the constant $k$, which stays the same in every case.'
         doodle_do:
           - {id: machine, op: circle, part: dial}
-        write: 'Formula: $x = \dfrac{kUV}{U + V}$'
-      - say: 'Now use the case we''re given to find $k$. Put in $x = 3$, $U = 3$ and $V = 1$.'
-        write: '$3 = \dfrac{k(3)(1)}{3 + 1}$'
-        point:
-          - {line: 3, kind: move, from: {line: 0, at: 'x = [[3]]'}, at: '[[3]] = 3', text: 'x'}
-          - {line: 3, kind: move, from: {line: 0, at: 'U = [[3]]'}, at: 'k[[(3)]]', text: 'U'}
-          - {line: 3, kind: move, from: {line: 0, at: 'V = [[1]]'}, at: '(3)[[(1)]]', text: 'V'}
-      - say: 'On top, $k$ times 3 times 1 is $3k$. Underneath, 3 plus 1 is 4.'
+        write: '$\therefore\ x = \dfrac{kUV}{U + V}$'
+      - section: 'Find k'
+        say: 'Substitute the case we know: $x$ is 3, $U$ is 3 and $V$ is 1.'
+        write: 'When $x = 3,\ U = 3,\ V = 1$: $\ 3 = \dfrac{k(3)(1)}{3 + 1}$'
+      - say: 'On top, $k$ times 3 times 1 is 3 $k$. Underneath, 3 plus 1 is 4.'
         write: '$3 = \dfrac{3k}{4}$'
-      - say: 'Multiply both sides by 4 to clear the fraction. 3 times 4 is 12.'
-        write: '$12 = 3k$'
-      - say: 'Divide both sides by 3. 12 over 3 is 4.'
+      - say: 'Cross multiply: 3 $k$ equals 12. Divide by 3, and $k$ is 4.'
         doodle_do:
           - {id: machine, op: label, part: dial, text: 'k = 4'}
-        write: '$k = 4$'
+        write: '$3k = 12$ $\ \therefore\ k = 4$'
         point:
-          - {line: 6, kind: highlight, at: 'k = 4', to: {doodle: machine, part: dial}}
-      - say: 'Now put $k = 4$ back into the formula. The relation is fully known.'
-        write: 'So $x = \dfrac{4UV}{U + V}$'
+          - {line: 5, kind: highlight, at: 'k = 4', to: {doodle: machine, part: dial}}
+      - section: 'The equation'
+        say: 'So the equation connecting $x$, $U$ and $V$ is $x$ equals 4 $UV$ over $U$ plus $V$.'
+        write: '$\therefore\ x = \dfrac{4UV}{U + V}$'
         point:
-          - {line: 7, kind: move, from: {line: 6, at: '4'}, at: '[[4]]UV', text: 'k'}
-      - say: 'Now feed the machine the second case, $U = 3$ and $V = 3$.'
+          - {line: 6, kind: move, from: {line: 5, at: 'k = [[4]]'}, at: '[[4]]UV', text: 'k'}
+      - section: 'Find x'
+        say: 'Now the second case: substitute $U$ equals 3 and $V$ equals 3.'
         doodle_do:
           - {id: machine, op: label, part: inputs, text: 'now U = 3 and V = 3'}
-        write: '$x = \dfrac{4(3)(3)}{3 + 3}$'
-      - say: 'On top, 4 times 3 is 12, and 12 times 3 is 36. Underneath, 3 plus 3 is 6.'
-        write: '$x = \dfrac{36}{6}$'
-      - say: '36 divided by 6 is 6. So $x$ is 6, which is answer choice C.'
+        write: 'When $U = 3,\ V = 3$: $\ x = \dfrac{4(3)(3)}{3 + 3}$'
+      - say: 'On top, 4 times 3 times 3 is 36. Underneath, 3 plus 3 is 6.'
+        write: '$= \dfrac{36}{6}$'
+      - say: '36 divided by 6 is 6.'
         doodle_do:
           - {id: machine, op: label, part: output, text: 'x = 6 comes out'}
+        write: '$\therefore\ x = 6$'
+        point:
+          - {line: 9, kind: highlight, at: 'x = 6', to: {doodle: machine, part: output}}
+      - section: 'Check'
+        say: 'Check the first case in the equation: 4 times 3 times 1 is 12, and 12 over 4 is 3. That is the given $x$.'
+        write: 'Check: $\ \dfrac{4(3)(1)}{3 + 1} = \dfrac{12}{4} = 3\ \checkmark$'
+      - say: 'So $x$ is 6: option C.'
         write: '$x = 6$'
         answer: true
-        point:
-          - {line: 10, kind: highlight, at: 'x = 6', to: {doodle: machine, part: output}}
     traps:
-      A: 'You went for 4. That''s the constant $k$, not $x$. Once you have $k = 4$, put $U = 3$ and $V = 3$ into the formula to get 36 over 6.'
+      A: 'You went for 4. That''s the constant $k$, not $x$. Once you have $k = 4$, put $U = 3$ and $V = 3$ into the equation to get 36 over 6.'
       B: 'You went for 9. That''s just $U$ times $V$, and it leaves out both the constant and the sum underneath. $x$ is 4 times 9, over 6, which is 6.'
-      D: 'You went for 3. That''s the first value of $x$. When $V$ changes from 1 to 3, $x$ changes too, so we need the formula.'
+      D: 'You went for 3. That''s the first value of $x$. When $V$ changes from 1 to 3, $x$ changes too, so we need the equation.'
 
   20:
     moments:
-      - say: 'Triangle $OPQ$ in the diagram is the solution of three inequalities. We want the set that describes it.'
+      - section: 'The question'
+        say: 'Triangle $OPQ$ is bounded by three lines, so the answer is three inequalities, one for each line. A single test point inside settles every sign.'
         write: 'Region: triangle $OPQ$'
         point:
           - {figure: 0, kind: circle, target: {x: 132, y: 140}, text: 'triangle OPQ'}
-      - say: 'Each side of the triangle lies along one of the lines in the diagram. So the answer is three inequalities, one for each line.'
-        point:
-          - {figure: 0, kind: highlight, target: PQ}
-          - {figure: 0, kind: highlight, target: OP}
-          - {figure: 0, kind: highlight, target: OQ, text: 'one side per line'}
-      - say: 'Reading them off the diagram: one side lies on the vertical line $x = -1$, which we can write as $x + 1 = 0$.'
-        write: 'Vertical side: $x + 1 = 0$'
+      - say: 'Solution. The vertical side lies on the line $x$ equals minus 1, which is $x$ plus 1 equals 0.'
+        write: 'Solution: $\ PQ$: $\ x = -1$, i.e. $x + 1 = 0$'
         point:
           - {figure: 0, kind: underline, target: 'x + 1 = 0'}
-      - say: 'The other two sides lie on the two diagonal lines through the origin: $y = -x$, which is $y + x = 0$, and $y = x$, which is $y - x = 0$.'
-        write: 'Diagonal sides: $y + x = 0,\quad y - x = 0$'
+      - say: 'The other two sides lie on the lines through the origin: $y$ equals minus $x$, and $y$ equals $x$.'
+        write: '$y + x = 0,\quad y - x = 0$'
         point:
           - {figure: 0, kind: underline, target: 'y + x = 0'}
           - {figure: 0, kind: underline, target: 'y − x = 0'}
-      - say: 'To decide which side of each line the triangle is on, test a point inside it. Let''s take negative a half, 0. It''s to the right of $x = -1$ and between the two diagonals.'
-        write: 'Test point: $\left(-\tfrac{1}{2},\ 0\right)$'
+      - section: 'Test a point'
+        say: 'Pick a point inside the triangle: minus a half, 0. It is right of $x$ equals minus 1 and between the two diagonals.'
+        write: 'Test point $\left(-\tfrac{1}{2},\ 0\right)$'
         point:
           - {figure: 0, kind: label, target: {x: 139, y: 140}, text: '(−½, 0)'}
-      - say: 'First the vertical line. Put $x$ equal to negative a half into $x + 1$. Negative a half plus 1 is a half.'
-        write: '$x + 1 = -\tfrac{1}{2} + 1 = \tfrac{1}{2}$'
-        point:
-          - {figure: 0, kind: circle, target: 'x + 1 = 0', text: 'vertical line'}
-      - say: 'A half is positive, so inside the triangle $x + 1$ is at least zero.'
-        write: 'So $x + 1 \ge 0$'
+      - say: '$x$ plus 1 is minus a half plus 1, which is a half. Positive, so inside the triangle $x$ plus 1 is at least 0.'
+        write: '$x + 1 = \tfrac{1}{2} > 0 \Rightarrow x + 1 \ge 0$'
         point:
           - {figure: 0, kind: highlight, target: PQ, text: 'x + 1 ≥ 0'}
-      - say: 'Next, $y + x$. That''s 0 plus negative a half, which is negative a half.'
-        write: '$y + x = 0 + \left(-\tfrac{1}{2}\right) = -\tfrac{1}{2}$'
-      - say: 'That''s negative, so inside the triangle $y + x$ is at most zero.'
-        write: 'So $y + x \le 0$'
+      - say: '$y$ plus $x$ is 0 plus minus a half, which is minus a half. Negative, so $y$ plus $x$ is at most 0.'
+        write: '$y + x = -\tfrac{1}{2} < 0 \Rightarrow y + x \le 0$'
         point:
           - {figure: 0, kind: highlight, target: OP, text: 'y + x ≤ 0'}
-      - say: 'Then $y - x$. That''s 0 minus negative a half, which is plus a half.'
-        write: '$y - x = 0 - \left(-\tfrac{1}{2}\right) = \tfrac{1}{2}$'
-      - say: 'That''s positive, so inside the triangle $y - x$ is at least zero.'
-        write: 'So $y - x \ge 0$'
+      - say: '$y$ minus $x$ is 0 minus minus a half, which is plus a half. Positive, so $y$ minus $x$ is at least 0.'
+        write: '$y - x = \tfrac{1}{2} > 0 \Rightarrow y - x \ge 0$'
         point:
           - {figure: 0, kind: highlight, target: OQ, text: 'y − x ≥ 0'}
-      - say: 'Putting the three together: $x + 1 \ge 0$, $y + x \le 0$ and $y - x \ge 0$. That''s answer choice B.'
-        write: '$x + 1 \ge 0,\ y + x \le 0,\ y - x \ge 0$'
+      - section: 'Answer'
+        say: 'Put the three together: option B.'
+        write: '$\therefore\ x + 1 \ge 0,\ y + x \le 0,\ y - x \ge 0$'
         answer: true
     traps:
-      A: 'You went for the set with $x - 1 \le 0$. That describes a boundary at $x$ equals positive 1, but the vertical side of the triangle is at $x$ equals negative 1.'
+      A: 'You went for the set with $x - 1 \le 0$. That puts a boundary at $x$ equals positive 1, but the vertical side of the triangle is at $x$ equals minus 1.'
       C: 'You went for the set with $x - 1 \ge 0$. That is everything to the right of $x = 1$, but the triangle is to the right of $x = -1$. Read the line''s label carefully off the diagram.'
-      D: 'You went for the set with $y + x \ge 0$. Test a point inside the triangle, like negative a half, 0: $y + x$ is negative there, so the region is $y + x \le 0$. And the vertical side is at $x = -1$, not 1.'
+      D: 'You went for the set with $y + x \ge 0$. Test a point inside the triangle, like minus a half, 0: $y + x$ is negative there, so the region has $y + x \le 0$. And the vertical side is at $x = -1$, not 1.'
 
   21:
     moments:
@@ -1013,48 +1002,50 @@ lessons:
 
   22:
     moments:
-      - say: 'The length a person can jump is inversely proportional to his weight. Picture a 20 kilogram person jumping 1.5 metres. We want the constant of proportionality.'
+      - section: 'The question'
+        say: 'The length a person can jump is inversely proportional to his weight. A 20 kilogram person jumps 1.5 metres. We want the constant of proportionality.'
         doodle: {name: 'custom:2003_q22_a', id: jump, caption: 'Heavier jumper, shorter jump'}
-        write: 'Weight $W = 20$ kg, length $L = 1.5$ m'
-      - say: 'Inversely proportional means that as one goes up, the other goes down in the same proportion. We write it as: length equals a constant divided by weight.'
+        write: 'Weight 20 kg, jump 1.5 m; $\ k = ?$'
+      - say: 'Solution. Let $L$ be the length jumped, in metres, and $W$ the weight, in kilograms.'
+        write: 'Solution: let $L$ = length (m), $W$ = weight (kg)'
+      - say: 'Inversely proportional: $L$ is proportional to 1 over $W$. A heavier jumper makes a shorter jump.'
         doodle_do:
           - {id: jump, op: label, part: jump, text: 'heavier jumper: shorter jump'}
-        write: 'Inverse proportion: $L = \dfrac{k}{W}$'
-      - say: 'Here $L$ is the length jumped, $W$ is the weight, and $k$ is the constant the question asks for.'
-      - say: 'To get $k$ by itself, multiply both sides by $W$.'
-        write: '$L \times W = \dfrac{k}{W} \times W$'
-      - say: 'On the right, the $W$s cancel, leaving $k$. So for an inverse relationship, the constant is the product of the two quantities.'
-        write: '$k = L \times W$'
-      - say: 'Now substitute the case we''re given: the length is 1.5, from the jump, and the weight is 20, from the tag.'
+        write: '$L \propto \dfrac{1}{W}$'
+      - say: 'Replace the sign with $k$, the constant of proportionality the question asks for.'
+        write: '$\therefore\ L = \dfrac{k}{W}$'
+      - section: 'Find k'
+        say: 'Substitute the given values: $L$ is 1.5, from the jump, and $W$ is 20, from the tag.'
         doodle_do:
           - {id: jump, op: highlight, part: jump}
           - {id: jump, op: highlight, part: weight}
-        write: '$k = 1.5 \times 20$'
+        write: 'When $W = 20,\ L = 1.5$: $\ 1.5 = \dfrac{k}{20}$'
         point:
-          - {line: 5, kind: move, from: {line: 0, at: '1.5'}, at: '1.5', text: 'L'}
-          - {line: 5, kind: move, from: {line: 0, at: '20'}, at: '20', text: 'W'}
-          - {line: 5, kind: highlight, at: '20', to: {doodle: jump, part: weight}}
-      - say: 'Split the 1.5 into 1 plus 0.5. 1 times 20 is 20, and 0.5 times 20 is 10.'
-        write: '$= 1 \times 20 + 0.5 \times 20 = 20 + 10$'
-      - say: '20 plus 10 is 30.'
+          - {line: 4, kind: highlight, at: 'W = 20', to: {doodle: jump, part: weight}}
+      - say: 'Multiply both sides by 20.'
+        write: '$k = 1.5 \times 20$'
+      - say: '1 times 20 is 20, and 0.5 times 20 is 10. 20 plus 10 is 30.'
         doodle_do:
           - {id: jump, op: label, part: weight, text: 'k = 1.5 × 20 = 30'}
-        write: '$= 30$'
-      - say: 'Let''s check with the formula we started with. $k$ over $W$ is 30 over 20, which is 1.5. That''s exactly the length jumped.'
-        write: 'Check: $L = \dfrac{30}{20} = 1.5$'
-      - say: 'So the constant of proportionality is 30, which is answer choice A.'
-        write: 'Constant: $k = 30$'
+        write: '$= 20 + 10 = 30$'
+      - say: 'Therefore the constant of proportionality is 30.'
+        write: '$\therefore\ k = 30$'
+      - section: 'Check'
+        say: 'Check: put $k$ back in. 30 over 20 is 1.5, exactly the length jumped.'
+        write: 'Check: $\ L = \dfrac{30}{20} = 1.5\ \checkmark$'
+      - say: 'So the constant is 30: option A.'
+        write: '$k = 30$'
         answer: true
     traps:
       B: 'You went for 60. That''s double the answer. 1.5 times 20 is 20 plus 10, which is 30.'
-      C: 'You went for 15. That''s 1.5 times 10, not 1.5 times 20. Inverse proportion means the constant is length times weight: 1.5 times 20, which is 30.'
+      C: 'You went for 15. That''s 1.5 times 10, not 1.5 times 20. From $1.5 = k$ over 20, multiply both sides by 20: $k$ is 30.'
       D: 'You went for 20. That''s the weight on its own. The constant is the weight times the length, 20 times 1.5, which is 30.'
 
   24:
     moments:
       - say: 'A point $P$ moves on one side only of a straight line $XY$, so that angle $XPY$ is always 90 degrees. We want the locus of $P$.'
         write: '$\angle XPY = 90^{\circ}$, $P$ on one side of $XY$'
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - say: 'Let me draw the line $XY$, and a point $P$ where angle $XPY$ is 90 degrees.'
         show_sketch: true
         point:
           - {figure: sketch, kind: arc, target: XPY, text: '90°'}
@@ -1202,7 +1193,7 @@ lessons:
     moments:
       - say: 'A line passes through negative 1, negative $p$ and negative 2, 2. It''s parallel to the line $2y + 8x - 17 = 0$. We want $p$.'
         write: 'Points $(-1,\ -p)$ and $(-2,\ 2)$; line $2y + 8x - 17 = 0$'
-      - say: 'Let me sketch the graph, so we can see its shape.'
+      - say: 'Let me draw the given line, and the parallel line through the two points.'
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: '(−1, −p)'}
@@ -1255,7 +1246,7 @@ lessons:
     moments:
       - say: 'We want the equation of the locus of $P(x, y)$, which is always the same distance from $Q(0, 0)$ as from $R(2, 1)$.'
         write: '$P(x, y),\quad Q(0, 0),\quad R(2, 1)$'
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - say: 'Let me plot $Q$ and $R$ on the axes.'
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: Q, text: '(0, 0)'}
@@ -1311,7 +1302,7 @@ lessons:
     moments:
       - say: 'An arc subtends 30 degrees at the circumference of a circle of radius 21 centimetres. We want the length of the arc.'
         write: 'Angle at circumference $= 30^{\circ}$, $r = 21$ cm'
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - say: 'Let me draw the circle with the arc $AB$ and the 30-degree angle at the circumference.'
         show_sketch: true
         point:
           - {figure: sketch, kind: arc, target: ACB, text: '30°'}
@@ -1364,7 +1355,7 @@ lessons:
     moments:
       - say: 'A trapezium has parallel sides of 5 centimetres and 9 centimetres, and an area of 21 square centimetres. We want the distance between the parallel sides.'
         write: 'Parallel sides 5 cm and 9 cm, area $21\ \text{cm}^{2}$'
-      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+      - say: 'Let me draw the trapezium.'
         show_sketch: true
         point:
           - {figure: sketch, kind: underline, target: '5 cm'}
@@ -1470,7 +1461,7 @@ lessons:
     moments:
       - say: 'A triangle has vertices $P(-1, 6)$, $Q(-3, -4)$ and $R(1, -4)$. We want the midpoints of $PQ$ and $QR$, in that order.'
         write: '$P(-1, 6),\quad Q(-3, -4),\quad R(1, -4)$'
-      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+      - say: 'Let me plot triangle $PQR$ on the axes.'
         show_sketch: true
         point:
           - {figure: sketch, kind: highlight, target: PQ}
@@ -1860,7 +1851,7 @@ lessons:
   43:
     moments:
       - section: 'The question'
-        say: 'A bag holds 5 black balls and 3 red balls. You pick two, without putting the first one back. What is the chance of one of each colour? Most students find one way to do it and forget the second. Let''s find both.'
+        say: 'A bag holds 5 black balls and 3 red balls. You pick two, without putting the first one back. What is the probability of one of each colour? Most students find one way to do it and forget the second. Let''s find both.'
         write: 'P(one black, one red) $= ?$'
         doodle: {id: bag, repeat: [{name: ball-black, n: 5}, {name: ball-red, n: 3}], layout: cluster, caption: '5 black and 3 red'}
       - section: 'What we know'
@@ -1885,7 +1876,7 @@ lessons:
           - {figure: sketch, kind: circle, target: 'BR', text: 'black, then red', 'on': 'black then red'}
           - {figure: sketch, kind: circle, target: 'RB', text: 'red, then black', 'on': 'red then black'}
       - section: 'Order 1: black, then red'
-        say: 'The first order. The first ball is black. 5 of the 8 balls are black, so the chance is 5 over 8.'
+        say: 'The first order. The first ball is black. 5 of the 8 balls are black, so the probability is 5 over 8.'
         write: 'First black: $\dfrac{5}{8}$'
         doodle_do:
           - {id: bag, op: group, n: 5, text: '5 black of 8', 'on': '5 of the 8'}
@@ -1895,12 +1886,12 @@ lessons:
         write: 'Left: 4 black, 3 red, 7 in all'
         doodle_do:
           - {id: bag, op: split, n: 1, text: 'picked: black | 7 left', 'on': 'leaves the bag'}
-      - say: 'So the chance that the second ball is red is 3 over 7: 3 reds out of the 7 left.'
+      - say: 'So the probability that the second ball is red is 3 over 7: 3 reds out of the 7 left.'
         write: 'Then red: $\dfrac{3}{7}$'
         point:
           - {line: 8, kind: travel, at: '73', from: {figure: sketch, target: '3/7'}, text: '3 of 7', 'on': '3 over 7'}
-      - say: 'Now a rule. When we want one thing and then another, we multiply their chances. We call it the and rule.'
-        write: 'And rule: multiply the chances'
+      - say: 'Now a rule. When we want one thing and then another, we multiply their probabilities. We call it the and rule.'
+        write: 'And rule: multiply the probabilities'
         'on': 'and rule'
       - say: 'So black then red is 5 over 8 times 3 over 7.'
         write: '$P(\text{B then R}) = \dfrac{5}{8} \times \dfrac{3}{7}$'
@@ -1912,12 +1903,12 @@ lessons:
         point:
           - {figure: sketch, kind: label, target: 'BR', text: '15/56', 'on': '15 over 56'}
       - section: 'Order 2: red, then black'
-        say: 'Now the other order. Start again with the bag full, all 8 balls. This time the first ball is red. 3 of the 8 are red, so the chance is 3 over 8.'
+        say: 'Now the other order. Start again with the bag full, all 8 balls. This time the first ball is red. 3 of the 8 are red, so the probability is 3 over 8.'
         write: 'First red: $\dfrac{3}{8}$'
         doodle: {id: bag2, repeat: [{name: ball-red, n: 3}, {name: ball-black, n: 5}], layout: cluster, caption: 'the same bag, full again', 'on': 'bag full'}
         point:
           - {line: 12, kind: travel, at: '83', from: {figure: sketch, target: '3/8'}, text: '3 of 8', 'on': '3 over 8'}
-      - say: 'The red ball leaves the bag. 7 are left, and all 5 blacks are still there. So the chance of black next is 5 over 7.'
+      - say: 'The red ball leaves the bag. 7 are left, and all 5 blacks are still there. So the probability of black next is 5 over 7.'
         write: 'Then black: $\dfrac{5}{7}$'
         doodle_do:
           - {id: bag2, op: split, n: 1, text: 'picked: red | 7 left', 'on': 'leaves the bag'}
@@ -1928,8 +1919,8 @@ lessons:
         point:
           - {figure: sketch, kind: label, target: 'RB', text: '15/56', 'on': 'same 15 over 56'}
       - section: 'Either order'
-        say: 'We are happy with either order. When either of two separate outcomes will do, we add their chances. We call it the or rule.'
-        write: 'Or rule: add the chances'
+        say: 'We are happy with either order. When either of two separate outcomes will do, we add their probabilities. We call it the or rule.'
+        write: 'Or rule: add the probabilities'
         'on': 'or rule'
       - say: 'So add the two paths: 15 over 56 plus 15 over 56. 15 plus 15 is 30, over the same 56.'
         write: '$P = \dfrac{15}{56} + \dfrac{15}{56} = \dfrac{30}{56}$'
@@ -1946,14 +1937,14 @@ lessons:
           - {figure: sketch, kind: label, target: 'RR', text: '6/56', 'on': 'Two reds'}
       - say: '20 plus 6 plus 30 is 56, and 56 over 56 is 1. Every path is counted once.'
         write: '$\dfrac{20 + 6 + 30}{56} = \dfrac{56}{56} = 1$'
-      - say: 'So the chance of one black and one red is 15 over 28, which is answer choice D.'
+      - say: 'So the probability of one black and one red is 15 over 28, which is answer choice D.'
         write: 'P(one black, one red) $= \dfrac{15}{28}$'
         answer: true
         point:
           - {figure: sketch, kind: label, target: 'P(one of each) = ?', text: '15/28', 'on': '15 over 28'}
     traps:
-      A: 'You went for 5 over 14. That is the chance that both balls are black: 5 over 8 times 4 over 7 is 20 over 56, which is 5 over 14. We want one of each colour.'
-      B: 'You went for 13 over 28. That is the chance of two balls of the same colour: two blacks is 20 over 56 and two reds is 6 over 56, making 26 over 56. We want one of each.'
+      A: 'You went for 5 over 14. That is the probability that both balls are black: 5 over 8 times 4 over 7 is 20 over 56, which is 5 over 14. We want one of each colour.'
+      B: 'You went for 13 over 28. That is the probability of two balls of the same colour: two blacks is 20 over 56 and two reds is 6 over 56, making 26 over 56. We want one of each.'
       C: 'You went for 3 over 14, which is 12 over 56. No path of the tree gives that. Black then red is 15 over 56, red then black is another 15 over 56, and together they make 30 over 56, which is 15 over 28.'
 
   44:
@@ -2162,7 +2153,7 @@ lessons:
       - say: 'Picture two dice thrown together. We want the probability that the sum of the numbers is divisible by 3.'
         doodle: {name: 'custom:2003_q48_a', id: dice, caption: 'Is the sum a multiple of 3?'}
         write: 'Two dice: $P(\text{sum divisible by } 3)$'
-      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+      - say: 'Let me draw the table of sums for the two dice.'
         show_sketch: true
       - say: 'Look at the two dice: each has 6 faces, so two dice give 6 times 6, which is 36 outcomes, all equally likely. We count outcomes, not sums, because the sums are not equally likely.'
         doodle_do:
@@ -2198,9 +2189,9 @@ lessons:
         write: 'Answer: $\dfrac{1}{3}$'
         answer: true
     traps:
-      A: 'You went for a half. That''s the chance of an even sum, not a sum divisible by 3. Only 12 of the 36 outcomes have a sum of 3, 6, 9 or 12.'
+      A: 'You went for a half. That''s the probability of an even sum, not a sum divisible by 3. Only 12 of the 36 outcomes have a sum of 3, 6, 9 or 12.'
       C: 'You went for a quarter. That would be 9 outcomes, but there are 12: 2 for a sum of 3, 5 for 6, 4 for 9 and 1 for 12.'
-      D: 'You went for two thirds. That''s the chance the sum is NOT divisible by 3. The favourable outcomes are 12 of 36, which is 1 over 3.'
+      D: 'You went for two thirds. That''s the probability the sum is NOT divisible by 3. The favourable outcomes are 12 of 36, which is 1 over 3.'
 
   49:
     moments:

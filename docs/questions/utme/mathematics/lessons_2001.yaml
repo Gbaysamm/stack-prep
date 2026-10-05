@@ -9,186 +9,189 @@ exam_year: 2001
 lessons:
   1:
     moments:
-      - say: 'Picture a money jar. We want the principal $P$, the money put in now, that grows to ₦5,000 at simple interest, over 5 years, at 2% per annum. "Amounts to" means ₦5,000 is where the money finishes, not where it starts.'
+      - section: 'The question'
+        say: 'Find the principal that amounts to ₦5,000 at simple interest in 5 years at 2% per annum. "Amounts to" means ₦5,000 is where the money finishes, not where it starts. Picture a money jar.'
+        write: 'Find $P$: amounts to ₦5,000 in 5 years at $2\%$ simple interest'
         doodle: {name: 'custom:2001_q01_a', id: jar, caption: 'P grows to ₦5,000'}
-        write: 'Amount $A = 5000$, rate $2\%$, time $5$ years'
-      - say: 'With simple interest, the interest is the same every single year, because it is always worked out on the original principal $P$. Watch the jar: each year the same slice goes on top.'
+      - section: 'Solution'
+        say: 'Solution. List the givens. A, the amount, is 5,000. R is 2 percent. T is 5 years. P, the principal, is what we want.'
+        write: '$A = 5000,\ R = 2,\ T = 5,\ P = ?$'
+      - say: 'The amount is the principal plus the interest.'
+        write: '$A = P + I$'
+      - say: 'Simple interest is I equals P R T over 100. The same slice is added every year, because it is always on the first P.'
+        write: '$I = \dfrac{PRT}{100}$'
         doodle_do:
           - {id: jar, op: stage, stage: 'custom:2001_q01_a2'}
-        write: 'Interest each year $= 2\%$ of $P$'
-      - say: 'The simple interest formula: the interest is the principal, times the rate, times the time, over 100.'
-        write: 'Simple interest: $I = \dfrac{PRT}{100}$'
-      - say: 'Over 5 years, that is five equal slices of 2%. 2 times 5 is 10, so the total interest is 10% of the principal.'
+      - section: 'Substitute'
+        say: 'Substitute R equals 2 and T equals 5. P times 2 times 5 is 10 P, over 100.'
+        write: '$I = \dfrac{P \times 2 \times 5}{100} = \dfrac{10P}{100}$'
+        point:
+          - {line: 3, kind: box, text: 'the formula'}
         doodle_do:
           - {id: jar, op: circle, part: slices}
-        write: 'Total interest $= 2\% \times 5 = 10\%$ of $P$'
-      - say: '10% means 10 over 100, which is 0.1. So the interest is $0.1P$.'
-        write: '$10\% \text{ of } P = \dfrac{10}{100} \times P = 0.1P$'
-      - say: 'The amount is the principal plus the interest. So the amount is $P$ plus $0.1P$.'
-        write: 'Amount $= P + 0.1P$'
+      - say: 'Cancel: 10 over 100 is 1 over 10. So the interest is P over 10.'
+        write: '$I = \dfrac{P}{10}$'
+      - say: 'Therefore, from A equals P plus I: P plus P over 10 equals 5,000.'
+        write: '$\therefore P + \dfrac{P}{10} = 5000$'
         point:
-          - { line: 5, kind: move, from: { line: 4, at: '= [[0.1P]]' }, at: '+ [[0.1P]]', text: 'interest' }
-      - say: '$P$ is the same as 1 $P$. 1 plus 0.1 is 1.1, so the amount is $1.1P$.'
-        write: '$= 1.1P$'
-      - say: 'Look at the jar''s tag again: the amount is ₦5,000. So $1.1P$ equals 5000.'
+          - {line: 6, kind: box, at: 'P + ', text: 'A = P + I'}
         doodle_do:
           - {id: jar, op: highlight, part: target}
-        write: '$1.1P = 5000$'
-        point:
-          - { line: 7, kind: move, from: { line: 6, at: '= [[1.1P]]' }, at: '[[1.1P]] =', text: 'amount' }
-          - { line: 7, kind: move, from: { line: 0, at: 'A = [[5000]]' }, at: '= [[5000]]', text: 'given' }
-      - say: 'How do we get $P$ by itself? We divide both sides by 1.1.'
-        write: '$P = \dfrac{5000}{1.1}$'
-        point:
-          - { line: 8, kind: move, from: { line: 7, at: '[[1.1]]P' }, at: 'P = [[1.1]]', text: 'divide' }
-      - say: 'To clear the decimal, multiply the top and the bottom by 10. That gives 50,000 over 11.'
-        write: '$= \dfrac{50000}{11}$'
-      - say: '50,000 divided by 11 is 4545.4545 and so on. To the nearest kobo, that is 4545.45.'
-        write: '$= 4545.4545\ldots \approx 4545.45$'
-      - say: 'Let''s check it. 10% of 4545.45 is about 454.55, and 4545.45 plus 454.55 is 5000. It works.'
-        write: 'Check: $10\%$ of $4545.45 \approx 454.55$, and $4545.45 + 454.55 = 5000$'
-      - say: 'So the principal, the money at the bottom of the jar, is ₦4,545.45, which is answer choice D.'
+      - section: 'Solve for P'
+        say: 'The L.C.M. of the denominators is 10. Over 10, P is 10 P over 10, so the left side is 10 P plus P, over 10.'
+        write: '$\dfrac{10P + P}{10} = 5000$'
+      - say: '10 P plus P is 11 P. Multiply both sides by 10: 11 P equals 50,000.'
+        write: '$11P = 50{,}000$'
+      - say: 'Divide both sides by 11.'
+        write: '$P = \dfrac{50{,}000}{11}$'
+      - say: 'By long division, 50,000 divided by 11 is 4545.4545 and so on. To the nearest kobo, 2 decimal places, that is 4545.45.'
+        write: '$= 4545.4545\ldots = 4545.45$ (2 d.p.)'
+      - section: 'Check'
+        say: 'Check with the formula. 4545.45 times 2 times 5, over 100, is 454.55 to the nearest kobo.'
+        write: 'Check: $I = \dfrac{4545.45 \times 2 \times 5}{100} = 454.55$'
+      - say: 'And 4545.45 plus 454.55 is 5000.00, the amount we were given. It agrees.'
+        write: '$A = 4545.45 + 454.55 = 5000.00$ ✓'
+      - say: 'Therefore the principal is ₦4,545.45: option D.'
+        write: '$\therefore P$ = ₦4,545.45 (D)'
+        answer: true
         doodle_do:
           - {id: jar, op: label, part: principal, text: 'P = ₦4,545.45'}
-        write: 'Principal $=$ ₦4,545.45'
-        answer: true
         point:
-          - {line: 12, kind: highlight, at: '₦4,545.45', to: {doodle: jar, part: principal}}
+          - {line: 13, kind: highlight, at: '₦4,545.45', to: {doodle: jar, part: principal}}
     traps:
-      A: 'You went for ₦5,000. That''s the amount at the end, after the interest has been added. If ₦5,000 were the principal, it would grow to ₦5,500. Divide 5000 by 1.1 instead.'
-      B: 'You went for ₦4,900. Check it: 10% of 4900 is 490, and 4900 plus 490 is 5390, not 5000. The principal is 5000 divided by 1.1.'
-      C: 'You went for ₦4,800. Check it: 10% of 4800 is 480, and 4800 plus 480 is 5280, not 5000. The principal is 5000 divided by 1.1.'
+      A: 'You went for ₦5,000. That is the amount at the end, after the interest is added. If ₦5,000 were the principal, it would grow to ₦5,500. Solve P plus P over 10 equals 5,000 instead.'
+      B: 'You went for ₦4,900. Check it: the interest on 4,900 is 490, and 4,900 plus 490 is 5,390, not 5,000. P is 50,000 over 11.'
+      C: 'You went for ₦4,800. Check it: the interest on 4,800 is 480, and 4,800 plus 480 is 5,280, not 5,000. P is 50,000 over 11.'
 
   2:
     moments:
-      - say: 'Picture the dealer''s car. He buys it for ₦250,000, spends ₦70,000 refurbishing it, and sells it for ₦400,000. We want his percentage gain.'
+      - section: 'The question'
+        say: 'A dealer buys a car for ₦250,000, spends ₦70,000 refurbishing it, and sells it for ₦400,000. What is his percentage gain? Three options come from leaving something out.'
+        write: 'Bought ₦250,000; refurbishing ₦70,000; sold ₦400,000'
         doodle: {name: 'custom:2001_q02_a', id: car, size: scene, caption: 'the dealer''s car'}
-        write: 'Bought ₦250,000, refurbishing ₦70,000, sold ₦400,000'
-      - say: 'Percentage gain is always measured against what the car really cost him. He spent money twice: once buying it, and again fixing it: there is the spanner. So both go into the cost.'
+      - section: 'Cost price'
+        say: 'Solution. The cost price, C.P., is everything the car cost him: the buying price plus the refurbishing. There is the spanner.'
+        write: 'C.P. $=$ buying price $+$ refurbishing'
         doodle_do:
           - {id: car, op: stage, stage: 'custom:2001_q02_a2'}
-        write: 'Cost $=$ buying price $+$ refurbishing'
-      - say: 'Put in the numbers: 250,000 plus 70,000.'
-        write: '$= 250{,}000 + 70{,}000$'
-        point:
-          - { line: 2, kind: move, from: { line: 0, at: 'Bought ₦[[250,000]]' }, at: '= [[250,000]]', text: 'buying' }
-          - { line: 2, kind: move, from: { line: 0, at: 'refurbishing ₦[[70,000]]' }, at: '+ [[70,000]]', text: 'refurbishing' }
-      - say: '250,000 plus 70,000 is 320,000. That is his total cost, everything the car took from his pocket.'
+      - say: '250,000 plus 70,000 is 320,000. His cost price is ₦320,000.'
+        write: '$= 250{,}000 + 70{,}000 = 320{,}000$'
         doodle_do:
-          - {id: car, op: label, part: car, text: 'cost ₦320,000'}
-        write: '$= 320{,}000$'
+          - {id: car, op: label, part: car, text: 'C.P. = ₦320,000'}
         point:
-          - {line: 3, kind: highlight, at: '320,000', to: {doodle: car, part: car}}
-      - say: 'Now the profit. That is what he sold it for, minus the total cost we just found.'
-        write: 'Profit $=$ selling price $-$ cost'
-      - say: 'Now the sale tag goes on the car: the selling price is 400,000 and the cost is 320,000.'
+          - {line: 2, kind: highlight, at: '320,000', to: {doodle: car, part: car}}
+      - section: 'Gain'
+        say: 'The selling price, S.P., is ₦400,000. Now the sale tag goes on the car. Gain is S.P. minus C.P.'
+        write: 'Gain $=$ S.P. $-$ C.P.'
         doodle_do:
           - {id: car, op: stage, stage: 'custom:2001_q02_a3'}
-        write: '$= 400{,}000 - 320{,}000$'
-        point:
-          - { line: 5, kind: move, from: { line: 0, at: 'sold ₦[[400,000]]' }, at: '= [[400,000]]', text: 'sold' }
-          - { line: 5, kind: move, from: { line: 3, at: '= [[320,000]]' }, at: '− [[320,000]]', text: 'cost' }
       - say: '400,000 minus 320,000 is 80,000.'
+        write: '$= 400{,}000 - 320{,}000 = 80{,}000$'
+        point:
+          - {line: 4, kind: move, from: {line: 2, at: '= [[320,000]]'}, at: '− [[320,000]]', text: 'C.P.'}
         doodle_do:
-          - {id: car, op: label, part: sell, text: 'profit ₦80,000'}
-        write: '$= 80{,}000$'
-        point:
-          - {line: 6, kind: highlight, at: '80,000', to: {doodle: car, part: sell}}
-      - say: 'Percentage gain is the profit over the cost, times 100.'
-        write: '$\text{Percentage gain} = \dfrac{\text{profit}}{\text{cost}} \times 100$'
-      - say: 'Put in the profit, 80,000, and the cost, 320,000, from the lines above.'
-        write: '$= \dfrac{80{,}000}{320{,}000} \times 100$'
-        point:
-          - { line: 8, kind: move, from: { line: 6, at: '= [[80,000]]' }, at: '= 320,000[[80,000]]', text: 'profit' }
-          - { line: 8, kind: move, from: { line: 3, at: '= [[320,000]]' }, at: '= [[320,000]]80', text: 'cost' }
-      - say: 'Cancel the thousands, and we have 80 over 320. 80 goes into 320 four times, so the fraction is 1 over 4.'
-        write: '$= \dfrac{80}{320} \times 100 = \dfrac{1}{4} \times 100$'
-      - say: 'A quarter of 100 is 25. So the gain is 25%, which is answer choice B.'
-        write: '$= 25\%$'
+          - {id: car, op: label, part: sell, text: 'gain ₦80,000'}
+      - section: 'Gain per cent'
+        say: 'Gain per cent is the gain over the C.P., times 100 percent.'
+        write: 'Gain $\% = \dfrac{\text{gain}}{\text{C.P.}} \times 100\%$'
+      - say: 'Substitute the gain, 80,000, and the C.P., 320,000.'
+        write: '$= \dfrac{80{,}000}{320{,}000} \times 100\%$'
+      - say: 'Cancel the thousands: 80 over 320. 80 goes into 320 four times, so it is 1 over 4. And 1 over 4 of 100 is 25.'
+        write: '$= \dfrac{80}{320} \times 100\% = \dfrac{1}{4} \times 100\% = 25\%$'
+      - section: 'Check'
+        say: 'Check: 25% of the C.P., 320,000, is 80,000. 320,000 plus 80,000 is 400,000, the S.P. It agrees.'
+        write: 'Check: $320{,}000 + 25\%$ of $320{,}000 = 400{,}000$ ✓'
+      - say: 'Therefore the percentage gain is 25 percent: option B.'
+        write: '$\therefore$ gain $\% = 25\%$ (B)'
         answer: true
     traps:
-      A: 'You went for 20%. That''s the profit over the selling price, 80,000 over 400,000. Percentage gain is always measured against the cost, ₦320,000.'
-      C: 'You went for 32%. That''s 80,000 over 250,000, which leaves the ₦70,000 refurbishing out of the cost. The cost is everything he spent: ₦320,000.'
-      D: 'You went for 60%. That ignores the refurbishing money completely: a profit of 150,000 over 250,000. The ₦70,000 is part of his cost, so the profit is only ₦80,000 on ₦320,000.'
+      A: 'You went for 20%. That is the gain over the S.P., 80,000 over 400,000. Gain per cent is always on the C.P., ₦320,000.'
+      C: 'You went for 32%. That is 80,000 over 250,000, leaving the ₦70,000 refurbishing out of the C.P. The C.P. is everything he spent: ₦320,000.'
+      D: 'You went for 60%. That ignores the refurbishing completely: a gain of 150,000 over 250,000. The ₦70,000 is part of the C.P., so the gain is ₦80,000 on ₦320,000.'
 
   3:
     moments:
-      - say: 'We need 21.05347 minus 1.6324 times 0.43, correct to 3 decimal places.'
-        write: '$21.05347 - 1.6324 \times 0.43$'
-      - say: 'Which do we do first? Multiplication comes before subtraction, so we work out 1.6324 times 0.43 first, and subtract afterwards.'
-        write: 'Multiply first: $1.6324 \times 0.43$'
-      - say: 'Ignore the decimal points for a moment and multiply the whole numbers: 16324 times 43. Split 43 into 40 plus 3.'
-        write: '$16324 \times 43 = 16324 \times 40 + 16324 \times 3$'
-      - say: '16324 times 40 is 652,960, and 16324 times 3 is 48,972.'
-        write: '$= 652{,}960 + 48{,}972$'
-      - say: 'Adding those gives 701,932.'
-        write: '$= 701{,}932$'
-      - say: 'Now put the decimal point back. 1.6324 has four decimal places and 0.43 has two, so the product has six.'
-        write: 'So $1.6324 \times 0.43 = 0.701932$'
-      - say: 'Now go back to the start: 21.05347 minus that product.'
+      - section: 'The question'
+        say: 'Evaluate 21.05347 minus 1.6324 times 0.43, to 3 decimal places. Two operations: which comes first? And two options sit near 20.98, the mark of a slipped decimal point.'
+        write: '$21.05347 - 1.6324 \times 0.43$ (3 d.p.)'
+      - section: 'Solution'
+        say: 'Solution. BODMAS: Brackets, Of, Division, Multiplication, Addition, Subtraction. Multiplication comes before subtraction, so we multiply first.'
+        write: 'By BODMAS: multiply first, then subtract'
+      - section: 'Multiply'
+        say: 'Ignore the points and multiply 16324 by 43 in long multiplication. 3 times 16324 is 48,972. 40 times 16324 is 652,960. Add them: 701,932.'
+        write: 'Long multiplication: $\begin{array}{r} 16324 \\ \times\ 43 \\ \hline 48972 \\ 652960 \\ \hline 701932 \end{array}$'
+      - say: 'Now place the point. 1.6324 has 4 decimal places and 0.43 has 2, so the product has 6.'
+        write: '$1.6324 \times 0.43 = 0.701932$'
+      - section: 'Subtract'
+        say: 'Now the subtraction: 21.05347 minus 0.701932.'
         write: '$21.05347 - 1.6324 \times 0.43 = 21.05347 - 0.701932$'
         point:
-          - { line: 6, kind: move, from: { line: 5, at: '= [[0.701932]]' }, at: '− [[0.701932]]', text: 'the product' }
-      - say: 'Line up the decimal points. Put an extra zero on the end of 21.05347, so both numbers have six decimal places.'
-        write: '$= 21.053470 - 0.701932$'
-      - say: 'Subtracting gives 20.351538. Picture a number line from 20.351 to 20.352, with a flag halfway.'
+          - {line: 4, kind: move, from: {line: 3, at: '= [[0.701932]]'}, at: '− [[0.701932]]', text: 'the product'}
+      - say: 'Line up the points, and add a zero to 21.05347 so both have 6 decimal places. Subtract column by column from the right, borrowing where needed.'
+        write: 'Subtract: $\begin{array}{r} 21.053470 \\ -\ \ 0.701932 \\ \hline 20.351538 \end{array}$'
+      - section: 'Correct to 3 d.p.'
+        say: 'For decimal places, count from the point: 3, 5, 1. Mark the cut after the third digit. Picture the number on a line from 20.351 to 20.352.'
+        write: 'Cut after 3 d.p.: $20.351\,|\,538$'
         doodle: {name: 'custom:2001_q03_a', id: line, caption: 'which end is nearer?'}
-        write: '$= 20.351538$'
-      - say: 'To round to 3 decimal places, look at the fourth digit after the point. It is a 5, so the third digit, 1, rounds up to 2. On the line, our number sits just past the halfway flag.'
+      - say: 'The next digit is 5. The rule: 5 or more, add 1 to the last digit kept. So the 1 becomes 2. On the line, the number is just past halfway.'
+        write: 'Next digit $5$: add $1$, so $20.351538 = 20.352$ (3 d.p.)'
         doodle_do:
           - {id: line, op: stage, stage: 'custom:2001_q03_a2'}
-        write: 'Fourth decimal digit is $5$, so round up'
-      - say: 'So the answer is 20.352, which is answer choice B.'
+      - section: 'Check'
+        say: 'Check the subtraction by adding back: 20.351538 plus 0.701932 is 21.053470. It agrees.'
+        write: 'Check: $20.351538 + 0.701932 = 21.05347$ ✓'
+      - say: 'Therefore the value is 20.352, to 3 decimal places: option B.'
+        write: '$\therefore$ value $= 20.352$ (3 d.p.) (B)'
+        answer: true
         doodle_do:
           - {id: line, op: circle, part: high}
-        write: '$21.05347 - 1.6324 \times 0.43 \approx 20.352$'
-        answer: true
         point:
-          - {line: 10, kind: highlight, at: '20.352', to: {doodle: line, part: high}}
+          - {line: 9, kind: highlight, at: '20.352', to: {doodle: line, part: high}}
     traps:
-      A: 'You went for 20.351. That cuts the number off instead of rounding it. The fourth decimal digit is 5, so the 1 rounds up to 2.'
-      C: 'You went for 20.980. That is what happens when a decimal place slips in the product, so only about 0.07 is taken away instead of 0.70. 1.6324 times 0.43 is 0.701932.'
-      D: 'You went for 20.981. A decimal place has slipped in the product, so too little was taken away. 1.6324 times 0.43 is 0.701932, and 21.05347 minus that is 20.351538.'
+      A: 'You went for 20.351. That cuts the number off without the rule. The next digit is 5, and 5 or more means add 1, so the 1 becomes 2.'
+      C: 'You went for 20.980. That comes from a decimal place slipping in the product, so only about 0.07 is taken away and you land near 20.98. 1.6324 times 0.43 is 0.701932: 6 decimal places.'
+      D: 'You went for 20.981. A decimal place has slipped in the product, so too little was taken away. Count the decimal places, 4 plus 2 is 6: the product is 0.701932.'
 
   4:
     moments:
-      - say: 'We need 0.14 squared, times 0.275, all over 7 times 0.02, correct to 3 decimal places.'
-        write: '$\dfrac{(0.14)^{2} \times 0.275}{7(0.02)}$'
-      - say: 'The plan: work out the top, then the bottom, and only then divide. Let''s start the top with 0.14 squared.'
-        write: 'Top: $(0.14)^{2} \times 0.275$'
-      - say: '0.14 squared is 0.14 times 0.14. 14 times 14 is 196. Each 0.14 has two decimal places, so the answer has four.'
-        write: '$14 \times 14 = 196$, so $(0.14)^{2} = 0.0196$'
-      - say: 'Now multiply that by 0.275. For the whole numbers, 196 times 275 is 53,900.'
-        write: '$196 \times 275 = 53{,}900$'
-      - say: 'Count the decimal places: 0.0196 has four and 0.275 has three, so seven in all. 53,900 with seven decimal places is 0.00539.'
-        write: 'So top $= 0.0196 \times 0.275 = 0.00539$'
-      - say: 'Now the bottom: 7 times 0.02. 7 times 2 is 14, with two decimal places, so 0.14.'
-        write: 'Bottom: $7 \times 0.02 = 0.14$'
-      - say: 'So the whole expression is the top we found, 0.00539, over the bottom, 0.14.'
-        write: '$\dfrac{(0.14)^{2} \times 0.275}{7(0.02)} = \dfrac{0.00539}{0.14}$'
-        point:
-          - { line: 6, kind: move, from: { line: 4, at: '= [[0.00539]]' }, at: '= 0.14[[0.00539]]', text: 'top' }
-          - { line: 6, kind: move, from: { line: 5, at: '= [[0.14]]' }, at: '= [[0.14]]0.00539', text: 'bottom' }
-      - say: 'Dividing by a decimal is awkward, so multiply the top and the bottom by 100. That turns 0.14 into 14, and 0.00539 into 0.539.'
-        write: '$= \dfrac{0.00539 \times 100}{0.14 \times 100} = \dfrac{0.539}{14}$'
-      - say: '0.539 divided by 14 is 0.0385. Picture it on a number line between 0.038 and 0.039. Check: 14 times 0.0385 is 0.539.'
+      - section: 'The question'
+        say: '0.14 squared, times 0.275, over 7 times 0.02, correct to 3 decimal places. It looks like a lot of multiplying. Look at the bottom first: something there cancels.'
+        write: '$\dfrac{(0.14)^{2} \times 0.275}{7(0.02)}$ (3 d.p.)'
+      - section: 'Solution'
+        say: 'Solution. The bottom is 7 times 0.02. 7 times 2 is 14, with 2 decimal places: 0.14.'
+        write: 'Bottom: $7(0.02) = 0.14$'
+      - say: '0.14 squared means 0.14 times 0.14. Write it out, with the bottom we just found.'
+        write: '$= \dfrac{0.14 \times 0.14 \times 0.275}{0.14}$'
+      - section: 'Cancel first'
+        say: 'Cancel first: one 0.14 on top cancels the 0.14 below. That leaves 0.14 times 0.275.'
+        write: '$= 0.14 \times 0.275$'
+      - section: 'Multiply'
+        say: 'Ignore the points: 275 times 14 in long multiplication. 4 times 275 is 1100. 10 times 275 is 2750. Add them: 3850.'
+        write: 'Long multiplication: $\begin{array}{r} 275 \\ \times\ 14 \\ \hline 1100 \\ 2750 \\ \hline 3850 \end{array}$'
+      - say: 'Place the point. 0.14 has 2 decimal places and 0.275 has 3, so the product has 5: 0.03850.'
+        write: '$0.14 \times 0.275 = 0.03850$'
+      - section: 'Correct to 3 d.p.'
+        say: 'For decimal places, count from the point: 0, 3, 8. Mark the cut after the 8. Picture the value on a line from 0.038 to 0.039.'
+        write: 'Cut after 3 d.p.: $0.038\,|\,50$'
         doodle: {name: 'custom:2001_q04_a', id: line, caption: 'which end does it go to?'}
-        write: '$= 0.0385$, since $14 \times 0.0385 = 0.539$'
-      - say: 'To 3 decimal places, look at the fourth digit after the point. It is 5, so the third digit, 8, rounds up to 9. Look at the line: 0.0385 sits exactly on the halfway flag, and a 5 rounds up.'
+      - say: 'The next digit is 5. The rule: 5 or more, add 1 to the last digit kept. So the 8 becomes 9. The value sits on the halfway flag, and a 5 goes up.'
+        write: 'Next digit $5$: add $1$, so $0.0385 = 0.039$ (3 d.p.)'
         doodle_do:
           - {id: line, op: stage, stage: 'custom:2001_q04_a2'}
-        write: 'Fourth decimal digit is $5$, so round up'
-      - say: 'That gives 0.039, which is answer choice B.'
+      - section: 'Check'
+        say: 'Check the long way: 0.14 squared is 0.0196, and 0.0196 times 0.275 is 0.00539. Divide by 0.14: 0.0385. It agrees.'
+        write: 'Check: $\dfrac{0.0196 \times 0.275}{0.14} = \dfrac{0.00539}{0.14} = 0.0385$ ✓'
+      - say: 'Therefore the value is 0.039, to 3 decimal places: option B.'
+        write: '$\therefore$ value $= 0.039$ (3 d.p.) (B)'
+        answer: true
         doodle_do:
           - {id: line, op: circle, part: high}
-        write: '$\dfrac{(0.14)^{2} \times 0.275}{7(0.02)} \approx 0.039$'
-        answer: true
         point:
-          - {line: 10, kind: highlight, at: '0.039', to: {doodle: line, part: high}}
+          - {line: 9, kind: highlight, at: '0.039', to: {doodle: line, part: high}}
     traps:
-      A: 'You went for 0.033. The exact value is 0.0385, so an arithmetic slip has crept in. Square 0.14 carefully to get 0.0196, then multiply by 0.275 and divide by 0.14 step by step.'
-      C: 'You went for 0.308. That''s far too big, the kind of answer you get when a decimal place is lost. Squaring doubles the decimal places: 0.14 squared is 0.0196, not 0.196.'
-      D: 'You went for 0.358. That''s about ten times too big, so a decimal place has gone missing. Count the places carefully: the value is 0.0385, which rounds to 0.039.'
+      A: 'You went for 0.033. The value is 0.0385, so a slip has crept into the arithmetic. Cancel the 0.14 first: 0.14 times 0.275 is 0.0385, which is 0.039.'
+      C: 'You went for 0.308. That is far too big: a decimal place has been lost. 0.14 times 0.275 has 5 decimal places: 0.03850.'
+      D: 'You went for 0.358. That is about ten times too big, so a decimal place has gone missing. Count the places: the value is 0.0385, which is 0.039.'
 
   5:
     moments:
@@ -341,247 +344,281 @@ lessons:
 
   8:
     moments:
-      - say: 'We need to factorise $4x^2$ minus $9y^2$ plus $20x$ plus 25.'
-        write: '$4x^{2} - 9y^{2} + 20x + 25$'
-      - say: 'Four terms in this order don''t factorise directly. The trick is to look for a perfect square hiding inside. The terms without $y$, that is $4x^2$, $20x$ and 25, look promising: picture them as tiles fitting into one square. Let''s group them.'
-        doodle: {name: 'custom:2001_q08_a', id: tiles, caption: 'a square of tiles'}
+      - section: 'The question'
+        say: 'Four terms, two letters, and no common factor. The secret is a perfect square hiding inside. Find it first, and the rest is a difference of two squares.'
+        write: 'Factorise $4x^{2} - 9y^{2} + 20x + 25$'
+      - section: 'Solution'
+        say: 'Solution. The three terms in $x$ belong together, so rearrange them side by side and put the $y$ term last. Picture those three as tiles that fit into one square.'
+        write: '$= 4x^{2} + 20x + 25 - 9y^{2}$'
+        doodle: {name: 'custom:2001_q08_a', id: tiles, caption: '4x² + 20x + 25 as a square of tiles', 'on': 'Picture'}
+      - say: 'Bracket the three $x$ terms. We factorise the bracket first, by product and sum.'
         write: '$= (4x^{2} + 20x + 25) - 9y^{2}$'
-      - say: 'Remember, a perfect square, $A$ plus $B$ all squared, expands to $A$ squared plus $2AB$ plus $B$ squared. Let''s see if our bracket fits.'
-        write: 'Perfect square: $(A + B)^{2} = A^{2} + 2AB + B^{2}$'
-      - say: '$4x^2$ is $2x$ all squared, so $A$ would be $2x$. And 25 is 5 squared, so $B$ would be 5.'
-        write: '$4x^{2} = (2x)^{2},\quad 25 = 5^{2}$'
-      - say: 'Now check the middle term, $2AB$. 2 times $2x$ times 5 is $20x$, exactly the middle term we have: the two yellow strips of $10x$. So it is a perfect square.'
+      - section: 'Factorise the bracket'
+        say: 'In the bracket, $a$ is 4, $b$ is 20 and $c$ is 25. The product is $a$ times $c$, 4 times 25, which is 100. The sum is $b$, 20.'
+        write: 'Product $= 4 \times 25 = 100$, Sum $= 20$'
+      - say: 'Two numbers that multiply to 100 and add up to 20: 10 and 10. 10 times 10 is 100, and 10 plus 10 is 20.'
+        write: 'Factors: $10,\ 10$'
+      - say: 'Split the middle term, $20x$, into $10x$ plus $10x$. In the picture, these are the two strips beside the big square.'
+        write: '$= 4x^{2} + 10x + 10x + 25$'
         doodle_do:
-          - {id: tiles, op: circle, part: strips}
-        write: 'Middle term: $2 \times 2x \times 5 = 20x$'
-      - say: 'So the bracket is $2x + 5$, all squared: look along the square''s side, $2x$ then 5.'
-        doodle_do:
-          - {id: tiles, op: highlight, part: side}
-        write: 'So $4x^{2} + 20x + 25 = (2x + 5)^{2}$'
+          - {id: tiles, op: circle, part: strips, 'on': 'two strips'}
         point:
-          - { line: 2, kind: box, text: 'the pattern' }
-      - say: 'Put that back into our grouped line, and take the pink square away. And $9y^2$ is $3y$ all squared, because 3 squared is 9.'
+          - {line: 5, kind: move, from: {line: 4, at: '[[10]], 10'}, at: '[[10x]] + 10x', text: 'split'}
+          - {line: 5, kind: move, from: {line: 4, at: '10, [[10]]'}, at: '10x + [[10x]]'}
+      - say: 'Group in pairs. From the first pair take out $2x$, leaving $2x$ plus 5. From the second pair take out 5, leaving $2x$ plus 5 again.'
+        write: '$= 2x(2x + 5) + 5(2x + 5)$'
+      - say: 'The brackets match, so take out $2x$ plus 5. The same bracket twice is a perfect square: $2x$ plus 5, all squared. Look along the side of the square.'
+        write: '$= (2x + 5)(2x + 5) = (2x + 5)^{2}$'
         doodle_do:
-          - {id: tiles, op: stage, stage: 'custom:2001_q08_a2'}
-        write: '$4x^{2} - 9y^{2} + 20x + 25 = (2x + 5)^{2} - (3y)^{2}$'
+          - {id: tiles, op: highlight, part: side, 'on': 'Look along'}
+      - section: 'Difference of two squares'
+        say: 'Put it back in place of the bracket. The whole expression is $2x$ plus 5 all squared, minus 9 $y$ squared: the big square with a square taken away.'
+        write: '$\therefore$ expression $= (2x + 5)^{2} - 9y^{2}$'
+        doodle_do:
+          - {id: tiles, op: stage, stage: 'custom:2001_q08_a2', 'on': 'taken away'}
+      - say: '9 $y$ squared is $3y$ all squared, because 3 times 3 is 9. Now it is one square minus another square.'
+        write: '$= (2x + 5)^{2} - (3y)^{2}$'
         point:
-          - { line: 6, kind: move, from: { line: 5, at: '= [[(2x + 5)2]]' }, at: '= [[(2x + 5)2]]', text: 'swap in' }
-      - say: 'Now we have one square minus another square. That is a difference of two squares.'
+          - {line: 9, kind: underline, at: '(3y)2', text: '9y² = (3y)²'}
+      - say: 'That is a difference of two squares. $A$ squared minus $B$ squared equals $A$ minus $B$, times $A$ plus $B$.'
         write: 'Difference of two squares: $A^{2} - B^{2} = (A - B)(A + B)$'
-      - say: 'This time $A$ is the whole bracket $2x + 5$, and $B$ is $3y$.'
-        write: 'Here $A = 2x + 5,\quad B = 3y$'
-      - say: 'So we get $2x + 5$ minus $3y$, times $2x + 5$ plus $3y$.'
-        write: '$= \left[(2x + 5) - 3y\right]\left[(2x + 5) + 3y\right]$'
+      - say: 'Here $A$ is the whole bracket, $2x$ plus 5, and $B$ is $3y$.'
+        write: 'Here $A = 2x + 5,\ B = 3y$'
+      - say: 'So we get $2x$ plus 5 minus $3y$, times $2x$ plus 5 plus $3y$.'
+        write: '$= (2x + 5 - 3y)(2x + 5 + 3y)$'
         point:
-          - { line: 7, kind: box, text: 'the rule' }
-          - { line: 9, kind: move, from: { line: 8, at: 'A = [[2x + 5]]' }, at: '[[(2x + 5)]] − 3y', text: 'A' }
-          - { line: 9, kind: move, from: { line: 8, at: 'B = [[3y]]' }, at: '− [[3y]]', text: 'B' }
-      - say: 'Remove the inner brackets and put the terms in a tidy order.'
+          - {line: 12, kind: move, from: {line: 11, at: 'A = [[2x + 5]]'}, at: '[[2x + 5]] − 3y', text: 'A'}
+          - {line: 12, kind: move, from: {line: 11, at: 'B = [[3y]]'}, at: '− [[3y]]', text: 'B'}
+      - say: 'Rearrange each bracket, with the $y$ term second and the number last.'
         write: '$= (2x - 3y + 5)(2x + 3y + 5)$'
-      - say: 'Quick check: the $y$ parts multiply to negative $3y$ times $3y$, which is negative $9y^2$. That matches the question.'
-        write: 'Check: $(-3y)(3y) = -9y^{2}$'
-      - say: 'So the factorisation is $2x - 3y + 5$, times $2x + 3y + 5$, which is answer choice C.'
-        write: 'Answer: $(2x - 3y + 5)(2x + 3y + 5)$'
+      - section: 'Check'
+        say: 'Check two of the terms. The $y$ parts give minus $3y$ times $3y$, minus 9 $y$ squared. The numbers give 5 times 5, 25. Both match the question.'
+        write: 'Check: $(-3y)(3y) = -9y^{2}$, $\ 5 \times 5 = 25$'
+      - say: 'Therefore the factors are $2x$ minus $3y$ plus 5, times $2x$ plus $3y$ plus 5, which is answer choice C.'
+        write: '$\therefore (2x - 3y + 5)(2x + 3y + 5)$'
         answer: true
     traps:
-      A: 'You went for $2x - 3y$ times $2x + 3y$. That only gives $4x^2 - 9y^2$ and drops the $20x + 25$. Group $4x^2 + 20x + 25$ as the perfect square $(2x + 5)^2$ first.'
-      B: 'You went for $2x + 5$ times $2x - 9y + 5$. Expanding that gives $xy$ and $y$ terms, and no $y$ squared at all. The $9y^2$ must be written as $3y$ all squared.'
-      D: 'You went for $2x - 3y$ times $2x + 3y + 5$. Expanding gives $10x$ and a $y$ term, and no 25. Spot the perfect square $(2x + 5)^2$ first, then use the difference of two squares.'
+      A: 'You went for $2x$ minus $3y$, times $2x$ plus $3y$. That gives only $4x^2$ minus $9y^2$ and drops $20x$ plus 25. Factorise $4x^2 + 20x + 25$ as $(2x + 5)^2$ first.'
+      B: 'You went for $2x$ plus 5, times $2x$ minus $9y$ plus 5. Expanding that gives $xy$ and $y$ terms, and no $y$ squared at all. Write $9y^2$ as $3y$ all squared.'
+      D: 'You went for $2x$ minus $3y$, times $2x$ plus $3y$ plus 5. Expanding gives $10x$ and a $y$ term, and no 25. Find the perfect square $(2x + 5)^2$ first, then use the difference of two squares.'
 
   9:
     moments:
-      - say: 'Two graphs, $y = px^2 + q$ and $y = 2x^2 - 1$, cross at $x = 2$. We want $p$ in terms of $q$.'
-        write: '$y = px^{2} + q,\quad y = 2x^{2} - 1$'
-      - say: 'What does it mean for two graphs to intersect? Picture the two curves. At the crossing point both graphs pass through the same point, so they have the same $y$ for the same $x$.'
+      - section: 'The question'
+        say: 'Two curves cross where $x$ is 2. At that crossing they share one point, and that single fact gives us an equation linking $p$ and $q$.'
+        write: '$y = px^{2} + q,\ \ y = 2x^{2} - 1$; meet at $x = 2$'
         doodle: {name: 'custom:2001_q09_a', id: graphs, caption: 'where the two curves cross'}
-        write: 'At the crossing point, $y$ is the same on both graphs'
-      - say: 'So we set the two expressions for $y$ equal to each other.'
+      - section: 'Solution'
+        say: 'Solution. Number the two equations. The first graph is equation 1.'
+        write: '$y = px^{2} + q \quad \ldots\ldots (1)$'
+      - say: 'The second graph is equation 2.'
+        write: '$y = 2x^{2} - 1 \quad \ldots\ldots (2)$'
+      - say: 'Where two graphs intersect, they pass through the same point, so they have the same $y$. So we equate equation 1 and equation 2.'
+        write: 'At the point of intersection, (1) = (2):'
+        doodle_do:
+          - {id: graphs, op: circle, part: meet, 'on': 'same point'}
+      - say: 'The right-hand sides must be equal: $p$ $x$ squared plus $q$ equals 2 $x$ squared minus 1.'
         write: '$px^{2} + q = 2x^{2} - 1$'
-      - say: 'Look at the picture: they cross above $x = 2$, so replace every $x$ with 2, on both sides.'
+      - say: 'They intersect at $x$ equals 2, so substitute 2 for $x$ on both sides, in brackets.'
+        write: 'Sub. $x = 2$: $\ p(2)^{2} + q = 2(2)^{2} - 1$'
         doodle_do:
           - {id: graphs, op: highlight, part: xline}
-        write: '$p(2)^{2} + q = 2(2)^{2} - 1$'
-      - say: '2 squared is 4. So the left side is $4p$ plus $q$, and the right side is 2 times 4, minus 1.'
-        write: '$4p + q = 2(4) - 1$'
-      - say: '2 times 4 is 8, and 8 minus 1 is 7. So the crossing point is at height 7.'
+      - say: '2 squared is 4, so $p$ times 4 is $4p$. On the right, 2 times 4 is 8.'
+        write: '$4p + q = 8 - 1$'
+      - say: '8 minus 1 is 7. Both graphs are at height 7 when $x$ is 2.'
+        write: '$4p + q = 7$'
         doodle_do:
           - {id: graphs, op: label, part: meet, text: 'y = 7 on both'}
-        write: '$4p + q = 8 - 1 = 7$'
-      - say: 'The question wants $p$ in terms of $q$, so $p$ must end up alone. First, take $q$ away from both sides.'
+      - section: 'Make p the subject'
+        say: 'The question wants $p$ in terms of $q$, so make $p$ the subject. Subtract $q$ from both sides.'
         write: '$4p = 7 - q$'
         point:
-          - { line: 6, kind: move, from: { line: 5, at: '+ [[q]]' }, at: '− q', text: 'across' }
-      - say: 'Now divide both sides by 4.'
+          - {line: 8, kind: move, from: {line: 7, at: '+ [[q]]'}, at: '− q', text: 'subtract q'}
+      - say: 'Divide both sides by 4, the coefficient of $p$, the number in front of it.'
         write: '$p = \dfrac{7 - q}{4}$'
         point:
-          - { line: 7, kind: move, from: { line: 6, at: '[[4]]p' }, at: 'p = [[4]]', text: 'divide' }
-      - say: 'Let''s check. Put this $p$ back into $4p$ plus $q$: the 4s cancel, and 7 minus $q$ plus $q$ is 7, which is exactly what the other graph gives at $x = 2$.'
-        write: 'Check: $4 \times \dfrac{7 - q}{4} + q = 7 - q + q = 7$'
-        point:
-          - { line: 7, kind: arrow, text: 'this p' }
-      - say: 'So $p$ is 7 minus $q$, over 4, which is answer choice A.'
-        write: 'Answer: $p = \dfrac{7 - q}{4}$'
+          - {line: 9, kind: move, from: {line: 8, at: '[[4]]p'}, at: '4', text: '÷ 4'}
+      - section: 'Check'
+        say: 'Check: put this $p$ back into $4p$ plus $q$. The 4s cancel, and 7 minus $q$ plus $q$ is 7, which is the height of the second graph at $x$ equals 2.'
+        write: 'Check: $4\left(\dfrac{7 - q}{4}\right) + q = 7 - q + q = 7$'
+      - say: 'Therefore $p$ is 7 minus $q$, all over 4, which is answer choice A.'
+        write: '$\therefore p = \dfrac{7 - q}{4}$'
         answer: true
     traps:
-      B: 'You went for 8 minus $q$, over 2. That forgets the minus 1 on the right, and divides by 2 instead of 4. At $x = 2$, $2x^2 - 1$ is 7, and $px^2$ is $4p$.'
-      C: 'You went for $q$ minus 8, over 7. That mixes up which letter is the subject. From $4p + q = 7$, subtract $q$ and divide by 4.'
-      D: 'You went for 7 over $q$ minus 1. The $q$ is added to $4p$, not multiplied, so you subtract it: $4p = 7 - q$, then divide by 4.'
+      B: 'You went for 8 minus $q$, over 2. That drops the minus 1 and divides by 2 instead of 4. At $x = 2$, $2x^2 - 1$ is 7, and $px^2$ is $4p$.'
+      C: 'You went for $q$ minus 8, over 7. That mixes up which letter is the subject. From $4p + q = 7$, subtract $q$ from both sides, then divide both sides by 4.'
+      D: 'You went for 7 over $q$ minus 1. The $q$ is added to $4p$, not multiplied, so subtract it: $4p = 7 - q$, then divide both sides by 4.'
 
   10:
     moments:
-      - say: 'Picture a rectangle with sides $m$ and $n$. We need to solve $m^2 + n^2 = 29$ and $m + n = 7$ at the same time.'
-        doodle: {name: 'custom:2001_q10_a', id: rect, caption: 'sides m and n'}
-        write: '$m^{2} + n^{2} = 29,\quad m + n = 7$'
-      - say: 'There is an identity that links a sum of squares to a sum. When we square $m + n$, we get $m$ squared, plus $n$ squared, plus $2mn$.'
-        write: '$(m + n)^{2} = m^{2} + n^{2} + 2mn$'
-      - say: 'Now put in what the question gives us. $m + n$ is 7, and $m^2 + n^2$ is 29.'
-        write: '$7^{2} = 29 + 2mn$'
-        point:
-          - { line: 1, kind: box, text: 'identity' }
-          - { line: 2, kind: move, from: { line: 0, at: 'm + n = [[7]]' }, at: '[[7]]2', text: 'm + n' }
-          - { line: 2, kind: move, from: { line: 0, at: '= [[29]]' }, at: '= [[29]]', text: 'm² + n²' }
-      - say: '7 squared is 49.'
-        write: '$49 = 29 + 2mn$'
-      - say: 'Subtract 29 from both sides. 49 minus 29 is 20.'
-        write: '$2mn = 49 - 29 = 20$'
-        point:
-          - { line: 4, kind: move, from: { line: 3, at: '= [[29]] +' }, at: '− 29', text: 'across' }
-      - say: 'Divide both sides by 2, and $mn$ is 10: that is the rectangle''s area.'
+      - section: 'The question'
+        say: 'Picture a rectangle with sides $m$ and $n$. One equation is linear and one is quadratic, so we use substitution: get one letter from the linear equation and put it into the quadratic.'
+        write: 'Solve $m^{2} + n^{2} = 29$, $\ m + n = 7$'
+        doodle: {name: 'custom:2001_q10_a', id: rect, caption: 'sides m and n', 'on': 'Picture'}
+      - section: 'Solution'
+        say: 'Solution. Number the equations. The quadratic one, $m$ squared plus $n$ squared equals 29, is equation 1.'
+        write: '$m^{2} + n^{2} = 29 \quad \ldots\ldots (1)$'
+      - say: 'The linear one, $m$ plus $n$ equals 7, is equation 2. The two sides of the rectangle add up to 7.'
+        write: '$m + n = 7 \quad \ldots\ldots (2)$'
         doodle_do:
-          - {id: rect, op: label, part: area, text: 'mn = 10'}
-        write: '$mn = 10$'
+          - {id: rect, op: pulse, part: sum, 'on': 'add up to 7'}
+      - section: 'Substitute'
+        say: 'Make $m$ the subject of the linear equation: subtract $n$ from both sides. Label this new equation 3.'
+        write: 'From (2): $\ m = 7 - n \quad \ldots\ldots (3)$'
+      - say: 'Substitute equation 3 into equation 1. Wherever we see $m$, write 7 minus $n$, in a bracket.'
+        write: 'Sub. (3) in (1): $\ (7 - n)^{2} + n^{2} = 29$'
         point:
-          - {line: 5, kind: highlight, at: 'mn = 10', to: {doodle: rect, part: area}}
-      - say: 'Look at the rectangle again. Now we know two things: $m$ and $n$ add up to 7, and they multiply to 10.'
-        doodle_do:
-          - {id: rect, op: pulse, part: sum}
-        write: 'So $m + n = 7,\quad mn = 10$'
-      - say: 'Two numbers with a sum of 7 and a product of 10 are the roots of the quadratic $t$ squared, minus 7 $t$, plus 10, equals 0.'
-        write: '$t^{2} - 7t + 10 = 0$'
+          - {line: 4, kind: move, from: {line: 3, at: '= [[7 − n]]'}, at: '7 − n', text: 'sub in'}
+      - say: 'To open the bracket, 7 minus $n$, all squared, means 7 minus $n$ times 7 minus $n$.'
+        write: '$(7 - n)(7 - n) + n^{2} = 29$'
+      - say: 'Expand: 7 times 7 is 49, 7 times minus $n$ is minus $7n$, twice, and minus $n$ times minus $n$ is plus $n$ squared.'
+        write: '$49 - 7n - 7n + n^{2} + n^{2} = 29$'
+      - say: 'Collect like terms, and subtract 29 from both sides so that the right side is zero.'
+        write: '$2n^{2} - 14n + 49 - 29 = 0$'
+      - say: '49 minus 29 is 20.'
+        write: '$2n^{2} - 14n + 20 = 0$'
+      - say: 'Every term divides by 2. Divide through by 2 to make the numbers smaller.'
+        write: '$n^{2} - 7n + 10 = 0$'
+      - section: 'Factorise: product and sum'
+        say: 'Here $a$ is 1, $b$ is minus 7 and $c$ is 10. The product is $a$ times $c$, 10. The sum is $b$, minus 7.'
+        write: 'Product $= ac = 10$, Sum $= b = -7$'
+      - say: 'Two numbers that multiply to 10 and add to minus 7: minus 2 and minus 5. Minus 2 times minus 5 is 10, and minus 2 plus minus 5 is minus 7.'
+        write: 'Factors: $-2,\ -5$'
+      - say: 'Split the middle term. Minus $7n$ becomes minus $2n$ minus $5n$.'
+        write: '$n^{2} - 2n - 5n + 10 = 0$'
         point:
-          - { line: 7, kind: move, from: { line: 6, at: 'm + n = [[7]]' }, at: '− [[7]]t', text: 'sum' }
-          - { line: 7, kind: move, from: { line: 6, at: 'mn = [[10]]' }, at: '+ [[10]]', text: 'product' }
-      - say: 'To factorise, we need two numbers that multiply to 10 and add to 7. 2 and 5 work: 2 times 5 is 10, and 2 plus 5 is 7.'
-        write: '$2 \times 5 = 10,\quad 2 + 5 = 7$'
-      - say: 'So the quadratic factorises as $t$ minus 2, times $t$ minus 5, equals 0.'
-        write: '$(t - 2)(t - 5) = 0$'
-      - say: 'So $t$ is 2 or 5. Those are our two numbers: a 5 by 2 rectangle, ten little squares.'
+          - {line: 12, kind: move, from: {line: 11, at: '[[−2]], −5'}, at: '−2n', text: 'split'}
+          - {line: 12, kind: move, from: {line: 11, at: '−2, [[−5]]'}, at: '−5n'}
+      - say: 'Group in pairs. From the first pair take out $n$, leaving $n$ minus 2. From the second pair take out minus 5, leaving $n$ minus 2 again.'
+        write: '$n(n - 2) - 5(n - 2) = 0$'
+      - say: 'The brackets match. Take out the common bracket, $n$ minus 2, and $n$ minus 5 is left.'
+        write: '$(n - 2)(n - 5) = 0$'
+      - say: 'Two brackets multiply to give zero, so one of them must be zero.'
+        write: 'Either $n - 2 = 0$ or $n - 5 = 0$'
+      - say: 'Add 2 to both sides of the first, and 5 to both sides of the second.'
+        write: '$\therefore n = 2$ or $n = 5$'
+      - section: 'Find m'
+        say: 'Now find $m$ from equation 3, the linear one. When $n$ is 2, $m$ is 7 minus 2, which is 5.'
+        write: 'Sub. in (3): $n = 2$, $\ m = 7 - 2 = 5$'
+      - say: 'When $n$ is 5, $m$ is 7 minus 5, which is 2. Pair each $m$ with its own $n$.'
+        write: '$n = 5$, $\ m = 7 - 5 = 2$'
+      - section: 'Check'
+        say: 'Check in equation 1: 5 squared plus 2 squared is 25 plus 4, which is 29. A 5 by 2 rectangle: the sides add to 7.'
+        write: 'Check (1): $5^{2} + 2^{2} = 25 + 4 = 29$'
         doodle_do:
-          - {id: rect, op: stage, stage: 'custom:2001_q10_a2'}
-        write: '$t = 2 \text{ or } t = 5$'
-      - say: 'Check them in the first equation: 2 squared plus 5 squared is 4 plus 25, which is 29. Good.'
-        write: 'Check: $2^{2} + 5^{2} = 4 + 25 = 29$'
-      - say: 'The question doesn''t say which one is $m$, so either order works. The solutions are 2, 5 and 5, 2, which is answer choice D.'
-        write: '$(m,\ n) = (2,\ 5) \text{ and } (5,\ 2)$'
+          - {id: rect, op: stage, stage: 'custom:2001_q10_a2', 'on': 'A 5 by 2'}
+      - say: 'Therefore $m$, $n$ is 5, 2 or 2, 5. The options list the pairs as 2, 5 and 5, 2, which is answer choice D.'
+        write: '$\therefore (m,\ n) = (5,\ 2)$ or $(2,\ 5)$'
         answer: true
     traps:
-      A: 'You went for 5, 2 and 5, 3. The pair 5, 3 adds to 8, not 7, so it fails $m + n = 7$.'
+      A: 'You went for 5, 2 and 5, 3. The pair 5, 3 adds to 8, not 7, so it fails equation 2, $m + n = 7$.'
       B: 'You went for 5, 3 and 3, 5. Those add to 8, not 7, and 25 plus 9 is 34, not 29.'
-      C: 'You went for 2, 3 and 3, 5. 2 plus 3 is 5 and 3 plus 5 is 8, so neither pair adds to 7.'
+      C: 'You went for 2, 3 and 3, 5. 2 plus 3 is 5 and 3 plus 5 is 8, so neither pair satisfies $m + n = 7$.'
 
   11:
     moments:
-      - say: 'We need to divide $a^{3x} - 26a^{2x} + 156a^x - 216$ by $a^{2x} - 24a^x + 108$.'
+      - section: 'The question'
+        say: 'Look at the powers: $3x$, $2x$ and $x$. Everything is built from $a$ to the power $x$. Give it one letter, and this becomes an ordinary long division.'
         write: '$\dfrac{a^{3x} - 26a^{2x} + 156a^{x} - 216}{a^{2x} - 24a^{x} + 108}$'
-      - say: 'Look at the powers: $3x$, $2x$ and $x$. $a^{3x}$ is $a^x$ cubed, and $a^{2x}$ is $a^x$ squared. So everything is built from one thing, $a^x$. Let''s give it a single letter, $u$.'
-        write: 'Let $u = a^{x}$'
-      - say: 'A law of indices: a power raised to another power multiplies the indices.'
-        write: 'Power of a power: $\left(b^{m}\right)^{n} = b^{mn}$'
-      - say: 'Then $a^{2x}$ is $u$ squared, and $a^{3x}$ is $u$ cubed.'
-        write: 'Then $a^{2x} = (a^{x})^{2} = u^{2},\quad a^{3x} = (a^{x})^{3} = u^{3}$'
-      - say: 'Replace them, and the division becomes an ordinary one between two polynomials in $u$.'
+      - section: 'Solution'
+        say: 'Solution. Let $a$ to the power $x$ be $u$.'
+        write: 'Let $a^{x} = u$'
+      - say: 'A power of a power: multiply the indices. $a$ to the power $2x$ is $a$ to the $x$, all squared, which is $u$ squared.'
+        write: '$a^{2x} = (a^{x})^{2} = u^{2}$'
+      - say: 'In the same way, $a$ to the power $3x$ is $a$ to the $x$, all cubed, which is $u$ cubed.'
+        write: '$a^{3x} = (a^{x})^{3} = u^{3}$'
+      - say: 'Substitute, and the question becomes: divide $u$ cubed minus 26 $u$ squared plus 156 $u$ minus 216, by $u$ squared minus 24 $u$ plus 108.'
         write: '$= \dfrac{u^{3} - 26u^{2} + 156u - 216}{u^{2} - 24u + 108}$'
+      - section: 'Long division'
+        say: 'Long division, as with numbers. First term: $u$ cubed divided by $u$ squared is $u$. That is the first term of the quotient.'
+        write: '$u^{3} \div u^{2} = u$'
+      - say: 'Multiply the whole divisor by $u$: $u$ cubed minus 24 $u$ squared plus 108 $u$.'
+        write: '$u(u^{2} - 24u + 108) = u^{3} - 24u^{2} + 108u$'
+      - say: 'Subtract it from the first three terms: change the signs and add. $u$ cubed cancels. Minus 26 plus 24 is minus 2. 156 minus 108 is 48.'
+        write: 'Subtract: $-2u^{2} + 48u$'
+      - say: 'Bring down the next term, minus 216.'
+        write: 'Bring down: $\ -2u^{2} + 48u - 216$'
+      - say: 'Next term: minus 2 $u$ squared divided by $u$ squared is minus 2.'
+        write: '$-2u^{2} \div u^{2} = -2$'
+      - say: 'Multiply the divisor by minus 2: minus 2 $u$ squared plus 48 $u$ minus 216.'
+        write: '$-2(u^{2} - 24u + 108) = -2u^{2} + 48u - 216$'
+      - say: 'Subtract, and every term cancels. The remainder is zero, so the division is exact.'
+        write: 'Subtract: remainder $= 0$'
+      - say: 'The terms we found, $u$ and minus 2, make the quotient: $u$ minus 2.'
+        write: 'Quotient $= u - 2$'
         point:
-          - { line: 3, kind: arrow, text: 'swap in' }
-      - say: 'Let''s factorise the bottom first. We want two numbers that multiply to 108 and add to negative 24. Negative 6 and negative 18 work.'
-        write: '$(-6)(-18) = 108,\ (-6) + (-18) = -24$, so bottom $= (u - 6)(u - 18)$'
-      - say: 'If the division is going to come out neatly, the top should share these factors. So let''s test $u = 6$ in the top.'
-        write: 'Top at $u = 6$: $6^{3} - 26(6^{2}) + 156(6) - 216$'
-      - say: '6 cubed is 216. 6 squared is 36, and 26 times 36 is 936. And 156 times 6 is also 936.'
-        write: '$= 216 - 26(36) + 936 - 216 = 216 - 936 + 936 - 216$'
-      - say: 'Everything cancels, and we get 0. When putting in 6 gives 0, $u - 6$ is a factor. So $u - 6$ is a factor of the top too.'
-        write: '$= 0$, so $(u - 6)$ is a factor of the top'
-      - say: 'Dividing the top by $u - 6$ leaves $u$ squared minus $20u$ plus 36. You can check by multiplying it back out.'
-        write: 'Top $= (u - 6)(u^{2} - 20u + 36)$'
-      - say: 'Now factorise that quadratic. Two numbers that multiply to 36 and add to negative 20 are negative 2 and negative 18.'
-        write: '$(-2)(-18) = 36,\ (-2) + (-18) = -20$, so $u^{2} - 20u + 36 = (u - 2)(u - 18)$'
-      - say: 'So the top is $u - 6$, times $u - 2$, times $u - 18$. Now put the factorised top over the factorised bottom. Picture each factor as a block.'
-        doodle: {name: 'custom:2001_q11_a', id: blocks, caption: 'factors as blocks'}
-        write: 'Division $= \dfrac{(u - 6)(u - 2)(u - 18)}{(u - 6)(u - 18)}$'
-      - say: 'The $u - 6$ and the $u - 18$ appear on the top and the bottom, so they cancel: cross out the matching blocks, and only $u - 2$ is left.'
+          - {line: 12, kind: move, from: {line: 5, at: '= [[u]]'}, at: '[[u]] − 2', text: 'first term'}
+          - {line: 12, kind: move, from: {line: 9, at: '= [[−2]]'}, at: '− 2', text: 'second term'}
+      - section: 'Check'
+        say: 'Check by multiplying back: quotient times divisor should give the top. $u$ minus 2, times $u$ squared minus 24 $u$ plus 108.'
+        write: 'Check: $(u - 2)(u^{2} - 24u + 108)$'
+      - say: '$u$ times the bracket, then minus 2 times the bracket.'
+        write: '$= u^{3} - 24u^{2} + 108u - 2u^{2} + 48u - 216$'
+      - say: 'Collect like terms: minus 24 minus 2 is minus 26, and 108 plus 48 is 156. That is exactly the top.'
+        write: '$= u^{3} - 26u^{2} + 156u - 216 \ \checkmark$'
+      - section: 'Exam tip'
+        say: 'Exam tip: the bottom factorises. Product 108, sum minus 24: minus 6 and minus 18. Picture each factor as a block.'
+        write: 'Exam tip: $u^{2} - 24u + 108 = (u - 6)(u - 18)$'
+        doodle: {name: 'custom:2001_q11_a', id: blocks, caption: 'factors as blocks', 'on': 'Picture'}
+      - say: 'So the top is $u$ minus 2, times $u$ minus 6, times $u$ minus 18. The blocks $u$ minus 6 and $u$ minus 18 cancel, leaving $u$ minus 2.'
+        write: 'Top $= (u - 2)(u - 6)(u - 18)$'
         doodle_do:
           - {id: blocks, op: cross, part: six}
           - {id: blocks, op: cross, part: eighteen}
           - {id: blocks, op: circle, part: two}
-        write: '$= u - 2$'
+      - say: 'Finally, put back $a$ to the power $x$ in place of $u$. The quotient is $a$ to the $x$ minus 2, which is answer choice C.'
+        write: '$\therefore$ quotient $= a^{x} - 2$'
         point:
-          - { line: 11, kind: strike, at: '= [[(u − 6)(u − 18)]]', text: 'cancels' }
-          - { line: 11, kind: strike, at: '[[(u − 6)]](u − 2)', text: 'cancels' }
-          - { line: 11, kind: strike, at: '(u − 2)[[(u − 18)]]', text: 'cancels' }
-      - say: 'Finally, put $a^x$ back in place of $u$. The answer is $a^x - 2$, which is answer choice C.'
-        doodle_do:
-          - {id: blocks, op: label, part: two, text: 'put back u = a^x'}
-        write: '$= a^{x} - 2$'
-        point:
-          - { line: 13, kind: move, from: { line: 1, at: 'u = [[ax]]' }, at: '= [[ax]]', text: 'u back' }
+          - {line: 18, kind: move, from: {line: 1, at: 'ax'}, at: 'ax', text: 'u = aˣ'}
         answer: true
     traps:
-      A: 'You went for $a^x - 18$. That factor is on the top and on the bottom, so it cancels. What''s left after cancelling is $a^x - 2$.'
-      B: 'You went for $a^x - 6$. That factor is on both the top and the bottom, so it cancels too. The factor left over is $a^x - 2$.'
-      D: 'You went for $a^x + 2$. The sign is wrong. The top factorises with $u - 2$, because negative 2 and negative 18 multiply to 36 and add to negative 20.'
+      A: 'You went for $a^x$ minus 18. That is a factor of the divisor, not the quotient. The long division gives $u$ minus 2, so the answer is $a^x$ minus 2.'
+      B: 'You went for $a^x$ minus 6. That is a factor of the divisor too. In the long division the second term is minus 2 $u$ squared divided by $u$ squared, which is minus 2.'
+      D: 'You went for $a^x$ plus 2. The sign slipped. After subtracting, the remainder line starts with minus 2 $u$ squared, and minus 2 $u$ squared divided by $u$ squared is minus 2.'
 
   12:
     moments:
-      - say: 'We want whole-number pairs $x$, $y$ with $3y + 5x \le 15$, where $y$ is more than 0 and less than 3, and $x$ is more than 0.'
-        write: '$3y + 5x \le 15,\quad y > 0,\quad y < 3,\quad x > 0$'
-        point:
-          - { figure: sketch, kind: circle, target: '3y + 5x = 15' }
-          - { figure: sketch, kind: circle, target: 'y = 3', text: 'not allowed' }
-      - say: 'Let me sketch the graph, so we can see its shape.'
-        show_sketch: true
-      - say: 'The plan: first narrow down the possible values using the simple conditions, then test the big inequality. Start with $y$. It is a whole number, bigger than 0 and less than 3.'
-        write: 'From $0 < y < 3$:'
-      - say: 'The whole numbers strictly between 0 and 3 are just 1 and 2. 3 itself is not allowed, because $y$ must be less than 3.'
-        write: '$y = 1 \text{ or } y = 2$'
-        point:
-          - { line: 0, kind: highlight, at: 'y > 0, y < 3', text: 'given' }
-      - say: 'And $x$ is a whole number bigger than 0, so $x$ is at least 1.'
-        write: 'From $x > 0$: $x \ge 1$'
-      - say: 'Now test $y = 1$ in the big inequality. Replace $y$ with 1.'
-        write: 'When $y = 1$: $3(1) + 5x \le 15$'
-        point:
-          - { line: 5, kind: move, from: { line: 3, at: 'y = [[1]]' }, at: '3([[1]])', text: 'y = 1' }
-      - say: '3 times 1 is 3. Subtract 3 from both sides: 15 minus 3 is 12.'
-        write: '$5x \le 15 - 3 = 12$'
-        point:
-          - { line: 6, kind: move, from: { line: 5, at: '[[3(1)]] +' }, at: '− [[3]] =', text: 'across' }
-      - say: 'Divide both sides by 5. 12 over 5 is 2.4, so $x$ is at most 2.4. The whole numbers from 1 up to 2.4 are 1 and 2.'
-        write: '$x \le 2.4$, so $x = 1 \text{ or } 2$'
-      - say: 'That gives the points 1, 1 and 2, 1. Remember, each point is written $x$ first, then $y$.'
-        write: 'Points: $(1,\ 1),\ (2,\ 1)$'
-        point:
-          - { figure: sketch, kind: circle, target: '(1, 1)' }
-          - { figure: sketch, kind: circle, target: '(2, 1)' }
-      - say: 'Now test $y = 2$. Replace $y$ with 2.'
-        write: 'When $y = 2$: $3(2) + 5x \le 15$'
-        point:
-          - { line: 9, kind: move, from: { line: 3, at: 'y = [[2]]' }, at: '3([[2]])', text: 'y = 2' }
-      - say: '3 times 2 is 6. Subtract 6 from both sides: 15 minus 6 is 9.'
-        write: '$5x \le 15 - 6 = 9$'
-        point:
-          - { line: 10, kind: move, from: { line: 9, at: '[[3(2)]] +' }, at: '− [[6]] =', text: 'across' }
-      - say: 'Divide by 5. 9 over 5 is 1.8, so $x$ is at most 1.8. Only $x = 1$ works.'
-        write: '$x \le 1.8$, so $x = 1$'
-      - say: 'That gives the point 1, 2.'
-        write: 'Point: $(1,\ 2)$'
-        point:
-          - { figure: sketch, kind: circle, target: '(1, 2)' }
-      - say: 'Putting both cases together, the solutions are 1, 1, then 1, 2, and 2, 1. That''s answer choice C.'
-        write: 'Solutions: $(1,\ 1),\ (1,\ 2),\ (2,\ 1)$'
-        point:
-          - { line: 13, kind: move, from: { line: 8, at: '[[(1, 1)]],' }, at: '[[(1, 1)]], (1, 2)', text: 'y = 1' }
-          - { line: 13, kind: move, from: { line: 12, at: '(1, 2)' }, at: '(1, 2)', text: 'y = 2' }
-          - { line: 13, kind: move, from: { line: 8, at: '(2, 1)' }, at: '(2, 1)', text: 'y = 1' }
+      - section: 'The question'
+        say: 'We want whole-number points $x$, $y$ that satisfy all four conditions at once. The two strict signs, $y$ less than 3 and $x$ greater than 0, decide which points count.'
+        write: '$3y + 5x \le 15,\quad 0 < y < 3,\quad x > 0$'
+      - say: 'Solution. Start with $y$. It is a whole number greater than 0 and less than 3, so $y$ is 1 or 2. 3 itself is not allowed.'
+        write: 'Solution: $\ 0 < y < 3 \Rightarrow y = 1$ or $2$'
+      - say: '$x$ is a whole number greater than 0, so $x$ is at least 1.'
+        write: '$x > 0 \Rightarrow x \ge 1$'
+      - say: 'Here is the graph. The boundary line $3y$ plus $5x$ equals 15 cuts the axes at 3, 0 and 0, 5. The line $y$ equals 3 is the top limit.'
+        diagram:
+          id: g
+          kind: graph
+          x: [-1, 4]
+          y: [-1, 6]
+          plots:
+            - {fn: '5 - 5x/3', label: '3y + 5x = 15', colour: blue}
+            - {fn: '3', label: 'y = 3', colour: orange}
+      - section: 'y = 1'
+        say: 'Put $y$ equals 1 into the main inequality. 3 times 1 is 3.'
+        write: '$y = 1$: $\ 3(1) + 5x \le 15$'
+      - say: 'Subtract 3 from both sides: $5x$ is at most 12. Divide by 5: $x$ is at most 2.4. So $x$ is 1 or 2.'
+        write: '$5x \le 12 \Rightarrow x \le 2.4$, $\ $so $x = 1,\ 2$'
+        diagram_do:
+          - {id: g, op: point, x: 1, y: 1, text: '(1, 1)', colour: green}
+          - {id: g, op: point, x: 2, y: 1, text: '(2, 1)', colour: green}
+      - section: 'y = 2'
+        say: 'Now $y$ equals 2. 3 times 2 is 6.'
+        write: '$y = 2$: $\ 3(2) + 5x \le 15$'
+      - say: 'Subtract 6: $5x$ is at most 9. Divide by 5: $x$ is at most 1.8. So $x$ is 1 only.'
+        write: '$5x \le 9 \Rightarrow x \le 1.8$, $\ $so $x = 1$'
+        diagram_do:
+          - {id: g, op: point, x: 1, y: 2, text: '(1, 2)', colour: green}
+      - section: 'Answer'
+        say: 'Collect the points, $x$ first, then $y$. All three lie under the boundary line and below $y$ equals 3.'
+        write: '$\therefore\ (1,\ 1),\ (1,\ 2),\ (2,\ 1)$'
+      - section: 'Check'
+        say: 'Check a point just outside, 2, 2: 6 plus 10 is 16, more than 15. It lies above the line, so it is rightly left out.'
+        write: 'Check $(2,\ 2)$: $\ 3(2) + 5(2) = 16 > 15\ \times$'
+        diagram_do:
+          - {id: g, op: point, x: 2, y: 2, text: '(2, 2) out', colour: red}
+      - say: 'So the points are 1, 1, then 1, 2, and 2, 1: option C.'
+        write: '$(1,\ 1),\ (1,\ 2),\ (2,\ 1)$'
         answer: true
     traps:
       A: 'You went for a list with 1, 3 in it. That point fits $3y + 5x \le 15$, since 9 plus 5 is 14, but $y$ must be strictly less than 3. The list also misses 1, 2.'
@@ -590,72 +627,50 @@ lessons:
 
   13:
     moments:
-      - say: 'In the graph, triangle $SPT$ is enclosed by the lines $2y - x - 2 = 0$ and $y + 2x + 2 = 0$, and the $x$-axis. We want the inequalities that describe it.'
+      - section: 'The question'
+        say: 'Triangle $SPT$ is bounded by two lines and the $x$-axis. One inequality for each edge. The options differ mainly on whether the triangle is above or below the axis.'
         write: '$2y - x - 2 = 0,\quad y + 2x + 2 = 0$'
         point:
-          - { figure: 0, kind: circle, target: '2y − x − 2 = 0' }
-          - { figure: 0, kind: circle, target: 'y + 2x + 2 = 0' }
-      - say: 'A region bounded by straight lines is described by one inequality for each boundary line. For each line, we decide which side the triangle is on. First, let''s find the corners.'
-        write: 'Corners $S$ and $T$ are on the $x$-axis, where $y = 0$'
+          - {figure: 0, kind: circle, target: '2y − x − 2 = 0'}
+          - {figure: 0, kind: circle, target: 'y + 2x + 2 = 0'}
+      - section: 'The corners'
+        say: 'Solution. $S$ and $T$ are on the $x$-axis, where $y$ is 0. Put $y$ equals 0 in the first line: minus $x$ minus 2 is 0, so $x$ is minus 2.'
+        write: 'Solution: $\ S$: $\ 2(0) - x - 2 = 0 \Rightarrow x = -2$'
         point:
-          - { figure: 0, kind: circle, target: { x: 152, y: 160 }, text: 'triangle SPT' }
-          - { figure: 0, kind: circle, target: 'P', text: 'corner' }
-      - say: 'Put $y = 0$ into the first line: 2 times 0, minus $x$, minus 2, equals 0.'
-        write: '$S:\ 2(0) - x - 2 = 0$'
+          - {figure: 0, kind: circle, target: 'S', text: 'x = −2'}
+      - say: 'Put $y$ equals 0 in the second line: $2x$ plus 2 is 0, so $x$ is minus 1.'
+        write: '$T$: $\ 0 + 2x + 2 = 0 \Rightarrow x = -1$'
         point:
-          - { figure: 0, kind: circle, target: '2y − x − 2 = 0', text: 'first line' }
-      - say: 'That is negative $x$ minus 2 equals 0, so $x$ is negative 2. That''s the point $S$.'
-        write: '$-x = 2 \Rightarrow x = -2$'
+          - {figure: 0, kind: circle, target: 'T', text: 'x = −1'}
+      - say: '$P$ is where the lines meet. From the second line, $y$ is minus $2x$ minus 2. Substitute that into the first line.'
+        write: '$P$: $\ 2(-2x - 2) - x - 2 = 0$'
         point:
-          - { line: 3, kind: move, from: { line: 2, at: 'x [[− 2]] = 0' }, at: '= [[2]] ⇒', text: 'across' }
-          - { figure: 0, kind: circle, target: 'S', text: 'x = −2' }
-      - say: 'Now put $y = 0$ into the second line: 0 plus $2x$ plus 2 equals 0.'
-        write: '$T:\ 0 + 2x + 2 = 0$'
+          - {figure: 0, kind: circle, target: 'P', text: 'on both lines'}
+      - say: 'Open the bracket and collect like terms: minus $4x$ minus 4 minus $x$ minus 2 is minus $5x$ minus 6. So $x$ is minus 1.2.'
+        write: '$-5x - 6 = 0 \Rightarrow x = -1.2$'
+      - say: 'Then $y$ is minus 2 times minus 1.2, minus 2. That is 2.4 minus 2, which is 0.4. $P$ is above the $x$-axis.'
+        write: '$y = -2(-1.2) - 2 = 0.4$'
         point:
-          - { figure: 0, kind: circle, target: 'y + 2x + 2 = 0', text: 'second line' }
-      - say: 'So $2x$ is negative 2, and $x$ is negative 1. That''s $T$.'
-        write: '$2x = -2 \Rightarrow x = -1$'
+          - {figure: 0, kind: label, target: 'P', text: 'height 0.4'}
+      - say: 'So the triangle sits on the upper side of the axis.'
+        write: '$\therefore\ y \ge 0$'
+      - section: 'Test a point'
+        say: 'Test a point inside the triangle, minus 1.4, 0.1, in the first expression: 0.2 plus 1.4 minus 2 is minus 0.4. Negative, so at most 0.'
+        write: 'Test $(-1.4,\ 0.1)$: $\ 2y - x - 2 = -0.4 \Rightarrow 2y - x - 2 \le 0$'
         point:
-          - { line: 5, kind: move, from: { line: 4, at: '2x [[+ 2]] = 0' }, at: '= [[−2]] ⇒', text: 'across' }
-          - { figure: 0, kind: circle, target: 'T', text: 'x = −1' }
-      - say: 'Now $P$, where the two lines meet. The second line gives $y$ equals negative $2x$ minus 2. The first line can be written $2y = x + 2$. Put that $y$ into it.'
-        write: '$P:\ 2(-2x - 2) = x + 2$'
-        point:
-          - { figure: 0, kind: circle, target: 'P', text: 'on both lines' }
-      - say: 'Expand the bracket: negative $4x$ minus 4 equals $x$ plus 2.'
-        write: '$-4x - 4 = x + 2$'
-      - say: 'Take $x$ from both sides and add 4: negative $5x$ equals 6. Divide by negative 5, and $x$ is negative 1.2.'
-        write: '$-5x = 6 \Rightarrow x = -1.2$'
-      - say: 'Now go back to $y = -2x - 2$. Negative 2 times negative 1.2 is 2.4, and 2.4 minus 2 is 0.4.'
-        write: '$y = -2(-1.2) - 2 = 2.4 - 2 = 0.4$'
-        point:
-          - { line: 9, kind: move, from: { line: 8, at: 'x = [[−1.2]]' }, at: '([[−1.2]])', text: 'x at P' }
-      - say: 'So $P$ is at height 0.4, above the $x$-axis. The triangle sits on the upper side of the axis, so $y$ is at least 0.'
-        write: 'So $y \ge 0$'
-        point:
-          - { line: 9, kind: circle, at: '= 0.4', text: 'above' }
-          - { figure: 0, kind: label, target: 'P', text: 'height 0.4' }
-      - say: 'Now pick a point inside the triangle, like negative 1.4, 0.1, and test it in the first line''s expression.'
-        write: 'Test $(-1.4,\ 0.1)$: $2(0.1) - (-1.4) - 2 = 0.2 + 1.4 - 2 = -0.4$'
-        point:
-          - { figure: 0, kind: circle, target: { x: 152, y: 163 }, text: '(−1.4, 0.1)' }
-      - say: 'That is negative, so every point of the triangle makes $2y - x - 2$ less than or equal to 0.'
-        write: 'So $2y - x - 2 \le 0$'
-      - say: 'Test the same point in the second expression: 0.1, plus 2 times negative 1.4, plus 2. That''s 0.1 minus 2.8 plus 2, which is negative 0.7.'
-        write: '$0.1 + 2(-1.4) + 2 = 0.1 - 2.8 + 2 = -0.7$'
-      - say: 'Negative again, so the triangle has $y + 2x + 2 \le 0$.'
-        write: 'So $y + 2x + 2 \le 0$'
-      - say: 'All three corners have negative $x$, so every point of the triangle has $x \le 0$ as well. That is option A''s set, which is answer choice A.'
-        write: 'Answer: $2y - x - 2 \le 0,\ y + 2x + 2 \le 0,\ y \ge 0,\ x \le 0$'
-        point:
-          - { figure: 0, kind: circle, target: 'S', text: 'x = −2' }
-          - { figure: 0, kind: circle, target: 'T', text: 'x = −1' }
-          - { figure: 0, kind: circle, target: 'P', text: 'x = −1.2' }
+          - {figure: 0, kind: circle, target: {x: 152, y: 163}, text: '(−1.4, 0.1)'}
+      - say: 'In the second: 0.1 minus 2.8 plus 2 is minus 0.7. Negative again, so at most 0.'
+        write: '$y + 2x + 2 = -0.7 \Rightarrow y + 2x + 2 \le 0$'
+      - say: 'All three corners have negative $x$, so every point of the triangle has $x$ at most 0 as well.'
+        write: '$S,\ P,\ T$ all have $x < 0$: $\ x \le 0$'
+      - section: 'Answer'
+        say: 'So triangle $SPT$ is the solution of these four: option A.'
+        write: '$\therefore\ 2y - x - 2 \le 0,\ y + 2x + 2 \le 0,\ y \ge 0,\ x \le 0$'
         answer: true
     traps:
       B: 'You went for the set with $y \le 0$. That describes points below the $x$-axis, but $P$ is at height 0.4, so the triangle is above the axis: $y \ge 0$.'
-      C: 'You went for the set with $y \le 0$ and $x \le -1$. The $y \le 0$ is the problem: $P$ is at height 0.4, so the triangle lies above the axis. And $S$ at negative 2 and $T$ at negative 1 don''t fit a single $x \le -1$ edge.'
-      D: 'You went for the set that starts with negative $2y < x$. That first inequality isn''t one of the boundary lines, and $y \le 0$ puts the region below the axis. The triangle is above it.'
+      C: 'You went for the set with $y \le 0$ and $x \le -1$. $P$ is at height 0.4, so the triangle lies above the axis. And $T$ is at $x = -1$ while $S$ is at $-2$, so $x \le -1$ is not an edge.'
+      D: 'You went for the set that starts with minus $2y < x$. That first inequality is not one of the boundary lines, and $y \le 0$ puts the region below the axis. The triangle is above it.'
 
   14:
     moments:
@@ -839,10 +854,10 @@ lessons:
     moments:
       - say: 'We have the matrix $k$ with rows 2, 1 and 3, 4. We want $k$ squared plus $k$ plus $I$.'
         write: '$k = \begin{pmatrix} 2 & 1 \\ 3 & 4 \end{pmatrix}$'
-      - say: 'We''ll build it in three pieces: first $k$ squared, then add $k$, then add $I$. $k$ squared means $k$ times $k$. Picture $k$ as four seats, in two rows and two columns.'
-        doodle: {name: 'custom:2001_q18_a', id: seats, caption: 'k as seats in rows and columns'}
+      - say: 'We''ll build it in three pieces: first $k$ squared, then add $k$, then add $I$. $k$ squared means $k$ times $k$. Picture $k$ as four entries, in two rows and two columns.'
+        doodle: {name: 'custom:2001_q18_a', id: seats, caption: 'k as entries in rows and columns'}
         write: '$k^{2} = \begin{pmatrix} 2 & 1 \\ 3 & 4 \end{pmatrix}\begin{pmatrix} 2 & 1 \\ 3 & 4 \end{pmatrix}$'
-      - say: 'To multiply matrices, go along a row of the first and down a column of the second, multiplying and adding. Top-left uses row 1 and column 1, the seats the two arrows point along: 2 times 2, plus 1 times 3.'
+      - say: 'To multiply matrices, go along a row of the first and down a column of the second, multiplying and adding. Top-left uses row 1 and column 1, the entries the two arrows point along: 2 times 2, plus 1 times 3.'
         doodle_do:
           - {id: seats, op: highlight, part: row1}
           - {id: seats, op: highlight, part: col1}
@@ -864,11 +879,11 @@ lessons:
           - { line: 6, kind: arrow, text: 'k²' }
       - say: '7 plus 2 is 9, 6 plus 1 is 7, 18 plus 3 is 21, and 19 plus 4 is 23.'
         write: '$= \begin{pmatrix} 9 & 7 \\ 21 & 23 \end{pmatrix}$'
-      - say: 'Finally $I$, the identity matrix. Picture its seats: it has 1s on the leading diagonal, top-left to bottom-right, and 0s everywhere else.'
+      - say: 'Finally $I$, the identity matrix. Picture its entries: it has 1s on the leading diagonal, top-left to bottom-right, and 0s everywhere else.'
         doodle_do:
           - {id: seats, op: stage, stage: 'custom:2001_q18_a2'}
         write: '$I = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$'
-      - say: 'Add $I$ to the matrix we just found. Only the diagonal seats, the ones holding 1, go up by 1.'
+      - say: 'Add $I$ to the matrix we just found. Only the diagonal entries, the ones holding 1, go up by 1.'
         doodle_do:
           - {id: seats, op: circle, part: diag}
         write: '$k^{2} + k + I = \begin{pmatrix} 9 + 1 & 7 + 0 \\ 21 + 0 & 23 + 1 \end{pmatrix}$'
@@ -964,7 +979,7 @@ lessons:
         point:
           - { figure: sketch, kind: circle, target: '2e', text: 'interior' }
           - { figure: sketch, kind: circle, target: 'e', text: 'exterior' }
-      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+      - say: 'Let me draw one corner of the polygon, with the interior and exterior angles.'
         show_sketch: true
       - say: 'At each corner, the interior angle and the exterior angle sit together on a straight line. Angles on a straight line add up to 180 degrees.'
         write: 'Interior $+$ exterior $= 180^{\circ}$'
@@ -1067,7 +1082,7 @@ lessons:
         point:
           - { figure: sketch, kind: circle, target: '3080 m³' }
           - { figure: sketch, kind: circle, target: '14 m' }
-      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+      - say: 'Let me draw the tank.'
         show_sketch: true
       - say: 'The volume of a cylinder is the area of its circular base, pi $r$ squared, times its height. For a tank, the height is the depth.'
         write: '$V = \pi r^{2}h$'
@@ -1170,7 +1185,7 @@ lessons:
         write: 'Chord $ST = r$'
         point:
           - { figure: sketch, kind: highlight, target: ST, text: 'r' }
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - say: 'Let me draw the circle with the chord $ST$.'
         show_sketch: true
       - say: 'Let me join $S$ and $T$ to the centre $O$ on the diagram.'
         show_sketch: sketch_b
@@ -1221,7 +1236,7 @@ lessons:
         point:
           - { figure: sketch, kind: circle, target: '8 cm', text: 'PR' }
           - { figure: sketch, kind: circle, target: '30°' }
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - say: 'Let me draw triangle $PQR$.'
         show_sketch: true
       - say: 'Equidistant from $Q$ and $R$ means $PQ$ equals $PR$. So triangle $PQR$ is isosceles, and $PQ$ is 8 too.'
         write: '$PQ = PR = 8$ cm'
@@ -1327,7 +1342,7 @@ lessons:
         point:
           - { figure: sketch, kind: circle, target: '30°' }
           - { figure: sketch, kind: circle, target: '5', text: 'y-intercept' }
-      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+      - say: 'Let me draw the line on the axes.'
         show_sketch: true
       - say: 'A straight line can be written $y = mx + c$, where $m$ is the gradient and $c$ is where it cuts the $y$-axis. Both are hiding in the question.'
         write: '$y = mx + c$'
@@ -1374,7 +1389,7 @@ lessons:
         point:
           - { figure: sketch, kind: circle, target: '(−6, 1)' }
           - { figure: sketch, kind: circle, target: '(6, 6)' }
-      - say: 'Let me draw a diagram of the circle first, so we can see what we are working with.'
+      - say: 'Let me draw the circle, with $P$ and $Q$ at the two ends of a diameter.'
         show_sketch: true
       - say: 'The ends of a diameter are exactly one diameter apart. So the distance $PQ$ is the diameter, and the radius is half of it.'
         write: 'Diameter $= PQ$, radius $= \dfrac{PQ}{2}$'
@@ -1475,7 +1490,7 @@ lessons:
           - { figure: sketch, kind: circle, target: 'bearings 020° and 300°' }
           - { figure: sketch, kind: highlight, target: NP }
           - { figure: sketch, kind: highlight, target: NQ }
-      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+      - say: 'Let me draw the two bearings from $N$.'
         show_sketch: true
       - say: 'Remember, a bearing is measured clockwise from north. So from $N$, $P$ is just east of north, and $Q$ is round in the north-west.'
         write: 'Bearings: measured clockwise from north'
@@ -1705,7 +1720,7 @@ lessons:
         write: 'Find $\dfrac{dV}{dr}$ at $r = 1$'
         point:
           - { figure: sketch, kind: circle, target: 'r = 1' }
-      - say: 'Let me draw the shape, so we can see its measurements.'
+      - say: 'Let me draw the sphere.'
         show_sketch: true
       - say: 'Rate of change of $V$ with respect to $r$ means how fast $V$ changes as $r$ changes. That is the derivative, $dV$ by $dr$. So first we need the formula for $V$.'
         write: 'Rate of change $= \dfrac{dV}{dr}$'
@@ -1742,7 +1757,7 @@ lessons:
     moments:
       - say: 'A rectangle has a fixed perimeter $p$. We want the sides that give it the greatest area.'
         write: 'Perimeter $= p$ (fixed); make the area as big as possible'
-      - say: 'Let me draw a diagram of this, to make it simpler to see.'
+      - say: 'Let me draw the rectangle.'
         show_sketch: true
       - say: 'Let the sides be $x$ and $y$. Going round the rectangle, the perimeter is $x$ plus $y$ plus $x$ plus $y$, which is $2x + 2y$.'
         write: '$2x + 2y = p$'
@@ -2351,4 +2366,4 @@ lessons:
     traps:
       A: 'You went for 1 over 4. There are only three possible results, not four: $P$ wins, $Q$ wins, or a draw.'
       C: 'You went for 1 over 2. That counts only two outcomes, one team winning or the other, and forgets the draw itself. There are three outcomes.'
-      D: 'You went for 2 over 3. That''s the chance the game does NOT end in a draw: $P$ wins or $Q$ wins. A draw is one outcome out of three.'
+      D: 'You went for 2 over 3. That''s the probability the game does NOT end in a draw: $P$ wins or $Q$ wins. A draw is one outcome out of three.'
