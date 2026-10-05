@@ -19,11 +19,11 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 from app.lesson_cues import LessonCue, cue_of
 
 DiagramKind = Literal[
-    "graph", "venn", "pie", "bar", "histogram", "numberline", "tree", "table", "ogive"
+    "graph", "venn", "pie", "bar", "histogram", "numberline", "tree", "table", "ogive", "ladder"
 ]
 #: As the loader allows.
 MAX_OPS = 3
-_ID = re.compile(r"[a-z][a-z0-9_]*")
+_ID = re.compile(r"[A-Za-z][A-Za-z0-9_]*")
 
 
 class LessonDiagram(BaseModel):

@@ -457,3 +457,97 @@ point:
 - Replace `show_sketch` with the `diagram` on that moment, and `figure: sketch` marks with links
   (`to: {diagram, part}`) or actions (`highlight`, `label`).
 - Don't add a doodle that duplicates the diagram (section 5).
+
+## 9. The division ladder and place-value expansion (5 October 2026)
+
+This is the Nigerian exercise-book layout for number bases, prime factors, LCM and HCF. See
+docs/content-review/nigerian-methods/number-and-algebra.md and §2 of
+docs/content-review/maths-review.md.
+
+```yaml
+diagram: {id: L, kind: ladder, divisor: 2, number: 39}                # base 10 → base 2
+diagram: {id: L, kind: ladder, mode: factors, number: 360}            # prime factors
+diagram: {id: L, kind: ladder, mode: lcm, numbers: [12, 18, 30]}      # LCM / HCF ladder
+```
+
+- **The rows** (quotient and remainder, written `2 | 19  R 1`) are computed from the numbers,
+  never typed by hand. The loader checks the arithmetic.
+- **Ops:**
+  - `step {n?}`: the pen writes the next n rows (default 1).
+  - `read`: draws the arrow up the remainders and writes the result with its base, e.g.
+    100111₂. Factors mode writes the product of primes; lcm mode writes the LCM or HCF product.
+  - `highlight {part: 'row:3' | 'remainders' | 'divisors'}`.
+- **Links:** `to: {diagram: L, part: 'row:2' | 'result'}`.
+
+**Place-value expansion** is written in the working line itself, with no diagram. The index
+row sits above the digits using KaTeX `\overset`, exactly as a student writes it:
+`\overset{3}{1}\overset{2}{0}\overset{1}{1}\overset{0}{1}_{2}`. The next line expands it:
+`= 1 \times 2^{3} + 0 \times 2^{2} + 1 \times 2^{1} + 1 \times 2^{0}`.
+
+### 9.1 The ladder in detail (added when it was built; nothing above changed)
+
+Checked by `database/lesson_diagrams.py` (`_spec_ladder`, `_op_ladder`); drawn by
+`apps/web/src/student/diagram/kinds/ladder.ts`.
+
+**Fields.**
+
+| mode | needs | may take | the rows |
+|---|---|---|---|
+| `divisor` (the default) | `divisor` (the new base, 2 to 9), `number` (1 to 100000) | — | the quotient with its remainder, `2 \| 19  R 1`, down to `0  R 1` |
+| `factors` | `number` (2 to 100000) | — | divided by its smallest prime each time, down to 1 |
+| `lcm` (the default when `numbers` is given) | `numbers` (2 to 4 whole numbers, each 2 or more) | `find: lcm \| hcf \| both` (default `lcm`) | see below |
+
+- **An lcm ladder** divides first by the primes **all** the numbers share (smallest first; these
+  rows give the HCF), then by the smallest prime that divides **any** of them, a number it does
+  not divide carried down unchanged, until every number is 1. `find: hcf` stops when they share
+  no prime (numbers that share none are refused: their HCF is 1). 12, 18, 30 gives the rows
+  `2 | 12 18 30`, `3 | 6 9 15`, `2 | 2 3 5`, `3 | 1 3 5`, `5 | 1 1 5`, `| 1 1 1`.
+- **At most 12 rows** (39 in base 2 has 6; 4095 in base 2 has 12). The loader works the ladder
+  out, checks every division a second way and checks the result (the digits make the number
+  again in its base; the primes multiply back to it; the LCM and HCF are right).
+- **`id`** may be a capital, as in the examples (`L`): any diagram's id is now
+  `[A-Za-z][A-Za-z0-9_]*`.
+
+**Arrival:** only the top line (`2 | 39`). Every other row waits for `step`.
+
+**Ops.**
+
+| op | needs | may take | what the pen does |
+|---|---|---|---|
+| `step` | — | `n` (default 1; no more than the rows left) | for each row: the bar down beside it, the quotient(s) and `R` remainder, then the divisor for the next division; a tick per row (whiteboard) |
+| `read` | every row written | `colour`, `answer` (green) | divisor: the arrow up beside the remainders, then `∴ 39₁₀ = 100111₂` under the ladder. factors: `∴ 360 = 2 × 2 × 2 × 3 × 3 × 5`, then `= 2³ × 3² × 5`. lcm: the shared divisors ringed (`find: both`), `HCF = 2 × 3 = 6`, `LCM = 2 × 3 × 2 × 3 × 5 = 180`. A ding (whiteboard). Once only |
+| `highlight`, `label`, `arrow` | as in 8.2 | | |
+
+**Parts.** `row:N` is the Nth row the steps write, from 1 (`row:1` is `2 | 19 R 1`); `row:0`
+(or `number`) is the top line, there from the start. `divisors` (the column left of the bar),
+`remainders` (divisor mode only, once a row is written) and `result` (once read). A part may be
+used once it is drawn: `row:3` after the third row's `step`.
+
+```yaml
+- say: 39 divided by 2 is 19, remainder 1.
+  diagram_do: [{id: L, op: step, on: remainder}]
+- say: Read the remainders from the bottom up.
+  write: '$\therefore 39_{10} = 100111_2$'
+  diagram_do: [{id: L, op: read, answer: true, on: bottom up}]
+  point: [{line: 5, kind: highlight, at: '100111', to: {diagram: L, part: result}}]
+```
+
+**Place-value expansion: what `at` matches.** KaTeX sets each index *after* its digit in the
+page, so the line `\overset{3}{1}\overset{2}{0}\overset{1}{1}\overset{0}{1}_{2}` would read
+"1 3 0 2 1 1 1 0 2". The board leaves the index row out when it looks for a mark's `at`:
+
+- `at` names the number as it reads, digits and then base: `at: '1011'` marks the digits 1011
+  (not the index row); `at: '10112'` also takes in the subscript 2. Use `[[ ]]` to pick out part
+  of it: `at: '1[[0]]11'` marks the 0.
+- The index numbers themselves cannot be an `at`. To point at them, mark the whole line (no `at`):
+  its box takes in the index row. A `circle` or `box` on the digits goes round their index
+  numbers too (never through them); a `highlight`, `underline` or `strike` stays on the digits.
+- A large operator's limits (a sum's) are still matched as before; only an index row over a
+  plain digit or letter is left out.
+- A power is matched by its digits as they sit: `2^3 \times 3^2 \times 5` is `at: '23×32×5'`
+  (not `2^3` or `2³`).
+- `\,` between the columns (`\overset{2}{2}\,\overset{1}{4}\,\overset{0}{1}_5`) is fine and
+  changes nothing.
+
+**How the pen writes it:** the digits left to right and the base, as a student writes the
+number, then the index numbers along the top, left to right; then the rest of the line.

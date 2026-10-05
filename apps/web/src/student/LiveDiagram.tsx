@@ -255,6 +255,9 @@ export function LiveDiagram({
     running.current?.();
     running.current = null;
     const engine = new DiagramEngine(host, spec, kind, plan);
+    engine.sound = (name) => {
+      if (soundRef.current) playSfx(name);
+    };
     engineRef.current = engine;
     drawn.current = false;
     done.current = 0;

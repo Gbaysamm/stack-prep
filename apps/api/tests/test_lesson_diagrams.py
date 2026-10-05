@@ -202,10 +202,14 @@ def test_a_diagram_needs_a_known_kind_and_its_own_fields() -> None:
             {
                 "say": "x",
                 "write": "1",
-                "diagram": {"id": "V1", "kind": "numberline", "range": [0, 5]},
+                "diagram": {"id": "1v", "kind": "numberline", "range": [0, 5]},
             }
         ],
         "id is a short handle",
+    )
+    # A capital is fine: section 9's ladders are written `id: L`.
+    run(
+        [{"say": "x", "write": "1", "diagram": {"id": "V1", "kind": "numberline", "range": [0, 5]}}]
     )
 
 
@@ -577,3 +581,184 @@ def test_the_api_passes_a_link_to_a_diagram_part_on() -> None:
     assert points is not None
     assert points[0].to is not None
     assert points[0].to.diagram == "v" and points[0].to.part == "M∩P"
+
+
+# ------------------------------------------------------------------- the division ladder (§9)
+
+
+def _ladder(diagram: dict[str, Any], *later: dict[str, Any]) -> list[dict[str, object]]:
+    """A ladder brought in on a written line, then a moment for each later set of actions."""
+    moments: list[dict[str, Any]] = [
+        {"say": "Divide again and again.", "write": "$x$", "diagram": diagram}
+    ]
+    for k, extra in enumerate(later, start=1):
+        moments.append({"say": "Next.", "write": f"$y_{k}$", **extra})
+    return run(moments)
+
+
+def test_ladder_rows_are_worked_out_from_the_numbers() -> None:
+    rungs = ld.ladder_rungs("divisor", [39], 2, "lcm")
+    assert [(r.values[0], r.remainder) for r in rungs[1:]] == [
+        (19, 1),
+        (9, 1),
+        (4, 1),
+        (2, 0),
+        (1, 0),
+        (0, 1),
+    ]
+    assert rungs[-1].divisor is None
+    assert [r.values[0] for r in ld.ladder_rungs("divisor", [71], 8, "lcm")] == [71, 8, 1, 0]
+    factors = ld.ladder_rungs("factors", [360], None, "lcm")
+    assert [r.divisor for r in factors] == [2, 2, 2, 3, 3, 5, None]
+    lcm = ld.ladder_rungs("lcm", [12, 18, 30], None, "both")
+    # The shared primes first (the HCF's rows), then any prime, the others carried down.
+    assert [(r.divisor, r.common) for r in lcm] == [
+        (2, True),
+        (3, True),
+        (2, False),
+        (3, False),
+        (5, False),
+        (None, False),
+    ]
+    assert lcm[3].values == [1, 3, 5] and lcm[-1].values == [1, 1, 1]
+    hcf = ld.ladder_rungs("lcm", [12, 18, 30], None, "hcf")
+    assert hcf[-1].values == [2, 3, 5] and hcf[-1].divisor is None
+
+
+def test_a_base_ladder_is_stepped_read_and_linked() -> None:
+    stored = _ladder(
+        {"id": "L", "kind": "ladder", "divisor": 2, "number": 39, "on": "divide"},
+        {"diagram_do": [{"id": "L", "op": "step", "on": "next"}]},
+        {
+            "diagram_do": [{"id": "L", "op": "step", "n": 5}],
+            "point": [
+                {
+                    "line": 1,
+                    "kind": "highlight",
+                    "at": "19",
+                    "to": {"diagram": "L", "part": "row:1"},
+                }
+            ],
+        },
+        {
+            "diagram_do": [
+                {"id": "L", "op": "highlight", "part": "remainders"},
+                {"id": "L", "op": "read", "answer": True},
+            ],
+            "point": [{"line": 3, "kind": "circle", "to": {"diagram": "L", "part": "result"}}],
+        },
+    )
+    assert stored[0]["diagram"] == {
+        "id": "L",
+        "kind": "ladder",
+        "mode": "divisor",
+        "number": 39,
+        "divisor": 2,
+        "on": "divide",
+    }
+    assert stored[2]["diagram_do"] == [{"id": "L", "op": "step", "n": 5}]
+    assert stored[3]["diagram_do"][1] == {"id": "L", "op": "read", "answer": True}
+
+
+@pytest.mark.parametrize(
+    ("diagram", "said"),
+    [
+        ({"divisor": 2}, "number is a whole number"),
+        ({"divisor": 12, "number": 39}, "divisor is the new base"),
+        ({"divisor": 2, "number": 39.5}, "whole number"),
+        ({"divisor": 2, "number": 9000}, "at most 12"),
+        ({"mode": "factors", "number": 1}, "number is 2 to"),
+        ({"mode": "factors", "number": 360, "divisor": 2}, "finds its own primes"),
+        ({"mode": "lcm", "numbers": [12]}, "numbers is a list of 2 to 4"),
+        ({"mode": "lcm", "numbers": [4, 9], "find": "hcf"}, "share no prime"),
+        ({"mode": "lcm", "numbers": [4, 6], "find": "gcd"}, "find is one of"),
+        ({"mode": "lcm", "number": 12}, "not number or divisor"),
+        ({"mode": "roots", "number": 12}, "mode is one of"),
+        ({"divisor": 2, "number": 39, "find": "lcm"}, "for an lcm ladder"),
+    ],
+)
+def test_a_ladder_needs_numbers_it_can_divide(diagram: dict[str, Any], said: str) -> None:
+    with pytest.raises(SystemExit, match=said):
+        _ladder({"id": "L", "kind": "ladder", **diagram})
+
+
+def test_a_ladder_mode_is_taken_from_its_fields() -> None:
+    stored = _ladder({"id": "lad", "kind": "ladder", "numbers": [4, 6]})
+    assert stored[0]["diagram"] == {
+        "id": "lad",
+        "kind": "ladder",
+        "mode": "lcm",
+        "numbers": [4, 6],
+        "find": "lcm",
+    }
+
+
+@pytest.mark.parametrize(
+    ("later", "said"),
+    [
+        # 71 in base 8 has three rows: 8 R 7, 1 R 0, 0 R 1.
+        ({"diagram_do": [{"id": "L", "op": "step", "n": 4}]}, "3 row"),
+        ({"diagram_do": [{"id": "L", "op": "step", "n": 0}]}, "1 or more"),
+        ({"diagram_do": [{"id": "L", "op": "read"}]}, "read once every row is written"),
+        ({"diagram_do": [{"id": "L", "op": "highlight", "part": "row:2"}]}, "`later`"),
+        ({"diagram_do": [{"id": "L", "op": "highlight", "part": "row:9"}]}, "rows 1 to 3"),
+        ({"diagram_do": [{"id": "L", "op": "highlight", "part": "result"}]}, "no part"),
+        ({"diagram_do": [{"id": "L", "op": "label", "part": "quotients", "text": "x"}]}, "parts"),
+        ({"diagram_do": [{"id": "L", "op": "step", "text": "x"}]}, "takes no"),
+        (
+            {"point": [{"line": 0, "kind": "highlight", "to": {"diagram": "L", "part": "row:1"}}]},
+            "`later`",
+        ),
+    ],
+)
+def test_ladder_actions_and_links_follow_its_rows(later: dict[str, Any], said: str) -> None:
+    with pytest.raises(SystemExit, match=said):
+        _ladder({"id": "L", "kind": "ladder", "divisor": 8, "number": 71}, later)
+
+
+def test_ladder_parts_by_mode() -> None:
+    steps = {"diagram_do": [{"id": "L", "op": "step", "n": 6}]}
+    stored = _ladder(
+        {"id": "L", "kind": "ladder", "mode": "factors", "number": 360},
+        steps,
+        {
+            "diagram_do": [
+                {"id": "L", "op": "read"},
+                {"id": "L", "op": "label", "part": "divisors", "text": "the primes"},
+                {"id": "L", "op": "arrow", "part": "row:0", "to_part": "result"},
+            ]
+        },
+    )
+    assert stored[2]["diagram_do"][1]["part"] == "divisors"
+    with pytest.raises(SystemExit, match="only a base ladder"):
+        _ladder(
+            {"id": "L", "kind": "ladder", "mode": "factors", "number": 360},
+            steps,
+            {"diagram_do": [{"id": "L", "op": "highlight", "part": "remainders"}]},
+        )
+    with pytest.raises(SystemExit, match="read already"):
+        _ladder(
+            {"id": "L", "kind": "ladder", "mode": "lcm", "numbers": [12, 18, 30]},
+            {"diagram_do": [{"id": "L", "op": "step", "n": 5}, {"id": "L", "op": "read"}]},
+            {"diagram_do": [{"id": "L", "op": "read"}]},
+        )
+    # The number at the top is there from the start, as row:0 or `number`.
+    _ladder(
+        {"id": "L", "kind": "ladder", "divisor": 2, "number": 5},
+        {"point": [{"line": 0, "kind": "circle", "to": {"diagram": "L", "part": "number"}}]},
+    )
+
+
+def test_the_api_passes_a_ladder_on() -> None:
+    stored = _ladder(
+        {"id": "L", "kind": "ladder", "mode": "lcm", "numbers": [12, 18, 30], "find": "both"},
+        {"diagram_do": [{"id": "L", "op": "step", "n": 2}]},
+    )
+    diagram = diagram_of(stored[0]["diagram"])
+    assert diagram is not None
+    out = diagram.model_dump(exclude_none=True)
+    assert out["kind"] == "ladder" and out["numbers"] == [12, 18, 30] and out["find"] == "both"
+    actions = diagram_actions(stored[1]["diagram_do"])
+    assert actions is not None
+    assert actions[0].model_dump(exclude_none=True) == {"id": "L", "op": "step", "n": 2}
+    assert diagram_link({"diagram": "L", "part": "row:2"}) == ("L", "row:2")

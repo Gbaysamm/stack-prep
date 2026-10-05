@@ -1,8 +1,8 @@
 """A lesson's LIVE DIAGRAMS: diagrams described as data, checked before loading.
 
 Shared by load_retranscribed_maths.py and load_retranscribed_english.py. The contract is
-docs/plans/doodles-v2-contract.md section 8; the board draws them with
-apps/web/src/student/LiveDiagram.tsx and diagram/kinds/*.ts, and this module refuses anything
+docs/plans/doodles-v2-contract.md sections 8 and 9 (the division ladder); the board draws them
+with apps/web/src/student/LiveDiagram.tsx and diagram/kinds/*.ts, and this module refuses anything
 the board could not draw, so a mistake is heard about at load time rather than seen as a
 half-drawn diagram in front of a student.
 
@@ -35,7 +35,18 @@ from dataclasses import dataclass, field
 from fractions import Fraction
 from typing import Any
 
-KINDS = {"graph", "venn", "pie", "bar", "histogram", "numberline", "tree", "table", "ogive"}
+KINDS = {
+    "graph",
+    "venn",
+    "pie",
+    "bar",
+    "histogram",
+    "numberline",
+    "tree",
+    "table",
+    "ogive",
+    "ladder",
+}
 #: The colours a diagram may use, each with its meaning (docs/lesson-style-guide.md 5).
 COLOURS = {"blue", "green", "purple", "orange", "red", "pink", "yellow", "grey"}
 SIZES = {"medium", "scene"}
@@ -48,7 +59,8 @@ MAX_TEXT = 40
 MAX_CAPTION = 40
 MAX_VALUE = 16
 MAX_NAME = 24
-_ID = re.compile(r"[a-z][a-z0-9_]*")
+#: A diagram's handle: a letter or a short word (section 9's ladders are written `id: L`).
+_ID = re.compile(r"[A-Za-z][A-Za-z0-9_]*")
 _SET_KEY = re.compile(r"[A-Z][A-Za-z0-9]{0,2}")
 _FRACTION = re.compile(r"\s*(\d+)\s*/\s*(\d+)\s*")
 
@@ -65,6 +77,7 @@ KIND_KEYS: dict[str, set[str]] = {
     "tree": {"branches", "root", "levels"},
     "table": {"columns", "rows"},
     "ogive": _AXES | {"points", "start", "later"},
+    "ladder": {"mode", "divisor", "number", "numbers", "find"},
 }
 
 #: Every action: the keys it needs and the keys it may take, beyond `id` and `op`.
@@ -109,6 +122,7 @@ KIND_OPS: dict[str, dict[str, tuple[set[str], set[str]]]] = {
         "total": ({"part"}, {"into"} | _NOTE),
     },
     "ogive": {"plot": (set(), set()), "read": (set(), {"x", "y"} | _NOTE)},
+    "ladder": {"step": (set(), {"n"}), "read": (set(), {"colour", "answer"})},
 }
 
 
@@ -515,6 +529,76 @@ def _probability(value: object, where: str) -> Fraction:
     return Fraction(number).limit_denominator(10000)
 
 
+# --------------------------------------------------------------------- the division ladder
+
+#: A ladder's modes (section 9), what an lcm ladder finds, and its limits.
+LADDER_MODES = {"divisor", "factors", "lcm"}
+LADDER_FINDS = {"lcm", "hcf", "both"}
+MAX_RUNGS = 12
+MAX_LADDER_NUMBER = 100_000
+
+
+@dataclass
+class Rung:
+    """One line of a division ladder: its numbers, the divisor left of its bar, and (divisor
+    mode) the remainder written with them. `common`: an lcm ladder's divisor shared by all."""
+
+    values: list[int]
+    divisor: int | None
+    remainder: int | None = None
+    common: bool = False
+
+
+def _smallest_prime(n: int) -> int:
+    p = 2
+    while p * p <= n:
+        if n % p == 0:
+            return p
+        p += 1
+    return n
+
+
+def ladder_rungs(mode: str, numbers: list[int], divisor: int | None, find: str) -> list[Rung]:
+    """Every line of the ladder, the top one first, worked out as the board works it out
+    (diagram/kinds/ladder.ts `ladderRungs`): divided down to 0 (divisor), to 1 (factors), or
+    for an lcm ladder by the primes all the numbers share first, then by any prime that
+    divides one of them (a number it does not divide carried down), until every one is 1 or,
+    finding only the HCF, they share no prime."""
+    if mode == "divisor":
+        assert divisor is not None
+        n = numbers[0]
+        rungs = [Rung([n], divisor)]
+        while n > 0:
+            n, r = divmod(n, divisor)
+            rungs.append(Rung([n], divisor if n > 0 else None, r))
+        return rungs
+    if mode == "factors":
+        n = numbers[0]
+        rungs = [Rung([n], _smallest_prime(n))]
+        while n > 1:
+            n //= _smallest_prime(n)
+            rungs.append(Rung([n], _smallest_prime(n) if n > 1 else None))
+        return rungs
+
+    def next_divisor(values: list[int]) -> tuple[int | None, bool]:
+        shared = math.gcd(*values)
+        if shared > 1:
+            return _smallest_prime(shared), True
+        live = [v for v in values if v > 1]
+        if find == "hcf" or not live:
+            return None, False
+        return min(_smallest_prime(v) for v in live), False
+
+    values = list(numbers)
+    p, common = next_divisor(values)
+    rungs = [Rung(values, p, None, common)]
+    while p is not None:
+        values = [v // p if v % p == 0 else v for v in values]
+        p, common = next_divisor(values)
+        rungs.append(Rung(values, p, None, common))
+    return rungs
+
+
 # --------------------------------------------------------------------- the book
 
 
@@ -571,7 +655,7 @@ class DiagramBook:
             raise SystemExit(f"{where}: a {kind} has no {sorted(unknown)}")
         handle = value.get("id")
         if not isinstance(handle, str) or not _ID.fullmatch(handle):
-            raise SystemExit(f"{where}: id is a short handle, [a-z][a-z0-9_]* ({handle!r})")
+            raise SystemExit(f"{where}: id is a short handle, [A-Za-z][A-Za-z0-9_]* ({handle!r})")
         if handle in self.held:
             raise SystemExit(f"{where}: two diagrams in this lesson have the id {handle!r}")
         if len(self.held) >= MAX_DIAGRAMS:
@@ -1100,6 +1184,177 @@ class DiagramBook:
         for k in range(1, len(held.extra["data"]) + 1):
             held.parts.add(f"point:{k}")
 
+    def _spec_ladder(
+        self, v: dict[str, Any], clean: dict[str, Any], held: _Held, where: str
+    ) -> None:
+        mode = v.get("mode")
+        if mode is None:
+            mode = "lcm" if v.get("numbers") is not None else "divisor"
+        if mode not in LADDER_MODES:
+            raise SystemExit(
+                f"{where}: a ladder's mode is one of {sorted(LADDER_MODES)} ({mode!r})"
+            )
+
+        def whole(value: object, what: str, least: int) -> int:
+            if isinstance(value, bool) or not isinstance(value, int | float) or value != int(value):
+                raise SystemExit(f"{where}: {what} is a whole number ({value!r})")
+            if not least <= int(value) <= MAX_LADDER_NUMBER:
+                raise SystemExit(
+                    f"{where}: {what} is {least} to {MAX_LADDER_NUMBER} ({fmt(float(value))})"
+                )
+            return int(value)
+
+        divisor: int | None = None
+        find = "lcm"
+        if mode == "lcm":
+            if v.get("number") is not None or v.get("divisor") is not None:
+                raise SystemExit(f"{where}: an lcm ladder has numbers: [..], not number or divisor")
+            raw = _list(v.get("numbers"), where, "numbers", 2, 4)
+            numbers = [whole(n, "each of numbers", 2) for n in raw]
+            find = v.get("find", "lcm")
+            if find not in LADDER_FINDS:
+                raise SystemExit(f"{where}: find is one of {sorted(LADDER_FINDS)} ({find!r})")
+            clean.update(mode="lcm", numbers=numbers, find=find)
+            if find != "lcm" and math.gcd(*numbers) == 1:
+                raise SystemExit(
+                    f"{where}: {numbers} share no prime, so their HCF is 1: there is no "
+                    "ladder to draw for it"
+                )
+        else:
+            if v.get("numbers") is not None or v.get("find") is not None:
+                raise SystemExit(
+                    f"{where}: numbers and find are for an lcm ladder (mode: lcm); "
+                    f"a {mode} ladder has one number"
+                )
+            numbers = [whole(v.get("number"), "number", 1 if mode == "divisor" else 2)]
+            clean.update(mode=mode, number=numbers[0])
+            if mode == "divisor":
+                d = v.get("divisor")
+                if isinstance(d, bool) or not isinstance(d, int) or not 2 <= d <= 9:
+                    raise SystemExit(
+                        f"{where}: divisor is the new base, a whole number 2 to 9 ({d!r})"
+                    )
+                divisor = d
+                clean["divisor"] = d
+            elif v.get("divisor") is not None:
+                raise SystemExit(f"{where}: a factors ladder finds its own primes (no divisor)")
+        rungs = ladder_rungs(mode, numbers, divisor, find)
+        if len(rungs) - 1 > MAX_RUNGS:
+            raise SystemExit(
+                f"{where}: the ladder would have {len(rungs) - 1} rows (at most {MAX_RUNGS}); "
+                "use smaller numbers"
+            )
+        self._check_ladder(mode, numbers, divisor, find, rungs, where)
+        held.extra.update(mode=mode, rungs=rungs, stepped=0, read=False)
+        held.parts.update({"row:0", "divisors"})
+        for k in range(1, len(rungs)):
+            held.waiting.append(f"row:{k}")
+
+    @staticmethod
+    def _check_ladder(
+        mode: str,
+        numbers: list[int],
+        divisor: int | None,
+        find: str,
+        rungs: list[Rung],
+        where: str,
+    ) -> None:
+        """The arithmetic, checked a second way: every row divides as written, and the result
+        is the number again (in its base, as the product of its primes, or as the LCM/HCF)."""
+        for above, below in itertools.pairwise(rungs):
+            p = above.divisor
+            if p is None:
+                raise SystemExit(f"{where}: the ladder stops at {above.values} early")
+            for a, b in zip(above.values, below.values, strict=True):
+                if mode == "divisor":
+                    r = below.remainder or 0
+                    ok = a == b * p + r and 0 <= r < p
+                else:
+                    ok = b * p == a if a % p == 0 else b == a
+                if not ok:
+                    raise SystemExit(f"{where}: {a} ÷ {p} does not give {b}")
+        if mode == "divisor":
+            assert divisor is not None
+            digits = "".join(str(r.remainder) for r in reversed(rungs[1:]))
+            if int(digits, divisor) != numbers[0]:
+                raise SystemExit(f"{where}: {digits} in base {divisor} is not {numbers[0]}")
+            return
+        primes = [r.divisor for r in rungs if r.divisor is not None]
+        if mode == "factors":
+            if math.prod(primes) != numbers[0]:
+                raise SystemExit(f"{where}: the primes {primes} do not make {numbers[0]}")
+            return
+        common = [r.divisor for r in rungs if r.common and r.divisor is not None]
+        if find != "hcf" and math.prod(primes) != math.lcm(*numbers):
+            raise SystemExit(f"{where}: the ladder's primes do not make the LCM of {numbers}")
+        if math.prod(common) != math.gcd(*numbers):
+            raise SystemExit(f"{where}: the shared primes do not make the HCF of {numbers}")
+
+    def _ladder_part(self, held: _Held, name: str, where: str) -> str:
+        lower = name.strip().lower()
+        rungs: list[Rung] = held.extra["rungs"]
+        if lower in ("number", "top"):
+            return "row:0"
+        if lower in ("divisor", "divisors"):
+            return "divisors"
+        if lower in ("remainder", "remainders"):
+            if held.extra["mode"] != "divisor":
+                raise SystemExit(
+                    f"{where}: only a base ladder (divisor mode) has remainders; a "
+                    f"{held.extra['mode']} ladder's parts are row:N, divisors and result"
+                )
+            return "remainders"
+        if lower == "result":
+            return "result"
+        if m := re.fullmatch(r"row:\s*(\d+)", lower):
+            k = int(m.group(1))
+            if k >= len(rungs):
+                raise SystemExit(
+                    f"{where}: the ladder has rows 1 to {len(rungs) - 1} (row:0 is the number "
+                    f"at the top) ({name!r})"
+                )
+            return f"row:{k}"
+        raise SystemExit(
+            f"{where}: a ladder's parts are row:N (row:0 the number at the top), divisors, "
+            f"remainders (divisor mode) and result ({name!r})"
+        )
+
+    def _op_ladder(
+        self, held: _Held, op: str, action: dict[str, Any], clean: dict[str, Any], where: str
+    ) -> None:
+        rows = len(held.extra["rungs"]) - 1
+        if op in COMMON_OPS:
+            self._op_common(held, op, action, clean, where)
+        elif op == "step":
+            n = action.get("n", 1)
+            if isinstance(n, bool) or not isinstance(n, int) or n < 1:
+                raise SystemExit(f"{where}: step's n is how many rows, 1 or more ({n!r})")
+            left = rows - held.extra["stepped"]
+            if n > left:
+                raise SystemExit(
+                    f"{where}: step {n}, but the ladder has {left} row(s) left to write "
+                    f"(it has {rows} in all)"
+                )
+            if "n" in action:
+                clean["n"] = n
+            for _ in range(n):
+                held.extra["stepped"] += 1
+                name = f"row:{held.extra['stepped']}"
+                held.waiting.remove(name)
+                held.parts.add(name)
+            if held.extra["mode"] == "divisor":
+                held.parts.add("remainders")
+        elif op == "read":
+            if held.extra["read"]:
+                raise SystemExit(f"{where}: the ladder is read already")
+            if held.extra["stepped"] < rows:
+                raise SystemExit(
+                    f"{where}: read once every row is written ({held.extra['stepped']} of "
+                    f"{rows} so far: step the rest first)"
+                )
+            held.extra["read"] = True
+            held.parts.add("result")
+
     # ----------------------------------------------------------------- parts by name
 
     def resolve(self, held: _Held, part: object, where: str, drawn: bool = True) -> str:
@@ -1144,6 +1399,8 @@ class DiagramBook:
             canonical = f"{prefix}:{known[route.lower()]}"
         elif kind == "table":
             canonical = self._table_part(held, name, where)
+        elif kind == "ladder":
+            canonical = self._ladder_part(held, name, where)
         if drawn and canonical not in held.parts:
             if canonical in held.waiting:
                 raise SystemExit(f"{where}: {name!r} is `later`, and nothing has drawn it yet")

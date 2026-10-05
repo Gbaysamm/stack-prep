@@ -1970,3 +1970,15 @@
     display: none;
   }
 }
+
+/* A number with its index numbers over its digits (`\overset{2}{2}\overset{1}{4}\overset{0}{1}_5`,
+   doodles-v2-contract.md 9.1): KaTeX sets the index row almost on the digits; a student leaves a
+   clear gap. The row is lifted a little (a large operator's limits are left alone), and the line
+   given the room it is lifted into. */
+.pb .katex .op-limits:not(:has(.op-symbol)) > .vlist-t > .vlist-r > .vlist > span:last-child > .sizing {
+  display: inline-block;
+  transform: translateY(-0.22em);
+}
+.pb .pb-item:has(.op-limits:not(:has(.op-symbol))) {
+  padding-top: 0.4em;
+}

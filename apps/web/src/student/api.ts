@@ -349,7 +349,8 @@ export type DiagramKind =
   | 'numberline'
   | 'tree'
   | 'table'
-  | 'ogive';
+  | 'ogive'
+  | 'ladder';
 
 /** The colours a diagram may use, each with its meaning (docs/lesson-style-guide.md 5). */
 export type DiagramColour = 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'pink' | 'yellow' | 'grey';
@@ -456,6 +457,12 @@ export interface LessonDiagram {
   // ogive
   start?: [number, number] | null;
   later?: boolean | null;
+  // ladder (section 9): base conversion, prime factors, LCM and HCF
+  mode?: 'divisor' | 'factors' | 'lcm' | null;
+  divisor?: number | null;
+  number?: number | null;
+  numbers?: number[] | null;
+  find?: 'lcm' | 'hcf' | 'both' | null;
 }
 
 /** Something the pen does to a diagram already on the board (section 8). */
@@ -481,6 +488,8 @@ export interface LessonDiagramOp {
   axis?: 'x' | 'y' | 'both' | null;
   into?: string | null;
   label?: string | null;
+  /** A ladder's `step`: how many rows the pen writes (default 1). */
+  n?: number | null;
   on?: LessonCue | null;
 }
 

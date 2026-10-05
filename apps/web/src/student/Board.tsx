@@ -2703,6 +2703,39 @@ function piece(at: string): { needle: string; skip: number; take: number } {
   return { needle: before + inside + folded(parts[3] ?? ""), skip: before.length, take: inside.length };
 }
 
+/**
+ * Whether a text node is the small row KaTeX sets over a plain base: the index numbers of
+ * `\overset{3}{1}\overset{2}{0}…`, written over the digits as a student writes them before
+ * expanding a number in its base. Read in the page's order they would come between the digits
+ * ("1 3 0 2 …"), so a mark's `at` leaves them out and names the number as it reads. A large
+ * operator's limits (a sum's) are kept.
+ */
+function indexRow(node: Text): boolean {
+  const limits = node.parentElement?.closest(".op-limits");
+  if (!limits || limits.querySelector(".op-symbol")) return false;
+  const stack = limits.querySelector(":scope > .vlist-t > .vlist-r > .vlist");
+  if (!stack) return false;
+  const layers = Array.from(stack.children);
+  const base = layers.findIndex((layer) => layer.querySelector(".mop") && !layer.querySelector(".mtight"));
+  const at = layers.findIndex((layer) => layer.contains(node));
+  return base >= 0 && at > base;
+}
+
+/** A piece's box grown to take in the index numbers written over it (`\overset`). */
+function withIndexRow(root: Element, box: Box): Box {
+  const range = document.createRange();
+  let out = box;
+  for (const node of textNodes(root)) {
+    if (!indexRow(node)) continue;
+    range.selectNodeContents(node);
+    const r = range.getBoundingClientRect();
+    const middle = (r.left + r.right) / 2;
+    if (r.width < 0.5 || middle < box.left || middle > box.right || r.top >= box.top) continue;
+    out = { left: Math.min(out.left, r.left), top: Math.min(out.top, r.top), right: Math.max(out.right, r.right), bottom: out.bottom };
+  }
+  return out;
+}
+
 /** One run of a piece's characters inside a single text node. */
 interface Run {
   node: Text;
@@ -2720,6 +2753,8 @@ function inkRanges(root: Element, at?: string | null): Run[] {
   let compact = "";
   const where: { node: Text; offset: number }[] = [];
   for (const node of nodes) {
+    // The index numbers over a number's digits are not read: `at: '1011'` finds 1011₂.
+    if (indexRow(node)) continue;
     for (let offset = 0; offset < node.data.length; offset += 1) {
       const char = fold(node.data.charAt(offset));
       if (!char) continue;
@@ -3103,7 +3138,9 @@ function measureMarks(sheet: HTMLElement, sets: MarkSet[], links: LinkPair[] = [
       const whole = inkBox(line);
       const found = point.at ? inkBox(line, point.at) : whole;
       if (!found || !whole) return;
-      const box = relative(found, base);
+      // A ring or a box round a number goes round its index numbers too, not through them.
+      const ringed = point.kind === "circle" || point.kind === "box" ? withIndexRow(line, found) : found;
+      const box = relative(ringed, base);
       const lineBox = relative(whole, base);
       const rnd = seeded(set.index * 131 + k * 17 + target * 7 + 3);
       const key = `${set.index}-${k}`;
@@ -5220,6 +5257,71 @@ function readScript(line: HTMLElement, sheet: HTMLElement): Script | null {
     return true;
   };
 
+  // A number with its index numbers over its digits (`\overset{3}{1}\overset{2}{0}…_{2}`):
+  // the digits first, left to right, and its base, then the index row above them, as a student
+  // writes the number down and then numbers its places. One group, so the index row stays
+  // hidden until the pen comes back along it.
+  const limitsOf = (element: Element): { base: DOMRect; over: DOMRect[] } | null => {
+    const limits = element.querySelector(":scope > .op-limits, :scope > .mord > .op-limits");
+    if (!limits || limits.querySelector(".op-symbol")) return null;
+    const stack = limits.querySelector(":scope > .vlist-t > .vlist-r > .vlist");
+    if (!stack) return null;
+    const layers = Array.from(stack.children);
+    const at = layers.findIndex((layer) => layer.querySelector(".mop") && !layer.querySelector(".mtight"));
+    if (at < 0 || at === layers.length - 1) return null;
+    const content = (layer: Element) =>
+      Array.from(layer.children)
+        .find((child) => !child.classList.contains("pstrut"))
+        ?.getBoundingClientRect();
+    const base = content(layers[at]!);
+    const over = layers
+      .slice(at + 1)
+      .map(content)
+      .filter((rect): rect is DOMRect => Boolean(rect && rect.width >= 0.5));
+    return base && base.width >= 0.5 && over.length ? { base, over } : null;
+  };
+  const indexed = (run: Element[]) => {
+    const found = run.map((element) => ({ element, limits: limitsOf(element)! }));
+    const bases: DOMRect[] = [];
+    const overs: DOMRect[] = [];
+    for (const { element, limits } of found) {
+      // The digit's box starts under its index, so writing the digit shows none of the index.
+      const under = Math.max(...limits.over.map((rect) => rect.bottom));
+      const top = Math.min(Math.max(limits.base.top, under), limits.base.bottom - 1);
+      bases.push(new DOMRect(limits.base.left, top, limits.base.width, limits.base.bottom - top));
+      const tail = element.querySelector(":scope > .msupsub")?.getBoundingClientRect();
+      if (tail) {
+        const from = Math.min(Math.max(tail.top, under), tail.bottom - 1);
+        bases.push(new DOMRect(tail.left, from, tail.width, tail.bottom - from));
+      }
+      overs.push(...limits.over);
+    }
+    const group = groups;
+    groups += 1;
+    const end = Math.max(...run.map((element) => element.getBoundingClientRect().right)) - frame.left;
+    const all = [...bases, ...overs].filter((rect) => rect.width >= 0.5 && rect.height >= 0.5);
+    all.forEach((rect, index) => add(rect, { group, closes: index === all.length - 1, groupX1: end }));
+  };
+  const atoms = (children: Element[]) => {
+    for (let i = 0; i < children.length; ) {
+      const run: Element[] = [];
+      let j = i;
+      while (j < children.length) {
+        const child = children[j]!;
+        if (limitsOf(child)) run.push(child);
+        else if (!(run.length && child.classList.contains("mspace"))) break;
+        j += 1;
+      }
+      if (run.length) {
+        indexed(run);
+        i = j;
+      } else {
+        atom(children[i]!);
+        i += 1;
+      }
+    }
+  };
+
   const atom = (element: Element) => {
     if (element.classList.contains("strut") || element.classList.contains("mspace")) return;
     const rect = element.getBoundingClientRect();
@@ -5256,7 +5358,7 @@ function readScript(line: HTMLElement, sheet: HTMLElement): Script | null {
     if (node.classList.contains("katex")) {
       const html = node.querySelector(".katex-html");
       for (const part of Array.from(html?.children ?? [])) {
-        if (part.classList.contains("base")) Array.from(part.children).forEach(atom);
+        if (part.classList.contains("base")) atoms(Array.from(part.children));
         else add(part.getBoundingClientRect());
       }
       return;

@@ -207,6 +207,8 @@ export class DiagramEngine {
   kind!: Kind;
   /** True while steps are being finished at once rather than drawn. */
   instant = false;
+  /** Plays a sound in the whiteboard style (LiveDiagram sets it; silent in the classic style). */
+  sound: ((name: SfxName) => void) | null = null;
   readonly parts = new Map<string, Part>();
   /** The words already on the diagram, which a new note keeps clear of. */
   readonly taken: UBox[] = [];
@@ -388,6 +390,25 @@ export class DiagramEngine {
       finish: () => {
         show(1);
         finish();
+      },
+    };
+  }
+
+  /**
+   * The same step, making a sound as it starts: a sound for each of several things one action
+   * draws (a ladder's rows, a tick each). Silent when the step is shown done at once.
+   */
+  withSound(item: DrawItem, name: SfxName): DrawItem {
+    if (this.instant) return item;
+    let played = false;
+    return {
+      ...item,
+      show: (p) => {
+        if (!played && p > 0) {
+          played = true;
+          this.sound?.(name);
+        }
+        item.show(p);
       },
     };
   }
