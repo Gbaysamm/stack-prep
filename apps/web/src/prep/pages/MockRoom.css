@@ -474,6 +474,26 @@
   box-shadow: inset 0 0 0 1px var(--ink-900);
 }
 
+/* Focus rings inside the room are drawn inside the element, like the palette's current cell:
+   the app-wide outline sits 3px outside, which a scrolling strip (the tabs, the phone sheet)
+   clips and which would overlap the calculator's neighbouring keys. */
+.sj .mx-tab:focus-visible,
+.sj .mx-key:focus-visible,
+.sj .mx-calc-close:focus-visible,
+.sj .mx-barbtn:focus-visible,
+.sj .mx-flag:focus-visible,
+.sj .mx-paletteBtn:focus-visible,
+.sj .mx-notice button:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--purple-300);
+}
+.sj .mx-option:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 2px var(--purple-600),
+    0 0 0 3px var(--purple-200);
+}
+
 /* Phone palette sheet */
 .sj .mx-sheetwrap {
   position: fixed;
