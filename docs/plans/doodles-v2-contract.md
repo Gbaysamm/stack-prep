@@ -379,7 +379,7 @@ once a path is drawn.
 diagram:
   id: f
   kind: table
-  columns: [Score, Frequency, cf]       # 1 to 6
+  columns: [Score, Frequency, cf]       # 1 to 7 (7: the 6 × 6 dice table with its + corner)
   rows: [[1, 3, ''], [2, 5, ''], [3, 2, '']]   # 1 to 12; '' or null: empty, to be filled
 ```
 

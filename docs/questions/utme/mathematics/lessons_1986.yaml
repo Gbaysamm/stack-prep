@@ -61,127 +61,137 @@ lessons:
       D: 'You went for one-two-two-two base three. That is 53 in base ten, not 33. Work left to right, and in each column borrow or carry in threes, not tens.'
   2:
     moments:
-      - say: 'If Musa had scored 75 in Biology instead of 57, his average over four subjects would have been 60. We want his real total. Picture his report card, and the dream in the bubble.'
-        doodle: {name: 'custom:1986_q02_a', id: card, caption: 'Biology: 57, not 75'}
-        write: 'Imagined average $= 60$ over 4 subjects'
-      - say: 'Remember what an average is: the total divided by the number of subjects.'
-        write: '$\text{average} = \dfrac{\text{total}}{\text{number of subjects}}$'
-      - say: 'Turn that round, and the total is the average times the number of subjects.'
-        write: '$\text{total} = \text{average} \times \text{number of subjects}$'
-      - say: 'That total belongs to the dream in the bubble. For the imagined marks, that is 60 times 4, which is 240.'
-        doodle_do: [{id: card, op: label, part: bubble, text: '60 × 4 = 240'}]
-        write: 'Imagined total $= 60 \times 4 = 240$'
-        point:
-          - {line: 2, kind: box, text: 'the rule'}
-          - {line: 3, kind: highlight, at: '240', to: {doodle: card, part: bubble}}
-      - say: 'But careful. That 240 is the total he would have had with 75 in Biology. His real Biology mark was 57, not 75.'
-        write: 'Real Biology mark $= 57$, not $75$'
-      - say: 'Look at the Biology line on the card. So the imagined total is too big by the gap between 75 and 57. 75 minus 57 is 18.'
-        doodle_do: [{id: card, op: circle, part: bio}, {id: card, op: label, part: bio, text: '18 short of 75'}]
-        write: 'Extra marks $= 75 - 57 = 18$'
-      - say: 'To get his real total, we take the imagined total of 240 and subtract those 18 extra marks.'
-        write: 'Real total $= 240 - 18$'
-        point:
-          - {line: 6, kind: move, from: {line: 3, at: '= 240'}, at: '240', text: 'imagined total'}
-          - {line: 6, kind: move, from: {line: 5, at: '= 18'}, at: '18', text: 'take away'}
-      - say: '240 minus 18 is 222. That is the real total on his card.'
-        doodle_do: [{id: card, op: label, part: card, text: 'real total 222'}]
-        write: '$= 222$'
-        point:
-          - {line: 7, kind: highlight, at: '222', to: {doodle: card, part: card}}
-      - say: 'Let''s check. Add the 18 marks back and 222 becomes 240, and 240 divided by 4 is 60, the average we were told.'
-        write: 'Check: $\ 222 + 18 = 240,\quad 240 \div 4 = 60$'
-      - say: 'So his total mark was 222, which is answer choice C.'
-        write: 'Total mark $= 222$'
+      - section: 'The question'
+        say: 'Musa scored 57 in Biology. If it had been 75, his average over four subjects would have been 60. We want his actual total. Picture his report card, with the dream in a bubble.'
+        write: 'Average $= 60$ over 4 subjects with 75, not 57, in Biology'
+        doodle: {name: 'custom:1986_q02_a', id: card, caption: 'Biology: 57, not 75', 'on': 'Picture'}
+      - section: 'Solution'
+        say: 'Solution. An average is the total over the number of subjects. So the total is the average times the number of subjects.'
+        write: 'Solution. Total $=$ average $\times$ number of subjects'
+      - say: 'With 75 in Biology, the total would be 60 times 4, which is 240. That is the total in the bubble.'
+        write: 'Total with 75 in Biology $= 60 \times 4 = 240$'
+        doodle_do:
+          - {id: card, op: label, part: bubble, text: '60 × 4 = 240', 'on': 'bubble'}
+      - say: 'Let his actual total be $T$. That total has 57 in Biology.'
+        write: 'Let his actual total $= T$'
+        doodle_do:
+          - {id: card, op: circle, part: bio, text: '57'}
+      - say: 'Take the 57 out of $T$ and put 75 in its place, and you get the 240.'
+        write: '$T - 57 + 75 = 240$'
+      - say: 'Minus 57 plus 75 is plus 18.'
+        write: '$T + 18 = 240$'
+      - say: 'Subtract 18 from both sides.'
+        write: '$T = 240 - 18$'
+      - say: '240 minus 18 is 222.'
+        write: '$\therefore T = 222$'
+        doodle_do:
+          - {id: card, op: label, part: card, text: 'actual total 222'}
+      - section: 'Check'
+        say: 'Check: put the 18 extra marks back. 222 plus 18 is 240, and 240 divided by 4 is 60, the average we were told.'
+        write: 'Check: $\dfrac{222 + 18}{4} = \dfrac{240}{4} = 60$ ✓'
+      - section: 'Answer'
+        say: 'So his total mark was 222, which is option C.'
+        write: '$\therefore$ Total mark $= 222$'
         answer: true
     traps:
-      A: 'You went for 282. That is even bigger than the imagined total of 240. His real Biology mark was lower than 75, so his real total must be smaller: 240 minus 18 is 222.'
-      B: 'You went for 240. That''s the total he would have had with 75 in Biology. The question wants what he really scored, which is 18 marks less: 222.'
-      D: 'You went for 210. That takes 30 marks off, but the gap between 75 and 57 is 18. Take 18 from 240 and you get 222.'
+      A: 'You went for 282. That is even bigger than 240, the total with 75 in Biology. His actual Biology mark is lower, so his actual total is smaller: $T$ plus 18 is 240, so $T$ is 222.'
+      B: 'You went for 240. That is the total he would have had with 75 in Biology. His actual total is 18 marks less: 222.'
+      D: 'You went for 210. That takes 30 marks off, but 75 minus 57 is 18. $T$ plus 18 is 240, so $T$ is 222.'
   3:
     moments:
-      - say: 'We want the L.C.M. of 48, 64 and 80, divided by their H.C.F.'
-        write: '$\dfrac{\text{L.C.M. of } 48,\ 64,\ 80}{\text{H.C.F. of } 48,\ 64,\ 80}$'
-      - say: 'Both the L.C.M. and the H.C.F. can be read straight off the prime factors, so the first job is to break each number into primes.'
-      - say: '48 is 16 times 3, and 16 is 2 times 2 times 2 times 2, which is 2 to the power 4. Picture each number as a sack of its prime factors.'
-        doodle: {name: 'custom:1986_q03_a', id: sacks, caption: 'each number as a sack of primes', size: scene}
-        write: '$48 = 16 \times 3 = 2^{4} \times 3$'
-      - say: 'The middle sack holds only 2s. 64 is 2 multiplied by itself six times, so 64 is 2 to the power 6.'
-        doodle_do: [{id: sacks, op: highlight, part: bag64}]
-        write: '$64 = 2^{6}$'
-      - say: '80 is 16 times 5, so 80 is 2 to the power 4, times 5.'
-        write: '$80 = 16 \times 5 = 2^{4} \times 5$'
-      - say: 'Look for the yellow 2s that sit in every sack: four in each. The H.C.F. is the biggest number that divides all three. So we take only the primes found in all three, each to its lowest power. Only 2 is in all three, and its lowest power is 2 to the 4.'
-        doodle_do: [{id: sacks, op: circle, part: shared}]
-        write: 'H.C.F. $= 2^{4}$'
-        point:
-          - {line: 2, kind: circle, at: '24', text: 'lowest power'}
-          - {line: 5, kind: highlight, at: '24', to: {doodle: sacks, part: shared}}
-      - say: '2 to the power 4 is 2 times 2 times 2 times 2, which is 16.'
-        write: '$= 16$'
-      - say: 'The L.C.M. is the smallest number all three divide into. So we take every prime that appears anywhere, each to its highest power: 2 to the 6, then 3, then 5. Line up the most of each kind from any sack.'
-        doodle_do: [{id: sacks, op: stage, stage: 'custom:1986_q03_a2'}]
-        write: 'L.C.M. $= 2^{6} \times 3 \times 5$'
-        point:
-          - {line: 3, kind: circle, at: '26', text: 'highest power'}
-          - {line: 7, kind: highlight, at: '26×3×5', to: {doodle: sacks, part: lcm}}
-      - say: '2 to the 6 is 64, and 3 times 5 is 15.'
-        write: '$= 64 \times 15$'
-      - say: '64 times 10 is 640, and 64 times 5 is 320. 640 plus 320 is 960.'
-        write: '$= 640 + 320 = 960$'
-      - say: 'Now divide the L.C.M. we just found, 960, by the H.C.F. we found, 16.'
+      - section: 'The question'
+        say: 'We need two things for 48, 64 and 80: the L.C.M., the lowest common multiple, and the H.C.F., the highest common factor. Then we divide the first by the second.'
+        write: 'L.C.M. of $48,\ 64,\ 80 \div$ H.C.F. of $48,\ 64,\ 80$'
+      - section: 'Solution'
+        say: 'Solution. Set the three numbers side by side and divide them down the ladder. First divide by a prime that goes into all three. 2 goes into 48, 64 and 80.'
+        write: 'Solution: divide by the prime factors'
+        diagram: {id: L, kind: ladder, mode: lcm, numbers: [48, 64, 80], find: both}
+      - say: 'Keep dividing by 2 while it goes into all three. 24, 32, 40. Then 12, 16, 20. Then 6, 8, 10. Then 3, 4, 5.'
+        write: 'Common divisors: $2,\ 2,\ 2,\ 2$'
+        diagram_do:
+          - {id: L, op: step, n: 4}
+      - say: '3, 4 and 5 have no common prime factor, so the common part stops here. The H.C.F. is the product of the common divisors: 2 times 2 times 2 times 2, which is 16.'
+        write: 'H.C.F. $= 2 \times 2 \times 2 \times 2 = 2^{4} = 16$'
+        diagram_do:
+          - {id: L, op: highlight, part: divisors, text: 'common to all three'}
+      - section: 'The L.C.M.'
+        say: 'For the L.C.M., keep dividing by any prime that goes into at least one number, and carry down the numbers it does not divide, until every number is 1.'
+        write: 'Continue: $2,\ 2,\ 3,\ 5$'
+        diagram_do:
+          - {id: L, op: step, n: 4}
+      - say: 'The L.C.M. is the product of all the divisors down the side: six 2s, then 3, then 5.'
+        write: 'L.C.M. $= 2 \times 2 \times 2 \times 2 \times 2 \times 2 \times 3 \times 5 = 2^{6} \times 3 \times 5$'
+        diagram_do:
+          - {id: L, op: read}
+      - say: '2 to the power 6 is 64, and 3 times 5 is 15. 64 times 10 is 640, and 64 times 5 is 320. 640 plus 320 is 960.'
+        write: '$= 64 \times 15 = 640 + 320 = 960$'
+      - section: 'Divide'
+        say: 'Now divide the L.C.M., 960, by the H.C.F., 16.'
         write: '$\dfrac{\text{L.C.M.}}{\text{H.C.F.}} = \dfrac{960}{16}$'
-        point:
-          - {line: 10, kind: move, from: {line: 9, at: '= 960'}, at: '960', text: 'L.C.M.'}
-          - {line: 10, kind: move, from: {line: 6, at: '= 16'}, at: '16', text: 'H.C.F.'}
-      - say: 'Back to the row of primes at the bottom. 16 times 6 is 96, so 16 times 60 is 960. That means 960 divided by 16 is 60.'
-        doodle_do: [{id: sacks, op: label, part: lcm, text: '960 ÷ 16 = 60'}]
+      - say: '16 into 96 goes 6 times exactly, and 16 into 0 goes 0 times. So 960 divided by 16 is 60.'
         write: '$= 60$'
-      - say: 'So the L.C.M. divided by the H.C.F. is 60, which is answer choice D.'
-        write: 'L.C.M. $\div$ H.C.F. $= 60$'
+      - section: 'Check'
+        say: 'Check with the index form. 2 to the 6, times 3, times 5, divided by 2 to the 4, leaves 2 squared times 3 times 5. 4 times 15 is 60.'
+        write: 'Check: $\dfrac{2^{6} \times 3 \times 5}{2^{4}} = 2^{2} \times 3 \times 5 = 60\ \checkmark$'
+      - say: 'Therefore the L.C.M. divided by the H.C.F. is 60, which is option D.'
+        write: '$\therefore$ L.C.M. $\div$ H.C.F. $= 60$'
         answer: true
     traps:
-      A: 'You went for 20. That comes from an L.C.M. of 320, which uses 2 to the 4 instead of 2 to the 6. But 64 needs 2 to the 6, so the L.C.M. is 960, and 960 divided by 16 is 60.'
-      B: 'You went for 30. That''s half the answer, from an L.C.M. of 480. The L.C.M. must use the highest power of 2, which is 2 to the 6, giving 960, and 960 divided by 16 is 60.'
-      C: 'You went for 48. That''s one of the numbers, not the result. Find the L.C.M., 960, and the H.C.F., 16, then divide to get 60.'
+      A: 'You went for 20. That uses an L.C.M. of 320, with 2 to the 4 instead of 2 to the 6. 64 is 2 to the 6, so the L.C.M. takes six 2s: 960, and 960 divided by 16 is 60.'
+      B: 'You went for 30. That comes from an L.C.M. of 480, one 2 short. Divide down the ladder until every number is 1: there are six 2s, so the L.C.M. is 960, and 960 divided by 16 is 60.'
+      C: 'You went for 48. That is one of the numbers, not the result. The L.C.M. is 960 and the H.C.F. is 16, and 960 divided by 16 is 60.'
   4:
     moments:
-      - say: 'We want the smallest number that 252 can be multiplied by to give a perfect square.'
-        write: '$252 \times k = \text{a perfect square}$'
-      - say: 'Here''s the key idea. A perfect square is a number times itself, so its prime factors always come in pairs. So let''s break 252 into primes and look for a prime without a partner.'
-      - say: '252 is 4 times 63.'
-        write: '$252 = 4 \times 63$'
-      - say: '4 is 2 times 2. 63 is 9 times 7, and 9 is 3 times 3. Picture the primes as cards looking for partners.'
-        doodle: {name: 'custom:1986_q04_a', id: cards, caption: 'prime factors looking for partners'}
-        write: '$= 2 \times 2 \times 3 \times 3 \times 7$'
-      - say: 'Written with powers, that is 2 squared, times 3 squared, times 7.'
-        write: '$= 2^{2} \times 3^{2} \times 7$'
-      - say: 'On the cards, the pink 7 has no partner. Now look for pairs. The two 2s make a pair, and the two 3s make a pair. But the 7 is on its own.'
-        doodle_do: [{id: cards, op: circle, part: lone}]
-        write: 'Unpaired prime: $\ 7$'
+      - section: 'The question'
+        say: 'Smallest number to make a perfect square. Many students go for 2. Break 252 into prime factors on the ladder, and look for the prime without a partner.'
+        write: '$252 \times k =$ a perfect square; $\ k = ?$'
+      - section: 'Solution'
+        say: 'Solution. First, express 252 as a product of prime factors. Divide by the smallest prime that goes in, again and again, down to 1.'
+        write: 'Solution: $252$ as a product of prime factors'
+        diagram: {id: L, kind: ladder, mode: factors, number: 252}
+      - say: '252 is even, so divide by 2: 126. 126 is even too: 126 divided by 2 is 63.'
+        write: '$252 \div 2 = 126,\ \ 126 \div 2 = 63$'
+        diagram_do:
+          - {id: L, op: step, n: 2}
+      - say: '63 is odd, so try 3. 63 divided by 3 is 21, and 21 divided by 3 is 7. 7 is prime: 7 divided by 7 is 1.'
+        write: '$63 \div 3 = 21,\ \ 21 \div 3 = 7,\ \ 7 \div 7 = 1$'
+        diagram_do:
+          - {id: L, op: step, n: 3}
+      - say: 'Read the divisors down the ladder. 252 is 2 times 2 times 3 times 3 times 7. In index form: 2 squared, times 3 squared, times 7.'
+        write: '$252 = 2 \times 2 \times 3 \times 3 \times 7 = 2^{2} \times 3^{2} \times 7$'
+        diagram_do:
+          - {id: L, op: read}
+      - say: 'A perfect square has every prime factor to an even power, so its primes come in pairs. 2 squared and 3 squared are paired. 7 is to the power 1: no partner.'
+        write: 'Unpaired prime factor: $7$ (power 1)'
+        doodle: {name: 'custom:1986_q04_a', id: cards, caption: 'prime factors in pairs'}
+        doodle_do:
+          - {id: cards, op: circle, part: lone}
         point:
-          - {line: 4, kind: circle, at: '× 7', text: 'no partner'}
-          - {line: 5, kind: highlight, at: '7', to: {doodle: cards, part: lone}}
-      - say: 'So we give the 7 a partner by multiplying by one more 7. Then 7 appears twice, as 7 squared. A second 7 card joins the first.'
-        doodle_do: [{id: cards, op: stage, stage: 'custom:1986_q04_a2'}]
+          - {line: 4, kind: circle, at: '32 × [[7]]', text: 'no partner'}
+      - say: 'Give the 7 a partner: multiply by one more 7. Now every power is even.'
         write: '$252 \times 7 = 2^{2} \times 3^{2} \times 7^{2}$'
+        doodle_do:
+          - {id: cards, op: stage, stage: 'custom:1986_q04_a2'}
         point:
-          - {line: 6, kind: arrow, from: {line: 5, at: '7'}, at: '252 × [[7]]', text: 'one more 7'}
-          - {line: 6, kind: highlight, at: '×7=', to: {doodle: cards, part: new7}}
-      - say: 'Now every prime is paired, so this is a square: 2 times 3 times 7, all squared. 2 times 3 is 6, and 6 times 7 is 42.'
-        doodle_do: [{id: cards, op: label, part: sq, text: '42 × 42'}]
+          - {line: 6, kind: highlight, at: '252 × [[7]]', to: {doodle: cards, part: new7}}
+      - say: 'Each prime is squared, so the whole product is a square: 2 times 3 times 7, all squared. 2 times 3 is 6, and 6 times 7 is 42.'
         write: '$= (2 \times 3 \times 7)^{2} = 42^{2}$'
-      - say: 'Let''s check. 252 times 7 is 1764, and 42 times 42 is also 1764.'
-        write: 'Check: $\ 252 \times 7 = 1764 = 42 \times 42$'
-      - say: 'Look at the new card again. Could a smaller number work? No. Whatever we multiply by must bring a partner for the lonely 7, so it must contain a 7.'
-        doodle_do: [{id: cards, op: pulse, part: new7}]
-      - say: 'So the smallest number is 7, which is answer choice D.'
-        write: 'Smallest multiplier: $\ k = 7$'
+        doodle_do:
+          - {id: cards, op: label, part: sq, text: '42 × 42'}
+      - section: 'Check'
+        say: 'Check. 252 times 7: 7 times 2 is 14, write 4 carry 1. 7 times 5 is 35, plus 1 is 36, write 6 carry 3. 7 times 2 is 14, plus 3 is 17. So 1764, and 42 times 42 is also 1764.'
+        write: 'Check: $252 \times 7 = 1764 = 42 \times 42\ \checkmark$'
+      - say: 'Could a smaller number work? No. Whatever we multiply by must bring a 7 to pair the lonely 7.'
+        write: 'Any $k$ must contain the factor $7$'
+        doodle_do:
+          - {id: cards, op: pulse, part: new7}
+      - say: 'Therefore the smallest number is 7, which is option D.'
+        write: '$\therefore k = 7$'
         answer: true
     traps:
-      A: 'You went for 2. But 252 already has 2 squared in it. Multiplying by 2 makes it 2 cubed, which is odd again. The unpaired prime is 7.'
+      A: 'You went for 2. But 252 already has 2 squared in it. Multiplying by 2 makes it 2 cubed, an odd power again. The unpaired prime is 7.'
       B: 'You went for 3. 252 already has 3 squared in it, so a third 3 would spoil the square. The prime that needs a partner is 7.'
-      C: 'You went for 5. 5 isn''t a factor of 252 at all, so multiplying by 5 would add a new unpaired prime. The one to pair up is 7.'
+      C: 'You went for 5. 5 is not a factor of 252 at all, so multiplying by 5 would add a new unpaired prime. The one to pair up is 7.'
   5:
     moments:
       - section: 'The question'
@@ -225,95 +235,89 @@ lessons:
       D: 'You went for 6 over 7. The denominator is a half plus a third, which is 5 over 6, not 7 over 6. Then the value is 4 over 5, and its reciprocal is 5 over 4.'
   6:
     moments:
-      - say: 'Three boys share some oranges. The first gets a third. The second gets two thirds of what is left. The third gets the last 12. How many oranges were there? Picture the three boys in a row.'
-        doodle: {name: 'custom:1986_q06_a', id: share, caption: 'The third boy gets the last 12', size: scene}
+      - section: 'The question'
+        say: 'Three boys share some oranges. The first gets a third. The second gets two thirds of the remainder. The third gets the last 12. How many oranges were there?'
         write: '1st: $\tfrac{1}{3}$ of all; 2nd: $\tfrac{2}{3}$ of the remainder; 3rd: $12$'
-      - say: 'The key word is remainder. The second boy''s share is a fraction of what is left, not of the whole. So we will write each share as a fraction of the whole.'
-      - say: 'Picture all the oranges as 9 equal blocks; the first boy takes 3 of them. After the first boy takes a third, what is left is 1 minus a third, which is two thirds of the oranges.'
-        doodle_do: [{id: share, op: stage, stage: 'custom:1986_q06_a2'}]
-        write: 'Remainder $= 1 - \tfrac{1}{3} = \tfrac{2}{3}$'
-      - say: 'The second boy takes two thirds of that remainder. Of means times, so his share is two thirds times two thirds.'
-        write: '2nd share $= \tfrac{2}{3} \times \tfrac{2}{3}$'
-        point:
-          - {line: 3, kind: move, from: {line: 2, at: '= 32'}, at: '× 32', text: 'of this'}
-      - say: 'Tops: 2 times 2 is 4. Bottoms: 3 times 3 is 9. So the second boy gets 4 over 9 of the whole. On the bar, that is 4 of the 9 blocks.'
-        doodle_do: [{id: share, op: stage, stage: 'custom:1986_q06_a3'}, {id: share, op: label, part: b2, text: '4 of 9'}]
-        write: '$= \tfrac{4}{9}$'
-      - say: 'The third boy gets whatever is left: 1, minus the first share of a third, minus the second share of 4 over 9.'
-        write: '3rd share $= 1 - \tfrac{1}{3} - \tfrac{4}{9}$'
-        point:
-          - {line: 5, kind: move, from: {line: 4, at: '= 94'}, at: '− 94', text: '2nd share'}
-      - say: 'Put everything over 9. 1 is 9 over 9, and a third is 3 over 9.'
-        write: '$= \tfrac{9}{9} - \tfrac{3}{9} - \tfrac{4}{9}$'
-      - say: '9 minus 3 is 6, and 6 minus 4 is 2. So the third boy gets 2 over 9 of the whole. The last 2 pink blocks are his.'
-        doodle_do: [{id: share, op: stage, stage: 'custom:1986_q06_a4'}, {id: share, op: label, part: b3, text: '2 of 9 = 12 oranges'}]
-        write: '$= \tfrac{2}{9}$'
-      - say: 'Now bring in the 12. The third boy got 12 oranges, so 2 over 9 of the total is 12.'
-        write: '$\tfrac{2}{9} \times \text{total} = 12$'
-        point:
-          - {line: 8, kind: move, from: {line: 0, at: '3rd: 12'}, at: '= 12', text: 'given'}
-          - {line: 8, kind: highlight, at: '12', to: {doodle: share, part: b3}}
-      - say: 'If 2 over 9 of the total is 12, then 1 over 9 of it is half of 12, which is 6.'
-        write: '$\tfrac{1}{9} \times \text{total} = 12 \div 2 = 6$'
-      - say: 'The whole is 9 over 9, so the total is 9 times 6, which is 54. 9 blocks of 6 oranges.'
-        doodle_do: [{id: share, op: label, part: b1, text: '6 in each block'}, {id: share, op: label, part: total, text: '54'}]
-        write: 'Total $= 9 \times 6 = 54$'
-        point:
-          - {line: 10, kind: move, from: {line: 9, at: '= 6'}, at: '× 6', text: 'one ninth'}
-          - {line: 10, kind: highlight, at: '54', to: {doodle: share, part: total}}
-      - say: 'Let''s check. A third of 54 is 18, which leaves 54 minus 18, that is 36.'
-        write: 'Check: $\ \tfrac{1}{3} \times 54 = 18,\quad 54 - 18 = 36$'
-      - say: 'Two thirds of 36 is 24, which leaves 36 minus 24, that is 12 for the third boy. Just right.'
-        write: '$\tfrac{2}{3} \times 36 = 24,\quad 36 - 24 = 12$'
-      - say: 'So they shared 54 oranges, which is answer choice B.'
-        write: 'Oranges shared $= 54$'
+        doodle: {name: 'custom:1986_q06_a', id: share, caption: 'the third boy gets the last 12', size: scene}
+      - section: 'Solution'
+        say: 'Solution. Let the number of oranges they shared be $x$. Then we write each boy''s share in terms of $x$.'
+        write: 'Solution: Let the number of oranges be $x$'
+      - say: 'The first boy gets a third of $x$.'
+        write: '1st boy $= \tfrac{1}{3}x$'
+      - say: 'The remainder is what is left after the first boy: $x$ minus a third of $x$, which is two thirds of $x$.'
+        write: 'Remainder $= x - \tfrac{1}{3}x = \tfrac{2}{3}x$'
+        doodle_do: [{id: share, op: stage, stage: 'custom:1986_q06_a2', 'on': 'remainder'}]
+      - say: 'The key word is remainder. The second boy gets two thirds of the remainder, not of the whole. Of means times.'
+        write: '2nd boy $= \tfrac{2}{3} \times \tfrac{2}{3}x = \tfrac{4}{9}x$'
+        doodle_do: [{id: share, op: stage, stage: 'custom:1986_q06_a3', 'on': 'second boy'}, {id: share, op: label, part: b2, text: '4 of 9'}]
+      - say: 'The third boy gets what is left: $x$, minus the first share, minus the second share.'
+        write: '3rd boy $= x - \tfrac{1}{3}x - \tfrac{4}{9}x$'
+      - say: 'The L.C.M. of 3 and 9 is 9. So $x$ is 9 over 9 of $x$, and a third of $x$ is 3 over 9 of $x$.'
+        write: '$= \dfrac{9x - 3x - 4x}{9} = \dfrac{2x}{9}$'
+        doodle_do: [{id: share, op: stage, stage: 'custom:1986_q06_a4', 'on': 'L.C.M.'}, {id: share, op: label, part: b3, text: '2 of 9 = 12 oranges'}]
+      - say: 'The third boy received 12 oranges. So $2x$ over 9 equals 12.'
+        write: '$\dfrac{2x}{9} = 12$'
+      - say: 'Cross multiply: $2x$ equals 12 times 9, which is 108.'
+        write: '$2x = 12 \times 9 = 108$'
+      - say: 'Divide both sides by 2. 108 divided by 2 is 54.'
+        write: '$x = \dfrac{108}{2} = 54$'
+      - say: 'Therefore they shared 54 oranges.'
+        write: '$\therefore$ they shared $54$ oranges'
+        doodle_do: [{id: share, op: label, part: total, text: '54'}]
+      - section: 'Check'
+        say: 'Check. A third of 54 is 18, which leaves 36. Two thirds of 36 is 24, which leaves 12 for the third boy. Just right.'
+        write: 'Check: $\tfrac{1}{3}(54) = 18,\ \ 54 - 18 = 36,\ \ \tfrac{2}{3}(36) = 24,\ \ 36 - 24 = 12\ \checkmark$'
+      - say: 'Therefore they shared 54 oranges, which is answer choice B.'
+        write: '$\therefore\ x = 54$'
         answer: true
     traps:
-      A: 'You went for 60. Test it: a third of 60 is 20, leaving 40, and two thirds of 40 is not a whole number. The third boy gets 2 over 9 of the total, so the total is 54.'
-      C: 'You went for 48. A third of 48 is 16, leaving 32, and two thirds of 32 isn''t whole. Work out the third boy''s fraction, 2 over 9, and set it equal to 12.'
-      D: 'You went for 42. Test it: a third of 42 is 14, leaving 28, and two thirds of 28 isn''t whole. Remember the second boy takes two thirds of the remainder, not of the whole; then 2 over 9 of the total is 12, so the total is 54.'
+      A: 'You went for 60. Test it: a third of 60 is 20, leaving 40, and two thirds of 40 is not a whole number. The third boy gets $\tfrac{2}{9}$ of the total, so the total is 54.'
+      C: 'You went for 48. A third of 48 is 16, leaving 32, and two thirds of 32 is not whole. Work out the third boy''s fraction, $\tfrac{2x}{9}$, and set it equal to 12.'
+      D: 'You went for 42. Test it: a third of 42 is 14, leaving 28, and two thirds of 28 is not whole. The second boy takes two thirds of the remainder, not of the whole; then $\tfrac{2x}{9} = 12$ gives 54.'
   7:
     moments:
-      - say: 'We''re told P is 18, Q is 21, R is negative 6 and S is negative 4. We want P minus Q plus 2S, all over R cubed.'
-        write: '$\dfrac{P - Q + 2S}{R^{3}}$'
-      - say: 'Two of the values are negative, so the danger is in the signs. The safe habit is to put every value in brackets as it goes in.'
-        write: '$= \dfrac{(18) - (21) + 2(-4)}{(-6)^{3}}$'
-      - say: 'Let''s do the top first. 18 minus 21 is negative 3.'
-        write: 'Top: $\ 18 - 21 = -3$'
-      - say: 'Next, 2 times negative 4 is negative 8.'
-        write: '$2(-4) = -8$'
-      - say: 'So the top is the negative 3 plus the negative 8, which is negative 11.'
-        write: 'Top $= -3 + (-8) = -11$'
-        point:
-          - {line: 4, kind: move, from: {line: 2, at: '= −3'}, at: '−3 +', text: 'from here'}
-          - {line: 4, kind: move, from: {line: 3, at: '= −8'}, at: '(−8)'}
-      - say: 'Now the bottom. Negative 6 cubed means negative 6, times negative 6, times negative 6. Picture three tiles, each marked minus 6.'
+      - section: 'The question'
+        say: 'Four values, two of them negative, go into one fraction. The danger is all in the signs, so every value goes in inside brackets.'
+        write: '$P = 18,\ Q = 21,\ R = -6,\ S = -4$'
+      - section: 'Solution'
+        say: 'Solution. Write the expression, then substitute each value in brackets.'
+        write: 'Solution. $\dfrac{P - Q + 2S}{R^{3}} = \dfrac{18 - 21 + 2(-4)}{(-6)^{3}}$'
+      - section: 'The numerator'
+        say: 'The numerator first. By BODMAS, multiply before adding and subtracting: 2 times negative 4 is negative 8.'
+        write: 'Numerator: $18 - 21 + 2(-4) = 18 - 21 - 8$'
+      - say: '18 minus 21 is negative 3, and negative 3 minus 8 is negative 11.'
+        write: '$= -3 - 8 = -11$'
+      - section: 'The denominator'
+        say: 'Now the denominator. Negative 6 cubed means negative 6, three times. Picture three tiles, each marked minus 6.'
         doodle: {name: 'custom:1986_q07_a', id: tiles, caption: 'three minus-6 tiles'}
-        write: 'Bottom: $\ (-6)^{3} = (-6)(-6)(-6)$'
-      - say: 'Pair up the first two tiles. The first two: negative 6 times negative 6 is positive 36, because two negatives make a positive.'
+        write: 'Denominator: $(-6)^{3} = (-6)(-6)(-6)$'
+      - say: 'Pair the first two: negative 6 times negative 6 is positive 36, because two negatives make a positive.'
         doodle_do: [{id: tiles, op: stage, stage: 'custom:1986_q07_a2'}]
         write: '$= 36 \times (-6)$'
-      - say: 'Now bring in the third tile. 36 times 6 is 216, and a positive times a negative is negative. So the bottom is negative 216.'
+      - say: '36 times 6 is 216, and a positive times a negative is negative. The third tile has no partner, so the minus stays.'
         doodle_do: [{id: tiles, op: stage, stage: 'custom:1986_q07_a3'}]
         write: '$= -216$'
         point:
-          - {line: 7, kind: highlight, at: '−216', to: {doodle: tiles, part: result}}
-      - say: 'Notice the idea here: an odd power of a negative number stays negative. Squaring removes the minus sign; cubing keeps it. On the tiles, the third one has no partner.'
-        doodle_do: [{id: tiles, op: circle, part: t3}]
-      - say: 'Now put together the top and the bottom we found: negative 11 over negative 216.'
+          - {line: 6, kind: highlight, at: '−216', to: {doodle: tiles, part: result}}
+      - section: 'Divide'
+        say: 'Put the numerator over the denominator: negative 11 over negative 216.'
         write: '$\dfrac{P - Q + 2S}{R^{3}} = \dfrac{-11}{-216}$'
         point:
-          - {line: 9, kind: move, from: {line: 4, at: '= −11'}, at: '−11', text: 'top'}
-          - {line: 9, kind: move, from: {line: 7, at: '= −216'}, at: '−216', text: 'bottom'}
+          - {line: 7, kind: move, from: {line: 3, at: '= −11'}, at: '−11', text: 'numerator'}
+          - {line: 7, kind: move, from: {line: 6, at: '= −216'}, at: '−216', text: 'denominator'}
       - say: 'A negative divided by a negative is positive, so the two minus signs cancel.'
         write: '$= \dfrac{11}{216}$'
-      - say: 'So the value is 11 over 216, which is answer choice B.'
-        write: 'Value $= \dfrac{11}{216}$'
+      - section: 'Check'
+        say: 'Check: multiply back. 11 over 216, times negative 216, is negative 11, the numerator we found.'
+        write: 'Check: $\dfrac{11}{216} \times (-216) = -11$ ✓'
+      - section: 'Answer'
+        say: 'Therefore the value is 11 over 216, which is answer choice B.'
+        write: '$\therefore \dfrac{P - Q + 2S}{R^{3}} = \dfrac{11}{216}$ (B)'
         answer: true
     traps:
-      A: 'You went for negative 11 over 216. The top is negative 11, but the bottom is negative too: negative 6 cubed is negative 216. A negative over a negative is positive.'
-      C: 'You went for negative 43 over 115. That doesn''t come from these numbers. The top is 18 minus 21 plus 2 times negative 4, which is negative 11, and the bottom is negative 216.'
-      D: 'You went for 41 over 116. The bottom must be R cubed, which is negative 216, and the top is negative 11. That gives 11 over 216.'
+      A: 'You went for negative 11 over 216. The numerator is negative 11, but the denominator is negative too: negative 6 cubed is negative 216. A negative over a negative is positive.'
+      C: 'You went for negative 43 over 115. That does not come from these numbers. The numerator is 18 minus 21 plus 2 times negative 4, which is negative 11, and the denominator is negative 216.'
+      D: 'You went for 41 over 116. The denominator must be $R$ cubed, which is negative 216, and the numerator is negative 11. That gives 11 over 216.'
   8:
     moments:
       - section: 'The question'
@@ -507,180 +511,187 @@ lessons:
       D: 'You went for 18 and 12. They differ by 6, but 18 times 12 is 216, not 187. Only 17 and 11 satisfy both equations.'
   12:
     moments:
-      - say: 'In 1984, Ike was 24 and his father was 45. In what year was Ike exactly half his father''s age? Picture Ike and his father in 1984.'
+      - section: 'The question'
+        say: 'In 1984, Ike was 24 and his father was 45. We go back in time to the year when Ike was exactly half his father''s age.'
         doodle: {name: 'custom:1986_q12_a', id: ages, caption: 'In 1984: Ike 24, father 45', size: scene}
-        write: 'In 1984: Ike $24$, father $45$'
-      - say: 'Here''s the key fact for age problems: the difference between two people''s ages never changes, because both of them get one year older every year.'
-      - say: 'So how much older is the father? 45 minus 24 is 21 years. That gap is 21 in every year. Look at the gap between the two bars.'
-        doodle_do: [{id: ages, op: stage, stage: 'custom:1986_q12_a2'}]
-        write: 'Age gap $= 45 - 24 = 21$'
-        point:
-          - {line: 2, kind: highlight, at: '21', to: {doodle: ages, part: gap}}
-      - say: 'Ike is half his father''s age when the father is twice Ike''s age. Let Ike''s age in that year be $I$. Then the father''s age is $2I$.'
-        write: 'Ike $= I$; father $= 2I$'
-      - say: 'The gap on the bars never changes. The gap between them is still the 21 we found. So $2I$ minus $I$ equals 21.'
-        doodle_do: [{id: ages, op: highlight, part: gap}]
-        write: '$2I - I = 21$'
-        point:
-          - {line: 4, kind: move, from: {line: 2, at: '= 21'}, at: '= 21', text: 'same gap'}
-      - say: '$2I$ minus $I$ is just $I$. So Ike was 21 in that year.'
-        write: '$I = 21$'
-      - say: 'And his father was 2 times 21, which is 42. On the bars, both ages drop by the same amount, so the gap stays 21.'
-        doodle_do: [{id: ages, op: label, part: ikebar, text: '21'}, {id: ages, op: label, part: dadbar, text: '42'}]
-        write: 'Father $= 2 \times 21 = 42$'
-      - say: 'Ike was 24 in 1984. How many years before that was he 21? 24 minus 21 is 3 years.'
-        write: 'Years earlier $= 24 - 21 = 3$'
-        point:
-          - {line: 0, kind: circle, at: 'Ike 24', text: 'in 1984'}
-          - {line: 7, kind: move, from: {line: 5, at: '21'}, at: '− 21', text: 'Ike then'}
-      - say: 'So the year was 3 years before 1984. 1984 minus 3 is 1981. Turn the calendar back.'
+        write: 'In 1984: Ike $= 24$, father $= 45$'
+      - section: 'Solution'
+        say: 'Solution. The unknown is how far back we go. Let that year be $x$ years before 1984.'
+        write: 'Solution. Let the year be $x$ years before 1984'
+      - say: '$x$ years earlier, each of them was $x$ years younger. So Ike was 24 minus $x$, and his father was 45 minus $x$.'
+        write: 'Then: Ike $= 24 - x$, father $= 45 - x$'
+      - section: 'Form the equation'
+        say: 'In that year, Ike''s age was half of his father''s age.'
+        write: '$24 - x = \tfrac{1}{2}(45 - x)$'
+      - say: 'Clear the fraction: multiply both sides by 2. 2 times 24 is 48, and 2 times $x$ is $2x$.'
+        write: '$2(24 - x) = 45 - x$'
+      - say: 'Open the bracket.'
+        write: '$48 - 2x = 45 - x$'
+      - say: 'Collect like terms: the numbers on the left, the $x$ terms on the right. 48 minus 45 is 3, and $2x$ minus $x$ is $x$.'
+        write: '$48 - 45 = 2x - x$'
+      - say: 'So $x$ is 3: we go back 3 years.'
+        write: '$x = 3$'
+      - say: '1984 minus 3 is 1981.'
+        write: '$\therefore$ year $= 1984 - 3 = 1981$'
         doodle_do: [{id: ages, op: label, part: cal, text: '1981'}]
-        write: 'Year $= 1984 - 3 = 1981$'
         point:
           - {line: 8, kind: move, from: {line: 7, at: '= 3'}, at: '− 3', text: '3 years back'}
-          - {line: 8, kind: highlight, at: '1981', to: {doodle: ages, part: cal}}
-      - say: 'Let''s check. In 1981, the father was 45 minus 3, which is 42, and half of 42 is 21, Ike''s age.'
-        write: 'Check: $\ 45 - 3 = 42,\quad \tfrac{1}{2} \times 42 = 21$'
-      - say: 'So the year was 1981, which is answer choice B.'
-        write: 'Year $= 1981$'
+      - section: 'Check'
+        say: 'Check. In 1981, Ike was 24 minus 3, which is 21, and his father was 45 minus 3, which is 42. Half of 42 is 21.'
+        write: 'Check: Ike $= 21$, father $= 42$, and $\tfrac{1}{2} \times 42 = 21$ ✓'
+        doodle_do:
+          - {id: ages, op: stage, stage: 'custom:1986_q12_a2'}
+          - {id: ages, op: label, part: ikebar, text: '21'}
+          - {id: ages, op: label, part: dadbar, text: '42'}
+      - say: 'Notice the gap: 45 minus 24 is 21, and 42 minus 21 is 21. The difference between two ages never changes, because both grow one year every year.'
+        write: 'Age gap: $45 - 24 = 42 - 21 = 21$'
+        doodle_do: [{id: ages, op: highlight, part: gap}]
+      - section: 'Answer'
+        say: 'Therefore Ike was half his father''s age in 1981, which is answer choice B.'
+        write: '$\therefore$ the year was 1981 (B)'
         answer: true
     traps:
-      A: 'You went for 1982. In 1982 Ike was 22 and his father was 43, and 22 isn''t half of 43. Ike is half his father''s age when he is 21, the size of the gap.'
+      A: 'You went for 1982. In 1982 Ike was 22 and his father was 43, and 22 is not half of 43. Solving $24 - x = \tfrac{1}{2}(45 - x)$ gives $x = 3$, so the year is 1981.'
       C: 'You went for 1979. In 1979 Ike was 19 and his father was 40. Half of 40 is 20, not 19. The right year is 1981, when they were 21 and 42.'
       D: 'You went for 1978. In 1978 Ike was 18 and his father was 39, so Ike was less than half his age. Go back only 3 years, to 1981.'
   13:
     moments:
-      - say: 'We have 1 over root 5 plus root 3, minus 1 over root 5 minus root 3, and all of that times 1 over root 3.'
-        write: '$\left(\dfrac{1}{\sqrt{5} + \sqrt{3}} - \dfrac{1}{\sqrt{5} - \sqrt{3}}\right) \times \dfrac{1}{\sqrt{3}}$'
-      - say: 'Let''s work on the bracket first. The two denominators are conjugates: the same surds, with opposite signs between them. When we multiply conjugates, the surds disappear.'
-      - say: 'To subtract the two fractions, we put them over a common denominator, the product of the two bottoms. Each top gets multiplied by the other bottom.'
+      - section: 'The question'
+        say: 'Two fractions with surds in their denominators, and the denominators are conjugates. Their product has no surd at all, so the bracket comes out clean.'
+        write: 'Simplify $\left(\dfrac{1}{\sqrt{5} + \sqrt{3}} - \dfrac{1}{\sqrt{5} - \sqrt{3}}\right) \times \dfrac{1}{\sqrt{3}}$'
+      - say: 'Solution. We simplify the bracket first, then multiply by 1 over root 3.'
+        write: 'Solution'
+      - section: 'The bracket'
+        say: 'The L.C.M. of the two denominators is their product. Each numerator is multiplied by the other denominator.'
         write: 'Bracket $= \dfrac{(\sqrt{5} - \sqrt{3}) - (\sqrt{5} + \sqrt{3})}{(\sqrt{5} + \sqrt{3})(\sqrt{5} - \sqrt{3})}$'
-      - say: 'The rule for the difference of two squares: a plus b, times a minus b, is a squared minus b squared.'
-        write: 'Difference of two squares: $(a + b)(a - b) = a^{2} - b^{2}$'
-      - say: 'The bottom is a difference of two squares: root 5 squared minus root 3 squared. Picture a square whose side is root 5.'
+      - section: 'The denominator'
+        say: 'The denominator is a difference of two squares: $a$ plus $b$, times $a$ minus $b$, is $a$ squared minus $b$ squared. Picture a square whose side is root 5.'
         doodle: {name: 'custom:1986_q13_a', id: squares, caption: 'root 5 squared minus root 3 squared', size: scene}
-        write: 'Bottom: $\ (\sqrt{5} + \sqrt{3})(\sqrt{5} - \sqrt{3}) = (\sqrt{5})^{2} - (\sqrt{3})^{2}$'
-      - say: 'Cut the square of area 3 out of it. Root 5 squared is 5, and root 3 squared is 3. 5 minus 3 is 2.'
+        write: '$(a + b)(a - b) = a^{2} - b^{2}$'
+      - say: 'Here $a$ is root 5 and $b$ is root 3. So the denominator is root 5 squared minus root 3 squared.'
+        write: 'Denominator $= (\sqrt{5})^{2} - (\sqrt{3})^{2}$'
+      - say: 'Cut the square of area 3 out of it. Root 5 squared is 5, root 3 squared is 3, and 5 minus 3 is 2.'
         doodle_do: [{id: squares, op: stage, stage: 'custom:1986_q13_a2'}]
         write: '$= 5 - 3 = 2$'
         point:
           - {line: 5, kind: highlight, at: '5−3=2', to: {doodle: squares, part: rest}}
-      - say: 'Now the top. Open the brackets carefully: the minus in front of the second bracket changes both of its signs. Picture the four terms as tiles.'
-        doodle: {name: 'custom:1986_q13_b', id: tiles, caption: 'the top as four tiles'}
-        write: 'Top: $\ \sqrt{5} - \sqrt{3} - \sqrt{5} - \sqrt{3}$'
-      - say: 'Cross out the two yellow root 5 tiles. Root 5 minus root 5 is zero. Minus root 3, minus another root 3, is minus 2 root 3.'
-        doodle_do: [{id: tiles, op: cross, part: r5a}, {id: tiles, op: cross, part: r5b}, {id: tiles, op: label, part: sum, text: '−2 root 3'}]
+      - section: 'The numerator'
+        say: 'Now the numerator. Open the brackets: the minus in front of the second bracket changes both of its signs. Picture the four terms as tiles.'
+        doodle: {name: 'custom:1986_q13_b', id: tiles, caption: 'the numerator as four tiles'}
+        write: 'Numerator $= \sqrt{5} - \sqrt{3} - \sqrt{5} - \sqrt{3}$'
+      - say: 'Root 5 minus root 5 is 0: cross out the two root 5 tiles. Minus root 3, minus another root 3, is minus 2 root 3.'
+        doodle_do: [{id: tiles, op: cross, part: r5a}, {id: tiles, op: cross, part: r5b}, {id: tiles, op: label, part: sum, text: '−2√3'}]
         write: '$= -2\sqrt{3}$'
         point:
-          - {line: 6, kind: strike, at: 'Top [[5]]', text: 'cancels'}
-          - {line: 6, kind: strike, at: '− 5'}
-      - say: 'So the bracket is the top we found over the bottom we found: minus 2 root 3, over 2.'
-        write: 'Bracket $= \dfrac{-2\sqrt{3}}{2}$'
-        point:
-          - {line: 8, kind: move, from: {line: 7, at: '−23'}, at: '−23', text: 'top'}
-          - {line: 8, kind: move, from: {line: 5, at: '= [[2]]'}, at: '= [[2]]', text: 'bottom'}
-      - say: 'The 2s cancel, leaving minus root 3.'
-        write: '$= -\sqrt{3}$'
-      - say: 'Now go back to the whole question. We multiply that bracket by 1 over root 3.'
-        write: 'Whole expression $= -\sqrt{3} \times \dfrac{1}{\sqrt{3}}$'
-        point:
-          - {line: 10, kind: move, from: {line: 9, at: '−3'}, at: '−3 ×', text: 'the bracket'}
+          - {line: 6, kind: strike, at: 'Numerator=[[5]]', text: 'cancels'}
+          - {line: 6, kind: strike, at: '3[[−5]]'}
+      - section: 'Put together'
+        say: 'So the bracket is minus 2 root 3, over 2. The 2s cancel, leaving minus root 3.'
+        write: 'Bracket $= \dfrac{-2\sqrt{3}}{2} = -\sqrt{3}$'
+      - say: 'Now go back to the whole question and multiply the bracket by 1 over root 3.'
+        write: '$\therefore$ Expression $= -\sqrt{3} \times \dfrac{1}{\sqrt{3}}$'
       - say: 'That is minus root 3 over root 3. Root 3 over root 3 is 1, so we get minus 1.'
         write: '$= -\dfrac{\sqrt{3}}{\sqrt{3}} = -1$'
-      - say: 'So the expression simplifies to minus 1, which is answer choice D.'
-        write: 'Answer: $\ -1$'
+      - section: 'Check'
+        say: 'Check with decimals. The first fraction is 1 over 3.968, about 0.252. The second is 1 over 0.504, about 1.984. Their difference is minus 1.732, and over 1.732 that is minus 1.'
+        write: 'Check: $(0.252 - 1.984) \times \dfrac{1}{1.732} = \dfrac{-1.732}{1.732} = -1\ \checkmark$'
+      - section: 'Answer'
+        say: 'Therefore the expression simplifies to minus 1, which is option D.'
+        write: '$\therefore$ the answer is $-1$'
         answer: true
     traps:
-      A: 'You went for root 3 over root 5. Combine the fractions over their product: the bottom becomes 5 minus 3, which is 2, and the bracket is minus root 3. Times 1 over root 3 gives minus 1.'
-      B: 'You went for minus 2 over root 3. The top of the bracket is minus 2 root 3, and the bottom is 2, so the bracket is minus root 3. Times 1 over root 3 gives minus 1.'
-      C: 'You went for minus 2. That forgets to divide by the bottom, which is 5 minus 3, or 2. The bracket is minus root 3, and the answer is minus 1.'
+      A: 'You went for root 3 over root 5. Put the fractions over the product of the denominators: the denominator becomes 5 minus 3, which is 2, and the bracket is minus root 3. Times 1 over root 3 gives minus 1.'
+      B: 'You went for minus 2 over root 3. The numerator of the bracket is minus 2 root 3 and the denominator is 2, so the bracket is minus root 3. Times 1 over root 3 gives minus 1.'
+      C: 'You went for minus 2. That forgets to divide by the denominator, 5 minus 3, which is 2. The bracket is minus root 3, and the answer is minus 1.'
   14:
     moments:
-      - say: 'We want $n$ when log base 2 of 4, plus log base 2 of 7, minus log base 2 of $n$, equals 1.'
-        write: '$\log_{2}4 + \log_{2}7 - \log_{2}n = 1$'
-      - say: 'The plan is to squeeze the three logs into one. Remember the laws of logs, all in the same base: adding logs means multiplying the numbers, and subtracting a log means dividing by its number.'
-        write: '$\log A + \log B - \log C = \log \dfrac{A \times B}{C}$'
-      - say: 'So the three logs combine into one: log base 2 of 4 times 7, over $n$.'
-        write: '$\log_{2}\dfrac{4 \times 7}{n} = 1$'
-        point:
-          - {line: 1, kind: box, text: 'the rule'}
+      - section: 'The question'
+        say: 'Three logs on one side, and a plain 1 on the other. Combine the logs into a single logarithm, change it to index form, and $n$ falls out.'
+        write: 'Find $n$ if $\log_{2}4 + \log_{2}7 - \log_{2}n = 1$'
+      - say: 'Solution. First the laws of logarithms, then index form.'
+        write: 'Solution'
+      - section: 'Laws of logarithms'
+        say: 'Recall the product law: adding two logs to the same base gives the log of the product.'
+        write: 'Recall: $\log_{a}M + \log_{a}N = \log_{a}MN$'
+      - say: 'And the quotient law: subtracting a log gives the log of the division.'
+        write: '$\log_{a}M - \log_{a}N = \log_{a}\dfrac{M}{N}$'
+      - section: 'A single logarithm'
+        say: 'By the product law, log base 2 of 4 plus log base 2 of 7 is log base 2 of 4 times 7.'
+        write: '$\log_{2}(4 \times 7) - \log_{2}n = 1$'
       - say: '4 times 7 is 28.'
+        write: '$\log_{2}28 - \log_{2}n = 1$'
+      - say: 'By the quotient law, log base 2 of 28 minus log base 2 of $n$ is log base 2 of 28 over $n$.'
         write: '$\log_{2}\dfrac{28}{n} = 1$'
-      - say: 'Now undo the log. What does log base 2 of something equals 1 mean? It means 2 to the power 1 gives that something. Picture log base 2 as counting doubling steps up from 1.'
+      - section: 'Index form'
+        say: 'Change to index form: the base 2, to the power 1, gives the number 28 over $n$. Picture log base 2 as counting doubling steps up from 1: one step lands on 2.'
         doodle: {name: 'custom:1986_q14_a', id: stairs, caption: 'log base 2 counts doubling steps'}
-        write: 'If $\log_{2}X = 1$, then $X = 2^{1}$'
-      - say: 'One step up the stairs lands on 2. So 28 over $n$ equals 2 to the power 1, which is 2.'
         doodle_do: [{id: stairs, op: circle, part: s1}]
         write: '$\dfrac{28}{n} = 2^{1} = 2$'
-        point:
-          - {line: 4, kind: box, text: 'the rule'}
-      - say: 'Multiply both sides by $n$ to bring it up from the bottom.'
+      - say: 'Cross multiply: 28 equals 2 times $n$.'
         write: '$28 = 2n$'
-        point:
-          - {line: 6, kind: move, from: {line: 5, at: 'n'}, at: '2[[n]]', text: 'times n'}
-      - say: 'Divide both sides by 2. 28 divided by 2 is 14. So 28 over 14 sits on the first step.'
+      - say: 'Divide both sides by 2, to get $n$ by itself.'
+        write: '$n = \dfrac{28}{2}$'
+      - say: '28 divided by 2 is 14.'
+        write: '$\therefore n = 14$'
+      - section: 'Check'
+        say: 'Check by putting 14 back in. 28 over 14 is 2, and log base 2 of 2 is 1, just as the equation says.'
         doodle_do: [{id: stairs, op: label, part: s1, text: '28 ÷ 14 = 2'}]
-        write: '$n = \dfrac{28}{2} = 14$'
-        point:
-          - {line: 7, kind: move, from: {line: 6, at: '= [[2]]n'}, at: '= [[2]]28', text: 'divide by 2'}
-      - say: 'Look at the first step again. Let''s check by putting 14 back in. 28 over 14 is 2, and log base 2 of 2 is 1, just as the equation says.'
-        doodle_do: [{id: stairs, op: pulse, part: s1}]
-        write: 'Check: $\ \log_{2}\dfrac{28}{14} = \log_{2}2 = 1$'
-      - say: 'So $n$ is 14, which is answer choice B.'
-        write: '$n = 14$'
+        write: 'Check: $\log_{2}\dfrac{28}{14} = \log_{2}2 = 1\ \checkmark$'
+      - section: 'Answer'
+        say: 'Therefore $n$ is 14, which is option B.'
+        write: '$\therefore n = 14$'
         answer: true
     traps:
-      A: 'You went for 10. Combine the logs into log base 2 of 28 over $n$. That equals 1, so 28 over $n$ is 2, and $n$ is 14.'
-      C: 'You went for 27. That looks like 28 minus 1. But logs turn adding into multiplying: 28 over $n$ must equal 2 to the power 1, so $n$ is 14.'
-      D: 'You went for 28. That makes 28 over $n$ equal 1, and log base 2 of 1 is 0, not 1. Log base 2 of something equal to 1 means that something is 2, so $n$ is 14.'
+      A: 'You went for 10. Combine the logs into log base 2 of 28 over $n$. That equals 1, so 28 over $n$ is 2 to the power 1, and $n$ is 14.'
+      C: 'You went for 27. That looks like 28 minus 1. But the laws of logarithms turn adding into multiplying: 28 over $n$ must equal 2 to the power 1, so $n$ is 14.'
+      D: 'You went for 28. That makes 28 over $n$ equal 1, and log base 2 of 1 is 0, not 1. In index form, 28 over $n$ is 2, so $n$ is 14.'
   15:
     moments:
-      - say: 'We need to simplify 9 to the power a third, times 27 to the power minus a half, all over 3 to the power minus 1 over 6, times 3 to the power minus two thirds.'
-        write: '$\dfrac{9^{\frac{1}{3}} \times 27^{-\frac{1}{2}}}{3^{-\frac{1}{6}} \times 3^{-\frac{2}{3}}}$'
-      - say: 'The key idea: every number here is a power of 3. 9 is 3 squared, and 27 is 3 cubed. Once everything is a power of 3, we just add and subtract the powers. Picture them as tiles of 3.'
+      - section: 'The question'
+        say: 'Four fractional powers, two on top and two below. They look messy, but every base is a power of 3. Once they share one base, the laws of indices finish the job.'
+        write: 'Simplify $\dfrac{9^{\frac{1}{3}} \times 27^{-\frac{1}{2}}}{3^{-\frac{1}{6}} \times 3^{-\frac{2}{3}}}$'
+      - say: 'Solution. First we express every base as a power of 3.'
+        write: 'Solution'
+      - section: 'Same base'
+        say: '9 is 3 times 3, so 9 is 3 squared. 27 is 3 times 3 times 3, so 27 is 3 cubed.'
         doodle: {name: 'custom:1986_q15_a', id: threes, caption: '9 and 27 as tiles of 3'}
         write: '$9 = 3^{2},\quad 27 = 3^{3}$'
-      - say: 'The law of indices: a power of a power means multiply the powers.'
-        write: '$(a^{m})^{n} = a^{mn}$'
-      - say: 'Two tiles of 3 make 9. Start with 9 to the power a third. That is 3 squared, to the power a third. A power of a power means we multiply the powers: 2 times a third is two thirds.'
-        doodle_do: [{id: threes, op: highlight, part: nine}]
-        write: '$9^{\frac{1}{3}} = (3^{2})^{\frac{1}{3}} = 3^{\frac{2}{3}}$'
-      - say: 'Three tiles of 3 make 27. Next, 27 to the minus a half is 3 cubed, to the minus a half. 3 times minus a half is minus 3 over 2.'
-        doodle_do: [{id: threes, op: highlight, part: twentyseven}]
-        write: '$27^{-\frac{1}{2}} = (3^{3})^{-\frac{1}{2}} = 3^{-\frac{3}{2}}$'
-      - say: 'The law of indices: to multiply powers of the same base, add the powers.'
-        write: '$a^{m} \times a^{n} = a^{m + n}$'
-      - say: 'On the top, we multiply these two powers of 3, so we add the powers: two thirds, plus minus 3 over 2.'
-        write: 'Top $= 3^{\frac{2}{3}} \times 3^{-\frac{3}{2}} = 3^{\frac{2}{3} - \frac{3}{2}}$'
-      - say: 'To subtract, use 6 as the common denominator. Two thirds is 4 over 6, and 3 over 2 is 9 over 6. 4 minus 9 is minus 5, so the power is minus 5 over 6.'
-        write: 'Top power: $\ \tfrac{2}{3} - \tfrac{3}{2} = \tfrac{4}{6} - \tfrac{9}{6} = -\tfrac{5}{6}$'
-      - say: 'So the top is 3 to the power minus 5 over 6.'
-        write: 'Top $= 3^{-\frac{5}{6}}$'
-      - say: 'On the bottom we also multiply powers of 3, so again we add the powers: minus 1 over 6, plus minus two thirds.'
-        write: 'Bottom $= 3^{-\frac{1}{6}} \times 3^{-\frac{2}{3}} = 3^{-\frac{1}{6} - \frac{2}{3}}$'
-      - say: 'Two thirds is 4 over 6. Minus 1 over 6, minus 4 over 6, is minus 5 over 6.'
-        write: 'Bottom power: $\ -\tfrac{1}{6} - \tfrac{4}{6} = -\tfrac{5}{6}$'
-      - say: 'So the bottom is also 3 to the power minus 5 over 6, exactly the same as the top. Picture the two boxes, top and bottom.'
+      - section: 'The numerator'
+        say: 'Substitute into the numerator: 3 squared to the power 1 over 3, times 3 cubed to the power negative 1 over 2.'
+        write: 'Numerator $= (3^{2})^{\frac{1}{3}} \times (3^{3})^{-\frac{1}{2}}$'
+        doodle_do: [{id: threes, op: highlight, part: nine}, {id: threes, op: highlight, part: twentyseven}]
+      - say: 'Law of indices: a power of a power multiplies the indices. 2 times 1 over 3 is 2 over 3. 3 times negative 1 over 2 is negative 3 over 2.'
+        write: '$= 3^{\frac{2}{3}} \times 3^{-\frac{3}{2}}$ $\quad [(a^{m})^{n} = a^{mn}]$'
+      - say: 'Law of indices: to multiply powers of the same base, add the indices. 2 over 3, plus negative 3 over 2.'
+        write: '$= 3^{\frac{2}{3} - \frac{3}{2}}$ $\quad [a^{m} \times a^{n} = a^{m+n}]$'
+      - say: 'The L.C.M. of 3 and 2 is 6. 2 over 3 is 4 over 6, and 3 over 2 is 9 over 6. 4 minus 9 is negative 5.'
+        write: '$= 3^{\frac{4 - 9}{6}} = 3^{-\frac{5}{6}}$'
+      - section: 'The denominator'
+        say: 'The denominator is already in base 3. Multiply, so add the indices: negative 1 over 6, plus negative 2 over 3.'
+        write: 'Denominator $= 3^{-\frac{1}{6}} \times 3^{-\frac{2}{3}} = 3^{-\frac{1}{6} - \frac{2}{3}}$'
+      - say: '2 over 3 is 4 over 6. Negative 1 minus 4 is negative 5, so the index is negative 5 over 6.'
+        write: '$= 3^{\frac{-1 - 4}{6}} = 3^{-\frac{5}{6}}$'
+      - section: 'Divide'
+        say: 'Now the numerator over the denominator. Picture the two boxes: the same power on top and below.'
         doodle: {name: 'custom:1986_q15_b', id: frac, caption: 'the same power on top and bottom'}
-        write: 'Bottom $= 3^{-\frac{5}{6}}$'
-      - say: 'The law of indices: to divide powers of the same base, subtract the powers.'
-        write: '$a^{m} \div a^{n} = a^{m - n}$'
-      - say: 'The two boxes match, so they cancel. Now divide the top by the bottom. Dividing powers of 3 means subtracting the powers: minus 5 over 6, minus minus 5 over 6, is 0.'
+        write: 'Expression $= \dfrac{3^{-\frac{5}{6}}}{3^{-\frac{5}{6}}}$'
+      - say: 'Law of indices: to divide powers of the same base, subtract the indices. Negative 5 over 6, minus negative 5 over 6, is 0.'
+        write: '$= 3^{-\frac{5}{6} - \left(-\frac{5}{6}\right)} = 3^{0}$ $\quad [a^{m} \div a^{n} = a^{m-n}]$'
         doodle_do: [{id: frac, op: cross, part: top}, {id: frac, op: cross, part: bottom}]
-        write: '$\dfrac{3^{-\frac{5}{6}}}{3^{-\frac{5}{6}}} = 3^{-\frac{5}{6} - \left(-\frac{5}{6}\right)} = 3^{0}$'
-        point:
-          - {line: 8, kind: arrow, text: 'top'}
-          - {line: 11, kind: arrow, text: 'bottom'}
-      - say: 'And any number to the power 0 is 1.'
+      - say: 'Zero index law: any number, except 0, to the power 0 is 1.'
+        write: '$\therefore 3^{0} = 1$ $\quad [a^{0} = 1]$'
         doodle_do: [{id: frac, op: label, part: bottom, text: 'anything ÷ itself = 1'}]
-        write: '$3^{0} = 1$'
-      - say: 'So the expression simplifies to 1, which is answer choice B.'
-        write: 'Answer: $\ 1$'
+      - section: 'Check'
+        say: 'Check another way. Bring the denominator up to the top: its indices change sign. Then add all four indices, with 6 as the L.C.M.: 4, minus 9, plus 1, plus 4 is 0.'
+        write: 'Check: $\tfrac{2}{3} - \tfrac{3}{2} + \tfrac{1}{6} + \tfrac{2}{3} = \tfrac{4 - 9 + 1 + 4}{6} = 0\ \checkmark$'
+      - section: 'Answer'
+        say: 'Therefore the expression simplifies to 1, which is option B.'
+        write: '$\therefore$ the expression $= 1$'
         answer: true
     traps:
-      A: 'You went for a third. That is 3 to the power minus 1, so a power has slipped somewhere. The top and bottom are both 3 to the minus 5 over 6, so the answer is 3 to the 0, which is 1.'
-      C: 'You went for 3. That comes from a slip with the fractional powers, such as adding two thirds and 3 over 2 without a common denominator. With 6 as the denominator, top and bottom are both 3 to the minus 5 over 6, so the answer is 1.'
-      D: 'You went for 9. Rewrite everything as a power of 3 and use common denominators. Top and bottom both come to 3 to the minus 5 over 6, so they divide to 1.'
+      A: 'You went for 1 over 3. That is 3 to the power negative 1, so an index has slipped somewhere. The numerator and denominator are both 3 to the negative 5 over 6, so the answer is 3 to the 0, which is 1.'
+      C: 'You went for 3. That comes from a slip with the fractional indices, such as adding 2 over 3 and 3 over 2 without the L.C.M. With 6 as the L.C.M., both parts are 3 to the negative 5 over 6, so the answer is 1.'
+      D: 'You went for 9. Write every base as a power of 3 and use the L.C.M. for the indices. The numerator and denominator both come to 3 to the negative 5 over 6, so they divide to 1.'
   16:
     moments:
       - section: 'The question'
@@ -1041,54 +1052,49 @@ lessons:
       D: 'You went for a(7a plus 1). That drops the numbers in A minus B. 3 minus negative 2 is 5, so the first factor is a plus 5.'
   25:
     moments:
-      - say: 'We''re told 5 to the power $x$ plus $2y$ is 5, and 4 to the power $x$ plus $3y$ is 16. We want 3 to the power $x$ plus $y$.'
-        write: '$5^{x + 2y} = 5,\ \ 4^{x + 3y} = 16$'
-      - say: 'When the unknowns are up in the powers, we write both sides with the same base. Then the powers must be equal.'
-        write: 'Same base $\Rightarrow$ equal powers'
-      - say: 'Take the first equation. 5 on its own is 5 to the power 1.'
+      - section: 'The question'
+        say: 'Two equations with the unknowns up in the indices. Make the bases the same, equate the indices, and they become two ordinary simultaneous equations.'
+        write: 'If $5^{x + 2y} = 5$ and $4^{x + 3y} = 16$, find $3^{x + y}$.'
+      - say: 'Solution. We take the first equation, then the second.'
+        write: 'Solution'
+      - section: 'The first equation'
+        say: 'Write the right side with base 5. 5 on its own is 5 to the power 1.'
         write: '$5^{x + 2y} = 5^{1}$'
-      - say: 'The bases match, so the powers match. Picture it as a strip of tiles: one $x$ and two $y$s.'
+      - say: 'The bases are the same, so equate the indices: $x$ plus $2y$ equals 1. Call it equation 1. Picture it as a strip of tiles: one $x$ and two $y$s.'
         doodle: {name: 'custom:1986_q25_a', id: strips, caption: 'x + 2y = 1 as a strip'}
-        write: '$x + 2y = 1$'
-        point:
-          - {line: 3, kind: move, from: {line: 2, at: '5[[x + 2y]]'}, at: 'x + 2y', text: 'the powers'}
-      - say: 'Now the second equation. 16 is 4 squared, so it says 4 to the $x$ plus $3y$ equals 4 squared.'
+        write: 'Equating the indices: $x + 2y = 1 \quad \ldots (1)$'
+      - section: 'The second equation'
+        say: 'Now the second equation. 16 is 4 times 4, so 16 is 4 squared.'
         write: '$4^{x + 3y} = 4^{2}$'
-      - say: 'Again, the bases match, so we equate the powers. A second strip, with one more $y$.'
+      - say: 'Again the bases are the same, so equate the indices: $x$ plus $3y$ equals 2. That is equation 2, a strip with one more $y$.'
         doodle_do: [{id: strips, op: stage, stage: 'custom:1986_q25_a2'}]
-        write: '$x + 3y = 2$'
-        point:
-          - {line: 5, kind: move, from: {line: 4, at: '4[[x + 3y]]'}, at: 'x + 3y', text: 'the powers'}
-      - say: 'Now we have two simultaneous equations. Take the second minus the first, so the $x$ terms cancel.'
-        write: '$(x + 3y) - (x + 2y) = 2 - 1$'
-      - say: 'The strips differ by one yellow tile. $3y$ minus $2y$ is $y$, and 2 minus 1 is 1.'
+        write: 'Equating the indices: $x + 3y = 2 \quad \ldots (2)$'
+      - section: 'Solve'
+        say: 'Subtract equation 1 from equation 2, so the $x$ terms cancel. $3y$ minus $2y$ is $y$, and 2 minus 1 is 1.'
+        write: '(2) $-$ (1): $\ y = 1$'
         doodle_do: [{id: strips, op: circle, part: extra}]
-        write: '$y = 1$'
         point:
-          - {line: 7, kind: highlight, at: 'y=1', to: {doodle: strips, part: extra}}
-      - say: 'Put $y$ equals 1 back into the first equation, $x$ plus $2y$ equals 1.'
-        write: '$x + 2(1) = 1$'
-        point:
-          - {line: 8, kind: move, from: {line: 7, at: 'y = [[1]]'}, at: '2(1)', text: 'y = 1'}
-          - {line: 8, kind: arrow, from: {line: 3, at: 'x + 2y'}, at: 'x + 2(1)', text: 'into this'}
-      - say: 'That is $x$ plus 2 equals 1. Take 2 from both sides: 1 minus 2 is negative 1. So the purple tile is minus 1.'
-        doodle_do: [{id: strips, op: label, part: x1, text: '−1'}]
+          - {line: 6, kind: highlight, at: 'y=1', to: {doodle: strips, part: extra}}
+      - say: 'Substitute $y$ equals 1 into equation 1.'
+        write: 'Substitute $y = 1$ in (1): $x + 2(1) = 1$'
+      - say: '$x$ plus 2 equals 1. Subtract 2 from both sides: 1 minus 2 is negative 1.'
         write: '$x = 1 - 2 = -1$'
-        point:
-          - {line: 9, kind: move, from: {line: 8, at: '+ 2(1)'}, at: '1 [[− 2]]', text: 'across the ='}
-      - say: 'So $x$ plus $y$ is negative 1 plus 1, which is 0.'
+        doodle_do: [{id: strips, op: label, part: x1, text: '−1'}]
+      - section: 'The value'
+        say: 'Now add them: $x$ plus $y$ is negative 1 plus 1, which is 0.'
         write: '$x + y = -1 + 1 = 0$'
-        point:
-          - {line: 10, kind: move, from: {line: 9, at: '= −1'}, at: '−1 +', text: 'x'}
-          - {line: 10, kind: move, from: {line: 7, at: 'y = 1'}, at: '+ 1', text: 'y'}
-      - say: 'So 3 to the power $x$ plus $y$ is 3 to the power 0. Any number to the power 0 is 1.'
-        write: '$3^{x + y} = 3^{0} = 1$'
-      - say: 'So the value is 1, which is answer choice B.'
-        write: '$3^{x + y} = 1$'
+      - say: 'Substitute into 3 to the power $x$ plus $y$. Zero index law: any number, except 0, to the power 0 is 1.'
+        write: '$\therefore 3^{x + y} = 3^{0} = 1$ $\quad [a^{0} = 1]$'
+      - section: 'Check'
+        say: 'Check both equations with $x$ equals negative 1 and $y$ equals 1. Negative 1 plus 2 is 1, so 5 to the 1 is 5. Negative 1 plus 3 is 2, so 4 squared is 16.'
+        write: 'Check: $5^{-1 + 2} = 5^{1} = 5,\ \ 4^{-1 + 3} = 4^{2} = 16\ \checkmark$'
+      - section: 'Answer'
+        say: 'Therefore 3 to the power $x$ plus $y$ is 1, which is option B.'
+        write: '$\therefore 3^{x + y} = 1$'
         answer: true
     traps:
-      A: 'You went for 0. That''s $x$ plus $y$, the power, not the final answer. The question wants 3 to that power, and 3 to the 0 is 1.'
-      C: 'You went for 3. That''s 3 to the power 1. But $x$ plus $y$ is negative 1 plus 1, which is 0, and 3 to the 0 is 1.'
+      A: 'You went for 0. That is $x$ plus $y$, the index, not the final answer. The question wants 3 to that index, and 3 to the 0 is 1.'
+      C: 'You went for 3. That is 3 to the power 1. But $x$ plus $y$ is negative 1 plus 1, which is 0, and 3 to the 0 is 1.'
       D: 'You went for 27, which is 3 cubed. Solve the two equations carefully: $y$ is 1 and $x$ is negative 1, so $x$ plus $y$ is 0, and 3 to the 0 is 1.'
   26:
     moments:
@@ -1162,44 +1168,52 @@ lessons:
       C: 'You went for 12 over w, minus 2S squared. That takes the reciprocal of the terms one at a time, which is not allowed. Make one fraction, then cross multiply: v is 12 over 2S squared plus w.'
   28:
     moments:
-      - say: 'We want the values of $x$ for which 16 to the $x$, minus 5 times 4 to the $x$, plus 4 equals 0.'
-        write: '$16^{x} - 5(4^{x}) + 4 = 0$'
-      - say: 'The law of indices: a power of a power means multiply the powers.'
-        write: '$(a^{m})^{n} = a^{mn}$'
-      - say: 'Notice that 16 is 4 squared. So 16 to the $x$ is 4 to the $x$, all squared. Picture 16 to the $x$ as a square with side 4 to the $x$.'
+      - section: 'The question'
+        say: '16 to the $x$ and 4 to the $x$ in one equation. 16 is 4 squared, so this is a quadratic equation in disguise.'
+        write: 'Solve $16^{x} - 5(4^{x}) + 4 = 0$'
+      - say: 'Solution. First we write 16 to the $x$ using 4 to the $x$.'
+        write: 'Solution'
+      - section: 'A quadratic in disguise'
+        say: '16 is 4 squared. Law of indices: a power of a power multiplies the indices, so 4 squared to the $x$ is 4 to the $2x$, which is 4 to the $x$, all squared. Picture a square with side 4 to the $x$.'
         doodle: {name: 'custom:1986_q28_a', id: sq, caption: '16 to the x as a square'}
-        write: '$16^{x} = (4^{2})^{x} = (4^{x})^{2}$'
-      - say: 'So this equation is really a quadratic in disguise. Let''s give 4 to the $x$ a simpler name, $u$. Each side of the square is now $u$.'
+        write: '$16^{x} = (4^{2})^{x} = (4^{x})^{2}$ $\quad [(a^{m})^{n} = a^{mn}]$'
+      - say: 'Put that into the equation.'
+        write: '$(4^{x})^{2} - 5(4^{x}) + 4 = 0$'
+      - say: 'Let $u$ be 4 to the $x$. Each side of the square is now $u$.'
         doodle_do: [{id: sq, op: label, part: top, text: u}, {id: sq, op: label, part: left, text: u}]
         write: 'Let $u = 4^{x}$'
-      - say: 'The square''s area is $u$ squared. Then 16 to the $x$ is $u$ squared, and the equation becomes $u$ squared minus $5u$ plus 4 equals 0.'
+      - say: 'The square''s area is $u$ squared, and the equation becomes $u$ squared minus $5u$ plus 4 equals 0.'
         doodle_do: [{id: sq, op: label, part: area, text: 'u²'}]
         write: '$u^{2} - 5u + 4 = 0$'
-        point:
-          - {line: 3, kind: arrow, text: 'swap in u'}
-      - say: 'To factorise, we need two numbers that multiply to 4 and add to negative 5. Those are negative 1 and negative 4.'
-        write: '$(-1) \times (-4) = 4,\quad -1 + (-4) = -5$'
-      - say: 'So the quadratic factorises into $u$ minus 1, times $u$ minus 4.'
+      - section: 'Factorise'
+        say: 'We need two numbers whose product is 4 and whose sum is negative 5. They are negative 1 and negative 4.'
+        write: 'Product $= 4$, Sum $= -5$: $\ -1$ and $-4$'
+      - say: 'Split the middle term: negative $5u$ is negative $u$ minus $4u$.'
+        write: '$u^{2} - u - 4u + 4 = 0$'
+      - say: 'Factorise in pairs: $u$ times, $u$ minus 1, minus 4 times, $u$ minus 1.'
+        write: '$u(u - 1) - 4(u - 1) = 0$'
+      - say: '$u$ minus 1 is common, so take it out.'
         write: '$(u - 1)(u - 4) = 0$'
-      - say: 'Either $u$ minus 1 is zero, or $u$ minus 4 is zero. So $u$ is 1 or $u$ is 4.'
-        write: '$u = 1 \ \text{ or } \ u = 4$'
-      - say: 'But we want $x$, not $u$. So go back to $u$ equals 4 to the $x$. First, 4 to the $x$ equals 1. Any number to the power 0 is 1, so $x$ is 0.'
-        write: '$4^{x} = 1 = 4^{0} \Rightarrow x = 0$'
-        point:
-          - {line: 3, kind: box, text: 'go back'}
-      - say: 'Next, 4 to the $x$ equals 4. 4 is 4 to the power 1, so $x$ is 1.'
-        write: '$4^{x} = 4 = 4^{1} \Rightarrow x = 1$'
-      - say: 'Let''s check $x$ equals 1 in the original equation: 16, minus 5 times 4, plus 4. That is 16 minus 20 plus 4, which is 0.'
-        write: 'Check $x = 1$: $\ 16 - 5(4) + 4 = 16 - 20 + 4 = 0$'
-      - say: 'And $x$ equals 0: 16 to the 0 is 1 and 4 to the 0 is 1, so we get 1 minus 5 plus 4, which is 0. Both work.'
-        write: 'Check $x = 0$: $\ 1 - 5(1) + 4 = 0$'
-      - say: 'So $x$ is 0 and 1, which is answer choice C.'
-        write: 'Solutions: $\ x = 0$ and $x = 1$'
+      - say: 'Either $u$ minus 1 is zero or $u$ minus 4 is zero. So $u$ is 1 or $u$ is 4.'
+        write: 'Either $u = 1$ or $u = 4$'
+      - section: 'Back to x'
+        say: 'Now go back to $u$ equals 4 to the $x$. First, 4 to the $x$ equals 1. By the zero index law, 1 is 4 to the power 0. Equating the indices, $x$ is 0.'
+        write: '$4^{x} = 1 = 4^{0} \quad \therefore x = 0$ $\quad [a^{0} = 1]$'
+      - say: 'Next, 4 to the $x$ equals 4, which is 4 to the power 1. Equating the indices, $x$ is 1.'
+        write: '$4^{x} = 4 = 4^{1} \quad \therefore x = 1$'
+      - section: 'Check'
+        say: 'Check $x$ equals 1: 16, minus 5 times 4, plus 4. 16 minus 20 plus 4 is 0.'
+        write: 'Check $x = 1$: $\ 16 - 5(4) + 4 = 16 - 20 + 4 = 0\ \checkmark$'
+      - say: 'Check $x$ equals 0: 16 to the 0 and 4 to the 0 are both 1, so we get 1 minus 5 plus 4, which is 0. Both work.'
+        write: 'Check $x = 0$: $\ 1 - 5(1) + 4 = 0\ \checkmark$'
+      - section: 'Answer'
+        say: 'Therefore $x$ is 0 or 1, which is option C.'
+        write: '$\therefore x = 0$ or $x = 1$'
         answer: true
     traps:
       A: 'You went for 1 and 4. Those are the values of $u$, which is 4 to the $x$, not the values of $x$. Go back: 4 to the $x$ equals 1 gives 0, and 4 to the $x$ equals 4 gives 1.'
       B: 'You went for negative 2 and 2. Try $x$ equals 2: 256 minus 80 plus 4 is 180, not 0. The quadratic in 4 to the $x$ gives $x$ equals 0 and 1.'
-      D: 'You went for 0 and 4. The 0 is right, but the 4 is a value of 4 to the $x$. 4 to the $x$ equals 4 means $x$ is 1.'
+      D: 'You went for 0 and 4. The 0 is right, but 4 is a value of $u$, which is 4 to the $x$. 4 to the $x$ equals 4 means $x$ is 1.'
   29:
     moments:
       - section: 'The question'
@@ -1305,911 +1319,934 @@ lessons:
       D: 'You went for 1, 3 and 2, 5. Both are on the line, but neither is on the curve. A meeting point must be on both, and solving gives x equals a half and negative 2.'
   31:
     moments:
-      - say: 'A regular polygon has $n$ sides, and each interior angle is 160 degrees. We want $n$.'
-        write: '$\text{interior angle} = 160^{\circ}$'
-      - say: 'Let me draw one corner of the polygon, with the interior and exterior angles.'
+      - section: 'The question'
+        say: '160 degrees inside every corner. The quick road to $n$ goes through the exterior angle, because the exterior angles of any polygon add up to 360.'
+        write: 'Int. $\angle = 160^{\circ}$, $n = ?$'
+      - section: 'Solution'
+        say: 'Solution. Let me draw the polygon, with one side extended at a corner to show the exterior angle beside the interior one.'
+        write: 'Solution'
         show_sketch: true
         point:
           - {figure: sketch, kind: circle, target: '160°', text: 'interior'}
-          - {figure: sketch, kind: circle, target: 'n = ?'}
-      - say: 'The quickest way is through the exterior angles. At each corner, the interior and exterior angles sit on a straight line, so they add up to 180 degrees.'
-        write: '$\text{interior} + \text{exterior} = 180^{\circ}$'
-        point:
-          - {figure: sketch, kind: circle, target: '160°', text: 'interior'}
-          - {figure: sketch, kind: circle, target: '20°', text: 'exterior'}
+      - say: 'At each corner, the interior and exterior angles sit together on a straight line, so they add up to 180. Reason: angles on a straight line.'
+        write: 'Int. $\angle$ + Ext. $\angle = 180^{\circ}$ ($\angle$s on a str. line)'
       - say: 'So each exterior angle is 180 minus 160, which is 20 degrees.'
-        write: '$\text{exterior} = 180^{\circ} - 160^{\circ} = 20^{\circ}$'
+        write: 'Ext. $\angle = 180^{\circ} - 160^{\circ} = 20^{\circ}$'
         point:
-          - {line: 2, kind: box, text: 'the rule'}
-          - {figure: sketch, kind: label, target: '20°', text: '180° − 160°'}
-      - say: 'Now the key fact: in any polygon, the exterior angles add up to 360 degrees.'
-        write: '$\text{sum of exterior angles} = 360^{\circ}$'
-      - say: 'In a regular polygon, all $n$ exterior angles are equal, each one the 20 degrees we just found. So $n$ times 20 is 360.'
-        write: '$n \times 20^{\circ} = 360^{\circ}$'
-        point:
-          - {line: 4, kind: box, text: 'key fact'}
-          - {line: 5, kind: move, from: {line: 3, at: '= 20∘'}, at: '20∘', text: 'each one'}
-          - {figure: sketch, kind: circle, target: 'n = ?', text: 'n × 20° = 360°'}
-      - say: 'To get $n$ on its own, divide both sides by 20. 360 divided by 20 is 18.'
+          - {figure: sketch, kind: circle, target: '20°', text: 'exterior'}
+      - say: 'The exterior angles of any polygon add up to 360. In a regular polygon they are all equal, so $n$ is 360 divided by one exterior angle.'
+        write: '$n = \dfrac{360^{\circ}}{\text{ext. } \angle}$ (sum of ext. $\angle$s $= 360^{\circ}$)'
+      - say: 'Put in 20. 360 divided by 20 is 18.'
         write: '$n = \dfrac{360}{20} = 18$'
         point:
-          - {line: 6, kind: move, from: {line: 5, at: '× [[20∘]]'}, at: '= [[20]]360', text: 'divide by 20'}
-      - say: 'The rule for the interior angles: in a polygon with n sides, they add up to n minus 2, times 180 degrees.'
-        write: 'Sum of interior angles $= (n - 2) \times 180^{\circ}$'
-      - say: 'Let''s check with the interior angle sum, $n$ minus 2 times 180. For 18 sides, that''s 16 times 180, which is 2880 degrees.'
+          - {figure: sketch, kind: label, target: 'n = ?', text: 'n = 18'}
+      - section: 'Check'
+        say: 'Check with the interior angles. A polygon of $n$ sides has interior angles adding up to $n$ minus 2, times 180. For 18 sides: 16 times 180 is 2880.'
         write: '$(18 - 2) \times 180^{\circ} = 2880^{\circ}$'
-      - say: 'Share that among 18 equal angles: 2880 divided by 18 is 160. That matches.'
-        write: '$2880 \div 18 = 160^{\circ}$'
-      - say: 'So the polygon has 18 sides, which is answer choice A.'
-        write: '$n = 18$'
+      - say: 'Share 2880 equally among 18 corners: 2880 divided by 18 is 160, the angle we were given.'
+        write: '$2880^{\circ} \div 18 = 160^{\circ}\ \checkmark$'
+      - say: 'Therefore the polygon has 18 sides, option A.'
+        write: '$\therefore n = 18$ (A)'
         answer: true
     traps:
-      B: 'You went for 16. That''s $n$ minus 2, the number that goes into the angle sum formula. The polygon itself has 18 sides, because 360 divided by the exterior angle of 20 is 18.'
-      C: 'You went for 14. With 14 sides each exterior angle would be 360 over 14, about 25.7 degrees, so the interior angle wouldn''t be 160. The exterior angle is 20, giving 18 sides.'
-      D: 'You went for 12. A regular 12-sided shape has exterior angles of 30 degrees and interior angles of 150. For 160 degrees, the exterior angle is 20, and 360 divided by 20 is 18.'
+      B: 'You went for 16. That is $n$ minus 2, the number that goes into the angle sum. The polygon itself has 18 sides, because 360 divided by the exterior angle of 20 is 18.'
+      C: 'You went for 14. With 14 sides each exterior angle would be 360 over 14, about 25.7 degrees, so the interior angle would not be 160. The exterior angle is 20, giving 18 sides.'
+      D: 'You went for 12. A regular 12-sided polygon has exterior angles of 30 degrees and interior angles of 150. For 160, the exterior angle is 20, and 360 divided by 20 is 18.'
   32:
     moments:
-      - say: 'We''re told cos theta is $a$ over $b$, and we want 1 plus tan squared theta.'
-        write: '$\cos\theta = \dfrac{a}{b}$'
-      - say: 'This uses one of the most important identities in trigonometry. Start with sine squared plus cos squared equals 1.'
-        write: '$\sin^{2}\theta + \cos^{2}\theta = 1$'
-      - say: 'Divide every term by cos squared theta.'
-        write: '$\dfrac{\sin^{2}\theta}{\cos^{2}\theta} + \dfrac{\cos^{2}\theta}{\cos^{2}\theta} = \dfrac{1}{\cos^{2}\theta}$'
-      - say: 'Sine over cos is tan, so the first term is tan squared. And cos squared over cos squared is 1.'
-        write: '$\tan^{2}\theta + 1 = \dfrac{1}{\cos^{2}\theta}$'
-      - say: 'So 1 plus tan squared is exactly 1 over cos squared. That''s what we want.'
-        write: '$1 + \tan^{2}\theta = \dfrac{1}{\cos^{2}\theta}$'
-      - say: 'Cos theta is $a$ over $b$, so cos squared is $a$ squared over $b$ squared.'
-        write: '$\cos^{2}\theta = \dfrac{a^{2}}{b^{2}}$'
-      - say: '1 divided by a fraction is that fraction turned upside down. So we get $b$ squared over $a$ squared.'
-        write: '$1 + \tan^{2}\theta = \dfrac{1}{a^{2}/b^{2}} = \dfrac{b^{2}}{a^{2}}$'
-        point:
-          - {line: 4, kind: box, text: 'identity'}
-          - {line: 6, kind: move, from: {line: 5, at: 'b2a2'}, at: 'a2/b2', text: 'cos² θ'}
-      - say: 'Let me draw a right-angled triangle for $\theta$.'
+      - section: 'The question'
+        say: 'Cos theta is $a$ over $b$, and we want 1 plus tan squared theta. A ratio in letters: draw the triangle it describes.'
+        write: '$\cos\theta = \dfrac{a}{b}$; find $1 + \tan^{2}\theta$'
+      - section: 'Solution'
+        say: 'Solution. Let me draw a right-angled triangle $ABC$, with the right angle at $B$ and theta at $A$.'
+        write: 'Solution: right $\angle$ at $B$, $\theta$ at $A$'
         show_sketch: true
-      - say: 'Let''s check with a right-angled triangle. Cos is adjacent over hypotenuse, so take adjacent $a$ and hypotenuse $b$. By Pythagoras, the opposite side is the root of $b$ squared minus $a$ squared.'
-        write: 'Opposite $= \sqrt{b^{2} - a^{2}}$'
+        'on': 'draw'
+      - say: 'CAH: cos is adjacent over hypotenuse. So the adjacent side $AB$ is $a$, and the hypotenuse $AC$ is $b$.'
+        write: 'CAH: $\cos\theta = \dfrac{\text{adj}}{\text{hyp}} = \dfrac{a}{b}$: adj $= a$, hyp $= b$'
         point:
-          - {figure: sketch, kind: highlight, target: [A, B], text: 'adjacent a'}
-          - {figure: sketch, kind: highlight, target: [A, C], text: 'hypotenuse b'}
-          - {figure: sketch, kind: circle, target: '?', text: 'opposite'}
-      - say: 'Tan is opposite over adjacent, so tan squared is $b$ squared minus $a$ squared, over $a$ squared.'
-        write: '$\tan^{2}\theta = \dfrac{b^{2} - a^{2}}{a^{2}}$'
+          - {figure: sketch, kind: highlight, target: AB, text: 'adj = a'}
+          - {figure: sketch, kind: highlight, target: AC, text: 'hyp = b'}
+      - section: 'The opposite side'
+        say: 'Pythagoras: the hypotenuse squared equals the opposite squared plus the adjacent squared. So the opposite squared is $b$ squared minus $a$ squared.'
+        write: '$\text{opp}^{2} = \text{hyp}^{2} - \text{adj}^{2} = b^{2} - a^{2}$'
         point:
-          - {figure: sketch, kind: circle, target: 'θ'}
+          - {figure: sketch, kind: highlight, target: BC, text: 'opp'}
+      - say: 'Take the square root.'
+        write: '$\text{opp} = \sqrt{b^{2} - a^{2}}$'
+        point:
           - {figure: sketch, kind: label, target: '?', text: '√(b² − a²)'}
-      - say: 'Add 1, written as $a$ squared over $a$ squared. The top becomes $b$ squared minus $a$ squared plus $a$ squared, which is $b$ squared.'
-        write: '$1 + \tan^{2}\theta = \dfrac{a^{2} + b^{2} - a^{2}}{a^{2}} = \dfrac{b^{2}}{a^{2}}$'
-      - say: 'Both ways agree. So 1 plus tan squared theta is $b$ squared over $a$ squared, which is answer choice A.'
-        write: '$1 + \tan^{2}\theta = \dfrac{b^{2}}{a^{2}}$'
+      - section: 'tan²θ'
+        say: 'TOA: tan is opposite over adjacent.'
+        write: 'TOA: $\tan\theta = \dfrac{\text{opp}}{\text{adj}} = \dfrac{\sqrt{b^{2} - a^{2}}}{a}$'
+      - say: 'Square it. The square of a square root is what is under the root, so the top is $b$ squared minus $a$ squared.'
+        write: '$\tan^{2}\theta = \dfrac{b^{2} - a^{2}}{a^{2}}$'
+      - section: 'Add 1'
+        say: 'Now add 1. Write 1 as $a$ squared over $a$ squared, so both have the same denominator.'
+        write: '$1 + \tan^{2}\theta = \dfrac{a^{2}}{a^{2}} + \dfrac{b^{2} - a^{2}}{a^{2}}$'
+      - say: 'Add the numerators: $a$ squared plus $b$ squared minus $a$ squared. The $a$ squared terms cancel, leaving $b$ squared.'
+        write: '$= \dfrac{a^{2} + b^{2} - a^{2}}{a^{2}} = \dfrac{b^{2}}{a^{2}}$'
+      - section: 'Check'
+        say: 'Check with an identity. Divide sin squared plus cos squared equals 1 by cos squared: 1 plus tan squared equals sec squared, which is 1 over cos squared.'
+        write: 'Check: $1 + \tan^{2}\theta = \sec^{2}\theta = \dfrac{1}{\cos^{2}\theta}$'
+      - say: 'Cos squared is $a$ squared over $b$ squared. Its reciprocal is $b$ squared over $a$ squared. It agrees.'
+        write: '$= 1 \div \dfrac{a^{2}}{b^{2}} = \dfrac{b^{2}}{a^{2}}\ \checkmark$'
+      - section: 'Answer'
+        say: 'So 1 plus tan squared theta is $b$ squared over $a$ squared, which is answer choice A.'
+        write: '$\therefore 1 + \tan^{2}\theta = \dfrac{b^{2}}{a^{2}}$'
         answer: true
     traps:
-      B: 'You went for $a$ squared over $b$ squared. That''s cos squared theta itself. 1 plus tan squared is 1 over cos squared, so you need to turn it upside down: $b$ squared over $a$ squared.'
-      C: 'You went for $a$ squared plus $b$ squared over $b$ squared minus $a$ squared. Use the identity: 1 plus tan squared is 1 over cos squared, which is $b$ squared over $a$ squared.'
-      D: 'You went for $2a$ squared plus $b$ squared over $a$ squared plus $b$ squared. Divide sine squared plus cos squared equals 1 by cos squared, and you get 1 plus tan squared equals $b$ squared over $a$ squared.'
+      B: 'You went for $a$ squared over $b$ squared. That is cos squared theta. 1 plus tan squared is sec squared, the reciprocal: $b$ squared over $a$ squared.'
+      C: 'You went for $a$ squared plus $b$ squared over $b$ squared minus $a$ squared. That mixes up the sides. With adj $a$ and opp root of $b$ squared minus $a$ squared, 1 plus tan squared comes to $b$ squared over $a$ squared.'
+      D: 'You went for 2$a$ squared plus $b$ squared over $a$ squared plus $b$ squared. That adds the sides wrongly. Pythagoras gives opp squared as $b$ squared minus $a$ squared, and 1 plus tan squared is $b$ squared over $a$ squared.'
   33:
     moments:
-      - say: 'In the diagram, the chords $PQ$ and $RS$ are extended to meet at $T$, outside the circle. $TP$ is 24, $TQ$ is 8, and $TR$ is 12. We want $TS$.'
-        write: '$TP = 24,\ \ TQ = 8,\ \ TR = 12$'
+      - section: 'The question'
+        say: 'Two chords, produced, meet at $T$ outside the circle. For each line, multiply the two distances from $T$: the products are equal.'
+        write: '$TP = 24$, $TQ = 8$, $TR = 12$ (cm), $TS = ?$'
         point:
           - {figure: 0, kind: label, target: TP, text: '24'}
           - {figure: 0, kind: label, target: TQ, text: '8'}
           - {figure: 0, kind: label, target: TR, text: '12'}
-      - say: 'There''s a theorem for two lines from one outside point. For each line, multiply the distances from $T$ to the two points where it meets the circle. The two products are equal.'
+      - section: 'Solution'
+        say: 'Solution. Every length in the rule is measured from $T$, the point outside the circle: to the near point and to the far point on each line.'
+        write: 'Solution'
         point:
-          - {figure: 0, kind: circle, target: 'T', text: 'outside point'}
-          - {figure: 0, kind: highlight, target: 'TP', text: 'line 1'}
-          - {figure: 0, kind: highlight, target: 'TS', text: 'line 2'}
-      - say: 'Written as a rule: on each line, the distance to the near point times the distance to the far point. The two products are equal.'
-        write: 'Secants from one point: $\text{near} \times \text{far} = \text{near} \times \text{far}$'
-      - say: 'So $TP$ times $TQ$ equals $TS$ times $TR$. Every length is measured from $T$.'
-        write: '$TP \times TQ = TS \times TR$'
+          - {figure: 0, kind: circle, target: T, text: 'outside point'}
+      - say: 'On line $TP$, the near point is $Q$ and the far point is $P$. On line $TS$, they are $R$ and $S$. Reason: intersecting chords, meeting outside the circle.'
+        write: '$TP \times TQ = TS \times TR$ (intersecting chords)'
         point:
-          - {figure: 0, kind: circle, target: T, text: 'from T'}
-      - say: 'Now substitute the lengths we know: $TP$ is 24, $TQ$ is 8, and $TR$ is 12.'
+          - {figure: 0, kind: highlight, target: TP, text: 'line 1'}
+          - {figure: 0, kind: highlight, target: TS, text: 'line 2'}
+      - say: 'Substitute: $TP$ is 24, $TQ$ is 8 and $TR$ is 12.'
         write: '$24 \times 8 = TS \times 12$'
-        point:
-          - {line: 4, kind: move, from: {line: 0, at: 'TP = 24'}, at: '24', text: 'TP'}
-          - {line: 4, kind: move, from: {line: 0, at: 'TQ = 8'}, at: '× 8', text: 'TQ'}
-          - {line: 4, kind: move, from: {line: 0, at: 'TR = 12'}, at: '× 12', text: 'TR'}
       - say: '24 times 8 is 192.'
         write: '$192 = 12 \times TS$'
-      - say: 'To get $TS$ on its own, divide both sides by 12.'
-        write: '$TS = \dfrac{192}{12}$'
-        point:
-          - {line: 6, kind: move, from: {line: 5, at: '12 ×'}, at: '[[12]]192', text: 'divide by 12'}
-      - say: '12 times 16 is 192, so 192 divided by 12 is 16.'
-        write: '$= 16$'
+      - say: 'Divide both sides by 12. 192 divided by 12 is 16.'
+        write: '$TS = \dfrac{192}{12} = 16$ cm'
         point:
           - {figure: 0, kind: label, target: TS, text: '16'}
-      - say: 'A sense check: in the diagram, $S$ is further from $T$ than $R$ is, so $TS$ should be longer than 12. And 16 is.'
-        write: 'Sense check: $\ TS = 16 > TR = 12$'
-      - say: 'So $TS$ is 16 centimetres, which is answer choice A.'
-        write: '$TS = 16 \text{ cm}$'
+      - section: 'Check'
+        say: 'Check. 16 times 12 is 192, and 24 times 8 is also 192. And $S$ is the far point, so $TS$ should be longer than $TR$: 16 is more than 12.'
+        write: '$16 \times 12 = 192 = 24 \times 8\ \checkmark$'
+      - say: 'Therefore $TS$ is 16 centimetres, option A.'
+        write: '$\therefore TS = 16$ cm (A)'
         answer: true
     traps:
       B: 'You went for 14 cm. Use the rule with every length measured from $T$: 24 times 8 is 192, and 192 divided by 12 is 16.'
-      C: 'You went for 12 cm. That''s $TR$, the length we were given. $TS$ is longer, because $S$ is the far point: 192 divided by 12 is 16.'
-      D: 'You went for 8 cm. That''s $TQ$, on the other line. Use $TP$ times $TQ$ equals $TS$ times $TR$ to get $TS$ equals 16.'
+      C: 'You went for 12 cm. That is $TR$, the length we were given. $TS$ is longer, because $S$ is the far point: 192 divided by 12 is 16.'
+      D: 'You went for 8 cm. That is $TQ$, on the other line. Use $TP$ times $TQ$ equals $TS$ times $TR$ to get $TS$ equals 16.'
   34:
     moments:
-      - say: 'A tower is 50 metres high. From $X$, the angle of elevation of its top is 30 degrees. From $Y$, on the other side, it''s 60 degrees. We want the distance from $X$ to $Y$.'
-        write: '$\text{height} = 50,\ \ X\text{: } 30^{\circ},\ \ Y\text{: } 60^{\circ}$'
-        point:
-          - {figure: sketch, kind: circle, target: '50 m', text: 'height'}
-          - {figure: sketch, kind: arc, target: 'AXB', text: '30°'}
-      - say: 'Picture it: the tower stands between $X$ and $Y$. Each point makes a right-angled triangle with the tower. The height is opposite the angle, and the ground distance is adjacent.'
+      - section: 'The question'
+        say: 'A tower is 50 metres high. From $X$, the angle of elevation of its top is 30 degrees. From $Y$, on the other side, it is 60 degrees. We want the distance $XY$.'
+        write: 'Tower $50$ m; elevation $30^{\circ}$ from $X$, $60^{\circ}$ from $Y$'
+      - section: 'Solution'
+        say: 'Solution. Let me draw the tower $AB$, with its foot $B$ on the ground, and the point $X$. The angle of elevation is measured up from the horizontal ground at $X$.'
+        write: 'Solution: $AB = 50$ m, $\angle AXB = 30^{\circ}$, $\angle ABX = 90^{\circ}$'
         show_sketch: true
+        'on': 'draw the tower'
         point:
-          - {figure: sketch, kind: highlight, target: AB, text: 'opposite'}
-          - {figure: sketch, kind: underline, target: XB, text: 'adjacent'}
-      - say: 'SOH CAH TOA: tan of an angle is the opposite side over the adjacent side.'
-        write: 'SOH CAH TOA: $\tan\theta = \dfrac{\text{opposite}}{\text{adjacent}}$'
-      - say: 'Tan is opposite over adjacent. So the ground distance is the height divided by tan of the angle.'
-        write: '$\text{distance} = \dfrac{\text{height}}{\tan\theta}$'
+          - {figure: sketch, kind: highlight, target: '50 m', text: 'height'}
+          - {figure: sketch, kind: arc, target: AXB, text: '30°'}
+      - section: 'From X'
+        say: 'From the 30 degree angle, the height $AB$ is opposite and the ground distance $XB$ is adjacent. Opposite and adjacent: TOA, so tangent.'
+        write: '$\tan 30^{\circ} = \dfrac{\text{opp}}{\text{adj}} = \dfrac{50}{XB}$ (TOA)'
         point:
-          - {figure: sketch, kind: arrow, target: 'AB', text: 'height (opposite)'}
-          - {figure: sketch, kind: arrow, target: 'XB', text: 'ground distance'}
-      - say: 'From $X$, the distance is 50 over tan 30 degrees.'
-        write: '$\text{from } X = \dfrac{50}{\tan 30^{\circ}}$'
-        point:
-          - {line: 3, kind: box, text: 'the rule'}
-          - {figure: sketch, kind: circle, target: '30°'}
-      - say: 'Tan 30 degrees is 1 over root 3, and dividing by 1 over root 3 means multiplying by root 3. So it is 50 root 3.'
-        write: '$= \dfrac{50}{1/\sqrt{3}} = 50\sqrt{3}$'
-      - say: 'Root 3 is about 1.7321, and 50 times 1.7321 is about 86.60 metres.'
-        write: '$\approx 86.60 \text{ m}$'
+          - {figure: sketch, kind: highlight, target: AB, text: 'opp'}
+          - {figure: sketch, kind: underline, target: XB, text: 'adj'}
+      - say: 'Cross-multiply, then divide by tan 30: $XB$ is 50 over tan 30.'
+        write: '$XB = \dfrac{50}{\tan 30^{\circ}}$'
+      - say: 'From the tables, tan 30 degrees is 0.5774. 50 divided by 0.5774 is 86.60 metres.'
+        write: '$XB = \dfrac{50}{0.5774} = 86.60$ m'
         point:
           - {figure: sketch, kind: label, target: XB, text: '86.60 m'}
-      - say: 'Now let me draw the second triangle, from $Y$ on the other side of the tower.'
+      - section: 'From Y'
+        say: 'Now $Y$, on the opposite side of the tower, with the angle of elevation 60 degrees. Let me add it to the sketch.'
+        write: '$\angle AYB = 60^{\circ}$, $\angle ABY = 90^{\circ}$'
         show_sketch: sketch_b
+        'on': 'add it'
         point:
           - {figure: sketch_b, kind: arc, target: AYB, text: '60°'}
-          - {figure: sketch_b, kind: circle, target: '?', text: 'XY'}
-      - say: 'From $Y$, the distance is 50 over tan 60 degrees. Tan 60 is root 3.'
-        write: '$\text{from } Y = \dfrac{50}{\tan 60^{\circ}} = \dfrac{50}{\sqrt{3}}$'
+      - say: 'The same ratio again: opposite is the height, adjacent is $BY$. TOA.'
+        write: '$\tan 60^{\circ} = \dfrac{50}{BY}$ (TOA)'
         point:
-          - {figure: sketch_b, kind: circle, target: '60°'}
-      - say: '50 divided by 1.7321 is about 28.87 metres.'
-        write: '$\approx 28.87 \text{ m}$'
+          - {figure: sketch_b, kind: underline, target: YB, text: 'adj'}
+      - say: 'So $BY$ is 50 over tan 60.'
+        write: '$BY = \dfrac{50}{\tan 60^{\circ}}$'
+      - say: 'Tan 60 degrees is 1.7321. 50 divided by 1.7321 is 28.87 metres.'
+        write: '$BY = \dfrac{50}{1.7321} = 28.87$ m'
         point:
           - {figure: sketch_b, kind: label, target: YB, text: '28.87 m'}
-      - say: '$X$ and $Y$ are on opposite sides of the tower, so $XY$ is the distance from $X$ to the tower, plus the distance from the tower to $Y$.'
-        write: '$XY = 86.60 + 28.87$'
+      - section: 'The distance XY'
+        say: '$X$ and $Y$ are on opposite sides of the tower, so the foot $B$ lies between them. $XY$ is $XB$ plus $BY$.'
+        write: '$XY = XB + BY$'
         point:
-          - {line: 10, kind: move, from: {line: 6, at: '86.60'}, at: '86.60', text: 'from X'}
-          - {line: 10, kind: move, from: {line: 9, at: '28.87'}, at: '28.87', text: 'from Y'}
-      - say: '86.60 plus 28.87 is 115.47.'
-        write: '$= 115.47 \text{ m}$'
+          - {figure: sketch_b, kind: circle, target: '?', text: 'XB + BY'}
+      - say: 'Substitute: 86.60 plus 28.87 is 115.47 metres.'
+        write: '$= 86.60 + 28.87 = 115.47$ m'
         point:
-          - {figure: sketch_b, kind: circle, target: '?', text: '115.47 m'}
-      - say: 'We can confirm it exactly. 50 root 3 is 150 over root 3, and adding 50 over root 3 gives 200 over root 3, which is about 115.47.'
-        write: 'Exactly: $\ 50\sqrt{3} + \dfrac{50}{\sqrt{3}} = \dfrac{150}{\sqrt{3}} + \dfrac{50}{\sqrt{3}} = \dfrac{200}{\sqrt{3}} \approx 115.47$'
-      - say: 'So $X$ and $Y$ are 115.47 metres apart, which is answer choice D.'
-        write: '$XY \approx 115.47 \text{ m}$'
+          - {line: 10, kind: move, from: {line: 4, at: '=86.60m'}, at: '=[[86.60]]+', text: 'XB'}
+          - {line: 10, kind: move, from: {line: 8, at: '=28.87m'}, at: '+[[28.87]]', text: 'BY'}
+      - say: 'Therefore the distance between $X$ and $Y$ is 115.47 metres.'
+        write: '$\therefore XY = 115.47$ m'
+        point:
+          - {figure: sketch_b, kind: label, target: '?', text: '115.47 m'}
+      - section: 'Check'
+        say: 'Check with the exact values. Tan 30 is 1 over root 3, so $XB$ is 50 root 3. Tan 60 is root 3, so $BY$ is 50 over root 3.'
+        write: 'Check: $50\sqrt{3} + \dfrac{50}{\sqrt{3}} = \dfrac{150 + 50}{\sqrt{3}} = \dfrac{200}{\sqrt{3}}$'
+      - say: 'Root 3 is 1.7321, and 200 divided by 1.7321 is 115.47. It agrees.'
+        write: '$\dfrac{200}{1.7321} = 115.47\ \checkmark$'
+      - section: 'Answer'
+        say: 'So $X$ and $Y$ are 115.47 metres apart, which is answer choice D.'
+        write: '$\therefore XY = 115.47$ m'
         answer: true
     traps:
-      A: 'You went for 14.43 m. That''s half of the distance from $Y$. The distances from the foot of the tower are 86.60 and 28.87, and since the points are on opposite sides, they add to 115.47.'
-      B: 'You went for 57.73 m. That''s 86.60 minus 28.87, which would be right if both points were on the same side. But $Y$ is on the opposite side, so the distances add.'
-      C: 'You went for 101.03 m. That uses only half of the distance from $Y$. The full distances are 50 root 3 and 50 over root 3, about 86.60 and 28.87, which add to 115.47.'
+      A: 'You went for 14.43 m. That is half of $BY$. The distances from the foot are 86.60 and 28.87, and since the points are on opposite sides, they add to 115.47.'
+      B: 'You went for 57.73 m. That is 86.60 minus 28.87, which would be right if both points were on the same side. $Y$ is on the opposite side, so $XY$ is $XB$ plus $BY$.'
+      C: 'You went for 101.03 m. That adds only half of $BY$. The full distances are 86.60 and 28.87, which add to 115.47.'
   35:
     moments:
-      - say: 'A girl walks 45 metres on a bearing of 050 degrees, from $Q$ to $X$. Then 24 metres on a bearing of 140 degrees, from $X$ to $Y$. How far is she from $Q$?'
-        write: '$QX = 45 \text{ on } 050^{\circ},\ \ XY = 24 \text{ on } 140^{\circ}$'
-      - say: 'Let me draw the walk from $Q$ to $X$ to $Y$.'
+      - section: 'The question'
+        say: 'A girl walks 45 metres on a bearing of 050 degrees, from $Q$ to $X$, then 24 metres on a bearing of 140 degrees, to $Y$. How far is she from $Q$?'
+        write: '$|QX| = 45$ m on $050^{\circ}$, $\ |XY| = 24$ m on $140^{\circ}$, $\ |QY| = ?$'
+      - section: 'Solution'
+        say: 'Solution. Let me draw the walk, with a North line at $Q$ and at $X$. Bearings are measured clockwise from North, and the North lines are parallel.'
+        write: 'Solution'
         show_sketch: true
         point:
           - {figure: sketch, kind: highlight, target: QX, text: '45 m'}
           - {figure: sketch, kind: highlight, target: XY, text: '24 m'}
-      - say: 'Bearings are measured clockwise from north. The key is the change of direction at $X$.'
+      - section: 'The angle at X'
+        say: 'At $X$, the North line carries on downwards, to the South. The angle between that line and $XY$ is 180 minus 140, angles on a straight line.'
+        write: 'Angle between $XY$ and South at $X = 180^{\circ} - 140^{\circ} = 40^{\circ}$ ($\angle$s on a str. line)'
         point:
-          - {figure: sketch, kind: circle, target: 'X', text: 'change of direction'}
-      - say: 'Her direction changes from 50 degrees to 140 degrees. 140 minus 50 is 90 degrees.'
-        write: '$140^{\circ} - 50^{\circ} = 90^{\circ}$'
+          - {figure: sketch, kind: circle, target: '140°'}
+      - say: 'The angle between $XQ$ and the South line at $X$ equals the 50 degrees at $Q$, because the North lines are parallel. Reason: alternate angles.'
+        write: 'Angle between $XQ$ and South at $X = 50^{\circ}$ (alt. $\angle$s)'
         point:
           - {figure: sketch, kind: circle, target: '050°'}
-          - {figure: sketch, kind: circle, target: '140°'}
-      - say: 'So at $X$ she turns through exactly a right angle, and the angle $QXY$ is 90 degrees.'
-        write: '$\angle QXY = 90^{\circ}$'
+      - say: 'Angle $QXY$ is made of the two: 40 plus 50 is 90 degrees. So the triangle is right-angled at $X$.'
+        write: '$\angle QXY = 40^{\circ} + 50^{\circ} = 90^{\circ}$'
         point:
           - {figure: sketch, kind: arc, target: QXY, text: '90°'}
-      - say: 'Pythagoras: the hypotenuse squared equals the opposite squared plus the adjacent squared.'
-        write: 'Pythagoras: $\text{hypotenuse}^{2} = \text{opposite}^{2} + \text{adjacent}^{2}$'
-      - say: 'Now let me join $Q$ to $Y$ on the diagram. That line is the distance we want.'
+      - section: 'Pythagoras'
+        say: 'Now join $Q$ to $Y$. That line is the distance we want, and it is the hypotenuse, opposite the right angle.'
         show_sketch: sketch_b
+        write: 'Join $QY$'
         point:
-          - {figure: sketch_b, kind: circle, target: '?', text: 'distance QY'}
-      - say: 'That makes $QXY$ a right-angled triangle, with legs 45 and 24. The distance $QY$ is the hypotenuse, so we use Pythagoras.'
-        write: '$QY^{2} = 45^{2} + 24^{2}$'
+          - {figure: sketch_b, kind: circle, target: '?', text: '|QY|'}
+      - say: 'By Pythagoras, the square on the hypotenuse equals the sum of the squares on the other two sides.'
+        write: '$|QY|^{2} = |QX|^{2} + |XY|^{2}$ (Pythagoras)'
+      - say: 'Substitute 45 and 24.'
+        write: '$|QY|^{2} = 45^{2} + 24^{2}$'
+      - say: '45 squared is 2025, and 24 squared is 576. 2025 plus 576 is 2601.'
+        write: '$= 2025 + 576 = 2601$'
+      - say: 'Take the square root. 51 times 51 is 2601, so the square root of 2601 is 51.'
+        write: '$|QY| = \sqrt{2601} = 51$ m'
         point:
-          - {line: 4, kind: arrow, at: '90∘', text: 'right angle'}
-          - {figure: sketch_b, kind: underline, target: QY, text: 'hypotenuse'}
-      - say: '45 squared is 2025. 24 squared is 576.'
-        write: '$QY^{2} = 2025 + 576$'
-      - say: '2025 plus 576 is 2601.'
-        write: '$QY^{2} = 2601$'
-      - say: 'Now take the square root. 50 squared is 2500, which is a bit too small, so try 51. 51 squared is 2601, exactly right.'
-        write: '$51^{2} = 2601$, so $QY = \sqrt{2601} = 51$'
-      - say: 'So she is 51 metres from $Q$, which is answer choice C.'
-        write: '$QY = 51 \text{ m}$'
+          - {figure: sketch_b, kind: label, target: '?', text: '51 m'}
+      - section: 'Check'
+        say: 'Check: 45, 24 and 51 are 3 times 15, 8 and 17, and 8 squared plus 15 squared is 64 plus 225, which is 289, 17 squared.'
+        write: 'Check: $3 \times (15,\ 8,\ 17)$, $\ 15^{2} + 8^{2} = 289 = 17^{2}$ ✓'
+      - section: 'Answer'
+        say: 'Therefore she is 51 metres from $Q$, which is answer choice C.'
+        write: '$\therefore |QY| = 51$ m (C)'
         answer: true
-        point:
-          - {figure: sketch_b, kind: circle, target: '?', text: '51 m'}
     traps:
-      A: 'You went for 69 m. That''s 45 plus 24, the distance she walked. The question asks how far she is from $Q$ in a straight line, which is the hypotenuse: 51 m.'
+      A: 'You went for 69 m. That is 45 plus 24, the distance she walked. "How far from $Q$" means the straight line $QY$, the hypotenuse: 51 m.'
       B: 'You went for 57 m. The triangle is right-angled at $X$, so use Pythagoras: 45 squared plus 24 squared is 2601, and its square root is 51.'
-      D: 'You went for 21 m. That''s 45 minus 24. The two walks are at right angles, so the straight-line distance is the hypotenuse, root 2601, which is 51.'
+      D: 'You went for 21 m. That is 45 minus 24. The two walks are at right angles, so the straight-line distance is the hypotenuse, the square root of 2601, which is 51.'
   36:
     moments:
-      - say: 'The figure shows a solid with the same trapezium cross-section all the way through. $PQ$ is 6, $QR$ is 12, $RS$ is 11, and the solid is 8 metres long. We want its volume.'
-        write: '$PQ = 6,\ \ QR = 12,\ \ RS = 11,\ \ \text{length} = 8$'
+      - section: 'The question'
+        say: 'Picture a long concrete block whose end face is a trapezium, the same shape all the way through. Its volume is that end face times its length.'
+        write: 'Find the volume of the solid.'
+      - say: 'Write Solution. The figure is given: the cross-section PQRS has right angles at Q and R, and the solid is 8 metres long.'
+        write: 'Solution'
         point:
-          - {figure: 0, kind: circle, target: '6 m', text: 'PQ'}
-          - {figure: 0, kind: circle, target: '12 m', text: 'QR'}
-          - {figure: 0, kind: circle, target: '11 m', text: 'RS'}
-      - say: 'A solid with a uniform cross-section is a prism. Its volume is the area of the cross-section times the length.'
-        write: '$V = \text{area of cross-section} \times \text{length}$'
+          - {figure: 0, kind: arc, target: PQR, text: '90°', 'on': 'right angles'}
+          - {figure: 0, kind: arc, target: QRS, text: '90°', 'on': 'right angles'}
+          - {figure: 0, kind: underline, target: '8 m', text: 'length', 'on': '8 metres long'}
+      - section: 'What we know'
+        say: 'List the givens: PQ is 6 m, QR is 12 m, RS is 11 m, and the length l is 8 m.'
+        write: '$|PQ| = 6$ m, $|QR| = 12$ m, $|RS| = 11$ m, $l = 8$ m'
+      - say: 'PQ and RS are both perpendicular to QR, so they are parallel. PQRS is a trapezium, and QR, 12 m, is the distance between the parallel sides.'
+        write: '$PQ \parallel RS$ (both $\perp QR$), $h = |QR| = 12$ m'
         point:
-          - {figure: 0, kind: arrow, target: {x: 294, y: 125}, text: 'cross-section'}
-          - {figure: 0, kind: underline, target: '8 m', text: 'length'}
-      - say: 'The cross-section $PQRS$ has right angles at $Q$ and $R$. So $PQ$ and $RS$ are both perpendicular to $QR$, which makes them parallel. $QR$ is the distance between them.'
-        point:
-          - {figure: 0, kind: arc, target: PQR, text: '90°'}
-          - {figure: 0, kind: arc, target: QRS, text: '90°'}
-      - say: 'The area of a trapezium is half the sum of the parallel sides, times the distance between them.'
-        write: '$\text{area} = \tfrac{1}{2}(a + b)h$'
-      - say: 'The parallel sides are 6 and 11, and the height is 12.'
-        write: '$\text{area} = \tfrac{1}{2}(6 + 11) \times 12$'
-        point:
-          - {figure: 0, kind: highlight, target: PQ, text: '6'}
-          - {figure: 0, kind: highlight, target: RS, text: '11'}
-          - {figure: 0, kind: underline, target: QR, text: 'height 12'}
-      - say: '6 plus 11 is 17.'
-        write: '$= \tfrac{1}{2} \times 17 \times 12$'
-      - say: 'Half of 12 is 6, and 17 times 6 is 102. So the area is 102 square metres.'
+          - {figure: 0, kind: highlight, target: PQ, text: '6', 'on': 'PQ and RS'}
+          - {figure: 0, kind: highlight, target: RS, text: '11', 'on': 'PQ and RS'}
+          - {figure: 0, kind: underline, target: QR, text: 'h = 12', 'on': 'distance between'}
+      - section: 'The cross-section'
+        say: 'Area of a trapezium is half the sum of the parallel sides, times the distance between them.'
+        write: 'Area of trapezium $= \tfrac{1}{2}(a + b)h$'
+      - say: 'Substitute: a is 6, b is 11, h is 12.'
+        write: '$= \tfrac{1}{2}(6 + 11) \times 12$'
+      - say: '6 plus 11 is 17. Half of 12 is 6, and 17 times 6 is 102 square metres.'
         write: '$= 17 \times 6 = 102\ \text{m}^{2}$'
-      - say: 'Now multiply by the length, 8 metres.'
+      - section: 'The volume'
+        say: 'Volume of a prism is the area of cross-section, times the length.'
+        write: '$V = \text{area of cross-section} \times l$'
+      - say: 'Substitute: 102 times 8.'
         write: '$V = 102 \times 8$'
         point:
-          - {line: 1, kind: box, text: 'the rule'}
-          - {line: 7, kind: move, from: {line: 6, at: '= 102'}, at: '102', text: 'area'}
-          - {figure: 0, kind: circle, target: '8 m', text: 'length'}
-      - say: '100 times 8 is 800, and 2 times 8 is 16. So 102 times 8 is 800 plus 16, which is 816.'
-        write: '$= 800 + 16 = 816\ \text{m}^{3}$'
-      - say: 'So the volume is 816 cubic metres, which is answer choice C.'
-        write: 'Volume $= 816\ \text{m}^{3}$'
+          - {line: 8, kind: move, from: {line: 6, at: '= [[102]]m'}, at: '102', text: 'area', 'on': '102 times'}
+          - {line: 8, kind: move, from: {line: 2, at: 'l = [[8]]'}, at: '×[[8]]', text: 'length', 'on': 'times 8'}
+      - say: 'Multiply: 8 times 2 is 16, write 6 carry 1; 8 times 0 is 0, plus 1 is 1; 8 times 1 is 8. That gives 816.'
+        write: '$= 816$'
+      - say: 'Therefore the volume of the solid is 816 cubic metres.'
+        write: '$\therefore V = 816\ \text{m}^{3}$'
+      - section: 'Check'
+        say: 'Check: a box 6 by 12 by 8 is 576, and a box 11 by 12 by 8 is 1,056. The trapezium is between them, and so is 816: in fact, exactly their average.'
+        write: 'Check: $\tfrac{1}{2}(576 + 1056) = 816$ ✓'
+      - section: 'Answer'
+        say: 'So the volume is 816 cubic metres, which is answer choice C.'
+        write: '$\therefore V = 816\ \text{m}^{3}$ (C)'
         answer: true
     traps:
-      A: 'You went for 102. That''s the area of the trapezium, in square metres. To get the volume, multiply by the length: 102 times 8 is 816.'
-      B: 'You went for 576. That''s 6 times 12 times 8, as if the cross-section were a rectangle 6 by 12. It''s a trapezium, with parallel sides 6 and 11, so its area is 102.'
-      D: 'You went for 1056. That''s 11 times 12 times 8, a rectangle using the longer side. Use the trapezium formula: half of 6 plus 11, times 12, is 102, and 102 times 8 is 816.'
+      A: 'You went for 102. That is the area of the trapezium, in square metres. To get the volume, multiply by the length: 102 times 8 is 816.'
+      B: 'You went for 576. That is 6 times 12 times 8, as if the cross-section were a rectangle 6 by 12. It is a trapezium with parallel sides 6 and 11, so its area is 102.'
+      D: 'You went for 1056. That is 11 times 12 times 8, a rectangle using the longer side. Use the trapezium formula: half of 6 plus 11, times 12, is 102, and 102 times 8 is 816.'
   37:
     moments:
-      - say: 'In the figure, $PQ$ and $PR$ are tangents from $P$ to a circle with centre $O$. Angle $QRP$ is 34 degrees, and we want the angle $x$ at the centre.'
-        write: '$\angle QRP = 34^{\circ}$'
+      - section: 'The question'
+        say: 'Two tangents from $P$. Equal tangents give an isosceles triangle, and each tangent meets its radius at 90 degrees. That is all we need to reach $x$ at the centre.'
+        write: '$\angle QRP = 34^{\circ}$, $x = \angle QOR = ?$'
         point:
           - {figure: 0, kind: arc, target: QRP, text: '34°'}
-      - say: 'First fact: two tangents from the same point are equal in length. So $PQ$ equals $PR$, and triangle $PQR$ is isosceles.'
-        write: '$PQ = PR$'
+          - {figure: 0, kind: circle, target: x, text: '?'}
+      - section: 'Solution'
+        say: 'Solution. We find the angle at $P$ first, then use the quadrilateral $OQPR$.'
+        write: 'Solution'
+      - say: 'Two tangents drawn from the same point are equal. Reason: tangents from an external point.'
+        write: '$PQ = PR$ (tangents from an external point)'
         point:
           - {figure: 0, kind: highlight, target: PQ}
           - {figure: 0, kind: highlight, target: PR}
-      - say: 'In an isosceles triangle the base angles are equal. So angle $PQR$ is also 34 degrees.'
-        write: '$\angle PQR = \angle PRQ = 34^{\circ}$'
+      - say: 'So triangle $PQR$ is isosceles, and its base angles at $Q$ and $R$ are equal. Reason: base angles of an isosceles triangle.'
+        write: '$\angle PQR = \angle PRQ = 34^{\circ}$ (base $\angle$s of isos. $\triangle$)'
         point:
-          - {line: 1, kind: underline, text: 'isosceles'}
           - {figure: 0, kind: arc, target: PQR, text: '34°'}
-      - say: 'The rule: the three angles in any triangle add up to 180 degrees.'
-        write: 'Angles in a triangle add up to $180^{\circ}$'
-      - say: 'The angles in a triangle add up to 180. So angle $QPR$ is 180 minus 34 minus 34.'
-        write: '$\angle QPR = 180^{\circ} - 34^{\circ} - 34^{\circ}$'
-        point:
-          - {figure: 0, kind: arc, target: 'QPR', text: 'angle QPR'}
+      - say: 'The three angles of triangle $PQR$ add up to 180. Reason: angle sum of a triangle.'
+        write: '$\angle QPR = 180^{\circ} - (34^{\circ} + 34^{\circ})$ ($\angle$ sum of $\triangle$)'
       - say: '34 plus 34 is 68, and 180 minus 68 is 112.'
-        write: '$= 180^{\circ} - 68^{\circ} = 112^{\circ}$'
+        write: '$\angle QPR = 180^{\circ} - 68^{\circ} = 112^{\circ}$'
         point:
           - {figure: 0, kind: arc, target: QPR, text: '112°'}
-      - say: 'Second fact: a tangent is perpendicular to the radius at the point where it touches. So the angles at $Q$ and $R$ in the shape $OQPR$ are each 90 degrees.'
-        write: '$\angle OQP = \angle ORP = 90^{\circ}$'
+      - say: 'A tangent is perpendicular to the radius at the point where it touches. So the angles at $Q$ and $R$ in $OQPR$ are each 90 degrees.'
+        write: '$\angle OQP = \angle ORP = 90^{\circ}$ (tangent $\perp$ radius)'
         point:
           - {figure: 0, kind: arc, target: OQP, text: '90°'}
           - {figure: 0, kind: arc, target: ORP, text: '90°'}
-      - say: 'The rule: the four angles in any quadrilateral add up to 360 degrees.'
-        write: 'Angles in a quadrilateral add up to $360^{\circ}$'
-      - say: '$OQPR$ is a quadrilateral, and the angles in a quadrilateral add up to 360 degrees.'
-        write: '$x + 90^{\circ} + 90^{\circ} + 112^{\circ} = 360^{\circ}$'
-        point:
-          - {line: 6, kind: arrow, text: 'right angles'}
-          - {line: 5, kind: arrow, at: '112∘', text: 'angle P'}
-          - {figure: 0, kind: circle, target: x}
+      - say: 'The four angles of the quadrilateral $OQPR$ add up to 360. Reason: sum of the angles of a quadrilateral.'
+        write: '$x + 90^{\circ} + 90^{\circ} + 112^{\circ} = 360^{\circ}$ (sum of $\angle$s of quad.)'
       - say: '90 plus 90 is 180, and 180 plus 112 is 292.'
         write: '$x + 292^{\circ} = 360^{\circ}$'
-      - say: 'Take 292 from both sides. 360 minus 292 is 68.'
+      - say: 'Take 292 to the other side. 360 minus 292 is 68.'
         write: '$x = 360^{\circ} - 292^{\circ} = 68^{\circ}$'
         point:
-          - {line: 10, kind: move, from: {line: 9, at: '+ 292∘'}, at: '− 292∘', text: 'across the ='}
+          - {line: 9, kind: move, from: {line: 8, at: '+ 292∘'}, at: '− 292∘', text: 'across the ='}
           - {figure: 0, kind: label, target: x, text: '68°'}
-      - say: 'A shortcut agrees: the angle between the two radii is always twice the angle between a tangent and the chord. 2 times 34 is 68.'
-        write: 'Shortcut: $\ x = 2 \times 34^{\circ} = 68^{\circ}$'
+      - section: 'Check'
+        say: 'Check with triangle $OQR$. $OQ$ equals $OR$, both radii. The angle $OQR$ is the right angle at $Q$ minus 34, which is 56, and so is angle $ORQ$.'
+        write: '$\angle OQR = \angle ORQ = 90^{\circ} - 34^{\circ} = 56^{\circ}$ (radii)'
         point:
-          - {figure: 0, kind: circle, target: '34°', text: 'tangent and chord'}
-          - {figure: 0, kind: circle, target: 'x', text: 'between the radii'}
-      - say: 'So $x$ is 68 degrees, which is answer choice C.'
-        write: '$x = 68^{\circ}$'
+          - {figure: 0, kind: arc, target: OQR, text: '56°'}
+      - say: 'The angles of triangle $OQR$ add up to 180. 180 minus 2 times 56 is 180 minus 112, which is 68. The same $x$.'
+        write: '$x = 180^{\circ} - 2 \times 56^{\circ} = 68^{\circ}\ \checkmark$'
+      - say: 'Therefore $x$ is 68 degrees, option C.'
+        write: '$\therefore x = 68^{\circ}$ (C)'
         answer: true
     traps:
-      A: 'You went for 34 degrees. That''s the angle given at $R$. The angle at the centre is twice the angle between the tangent and the chord, so it''s 68.'
-      B: 'You went for 56 degrees. That''s 90 minus 34, the angle $OQR$ inside the triangle. We want the angle at the centre, which is 360 minus 90 minus 90 minus 112, or 68.'
-      D: 'You went for 112 degrees. That''s the angle at $P$, between the tangents. The angle at the centre is what''s left in the quadrilateral: 360 minus 292, which is 68.'
+      A: 'You went for 34 degrees. That is the angle given at $R$. The angle at $P$ is 112, and the quadrilateral $OQPR$ gives $x$ as 360 minus 292, which is 68.'
+      B: 'You went for 56 degrees. That is 90 minus 34, the angle $OQR$ inside triangle $OQR$. We want the angle at the centre: 180 minus 2 times 56, which is 68.'
+      D: 'You went for 112 degrees. That is the angle at $P$, between the tangents. The angle at the centre is what is left in the quadrilateral: 360 minus 292, which is 68.'
   38:
     moments:
-      - say: 'An arc of a circle of radius 6 centimetres is 8 centimetres long. We want the area of the sector.'
-        write: '$r = 6,\ \ l = 8$'
-      - say: 'Let me draw the sector: radius 6 cm, and an arc 8 cm long.'
+      - section: 'The question'
+        say: 'A circle has radius 6 cm, and a piece of its edge 8 cm long is marked off. Join both ends to the centre. How much area is in that slice?'
+        write: 'Find the area of the sector.'
+      - say: 'Write Solution, then sketch the sector: centre O, radius 6 cm, and an arc AB 8 cm long.'
+        write: 'Solution'
         show_sketch: true
         point:
-          - {figure: sketch, kind: underline, target: OA, text: 'r = 6'}
-          - {figure: sketch, kind: arc, target: AB, text: 'l = 8'}
-      - say: 'A sector is a fraction of the whole circle. That fraction is the arc length divided by the whole circumference.'
-        write: '$\text{fraction} = \dfrac{l}{2\pi r}$'
+          - {figure: sketch, kind: underline, target: OA, text: 'r = 6', 'on': 'radius 6 cm'}
+          - {figure: sketch, kind: circle, target: '8 cm', text: 'L = 8', 'on': 'arc AB'}
+      - section: 'What we know'
+        say: 'List the givens: r is 6 cm, the arc length L is 8 cm. The angle theta is not given, so we find it first.'
+        write: '$r = 6$ cm, $L = 8$ cm, $\theta = ?$'
+      - section: 'Find the angle'
+        say: 'Length of arc: L equals theta over 360, times 2 pi r.'
+        write: '$L = \dfrac{\theta}{360} \times 2\pi r$'
+      - say: 'Substitute: L is 8 and r is 6.'
+        write: '$8 = \dfrac{\theta}{360} \times 2\pi \times 6$'
+      - say: 'We do not need theta itself, only the fraction theta over 360. 2 pi times 6 is 12 pi, so divide both sides by 12 pi.'
+        write: '$\dfrac{\theta}{360} = \dfrac{8}{12\pi} = \dfrac{2}{3\pi}$'
+      - section: 'The area'
+        say: 'Area of a sector: A equals theta over 360, times pi r squared.'
+        write: '$A = \dfrac{\theta}{360} \times \pi r^{2}$'
+      - say: 'Substitute: theta over 360 is 2 over 3 pi, and r is 6.'
+        write: '$A = \dfrac{2}{3\pi} \times \pi \times 6^{2}$'
         point:
-          - {figure: sketch, kind: arc, target: 'AB', text: 'arc length'}
-      - say: 'The sector''s area is that same fraction of the whole circle''s area, pi $r$ squared.'
-        write: '$\text{area} = \dfrac{l}{2\pi r} \times \pi r^{2}$'
+          - {line: 7, kind: move, from: {line: 5, at: '=[[3π2]]'}, at: '3π2', text: 'θ/360', 'on': '2 over 3 pi'}
+      - say: 'The pi cancels. 6 squared is 36, and 36 over 3 is 12. 2 times 12 is 24.'
+        write: '$= \dfrac{2 \times 36}{3} = 24$'
+      - say: 'Therefore the area of the sector is 24 square centimetres.'
+        write: '$\therefore A = 24\ \text{cm}^{2}$'
         point:
-          - {figure: sketch, kind: circle, target: 'area = ?', text: 'the sector'}
-      - say: 'Now simplify. Pi on the top cancels pi on the bottom, and $r$ squared over $r$ leaves one $r$. That leaves $l$ times $r$ over 2, which is half of $r$ times $l$.'
-        write: '$= \dfrac{l \times \pi r^{2}}{2\pi r} = \tfrac{1}{2}rl$'
-      - say: 'This is a great formula to remember: the area of a sector is half the radius times the arc length. No angle and no pi needed.'
-        write: 'Sector area $= \tfrac{1}{2}rl$'
-        point:
-          - {figure: sketch, kind: underline, target: 'OA', text: 'r'}
-          - {figure: sketch, kind: circle, target: '8 cm', text: 'l'}
-      - say: 'Now put in the radius, 6, and the arc length, 8.'
-        write: 'Area $= \tfrac{1}{2} \times 6 \times 8$'
-        point:
-          - {line: 5, kind: box, text: 'the rule'}
-          - {line: 6, kind: move, from: {line: 0, at: 'r = 6'}, at: '× 6', text: 'r'}
-          - {line: 6, kind: move, from: {line: 0, at: 'l = 8'}, at: '× 8', text: 'l'}
-      - say: '6 times 8 is 48, and half of 48 is 24.'
-        write: '$= \tfrac{1}{2} \times 48 = 24$'
-      - say: 'Let''s check another way. The whole circumference is 2 pi times 6, which is 12 pi. So the sector is 8 over 12 pi of the circle.'
-        write: 'Check: $\ 2\pi(6) = 12\pi$, so fraction $= \dfrac{8}{12\pi}$'
-        point:
-          - {figure: sketch, kind: circle, target: '8 cm', text: '8 of 12π'}
-      - say: 'The whole circle''s area is pi times 6 squared, which is 36 pi. Take 8 over 12 pi of that: the pis cancel, 36 over 12 is 3, and 8 times 3 is 24.'
-        write: '$\dfrac{8}{12\pi} \times 36\pi = 8 \times 3 = 24$'
-      - say: 'So the area of the sector is 24 square centimetres, which is answer choice B.'
-        write: 'Sector area $= 24\ \text{cm}^{2}$'
+          - {figure: sketch, kind: label, target: 'area = ?', text: '24 cm²', 'on': 'Therefore'}
+      - section: 'Exam tip'
+        say: 'Exam tip: putting the two formulas together gives area equals a half, r times L. Here that is a half times 6 times 8, which is 24 again.'
+        write: 'Exam tip: $A = \tfrac{1}{2}rL = \tfrac{1}{2} \times 6 \times 8 = 24$ ✓'
+      - section: 'Answer'
+        say: 'So the area of the sector is 24 square centimetres, which is answer choice B.'
+        write: '$\therefore A = 24\ \text{cm}^{2}$ (B)'
         answer: true
-        point:
-          - {figure: sketch, kind: circle, target: 'area = ?', text: '24 cm²'}
     traps:
-      A: 'You went for 5 and a third. That doesn''t come from the sector formula. The area is half of radius times arc length: half of 6 times 8, which is 24.'
-      C: 'You went for 36. That''s 6 squared, the radius squared. The sector area is half of $r$ times $l$: half of 6 times 8 is 24.'
-      D: 'You went for 48. That''s $r$ times $l$, but you''ve forgotten the half. Half of 48 is 24.'
+      A: 'You went for 5 and a third. That is 8 squared over 12, not a sector area. With theta over 360 equal to 2 over 3 pi, the area is 2 over 3 pi times 36 pi, which is 24.'
+      C: 'You went for 36. That is 6 squared, the radius squared, with no pi and no fraction. The sector is 2 over 3 pi of the circle''s 36 pi, which is 24.'
+      D: 'You went for 48. That is r times L, 6 times 8, without the half. The area is a half r L, which is 24.'
   39:
     moments:
-      - say: 'In triangle $XYZ$, $XY$ is 4, $XZ$ is 3, and $YZ$ is 6. We want the cosine of angle $Z$.'
-        write: '$XY = 4,\ \ XZ = 3,\ \ YZ = 6$'
+      - section: 'The question'
+        say: 'In triangle $XYZ$, $XY$ is 4, $XZ$ is 3 and $YZ$ is 6. We want the cosine of angle $Z$.'
+        write: '$XY = 4,\ XZ = 3,\ YZ = 6$; find $\cos Z$'
         point:
           - {figure: 0, kind: arc, target: XZY, text: 'Z'}
-      - say: 'We know all three sides and want an angle. That''s a job for the cosine rule.'
-        point:
-          - {figure: 0, kind: circle, target: '4'}
-          - {figure: 0, kind: circle, target: '3'}
-          - {figure: 0, kind: circle, target: '6', text: 'all three sides'}
-      - say: 'First, match the sides to angle $Z$. The two sides that meet at $Z$ are $XZ$ and $YZ$, which are 3 and 6. The side opposite $Z$ is $XY$, which is 4.'
-        write: 'Sides at $Z$: $\ XZ = 3,\ YZ = 6$; opposite $Z$: $\ XY = 4$'
+      - section: 'Solution'
+        say: 'Solution. We know all three sides and want an angle, so we use the cosine rule. Small $z$ is the side opposite $Z$; $x$ and $y$ are the sides that meet at $Z$.'
+        write: 'Solution: $\cos Z = \dfrac{x^{2} + y^{2} - z^{2}}{2xy}$ (cosine rule)'
+      - say: 'Match the sides to angle $Z$. The two sides meeting at $Z$ are $XZ$ and $YZ$, 3 and 6. The side opposite $Z$ is $XY$, 4: that is the one we subtract.'
+        write: 'At $Z$: $XZ = 3,\ YZ = 6$; opp. $Z$: $XY = 4$'
         point:
           - {figure: 0, kind: highlight, target: XZ, text: '3'}
           - {figure: 0, kind: highlight, target: YZ, text: '6'}
           - {figure: 0, kind: underline, target: XY, text: 'opposite'}
-      - say: 'The cosine rule, for the angle C between sides a and b, with side c opposite it: cos C is a squared plus b squared minus c squared, all over 2 a b.'
-        write: 'Cosine rule: $\cos C = \dfrac{a^{2} + b^{2} - c^{2}}{2ab}$'
-      - say: 'The cosine rule: the two sides at the angle, squared and added, minus the opposite side squared, all over 2 times the two sides.'
-        write: '$\cos Z = \dfrac{XZ^{2} + YZ^{2} - XY^{2}}{2 \times XZ \times YZ}$'
-        point:
-          - {figure: 0, kind: arc, target: 'XZY', text: 'angle Z'}
-          - {figure: 0, kind: underline, target: 'XY', text: 'opposite'}
-      - say: 'Now substitute the sides we matched up: $XZ$ is 3, $YZ$ is 6, and the opposite side $XY$ is 4.'
+      - say: 'Substitute.'
         write: '$\cos Z = \dfrac{3^{2} + 6^{2} - 4^{2}}{2 \times 3 \times 6}$'
         point:
-          - {line: 5, kind: move, from: {line: 2, at: 'XZ = 3'}, at: '32 +', text: 'XZ'}
-          - {line: 5, kind: move, from: {line: 2, at: 'YZ = 6'}, at: '+ 62', text: 'YZ'}
-          - {line: 5, kind: move, from: {line: 2, at: 'XY = 4'}, at: '− 42', text: 'opposite'}
-      - say: '3 squared is 9, 6 squared is 36, and 4 squared is 16. On the bottom, 2 times 3 times 6 is 36.'
+          - {line: 3, kind: move, from: {line: 2, at: 'XY=4'}, at: '−[[42]]', text: 'opposite'}
+      - say: '3 squared is 9, 6 squared is 36, and 4 squared is 16. Below, 2 times 3 is 6, and 6 times 6 is 36.'
         write: '$= \dfrac{9 + 36 - 16}{36}$'
-      - say: '9 plus 36 is 45, and 45 minus 16 is 29.'
+      - say: 'The top: 9 plus 36 is 45, and 45 minus 16 is 29. 29 is prime, so the fraction is already in its lowest terms.'
         write: '$= \dfrac{45 - 16}{36} = \dfrac{29}{36}$'
-      - say: 'A sense check: 29 over 36 is about 0.81, a positive cosine, so $Z$ is acute. That fits, because $Z$ faces the middle-sized side.'
-        write: 'Sense check: $\ \tfrac{29}{36} \approx 0.81 > 0$, so $Z$ is acute'
+      - say: 'Therefore cos $Z$ is 29 over 36.'
+        write: '$\therefore \cos Z = \dfrac{29}{36}$'
+      - section: 'Check'
+        say: 'Check the size. 29 over 36 is about 0.81, positive, so $Z$ is acute. That fits: $Z$ faces the middle side, 4, not the longest.'
+        write: 'Check: $\dfrac{29}{36} \approx 0.81 > 0$, so $Z$ is acute $\checkmark$'
         point:
-          - {figure: 0, kind: underline, target: 'XY', text: 'middle side, 4'}
-          - {figure: 0, kind: arc, target: 'XZY', text: 'acute'}
-      - say: 'So cos $Z$ is 29 over 36, which is answer choice B.'
-        write: '$\cos Z = \tfrac{29}{36}$'
+          - {figure: 0, kind: arc, target: XZY, text: 'acute'}
+      - section: 'Answer'
+        say: 'So cos $Z$ is 29 over 36, which is answer choice B.'
+        write: '$\therefore \cos Z = \dfrac{29}{36}$'
         answer: true
     traps:
-      A: 'You went for three quarters. The cosine rule needs all three sides: 3 squared plus 6 squared minus 4 squared, over 2 times 3 times 6. That''s 29 over 36.'
-      C: 'You went for two thirds. Check which side you subtract: it must be the side opposite $Z$, which is 4. So it''s 9 plus 36 minus 16, over 36, which is 29 over 36.'
+      A: 'You went for three quarters. The cosine rule needs all three sides: 3 squared plus 6 squared minus 4 squared, over 2 times 3 times 6. That is 29 over 36.'
+      C: 'You went for two thirds. Check which side you subtract: it must be the side opposite $Z$, which is 4. So it is 9 plus 36 minus 16, over 36, which is 29 over 36.'
       D: 'You went for a half. That would make angle $Z$ exactly 60 degrees. Work it out: 9 plus 36 minus 16 is 29, and the bottom is 36, so cos $Z$ is 29 over 36.'
   40:
     moments:
-      - say: 'In the figure, triangle $PQT$ is isosceles with $PQ$ equal to $QT$. Angle $TPQ$ is 20 degrees, angle $SRQ$ is 35 degrees, and $PQR$ is a straight line. We want angle $TSR$.'
-        write: '$PQ = QT,\ \ \angle TPQ = 20^{\circ},\ \ \angle SRQ = 35^{\circ}$'
+      - section: 'The question'
+        say: 'An isosceles triangle on a straight line, and a second triangle leaning on it. Chase the angle from $P$ along the line to $Q$, then up to $S$.'
+        write: '$PQ = QT$, $\angle TPQ = 20^{\circ}$, $\angle SRQ = 35^{\circ}$'
         point:
-          - {figure: 0, kind: highlight, target: 'PQ'}
-          - {figure: 0, kind: highlight, target: 'QT', text: 'PQ = QT'}
-          - {figure: 0, kind: circle, target: '?', text: 'angle TSR'}
-      - say: 'Start in the isosceles triangle. The angles opposite the equal sides are equal, so the angle at $T$ equals the angle at $P$, 20 degrees.'
-        write: '$\angle QTP = \angle QPT = 20^{\circ}$'
+          - {figure: 0, kind: arc, target: TPQ, text: '20°'}
+          - {figure: 0, kind: arc, target: SRQ, text: '35°'}
+          - {figure: 0, kind: circle, target: '?', text: '∠TSR = ?'}
+      - section: 'Solution'
+        say: 'Solution. We work through the triangle $PQT$ first, then the triangle $SQR$.'
+        write: 'Solution'
+      - say: '$PQ$ equals $QT$, so triangle $PQT$ is isosceles. The angles opposite the equal sides, at $T$ and $P$, are equal. Reason: base angles of an isosceles triangle.'
+        write: '$\angle QTP = \angle QPT = 20^{\circ}$ (base $\angle$s of isos. $\triangle$)'
         point:
+          - {figure: 0, kind: highlight, target: PQ}
+          - {figure: 0, kind: highlight, target: QT}
           - {figure: 0, kind: arc, target: QTP, text: '20°'}
-      - say: 'The rule: the three angles in any triangle add up to 180 degrees.'
-        write: 'Angles in a triangle add up to $180^{\circ}$'
-      - say: 'The angles of the triangle add up to 180, so angle $PQT$ is 180 minus 20 minus 20.'
-        write: '$\angle PQT = 180^{\circ} - 20^{\circ} - 20^{\circ} = 140^{\circ}$'
-        point:
-          - {figure: 0, kind: arc, target: PQT, text: '140°'}
-      - say: 'The rule: angles on a straight line add up to 180 degrees.'
-        write: 'Angles on a straight line add up to $180^{\circ}$'
-      - say: '$PQR$ is a straight line, so angles on it add to 180. Angle $TQR$ is 180 minus 140, which is 40 degrees.'
-        write: '$\angle TQR = 180^{\circ} - 140^{\circ} = 40^{\circ}$'
+      - say: '$PQR$ is a straight line, so angle $TQR$ is outside triangle $PQT$, at $Q$. An exterior angle equals the two interior opposite angles added.'
+        write: '$\angle TQR = 20^{\circ} + 20^{\circ} = 40^{\circ}$ (ext. $\angle$ of $\triangle PQT$)'
         point:
           - {figure: 0, kind: arc, target: TQR, text: '40°'}
-      - say: 'In the figure, $S$ lies on $QT$. So in triangle $SQR$, the angle at $Q$ is 40 degrees, and the angle at $R$ is 35 degrees.'
-        write: '$\angle SQR = 40^{\circ},\ \ \angle SRQ = 35^{\circ}$'
+      - say: '$S$ lies on $QT$, so in triangle $SQR$ the angle at $Q$ is that 40, and the angle at $R$ is 35. Angle $TSR$ is its exterior angle at $S$.'
+        write: '$\angle TSR = \angle SQR + \angle SRQ$ (ext. $\angle$ of $\triangle SQR$)'
+      - say: '40 plus 35 is 75.'
+        write: '$\angle TSR = 40^{\circ} + 35^{\circ} = 75^{\circ}$'
         point:
-          - {line: 6, kind: move, from: {line: 5, at: '= 40∘'}, at: '40∘', text: 'from here'}
-          - {figure: 0, kind: arc, target: 'SQR', text: '40°'}
-          - {figure: 0, kind: arc, target: 'SRQ', text: '35°'}
-      - say: 'The angles of triangle $SQR$ add to 180, so angle $QSR$ is 180 minus 40 minus 35.'
-        write: '$\angle QSR = 180^{\circ} - 40^{\circ} - 35^{\circ}$'
-        point:
-          - {figure: 0, kind: arc, target: 'QSR', text: '180 − 40 − 35'}
-      - say: '40 plus 35 is 75, and 180 minus 75 is 105.'
-        write: '$= 180^{\circ} - 75^{\circ} = 105^{\circ}$'
+          - {figure: 0, kind: arc, target: TSR, text: '75°'}
+      - section: 'Check'
+        say: 'Check by the angle sum. In triangle $SQR$, angle $QSR$ is 180 minus 40 minus 35, which is 105.'
+        write: '$\angle QSR = 180^{\circ} - 40^{\circ} - 35^{\circ} = 105^{\circ}$ ($\angle$ sum of $\triangle$)'
         point:
           - {figure: 0, kind: arc, target: QSR, text: '105°'}
-      - say: '$T$, $S$ and $Q$ lie on one straight line, so the angles at $S$ on that line add to 180. Angle $TSR$ is 180 minus the 105 we just found.'
-        write: '$\angle TSR = 180^{\circ} - 105^{\circ}$'
-        point:
-          - {line: 9, kind: move, from: {line: 8, at: '= 105∘'}, at: '− 105∘', text: 'from here'}
-          - {figure: 0, kind: highlight, target: 'TQ', text: 'straight line'}
-          - {figure: 0, kind: arc, target: 'TSR', text: 'TSR'}
-      - say: '180 minus 105 is 75.'
-        write: '$= 75^{\circ}$'
-        point:
-          - {figure: 0, kind: label, target: '?', text: '75°'}
-      - say: 'A shortcut agrees: angle $TSR$ is the exterior angle of triangle $SQR$, so it equals the two opposite angles added, 40 plus 35, which is 75.'
-        write: 'Shortcut: $\ \angle TSR = 40^{\circ} + 35^{\circ} = 75^{\circ}$'
-        point:
-          - {figure: 0, kind: arc, target: 'TSR', text: '40° + 35°'}
-      - say: 'So angle $TSR$ is 75 degrees, which is answer choice C.'
-        write: '$\angle TSR = 75^{\circ}$'
+      - say: '$T$, $S$ and $Q$ are on one straight line, so angle $TSR$ is 180 minus 105, which is 75 again.'
+        write: '$\angle TSR = 180^{\circ} - 105^{\circ} = 75^{\circ}\ \checkmark$ ($\angle$s on a str. line)'
+      - say: 'Therefore angle $TSR$ is 75 degrees, option C.'
+        write: '$\therefore \angle TSR = 75^{\circ}$ (C)'
         answer: true
-        point:
-          - {figure: 0, kind: circle, target: '?', text: '75°'}
     traps:
-      A: 'You went for 20 degrees. That''s the angle at $P$, given in the question. Chase the angles: the angle at $Q$ in triangle $SQR$ is 40, so angle $TSR$ is 40 plus 35, which is 75.'
-      B: 'You went for 55 degrees. That uses 20 degrees for the angle at $Q$. But angle $TQR$ is 180 minus 140, which is 40. So angle $TSR$ is 40 plus 35, which is 75.'
-      D: 'You went for 140 degrees. That''s angle $PQT$, at the top of the isosceles triangle. We want angle $TSR$, which is 180 minus 105, or 75.'
+      A: 'You went for 20 degrees. That is the angle at $P$, given in the question. The exterior angle at $Q$ is 20 plus 20, which is 40, so angle $TSR$ is 40 plus 35, which is 75.'
+      B: 'You went for 55 degrees. That uses 20 degrees for the angle at $Q$. But angle $TQR$ is the exterior angle of triangle $PQT$, 20 plus 20, which is 40. So angle $TSR$ is 40 plus 35, which is 75.'
+      D: 'You went for 140 degrees. That is angle $PQT$, at the top of the isosceles triangle. We want angle $TSR$, which is 40 plus 35, or 75.'
   41:
     moments:
-      - say: 'We want the total surface area of a solid cone with radius 2 root 3 centimetres and slant height 4 root 3 centimetres.'
-        write: '$r = 2\sqrt{3},\ \ l = 4\sqrt{3}$'
-      - say: 'Let me draw the cone.'
+      - section: 'The question'
+        say: 'Picture a solid cone made of card: a curved side, and a flat circle at the bottom. We want the area of all the card, both parts together.'
+        write: 'Find the total surface area of the solid cone.'
+      - say: 'Write Solution, then sketch the cone with its base radius and its slant height.'
+        write: 'Solution'
         show_sketch: true
         point:
-          - {figure: sketch, kind: underline, target: OB, text: 'r'}
-          - {figure: sketch, kind: highlight, target: AB, text: 'l'}
-      - say: 'The word solid matters. A solid cone has a curved surface and a flat circular base, so we count both.'
-      - say: 'Two basic formulas. The area of a circle is pi r squared.'
-        write: 'Area of a circle: $A = \pi r^{2}$'
-      - say: 'And the curved surface of a cone is pi times the radius times the slant height, pi r l.'
-        write: 'Curved surface of a cone $= \pi rl$'
-      - say: 'Part one, the circular base. Pi times 2 root 3 squared. 2 root 3 squared is 4 times 3, which is 12. So the base is 12 pi.'
-        write: 'Base: $\ \pi r^{2} = \pi \times (2\sqrt{3})^{2} = \pi \times 12 = 12\pi$'
-        point:
-          - {figure: sketch, kind: underline, target: OB, text: 'base radius'}
-      - say: 'Part two, the curved surface. Pi times 2 root 3 times 4 root 3. 2 times 4 is 8, and root 3 times root 3 is 3, so 8 times 3 is 24. The curved surface is 24 pi.'
-        write: 'Curved: $\ \pi rl = \pi \times 2\sqrt{3} \times 4\sqrt{3} = \pi \times 8 \times 3 = 24\pi$'
-        point:
-          - {figure: sketch, kind: highlight, target: AB, text: 'slant height'}
-      - say: 'The total is the base plus the curved surface: 12 pi plus 24 pi, which is 36 pi. Now the same thing done a tidier way.'
-        write: 'Total $=$ base $+$ curved $= 12\pi + 24\pi = 36\pi$'
-      - say: 'The curved surface is pi $r l$, and the base is pi $r$ squared.'
-        write: '$\text{total} = \pi r^{2} + \pi rl$'
-      - say: 'Both terms have pi $r$, so take it out. The total is pi $r$ times $r$ plus $l$.'
-        write: '$\text{total} = \pi r(r + l)$'
-      - say: 'First, $r$ plus $l$. 2 root 3 plus 4 root 3 is 6 root 3, just like 2 apples plus 4 apples.'
-        write: '$r + l = 2\sqrt{3} + 4\sqrt{3} = 6\sqrt{3}$'
-      - say: 'Now put it all in: pi times 2 root 3 times 6 root 3.'
-        write: '$\text{total} = \pi \times 2\sqrt{3} \times 6\sqrt{3}$'
-        point:
-          - {line: 9, kind: box, text: 'the rule'}
-          - {line: 11, kind: move, from: {line: 10, at: '= 63'}, at: '× 63', text: 'r + l'}
+          - {figure: sketch, kind: underline, target: OB, text: 'r', 'on': 'base radius'}
+          - {figure: sketch, kind: highlight, target: AB, text: 'l', 'on': 'slant height'}
+      - section: 'What we know'
+        say: 'List the givens: r is 2 root 3 cm, and the slant height l is 4 root 3 cm.'
+        write: '$r = 2\sqrt{3}$ cm, $l = 4\sqrt{3}$ cm'
+      - section: 'The formula'
+        say: 'Solid means the base is included. Total surface area is the curved surface, pi r l, plus the base, pi r squared.'
+        write: 'T.S.A. $= \pi rl + \pi r^{2}$'
+      - say: 'Take out the common factor pi r. That gives pi r, times r plus l.'
+        write: 'T.S.A. $= \pi r(r + l)$'
+      - section: 'Substitute'
+        say: 'Substitute: r is 2 root 3, and r plus l is 2 root 3 plus 4 root 3.'
+        write: '$= \pi \times 2\sqrt{3}(2\sqrt{3} + 4\sqrt{3})$'
+      - section: 'Simplify'
+        say: 'Add the like surds: 2 root 3 plus 4 root 3 is 6 root 3.'
+        write: '$= \pi \times 2\sqrt{3} \times 6\sqrt{3}$'
       - say: 'Multiply the whole numbers: 2 times 6 is 12. Multiply the surds: root 3 times root 3 is 3.'
         write: '$= \pi \times 12 \times 3$'
-      - say: '12 times 3 is 36. So the total surface area is 36 pi.'
-        write: '$= 36\pi$'
-      - say: 'So the total surface area is 36 pi square centimetres, which is answer choice D.'
-        write: 'Total surface area $= 36\pi\ \text{cm}^{2}$'
+      - say: '12 times 3 is 36. Therefore the total surface area is 36 pi square centimetres.'
+        write: '$\therefore$ T.S.A. $= 36\pi\ \text{cm}^{2}$'
+      - section: 'Check'
+        say: 'Check part by part. Base: pi times 2 root 3 squared, which is 12 pi. Curved: pi times 2 root 3 times 4 root 3, which is 24 pi. 12 pi plus 24 pi is 36 pi.'
+        write: 'Check: $12\pi + 24\pi = 36\pi$ ✓'
+      - section: 'Answer'
+        say: 'So the total surface area is 36 pi square centimetres, which is answer choice D.'
+        write: '$\therefore$ T.S.A. $= 36\pi\ \text{cm}^{2}$ (D)'
         answer: true
     traps:
       A: 'You went for 8 root 3 pi. The surds should multiply out: root 3 times root 3 is 3. The total is pi times 2 root 3 times 6 root 3, which is 36 pi.'
-      B: 'You went for 24 pi. That''s the curved surface on its own: pi times 2 root 3 times 4 root 3. A solid cone also has its base, 12 pi, which brings the total to 36 pi.'
-      C: 'You went for 15 root 3 pi. Use the formula pi $r$ times $r$ plus $l$: that''s pi times 2 root 3 times 6 root 3, and the root 3s multiply to 3, giving 36 pi.'
+      B: 'You went for 24 pi. That is the curved surface on its own, pi r l. A solid cone also has its base, pi r squared, which is 12 pi, bringing the total to 36 pi.'
+      C: 'You went for 15 root 3 pi. Use pi r, times r plus l: that is pi times 2 root 3 times 6 root 3, and the root 3s multiply to 3, giving 36 pi.'
   42:
     moments:
-      - say: '$U$ and $V$ are fixed points, and $W$ moves so that angle $UWV$ is always a right angle. What path does $W$ trace? That path is called the locus.'
-        write: '$\angle UWV = 90^{\circ}$'
-      - say: 'Let me draw $U$, $V$, and one position of $W$ where angle $UWV$ is a right angle.'
+      - section: 'The question'
+        say: '$U$ and $V$ are fixed points, and $W$ moves so that angle $UWV$ is always a right angle. The path $W$ traces is its locus. Which path is it?'
+        write: '$\angle UWV = 90^{\circ}$; locus of $W = ?$'
+      - section: 'Solution'
+        say: 'Solution. A locus is the path traced by a moving point under a given condition. Let me draw $U$, $V$, and one position of $W$ with a right angle there.'
         show_sketch: true
+        write: 'Solution: $\angle UWV = 90^{\circ}$ for every position of $W$'
         point:
           - {figure: sketch, kind: arc, target: UWV, text: '90°'}
-      - say: 'Remember a circle theorem: the angle in a semicircle is a right angle. The reverse is also true, and that''s what we need here.'
-        point:
-          - {figure: sketch, kind: arc, target: 'UWV', text: 'angle in a semicircle'}
-      - say: 'Let''s see why. Mark $M$, the midpoint of $UV$. Triangle $UWV$ is right-angled at $W$, so $UV$ is its hypotenuse.'
-        write: '$M = \text{midpoint of } UV$'
+      - say: 'Let $M$ be the midpoint of $UV$. In triangle $UWV$ the right angle is at $W$, so $UV$ is the hypotenuse.'
+        write: 'Let $M$ be the midpoint of $UV$'
         point:
           - {figure: sketch, kind: circle, target: M, text: 'midpoint'}
-      - say: 'In any right-angled triangle, the midpoint of the hypotenuse is the same distance from all three corners.'
-        write: '$MW = MU = MV$'
+      - say: 'In a right-angled triangle, the midpoint of the hypotenuse is the same distance from all three vertices. Write the reason in brackets.'
+        write: '$MW = MU = MV$ (mid-pt of hyp. of rt.-$\angle$d $\triangle$)'
         point:
           - {figure: sketch, kind: highlight, target: MW}
           - {figure: sketch, kind: highlight, target: MU}
           - {figure: sketch, kind: highlight, target: MV}
-      - say: '$MU$ is half of $UV$. So $W$ is always half of $UV$ away from $M$.'
-        write: '$MW = \tfrac{1}{2}UV$'
-      - say: 'Points that are always the same distance from a fixed point lie on a circle. So $W$ is on the circle with centre $M$, and radius half of $UV$.'
-        write: 'Circle: centre $M$, radius $= \tfrac{1}{2}UV$'
+      - say: '$MU$ is half of $UV$, and $UV$ never changes. So $W$ is always the same distance, half of $UV$, from the fixed point $M$.'
+        write: '$MW = \tfrac{1}{2}UV$ (a constant)'
+      - say: 'The standard locus: a point at a fixed distance from a fixed point traces a circle. Here the centre is $M$ and the radius is half of $UV$.'
+        write: 'Fixed distance from fixed point $M$ $\Rightarrow$ circle, centre $M$, radius $\tfrac{1}{2}UV$'
         point:
-          - {figure: sketch, kind: circle, target: 'M', text: 'centre'}
-          - {figure: sketch, kind: highlight, target: 'MW', text: 'radius ½UV'}
-      - say: 'The diameter is twice the radius, and twice half of $UV$ is $UV$ itself. So this circle has $UV$ as its diameter.'
+          - {figure: sketch, kind: circle, target: 'locus of W'}
+      - say: 'The diameter is twice the radius: 2 times half of $UV$ is $UV$ itself.'
         write: 'Diameter $= 2 \times \tfrac{1}{2}UV = UV$'
         point:
           - {figure: sketch, kind: underline, target: UV, text: 'diameter'}
-      - say: 'One small detail: the points $U$ and $V$ themselves are left out, because there the angle $UWV$ does not exist.'
-        write: 'Except $W = U$ and $W = V$'
+      - section: 'Check'
+        say: 'Check with the circle theorem: the angle in a semicircle is 90 degrees. So every $W$ on this circle does give a right angle. $U$ and $V$ themselves are left out.'
+        write: 'Check: $\angle$ in a semicircle $= 90^{\circ}\ \checkmark$ ($W \neq U, V$)'
         point:
-          - {figure: sketch, kind: strike, target: U}
-          - {figure: sketch, kind: strike, target: V}
-      - say: 'So the locus of $W$ is a circle with $UV$ as diameter, which is answer choice D.'
-        write: 'Locus of $W$: circle with $UV$ as diameter'
+          - {figure: sketch, kind: arc, target: UWV, text: '∠ in a semicircle'}
+      - section: 'Answer'
+        say: 'Therefore the locus of $W$ is a circle with $UV$ as diameter, which is option D.'
+        write: '$\therefore$ locus of $W$: a circle with $UV$ as diameter'
         answer: true
-        point:
-          - {figure: sketch, kind: underline, target: 'locus of W'}
     traps:
-      A: 'You went for the perpendicular bisector of $UV$. That''s the locus of points the same distance from $U$ and $V$. A right angle at $W$ puts $W$ on the circle with $UV$ as diameter.'
-      B: 'You went for a circle with $UV$ as radius. That''s twice too big, and centred at the wrong place. The circle is centred at the midpoint of $UV$, with $UV$ as its diameter.'
-      C: 'You went for a line parallel to $UV$. Along such a line the angle $UWV$ keeps changing, so it can''t always be 90 degrees. The right angle means $W$ is on the circle with $UV$ as diameter.'
+      A: 'You went for the perpendicular bisector of $UV$. That is the locus of points equidistant from $U$ and $V$. A right angle at $W$ makes $MW = \tfrac{1}{2}UV$: a circle with $UV$ as diameter.'
+      B: 'You went for a circle with $UV$ as radius. That circle is twice too big and centred at the wrong point. The radius is $MW = \tfrac{1}{2}UV$, so $UV$ is the diameter.'
+      C: 'You went for a line parallel to $UV$. Along such a line the angle $UWV$ keeps changing, so it cannot stay 90 degrees. The angle in a semicircle gives the circle with $UV$ as diameter.'
   43:
     moments:
-      - say: 'In the figure, $PQ$ is parallel to $ST$, and $RS$ is parallel to $UV$. Angle $PQR$ is 35 degrees and angle $QRS$ is 65 degrees. We want angle $STV$.'
-        write: '$PQ \parallel ST,\ \ RS \parallel UV,\ \ \angle PQR = 35^{\circ},\ \ \angle QRS = 65^{\circ}$'
+      - section: 'The question'
+        say: 'Two pairs of parallel lines, and a path that bends at $R$. One extra line through the bend carries the angles across to $T$.'
+        write: '$PQ \parallel ST$, $RS \parallel UV$, $\angle PQR = 35^{\circ}$, $\angle QRS = 65^{\circ}$, $\angle STV = ?$'
         point:
           - {figure: 0, kind: circle, target: '35°'}
           - {figure: 0, kind: circle, target: '65°'}
           - {figure: 0, kind: circle, target: '?', text: 'angle STV'}
-      - say: 'Here''s the plan. $ST$ runs in the same direction as $PQ$, and $TV$ runs in the same direction as $RS$. So angle $STV$ equals the angle between the lines $PQ$ and $RS$ themselves.'
+      - section: 'Solution'
+        say: 'Solution. We re-draw the diagram, so we can add our own line to it. The line $QRS$ bends at $R$, between the parallels $PQ$ and $ST$.'
+        write: 'Solution'
+        show_sketch: true
+      - say: 'Through $R$, draw the line $RX$ parallel to $PQ$ and $ST$. Now each arm of the bend meets a parallel line we can use.'
+        write: 'Draw $RX \parallel PQ \parallel ST$ (construction)'
         point:
-          - {figure: 0, kind: highlight, target: PQ}
-          - {figure: 0, kind: highlight, target: ST, text: 'parallel'}
-      - say: 'To find that angle, imagine extending $QP$ and $SR$ until they meet. Call the meeting point $W$. That gives us a triangle $WQR$.'
-        write: 'Extend $QP$ and $SR$ to meet at $W$'
+          - {figure: sketch, kind: highlight, target: RX, text: 'new parallel line'}
+      - say: 'Angle $PQR$ and angle $QRX$ make a Z between $PQ$ and $RX$. Alternate angles are equal. Reason: alternate angles.'
+        write: '$\angle QRX = \angle PQR = 35^{\circ}$ (alt. $\angle$s, $PQ \parallel RX$)'
         point:
-          - {figure: 0, kind: label, target: {x: 15, y: 131}, text: 'W'}
-      - say: 'In triangle $WQR$, the angle at $Q$ is the given 35 degrees.'
-        write: '$\angle WQR = 35^{\circ}$'
+          - {figure: sketch, kind: arc, target: PQR, text: '35°'}
+          - {figure: sketch, kind: arc, target: QRX, text: '35°'}
+      - say: '$RX$ cuts the 65 degrees at $R$ into two parts. The part we want, angle $XRS$, is the whole angle minus the part we found.'
+        write: '$\angle XRS = \angle QRS - \angle QRX$'
         point:
-          - {figure: 0, kind: circle, target: '35°'}
-      - say: 'The rule: angles on a straight line add up to 180 degrees.'
-        write: 'Angles on a straight line add up to $180^{\circ}$'
-      - say: '$S$, $R$ and $W$ are on one straight line, so the angle at $R$ inside the triangle is 180 minus 65, which is 115 degrees.'
-        write: '$\angle QRW = 180^{\circ} - 65^{\circ} = 115^{\circ}$'
+          - {figure: sketch, kind: arc, target: QRS, text: '65°'}
+      - say: '65 minus 35 is 30 degrees.'
+        write: '$\angle XRS = 65^{\circ} - 35^{\circ} = 30^{\circ}$'
         point:
-          - {figure: 0, kind: circle, target: '65°'}
-      - say: 'The rule: the three angles in any triangle add up to 180 degrees.'
-        write: 'Angles in a triangle add up to $180^{\circ}$'
-      - say: 'The angles of triangle $WQR$ add up to 180. So the angle at $W$ is 180 minus 35 minus 115.'
-        write: '$\angle W = 180^{\circ} - 35^{\circ} - 115^{\circ}$'
+          - {line: 5, kind: move, from: {line: 3, at: '= 35∘'}, at: '− 35∘', text: 'from here'}
+          - {figure: sketch, kind: arc, target: XRS, text: '30°'}
+      - say: 'Now the other arm. Angle $XRS$ and angle $RST$ make a Z between $RX$ and $ST$. Reason: alternate angles again.'
+        write: '$\angle RST = \angle XRS = 30^{\circ}$ (alt. $\angle$s, $RX \parallel ST$)'
         point:
-          - {line: 7, kind: move, from: {line: 5, at: '= 115∘'}, at: '− 115∘', text: 'from here'}
-          - {figure: 0, kind: circle, target: {x: 15, y: 131}, text: 'angle W'}
-      - say: '35 plus 115 is 150, and 180 minus 150 is 30 degrees.'
-        write: '$= 180^{\circ} - 150^{\circ} = 30^{\circ}$'
-      - say: 'Another way to see it: the 65 degrees at $R$ is an exterior angle of the triangle, so it equals 35 plus the angle at $W$. 65 minus 35 is 30.'
-        write: '$65^{\circ} = 35^{\circ} + \angle W \Rightarrow \angle W = 30^{\circ}$'
+          - {figure: sketch, kind: arc, target: RST, text: '30°'}
+      - say: 'Last, the second pair of parallels. $ST$ crosses $RS$ and $UV$, and angle $RST$ and angle $STV$ make a Z. Reason: alternate angles.'
+        write: '$\angle STV = \angle RST = 30^{\circ}$ (alt. $\angle$s, $RS \parallel UV$)'
         point:
-          - {figure: 0, kind: circle, target: '65°', text: 'exterior angle'}
-      - say: 'Since $ST$ is parallel to $PQ$, and $TV$ is parallel to $RS$, angle $STV$ is this same 30 degrees.'
-        write: '$\angle STV = \angle W$'
+          - {figure: sketch, kind: highlight, target: RS}
+          - {figure: sketch, kind: highlight, target: TV, text: 'parallel'}
+          - {figure: sketch, kind: arc, target: STV, text: '30°'}
+      - section: 'Check'
+        say: 'Check. The two parts at $R$ must make up the given 65 degrees. 35 plus 30 is 65.'
+        write: '$\angle QRX + \angle XRS = 35^{\circ} + 30^{\circ} = 65^{\circ}$ $\checkmark$'
         point:
-          - {figure: 0, kind: highlight, target: RS}
-          - {figure: 0, kind: highlight, target: TV, text: 'parallel'}
-          - {figure: 0, kind: arc, target: STV, text: '30°'}
-      - say: 'So angle $STV$ is 30 degrees, which is answer choice A.'
-        write: '$\angle STV = 30^{\circ}$'
+          - {figure: sketch, kind: arc, target: QRX, text: '35°'}
+          - {figure: sketch, kind: arc, target: XRS, text: '30°'}
+      - say: 'Therefore angle $STV$ is 30 degrees, option A.'
+        write: '$\therefore \angle STV = 30^{\circ}$ (A)'
         answer: true
         point:
-          - {figure: 0, kind: circle, target: '?', text: '30°'}
+          - {figure: 0, kind: label, target: '?', text: '30°'}
     traps:
-      B: 'You went for 35 degrees. That copies the angle at $Q$ across on its own. Angle $STV$ is the angle between the directions of $PQ$ and $RS$, and that needs both given angles: 65 minus 35 is 30.'
-      C: 'You went for 55 degrees. That doesn''t come from combining the angles. Extend $QP$ and $SR$ to meet: the exterior angle 65 equals 35 plus the angle between them, so that angle is 30.'
-      D: 'You went for 65 degrees. That copies the angle at $R$ across on its own. Both angles are needed: the lines $PQ$ and $RS$ meet at 65 minus 35, which is 30 degrees.'
+      B: 'You went for 35 degrees. That copies angle $PQR$ across on its own. It is only one part of the 65 at $R$; the other part, 65 minus 35, is 30, and that is the part carried to $T$.'
+      C: 'You went for 55 degrees, which is 90 minus 35. There is no right angle here. Alternate angles give 35 at $R$, so the other part of the 65 is 30, and alternate angles carry it to $STV$.'
+      D: 'You went for 65 degrees. That copies angle $QRS$ across. The line $RX$ splits it into 35 and 30, and only the 30 is carried to $S$ and then to $T$.'
   44:
     moments:
-      - say: 'An open box measures 4 metres by 3 metres by 4 metres on the outside. Painting costs ₦2 per square metre. What does it cost to paint the outside? Picture the paint tin: it fills as we add up the area.'
+      - section: 'The question'
+        say: 'An open box: no lid. Count the faces before you paint, because the lid is where most students lose this one. Picture the paint tin: it fills as we add up the area.'
         doodle: {name: 'custom:1986_q44_a', id: tin, caption: 'Painting costs ₦2 per m²'}
-        write: 'Box 4 m by 3 m by 4 m, ₦2.00 per square metre'
-      - say: 'Let me draw the open box.'
+        write: 'Open box $4\ \text{m} \times 3\ \text{m} \times 4\ \text{m}$, ₦2.00 per $\text{m}^{2}$, cost $= ?$'
+      - section: 'Solution'
+        say: 'Solution. Let me draw the open box and label it: length 4 metres, breadth 3 metres, height 4 metres.'
+        write: 'Solution'
         show_sketch: true
-      - say: 'Painting means we need the surface area. The box is open, so it has no lid. We paint the base and the four sides.'
+      - say: 'Write the givens: $l$ is 4, $b$ is 3, $h$ is 4.'
+        write: '$l = 4$ m, $b = 3$ m, $h = 4$ m'
+        point:
+          - {figure: sketch, kind: circle, target: 'l = 4 m'}
+          - {figure: sketch, kind: circle, target: 'b = 3 m'}
+          - {figure: sketch, kind: circle, target: 'h = 4 m'}
+      - say: 'Painting the outside means the surface area. The box is open, so there is no lid: we paint the base and the four sides only.'
+        write: 'Area to paint $=$ base $+$ 4 sides (no lid)'
         point:
           - {figure: sketch, kind: underline, target: 'open top (no lid)'}
-      - say: 'The area of a rectangle is its length times its width.'
-        write: 'Area of a rectangle $= \text{length} \times \text{width}$'
-      - say: 'Take the base as 4 by 3, and the height as 4. The base is 4 times 3, which is 12 square metres. Into the tin go 12 square metres.'
-        doodle_do: [{id: tin, op: fill, to: 0.18}]
-        write: '$\text{base} = 4 \times 3 = 12\ \text{m}^{2}$'
-        point:
-          - {figure: sketch, kind: circle, target: {x: 116, y: 256}, text: 'base 4'}
-          - {figure: sketch, kind: circle, target: '3 m', text: 'base 3'}
-          - {figure: sketch, kind: circle, target: {x: 20, y: 164}, text: 'height 4'}
-      - say: 'Two of the sides are 4 by 4. Each is 16 square metres, so together 32. The tin fills up.'
-        doodle_do: [{id: tin, op: fill, to: 0.65}]
-        write: '$2 \times (4 \times 4) = 2 \times 16 = 32\ \text{m}^{2}$'
-      - say: 'The other two sides are 3 by 4. Each is 12 square metres, so together 24. Now the tin is full.'
+      - say: 'The formula first. The base is $l$ times $b$. Two sides are $l$ by $h$, and two sides are $b$ by $h$.'
+        write: '$A = lb + 2lh + 2bh$'
+      - say: 'Substitute: 4 times 3, plus 2 times 4 times 4, plus 2 times 3 times 4.'
+        write: '$A = 4 \times 3 + 2(4 \times 4) + 2(3 \times 4)$'
+      - say: '4 times 3 is 12. 2 times 16 is 32. 2 times 12 is 24. The tin fills as each face goes in.'
         doodle_do: [{id: tin, op: fill, to: 1.0}]
-        write: '$2 \times (3 \times 4) = 2 \times 12 = 24\ \text{m}^{2}$'
-      - say: 'Now add the base and the four sides: 12 plus 32 plus 24.'
-        write: 'Area to paint $= 12 + 32 + 24$'
+        write: '$A = 12 + 32 + 24$'
       - say: '12 plus 32 is 44, and 44 plus 24 is 68 square metres.'
-        write: '$= 44 + 24 = 68\ \text{m}^{2}$'
+        write: '$A = 68\ \text{m}^{2}$'
         point:
-          - {line: 8, kind: highlight, at: '68', to: {doodle: tin, part: area}}
-      - say: 'Each square metre costs ₦2, so the cost is the 68 square metres we found, times 2. That is ₦136.'
+          - {line: 7, kind: highlight, at: '68', to: {doodle: tin, part: area}}
+      - say: 'Each square metre costs 2 naira, so the cost is the area times 2 naira.'
+        write: 'Cost $= 68 \times$ ₦2.00'
+        point:
+          - {line: 8, kind: move, from: {line: 7, at: '= 68'}, at: '68', text: 'area'}
+      - say: '68 times 2 is 136. The cost is 136 naira.'
         doodle_do: [{id: tin, op: label, part: price, text: '68 × ₦2 = ₦136'}]
-        write: 'Cost $= 68 \times 2 = 136$ naira'
-        point:
-          - {line: 9, kind: move, from: {line: 8, at: '= 68'}, at: '68', text: 'area'}
-          - {line: 0, kind: underline, at: '₦2.00 per square metre', text: 'given'}
-          - {line: 9, kind: highlight, at: '136', to: {doodle: tin, part: price}}
-      - say: 'So it costs ₦136.00, which is answer choice C.'
-        write: 'Cost: ₦136.00'
+        write: '$=$ ₦136.00'
+      - section: 'Check'
+        say: 'Check another way. A closed box has 2 times, $lb$ plus $lh$ plus $bh$. That is 2 times 40, which is 80. Take away the lid, 12: 80 minus 12 is 68.'
+        write: '$2(12 + 16 + 12) - 12 = 80 - 12 = 68\ \text{m}^{2}$ $\checkmark$'
+      - say: 'Therefore the cost is 136 naira, option C.'
+        write: '$\therefore$ Cost $=$ ₦136.00 (C)'
         answer: true
     traps:
-      A: 'You went for ₦96. That''s 48 times 2, and 48 is the volume, 4 times 3 times 4. Painting needs the surface area, which is 68 square metres, so ₦136.'
-      B: 'You went for ₦112. That''s the four sides only, 56 square metres. The base is painted too, adding 12, so it''s 68 square metres and ₦136.'
-      D: 'You went for ₦160. That paints a lid as well, making 80 square metres. An open box has no lid, so it''s 68 square metres, and 68 times 2 is ₦136.'
+      A: 'You went for ₦96. That is 48 times 2, and 48 is the volume, 4 times 3 times 4. Painting needs the surface area: 12 plus 32 plus 24 is 68 square metres, so ₦136.'
+      B: 'You went for ₦112. That is the four sides only, 32 plus 24, which is 56 square metres. The base is painted too: add 12 to get 68 square metres, and 68 times 2 is ₦136.'
+      D: 'You went for ₦160. That paints a lid as well: 80 square metres. An open box has no lid, so take 12 away: 68 square metres, and 68 times 2 is ₦136.'
   45:
     moments:
-      - say: 'Nine hundred students were admitted, spread over six states. In a pie chart, we want the angle for Anambra, which had 185 students.'
-        write: '$\text{Anambra} = 185$'
-      - say: 'Let me draw the pie chart, so we can see the parts of the whole.'
-        show_sketch: true
-        point:
-          - {figure: sketch, kind: circle, target: 'Anambra 185'}
-          - {figure: sketch, kind: circle, target: '?', text: 'this angle'}
-      - say: 'A pie chart shares the full 360 degrees among the groups. Each angle is the group''s fraction of the total, times 360.'
-        write: '$\text{angle} = \dfrac{\text{group}}{\text{total}} \times 360^{\circ}$'
-      - say: 'First, check the total. 185 plus 135 is 320. Plus 90 is 410. Plus 110 is 520. Plus 155 is 675. Plus 225 is 900.'
-        write: '$185 + 135 + 90 + 110 + 155 + 225 = 900$'
-        point:
-          - {figure: sketch, kind: underline, target: 'Total 900', text: 'all six states'}
-      - say: 'Good, that matches the nine hundred students. So Anambra''s angle is 185 over 900, times 360 degrees.'
-        write: 'Anambra angle $= \dfrac{185}{900} \times 360^{\circ}$'
-        point:
-          - {line: 2, kind: box, text: 'the rule'}
-          - {line: 4, kind: move, from: {line: 0, at: '185'}, at: '185', text: 'Anambra'}
-          - {line: 4, kind: move, from: {line: 3, at: '= 900'}, at: '900', text: 'total'}
-      - say: 'An easy way to work it out: find what one student is worth. 360 degrees shared among 900 students is 360 over 900, which is 0.4 of a degree each.'
-        write: 'One student $= \dfrac{360^{\circ}}{900} = 0.4^{\circ}$'
-      - say: 'Anambra has 185 students, each worth the 0.4 of a degree we just found. 185 times 4 is 740, and dividing by 10 gives 74.'
-        write: 'Anambra $= 185 \times 0.4^{\circ} = 74^{\circ}$'
-        point:
-          - {line: 6, kind: move, from: {line: 5, at: '= 0.4∘'}, at: '0.4∘', text: 'one student'}
-          - {figure: sketch, kind: label, target: '?', text: '74°'}
-      - say: 'Let''s check with the fraction instead. 360 over 900 simplifies to 2 over 5, so the angle is 185 times 2, over 5. That is 370 over 5, which is 74.'
-        write: 'Check: $\ \dfrac{185}{900} \times 360 = \dfrac{185 \times 2}{5} = \dfrac{370}{5} = 74$'
-      - say: 'One more check with Oyo: 225 times 0.4 is 90 degrees, a quarter of the circle. And 225 is a quarter of 900. That fits.'
-        write: 'Oyo $= 225 \times 0.4^{\circ} = 90^{\circ}$'
-        point:
-          - {figure: sketch, kind: circle, target: 'Oyo', text: '90°, a quarter'}
-      - say: 'So the angle for Anambra is 74 degrees, which is answer choice C.'
-        write: 'Anambra angle $= 74^{\circ}$'
+      - section: 'The question'
+        say: 'Nine hundred students were admitted from six states. In a pie chart of this distribution, we want the angle for Anambra, which had 185 students.'
+        write: 'Anambra: 185 students. Sectoral angle $= ?$'
+      - section: 'Solution'
+        say: 'Solution. The table of states and students is given. Add a column for the sectoral angle: the frequency over the total, times 360 degrees.'
+        write: 'Sectoral angle $= \dfrac{f}{\Sigma f} \times 360^{\circ}$'
+        diagram: {id: t, kind: table, columns: [State, 'Students (f)', 'Sectoral angle'], rows: [[Anambra, 185, ''], [Imo, 135, ''], [Kaduna, 90, ''], [Kwara, 110, ''], [Ondo, 155, ''], [Oyo, 225, '']]}
+      - say: 'Check the total. 185 plus 135 is 320, plus 90 is 410, plus 110 is 520, plus 155 is 675, plus 225 is 900. That matches the nine hundred.'
+        write: '$\Sigma f = 185 + 135 + 90 + 110 + 155 + 225 = 900$'
+        diagram_do:
+          - {id: t, op: total, part: 'col:2', 'on': '900'}
+      - section: 'Anambra'
+        say: 'Substitute Anambra''s 185 and the total, 900.'
+        write: 'Anambra $= \dfrac{185}{900} \times 360^{\circ}$'
+      - say: 'Simplify 360 over 900: divide both by 180, and it is 2 over 5. So it is 185 times 2, over 5.'
+        write: '$= \dfrac{185 \times 2}{5} = \dfrac{370}{5}$'
+      - say: '370 divided by 5 is 74 degrees.'
+        write: '$= 74^{\circ}$'
+        diagram_do:
+          - {id: t, op: fill, part: 'cell:1,3', text: '74°', 'on': '74 degrees'}
+      - section: 'Check'
+        say: 'Check the full circle with the same 2 over 5. Imo is 54 degrees, Kaduna 36, and Kwara 44.'
+        write: 'Imo $54^{\circ}$, Kaduna $36^{\circ}$, Kwara $44^{\circ}$'
+        diagram_do:
+          - {id: t, op: fill, part: 'cell:2,3', text: '54°', 'on': '54'}
+          - {id: t, op: fill, part: 'cell:3,3', text: '36°', 'on': '36'}
+          - {id: t, op: fill, part: 'cell:4,3', text: '44°', 'on': '44'}
+      - say: 'Ondo is 62 and Oyo is 90. 74 plus 54 plus 36 plus 44 plus 62 plus 90 is 360 degrees.'
+        write: '$74 + 54 + 36 + 44 + 62 + 90 = 360^{\circ}\ \checkmark$'
+        diagram_do:
+          - {id: t, op: fill, part: 'cell:5,3', text: '62°', 'on': 'Ondo'}
+          - {id: t, op: fill, part: 'cell:6,3', text: '90°', 'on': 'Oyo'}
+      - section: 'Answer'
+        say: 'Therefore the angle for Anambra is 74 degrees, which is answer choice C.'
+        write: '$\therefore$ Anambra $= 74^{\circ}$'
         answer: true
     traps:
-      A: 'You went for 50 degrees. Each student is worth 360 over 900, which is 0.4 of a degree. Anambra has 185 students, and 185 times 0.4 is 74.'
-      B: 'You went for 65 degrees. Work it out from the fraction: 185 over 900 of 360 degrees. Each student is 0.4 of a degree, so 185 students give 74.'
-      D: 'You went for 88 degrees. That''s too big. 360 divided by 900 is 0.4 of a degree per student, and 185 times 0.4 is 74.'
+      A: 'You went for 50 degrees. Anambra is 185 over 900, times 360: 185 times 2, over 5, which is 74 degrees.'
+      B: 'You went for 65 degrees. Substitute into the formula: 185 over 900, times 360, is 370 over 5, which is 74.'
+      D: 'You went for 88 degrees. That is too big. 185 over 900, times 360, is 74 degrees.'
   46:
     moments:
-      - say: 'We want the median of ten numbers: 89, 141, 130, 161, 120, 131, 131, 100, 108 and 119. Picture them as ten cards.'
-        doodle: {name: 'custom:1986_q46_a', id: cards, caption: 'ten number cards', size: scene}
-        write: '$89,\ 141,\ 130,\ 161,\ 120,\ 131,\ 131,\ 100,\ 108,\ 119$'
-      - say: 'The median is the middle value once the data is in order. So the first job is always to sort the numbers from smallest to largest.'
-      - say: 'In order, they are: 89, 100, 108, 119, 120, 130, 131, 131, 141, 161. The cards are now in order.'
-        doodle_do: [{id: cards, op: stage, stage: 'custom:1986_q46_a2'}]
-        write: 'In order: $\ 89,\ 100,\ 108,\ 119,\ 120,\ 130,\ 131,\ 131,\ 141,\ 161$'
-      - say: 'Picture ten people in a line, one for each number. Now count them. There are 10 numbers.'
-        doodle: {name: 'person-small', id: line, caption: 'one person per number', repeat: 10, layout: row}
-        write: 'Number of values $= 10$'
-      - say: 'Split the line of people in half. 10 is even, so there is no single middle number. The median is the average of the two middle values, the 5th and the 6th, with four numbers on each side of them.'
-        doodle_do: [{id: line, op: split, n: 5, text: 'first five | last five'}]
-        write: 'Median $= \dfrac{5\text{th} + 6\text{th}}{2}$'
-      - say: 'On the cards, the two green ones. Counting along, the 5th number is 120 and the 6th is 130.'
-        doodle_do: [{id: cards, op: circle, part: c5}, {id: cards, op: circle, part: c6}]
-        write: '$5\text{th} = 120,\ \ 6\text{th} = 130$'
+      - section: 'The question'
+        say: 'Ten numbers, in no order. We want the median, the middle value. Picture them as ten cards.'
+        write: 'Data: $89,\ 141,\ 130,\ 161,\ 120,\ 131,\ 131,\ 100,\ 108,\ 119$'
+        doodle: {name: 'custom:1986_q46_a', id: cards, caption: 'ten number cards', size: scene, 'on': 'cards'}
+      - section: 'Solution'
+        say: 'Solution. The median is the middle value once the data are arranged in order of size. So arrange them, smallest first: 89, 100, 108, 119, 120, 130, 131, 131, 141, 161.'
+        write: 'Solution. In order: $89,\ 100,\ 108,\ 119,\ 120,\ 130,\ 131,\ 131,\ 141,\ 161$'
+        doodle_do:
+          - {id: cards, op: stage, stage: 'custom:1986_q46_a2', 'on': 'arrange'}
+      - section: 'The median'
+        say: 'Count them: $n$ is 10. For ungrouped data the median is the $n$ plus 1 over 2th value.'
+        write: '$n = 10$; median $=$ the $\left(\dfrac{n + 1}{2}\right)$th value'
+      - say: '10 plus 1 is 11, and 11 over 2 is 5 and a half. So the median sits halfway between the 5th and the 6th values.'
+        write: '$= \left(\dfrac{10 + 1}{2}\right)$th $= 5\tfrac{1}{2}$th: between the 5th and 6th values'
+      - say: 'Count along the ordered list: the 5th value is 120 and the 6th is 130. On the cards, the two in the middle.'
+        write: '5th value $= 120$, 6th value $= 130$'
+        doodle_do:
+          - {id: cards, op: circle, part: c5, text: '5th'}
+          - {id: cards, op: circle, part: c6, text: '6th'}
         point:
-          - {line: 2, kind: circle, at: '120', text: '5th'}
-          - {line: 2, kind: circle, at: '130', text: '6th'}
-          - {line: 5, kind: highlight, at: '5th=120', to: {doodle: cards, part: c5}}
-      - say: 'So the median is 120 plus 130, over 2.'
-        doodle_do: [{id: cards, op: stage, stage: 'custom:1986_q46_a3'}]
-        write: '$\text{median} = \dfrac{120 + 130}{2}$'
-        point:
-          - {line: 6, kind: move, from: {line: 5, at: '= 120'}, at: '120'}
-          - {line: 6, kind: move, from: {line: 5, at: '= 130'}, at: '130'}
-      - say: '120 plus 130 is 250, and 250 divided by 2 is 125. That is halfway between the two green cards.'
-        doodle_do: [{id: cards, op: label, part: mid, text: '125'}]
+          - {line: 1, kind: circle, at: '120', text: '5th'}
+          - {line: 1, kind: circle, at: '130', text: '6th'}
+      - say: 'The median is their average: 120 plus 130, over 2.'
+        write: 'Median $= \dfrac{120 + 130}{2}$'
+      - say: '120 plus 130 is 250, and 250 over 2 is 125: halfway between the two middle cards.'
         write: '$= \dfrac{250}{2} = 125$'
-      - say: 'Notice the median doesn''t have to be one of the numbers in the list. So the median is 125, which is answer choice B.'
-        write: '$\text{median} = 125$'
+        doodle_do:
+          - {id: cards, op: stage, stage: 'custom:1986_q46_a3', 'on': 'halfway'}
+          - {id: cards, op: label, part: mid, text: '125'}
+      - say: 'So the median is 125. It does not have to be one of the numbers in the list.'
+        write: '$\therefore$ Median $= 125$'
+      - section: 'Check'
+        say: 'Check: four values sit below 120, from 89 to 119, and four sit above 130, from 131 to 161. So 120 and 130 are the middle pair.'
+        write: 'Check: 4 values below the 5th, 4 values above the 6th ✓'
+      - section: 'Answer'
+        say: 'So the median is 125, which is option B.'
+        write: '$\therefore$ Median $= 125$'
         answer: true
     traps:
-      A: 'You went for 131. That''s the mode, the only number that appears twice. The median is the middle of the sorted list: the average of 120 and 130, which is 125.'
-      C: 'You went for 123. That''s the mean: the ten numbers add to 1230, and 1230 divided by 10 is 123. The median is the middle of the sorted list, which is 125.'
-      D: 'You went for 120. That''s only the 5th number. With ten numbers, the median is halfway between the 5th and 6th, 120 and 130, which is 125.'
+      A: 'You went for 131. That is the mode, the only value that appears twice. The median is the middle of the ordered list: the average of the 5th and 6th values, 120 and 130, which is 125.'
+      C: 'You went for 123. That is the mean: the ten numbers add to 1230, and 1230 over 10 is 123. The median is the middle of the ordered list, 125.'
+      D: 'You went for 120. That is only the 5th value. With ten values, the median is halfway between the 5th and 6th, 120 and 130, which is 125.'
   47:
     moments:
-      - say: 'A number is picked at random from 40 to 50. What''s the probability that it''s a prime? Picture eleven cards and one being picked.'
+      - section: 'The question'
+        say: 'A number is picked at random from 40 to 50. What is the probability that it is a prime? Two of the odd numbers here only look prime. Picture eleven cards.'
+        write: '$40$ to $50$: $P(\text{prime}) = ?$'
         doodle: {name: 'custom:1986_q47_a', id: cards, caption: 'One number from 40 to 50', size: scene}
-        write: '$40,\ 41,\ \ldots,\ 50$'
-      - say: 'Probability is the number of favourable outcomes over the number of possible outcomes. So we count carefully.'
-        write: '$P = \dfrac{\text{favourable}}{\text{possible}}$'
-      - say: 'First, the possible outcomes. How many numbers are there from 40 to 50? Both ends count, so it is 50 minus 40, plus 1, which is 11. Count the cards: 11.'
-        doodle_do: [{id: cards, op: stage, stage: 'custom:1986_q47_a2'}]
-        write: 'Possible $= 50 - 40 + 1 = 11$'
+      - say: 'Solution. Let $E$ be the event that the number is a prime.'
+        write: 'Solution: let $E$ = the number is prime'
+      - section: 'The sample space'
+        say: 'The sample space is every number from 40 to 50.'
+        write: '$S = \{40,\ 41,\ 42,\ \ldots,\ 50\}$'
+      - say: 'Both ends count, so n of $S$ is 50 minus 40, plus 1, which is 11. Count the cards: 11.'
+        write: '$n(S) = 50 - 40 + 1 = 11$'
+        doodle_do:
+          - {id: cards, op: stage, stage: 'custom:1986_q47_a2'}
         point:
-          - {line: 2, kind: highlight, at: '11', to: {doodle: cards, part: count}}
-      - say: 'Now the favourable ones, the primes. A prime has exactly two factors, 1 and itself. The even numbers 40, 42, 44, 46, 48 and 50 all divide by 2, so they are out. Cross out every even card.'
-        doodle_do: [{id: cards, op: stage, stage: 'custom:1986_q47_a3'}]
-        write: 'Even, not prime: $\ 40,\ 42,\ 44,\ 46,\ 48,\ 50$'
-      - say: 'That leaves the odd numbers: 41, 43, 45, 47 and 49.'
-        write: 'Odd: $\ 41,\ 43,\ 45,\ 47,\ 49$'
-      - say: '45 is 5 times 9, so it is not prime. Cross out that card.'
-        doodle_do: [{id: cards, op: cross, part: c45}]
-        write: '$45 = 5 \times 9$'
-      - say: '49 is 7 times 7, so it is not prime either. It looks prime, but it is 7 squared. Cross that card out too.'
-        doodle_do: [{id: cards, op: cross, part: c49}]
-        write: '$49 = 7 \times 7$'
-      - say: 'Three cards are left standing. 41, 43 and 47 have no factors except 1 and themselves, so they are prime. That is 3 favourable numbers.'
-        doodle_do: [{id: cards, op: circle, part: c41}, {id: cards, op: circle, part: c43}, {id: cards, op: circle, part: c47}]
-        write: 'Primes: $\ 41,\ 43,\ 47$, so favourable $= 3$'
+          - {line: 3, kind: highlight, at: '= 11', to: {doodle: cards, part: count}}
+      - section: 'The favourable outcomes'
+        say: 'A prime has exactly two factors, 1 and itself. The even numbers all divide by 2, so they are not prime. Cross out every even card.'
+        write: 'Even, not prime: $40,\ 42,\ 44,\ 46,\ 48,\ 50$'
+        doodle_do:
+          - {id: cards, op: stage, stage: 'custom:1986_q47_a3'}
+      - say: 'Now test the odd ones. 45 is 5 times 9, and 49 is 7 times 7. It looks prime, but it is 7 squared. Cross both out.'
+        write: '$45 = 5 \times 9,\quad 49 = 7 \times 7$'
+        doodle_do:
+          - {id: cards, op: cross, part: c45}
+          - {id: cards, op: cross, part: c49}
+      - say: 'Three cards are left: 41, 43 and 47. Each has no factor but 1 and itself.'
+        write: '$E = \{41,\ 43,\ 47\}$'
+        doodle_do:
+          - {id: cards, op: circle, part: c41}
+          - {id: cards, op: circle, part: c43}
+          - {id: cards, op: circle, part: c47}
+      - say: 'So n of $E$ is 3.'
+        write: '$n(E) = 3$'
+      - section: 'The probability'
+        say: 'The probability of $E$ is n of $E$ over n of $S$: the number of favourable outcomes over the total number of possible outcomes.'
+        write: '$P(E) = \dfrac{n(E)}{n(S)}$'
+      - say: 'Substitute: 3 over 11. 11 is prime, so this does not simplify.'
+        write: '$= \dfrac{3}{11}$'
         point:
-          - {line: 4, kind: strike, at: '45', text: 'not prime'}
-          - {line: 4, kind: strike, at: '49'}
-      - say: 'Now put the two counts into the formula: 3 favourable over 11 possible.'
-        write: '$P = \dfrac{3}{11}$'
-        point:
-          - {line: 8, kind: move, from: {line: 7, at: '= 3'}, at: '11[[3]]', text: 'favourable'}
-          - {line: 8, kind: move, from: {line: 2, at: '= 11'}, at: '= [[11]]3', text: 'possible'}
-      - say: 'So the probability is 3 over 11, which is answer choice A.'
-        write: 'Probability $= \dfrac{3}{11}$'
+          - {line: 9, kind: move, from: {line: 7, at: '= 3'}, at: '11[[3]]', text: 'n(E)'}
+          - {line: 9, kind: move, from: {line: 3, at: '= 11'}, at: '[[11]]3', text: 'n(S)'}
+      - section: 'Check'
+        say: 'Check the three primes. 7 times 7 is 49, so any factor of a number below 50 shows up among 2, 3, 5 and 7. None of them divides 41, 43 or 47.'
+        write: 'Check: $2, 3, 5, 7$ do not divide $41, 43, 47\ \checkmark$'
+      - section: 'Answer'
+        say: 'Therefore the probability that the number is a prime is 3 over 11: option A.'
+        write: '$\therefore P(\text{prime}) = \dfrac{3}{11}$'
         answer: true
     traps:
-      B: 'You went for 5 over 11. That counts all the odd numbers, 41, 43, 45, 47 and 49. But 45 is 5 times 9 and 49 is 7 times 7, so only 3 are prime.'
-      C: 'You went for 3 over 10. The 3 primes are right, but from 40 to 50 there are 11 numbers, not 10. Both ends count, so it''s 50 minus 40, plus 1.'
-      D: 'You went for 4 over 11. That includes 49, which looks prime but is 7 times 7. The primes are only 41, 43 and 47.'
+      B: 'You went for 5 over 11. That counts all the odd numbers, 41, 43, 45, 47 and 49. But 45 is 5 times 9 and 49 is 7 times 7, so n of E is only 3.'
+      C: 'You went for 3 over 10. The 3 primes are right, but n of S is 11, not 10. Both ends count: 50 minus 40, plus 1.'
+      D: 'You went for 4 over 11. That includes 49, which looks prime but is 7 times 7. E is only 41, 43 and 47.'
   48:
     moments:
-      - say: 'A city of 90 million people is shown by age group in the pie chart. We want the number of people aged 15 to 29.'
-        write: '$\text{population} = 90 \text{ million}$'
-      - say: 'In the pie chart, the 15 to 29 group has a sector of 104 degrees.'
-        write: '15 to 29 years: $\ 104^{\circ}$'
+      - section: 'The question'
+        say: 'A city of 90 million people is shown by age group in the pie chart. We want the number of people aged 15 to 29.'
+        write: 'Population 90 million. Aged 15–29 $= ?$'
+      - section: 'Solution'
+        say: 'Solution. Read the sector from the chart: the 15 to 29 group has a sectoral angle of 104 degrees.'
+        write: '15–29 years: $104^{\circ}$; total $= 90$ million'
         point:
           - {figure: 0, kind: circle, target: '104°', text: '15–29'}
-      - say: 'Here is the idea. The whole circle, 360 degrees, stands for the whole population. So a sector''s share of the people is the same as its share of the 360 degrees.'
-        write: 'Share of people $= \dfrac{\text{angle}}{360^{\circ}}$'
-        point:
-          - {figure: 0, kind: circle, target: {x: 170, y: 150}, text: '360° = everyone'}
-          - {figure: 0, kind: circle, target: '104°', text: 'its share'}
-      - say: 'So this group is 104 over 360 of the 90 million people.'
-        write: 'Number $= \dfrac{104}{360} \times 90$ million'
-        point:
-          - {line: 2, kind: box, text: 'the rule'}
-          - {line: 3, kind: move, from: {line: 1, at: '104∘'}, at: '104', text: 'from chart'}
-          - {line: 3, kind: move, from: {line: 0, at: '90 million'}, at: '90 million', text: 'everyone'}
-      - say: '90 over 360 is a quarter, since 360 is 4 times 90. So this is 104 times a quarter.'
-        write: '$= 104 \times \dfrac{90}{360} = 104 \times \dfrac{1}{4}$ million'
-      - say: 'A quarter of 104 is 104 divided by 4, which is 26. So it is 26 million.'
+      - say: 'The whole circle, 360 degrees, stands for the whole population. So the number in a group is its angle over 360, times the total.'
+        write: 'Number $= \dfrac{\text{angle}}{360^{\circ}} \times \text{total}$'
+      - say: 'Substitute 104 degrees and 90 million.'
+        write: '$= \dfrac{104}{360} \times 90$ million'
+      - say: 'Simplify. 90 over 360 is 1 over 4, since 360 is 4 times 90. So it is 104 times 1 over 4.'
+        write: '$= 104 \times \dfrac{1}{4}$ million'
+      - say: '104 divided by 4 is 26. So it is 26 million.'
         write: '$= 26$ million'
-      - say: 'A million is 10 to the power 6. So 26 million is 26 times 10 to the 6.'
+        point:
+          - {figure: 0, kind: label, target: '15–29 yrs', text: '26 million'}
+      - say: 'One million is 10 to the power 6, so 26 million is 26 times 10 to the power 6.'
         write: '$= 26 \times 10^{6}$'
-      - say: 'A quick check that we read the chart properly: the angles 116, 104, 64, 52 and 24 add up to 360 degrees.'
-        write: 'Check: $\ 116 + 104 + 64 + 52 + 24 = 360$'
-      - say: 'So there are 26 times 10 to the 6 people aged 15 to 29, which is answer choice B.'
-        write: 'Aged 15 to 29 $= 26 \times 10^{6}$'
+      - section: 'Check'
+        say: 'Check that the chart was read correctly: the angles 116, 104, 64, 52 and 24 degrees add up to 360.'
+        write: '$116 + 104 + 64 + 52 + 24 = 360^{\circ}\ \checkmark$'
+      - section: 'Answer'
+        say: 'Therefore 26 times 10 to the power 6 people are aged 15 to 29, which is answer choice B.'
+        write: '$\therefore$ aged 15–29 $= 26 \times 10^{6}$'
         answer: true
     traps:
-      A: 'You went for 29 times 10 to the 6. That''s the under-15 group, the 116 degree sector. The 15 to 29 group is 104 degrees, and 104 over 360 of 90 million is 26 million.'
-      C: 'You went for 16 times 10 to the 6. That''s the 30 to 44 group, the 64 degree sector. Use the 104 degree sector: 104 divided by 4 is 26 million.'
-      D: 'You went for 13 times 10 to the 6. That''s the 45 to 59 group, the 52 degree sector. The 15 to 29 sector is 104 degrees, which gives 26 million.'
+      A: 'You went for 29 times 10 to the power 6. That is the under-15 group, the 116 degree sector. The 15 to 29 sector is 104 degrees: 104 over 360 of 90 million is 26 million.'
+      C: 'You went for 16 times 10 to the power 6. That is the 30 to 44 group, the 64 degree sector. Use the 104 degree sector: 26 million.'
+      D: 'You went for 13 times 10 to the power 6. That is the 45 to 59 group, the 52 degree sector. The 15 to 29 sector, 104 degrees, gives 26 million.'
   49:
     moments:
-      - say: 'A man has 6 black, 5 brown and 7 purple shirts in a drawer. With his eyes closed, what''s the probability he picks a purple one? Picture the three piles of shirts in the drawer.'
+      - section: 'The question'
+        say: 'A man has 6 black, 5 brown and 7 purple shirts in a drawer. With his eyes closed, what is the probability that he picks a purple one? Picture the three piles.'
+        write: 'Black $6$, brown $5$, purple $7$: $P(\text{purple}) = ?$'
         doodle: {name: 'custom:1986_q49_a', id: drawer, caption: 'Picked with his eyes closed'}
-        write: '$\text{black } 6,\ \ \text{brown } 5,\ \ \text{purple } 7$'
-      - say: 'Why does it matter that his eyes are closed? Because then he can''t choose a colour, so every shirt is equally likely to be picked.'
-      - say: 'When every item is equally likely, the probability is the number of favourable items over the total number of items. Here, purple shirts over all the shirts.'
-        write: '$P(\text{purple}) = \dfrac{\text{number of purple shirts}}{\text{total number of shirts}}$'
-      - say: 'Count all three piles. The total is 6 plus 5 plus 7. 6 plus 5 is 11, and 11 plus 7 is 18.'
-        doodle_do: [{id: drawer, op: label, part: drawer, text: '18 shirts'}]
-        write: 'Total $= 6 + 5 + 7 = 11 + 7 = 18$'
+      - say: 'Solution. Let $E$ be the event that he picks a purple shirt. His eyes are closed, so every shirt is equally likely.'
+        write: 'Solution: let $E$ = a purple shirt'
+      - section: 'The sample space'
+        say: 'The sample space is every shirt in the drawer. n of $S$ is 6 plus 5 plus 7.'
+        write: '$n(S) = 6 + 5 + 7$'
+      - say: '6 plus 5 is 11, and 11 plus 7 is 18.'
+        write: '$= 18$'
+        doodle_do:
+          - {id: drawer, op: label, part: drawer, text: '18 shirts'}
         point:
           - {line: 3, kind: highlight, at: '18', to: {doodle: drawer, part: drawer}}
-      - say: 'The favourable shirts are the purple ones, and there are 7 of them. That is the purple pile.'
-        doodle_do: [{id: drawer, op: circle, part: purple}]
-        write: 'Purple $= 7$'
-      - say: 'Now put the 7 purple shirts and the 18 in total into the formula.'
-        doodle_do: [{id: drawer, op: label, part: purple, text: '7 of the 18'}]
-        write: '$P(\text{purple}) = \dfrac{7}{18}$'
+      - section: 'The favourable outcomes'
+        say: 'The favourable shirts are the purple pile: n of $E$ is 7.'
+        write: '$n(E) = 7$'
+        doodle_do:
+          - {id: drawer, op: circle, part: purple}
+      - section: 'The probability'
+        say: 'The probability of $E$ is n of $E$ over n of $S$: the number of favourable outcomes over the total number of possible outcomes.'
+        write: '$P(E) = \dfrac{n(E)}{n(S)}$'
+      - say: 'Substitute: 7 over 18.'
+        write: '$= \dfrac{7}{18}$'
+        doodle_do:
+          - {id: drawer, op: label, part: purple, text: '7 of the 18'}
         point:
-          - {line: 2, kind: box, text: 'the rule'}
-          - {line: 5, kind: move, from: {line: 4, at: '= 7'}, at: '18[[7]]', text: 'purple'}
-          - {line: 5, kind: move, from: {line: 3, at: '= 18'}, at: '= [[18]]7', text: 'total'}
-      - say: 'Does it simplify? 7 is prime, and 18 is 2 times 3 times 3, with no 7 in it. So 7 over 18 is already in its lowest terms.'
-        write: '$18 = 2 \times 3 \times 3$, no factor of $7$'
-      - say: 'A sense check: purple is the biggest group but less than half the drawer, so the answer should be a bit under a half. 7 over 18 is about 0.39. Good.'
-        write: 'Sense check: $\ \dfrac{7}{18} \approx 0.39 < \dfrac{1}{2}$'
-      - say: 'So the probability is 7 over 18, which is answer choice C.'
-        write: 'Probability $= \dfrac{7}{18}$'
+          - {line: 6, kind: move, from: {line: 4, at: '= 7'}, at: '18[[7]]', text: 'n(E)'}
+          - {line: 6, kind: move, from: {line: 3, at: '= 18'}, at: '[[18]]7', text: 'n(S)'}
+      - say: 'Does it simplify? 7 is prime, and 18 is 2 times 3 times 3, with no 7 in it. So 7 over 18 is in its lowest terms.'
+        write: '$18 = 2 \times 3 \times 3$: no factor of 7'
+      - section: 'Check'
+        say: 'Check with the complement. Not purple is the 11 black and brown shirts: 11 over 18. And 7 over 18 plus 11 over 18 is 18 over 18, which is 1.'
+        write: 'Check: $P(E^{\prime}) = \dfrac{11}{18}$, $\ \dfrac{7}{18} + \dfrac{11}{18} = 1\ \checkmark$'
+      - section: 'Answer'
+        say: 'Therefore the probability of picking a purple shirt is 7 over 18: option C.'
+        write: '$\therefore P(\text{purple}) = \dfrac{7}{18}$'
         answer: true
     traps:
-      A: 'You went for 1 over 7. That ignores the total number of shirts. There are 7 purple shirts out of 18 altogether, so the probability is 7 over 18.'
-      B: 'You went for 11 over 18. That''s the probability of NOT picking purple, since 11 shirts are black or brown. Purple is 7 out of 18.'
-      D: 'You went for 7 over 11. That divides by the 11 shirts that aren''t purple. We must divide by all 18 shirts in the drawer, so it''s 7 over 18.'
+      A: 'You went for 1 over 7. That leaves out n of S. There are 7 purple shirts out of 18 altogether, so P of E is 7 over 18.'
+      B: 'You went for 11 over 18. That is P of E complement, NOT purple: the 11 black and brown shirts. Purple is 7 out of 18.'
+      D: 'You went for 7 over 11. That divides by the 11 shirts that are not purple. n of S is all 18 shirts in the drawer, so it is 7 over 18.'
   50:
     moments:
-      - say: 'The table gives the scores of students in a test. We want the pair $S$, $m$: $S$ is how many scored 4 or less, and $m$ is the mode.'
-        write: '$(S,\ m)$'
-      - say: 'Start with the mode. The mode is the score that happens most often, which means the score with the highest frequency.'
-        write: 'Mode $=$ score with the highest frequency'
-      - say: 'Read along the frequency row: 2, 4, 7, 14, 12, 6, 4 and 1. The biggest of these is 14. Picture each frequency as a bar.'
-        doodle: {name: 'custom:1986_q50_a', id: bars, caption: 'the frequencies as bars', size: scene}
-        write: 'Frequencies: $\ 2,\ 4,\ 7,\ 14,\ 12,\ 6,\ 4,\ 1$; largest $= 14$'
-      - say: 'Look at the tallest bar. That 14 sits under the score 4. So the mode is 4.'
-        doodle_do: [{id: bars, op: circle, part: b4}]
-        write: '$m = 4$'
-        point:
-          - {line: 2, kind: circle, at: 'largest = 14', text: 'most often'}
-          - {line: 3, kind: highlight, at: 'm=4', to: {doodle: bars, part: b4}}
-      - say: 'Now $S$. Scored 4 or less means the scores 1, 2, 3 and 4. It includes 4 itself.'
-        write: '4 or less: scores $1,\ 2,\ 3,\ 4$'
-      - say: 'So $S$ is the total of their frequencies: 2 plus 4 plus 7 plus 14. Those are the first four bars.'
-        doodle_do: [{id: bars, op: stage, stage: 'custom:1986_q50_a2'}]
+      - section: 'The question'
+        say: 'Scores in a Mathematics test, with their frequencies. $S$ is the number who scored 4 or less, and $m$ is the mode. We want the pair $S$, $m$. Table first.'
+        write: '$(S,\ m) = ?$'
+        diagram:
+          id: t
+          kind: table
+          columns: ['Score (x)', 'f', 'cf']
+          rows: [[1, 2, ''], [2, 4, ''], [3, 7, ''], [4, 14, ''], [5, 12, ''], [6, 6, ''], [7, 4, ''], [8, 1, '']]
+          'on': 'Table'
+      - section: 'Solution'
+        say: 'Solution. $x$ is the score, and $f$, the frequency, is the number of students with that score. Picture each frequency as a bar.'
+        write: 'Solution'
+        doodle: {name: 'custom:1986_q50_a', id: bars, caption: 'the frequencies as bars', size: scene, 'on': 'bar'}
+      - section: 'The mode'
+        say: 'The mode is the value with the highest frequency. Down the $f$ column, the highest is 14, the tallest bar, at the score 4.'
+        write: 'Highest frequency $= 14$, at $x = 4$'
+        diagram_do:
+          - {id: t, op: highlight, part: 'row:4', text: 'highest f', 'on': 'highest'}
+        doodle_do:
+          - {id: bars, op: circle, part: b4, text: 'mode', 'on': 'tallest'}
+      - say: 'So the mode, $m$, is 4.'
+        write: '$\therefore m = 4$'
+      - section: 'S, scored 4 or less'
+        say: 'Now the cf column, the cumulative frequency: a running total of $f$ down the table. 2, then 6, 13, 27, 39, 45, 49 and 50.'
+        diagram_do:
+          - {id: t, op: total, part: 'col:2', into: 'col:3', 'on': 'running'}
+      - say: '4 or less means the scores 1, 2, 3 and 4, with 4 itself included. So $S$ adds their frequencies: the first four bars.'
         write: '$S = 2 + 4 + 7 + 14$'
+        doodle_do:
+          - {id: bars, op: stage, stage: 'custom:1986_q50_a2', 'on': 'bars'}
+      - say: '2 plus 4 is 6, plus 7 is 13, plus 14 is 27. That is the cf in the row for the score 4.'
+        write: '$\therefore S = 27$'
+        diagram_do:
+          - {id: t, op: highlight, part: 'cell:4,3', text: 'S = 27', 'on': 'row'}
+        doodle_do:
+          - {id: bars, op: label, part: le4, text: '27 students'}
         point:
-          - {line: 2, kind: underline, at: '2, 4, 7, 14', text: 'scores 1–4'}
-          - {line: 5, kind: highlight, at: 'S=2+4+7+14', to: {doodle: bars, part: le4}}
-      - say: '2 plus 4 is 6. 6 plus 7 is 13. 13 plus 14 is 27.'
-        doodle_do: [{id: bars, op: label, part: le4, text: '27 students'}]
-        write: '$= 6 + 7 + 14 = 13 + 14 = 27$'
-      - say: 'Now the other four bars. Let''s check from the other end. Those who scored more than 4: 12 plus 6 plus 4 plus 1, which is 23.'
-        doodle_do: [{id: bars, op: stage, stage: 'custom:1986_q50_a3'}, {id: bars, op: label, part: gt4, text: '23 students'}]
-        write: 'More than 4: $\ 12 + 6 + 4 + 1 = 23$'
-      - say: 'Then 27 plus 23 is 50, and all the frequencies in the table do add to 50. So the count is right.'
-        write: 'All students: $\ 27 + 23 = 50$'
-      - say: 'So $S$, $m$ is 27, 4, which is answer choice A.'
-        write: '$(S,\ m) = (27,\ 4)$'
+          - {line: 6, kind: highlight, at: '27', to: {diagram: t, part: 'cell:4,3'}}
+      - section: 'Check'
+        say: 'Check from the other end. Add down the $f$ column: the total is 50, the last cf. More than 4 is the other four bars: 12 plus 6 plus 4 plus 1, which is 23.'
+        write: '$\sum f = 50$; more than 4: $12 + 6 + 4 + 1 = 23$'
+        diagram_do:
+          - {id: t, op: total, part: 'col:2', 'on': 'Add'}
+        doodle_do:
+          - {id: bars, op: stage, stage: 'custom:1986_q50_a3', 'on': 'other'}
+      - say: '50 minus 23 is 27, the same $S$ as before.'
+        write: 'Check: $50 - 23 = 27$ ✓'
+      - section: 'Answer'
+        say: '$S$ first, then $m$: 27 and 4. That is option A.'
+        write: '$\therefore (S,\ m) = (27,\ 4)$'
         answer: true
     traps:
-      B: 'You went for 14, 4. The 14 is the number who scored exactly 4. But $S$ is 4 or less, which adds the scores 1, 2 and 3 as well: 2 plus 4 plus 7 plus 14 is 27.'
-      C: 'You went for 13, 4. That counts the scores below 4 only. "4 or less" includes the 14 students who scored 4, so $S$ is 13 plus 14, which is 27.'
-      D: 'You went for 4, 4. The mode is 4, but $S$ is a count of students, not a score. Add the frequencies for scores 1 to 4: 27.'
+      B: 'You went for 14 and 4. The 14 is the number who scored exactly 4. $S$ is 4 or less, the cf at the score 4: 2 plus 4 plus 7 plus 14, which is 27.'
+      C: 'You went for 13 and 4. 13 is the cf at the score 3, the scores below 4 only. "4 or less" includes the 14 who scored 4, so $S$ is 13 plus 14, which is 27.'
+      D: 'You went for 4 and 4. The mode is 4, but $S$ is a number of students, not a score. The cf at the score 4 is 27.'

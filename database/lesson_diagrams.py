@@ -1115,7 +1115,7 @@ class DiagramBook:
     def _spec_table(
         self, v: dict[str, Any], clean: dict[str, Any], held: _Held, where: str
     ) -> None:
-        columns = _list(v.get("columns"), where, "columns", 1, 6)
+        columns = _list(v.get("columns"), where, "columns", 1, 7)
         heads = [_text(c, where, "a column's header", MAX_VALUE) for c in columns]
         if len({h.lower() for h in heads}) != len(heads):
             raise SystemExit(f"{where}: two columns have the same header")
