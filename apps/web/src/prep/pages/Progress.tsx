@@ -1,8 +1,9 @@
 /**
  * Progress: what the student has done and what it says. The hero carries the two headline
  * numbers; the signature is a strip of every run, one bar each, split into right first time,
- * taught and missed; then the latest check-up per subject beside its topic picture, and the full
- * run history, a page at a time.
+ * taught and missed; then your score (one subject: score, started at, the change and every
+ * check-up; all subjects: one row each), every topic's score, and the full run history, a page
+ * at a time. Every number follows docs/student-scoring.md.
  *
  * The run history is paged by the server; the subject filter works on what has been loaded, and
  * says so when it is waiting on older runs to find more.
@@ -13,16 +14,17 @@ import { Link } from "react-router-dom";
 
 import { Maths } from "../../Maths.js";
 
-import { api, type CheckupReport } from "../../student/api.js";
+import type { CheckupResult, SubjectScore, TopicScore, TopicStatus } from "../../student/api.js";
 import { IconArrowRight, IconBolt, IconBook, IconChart, IconTarget } from "../icons.js";
 import { lessonFeedbackApi, type LessonToRevisit, type Understood } from "../lessonFeedbackApi.js";
 import { progressApi, type PracticeRunPage, type SubjectOverview } from "../progressApi.js";
-import { useCachedLoad, useLoad, usePageTitle, useStudent } from "../store.js";
+import { useLoad, usePageTitle, useStudent } from "../store.js";
 import { Badge, Button, CountUp, PageHero, Pager, Skeleton, cx, usePaged } from "../ui.js";
 import {
   ALL,
   ScoreCell,
   SubjectName,
+  scoreNote,
   SubjectRows,
   SubjectSwitcher,
   useOverview,
@@ -37,7 +39,6 @@ import {
   NothingFreshNote,
   RunRow,
   Section,
-  masteryWord,
   plural,
   runHref,
   shortDate,
@@ -49,64 +50,93 @@ const PAGE = 20;
 /** The strip always shows at least this many slots, so a first run has room to grow into. */
 const STRIP_SLOTS = 12;
 
-/* ================================================================== topic strengths (shared) */
+/* ================================================================== topic scores (shared) */
 
-/** The legend for mastery bars: what the colour means, and what the stripes mean. */
-export function MasteryLegend() {
+/** The five topic labels (docs/student-scoring.md §2), in the student's words. */
+export const TOPIC_STATUS_WORD: Record<TopicStatus, string> = {
+  not_tried: "Not tried yet",
+  just_started: "Just started",
+  needs_work: "Needs work",
+  getting_there: "Getting there",
+  strong: "Strong",
+};
+
+/** The legend for topic bars: the five labels and where each starts. */
+export function TopicLegend() {
   return (
-    <div className="prog-legend" aria-label="How to read the bars">
+    <div className="prog-legend" aria-label="How to read the topics">
       <span className="scale">
-        <span className="sj-mono">Weak</span>
+        <span className="sj-mono">0%</span>
         <i className="grad" />
-        <span className="sj-mono">Strong</span>
+        <span className="sj-mono">100%</span>
       </span>
+      <ul className="prog-legend-labels">
+        <li>
+          <b className="needs_work">Needs work</b> under 50%
+        </li>
+        <li>
+          <b className="getting_there">Getting there</b> 50–79%
+        </li>
+        <li>
+          <b className="strong">Strong</b> 80%+
+        </li>
+        <li>
+          <b className="just_started">Just started</b> fewer than 3 answered
+        </li>
+      </ul>
       <span className="none">
         <i className="stripe" />
-        Not checked yet
+        Not tried yet
       </span>
     </div>
   );
 }
 
+/** "+10", "−3", or a muted "0": a change in whole percentage points. */
+export function Change({ value }: { value: number | null }) {
+  if (value === null) return null;
+  if (value === 0) return <span className="prog-change zero">0</span>;
+  return <span className={cx("prog-change", value > 0 ? "up" : "down")}>{value > 0 ? `+${value}` : `−${Math.abs(value)}`}</span>;
+}
+
 /**
- * Every JAMB topic from a check-up report (23 in Maths), grouped under its syllabus section.
- * The topic is the unit: each has its own bar and its own way into practice. A section is only
- * a heading, with how many of its topics were checked. Silence is not weakness: a topic the
- * check-up did not reach is shown striped, as not checked, not as a low bar.
+ * Every JAMB topic of a subject (23 in Maths) with its score, grouped under its syllabus
+ * section. The topic is the unit: each has its own bar and its own way into practice. A section
+ * is only a heading, with how many of its topics have been tried. Nothing answered is not
+ * weakness: an untried topic is shown striped, as not tried yet, not as a low bar.
  *
- * With `limit`, only that many topics show, the weakest checked ones first (then unchecked),
- * still under their section headings and in syllabus order.
+ * With `limit`, only that many topics show, the lowest scores first (then untried), still under
+ * their section headings and in syllabus order.
  */
-export function TopicStrengths({ report, limit }: { report: CheckupReport; limit?: number }) {
+export function TopicStrengths({ topics, subjectId, limit }: { topics: TopicScore[]; subjectId: string; limit?: number }) {
   const sections = useMemo(() => {
     const keep =
       limit === undefined
         ? null
         : new Set(
-            [...report.subtopics]
-              .sort((a, b) => (a.mastery ?? 2) - (b.mastery ?? 2))
+            [...topics]
+              .sort((a, b) => (a.score ?? 200) - (b.score ?? 200))
               .slice(0, limit)
-              .map((sub) => sub.subtopic_id),
+              .map((topic) => topic.subtopic_id),
           );
-    // The report lists topics in syllabus order; a section starts where its first topic is.
-    const groups: { id: string; name: string; all: CheckupReport["subtopics"]; shown: CheckupReport["subtopics"] }[] = [];
-    for (const sub of report.subtopics) {
-      const id = sub.section_id ?? sub.topic_name;
-      let group = groups.find((g) => g.id === id);
+    // Topics come in syllabus order; a section starts where its first topic is.
+    const groups: { id: string; name: string; all: TopicScore[]; shown: TopicScore[] }[] = [];
+    for (const topic of topics) {
+      let group = groups.find((g) => g.id === topic.section_id);
       if (!group) {
-        group = { id, name: sub.section_name ?? sub.topic_name, all: [], shown: [] };
+        group = { id: topic.section_id, name: topic.section_name, all: [], shown: [] };
         groups.push(group);
       }
-      group.all.push(sub);
-      if (!keep || keep.has(sub.subtopic_id)) group.shown.push(sub);
+      group.all.push(topic);
+      if (!keep || keep.has(topic.subtopic_id)) group.shown.push(topic);
     }
     return groups.filter((g) => g.shown.length > 0);
-  }, [report, limit]);
+  }, [topics, limit]);
 
   return (
     <div className="prog-sections">
       {sections.map((section) => {
-        const checked = section.all.filter((s) => s.mastery !== null).length;
+        const tried = section.all.filter((t) => t.answered > 0).length;
         const headId = `prog-sec-${section.id}`;
         return (
           <section key={section.id} className="prog-section" aria-labelledby={headId}>
@@ -116,40 +146,168 @@ export function TopicStrengths({ report, limit }: { report: CheckupReport; limit
                 {section.name}
               </h3>
               <span className="meta sj-mono">
-                {checked} of {section.all.length} {section.all.length === 1 ? "topic" : "topics"} checked
+                {tried} of {section.all.length} {section.all.length === 1 ? "topic" : "topics"} tried
               </span>
             </header>
             <ul className="prog-tlist">
-              {section.shown.map((sub) => (
-                <li key={sub.subtopic_id} className="prog-trow">
-                  <span className="name">
-                    <strong>{sub.name}</strong>
-                    <span className="meta sj-mono">
-                      {sub.answered > 0 ? `${sub.correct}/${sub.answered} right` : "No check-up question yet"}
+              {section.shown.map((topic) => {
+                const moved = topic.started_score !== null && topic.score !== null && topic.started_score !== topic.score;
+                return (
+                  <li key={topic.subtopic_id} className="prog-trow">
+                    <span className="name">
+                      <strong>{topic.name}</strong>
+                      <span className="meta sj-mono">
+                        {topic.answered > 0 ? `${topic.right} of ${topic.answered} right` : "No questions yet"}
+                        {moved ? ` · started ${topic.started_score}% → now ${topic.score}%` : ""}
+                      </span>
                     </span>
-                  </span>
-                  <span className="bar">
-                    <MasteryBar value={sub.mastery} label={`${sub.name} mastery`} />
-                    <span className={cx("word", sub.mastery === null && "none")}>
-                      {sub.mastery === null ? "Not checked" : `${Math.round(sub.mastery * 100)}% · ${masteryWord(sub.mastery)}`}
+                    <span className="bar">
+                      <MasteryBar value={topic.score === null ? null : topic.score / 100} label={`${topic.name} score`} />
+                      <span className={cx("word", topic.status, topic.score === null && "none")}>
+                        {topic.score === null
+                          ? TOPIC_STATUS_WORD[topic.status]
+                          : `${topic.score}% · ${TOPIC_STATUS_WORD[topic.status]}`}
+                      </span>
                     </span>
-                  </span>
-                  {/* Straight into the run builder with this topic alone chosen. */}
-                  <Link
-                    className="prog-trow-go"
-                    to={`/practice/new?subject=${report.subject_id}&subtopic=${sub.subtopic_id}`}
-                    aria-label={`Practise ${sub.name}`}
-                    title={`Practise ${sub.name}`}
-                  >
-                    <span className="lbl">Practise</span>
-                    <IconArrowRight size={14} />
-                  </Link>
-                </li>
-              ))}
+                    {/* Straight into the run builder with this topic alone chosen. */}
+                    <Link
+                      className="prog-trow-go"
+                      to={`/practice/new?subject=${subjectId}&subtopic=${topic.subtopic_id}`}
+                      aria-label={`Practise ${topic.name}`}
+                      title={`Practise ${topic.name}`}
+                    >
+                      <span className="lbl">Practise</span>
+                      <IconArrowRight size={14} />
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </section>
         );
       })}
+    </div>
+  );
+}
+
+/* ================================================================== your score, one subject */
+
+/** Whole days from today to an ISO date (negative once it has passed). */
+function daysTo(iso: string): number {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.round((new Date(`${iso.slice(0, 10)}T00:00:00`).getTime() - today.getTime()) / 86400000);
+}
+
+/** When the next check-up is due, in words: "Check-up due" or "Next check-up in 3 days". */
+export function checkupDueWords(scores: SubjectScore | null | undefined): string | null {
+  if (!scores || scores.checkups.length === 0) return null;
+  if (scores.checkup_due) return "Check-up due";
+  if (!scores.next_checkup_due) return null;
+  const days = daysTo(scores.next_checkup_due);
+  if (days <= 0) return "Check-up due";
+  return days === 1 ? "Next check-up tomorrow" : `Next check-up in ${days} days`;
+}
+
+/** Every check-up's result as a row of chips, oldest first: "20% → 28% → 47%". */
+export function CheckupTrail({ checkups, max }: { checkups: CheckupResult[]; max?: number }) {
+  const shown = max !== undefined && checkups.length > max ? checkups.slice(-max) : checkups;
+  const hidden = checkups.length - shown.length;
+  return (
+    <ol className="prog-trail" aria-label={`Check-up results, oldest first: ${checkups.map((c) => (c.score === null ? "none" : `${c.score}%`)).join(", ")}`}>
+      {hidden > 0 ? <li className="more sj-mono">+{hidden} earlier</li> : null}
+      {shown.map((checkup, index) => (
+        <li key={checkup.session_id} className={cx(index === shown.length - 1 && "last")}>
+          <Link to={`/checkup/${checkup.session_id}/report`} title={`${shortDate(checkup.finished_at)}: ${checkup.answered} questions`}>
+            <b className="sj-num">{checkup.score === null ? "—" : `${checkup.score}%`}</b>
+            <small className="sj-mono">{shortDate(checkup.finished_at)}</small>
+          </Link>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/**
+ * One subject's score: your score with its count, where you started and the change, the
+ * predicted score, every check-up oldest first, and when the next one is due.
+ */
+function ScoreSummary({ subject }: { subject: SubjectOverview }) {
+  const sc = subject.scores ?? null;
+  const target = subject.goal?.target_score ?? null;
+  const due = checkupDueWords(sc);
+  const checkupCta = (
+    <Button
+      size="sm"
+      tone={sc?.checkup_due || !sc || sc.checkups.length === 0 ? "dark" : "soft"}
+      to={subject.open_checkup_session_id ? `/checkup/${subject.open_checkup_session_id}` : `/checkup?subject=${subject.subject_id}`}
+      trailing={<IconArrowRight size={16} />}
+    >
+      {subject.open_checkup_session_id ? "Finish the check-up" : "Take a check-up"}
+    </Button>
+  );
+
+  if (!sc || (sc.answered === 0 && sc.checkups.length === 0)) {
+    return (
+      <Note
+        card
+        icon={<IconTarget size={18} />}
+        title={`No ${subject.subject_name} score yet`}
+        action={checkupCta}
+      >
+        Your score starts with a check-up: a short mixed test with no help, like the exam. Practice opens after it, and
+        every question you answer then adds to your topics.
+      </Note>
+    );
+  }
+
+  const gap = target !== null && (sc.predicted ?? sc.score) !== null ? Math.round(target - (sc.predicted ?? sc.score)!) : null;
+  return (
+    <div className="sj-card prog-score">
+      <dl className="prog-score-nums">
+        <div className="lead">
+          <dt>Your score</dt>
+          <dd className="sj-num">{sc.score === null ? "—" : `${sc.score}%`}</dd>
+          <small>{scoreNote(subject)}</small>
+        </div>
+        <div>
+          <dt>Started at</dt>
+          <dd className="sj-num">{sc.started_score === null ? "—" : `${sc.started_score}%`}</dd>
+          <small>
+            {sc.change !== null ? (
+              <>
+                <Change value={sc.change} /> since you started
+              </>
+            ) : (
+              "Your first check-up"
+            )}
+          </small>
+        </div>
+        <div>
+          <dt>Predicted score</dt>
+          <dd className="sj-num">{sc.predicted === null ? "—" : `${sc.predicted}%`}</dd>
+          <small>{sc.predicted === null ? "After your first check-up" : "Your last check-up"}</small>
+        </div>
+        {target !== null ? (
+          <div>
+            <dt>Target</dt>
+            <dd className="sj-num">{Math.round(target)}%</dd>
+            <small className={cx(gap !== null && gap <= 0 ? "ok" : "short")}>
+              {gap === null ? "Your goal" : gap <= 0 ? "On track" : `${gap} short`}
+            </small>
+          </div>
+        ) : null}
+      </dl>
+      <div className="prog-score-foot">
+        <div className="prog-score-history">
+          <span className="sj-mono">Check-ups, oldest first</span>
+          {sc.checkups.length > 0 ? <CheckupTrail checkups={sc.checkups} /> : <span className="prog-score-none">None yet</span>}
+        </div>
+        <div className="prog-score-due">
+          {due ? <span className={cx("prog-due", sc.checkup_due && "on")}>{due}</span> : null}
+          {sc.checkup_due || sc.checkups.length === 0 || subject.open_checkup_session_id ? checkupCta : null}
+        </div>
+      </div>
     </div>
   );
 }
@@ -221,7 +379,7 @@ function RunStrip({ runs }: { runs: Run[] }) {
 
 /* ================================================================== every subject, as rows */
 
-/** Latest check-up and practice for every subject, one row each, ten to a page. */
+/** Every subject's score, where it started, its check-ups and its practice: one row each, ten to a page. */
 function SubjectTable({ subjects, selected }: { subjects: SubjectOverview[]; selected: string | null }) {
   const paged = usePaged(subjects, 10);
   const columns: SubjectColumn[] = [
@@ -232,7 +390,34 @@ function SubjectTable({ subjects, selected }: { subjects: SubjectOverview[]; sel
       phone: "lead",
       cell: (s) => <SubjectName subject={s} to={<Link to={`/subjects/${s.subject_id}`}>{s.subject_name}</Link>} />,
     },
-    { key: "score", head: "Predicted score", width: "minmax(0, 1.3fr)", phone: "full", cell: (s) => <ScoreCell subject={s} /> },
+    { key: "score", head: "Your score", width: "minmax(0, 1.3fr)", phone: "full", cell: (s) => <ScoreCell subject={s} /> },
+    {
+      key: "started",
+      head: "Started at",
+      width: "96px",
+      align: "end",
+      cell: (s) => {
+        const sc = s.scores;
+        return (
+          <span className="prog-fig">
+            <b className="sj-num">{sc?.started_score == null ? "—" : `${sc.started_score}%`}</b>
+            <small>{sc?.change != null ? <Change value={sc.change} /> : "started at"}</small>
+          </span>
+        );
+      },
+    },
+    {
+      key: "checkups",
+      head: "Check-ups",
+      width: "minmax(0, 1.2fr)",
+      phone: "full",
+      cell: (s) =>
+        s.scores && s.scores.checkups.length > 0 ? (
+          <CheckupTrail checkups={s.scores.checkups} max={3} />
+        ) : (
+          <span className="prog-score-none">None yet</span>
+        ),
+    },
     {
       key: "runs",
       head: "Runs",
@@ -248,30 +433,19 @@ function SubjectTable({ subjects, selected }: { subjects: SubjectOverview[]; sel
       cell: (s) => <Fig value={s.practice.questions_answered} label="answered" />,
     },
     {
-      key: "rate",
-      head: "First time",
-      width: "84px",
-      align: "end",
-      cell: (s) => {
-        const p = s.practice;
-        return (
-          <Fig
-            value={p.questions_answered > 0 ? `${Math.round((p.correct_unaided / p.questions_answered) * 100)}%` : "—"}
-            label="first time"
-          />
-        );
-      },
-    },
-    {
       key: "go",
       head: "Check-up",
       width: "150px",
       align: "end",
       phone: "end",
       cell: (s) =>
-        s.latest_checkup ? (
+        s.latest_checkup && !s.scores?.checkup_due ? (
           <Link className="sj-link prog-rowlink" to={`/checkup/${s.latest_checkup.session_id}/report`}>
             Read the report <IconArrowRight size={14} />
+          </Link>
+        ) : s.latest_checkup ? (
+          <Link className="sj-link prog-rowlink warn" to={`/checkup?subject=${s.subject_id}`}>
+            <span className="ss-dot yellow" aria-hidden="true" /> Check-up due
           </Link>
         ) : (
           <Link className="sj-link prog-rowlink warn" to={`/checkup?subject=${s.subject_id}`}>
@@ -299,48 +473,27 @@ function Fig({ value, label }: { value: ReactNode; label: string }) {
 }
 
 function StrengthsCard({ subject }: { subject: SubjectOverview }) {
-  const latest = subject.latest_checkup;
-  // Remembered per check-up, so switching subjects back and forth never waits twice.
-  const report = useCachedLoad<CheckupReport | null>(`report:${latest?.session_id ?? "none"}`, () =>
-    latest ? api.report(latest.session_id) : Promise.resolve(null),
-  );
+  const topics = subject.scores?.topics ?? [];
+  const tried = topics.some((topic) => topic.answered > 0);
   return (
     <div className="sj-card prog-panel">
-      {!latest ? (
+      {!tried ? (
         <Note
           icon={<IconTarget size={18} />}
-          title={`No ${subject.subject_name} check-up yet`}
+          title={`No ${subject.subject_name} topics tried yet`}
           action={
             <Button to={`/checkup?subject=${subject.subject_id}`} trailing={<IconArrowRight size={18} />}>
               Take the {subject.subject_name} check-up
             </Button>
           }
         >
-          {subject.subject_name}'s topic strengths come from a check-up. It's about 15 questions, and it's where the plan starts.
+          Each topic's score is the questions you got right out of those you answered there. Your first check-up starts
+          them off, and practice opens after it.
         </Note>
-      ) : report.error ? (
-        <Note
-          icon={<IconChart size={18} />}
-          tone="pink"
-          title="We couldn't load your topics"
-          action={
-            <Button tone="soft" onClick={report.reload}>
-              Try again
-            </Button>
-          }
-        >
-          Your check-up is safe. This is just a loading hiccup.
-        </Note>
-      ) : !report.data ? (
-        <div className="prog-skel">
-          {[0, 1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} height={58} radius={10} />
-          ))}
-        </div>
       ) : (
         <>
-          <MasteryLegend />
-          <TopicStrengths report={report.data} />
+          <TopicLegend />
+          <TopicStrengths topics={topics} subjectId={subject.subject_id} />
         </>
       )}
     </div>
@@ -663,8 +816,13 @@ export function Progress() {
   const filterSubject = subjects.find((s) => s.subject_id === filter);
   const scope = filterSubject ? [filterSubject] : subjects;
   // Topics need one subject: the page's, else their own choice (?topics=), checked ones first.
-  const [topicsId, setTopicsId] = useSubjectChoice(subjects, { param: "topics", prefer: (s) => !!s.latest_checkup });
+  const [topicsId, setTopicsId] = useSubjectChoice(subjects, {
+    param: "topics",
+    prefer: (s) => !!s.scores?.topics.some((topic) => topic.answered > 0),
+  });
   const strengthSubject = filterSubject ?? subjects.find((s) => s.subject_id === topicsId) ?? subjects[0];
+  // One subject in view (chosen, or the only one): its score in full. Otherwise a row each.
+  const scoreSubject = filterSubject ?? (subjects.length === 1 ? subjects[0] : undefined);
 
   const totals = scope.reduce(
     (sum, s) => ({
@@ -680,7 +838,7 @@ export function Progress() {
     <PageHero
       eyebrow={filterSubject ? `Progress · ${filterSubject.subject_name}` : "Progress"}
       title="Your progress"
-      sub="Every run and check-up you've done, and what they say about where your marks are."
+      sub="Every run and check-up you've done, and what they add up to."
       aside={
         overview.data && (totals.answered > 0 || totals.runs > 0) ? (
           <HeroStats
@@ -791,23 +949,35 @@ export function Progress() {
         {!first.data && !first.error ? <Skeleton height={250} radius={14} /> : <RunStrip runs={shown} />}
       </Section>
 
-      <Section
-        eyebrow={subjects.length > 1 ? `Latest check-up · ${plural(subjects.length, "subject")}` : "Latest check-up"}
-        title={subjects.length > 1 ? "Your subjects" : "Your score"}
-        id="prog-subjects"
-        className="sj-rise d2"
-        sub="Predicted score: what you'd likely get if you sat the exam today, against your target."
-      >
-        <SubjectTable subjects={subjects} selected={filterSubject?.subject_id ?? null} />
-      </Section>
+      {scoreSubject ? (
+        <Section
+          eyebrow={`Your score · ${scoreSubject.subject_name}`}
+          title="Your score"
+          id="prog-subjects"
+          className="sj-rise d2"
+          sub="Your score is the average of your topic scores. Predicted score is your last check-up's result, worked out the same way."
+        >
+          <ScoreSummary subject={scoreSubject} />
+        </Section>
+      ) : (
+        <Section
+          eyebrow={`Your score · ${plural(subjects.length, "subject")}`}
+          title="Your subjects"
+          id="prog-subjects"
+          className="sj-rise d2"
+          sub="Your score is the average of your topic scores. Check-ups run oldest to newest; the last one is your predicted score."
+        >
+          <SubjectTable subjects={subjects} selected={null} />
+        </Section>
+      )}
 
       {strengthSubject ? (
         <Section
-          eyebrow={`Topic strengths · ${strengthSubject.subject_name}`}
+          eyebrow={`Topic scores · ${strengthSubject.subject_name}`}
           title="How each topic stands"
           id="prog-strengths"
           className="sj-rise d3"
-          sub="Mastery: how often we think you'd get a question on it right. Every topic on the syllabus, under its section, from your latest check-up. Striped means it didn't reach that topic yet."
+          sub="Every topic on the syllabus, under its section: questions right out of questions answered there. Questions you missed come back in your runs, and getting them right raises the topic's score."
           action={
             strengthSubject.latest_checkup ? (
               <Link className="sj-link" to={`/checkup/${strengthSubject.latest_checkup.session_id}/report`}>

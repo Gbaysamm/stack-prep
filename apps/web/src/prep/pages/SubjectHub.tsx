@@ -1,20 +1,20 @@
 /**
  * One subject, everything about it. The hero names the subject, the goal and the one thing to do
- * next; below, where the score stands (the same scale as home), what is weakest beside the study
- * plan, the two ways to move the score, how each topic stands, and the runs done in it.
+ * next, with your score and the predicted score; below, where the score stands (the same picture
+ * as home), the lowest topics beside the goal, the two ways to move the score, every topic's
+ * score, and the runs done in it. Every number follows docs/student-scoring.md.
  *
- * With no goal yet the hero leads with setting one, because the score, the countdown and the
- * plan all need it.
+ * With no goal yet the hero leads with setting one, because the target and the countdown need it.
  */
 
 import { useEffect, useMemo, type ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
-import { api, type CheckupReport } from '../../student/api.js';
-import { IconArrowRight, IconBolt, IconBook, IconCalendar, IconClock, IconTarget, IconTrophy } from '../icons.js';
+import { api } from '../../student/api.js';
+import { IconArrowRight, IconBolt, IconBook, IconClock, IconTarget, IconTrophy } from '../icons.js';
 import { progressApi, type SubjectOverview } from '../progressApi.js';
-import { useCachedLoad, useLoad, usePageTitle, useStudent } from '../store.js';
-import { SubjectSwitcher, rememberSubject, useOverview } from '../SubjectSwitcher.js';
+import { useLoad, usePageTitle, useStudent } from '../store.js';
+import { PRACTICE_LOCK_WORDS, SubjectSwitcher, practiceLock, rememberSubject, scoreNote, useOverview } from '../SubjectSwitcher.js';
 import { Button, CountUp, PageHero, Pager, ShowMore, Skeleton, Track, cx, usePaged, useShowMore } from '../ui.js';
 import { MetricTip } from './HowItsWorkedOut.js';
 import {
@@ -31,7 +31,7 @@ import {
   useStartCheckup,
   useStartPractice,
 } from './Home.js';
-import { MasteryLegend, TopicStrengths } from './Progress.js';
+import { TopicLegend, TopicStrengths, checkupDueWords } from './Progress.js';
 import './SubjectHub.css';
 
 const WEEK = [
@@ -64,8 +64,8 @@ function PlanCard({ subject }: { subject: SubjectOverview }) {
           </Button>
         }
       >
-        Tell us the score you want and when you sit {subject.subject_name}. Your predicted score, countdown and study plan
-        are all worked out from it.
+        Tell us the score you want and when you sit {subject.subject_name}. Your predicted score is measured against it,
+        and the countdown runs to that day.
       </Note>
     );
   }
@@ -80,7 +80,7 @@ function PlanCard({ subject }: { subject: SubjectOverview }) {
           </dt>
           <dd>
             <span className="sj-num">{fmtScore(goal.target_score)}</span>
-            <span className="of sj-mono">/100</span>
+            <span className="of sj-mono">%</span>
           </dd>
           <span className="hub-under">The score you're aiming for</span>
         </div>
@@ -116,23 +116,12 @@ function PlanCard({ subject }: { subject: SubjectOverview }) {
         )}
       </div>
 
-      {goal.minutes_per_day || goal.sessions_before_exam !== null ? (
+      {goal.minutes_per_day ? (
         <ul className="hub-plan-facts">
-          {goal.minutes_per_day ? (
-            <li>
-              <IconClock size={16} />
-              {goal.minutes_per_day} minutes a day
-            </li>
-          ) : null}
-          {goal.sessions_before_exam !== null ? (
-            <li>
-              <IconCalendar size={16} />
-              <span>
-                About {plural(goal.sessions_before_exam, 'study session')} left before the exam{' '}
-                <MetricTip id="sessions" />
-              </span>
-            </li>
-          ) : null}
+          <li>
+            <IconClock size={16} />
+            {goal.minutes_per_day} minutes a day
+          </li>
         </ul>
       ) : null}
 
@@ -147,6 +136,10 @@ function ActionCards({ subject, openRun }: { subject: SubjectOverview; openRun?:
   const practice = useStartPractice();
   const checkup = useStartCheckup();
   const latest = subject.latest_checkup;
+  const sc = subject.scores ?? null;
+  const due = checkupDueWords(sc);
+  // Practice opens after the first check-up and waits while one is due; an open run can finish.
+  const lock = practiceLock(subject);
   return (
     <div className="hub-actions">
       <article className="sj-card hub-action">
@@ -157,9 +150,10 @@ function ActionCards({ subject, openRun }: { subject: SubjectOverview; openRun?:
           <h3 className="sj-display sj-h3">Practice</h3>
         </div>
         <p className="hub-action-text">
-          Ten questions aimed at your weakest topics. Miss one twice and the coach teaches it on the board.
-          {!latest && !subject.open_practice_session_id ? ' Works best after a check-up, so it knows where to start.' : ''}
+          Ten questions aimed at your weakest topics. Miss one twice and the coach teaches it on the board, and any
+          question you miss comes back in a later run until you get it right.
         </p>
+        {lock ? <p className="hub-action-text hub-locked">{PRACTICE_LOCK_WORDS[lock]}</p> : null}
         {subject.open_practice_session_id && openRun ? (
           <div className="hub-action-progress">
             <span className="sj-mono">
@@ -174,20 +168,29 @@ function ActionCards({ subject, openRun }: { subject: SubjectOverview; openRun?:
               <Button to={`/practice/${subject.open_practice_session_id}`} trailing={<IconArrowRight size={18} />}>
                 Resume run
               </Button>
-              <Button tone="ghost" busy={practice.busy !== null} onClick={() => practice.start(subject.subject_id)}>
-                Start a new run
-              </Button>
+              {lock ? null : (
+                <Button tone="ghost" busy={practice.busy !== null} onClick={() => practice.start(subject.subject_id)}>
+                  Start a new run
+                </Button>
+              )}
             </>
           ) : (
-            <Button busy={practice.busy !== null} onClick={() => practice.start(subject.subject_id)} trailing={<IconArrowRight size={18} />}>
+            <Button
+              busy={practice.busy !== null}
+              disabled={!!lock}
+              onClick={() => practice.start(subject.subject_id)}
+              trailing={<IconArrowRight size={18} />}
+            >
               Start practice
             </Button>
           )}
         </div>
-        <Link className="hub-choose" to={`/practice/new?subject=${subject.subject_id}`}>
-          Choose topics &amp; years
-          <IconArrowRight size={14} />
-        </Link>
+        {lock ? null : (
+          <Link className="hub-choose" to={`/practice/new?subject=${subject.subject_id}`}>
+            Choose topics &amp; years
+            <IconArrowRight size={14} />
+          </Link>
+        )}
         {practice.error ? <Alert>{practice.error}</Alert> : null}
       </article>
 
@@ -200,8 +203,8 @@ function ActionCards({ subject, openRun }: { subject: SubjectOverview; openRun?:
         </div>
         <p className="hub-action-text">
           {latest
-            ? `Last taken ${shortDate(latest.finished_at)}, ${plural(latest.answered, 'question')}. Take another to see how far you've moved.`
-            : 'A short set of questions that finds where you stand and predicts your score.'}
+            ? `Last taken ${shortDate(latest.finished_at)}, ${plural(latest.answered, 'question')}${latest.score !== null ? `: ${latest.score}%` : ''}.${due ? ` ${due}.` : ''}`
+            : 'A short mixed test with no help, like the exam. Its result is your predicted score. Practice opens after it, and one is due every 7 days.'}
         </p>
         <div className="hub-action-buttons">
           {subject.open_checkup_session_id ? (
@@ -215,13 +218,22 @@ function ActionCards({ subject, openRun }: { subject: SubjectOverview; openRun?:
                 </Button>
               ) : null}
             </>
+          ) : latest && sc?.checkup_due ? (
+            <>
+              <Button busy={checkup.busy} onClick={() => checkup.start(subject.subject_id)} trailing={<IconArrowRight size={18} />}>
+                Take your check-up
+              </Button>
+              <Button to={`/checkup/${latest.session_id}/report`} tone="ghost">
+                View last report
+              </Button>
+            </>
           ) : latest ? (
             <>
               <Button to={`/checkup/${latest.session_id}/report`} tone="soft" trailing={<IconArrowRight size={18} />}>
                 View last report
               </Button>
               <Button tone="ghost" busy={checkup.busy} onClick={() => checkup.start(subject.subject_id)}>
-                Take a new check-up
+                Take one early
               </Button>
             </>
           ) : (
@@ -236,59 +248,36 @@ function ActionCards({ subject, openRun }: { subject: SubjectOverview; openRun?:
   );
 }
 
-/** How many JAMB topics show before "Show all": the weakest, under their section headings. */
+/** How many JAMB topics show before "Show all": the lowest, under their section headings. */
 const TOPICS_SHOWN = 8;
 
 function Topics({ subject }: { subject: SubjectOverview }) {
+  const topics = subject.scores?.topics ?? [];
+  // Capped to the lowest topics (TopicStrengths picks them), until "Show all" opens every one.
+  const more = useShowMore(topics, TOPICS_SHOWN);
+  if (!topics.some((topic) => topic.answered > 0)) return null;
   const latest = subject.latest_checkup;
-  const report = useCachedLoad<CheckupReport | null>(`report:${latest?.session_id ?? 'none'}`, () =>
-    latest ? api.report(latest.session_id) : Promise.resolve(null),
-  );
-  // Capped to the weakest topics (TopicStrengths picks them), until "Show all" opens every one.
-  const more = useShowMore(report.data?.subtopics ?? [], TOPICS_SHOWN);
-  if (!latest) return null;
   return (
     <Section
       eyebrow="Topic by topic"
       title="How each topic stands"
       id="hub-topics"
-      sub="From your last check-up: your weakest topics, under their syllabus sections. Show all for every topic. Striped means the check-up didn't reach it yet."
-      tip={<MetricTip id="bands" />}
+      sub="Each topic's score is the questions you got right out of those you answered there. Lowest first; show all for every topic. Striped means not tried yet."
+      tip={<MetricTip id="status" />}
       action={
-        <Link className="sj-link" to={`/checkup/${latest.session_id}/report`}>
-          Full report <IconArrowRight size={14} />
-        </Link>
+        latest ? (
+          <Link className="sj-link" to={`/checkup/${latest.session_id}/report`}>
+            Last check-up report <IconArrowRight size={14} />
+          </Link>
+        ) : null
       }
     >
       <div className="sj-card hub-panel">
-        {report.error ? (
-          <Note
-            icon={<IconBook size={18} />}
-            tone="pink"
-            title="We couldn't load your topics"
-            action={
-              <Button tone="soft" onClick={report.reload}>
-                Try again
-              </Button>
-            }
-          >
-            Your check-up is safe. This is just a loading hiccup.
-          </Note>
-        ) : !report.data ? (
-          <div className="hub-skel">
-            {[0, 1, 2, 3].map((i) => (
-              <Skeleton key={i} height={58} radius={10} />
-            ))}
-          </div>
-        ) : (
-          <>
-            <MasteryLegend />
-            <div id="hub-topic-list">
-              <TopicStrengths report={report.data} limit={more.open ? undefined : TOPICS_SHOWN} />
-            </div>
-            <ShowMore more={more} noun="topics" controls="hub-topic-list" className="hub-more" />
-          </>
-        )}
+        <TopicLegend />
+        <div id="hub-topic-list">
+          <TopicStrengths topics={topics} subjectId={subject.subject_id} limit={more.open ? undefined : TOPICS_SHOWN} />
+        </div>
+        <ShowMore more={more} noun="topics" controls="hub-topic-list" className="hub-more" />
       </div>
     </Section>
   );
@@ -332,10 +321,10 @@ function useHeroActions(subject: SubjectOverview, hasGoal: boolean) {
         Set my goal
       </Button>
     );
-  } else if (!latest) {
+  } else if (!latest || subject.scores?.checkup_due) {
     primary = (
       <Button tone="lime" size="lg" busy={checkup.busy} onClick={() => checkup.start(subject.subject_id)} trailing={<IconArrowRight size={18} />}>
-        Take a check-up
+        {latest ? 'Take your check-up' : 'Take a check-up'}
       </Button>
     );
   } else {
@@ -383,14 +372,25 @@ function HubBody({
   const weak = subject.latest_checkup?.weakest_subtopics ?? [];
   const goal = subject.goal;
   const days = goal?.days_to_exam ?? null;
-  const now = subject.latest_checkup?.score_now ?? null;
+  const sc = subject.scores ?? null;
+  const predicted = sc?.predicted ?? subject.latest_checkup?.score ?? null;
 
   const stats: Parameters<typeof HeroStats>[0]['stats'] = [];
   if (days !== null && days >= 0) {
     stats.push({ label: 'Days to exam', value: <CountUp value={days} />, tone: 'yellow', note: goal?.exam_date ? shortDate(goal.exam_date) : undefined, tip: 'days' });
   }
-  if (now !== null) {
-    stats.push({ label: 'Predicted', value: <CountUp value={Math.round(now)} />, unit: '/100', tone: 'lime', note: 'If you sat it today', tip: 'predicted' });
+  if (sc && sc.score !== null) {
+    stats.push({ label: 'Your score', value: <CountUp value={sc.score} />, unit: '%', tone: 'lime', note: scoreNote(subject), tip: 'score' });
+  }
+  if (predicted !== null) {
+    stats.push({
+      label: 'Predicted',
+      value: <CountUp value={Math.round(predicted)} />,
+      unit: '%',
+      tone: 'white',
+      note: checkupDueWords(sc) ?? 'Your last check-up',
+      tip: 'predicted',
+    });
   }
 
   return (
@@ -402,7 +402,7 @@ function HubBody({
         sub={
           hasGoal && goal ? (
             <>
-              You're aiming for <b>{fmtScore(goal.target_score!)}</b>
+              You're aiming for <b>{fmtScore(goal.target_score!)}%</b>
               {goal.exam_date ? (
                 <>
                   {' '}
@@ -412,7 +412,7 @@ function HubBody({
               . Here's where you stand, and what to do next.
             </>
           ) : (
-            `Set your goal and take a check-up, and this page fills in with your predicted score and a plan for ${subject.subject_name}.`
+            `Set your goal and take a check-up, and this page fills in with your score and every topic of ${subject.subject_name}.`
           )
         }
         actions={
@@ -426,21 +426,20 @@ function HubBody({
       {hero.error ? <Alert>{hero.error}</Alert> : null}
       {switcher}
 
-      <Section eyebrow="Predicted score" title="Where you stand" id="hub-stand" className="sj-rise d1">
+      <Section eyebrow="Your score" title="Where you stand" id="hub-stand" className="sj-rise d1">
         <Standing subject={subject} />
       </Section>
 
       <div className="hub-duo">
         <Section
           eyebrow="Work on next"
-          title="Your weakest topics"
+          title="Your lowest topics"
           id="hub-weak"
           className="sj-rise d2"
           tip={<MetricTip id="weakest" />}
           sub={
             <>
-              Mastery is how often we think you'd get a question on it right, from your check-up answers.{' '}
-              <MetricTip id="mastery" />
+              A topic's score is the questions you got right out of those you answered there. <MetricTip id="topic" />
             </>
           }
         >
@@ -452,10 +451,10 @@ function HubBody({
                 {starter.error ? <Alert>{starter.error}</Alert> : null}
               </>
             ) : (
-              <Note icon={<IconTarget size={18} />} title={subject.latest_checkup ? 'Nothing weak to single out' : 'Nothing to show yet'}>
+              <Note icon={<IconTarget size={18} />} title={subject.latest_checkup ? 'No topics to show yet' : 'Nothing to show yet'}>
                 {subject.latest_checkup
-                  ? 'Your check-up found nothing weak enough to single out. Keep practising to hold it.'
-                  : 'Take a check-up and the topics holding your score down show up here, weakest first.'}
+                  ? 'Your topics show up here, lowest score first, as soon as you have answers in them.'
+                  : 'Take a check-up and your lowest topics show up here, lowest score first.'}
               </Note>
             )}
           </div>
@@ -466,7 +465,7 @@ function HubBody({
           title="Goal and study days"
           id="hub-plan"
           className="sj-rise d3"
-          sub="The days you said you'd study, and what's left before the exam."
+          sub="The score you're aiming for, the days you said you'd study, and the countdown."
         >
           <PlanCard subject={subject} />
         </Section>

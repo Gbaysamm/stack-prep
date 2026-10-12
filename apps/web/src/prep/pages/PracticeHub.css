@@ -348,44 +348,74 @@
   background: #faf9fc;
   border-top: 1px solid var(--gray-200);
 }
-/* Checked: score | what runs aim at | the report, in three aligned cells. */
+/* Checked: your score, predicted and target | what runs aim at | the report, in three cells. */
 .sj .ph-stand {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 16px 28px;
 }
-.sj .ph-score {
+.sj .ph-figs {
   display: flex;
-  align-items: center;
-  gap: 14px;
+  align-items: flex-end;
+  gap: 22px;
+  margin: 0;
   min-width: 0;
+}
+.sj .ph-fig {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--gray-600);
+}
+.sj .ph-fig dt {
+  order: -1;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+.sj .ph-fig dd {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.1;
+  color: var(--ink-900);
+}
+.sj .ph-fig .short {
+  color: #9c1d4c;
+}
+.sj .ph-fig .ok {
+  color: var(--green-600);
 }
 .sj .ph-score-num {
   display: inline-flex;
   align-items: baseline;
-  gap: 4px;
+  gap: 2px;
 }
-.sj .ph-score-num .sj-num {
+.sj .ph-fig.lead .ph-score-num .sj-num {
   font-size: 44px;
   line-height: 1;
   color: var(--ink-900);
 }
 .sj .ph-score-num .sj-mono {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--gray-500);
 }
-.sj .ph-score-words {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-size: 13.5px;
-  line-height: 1.4;
+.sj .ph-aims-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
   color: var(--gray-600);
 }
-.sj .ph-score-words b {
+.sj .ph-locked {
+  grid-column: 1 / -1;
+  margin: 4px 0 0;
+  font-size: 13px;
   font-weight: 600;
-  color: var(--gray-900);
+  color: #8a6100;
 }
 .sj .ph-aims {
   display: flex;
@@ -425,6 +455,12 @@
 .sj .ph-chip b {
   font-size: 11px;
   color: #9c1d4c;
+}
+.sj .ph-chip b.getting_there {
+  color: #8a6100;
+}
+.sj .ph-chip b.strong {
+  color: var(--green-600);
 }
 .sj .ph-report {
   justify-self: end;
@@ -753,8 +789,12 @@
   .sj .ph-new-go {
     width: 100%;
   }
-  .sj .ph-score-num .sj-num {
+  .sj .ph-fig.lead .ph-score-num .sj-num {
     font-size: 40px;
+  }
+  .sj .ph-figs {
+    flex-wrap: wrap;
+    gap: 14px 20px;
   }
   .sj .ph-stand {
     grid-template-columns: minmax(0, 1fr);
@@ -1004,16 +1044,16 @@
 .sj .ph-tbar i.sec-start:not(:first-child) {
   margin-left: 3px;
 }
-.sj .ph-tbar i.none {
+.sj .ph-tbar i.not_tried {
   background: repeating-linear-gradient(135deg, var(--gray-200) 0 4px, var(--gray-100) 4px 8px);
 }
-.sj .ph-tbar i.weak {
+.sj .ph-tbar i.just_started {
+  background: var(--gray-300);
+}
+.sj .ph-tbar i.needs_work {
   background: var(--pink-400);
 }
-.sj .ph-tbar i.shaky {
-  background: #ffa24c;
-}
-.sj .ph-tbar i.holding {
+.sj .ph-tbar i.getting_there {
   background: var(--yellow-400);
 }
 .sj .ph-tbar i.strong {
@@ -1280,16 +1320,16 @@
   height: 10px;
   border-radius: 2px;
 }
-.sj .ph-tkey i.weak {
+.sj .ph-tkey i.needs_work {
   background: var(--pink-400);
 }
-.sj .ph-tkey i.shaky {
-  background: #ffa24c;
+.sj .ph-tkey i.getting_there {
+  background: var(--yellow-400);
 }
 .sj .ph-tkey i.strong {
   background: var(--green-400);
 }
-.sj .ph-tkey i.none {
+.sj .ph-tkey i.not_tried {
   background: repeating-linear-gradient(135deg, var(--gray-200) 0 3px, var(--gray-100) 3px 6px);
 }
 .sj .ph-checklink {

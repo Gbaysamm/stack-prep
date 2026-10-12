@@ -215,6 +215,187 @@
   box-shadow: inset 0 0 0 1px var(--gray-200);
 }
 
+.sj .prog-legend-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .prog-legend-labels b {
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+/* The five topic labels, in their own colours wherever a topic is named. */
+.sj .needs_work {
+  color: #9c1d4c;
+}
+.sj .getting_there {
+  color: #8a6100;
+}
+.sj .prog-legend-labels b.strong,
+.sj .prog-trow .word.strong {
+  color: var(--green-600);
+}
+.sj .just_started {
+  color: var(--gray-600);
+}
+
+/* "+10", "−3", a muted "0" */
+.sj .prog-change {
+  font-weight: 700;
+}
+.sj .prog-change.up {
+  color: var(--green-600);
+}
+.sj .prog-change.down {
+  color: #9c1d4c;
+}
+.sj .prog-change.zero {
+  font-weight: 400;
+  color: var(--gray-500);
+}
+
+/* ---------------------------------------------------------------- your score, one subject */
+.sj .prog-score {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 22px;
+}
+.sj .prog-score-nums {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px 20px;
+  margin: 0;
+}
+.sj .prog-score-nums > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.sj .prog-score-nums dt {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--gray-600);
+}
+.sj .prog-score-nums dd {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.1;
+  color: var(--gray-900);
+}
+.sj .prog-score-nums .lead dd {
+  font-size: 44px;
+}
+.sj .prog-score-nums small {
+  font-size: 12.5px;
+  color: var(--gray-600);
+}
+.sj .prog-score-nums small.short {
+  color: #9c1d4c;
+}
+.sj .prog-score-nums small.ok {
+  color: var(--green-600);
+}
+.sj .prog-score-foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--gray-200);
+}
+.sj .prog-score-history {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.sj .prog-score-history > .sj-mono {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+}
+.sj .prog-score-none {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+.sj .prog-score-due {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+.sj .prog-due {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+.sj .prog-due.on {
+  color: #8a6100;
+}
+
+/* Check-ups as chips joined by arrows, oldest first. */
+.sj .prog-trail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .prog-trail > li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.sj .prog-trail > li + li::before {
+  content: '→';
+  color: var(--gray-500);
+  font-size: 13px;
+}
+.sj .prog-trail > li.more + li::before {
+  content: '';
+}
+.sj .prog-trail a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--gray-100);
+  color: var(--gray-900);
+  text-decoration: none;
+  transition: background var(--t-fast) var(--ease);
+}
+.sj .prog-trail a:hover {
+  background: var(--gray-200);
+}
+.sj .prog-trail li.last a {
+  background: var(--ink-900);
+  color: #fff;
+}
+.sj .prog-trail b {
+  font-size: 14px;
+}
+.sj .prog-trail small {
+  font-size: 10.5px;
+  color: inherit;
+  opacity: 0.7;
+}
+.sj .prog-trail .more {
+  font-size: 11px;
+  color: var(--gray-500);
+}
+
 /* ---------------------------------------------------------------- topics under sections (shared) */
 /* JAMB's words: the topic is the row; the section is only a heading over its topics. */
 .sj .prog-sections {

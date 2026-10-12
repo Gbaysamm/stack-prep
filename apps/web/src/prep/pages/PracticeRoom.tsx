@@ -1004,6 +1004,13 @@ function Asking({
           <div className="pr-tags">
             <Badge tone="ghost">{question.topic_name}</Badge>
             <Badge>{question.subtopic_name}</Badge>
+            {question.comeback ? (
+              <span title="You missed or guessed this one before. Get it right now and your score goes up.">
+                <Badge tone="yellow" dot>
+                  Back again
+                </Badge>
+              </span>
+            ) : null}
           </div>
         </header>
 

@@ -224,6 +224,7 @@ async def fixture() -> AsyncIterator[dict[str, str]]:
                 ),
                 {"v": version_id, "r": ids["reviewer_id"]},
             )
+    await checkup_done(ids["student"], ids["subject_id"])
     yield ids
     async with engine.begin() as conn:
         await conn.execute(text("SET LOCAL scorepilot.allow_erasure = 'on'"))
@@ -256,6 +257,21 @@ async def fixture() -> AsyncIterator[dict[str, str]]:
             "DELETE FROM examinations WHERE short_name = :short",
         ):
             await conn.execute(text(statement), {**ids, "short": f"PR{suffix[:5]}"})
+
+
+async def checkup_done(student: str, subject: str) -> None:
+    """A finished check-up with no answers, so practice is open (docs/student-scoring.md §3)."""
+    async with get_engine().begin() as conn:
+        await conn.execute(
+            text(
+                """
+                INSERT INTO study_sessions (student_id, subject_id, session_type, ended_at)
+                SELECT id, CAST(:subject AS uuid), 'checkup', now()
+                FROM students WHERE id = CAST(:student AS uuid)
+                """
+            ),
+            {"student": student, "subject": subject},
+        )
 
 
 @pytest.fixture
@@ -1419,3 +1435,76 @@ def test_a_moment_brings_in_the_sketch_it_names() -> None:
     assert _show_sketch("sketch_c") == "sketch_c"
     assert _show_sketch(None) is False
     assert _show_sketch("sketch_z") is False
+
+
+async def test_a_question_taught_on_the_board_comes_back_in_a_later_run(
+    client: httpx.AsyncClient, fixture: dict[str, str]
+) -> None:
+    """docs/student-scoring.md §6: missed, taught, and asked again, never in the same run."""
+    first = await start(client, fixture, length=1)
+    session = first["session_id"]
+    missed = first["question"]["question_version_id"]
+    state = await answer(client, session, first, "B")
+    state = await answer(client, session, state, "B")
+    assert state["solution_steps"] is not None
+    done = (await client.post(f"/v1/practice/{session}/taught")).json()
+    assert done["stage"] == "finished"
+    assert done["score_change"]["after"] == 0
+
+    second = await start(client, fixture, length=3)
+    later = second["session_id"]
+    assert second["question"]["question_version_id"] != missed
+    assert second["question"]["comeback"] is False
+    state = await answer(client, later, second, "A", confidence="sure")
+    assert state["question"]["question_version_id"] == missed
+    assert state["question"]["comeback"] is True
+    state = await answer(client, later, state, "A", confidence="sure")
+    state = await answer(client, later, state, "A", confidence="sure")
+    assert state["stage"] == "finished"
+
+    # Before the run: 0 of 1. After: all three right, the missed one now included.
+    change = state["score_change"]
+    assert (change["before"], change["after"]) == (0, 100)
+
+    [subject] = (await client.get(f"/v1/student/{fixture['student']}/overview")).json()["subjects"]
+    scores = subject["scores"]
+    assert (scores["right"], scores["answered"], scores["score"]) == (3, 3, 100)
+    # The fixture's check-up had no answers, so it gives no starting score: the first run does.
+    assert scores["started_score"] == 0
+    assert scores["change"] == 100
+    assert scores["predicted"] is None
+    assert scores["checkup_due"] is False
+
+
+async def test_practice_is_locked_until_the_first_check_up(
+    client: httpx.AsyncClient, fixture: dict[str, str]
+) -> None:
+    """docs/student-scoring.md §3: no practice before the first check-up, nor once one is due."""
+    async with get_engine().begin() as conn:
+        await conn.execute(
+            text("DELETE FROM study_sessions WHERE student_id = CAST(:s AS uuid)"),
+            {"s": fixture["student"]},
+        )
+    body = {"student_id": fixture["student"], "subject_id": fixture["subject_id"], "length": 3}
+    refused = await client.post("/v1/practice/start", json=body)
+    assert refused.status_code == 423
+    assert "first check-up" in refused.json()["detail"]
+
+    async with get_engine().begin() as conn:
+        await conn.execute(
+            text(
+                """
+                INSERT INTO study_sessions (student_id, subject_id, session_type, started_at,
+                  ended_at)
+                VALUES (CAST(:s AS uuid), CAST(:j AS uuid), 'checkup',
+                  now() - interval '8 days', now() - interval '8 days')
+                """
+            ),
+            {"s": fixture["student"], "j": fixture["subject_id"]},
+        )
+    due = await client.post("/v1/practice/start", json=body)
+    assert due.status_code == 423
+    assert "due" in due.json()["detail"]
+
+    await checkup_done(fixture["student"], fixture["subject_id"])
+    assert (await client.post("/v1/practice/start", json=body)).status_code == 200

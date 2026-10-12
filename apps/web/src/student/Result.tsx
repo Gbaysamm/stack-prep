@@ -1,37 +1,34 @@
 /**
- * What the check-up found, and what study could make of it.
+ * What the check-up found, in the plain numbers of docs/student-scoring.md.
  *
- * The screen is ordered the way a student reads it: the number first, then where the number
- * comes from, then what to do about it. The subtopic list is the part that earns its place —
- * "Lexis and Structure, 62%" is not something anyone can act on, while "Synonyms 80%,
- * Idiomatic usage 35%" decides what Saturday morning is for.
- *
- * Every number carries what stands behind it. A subtopic the sitting never reached shows as
- * "not checked" rather than as a low score, because silence is not evidence of weakness and
- * showing it as zero would invent a gap the student does not have.
+ * The screen is ordered the way a student reads it: the result first (right ÷ answered, now the
+ * predicted score), then the subject's score from every answer, then topic by topic, then what
+ * to do about it. Every number carries the count behind it. A topic the sitting never reached
+ * shows as "not reached" rather than as a low score: silence is not evidence of weakness.
  */
 
 import { useEffect, useState } from 'react';
 
-import { api, type CheckupReport, type PlanLine, type SubtopicReport } from './api.js';
+import { api, type CheckupReport, type SubtopicReport, type TopicStatus } from './api.js';
 import './theme.css';
 
-const percent = (value: number) => `${Math.round(value * 100)}%`;
+const STATUS_LABEL: Record<TopicStatus, string> = {
+  not_tried: 'not tried yet',
+  just_started: 'just started',
+  needs_work: 'needs work',
+  getting_there: 'getting there',
+  strong: 'strong',
+};
 
-function bandFor(mastery: number | null): string {
-  if (mastery === null) return 'grey';
-  if (mastery >= 0.75) return 'green';
-  if (mastery >= 0.5) return 'mint';
-  return 'pink';
-}
+const STATUS_BAND: Record<TopicStatus, string> = {
+  not_tried: 'grey',
+  just_started: 'yellow',
+  needs_work: 'pink',
+  getting_there: 'mint',
+  strong: 'green',
+};
 
-function labelFor(mastery: number | null): string {
-  if (mastery === null) return 'not checked';
-  if (mastery >= 0.75) return 'strong';
-  if (mastery >= 0.5) return 'holding';
-  if (mastery >= 0.3) return 'shaky';
-  return 'needs teaching';
-}
+const signed = (value: number) => (value > 0 ? `+${value}` : value < 0 ? `−${Math.abs(value)}` : '0');
 
 export function Result({
   sessionId,
@@ -40,7 +37,7 @@ export function Result({
 }: {
   sessionId: string;
   onRestart: () => void;
-  /** Absent until the subject is known; training starts where the plan says to start. */
+  /** Absent until the subject is known; training starts on the weakest topics. */
   onTrain?: () => Promise<void>;
 }) {
   const [report, setReport] = useState<CheckupReport | null>(null);
@@ -68,7 +65,7 @@ export function Result({
         <main className="sp-content">
           <div className="sp-card">
             <p className="sp-small sp-muted" style={{ margin: 0 }}>
-              Working out where you stand…
+              Working out your result…
             </p>
           </div>
         </main>
@@ -76,154 +73,113 @@ export function Result({
     );
   }
 
-  const projection = report.projection;
+  const standing = report.standing;
+  const topicScores = new Map((standing?.topics ?? []).map((t) => [t.subtopic_id, t]));
   const byTopic = new Map<string, SubtopicReport[]>();
   for (const subtopic of report.subtopics) {
     byTopic.set(subtopic.topic_name, [...(byTopic.get(subtopic.topic_name) ?? []), subtopic]);
   }
-  const worked = projection?.plan.filter((line) => line.sessions > 0) ?? [];
 
   return (
     <div className="sp">
       <header className="sp-topbar">
         <div className="sp-title">
           <span className="sp-kicker">Your check-up</span>
-          <h1>Where you stand</h1>
+          <h1>Your result</h1>
         </div>
       </header>
       <main className="sp-content">
         <div className="sp-two">
           <div className="sp-card dark hard">
-            <span className="sp-eyebrow">Estimated today</span>
-            {projection ? (
+            <span className="sp-eyebrow">Predicted score</span>
+            {report.score !== null ? (
               <>
                 <div className="sp-hero-num" style={{ margin: '12px 0 6px' }}>
-                  {projection.score_now}
-                  <span style={{ fontSize: 20, color: '#d7bdff' }}> / 100</span>
+                  {report.score}
+                  <span style={{ fontSize: 20, color: '#d7bdff' }}>%</span>
                 </div>
                 <p className="sp-tiny sp-muted" style={{ margin: 0 }}>
-                  likely between {projection.score_low} and {projection.score_high}, from{' '}
-                  {report.answered} question{report.answered === 1 ? '' : 's'}
+                  You got {report.right} of {report.answered} right in this check-up
+                  {report.previous_score !== null
+                    ? `. Last check-up ${report.previous_score}% → now ${report.score}% (${signed(report.score - report.previous_score)}).`
+                    : '.'}
                 </p>
-                <div
-                  className="sp-grid3"
-                  style={{ marginTop: 18, borderTop: '1px solid #3a1a70', paddingTop: 16 }}
-                >
-                  <div className="sp-stat">
-                    <b style={{ color: '#85de4c' }}>{projection.score_projected}</b>
-                    <small style={{ color: '#c9b8ea' }}>after your plan</small>
+                {standing ? (
+                  <div
+                    className="sp-grid3"
+                    style={{ marginTop: 18, borderTop: '1px solid #3a1a70', paddingTop: 16 }}
+                  >
+                    <div className="sp-stat">
+                      <b style={{ color: '#85de4c' }}>{standing.score !== null ? `${standing.score}%` : '—'}</b>
+                      <small style={{ color: '#c9b8ea' }}>
+                        your score · {standing.right} of {standing.answered} right
+                      </small>
+                    </div>
+                    <div className="sp-stat">
+                      <b>{standing.started_score !== null ? `${standing.started_score}%` : '—'}</b>
+                      <small style={{ color: '#c9b8ea' }}>
+                        started at{standing.change !== null ? ` · ${signed(standing.change)}` : ''}
+                      </small>
+                    </div>
+                    <div className="sp-stat">
+                      <b style={{ color: '#f4fe6e' }}>{standing.checkups.length}</b>
+                      <small style={{ color: '#c9b8ea' }}>
+                        {standing.checkups.length === 1 ? 'check-up' : 'check-ups'}
+                      </small>
+                    </div>
                   </div>
-                  <div className="sp-stat">
-                    <b style={{ color: '#f4fe6e' }}>{projection.target_score ?? '—'}</b>
-                    <small style={{ color: '#c9b8ea' }}>your target</small>
-                  </div>
-                  <div className="sp-stat">
-                    <b>{projection.sessions_available}</b>
-                    <small style={{ color: '#c9b8ea' }}>sessions left</small>
-                  </div>
-                </div>
+                ) : null}
               </>
             ) : (
               <p className="sp-small sp-muted" style={{ marginTop: 12 }}>
-                Set a target score and an exam date and this becomes a projection you can plan
-                against.
+                No answers yet. Answer a few questions and your result shows here.
               </p>
             )}
           </div>
           <div className="sp-stack">
-            {projection?.shortfall_note ? (
-              <div className="sp-notice warn">{projection.shortfall_note}</div>
-            ) : projection ? (
-              <div className="sp-notice ok">
-                On the hours you gave us, this plan reaches {projection.score_projected} — past
-                your target of {projection.target_score}.
-              </div>
-            ) : null}
             <div className="sp-card lav">
-              <b className="sp-small">How the score is worked out</b>
+              <b className="sp-small">How this is worked out</b>
               <p className="sp-small" style={{ margin: '6px 0 0' }}>
-                Each part of the syllabus is worth what the exam itself gives it, and your score
-                is how much of each part you have. Nothing is curved.
-              </p>
-              <p className="sp-tiny sp-muted" style={{ margin: '8px 0 0' }}>
-                Weights: {report.weights_source}.
+                Right ÷ answered. Only your latest answer to each question counts, and questions you got
+                wrong or guessed come back in practice. A check-up is due every 7 days, and the latest one is
+                your predicted score.
               </p>
             </div>
           </div>
         </div>
 
-        <h2 style={{ margin: '26px 0 12px', fontSize: 20 }}>Subtopic by subtopic</h2>
+        <h2 style={{ margin: '26px 0 12px', fontSize: 20 }}>Topic by topic</h2>
         <div className="sp-three">
           {[...byTopic.entries()].map(([topic, subtopics]) => (
             <div className="sp-card" key={topic}>
-              <div className="sp-row between">
-                <h3 style={{ margin: 0 }}>{topic}</h3>
-                <span className="sp-tiny sp-muted">
-                  {percent(subtopics.reduce((total, s) => total + s.share, 0))} of the paper
-                </span>
-              </div>
+              <h3 style={{ margin: 0 }}>{topic}</h3>
               <div style={{ marginTop: 10 }}>
-                {subtopics.map((subtopic) => (
-                  <div key={subtopic.subtopic_id} style={{ padding: '10px 0' }}>
-                    <div className="sp-row between" style={{ marginBottom: 5 }}>
-                      <b className="sp-small">{subtopic.name}</b>
-                      <span className={`sp-pill ${bandFor(subtopic.mastery)}`}>
-                        {labelFor(subtopic.mastery)}
-                      </span>
+                {subtopics.map((subtopic) => {
+                  const score = topicScores.get(subtopic.subtopic_id);
+                  const status: TopicStatus = score?.status ?? (subtopic.answered > 0 ? 'just_started' : 'not_tried');
+                  const value = score?.score ?? null;
+                  return (
+                    <div key={subtopic.subtopic_id} style={{ padding: '10px 0' }}>
+                      <div className="sp-row between" style={{ marginBottom: 5 }}>
+                        <b className="sp-small">{subtopic.name}</b>
+                        <span className={`sp-pill ${status === 'just_started' ? 'grey' : STATUS_BAND[status]}`}>{STATUS_LABEL[status]}</span>
+                      </div>
+                      <div className={`sp-bar thin ${STATUS_BAND[status]}`}>
+                        <i style={{ width: value !== null ? `${value}%` : '0%' }} />
+                      </div>
+                      <div className="sp-tiny sp-muted" style={{ marginTop: 4 }}>
+                        {subtopic.answered > 0
+                          ? `${subtopic.correct} of ${subtopic.answered} right in this check-up`
+                          : 'not reached in this check-up'}
+                        {score && value !== null ? ` · topic score ${value}% (${score.right} of ${score.answered})` : ''}
+                      </div>
                     </div>
-                    <div className={`sp-bar thin ${bandFor(subtopic.mastery)}`}>
-                      <i style={{ width: subtopic.mastery ? percent(subtopic.mastery) : '0%' }} />
-                    </div>
-                    <div className="sp-tiny sp-muted" style={{ marginTop: 4 }}>
-                      {subtopic.answered > 0
-                        ? `${subtopic.correct} of ${subtopic.answered} right · ${percent(subtopic.share)} of the paper`
-                        : `no questions reached it · ${percent(subtopic.share)} of the paper`}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}
         </div>
-
-        {projection ? (
-          <>
-            <h2 style={{ margin: '26px 0 4px', fontSize: 20 }}>Where your time goes</h2>
-            <p className="sp-small sp-muted" style={{ margin: '0 0 12px' }}>
-              Ordered by the marks each is expected to add — not by how weak it is. A subtopic
-              worth one question of sixty pays back a sixtieth of the same hour spent on one
-              worth ten.
-            </p>
-            <div className="sp-card">
-              <ul className="sp-list">
-                {worked.map((line: PlanLine) => (
-                  <li key={line.subtopic_id}>
-                    <span className="sp-mono" style={{ minWidth: 58, fontWeight: 700 }}>
-                      +{line.marks_gained.toFixed(1)}
-                    </span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <b className="sp-small">{line.name}</b>
-                      <div className="sp-tiny sp-muted">
-                        {line.topic_name} · {percent(line.mastery_now)} →{' '}
-                        {percent(line.mastery_projected)} · {line.reason}
-                      </div>
-                    </div>
-                    <span className="sp-pill">{line.sessions} sessions</span>
-                  </li>
-                ))}
-              </ul>
-              {worked.length === 0 ? (
-                <p className="sp-small sp-muted" style={{ margin: 0 }}>
-                  There is no study time left before your exam date, so there is nothing to
-                  plan. Moving the date gives the plan something to work with.
-                </p>
-              ) : null}
-            </div>
-            <div className="sp-notice" style={{ marginTop: 14 }}>
-              {projection.caveat}
-            </div>
-          </>
-        ) : null}
 
         {report.unassessed_topics.length > 0 ? (
           <div className="sp-notice warn" style={{ marginTop: 14 }}>

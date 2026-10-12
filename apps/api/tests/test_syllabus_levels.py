@@ -134,7 +134,7 @@ async def test_the_check_up_names_the_topic_and_reports_under_its_section(
     assert (weak["section_id"], weak["section_name"]) == (ids["topic"], SECTION)
 
 
-async def test_a_plan_line_names_its_section(
+async def test_a_topic_score_names_its_section(
     client: httpx.AsyncClient, fixture: dict[str, str]
 ) -> None:
     await client.put(
@@ -164,12 +164,11 @@ async def test_a_plan_line_names_its_section(
                 },
             )
         ).json()
-    projection = (await client.get(f"/v1/checkup/{session}/report")).json()["projection"]
-    assert projection is not None
-    assert projection["plan"], "a wrong answer leaves something to plan"
-    for line in projection["plan"]:
-        assert line["name"] == TOPIC
-        assert line["section_name"] == SECTION == line["topic_name"]
+    standing = (await client.get(f"/v1/checkup/{session}/report")).json()["standing"]
+    assert standing is not None
+    [line] = [line for line in standing["topics"] if line["answered"]]
+    assert line["name"] == TOPIC
+    assert line["section_name"] == SECTION
 
 
 async def test_the_catalogue_counts_topics_not_only_skills(

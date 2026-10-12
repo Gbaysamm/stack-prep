@@ -15,7 +15,7 @@ import pytest
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 from test_access import People, people
-from test_practice import answer, client, fixture
+from test_practice import answer, checkup_done, client, fixture
 
 from app.db import get_engine
 
@@ -466,6 +466,7 @@ async def test_another_student_is_refused(
 ) -> None:
     owner, student = await people.account()
     stranger, _ = await people.account()
+    await checkup_done(student, fixture["subject_id"])
     started = await owner.post(
         "/v1/practice/start",
         json={"student_id": student, "subject_id": fixture["subject_id"], "length": 2},

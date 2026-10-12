@@ -1,12 +1,9 @@
 """The student's home: where they stand, what they have done, and what is waiting for them.
 
-Everything here is read, and none of it is new arithmetic. The score comes from the check-up
-report exactly as the report page shows it, the run counts are the ones the guided loop keeps,
-and a subject appears only because the student set a goal for it or sat something in it.
-
-A score with no goal behind it is left empty rather than filled in. The report only projects
-once there is a date and a target to project towards, and a dashboard that showed a number
-the report would not is two pages disagreeing about the same sitting.
+Everything here is read, and none of it is new arithmetic. Every score comes from
+`app.scoring` (docs/student-scoring.md), the same module the check-up report and the end of a
+run use, so no two pages can disagree. The run counts are the ones the guided loop keeps, and
+a subject appears only because the student set a goal for it or sat something in it.
 """
 
 from __future__ import annotations
@@ -21,9 +18,10 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
+from app import scoring
 from app.auth import require_student
 from app.db import connection, fetch_all
-from app.routers.checkup import build_report
+from app.routers.checkup import _subtopics
 from app.routers.practice import DEFAULT_LENGTH
 from app.routers.student import sessions_before
 
@@ -119,10 +117,12 @@ class WeakSubtopic(BaseModel):
     name: str
     #: The DB topic, which is JAMB's section. Kept for older clients.
     topic_name: str
-    #: 0 to 1, as the report shows it.
+    #: 0 to 1: the topic score (right ÷ answered) as a fraction.
     mastery: float
     #: How much the reading can carry: "low" or "medium", from the number answered.
     confidence: str
+    answered: int = 0
+    right: int = 0
     #: JAMB's section (the DB topic): a heading, never the unit a student works on.
     section_id: UUID | None = None
     section_name: str | None = None
@@ -132,13 +132,10 @@ class LatestCheckup(BaseModel):
     session_id: UUID
     finished_at: datetime
     answered: int
-    #: From the report's projection, so null until the student has a goal for this subject.
-    score_now: float | None
-    score_low: float | None
-    score_high: float | None
-    score_projected: float | None
-    target_score: float | None
-    #: Weakest first, only among subtopics the check-up actually reached.
+    right: int
+    #: That sitting's result, right ÷ answered: the predicted score.
+    score: int | None
+    #: Weakest first, by topic score, among topics the student has answered in.
     weakest_subtopics: list[WeakSubtopic]
 
 
@@ -157,6 +154,8 @@ class SubjectOverview(BaseModel):
     examination_short_name: str
     goal: SubjectGoal | None
     latest_checkup: LatestCheckup | None
+    #: Every number the home page shows for this subject (docs/student-scoring.md).
+    scores: scoring.SubjectScore | None = None
     #: A check-up started and not finished, to resume rather than start again.
     open_checkup_session_id: UUID | None
     #: The newest guided run not yet finished.
@@ -323,44 +322,47 @@ def streak(days: list[date], today: date) -> tuple[int, bool]:
     return count, active_today
 
 
-async def _latest_checkup(
-    conn: AsyncConnection, session_id: UUID, finished_at: datetime
-) -> LatestCheckup | None:
-    """The latest finished check-up, read through the report endpoint itself.
-
-    Not recomputed here: the dashboard and the report page have to show the same number, and
-    the only way to guarantee that is to ask the same function. A subject whose syllabus has
-    since lost its current version cannot be reported on, and is left empty rather than failed.
-    """
+async def _scores(
+    conn: AsyncConnection, student_id: UUID, subject_id: UUID, today: date
+) -> scoring.SubjectScore | None:
+    """The subject's scores, or nothing when its syllabus has lost its current version."""
     try:
-        found = await build_report(conn, session_id)
+        units, _ = await _subtopics(conn, subject_id)
     except HTTPException as error:
         if error.status_code == 409:
             return None
         raise
+    return await scoring.subject_scores(conn, student_id, subject_id, units, today)
+
+
+def _latest_checkup(found: scoring.SubjectScore | None) -> LatestCheckup | None:
+    """The latest finished check-up, and the weakest topics as they stand now."""
+    # A check-up closed with no answers has no result to show.
+    finished = [line for line in found.checkups if line.answered] if found else []
+    if found is None or not finished:
+        return None
+    last = finished[-1]
     reached = sorted(
-        (line for line in found.subtopics if line.mastery is not None),
-        key=lambda line: (line.mastery, -line.share),
+        (line for line in found.topics if line.score is not None),
+        key=lambda line: (line.score or 0, -line.share),
     )
-    projection = found.projection
     return LatestCheckup(
-        session_id=session_id,
-        finished_at=finished_at,
-        answered=found.answered,
-        score_now=projection.score_now if projection else None,
-        score_low=projection.score_low if projection else None,
-        score_high=projection.score_high if projection else None,
-        score_projected=projection.score_projected if projection else None,
-        target_score=projection.target_score if projection else None,
+        session_id=last.session_id,
+        finished_at=last.finished_at,
+        answered=last.answered,
+        right=last.right,
+        score=last.score,
         weakest_subtopics=[
             WeakSubtopic(
                 subtopic_id=line.subtopic_id,
                 name=line.name,
-                topic_name=line.topic_name,
-                mastery=float(line.mastery or 0.0),
-                confidence=line.confidence,
+                topic_name=line.section_name,
+                mastery=(line.score or 0) / 100,
+                confidence="low" if line.answered < scoring.JUST_STARTED_BELOW else "medium",
                 section_id=line.section_id,
                 section_name=line.section_name,
+                answered=line.answered,
+                right=line.right,
             )
             for line in reached[:WEAKEST]
         ],
@@ -470,17 +472,15 @@ async def overview(
                     row["exam_date"], row["minutes_per_day"], study_days or []
                 ),
             )
+        found = await _scores(conn, student_id, row["subject_id"], today)
         subject_views.append(
             SubjectOverview(
                 subject_id=row["subject_id"],
                 subject_name=row["subject_name"],
                 examination_short_name=row["short_name"],
                 goal=goal,
-                latest_checkup=(
-                    await _latest_checkup(conn, row["checkup_id"], row["checkup_finished_at"])
-                    if row["checkup_id"] is not None
-                    else None
-                ),
+                latest_checkup=_latest_checkup(found),
+                scores=found,
                 open_checkup_session_id=row["open_checkup_id"],
                 open_practice_session_id=open_run["session_id"] if open_run else None,
                 practice=PracticeTotals(

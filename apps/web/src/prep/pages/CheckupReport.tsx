@@ -1,80 +1,77 @@
 /**
- * /checkup/:sessionId/report — what the check-up found, and what study could make of it.
+ * /checkup/:sessionId/report — what one check-up found, in the plain numbers of
+ * docs/student-scoring.md.
  *
- * Ordered the way a student reads it: the number first (in the page hero), then where it sits on
- * the 0–100 scale against the plan and the target, then what's behind it, then what to do. Every
- * number says what stands behind it. A topic the sitting never reached shows as "not checked",
- * never as a low score: silence is not evidence of weakness.
+ * Ordered the way a student reads it: the result first (in the page hero), which is now the
+ * predicted score; then the subject's score from every answer; then the topics this sitting
+ * touched, weakest first; then what to do next and when the next check-up is due; then how the
+ * numbers are worked out. Every number is right ÷ answered, shown with its count.
  *
- * JAMB's words throughout: a TOPIC (the API's `subtopics`) is the unit read, scored and planned;
- * a SECTION (the API's `topics`) is only the heading that groups them.
- *
- * The projection needs a goal (a target and a date). Without one the report still shows the
- * topics, and asks for the goal instead of inventing a score.
+ * JAMB's words throughout: a TOPIC (the API's `subtopics`) is the unit scored; a SECTION (the
+ * API's `topics`) is only the heading that groups them.
  */
 
-import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import {
   api,
   type CheckupReport as Report,
-  type PlanLine,
+  type SubjectScore,
   type SubtopicReport,
-  type TopicReport,
+  type TopicScore,
+  type TopicStatus,
 } from '../../student/api.js';
-import {
-  IconArrowRight,
-  IconBolt,
-  IconCheck,
-  IconChevronRight,
-  IconHelp,
-  IconReplay,
-  IconTarget,
-} from '../icons.js';
+import { IconArrowRight, IconBolt, IconCalendar, IconCheck, IconHelp, IconReplay } from '../icons.js';
 import { progressApi } from '../progressApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
-import { Button, Card, CountUp, Eyebrow, PageHero, Pager, ShowMore, Skeleton, cx, usePaged, useShowMore } from '../ui.js';
-import { HOW_PATH, MetricTip } from './HowItsWorkedOut.js';
+import { Button, CountUp, Eyebrow, PageHero, ShowMore, Skeleton, cx, useShowMore } from '../ui.js';
+import { HOW_PATH } from './HowItsWorkedOut.js';
 import { NothingFreshNote, useStartPractice } from './Home.js';
 import './CheckupReport.css';
 
-/* ------------------------------------------------------------------ mastery bands */
+/* ------------------------------------------------------------------ words and numbers */
 
-type Band = 'strong' | 'holding' | 'shaky' | 'teach' | 'none';
+const STATUS_LABEL: Record<TopicStatus, string> = {
+  not_tried: 'Not tried yet',
+  just_started: 'Just started',
+  needs_work: 'Needs work',
+  getting_there: 'Getting there',
+  strong: 'Strong',
+};
 
-/** The same thresholds the first report used (student/Result.tsx). */
-function bandOf(mastery: number | null): Band {
-  if (mastery === null) return 'none';
-  if (mastery >= 0.75) return 'strong';
-  if (mastery >= 0.5) return 'holding';
-  if (mastery >= 0.3) return 'shaky';
-  return 'teach';
+/** A change in points: "+10", "−3", or a muted "0". */
+function Signed({ value }: { value: number }) {
+  if (value === 0) return <span className="cp-delta zero">0</span>;
+  return <span className={cx('cp-delta', value > 0 ? 'up' : 'down')}>{value > 0 ? `+${value}` : `−${Math.abs(value)}`}</span>;
 }
 
-const BAND_LABEL: Record<Band, string> = {
-  strong: 'Strong',
-  holding: 'Holding',
-  shaky: 'Shaky',
-  teach: 'Needs teaching',
-  none: 'Not checked',
-};
+/** "2026-10-19" as a local date, "19 October". */
+function dayText(iso: string): string {
+  const [y = 1970, m = 1, d = 1] = iso.slice(0, 10).split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' });
+}
 
-const BAND_GLOSS: Record<Band, string> = {
-  strong: '75% and up',
-  holding: '50–74%',
-  shaky: '30–49%',
-  teach: 'under 30%',
-  none: 'no questions reached it',
-};
+/** How many topics "What next" names. */
+const NEXT_COUNT = 3;
+/** Topic rows before "Show all". */
+const TOUCHED_SHOWN = 8;
 
-const pct = (value: number) => `${Math.round(value * 100)}%`;
-const fmt = (value: number) => String(Math.round(value));
-const clamp100 = (value: number) => Math.max(0, Math.min(100, value));
-
-/** Weakest first; the unmeasured go last, since nothing is known about them. */
-const byWeakness = <T extends { mastery: number | null }>(a: T, b: T) =>
-  (a.mastery ?? 2) - (b.mastery ?? 2);
+/** The topics to practise next: the lowest topic scores in the subject, the bigger topic first on a tie. */
+function weakestTopics(report: Report): { subtopic_id: string; name: string; score: number | null }[] {
+  const standing = report.standing;
+  if (standing) {
+    return standing.topics
+      .filter((t) => t.answered > 0 && t.score !== null)
+      .sort((a, b) => a.score! - b.score! || b.share - a.share)
+      .slice(0, NEXT_COUNT);
+  }
+  return report.subtopics
+    .filter((s) => s.answered > 0 && s.mastery !== null)
+    .sort((a, b) => a.mastery! - b.mastery!)
+    .slice(0, NEXT_COUNT)
+    .map((s) => ({ subtopic_id: s.subtopic_id, name: s.name, score: Math.round(s.mastery! * 100) }));
+}
 
 /** A notice: icon and title on one line, the words and any button beneath, all from the left. */
 function Notice({
@@ -86,7 +83,7 @@ function Notice({
   role = 'note',
   className,
 }: {
-  tone: 'warn' | 'short' | 'ok' | 'plain';
+  tone: 'warn' | 'plain';
   icon: ReactNode;
   title: ReactNode;
   children?: ReactNode;
@@ -110,9 +107,6 @@ function Notice({
 
 /* ------------------------------------------------------------------ page */
 
-/** The server's sentences carry decimals (59.3, 75.0); a student reads whole marks. */
-const wholeNumbers = (text: string) => text.replace(/\b\d+\.\d+\b/g, (n) => String(Math.round(Number(n))));
-
 export function CheckupReport() {
   const { sessionId = '' } = useParams();
   const student = useStudent();
@@ -126,7 +120,7 @@ export function CheckupReport() {
   const subjectName = subject?.subject_name ?? '';
   usePageTitle(subjectName ? `${subjectName} report` : 'Check-up report');
 
-  // A link to a part of the report (#topics, #plan) lands on it once the report is in.
+  // A link to a part of the report (#topics, #next) lands on it once the report is in.
   const ready = Boolean(report.data);
   useEffect(() => {
     if (!ready || !window.location.hash) return;
@@ -135,17 +129,22 @@ export function CheckupReport() {
     }, 60);
     return () => window.clearTimeout(id);
   }, [ready]);
-  // "Practise weakest topic" means that topic: the run is narrowed to the spot the plan puts
-  // first (or, with no plan, the lowest mastery measured), never a general run.
+
+  // "Practise" means the weakest topics named under What next, never a general run.
   const starter = useStartPractice();
   const starting = starter.busy !== null;
   const startIssue = starter.error;
+  const weakest = report.data ? weakestTopics(report.data) : [];
   const practise = (where: 'hero' | 'cta') => {
     if (!report.data || starting) return;
-    const target = weakestSpot(report.data);
     void starter.start(
       report.data.subject_id,
-      target ? { subtopicIds: [target.subtopic_id], label: target.name } : {},
+      weakest.length > 0
+        ? {
+            subtopicIds: weakest.map((t) => t.subtopic_id),
+            label: weakest.length === 1 ? weakest[0]!.name : `your ${weakest.length} weakest topics`,
+          }
+        : {},
       where,
     );
   };
@@ -174,70 +173,85 @@ export function CheckupReport() {
   if (!report.data) return <ReportSkeleton />;
 
   const data = report.data;
-  const projection = data.projection;
-  const finishedAt =
-    subject?.latest_checkup?.session_id === data.session_id ? subject.latest_checkup.finished_at : null;
+  const standing = data.standing;
+  const finishedAt = standing?.checkups.find((c) => c.session_id === data.session_id)?.finished_at ?? null;
   const dateText = finishedAt
     ? new Date(finishedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })
     : null;
-  const goalPath = `/subjects/${data.subject_id}/goal`;
-  const firstUp = projection?.plan.find((line) => line.sessions > 0) ?? null;
   const exam = subject?.examination_short_name;
-  const right = data.topics.reduce((sum, t) => sum + t.correct, 0);
+  const goalPath = `/subjects/${data.subject_id}/goal`;
+  const target = subject?.goal?.target_score ?? null;
+  const score = data.score;
+  const sittingTopics = data.subtopics.filter((line) => line.answered > 0).length;
+  const practiseLabel = weakest.length > 1 ? `Practise ${weakest.length} weakest topics` : 'Practise weakest topic';
 
   return (
     <div className="sj-page cp-page">
       <PageHero
         back={{ to: '/checkup', label: 'All check-ups' }}
         eyebrow={`Check-up report${exam || subjectName ? ` · ${[exam, subjectName].filter(Boolean).join(' ')}` : ''}`}
-        title="Here’s where you stand"
-        sub={`From ${data.answered} answer${data.answered === 1 ? '' : 's'}${dateText ? ` on ${dateText}` : ''}: your predicted score, what’s holding it down, and where your study time pays off most.`}
+        title={
+          data.answered > 0 && score !== null
+            ? `Your check-up result: ${score}%`
+            : 'No answers in this check-up yet'
+        }
+        sub={
+          data.answered === 0
+            ? 'Answer a few questions and your result shows here.'
+            : data.finished
+              ? `${dateText ? `On ${dateText}. ` : ''}This result is now your predicted score: the closest thing to sitting the exam today.`
+              : `From the ${data.answered} answer${data.answered === 1 ? '' : 's'} so far. Finish the check-up and the result becomes your predicted score.`
+        }
         actions={
-          <>
+          weakest.length > 0 ? (
             <Button
               tone="lime"
               onClick={() => practise('hero')}
               busy={starting}
               icon={starting ? undefined : <IconBolt size={18} />}
             >
-              {starting ? 'Starting…' : 'Practise weakest topic'}
+              {starting ? 'Starting…' : practiseLabel}
             </Button>
-          </>
+          ) : null
         }
         aside={
-          projection ? (
+          score !== null ? (
             <div className="cp-stat">
-              <span className="cp-stat-label">
-                Predicted score today <MetricTip id="predicted" onDark />
-              </span>
+              <span className="cp-stat-label">{data.finished ? 'Predicted score' : 'So far'}</span>
               <span className="cp-stat-num">
                 <span className="sj-num">
-                  <CountUp value={projection.score_now} duration={1100} />
+                  <CountUp value={score} duration={1100} />
                 </span>
-                <span className="unit sj-mono">/100</span>
+                <span className="unit sj-mono">%</span>
               </span>
-              <span className="cp-stat-note">What you’d likely get if you sat the exam today.</span>
+              <span className="cp-stat-note">
+                The average of your {sittingTopics} topic score{sittingTopics === 1 ? '' : 's'} here ({data.right} of{' '}
+                {data.answered} questions right).
+              </span>
               <span className="cp-stat-chips">
-                <span>
-                  <IconCheck size={14} />
-                  {data.answered} answers
-                </span>
-                <span>
-                  Likely {fmt(projection.score_low)}–{fmt(projection.score_high)}
-                </span>
-                <MetricTip id="range" onDark />
+                {data.previous_score !== null ? (
+                  <span>
+                    Last check-up {data.previous_score}% → now {score}% (<Signed value={score - data.previous_score} />)
+                  </span>
+                ) : (
+                  <span>
+                    <IconCheck size={14} />
+                    Your first check-up
+                  </span>
+                )}
+                {target !== null && data.finished ? (
+                  <span>{target - score > 0 ? `${target - score} to go to your target of ${target}` : `At your target of ${target}`}</span>
+                ) : null}
               </span>
             </div>
           ) : (
             <div className="cp-stat">
-              <span className="cp-stat-label">You answered</span>
+              <span className="cp-stat-label">This check-up</span>
               <span className="cp-stat-num">
-                <span className="sj-num">
-                  <CountUp value={right} />
-                </span>
-                <span className="unit sj-mono">of {data.answered} right</span>
+                <span className="sj-num">0</span>
+                <span className="unit sj-mono">answered</span>
               </span>
-              <span className="cp-stat-note">A goal turns this into a predicted score.</span>
+              <span className="cp-stat-note">Your result appears after your first answer.</span>
             </div>
           )
         }
@@ -263,38 +277,46 @@ export function CheckupReport() {
             </Button>
           }
         >
-          What’s below comes from the {data.answered} answers so far. Finish it for a firmer picture.
+          What’s below comes from the {data.answered} answers so far. Finish it to set your predicted score.
         </Notice>
       ) : null}
 
-      {projection ? <ScoreSection report={data} goalPath={goalPath} subject={subject} /> : <NoGoal report={data} goalPath={goalPath} />}
+      {standing ? <YourScore standing={standing} subjectName={subjectName} target={target} goalPath={goalPath} /> : null}
 
-      <HowWorkedOut report={data} />
+      <Touched report={data} />
 
-      {/* JAMB topics no question reached (the API's own list names sections). */}
-      {data.subtopics.some((s) => s.answered === 0) ? (
-        <NotReached topics={data.subtopics.filter((s) => s.answered === 0).map((s) => s.name)} />
-      ) : null}
-
-      <Topics report={data} />
-
-      {projection ? <Plan lines={projection.plan} sessionsAvailable={projection.sessions_available} /> : null}
-
-      <section className="cp-cta sj-rise" aria-labelledby="cp-cta-title">
+      <section className="cp-cta sj-rise" id="next" aria-labelledby="cp-cta-title">
         <Eyebrow>What next</Eyebrow>
         <h2 id="cp-cta-title" className="sj-display sj-h2">
-          Start with your weakest topic
+          {weakest.length > 1
+            ? `Practise your ${weakest.length} weakest topics`
+            : weakest.length === 1
+              ? 'Practise your weakest topic'
+              : 'Start practising'}
         </h2>
-        <p>
-          {firstUp
-            ? `Your plan starts with ${firstUp.name} (${firstUp.topic_name}). Get a hint or a worked lesson whenever you’re stuck.`
-            : 'Practice picks up where you’re weakest. Get a hint or a worked lesson whenever you’re stuck.'}
-        </p>
-        {startIssue ? (
-          <p className="cp-issue dark">
-            {startIssue}
-          </p>
+        {weakest.length > 0 ? (
+          <ol className="cp-next">
+            {weakest.map((t) => (
+              <li key={t.subtopic_id}>
+                <span className="name">{t.name}</span>
+                <b className="sj-mono">{t.score !== null ? `${t.score}%` : '—'}</b>
+              </li>
+            ))}
+          </ol>
         ) : null}
+        <p>
+          Questions you got wrong or guessed come back in practice until you get them. Get a hint or a worked lesson
+          whenever you’re stuck.
+        </p>
+        {standing && (standing.checkup_due || standing.next_checkup_due) ? (
+          <span className="cp-due">
+            <IconCalendar size={16} />
+            {standing.checkup_due || !standing.next_checkup_due
+              ? 'Your next check-up is due now'
+              : `Next check-up due ${dayText(standing.next_checkup_due)}`}
+          </span>
+        ) : null}
+        {startIssue ? <p className="cp-issue dark">{startIssue}</p> : null}
         {starter.exhausted?.key === 'cta' ? <NothingFreshNote starter={starter} /> : null}
         <div className="cp-cta-actions">
           <Button
@@ -311,595 +333,217 @@ export function CheckupReport() {
           </Button>
         </div>
       </section>
+
+      <HowWorkedOut />
     </div>
   );
 }
 
-/* ------------------------------------------------------------------ the scale: today, plan, target */
+/* ------------------------------------------------------------------ your score */
 
-function ScoreSection({
-  report,
+function YourScore({
+  standing,
+  subjectName,
+  target,
   goalPath,
-  subject,
 }: {
-  report: Report;
+  standing: SubjectScore;
+  subjectName: string;
+  target: number | null;
   goalPath: string;
-  subject: { goal: { minutes_per_day: number | null; days_to_exam: number | null } | null } | undefined;
 }) {
-  const p = report.projection!;
-  const low = clamp100(p.score_low);
-  const high = clamp100(p.score_high);
-  const now = clamp100(p.score_now);
-  const projected = clamp100(p.score_projected);
-  const target = p.target_score !== null ? clamp100(p.target_score) : null;
-  const bandMid = (low + high) / 2;
-  // The range label stays inside the scale at either end.
-  const labelAlign = bandMid < 22 ? 'start' : bandMid > 78 ? 'end' : 'mid';
-  const gain = p.score_projected - p.score_now;
-
+  const s = standing;
+  const trend = s.checkups.filter((c) => c.score !== null);
   return (
-    <section className="cp-section first" aria-labelledby="cp-scale-title">
+    <section className="cp-section first" aria-labelledby="cp-score-title">
       <div className="cp-sechead">
         <div className="text">
-          <Eyebrow>On the 0–100 scale</Eyebrow>
-          <h2 id="cp-scale-title" className="sj-display sj-h2">
-            Today, after your plan, and your target
+          <Eyebrow>{subjectName ? `${subjectName} now` : 'The subject now'}</Eyebrow>
+          <h2 id="cp-score-title" className="sj-display sj-h2">
+            Your score
           </h2>
-        </div>
-      </div>
-
-      <div className="cp-scalecard sj-rise d1">
-        <div
-          className="cp-scale"
-          role="img"
-          aria-label={`Today ${fmt(p.score_now)}, likely between ${fmt(p.score_low)} and ${fmt(p.score_high)}${
-            target !== null ? `, target ${fmt(p.target_score!)}` : ''
-          }, ${fmt(p.score_projected)} after your plan.`}
-        >
-          <div className="cp-scale-flags">
-            {target !== null ? (
-              <span className="cp-flag" style={{ left: `${target}%` }}>
-                <span className="tab sj-mono">Target {fmt(p.target_score!)}</span>
-              </span>
-            ) : null}
-          </div>
-          <div className="cp-scale-track">
-            <span className="band" style={{ left: `${low}%`, width: `${high - low}%` }} />
-            {projected > now ? <span className="gain" style={{ left: `${now}%`, width: `${projected - now}%` }} /> : null}
-            <span className="dot projected" style={{ left: `${projected}%` }} />
-            <span className="dot now" style={{ left: `${now}%` }} />
-            {target !== null ? <span className="pole" style={{ left: `${target}%` }} /> : null}
-          </div>
-          <div className="cp-scale-bracket">
-            <span className={cx('bracket', labelAlign)} style={{ left: `${low}%`, width: `${high - low}%` }}>
-              <span className="label sj-mono">
-                today {fmt(p.score_now)} · likely {fmt(p.score_low)}–{fmt(p.score_high)}
-              </span>
-            </span>
-          </div>
-          <div className="cp-scale-ticks sj-mono" aria-hidden="true">
-            {[0, 25, 50, 75, 100].map((tick) => (
-              <span key={tick} style={{ left: `${tick}%` }}>
-                {tick}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div className="cp-stats three">
-          <div className="cp-statcell">
-            <span className="cp-statcell-head">
-              <span className="key projected" aria-hidden="true" />
-              <span className="sj-eyebrow">After your plan</span>
-              <MetricTip id="projected" />
-            </span>
-            <span className="sj-num green">
-              <CountUp value={p.score_projected} />
-            </span>
-            <span className="cp-statcell-foot">
-              {gain > 0 ? `+${fmt(gain)} on today, if you follow the plan to exam day.` : 'Where the plan takes you by exam day.'}
-            </span>
-          </div>
-          <div className="cp-statcell">
-            <span className="cp-statcell-head">
-              <span className="key target" aria-hidden="true" />
-              <span className="sj-eyebrow">Your target</span>
-              <MetricTip id="target" />
-              <Link to={goalPath} className="cp-change">
-                Change
-              </Link>
-            </span>
-            <span className="sj-num">{p.target_score !== null ? <CountUp value={p.target_score} /> : '—'}</span>
-            <span className="cp-statcell-foot">
-              {p.target_score !== null ? 'The score you told us you’re aiming for.' : 'No target yet. Set one to measure the plan against.'}
-            </span>
-          </div>
-          <div className="cp-statcell">
-            <span className="cp-statcell-head">
-              <span className="key sessions" aria-hidden="true" />
-              <span className="sj-eyebrow">Sessions left</span>
-              <MetricTip id="sessions" />
-            </span>
-            <span className="sj-num">
-              <CountUp value={p.sessions_available} />
-            </span>
-            <span className="cp-statcell-foot">
-              {subject?.goal?.minutes_per_day && subject.goal.days_to_exam !== null
-                ? `${subject.goal.minutes_per_day}-minute study sessions in the ${subject.goal.days_to_exam} days to go.`
-                : 'Study sessions on your study days before the exam.'}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <Verdict report={report} goalPath={goalPath} />
-    </section>
-  );
-}
-
-function NoGoal({ report, goalPath }: { report: Report; goalPath: string }) {
-  const measured = report.subtopics.filter((t) => t.answered > 0);
-  const right = report.topics.reduce((sum, t) => sum + t.correct, 0);
-  return (
-    <section className="cp-section first" aria-labelledby="cp-nogoal-title">
-      <div className="cp-sechead">
-        <div className="text">
-          <Eyebrow>Predicted score</Eyebrow>
-          <h2 id="cp-nogoal-title" className="sj-display sj-h2">
-            Set a goal to see your predicted score
-          </h2>
-        </div>
-      </div>
-      <div className="cp-scalecard cp-nogoal sj-rise d1">
-        <p className="cp-nogoal-text">
-          Your score is worked out against a target and an exam date. Add them and this report fills in, with a plan of
-          where your time goes.
-        </p>
-        <div className="cp-stats three">
-          <div className="cp-statcell">
-            <span className="cp-statcell-head">
-              <span className="sj-eyebrow">Answered</span>
-              <MetricTip id="checkup" />
-            </span>
-            <span className="sj-num">{report.answered}</span>
-            <span className="cp-statcell-foot">questions in this check-up</span>
-          </div>
-          <div className="cp-statcell">
-            <span className="sj-eyebrow">Right</span>
-            <span className="sj-num green">{right}</span>
-            <span className="cp-statcell-foot">answered correctly</span>
-          </div>
-          <div className="cp-statcell">
-            <span className="sj-eyebrow">Topics checked</span>
-            <span className="sj-num">{measured.length}</span>
-            <span className="cp-statcell-foot">
-              of {report.subtopics.length} reached by at least one question
-            </span>
-          </div>
-        </div>
-        <div className="cp-nogoal-actions">
-          <Button to={goalPath} trailing={<IconArrowRight size={18} />}>
-            Set my goal
-          </Button>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ verdict */
-
-function Verdict({ report, goalPath }: { report: Report; goalPath: string }) {
-  const p = report.projection!;
-  if (p.target_score === null) return null;
-  const short = p.target_score - p.score_projected;
-  if (short > 0) {
-    // The gap as the headline figure, the plain reason beside it, and the one way to change it.
-    return (
-      <div className="cp-short sj-rise d2" role="note">
-        <div className="cp-short-fig" aria-hidden="true">
-          <span className="sj-num">{fmt(short)}</span>
-          <span>{Math.round(short) === 1 ? 'mark' : 'marks'} short</span>
-        </div>
-        <div className="cp-short-text">
-          <strong>
-            This plan gets you to {fmt(p.score_projected)} by exam day. You’re aiming for {fmt(p.target_score)}.
-          </strong>
           <p>
-            The last {fmt(short)} {Math.round(short) === 1 ? 'mark needs' : 'marks need'} more study
-            time: more days a week, or longer each day. Moving the same hours around won’t close the gap.
+            It counts every answer you’ve given in {subjectName || 'this subject'}, practice and check-ups, with only
+            your latest try at each question.
           </p>
         </div>
-        <div className="cp-short-actions">
-          <Button size="sm" tone="dark" to={goalPath} trailing={<IconArrowRight size={16} />}>
-            Adjust my goal
-          </Button>
-          <span className="cp-tipline">
-            How this is worked out <MetricTip id="gap" />
-          </span>
-        </div>
       </div>
-    );
-  }
-  if (p.shortfall_note) {
-    return (
-      <Notice tone="short" className="sj-rise d2" icon={<IconTarget size={18} />} title="Short of your target">
-        {wholeNumbers(p.shortfall_note)}
-      </Notice>
-    );
-  }
-  return (
-    <Notice
-      tone="ok"
-      className="sj-rise d2"
-      icon={<IconCheck size={18} />}
-      title="You’re on track"
-      action={
-        <span className="cp-tipline">
-          How this is worked out <MetricTip id="gap" />
-        </span>
-      }
-    >
-      On the time you gave us, this plan reaches {fmt(p.score_projected)}, past your target of {fmt(p.target_score)}.
-    </Notice>
-  );
-}
 
-/* ------------------------------------------------------------------ how it is worked out */
-
-function HowWorkedOut({ report }: { report: Report }) {
-  const p = report.projection;
-  return (
-    <details className="cp-how sj-rise d3">
-      <summary>
-        <span className="cp-ico" aria-hidden="true">
-          <IconHelp size={18} />
-        </span>
-        <strong className="cp-how-title">How your score is worked out</strong>
-        <IconChevronRight size={20} className="cp-how-chev" />
-      </summary>
-      <div className="cp-how-body">
-        <p className="cp-how-lede">What the number means, and how sure it is.</p>
-        <ol className="cp-how-steps">
-          <li>
-            <span className="cp-how-head">
-              <span className="n sj-mono">1</span>
-              <b>Each topic of the syllabus is worth what the exam gives it.</b>
+      <div className="cp-scorecard sj-rise d1">
+        <div className="cp-stats">
+          <div className="cp-statcell">
+            <span className="sj-eyebrow">Your score</span>
+            <span className="sj-num">{s.score !== null ? `${s.score}%` : '—'}</span>
+            <span className="cp-statcell-foot">
+              {s.topics_tried > 0
+                ? `Average of ${s.topics_tried} topic${s.topics_tried === 1 ? '' : 's'} tried`
+                : 'No answers yet'}
             </span>
-            <p>Weights used: {report.weights_source}.</p>
-          </li>
-          <li>
-            <span className="cp-how-head">
-              <span className="n sj-mono">2</span>
-              <b>Your score is how much of each topic you have.</b>
+          </div>
+          <div className="cp-statcell">
+            <span className="sj-eyebrow">Started at</span>
+            <span className="sj-num">{s.started_score !== null ? `${s.started_score}%` : '—'}</span>
+            <span className="cp-statcell-foot">
+              {s.change !== null ? (
+                <>
+                  <Signed value={s.change} /> since your first check-up
+                </>
+              ) : (
+                'Your first check-up'
+              )}
             </span>
-            <p>Worked out from your answers, question by question. Nothing is curved.</p>
-          </li>
-          <li>
-            <span className="cp-how-head">
-              <span className="n sj-mono">3</span>
-              <b>The range shows how sure it is.</b>
+          </div>
+          <div className="cp-statcell">
+            <span className="cp-statcell-head">
+              <span className="sj-eyebrow">Predicted score</span>
+              <Link to={goalPath} className="cp-change">
+                {target !== null ? 'Change target' : 'Set a target'}
+              </Link>
             </span>
-            <p>
-              {p
-                ? `${pct(p.unmeasured_share)} of the paper wasn’t reached, so it sits at your average for its section. More answers narrow the range.`
-                : 'More answers narrow the range.'}
-            </p>
-          </li>
-        </ol>
-        <div className="cp-how-fine">
-          <p>{report.caveat}</p>
-          {p ? <p>{p.caveat}</p> : null}
+            <span className="sj-num green">{s.predicted !== null ? `${s.predicted}%` : '—'}</span>
+            <span className="cp-statcell-foot">
+              {s.predicted === null
+                ? 'Your latest check-up result, once you finish one.'
+                : target === null
+                  ? 'Your latest check-up result.'
+                  : target - s.predicted > 0
+                    ? `${target - s.predicted} to go to your target of ${target}.`
+                    : `At or past your target of ${target}.`}
+            </span>
+          </div>
         </div>
-        <Link className="sj-link cp-how-more" to={HOW_PATH}>
-          Every number on this page, explained <IconArrowRight size={14} />
-        </Link>
+        {trend.length > 1 ? (
+          <div className="cp-trend">
+            <span className="sj-eyebrow">Check-ups so far</span>
+            <span className="cp-trend-line sj-mono">
+              {trend.map((c, i) => (
+                <span key={c.session_id}>
+                  {i > 0 ? <span className="arrow" aria-hidden="true">→</span> : null}
+                  <b className={cx(i === trend.length - 1 && 'last')}>{c.score}%</b>
+                </span>
+              ))}
+            </span>
+          </div>
+        ) : null}
       </div>
-    </details>
+    </section>
   );
 }
 
-/* ------------------------------------------------------------------ topics */
+/* ------------------------------------------------------------------ topics this check-up touched */
 
-/** Section cards a page, topics a card before "Show all" (every section's fit), plan lines a page. */
-const TOPICS_PER_PAGE = 6;
-const SUBS_SHOWN = 8;
-const PLAN_PER_PAGE = 8;
-/** Names in the "not reached" note before the rest fold away. */
-const NOT_REACHED_SHOWN = 4;
-
-function NotReached({ topics }: { topics: string[] }) {
-  const more = useShowMore(topics, NOT_REACHED_SHOWN);
-  const count = `${topics.length} ${topics.length === 1 ? 'topic' : 'topics'}`;
-  return (
-    <Notice
-      tone="warn"
-      icon={<IconHelp size={18} />}
-      title={`Not reached: ${count}`}
-      action={more.hidden > 0 ? <ShowMore more={more} noun="topics" controls="cp-notreached" className="cp-inline-more" /> : undefined}
-    >
-      <span id="cp-notreached">
-        {more.items.join(', ')}
-        {more.open || more.hidden === 0 ? '' : ` and ${more.hidden} more`}.
-      </span>{' '}
-      No questions touched these, so nothing on this page is a judgement about them.
-    </Notice>
-  );
+interface TouchedRow {
+  sub: SubtopicReport;
+  topic: TopicScore | undefined;
 }
 
-function Topics({ report }: { report: Report }) {
-  const [weakestFirst, setWeakestFirst] = useState(false);
-  const groups = useMemo(() => {
-    // Grouped under their sections, in syllabus order; a section is a heading, not a score.
-    const subs = new Map<string, SubtopicReport[]>();
-    for (const s of report.subtopics) {
-      const key = s.section_name ?? s.topic_name;
-      subs.set(key, [...(subs.get(key) ?? []), s]);
-    }
-    const topics = report.topics.map((topic) => ({
-      topic,
-      subtopics: subs.get(topic.name) ?? [],
-      share: (subs.get(topic.name) ?? []).reduce((sum, s) => sum + s.share, 0),
-    }));
-    if (!weakestFirst) return topics;
-    // Weakest first: each section's topics weakest first, and the section with the weakest
-    // topic leads. Unchecked topics sort last, never as weak.
-    const weakestIn = (g: (typeof topics)[number]) =>
-      Math.min(2, ...g.subtopics.map((s) => (s.mastery === null ? 2 : s.mastery)));
-    return topics
-      .map((g) => ({ ...g, subtopics: [...g.subtopics].sort(byWeakness) }))
-      .sort((a, b) => weakestIn(a) - weakestIn(b));
-  }, [report, weakestFirst]);
-  const paged = usePaged(groups, TOPICS_PER_PAGE, weakestFirst);
+function Touched({ report }: { report: Report }) {
+  const byId = new Map((report.standing?.topics ?? []).map((t) => [t.subtopic_id, t]));
+  const rows: TouchedRow[] = report.subtopics
+    .filter((s) => s.answered > 0)
+    .map((sub) => ({ sub, topic: byId.get(sub.subtopic_id) }))
+    // Weakest first, by the topic score now; this sitting breaks a tie.
+    .sort(
+      (a, b) =>
+        (a.topic?.score ?? Math.round((a.sub.mastery ?? 0) * 100)) - (b.topic?.score ?? Math.round((b.sub.mastery ?? 0) * 100)) ||
+        (a.sub.mastery ?? 0) - (b.sub.mastery ?? 0),
+    );
+  const more = useShowMore(rows, TOUCHED_SHOWN);
+  if (rows.length === 0) return null;
 
   return (
     <section className="cp-section" id="topics" aria-labelledby="cp-topics-title">
       <div className="cp-sechead">
         <div className="text">
-          <Eyebrow>Topic by topic</Eyebrow>
-          <div className="cp-titlerow">
-            <h2 id="cp-topics-title" className="sj-display sj-h2">
-              What you’ve got, and what’s shaky
-            </h2>
-            <MetricTip id="bands" />
-          </div>
-          <p>
-            How much of each topic you have, from what you answered, under its syllabus section. Grey isn’t a low
-            score — we just didn’t get there.{' '}
-            <MetricTip id="mastery" />
-          </p>
+          <Eyebrow>
+            {rows.length} {rows.length === 1 ? 'topic' : 'topics'} in this check-up
+          </Eyebrow>
+          <h2 id="cp-topics-title" className="sj-display sj-h2">
+            Topic by topic, weakest first
+          </h2>
+          <p>What you got right in this check-up, and each topic’s score now from all your answers.</p>
         </div>
       </div>
 
-      {/* One quiet bar: what the colours mean on the left, the order on the right. */}
-      <div className="cp-topicbar">
-        <ul className="cp-bandkey" aria-label="What the colours mean">
-          {(['strong', 'holding', 'shaky', 'teach', 'none'] as Band[]).map((band) => (
-            <li key={band}>
-              <span className={cx('swatch', band)} aria-hidden="true" />
-              <b>{BAND_LABEL[band]}</b>
-              {band === 'none' ? null : <span>{BAND_GLOSS[band]}</span>}
-            </li>
-          ))}
-        </ul>
-        <div className="cp-seg" role="group" aria-label="Order topics">
-          <button type="button" aria-pressed={!weakestFirst} onClick={() => setWeakestFirst(false)}>
-            Syllabus order
-          </button>
-          <button type="button" aria-pressed={weakestFirst} onClick={() => setWeakestFirst(true)}>
-            Weakest first
-          </button>
-        </div>
-      </div>
-
-      <div className="cp-topics">
-        {paged.items.map(({ topic, subtopics, share }, index) => (
-          <TopicCard key={topic.topic_id} topic={topic} subtopics={subtopics} share={share} index={index} />
-        ))}
-      </div>
-      <Pager paged={paged} noun="sections" label="Pages of sections" anchorId="topics" />
-    </section>
-  );
-}
-
-function TopicCard({
-  topic,
-  subtopics,
-  share,
-  index,
-}: {
-  topic: TopicReport;
-  subtopics: SubtopicReport[];
-  share: number;
-  index: number;
-}) {
-  const more = useShowMore(subtopics, SUBS_SHOWN);
-  const listId = `cp-subs-${topic.topic_id}`;
-  const checked = subtopics.filter((s) => s.mastery !== null).length;
-  // A section is a heading over its topics: what it holds and how much of it was reached,
-  // never a mastery of its own.
-  return (
-    <article className="sj-card cp-topic" style={{ animationDelay: `${index * 50}ms` } as CSSProperties}>
-      <header className="cp-topic-head">
-        <div className="cp-topic-name">
-          <span className="cp-sec-eyebrow sj-mono">Section</span>
-          <h3 className="sj-display sj-h3">{topic.name}</h3>
-          <span className="meta">
-            {subtopics.length} {subtopics.length === 1 ? 'topic' : 'topics'} · {checked} checked
-            {share > 0 ? ` · ${pct(share)} of the paper` : ''}
-          </span>
-        </div>
-        <span className="cp-sec-right sj-mono">
-          {topic.answered > 0 ? `${topic.correct}/${topic.answered} right` : 'Not reached'}
-        </span>
-      </header>
-      {subtopics.length > 0 ? (
-        <ul className="cp-subs" id={listId}>
-          {more.items.map((s) => {
-            const b = bandOf(s.mastery);
+      <div className="sj-card cp-touched">
+        <ul className="cp-subs" id="cp-touched-list">
+          {more.items.map(({ sub, topic }) => {
+            const status: TopicStatus = topic?.status ?? 'not_tried';
+            const value = topic?.score ?? null;
             return (
-              <li key={s.subtopic_id} className={cx('cp-sub', b)}>
+              <li key={sub.subtopic_id} className={cx('cp-sub', status)}>
                 <div className="cp-sub-row">
-                  <span className="name">{s.name}</span>
-                  <span className="val sj-mono">{s.mastery !== null ? pct(s.mastery) : '—'}</span>
+                  <span className="name">
+                    {sub.name}
+                    {sub.section_name ? <small>{sub.section_name}</small> : null}
+                  </span>
+                  <span className="val sj-mono">
+                    {sub.correct} of {sub.answered} right
+                  </span>
                 </div>
-                <Bar value={s.mastery} band={b} />
-                <span className="cp-sub-meta">
-                  <span className={cx('tag', b)}>{BAND_LABEL[b]}</span>
-                  {s.answered > 0 ? `${s.correct} of ${s.answered} right` : 'no questions reached it'}
-                </span>
+                {topic ? (
+                  <>
+                    <div
+                      className={cx('cp-bar', status)}
+                      role="meter"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={value ?? undefined}
+                      aria-valuetext={value !== null ? `Topic score ${value}%, ${STATUS_LABEL[status].toLowerCase()}` : 'not tried yet'}
+                    >
+                      <span style={{ width: value !== null ? `${value}%` : '100%' }} />
+                    </div>
+                    <span className="cp-sub-meta">
+                      <span className={cx('tag', status)}>{STATUS_LABEL[status]}</span>
+                      {value !== null ? `Topic score ${value}% (${topic.right} of ${topic.answered})` : null}
+                    </span>
+                  </>
+                ) : null}
               </li>
             );
           })}
         </ul>
-      ) : null}
-      <ShowMore more={more} noun="topics" controls={listId} className="cp-submore" />
-    </article>
-  );
-}
-
-function Bar({ value, band, thick }: { value: number | null; band: Band; thick?: boolean }) {
-  return (
-    <div
-      className={cx('cp-bar', band, thick && 'thick')}
-      role="meter"
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-valuenow={value !== null ? Math.round(value * 100) : undefined}
-      aria-valuetext={value !== null ? `${pct(value)}, ${BAND_LABEL[band].toLowerCase()}` : 'not checked'}
-    >
-      <span style={{ width: value !== null ? pct(value) : '100%' }} />
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ plan */
-
-const TOPIC_SHADES = ['var(--purple-600)', 'var(--ink-900)', 'var(--purple-300)', 'var(--pink-500)', 'var(--green-400)', 'var(--yellow-400)', 'var(--purple-200)', 'var(--gray-500)'];
-
-function Plan({ lines, sessionsAvailable }: { lines: PlanLine[]; sessionsAvailable: number }) {
-  const worked = useMemo(() => lines.filter((line) => line.sessions > 0), [lines]);
-  const paged = usePaged(worked, PLAN_PER_PAGE);
-  const planned = worked.reduce((sum, line) => sum + line.sessions, 0);
-  const gained = worked.reduce((sum, line) => sum + line.marks_gained, 0);
-
-  const byTopic: { topic: string; sessions: number }[] = [];
-  for (const line of worked) {
-    const found = byTopic.find((t) => t.topic === line.topic_name);
-    if (found) found.sessions += line.sessions;
-    else byTopic.push({ topic: line.topic_name, sessions: line.sessions });
-  }
-  byTopic.sort((a, b) => b.sessions - a.sessions);
-  const shade = (topic: string) => TOPIC_SHADES[byTopic.findIndex((t) => t.topic === topic) % TOPIC_SHADES.length];
-
-  return (
-    <section className="cp-section" id="plan" aria-labelledby="cp-plan-title">
-      <div className="cp-sechead">
-        <div className="text">
-          <Eyebrow>Your plan</Eyebrow>
-          <div className="cp-titlerow">
-            <h2 id="cp-plan-title" className="sj-display sj-h2">
-              Where your time goes
-            </h2>
-            <MetricTip id="plan" />
-          </div>
-          <p>
-            Ordered by the marks each topic is likely to add — not just by how weak it is. An hour on a big topic
-            pays back more than an hour on a small one.
-          </p>
-        </div>
+        <ShowMore more={more} noun="topics" controls="cp-touched-list" className="cp-submore" />
       </div>
-
-      {worked.length === 0 ? (
-        <Card className="cp-plan-empty">
-          <p>
-            There’s no study time left before your exam date, so there’s nothing to plan. Moving the date gives the
-            plan something to work with.
-          </p>
-        </Card>
-      ) : (
-        <div className="sj-card cp-plan">
-          <div className="cp-split">
-            <div className="cp-split-head">
-              <div className="cp-split-stat">
-                <span className="sj-num">{planned}</span>
-                <span>
-                  of {sessionsAvailable} sessions
-                  <br />
-                  planned
-                </span>
-              </div>
-              <div className="cp-split-stat gain">
-                <span className="sj-num">+{fmt(gained)}</span>
-                <span>
-                  marks the plan
-                  <br />
-                  expects to add
-                </span>
-              </div>
-            </div>
-            <div className="cp-split-bar" role="img" aria-label={`Sessions by section: ${byTopic.map((t) => `${t.topic} ${t.sessions}`).join(', ')}`}>
-              {byTopic.map((t) => (
-                <span
-                  key={t.topic}
-                  style={{ flexGrow: t.sessions, background: shade(t.topic) } as CSSProperties}
-                  title={`${t.topic}: ${t.sessions} sessions`}
-                />
-              ))}
-            </div>
-            <ul className="cp-split-key">
-              {byTopic.map((t) => (
-                <li key={t.topic}>
-                  <span className="sw" style={{ background: shade(t.topic) }} />
-                  {t.topic}
-                  <b className="sj-mono">{t.sessions}</b>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="cp-lines-head" aria-hidden="true">
-            <span>What to study</span>
-            <span>Now → after plan</span>
-            <span>Sessions</span>
-            <span>Adds</span>
-          </div>
-          <ol className="cp-lines">
-            {paged.items.map((line, index) => (
-              <li key={line.subtopic_id} className="cp-line">
-                <span className="rank sj-mono">{String(paged.start + index + 1).padStart(2, '0')}</span>
-                <div className="what">
-                  <b>{line.name}</b>
-                  <span className="topic">
-                    <span className="sw" style={{ background: shade(line.topic_name) }} />
-                    {line.topic_name}
-                  </span>
-                  <span className="why">{line.reason.charAt(0).toUpperCase() + line.reason.slice(1)}.</span>
-                </div>
-                <div className="move">
-                  <div className="cp-move-bar" aria-hidden="true">
-                    <span className="to" style={{ width: pct(line.mastery_projected) }} />
-                    <span className="from" style={{ width: pct(line.mastery_now) }} />
-                  </div>
-                  <span className="cp-move-text sj-mono">
-                    {pct(line.mastery_now)} <IconArrowRight size={12} /> <b>{pct(line.mastery_projected)}</b>
-                  </span>
-                </div>
-                <span className="sessions">
-                  <b className="sj-mono">{line.sessions}</b>
-                  <span>{line.sessions === 1 ? 'session' : 'sessions'}</span>
-                </span>
-                <span className="adds sj-mono">
-                  +{line.marks_gained.toFixed(1)}
-                  <span className="unit">&nbsp;marks</span>
-                </span>
-              </li>
-            ))}
-          </ol>
-          <Pager paged={paged} noun="topics" label="Pages of your plan" anchorId="plan" />
-        </div>
-      )}
     </section>
+  );
+}
+
+/* ------------------------------------------------------------------ how it is worked out */
+
+const HOW_STEPS = [
+  { title: 'Right ÷ answered', body: 'Every score is the questions you got right, divided by the questions you answered.' },
+  { title: 'Your latest answer counts', body: 'Get a question wrong, then right later, and it now counts as right.' },
+  { title: 'Mistakes come back', body: 'Questions you got wrong or guessed come back in practice until you get them.' },
+  { title: 'A check-up every 7 days', body: 'Your latest check-up result is your predicted score.' },
+];
+
+function HowWorkedOut() {
+  return (
+    <details className="cp-how sj-rise d3" open>
+      <summary>
+        <span className="cp-ico" aria-hidden="true">
+          <IconHelp size={18} />
+        </span>
+        <strong className="cp-how-title">How this is worked out</strong>
+      </summary>
+      <div className="cp-how-body">
+        <ol className="cp-how-steps">
+          {HOW_STEPS.map((step, i) => (
+            <li key={step.title}>
+              <span className="cp-how-head">
+                <span className="n sj-mono">{i + 1}</span>
+                <b>{step.title}</b>
+              </span>
+              <p>{step.body}</p>
+            </li>
+          ))}
+        </ol>
+        <Link className="sj-link cp-how-more" to={HOW_PATH}>
+          Every number, explained <IconArrowRight size={14} />
+        </Link>
+      </div>
+    </details>
   );
 }
 
@@ -918,21 +562,9 @@ function ReportSkeleton() {
       <div style={{ height: 8 }} />
       <Skeleton width="40%" height={28} />
       <div style={{ height: 14 }} />
-      <Skeleton height={260} radius={14} />
-      <div className="cp-topics" style={{ marginTop: 28 }}>
-        {[0, 1].map((i) => (
-          <Skeleton key={i} height={280} radius={14} />
-        ))}
-      </div>
+      <Skeleton height={180} radius={14} />
+      <div style={{ height: 28 }} />
+      <Skeleton height={280} radius={14} />
     </div>
   );
-}
-
-/** The spot "Practise weakest topic" means: the plan's first, else the lowest mastery measured. */
-function weakestSpot(report: Report): { subtopic_id: string; name: string } | null {
-  const planned = report.projection?.plan.find((line) => line.sessions > 0);
-  if (planned) return planned;
-  const measured = report.subtopics.filter((sub) => sub.mastery !== null);
-  measured.sort((a, b) => (a.mastery ?? 0) - (b.mastery ?? 0));
-  return measured[0] ?? null;
 }

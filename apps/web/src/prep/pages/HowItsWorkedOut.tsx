@@ -2,20 +2,20 @@
  * Every number the app shows a student, and exactly how it is worked out: the words behind each
  * ⓘ, and the data the /help/numbers page (HelpNumbers.tsx) is drawn from.
  *
- * The words here are written from the code, not from the spec, and must change when the code
- * does. Where each one comes from:
- *   predicted, range, projected, plan    packages/engine/src/engine/projection.py (score_now,
- *                                        project: range widths 18/12/8, ceiling 0.9, 30% reserved,
- *                                        unknown subtopic = topic average or 0.40)
- *   mastery, bands                       packages/engine/src/engine/mastery.py (Elo update, level 3
- *                                        reference, guess = under 25% of expected time, half step)
- *                                        and the web bands in CheckupReport (75 / 50 / 30)
- *   checkup                              engine/checkup.py (up to 15 questions, blueprint, ladder)
- *   sessions                             apps/api routers/student.py sessions_before (45-minute
- *                                        sessions, weeks × study days × sittings a day)
+ * The rule is docs/student-scoring.md (version 3.1): a topic score is right ÷ answered; your
+ * score, and each check-up's result, is the average of the topic scores. Nothing is weighted or
+ * estimated. The words here must change when it does. Where each one comes from in the code:
+ *   score, started, topic, status        apps/api scoring.py (latest counted answer to each
+ *                                        question; labels at 3 answers, 50, 80)
+ *   predicted, checkup                   scoring.py checkups (each sitting's own result; the latest
+ *                                        is the predicted score; CHECKUP_EVERY_DAYS = 7; practice
+ *                                        locked until the first, and while one is due)
+ *   target, gap                          the goal's target; gap = target − predicted
+ *   weakest                              routers/progress.py _latest_checkup (lowest topic scores
+ *                                        among topics with an answer)
+ *   comeback                             routers/practice.py _comeback (COMEBACK_EVERY = 3)
  *   days, streak                         routers/progress.py (student's timezone, yesterday counts)
  *   answered, right, taught              routers/progress.py RUNS and the scoring_attempts view
- *   gap                                  CheckupReport / Home (target − by exam day, rounded)
  *
  * `MetricTip` is the ⓘ each page puts beside a number; it opens the short version and links
  * here for the rest.
@@ -27,18 +27,17 @@ import { Link } from 'react-router-dom';
 import { InfoTip } from '../ui.js';
 
 export type MetricId =
+  | 'score'
+  | 'started'
   | 'predicted'
-  | 'range'
-  | 'projected'
+  | 'checkup'
   | 'target'
   | 'gap'
-  | 'plan'
-  | 'days'
-  | 'sessions'
-  | 'mastery'
-  | 'bands'
+  | 'topic'
+  | 'status'
   | 'weakest'
-  | 'checkup'
+  | 'comeback'
+  | 'days'
   | 'answered'
   | 'right'
   | 'taught'
@@ -58,58 +57,86 @@ interface Metric {
 }
 
 export const METRICS: Record<MetricId, Metric> = {
+  score: {
+    title: 'Your score',
+    plain: 'The average of your topic scores, over the topics you’ve tried.',
+    short:
+      'The average of your topic scores in this subject, counting only the topics you’ve tried. Every check-up and practice question counts in its topic, and only your latest answer to each question counts. So when you get a question right that you once got wrong, that topic goes up, and so does your score.',
+    more: [
+      'A right answer counts when it’s your first try, with no hint and no board, and you didn’t tap “I guessed”. Otherwise the question comes back in a later run so you can show you know it.',
+      'A topic you haven’t tried yet isn’t in the average, so it doesn’t pull your score down.',
+    ],
+    example: 'Vowels 20% and Stress 40%: your score is (20 + 40) ÷ 2 = 30%. Practise Vowels up to 60%: (60 + 40) ÷ 2 = 50%.',
+  },
+  started: {
+    title: 'Started at',
+    plain: 'Your first check-up’s result. Your score now is shown next to it, so you can see how far you’ve come.',
+    short:
+      'The result of your first check-up in this subject: the average of your topic scores from that check-up alone. It never changes. The difference between it and your score now shows your improvement.',
+    example: 'Started at 30%, now 50%: that’s +20.',
+  },
   predicted: {
     title: 'Predicted score',
-    plain: 'What you’d likely score out of 100 if you sat the exam today, worked out from your latest check-up.',
+    plain: 'Your latest check-up’s result: the average of your topic scores from that check-up alone.',
     short:
-      'What you’d likely score if you sat the exam today, out of 100, from your latest check-up. We split the paper into its topics, as the syllabus lists them, and give each one the share of marks the real exam gives it. For each topic we multiply that share by your mastery there, then add them all up. No curve, no bonus marks.',
+      'Your latest check-up’s result: the average of your topic scores from that check-up alone. A check-up is the closest thing to the exam, so it’s the best guess of what you’d get if you sat the exam today.',
     more: [
-      'A topic the check-up didn’t reach isn’t counted as zero. It’s given your average for the other topics in the same section, or 40% if nothing in that section was reached yet.',
-      'The shares come from the exam’s printed section structure. For a subject whose structure we haven’t loaded yet, every topic gets an equal share, and the report says so.',
-      'Only check-ups set this number. Practice doesn’t change it, so take another check-up to see how far you’ve moved.',
+      'Only a check-up changes it. Practice raises your score, but your predicted score stays the same until your next check-up.',
+      'Each check-up is a checkpoint, so the history shows the trend: 30% → 38% → 47%.',
     ],
-    example:
-      'If one topic is worth 10% of the paper and your mastery there is 60%, it adds 6 marks. Do the same for every topic and add them up.',
+    example: 'In your latest check-up, Vowels 40% and Stress 60%: your predicted score is (40 + 60) ÷ 2 = 50%.',
   },
-  range: {
-    title: 'Likely range',
-    plain: 'The band your predicted score most likely sits in. The more check-up answers behind it, the narrower it gets.',
+  checkup: {
+    title: 'Check-up',
+    plain: 'A short mixed test with no help, like the exam. The first one opens practice, and one is due every 7 days.',
     short:
-      'Your predicted score comes from a handful of questions, so we show the band it most likely sits in. The band is your score plus or minus a set number of marks that depends on how many check-up answers stand behind it: 18 marks with fewer than 10 answers, 12 marks with 10 to 24, and 8 marks with 25 or more. It never goes below 0 or above 100.',
-    example: 'Predicted 52 from a 15-question check-up: 52 minus 12 to 52 plus 12, so likely 40–64.',
-  },
-  projected: {
-    title: 'By exam day',
-    plain: 'Where your score could be on exam day if you do every study session the plan counted.',
-    short:
-      'Where your score could be on exam day if you do every study session we counted and follow the plan. We spend your sessions one at a time on the topic where one more session adds the most marks. A session moves you most when you’re around the middle (about 55%), less near the bottom or the top, and no topic is taken past 90%.',
+      'A check-up is a short mixed test with no hints and no board, like the real exam. Your first check-up comes first: practice opens only after it. After that a check-up is due every 7 days, and while one is due, practice is locked until you take it. Its result becomes your predicted score, and its answers also count in your topic scores.',
     more: [
-      'About 30% of the sessions go first to your heaviest weak topics (under 50%), so the big topics that hold your score down are never left till last.',
-      'It assumes the study actually happens and it doesn’t allow for forgetting, so read it as a good case, not a promise.',
+      'Questions you haven’t seen yet come first. If a topic has none left, it reuses the ones you saw longest ago.',
     ],
-    example:
-      'A topic at 45% that carries 10% of the paper: one session lifts it to about 54%, worth about 0.9 of a mark. The same session on a topic already at 85% adds less than half a point of mastery.',
+    example: 'Three check-ups a week apart: 30% → 38% → 47%.',
   },
   target: {
     title: 'Your target',
     plain: 'The score you said you’re aiming for. We never change it, but you can.',
     short:
-      'The score you told us you’re aiming for when you set your goal. We never change it. The by-exam-day score is measured against it, and you can change it any time from your goal.',
-    example: 'Aiming for 75 in UTME Mathematics? The target mark on the scale sits at 75.',
+      'The score you told us you’re aiming for when you set your goal. We never change it. Your predicted score is measured against it, and you can change it any time from your goal.',
+    example: 'Aiming for 60% in UTME Mathematics? The target mark on the scale sits at 60.',
   },
   gap: {
-    title: 'On track, or marks short',
-    plain: 'Your target minus your by-exam-day score. Reach your target or pass it and you’re on track.',
+    title: 'On track, or short',
+    plain: 'Your target minus your predicted score. Reach your target or pass it and you’re on track.',
     short:
-      'We compare your by-exam-day score with your target. If it reaches your target or passes it, you’re on track. If not, the gap is your target minus the by-exam-day score, rounded to a whole mark. The plan already puts every session where it earns most, so what closes a gap is more time: more study days, more minutes a day, or a later exam.',
-    example: 'Target 75, by exam day 68: you’re 7 short.',
+      'Your target minus your predicted score. If your predicted score reaches your target or passes it, you’re on track.',
+    example: 'Target 60%, predicted score 47%: you’re 13 short.',
   },
-  plan: {
-    title: 'Your plan: sessions and marks added',
-    plain: 'Which topics your sessions go to, in order of the marks each is expected to add.',
+  topic: {
+    title: 'Topic score',
+    plain: 'Questions right ÷ questions answered in that topic, shown with the count.',
     short:
-      'Each line is one topic of the syllabus the plan spends sessions on, ordered by the marks it’s expected to add, not just by how weak it is. “Now → after plan” is your mastery there today and after those sessions. The marks it adds are the topic’s share of the paper times how much the sessions lift your mastery.',
-    example: 'A topic worth 8% of the paper going from 40% to 58% adds 0.08 × 18 = about 1.4 marks.',
+      'Questions right ÷ questions answered in one topic of the syllabus. If you redo a question, your latest answer replaces the old one, so fixing a mistake raises the score. It’s always shown with the count, so you can check it yourself.',
+    example: 'Vowels: 2 of 10 right is 20%. Redo the same 10 and get 3 right: 3 of 10 is 30% (+10).',
+  },
+  status: {
+    title: 'Topic labels',
+    plain: 'Not tried yet, Just started, Needs work, Getting there or Strong.',
+    short:
+      'Each topic gets one plain label. Not tried yet: nothing answered. Just started: fewer than 3 questions answered, too few to say. Needs work: under 50%. Getting there: 50% to 79%. Strong: 80% and over.',
+    example: '3 of 10 is 30%: Needs work. 6 of 10 is 60%: Getting there. 2 of 2 is still Just started.',
+  },
+  weakest: {
+    title: 'Topics to work on',
+    plain: 'Your topics with the lowest scores, lowest first.',
+    short:
+      'The topics with your lowest scores, lowest first, among the topics you’ve answered questions on. A topic you haven’t tried yet isn’t listed here, because no answers isn’t the same as weak.',
+    example: 'Sets 22%, Variation 35% and Probability 48% are listed in that order.',
+  },
+  comeback: {
+    title: 'Questions that come back',
+    plain: 'A question you got wrong, or guessed, comes back in a later run until you get it right.',
+    short:
+      'When you got a question wrong, were taught it on the board, or guessed it, that same question comes back in a later practice run, never the same run, marked “Back again”. About one question in three of a run is one of these. Get it right and the topic score goes up.',
+    example: 'Wrong on a Vowels question on Monday, right when it comes back on Tuesday: it now counts as right, and Vowels goes up.',
   },
   days: {
     title: 'Days to exam',
@@ -117,45 +144,6 @@ export const METRICS: Record<MetricId, Metric> = {
     short:
       'Calendar days from today to your exam date. Today isn’t counted and exam day is, so the day before the exam shows 1. For an exam sat on one day, like UTME, all your subjects share one date and one countdown. For an exam whose papers fall on different days, like WAEC, it counts to the nearest paper still to come and names it; once that day passes it moves to the next. With more than one exam, the nearest comes first. Weekends and rest days count: it’s a countdown, not study time.',
     example: 'Exam on Friday 13 November, and today is Monday 9 November: 4 days to exam.',
-  },
-  sessions: {
-    title: 'Study sessions left',
-    plain: 'Weeks left × the days a week you study × the sessions you fit in a day.',
-    short:
-      'How many study sessions fit before your exam, from your goal. We take the weeks left, times the days a week you said you’d study, times the sessions you fit in a day (one for every 45 minutes of daily study, and at least one), then round down. This is the time the plan spends, and it assumes you study on every one of those days.',
-    example: '46 days left is about 6.6 weeks. Studying 5 days a week for 60 minutes a day: 6.6 × 5 × 1 = 32 sessions.',
-  },
-  mastery: {
-    title: 'Mastery',
-    plain: 'Your chance of getting a standard exam-level question on that topic right.',
-    short:
-      'Your chance of getting a standard exam-level question on that topic right, from your check-up answers. Everyone starts at 50%. A right answer lifts it and a wrong one lowers it, by more when the result is a surprise: a hard question right lifts it more than an easy one. Early answers move it most. A right answer given in under a quarter of the time the question should take moves it only half as much, because it may be a guess.',
-    more: [
-      '“Standard exam-level” is the middle of our five difficulty levels. A section’s percentage comes from all its answers together, not from averaging its topics.',
-      'With only two or three questions on a topic, mastery can’t move far from 50%. That’s on purpose: a few answers are a starting point, not a verdict.',
-    ],
-    example: 'Start at 50%. Right on a middle question: 55%. Then right on a harder one: 61%. Then wrong on the hardest: 59%.',
-  },
-  bands: {
-    title: 'Strong, holding, shaky, needs teaching',
-    plain: 'Plain names for your mastery: Strong, Holding, Shaky or Needs teaching, or Not checked yet.',
-    short:
-      'Names for the mastery percentage: Strong is 75% and up, Holding is 50–74%, Shaky is 30–49%, and Needs teaching is under 30%. Not checked means the check-up asked nothing there, so we don’t know yet. It isn’t a low score. On the bars, the colour runs from pink (weak) to green (strong), and stripes mean not checked.',
-    example: '62% on Polynomials is Holding. 28% on Loci is Needs teaching.',
-  },
-  weakest: {
-    title: 'Your weakest topics',
-    plain: 'The topics your latest check-up reached where your mastery is lowest, lowest first.',
-    short:
-      'The topics of the syllabus with the lowest mastery, among the ones your latest check-up reached, lowest first. Home and your subject page show the three lowest. A topic the check-up didn’t reach is never listed here, because no answers isn’t the same as weak.',
-    example: 'If you’re at 22% on Sets, 35% on Variation and 48% on Probability, they’re listed in that order.',
-  },
-  checkup: {
-    title: 'Check-up answers',
-    plain: 'Up to 15 questions across the paper. Each section gets harder when you’re right and easier when you’re wrong.',
-    short:
-      'A check-up is up to 15 questions. They’re spread over the syllabus sections by how much of the paper each is worth, with at least one per section while there’s room, and within a section over its topics. Each section starts at a middle question, then goes one step harder after a right answer and one step easier after a wrong one. There’s no pass mark and no time limit.',
-    example: 'Right on your first Algebra question? Your next Algebra question is one level harder.',
   },
   answered: {
     title: 'Questions answered',
@@ -176,7 +164,7 @@ export const METRICS: Record<MetricId, Metric> = {
     title: 'Taught',
     plain: 'Questions you missed twice, so the coach worked them through with you on the board.',
     short:
-      'Practice questions you missed twice, so the coach worked the solution through with you on the board, step by step. They’re counted as taught, not as known.',
+      'Practice questions you missed twice, so the coach worked the solution through with you on the board, step by step. They count as wrong for now, and the same question comes back in a later run for you to get right.',
     example: 'Wrong, then wrong again after the hint: the board opens and the question counts as taught.',
   },
   streak: {
@@ -211,28 +199,31 @@ export function MetricTip({ id, onDark, title }: { id: MetricId; onDark?: boolea
 
 /* ================================================================== groups */
 
-/** How the numbers are grouped on /help/numbers and on the help hub. `id` is the group's anchor. */
-export const METRIC_GROUPS: { id: 'score' | 'plan' | 'practice'; label: string; title: string; sub: string; metrics: MetricId[] }[] = [
+/**
+ * How the numbers are grouped on /help/numbers and on the help hub. `id` is the group's anchor,
+ * so it must never equal a metric's id.
+ */
+export const METRIC_GROUPS: { id: 'scores' | 'topics' | 'practice'; label: string; title: string; sub: string; metrics: MetricId[] }[] = [
   {
-    id: 'score',
+    id: 'scores',
     label: 'Your score',
     title: 'Your score',
-    sub: 'The numbers on the 0–100 scale: on Home, your subject pages and your check-up report.',
-    metrics: ['predicted', 'range', 'projected', 'target', 'gap'],
+    sub: 'The percentages on Home, your subject pages and your check-up report.',
+    metrics: ['score', 'started', 'predicted', 'checkup', 'target', 'gap'],
   },
   {
-    id: 'plan',
-    label: 'Your plan',
-    title: 'Your plan',
-    sub: 'How much time is left, and where the plan spends it.',
-    metrics: ['days', 'sessions', 'plan'],
+    id: 'topics',
+    label: 'Your topics',
+    title: 'Your topics',
+    sub: 'How each topic is scored, the words we use for it, and what comes back.',
+    metrics: ['topic', 'status', 'weakest', 'comeback'],
   },
   {
     id: 'practice',
     label: 'Your practice',
     title: 'Your practice',
-    sub: 'What you’ve done, what you know, and the words we use for it.',
-    metrics: ['answered', 'right', 'taught', 'streak', 'mastery', 'bands', 'weakest', 'checkup', 'checked'],
+    sub: 'What you’ve done, and how long is left.',
+    metrics: ['answered', 'right', 'taught', 'streak', 'checked', 'days'],
   },
 ];
 

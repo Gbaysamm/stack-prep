@@ -9,7 +9,7 @@
 
 import { useNavigate, useParams } from "react-router-dom";
 
-import { api, type PracticeState } from "../../student/api.js";
+import { api, type PracticeState, type ScoreChange } from "../../student/api.js";
 import {
   IconArrowRight,
   IconBolt,
@@ -36,7 +36,7 @@ import {
   cx,
   useNarrow,
 } from "../ui.js";
-import { Alert, NothingFreshNote, useStartPractice } from "./Home.js";
+import { Alert, MasteryBar, NothingFreshNote, signed, useStartPractice } from "./Home.js";
 import { RunStrip, whenLabel } from "./PracticeHub.js";
 import "./RunSummary.css";
 
@@ -69,6 +69,72 @@ function headline(
     title: "You showed up for the hard ones.",
     line: "None came easy today, and every one was worked through. That is how it starts.",
   };
+}
+
+/** "45%", or a dash when there is nothing to score yet. */
+const pct = (n: number | null) => (n === null ? "—" : `${n}%`);
+
+/**
+ * What the run did to the student's scores (docs/student-scoring.md §5): the subject before and
+ * after, and each topic it touched. The change is the point, so it is the biggest thing here.
+ */
+function ScoreMoved({ change }: { change: ScoreChange }) {
+  const moved = change.before !== null && change.after !== null ? change.after - change.before : null;
+  return (
+    <section className="rs-section sj-rise d1" aria-labelledby="rs-score-title">
+      <span className="sj-eyebrow">Your score</span>
+      <h2 id="rs-score-title" className="sj-display sj-h2">
+        {moved === null
+          ? `Your score is now ${pct(change.after)}`
+          : moved > 0
+            ? `Up ${moved} — now ${pct(change.after)}`
+            : moved < 0
+              ? `Now ${pct(change.after)}`
+              : `Holding at ${pct(change.after)}`}
+      </h2>
+      <Card className="rs-score">
+        <div className="rs-score-head">
+          <span className="rs-score-from sj-num">{pct(change.before)}</span>
+          <IconArrowRight size={22} aria-hidden="true" />
+          <span className="rs-score-to sj-num">{pct(change.after)}</span>
+          {moved !== null ? (
+            <Badge tone={moved > 0 ? "green" : moved < 0 ? "pink" : "ghost"} dot>
+              {signed(moved)}
+            </Badge>
+          ) : null}
+        </div>
+        <p className="rs-note sj-small">
+          Your score is the average of your topic scores. A topic score is the share of its
+          questions you&apos;ve got right, counting your latest try at each. Questions you missed or
+          guessed come back in later runs, and getting them right then raises it.
+        </p>
+        {change.topics.length > 0 ? (
+          <ul className="rs-score-topics">
+            {change.topics.map((topic) => {
+              const delta = topic.before !== null && topic.after !== null ? topic.after - topic.before : null;
+              return (
+                <li key={topic.subtopic_id}>
+                  <span className="rs-score-name">
+                    <strong>{topic.name}</strong>
+                    <span className="sj-small sj-muted">
+                      {topic.right} of {topic.answered} right this run
+                    </span>
+                  </span>
+                  <MasteryBar value={topic.after === null ? null : topic.after / 100} label={`${topic.name} score`} />
+                  <span className="rs-score-move sj-mono">
+                    {topic.before === null ? "new" : pct(topic.before)} → <b>{pct(topic.after)}</b>
+                    {delta !== null && delta !== 0 ? (
+                      <span className={cx("rs-score-delta", delta > 0 ? "up" : "down")}>{signed(delta)}</span>
+                    ) : null}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        ) : null}
+      </Card>
+    </section>
+  );
 }
 
 export function RunSummary() {
@@ -358,6 +424,8 @@ export function RunSummary() {
           ) : null}
         </div>
       </section>
+
+      {data.score_change ? <ScoreMoved change={data.score_change} /> : null}
 
       <section className="rs-section sj-rise d2" aria-labelledby="rs-next-title">
         <span className="sj-eyebrow">Next up</span>

@@ -375,8 +375,8 @@
   grid-column: 2;
   grid-row: 1 / span 2;
 }
-.sj .hp-group.g-score,
-.sj .hp-group.g-plan {
+.sj .hp-group.g-scores,
+.sj .hp-group.g-topics {
   grid-column: 1;
 }
 .sj .hp-group {
@@ -385,7 +385,7 @@
   overflow: hidden;
   border-top: 4px solid var(--accent);
 }
-.sj .hp-group.g-plan {
+.sj .hp-group.g-topics {
   --accent: var(--green-400);
 }
 .sj .hp-group.g-practice {
@@ -748,6 +748,89 @@
   gap: 14px;
 }
 
+/* The worked example: one student's first week, a card per day. */
+.sj .hn-story {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  align-items: stretch;
+}
+.sj .hn-day {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  border-top: 4px solid var(--yellow-400);
+}
+.sj .hn-day:nth-child(2) {
+  border-top-color: var(--green-400);
+}
+.sj .hn-day:nth-child(3) {
+  border-top-color: var(--pink-400);
+}
+.sj .hn-day-head .sj-mono {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+}
+.sj .hn-day-head h3 {
+  margin: 4px 0 0;
+  font-size: 19px;
+  line-height: 1.15;
+  color: var(--gray-900);
+}
+.sj .hn-day-lines {
+  margin: 0;
+  padding-left: 18px;
+  flex: 1;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--gray-700);
+}
+.sj .hn-day-lines li + li {
+  margin-top: 4px;
+}
+.sj .hn-day-nums {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--gray-200);
+}
+.sj .hn-day-nums > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.sj .hn-day-nums dt {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray-600);
+}
+.sj .hn-day-nums dd {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.1;
+  color: var(--gray-900);
+}
+.sj .hn-day-nums small {
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--gray-600);
+}
+@media (max-width: 900px) {
+  .sj .hn-story {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* One number: the answer and its detail on the left, the worked picture on the right. */
 .sj .hn-card {
   display: grid;
@@ -1027,16 +1110,11 @@
 .sj .nv-scale-ticks span:last-child {
   transform: translateX(-100%);
 }
-.sj .nv-band,
 .sj .nv-gap {
   position: absolute;
   top: -4px;
   height: 18px;
   border-radius: 4px;
-  background: rgba(255, 199, 0, 0.55);
-  box-shadow: inset 0 0 0 1.5px var(--yellow-400);
-}
-.sj .nv-gap {
   background: repeating-linear-gradient(135deg, var(--pink-100) 0 4px, #fff 4px 8px);
   box-shadow: inset 0 0 0 1.5px var(--pink-500);
 }
@@ -1149,20 +1227,15 @@
   font-family: var(--f-mono);
   color: var(--gray-900);
 }
-.sj .nv-keys .on {
-  padding: 2px 8px;
-  margin: -2px 0;
-  border-radius: 6px;
-  background: #fff;
-  box-shadow: inset 0 0 0 1.5px var(--ink-900);
-  color: var(--gray-900);
-}
 .sj .nv-swatch {
   display: inline-block;
   flex: none;
   width: 12px;
   height: 12px;
   border-radius: 3px;
+}
+.sj .nv-swatch.few {
+  background: var(--gray-300);
 }
 .sj .nv-swatch.none {
   background: repeating-linear-gradient(135deg, var(--gray-300) 0 3px, var(--gray-100) 3px 6px);
@@ -1199,51 +1272,6 @@
   margin: 0;
   font-size: 12px;
   color: var(--gray-600);
-}
-
-/* Plan: a part's mastery before and after */
-.sj .nv-planrow {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px 12px;
-  align-items: center;
-}
-.sj .nv-planrow-name {
-  grid-column: 1 / -1;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--gray-800);
-}
-.sj .nv-growbar {
-  position: relative;
-  height: 14px;
-  border-radius: 4px;
-  background: #fff;
-  box-shadow: inset 0 0 0 1px var(--gray-200);
-  overflow: hidden;
-}
-.sj .nv-growbar .was,
-.sj .nv-growbar .gain {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-}
-.sj .nv-growbar .was {
-  background: var(--yellow-400);
-}
-.sj .nv-growbar .gain {
-  background: repeating-linear-gradient(135deg, var(--green-500) 0 4px, var(--green-400) 4px 8px);
-  transform-origin: left center;
-  animation: nv-grow 700ms var(--ease) both 200ms;
-}
-.sj .nv-planrow-nums {
-  font-size: 12px;
-  color: var(--gray-600);
-  white-space: nowrap;
-}
-.sj .nv-planrow-nums b {
-  color: var(--green-600);
 }
 
 /* Days: a week strip */
@@ -1330,7 +1358,7 @@
   color: var(--ink-900);
 }
 
-/* Mastery: four answers, four heights */
+/* Check-up history: one bar per sitting */
 .sj .nv-steps {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1369,8 +1397,14 @@
 .sj .nv-step:not(:first-child) .nv-step-bar span {
   background: var(--green-400);
 }
-.sj .nv-step .nv-step-bar span.down {
-  background: var(--pink-400);
+.sj .nv-step.next .nv-step-bar {
+  background: transparent;
+  border: 1.5px dashed var(--gray-300);
+  box-shadow: none;
+}
+.sj .nv-step.next .nv-step-val {
+  font-weight: 400;
+  color: var(--gray-600);
 }
 @keyframes nv-rise {
   from {
@@ -1401,7 +1435,7 @@
   background: var(--pink-500);
 }
 
-/* Bands */
+/* Topic labels */
 .sj .nv-bands {
   position: relative;
   display: flex;
@@ -1422,19 +1456,15 @@
 .sj .nv-bandseg:first-child {
   border-radius: var(--r-sm) 0 0 var(--r-sm);
 }
-.sj .nv-bandseg:nth-child(4) {
+.sj .nv-bandseg:nth-child(3) {
   border-radius: 0 var(--r-sm) var(--r-sm) 0;
 }
-.sj .nv-bandseg.teach {
+.sj .nv-bandseg.needs {
   background: var(--pink-500);
   color: #fff;
 }
-.sj .nv-bandseg.shaky {
+.sj .nv-bandseg.there {
   background: var(--yellow-400);
-  color: var(--ink-900);
-}
-.sj .nv-bandseg.holding {
-  background: var(--green-400);
   color: var(--ink-900);
 }
 .sj .nv-bandseg.strong {
@@ -1504,10 +1534,10 @@
   transform-origin: left center;
   animation: nv-grow 600ms var(--ease) both;
 }
-.sj .nv-rank-bar > span.teach {
+.sj .nv-rank-bar > span.needs {
   background: var(--pink-500);
 }
-.sj .nv-rank-bar > span.shaky {
+.sj .nv-rank-bar > span.there {
   background: var(--yellow-400);
 }
 .sj .nv-rank-bar.none {
@@ -1531,63 +1561,6 @@
 .sj .nv-rank li.skip .nv-rank-val {
   font-size: 11px;
   color: var(--gray-500);
-}
-
-/* Check-up: the ladder */
-.sj .nv-ladder {
-  display: flex;
-  gap: 10px;
-}
-.sj .nv-ladder-axis {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding-bottom: 20px;
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--gray-500);
-}
-.sj .nv-ladder-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  flex: 1;
-  min-width: 0;
-}
-.sj .nv-ladder-col {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-.sj .nv-rung {
-  display: grid;
-  place-items: center;
-  height: 18px;
-  border-radius: 4px;
-  background: #fff;
-  box-shadow: inset 0 0 0 1px var(--gray-200);
-}
-.sj .nv-rung.on {
-  background: var(--ink-900);
-  box-shadow: none;
-  height: 24px;
-  margin: -3px 0;
-}
-.sj .nv-rung.on .nv-mark {
-  width: 16px;
-  height: 16px;
-}
-.sj .nv-rung.on b {
-  color: var(--green-400);
-  font-size: 12px;
-}
-.sj .nv-ladder-q {
-  margin-top: 5px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--gray-600);
 }
 
 /* A practice run, question by question */
@@ -1792,8 +1765,8 @@
     grid-template-columns: minmax(0, 1fr);
   }
   .sj .hp-group.g-practice,
-  .sj .hp-group.g-score,
-  .sj .hp-group.g-plan {
+  .sj .hp-group.g-scores,
+  .sj .hp-group.g-topics {
     grid-column: 1;
     grid-row: auto;
   }

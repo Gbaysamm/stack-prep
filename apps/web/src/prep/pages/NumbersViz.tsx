@@ -12,7 +12,7 @@ import type { MetricId } from './HowItsWorkedOut.js';
 const pct = (value: number) => `${value}%`;
 
 /** An equation strip: labelled boxes joined by operators. The last box is the answer. */
-function Eq({ parts }: { parts: (readonly [label: string, value: ReactNode] | '×' | '=')[] }) {
+function Eq({ parts }: { parts: (readonly [label: string, value: ReactNode] | '×' | '÷' | '=')[] }) {
   return (
     <div className="nv-eq">
       {parts.map((part, index) =>
@@ -71,59 +71,104 @@ function Mark({ right }: { right: boolean }) {
   );
 }
 
-function Predicted() {
+/** Two topic bars and their average: the shape of "your score". */
+function Average({ rows, answer, label }: { rows: { name: string; value: number }[]; answer: number; label: string }) {
   return (
     <>
-      <Eq parts={[['Share', '10%'], '×', ['Mastery', '60%'], '=', ['Marks', '6']]} />
-      <div className="nv-cells" aria-hidden="true">
-        {Array.from({ length: 10 }, (_, index) => (
-          <span key={index} className={index < 6 ? 'on' : ''} style={{ '--i': index } as CSSProperties} />
+      <ol className="nv-rank">
+        {rows.map((row) => (
+          <li key={row.name}>
+            <span className="nv-rank-n sj-mono">·</span>
+            <span className="nv-rank-name">{row.name}</span>
+            <span className="nv-rank-bar">
+              <span style={{ width: pct(row.value) }} className={row.value >= 50 ? 'there' : 'needs'} />
+            </span>
+            <span className="nv-rank-val sj-mono">{row.value}%</span>
+          </li>
         ))}
-        <span className="nv-cells-note">10 marks on this topic · you’d get 6</span>
-      </div>
+      </ol>
+      <Eq
+        parts={[
+          ['Add', rows.map((row) => row.value).join(' + ')],
+          '÷',
+          ['Topics', String(rows.length)],
+          '=',
+          [label, `${answer}%`],
+        ]}
+      />
     </>
   );
 }
 
-function Range() {
+function Score() {
+  return (
+    <Average
+      rows={[
+        { name: 'Vowels', value: 20 },
+        { name: 'Stress', value: 40 },
+      ]}
+      answer={30}
+      label="Your score"
+    />
+  );
+}
+
+function Started() {
   return (
     <>
       <Scale>
-        <span className="nv-band" style={{ left: pct(40), width: pct(24) }} />
-        <Dot at={40} tone="gray" label="40" below />
-        <Dot at={64} tone="gray" label="64" below />
-        <Dot at={52} tone="ink" label="52" />
+        <span className="nv-rise" style={{ left: pct(30), width: pct(20) }} />
+        <Dot at={30} tone="gray" label="Started 30%" below />
+        <Dot at={50} tone="green" label="Now 50%" />
       </Scale>
-      <div className="nv-keys">
-        <span>
-          <b>±18</b> under 10 answers
-        </span>
-        <span className="on">
-          <b>±12</b> 10 to 24
-        </span>
-        <span>
-          <b>±8</b> 25 or more
-        </span>
+      <div className="nv-sum">
+        <span className="sj-mono">50 − 30 =</span> <b>+20</b>
       </div>
     </>
   );
 }
 
-function Projected() {
+function Predicted() {
   return (
-    <Scale>
-      <span className="nv-rise" style={{ left: pct(52), width: pct(16) }} />
-      <Dot at={52} tone="gray" label="Now 52" />
-      <Dot at={68} tone="green" label="Exam day 68" below />
-    </Scale>
+    <>
+      <Average
+        rows={[
+          { name: 'Vowels', value: 40 },
+          { name: 'Stress', value: 60 },
+        ]}
+        answer={50}
+        label="Predicted"
+      />
+      <p className="nv-note">That check-up’s answers only. Practice doesn’t move it; the next check-up does.</p>
+    </>
+  );
+}
+
+function Checkup() {
+  const sittings = [
+    { label: 'Week 1', value: 30 as number | null },
+    { label: 'Week 2', value: 38 },
+    { label: 'Week 3', value: 47 },
+    { label: 'Due', value: null },
+  ];
+  return (
+    <div className="nv-steps">
+      {sittings.map((step, index) => (
+        <div key={step.label} className={`nv-step ${step.value === null ? 'next' : ''}`} style={{ '--i': index } as CSSProperties}>
+          <span className="nv-step-val sj-mono">{step.value === null ? 'in 7 days' : `${step.value}%`}</span>
+          <span className="nv-step-bar">{step.value === null ? null : <span style={{ height: pct(step.value * 2) }} />}</span>
+          <span className="nv-step-label">{step.label}</span>
+        </div>
+      ))}
+    </div>
   );
 }
 
 function Target() {
   return (
     <Scale>
-      <span className="nv-fill" style={{ width: pct(75) }} />
-      <Flag at={75} label="Target 75" />
+      <span className="nv-fill" style={{ width: pct(60) }} />
+      <Flag at={60} label="Target 60%" />
     </Scale>
   );
 }
@@ -132,32 +177,107 @@ function Gap() {
   return (
     <>
       <Scale>
-        <span className="nv-gap" style={{ left: pct(68), width: pct(7) }} />
-        <Dot at={68} tone="green" label="Exam day 68" below />
-        <Flag at={75} label="Target 75" />
+        <span className="nv-gap" style={{ left: pct(47), width: pct(13) }} />
+        <Dot at={47} tone="green" label="Predicted 47%" below />
+        <Flag at={60} label="Target 60%" />
       </Scale>
       <div className="nv-sum">
-        <span className="sj-mono">75 − 68 =</span> <b className="nv-short">7 short</b>
+        <span className="sj-mono">60 − 47 =</span> <b className="nv-short">13 short</b>
       </div>
     </>
   );
 }
 
-function Plan() {
+function Topic() {
   return (
     <>
-      <div className="nv-planrow">
-        <span className="nv-planrow-name">A topic worth 8% of the paper</span>
-        <span className="nv-growbar">
-          <span className="was" style={{ width: pct(40) }} />
-          <span className="gain" style={{ left: pct(40), width: pct(18) }} />
+      <div className="nv-cells" aria-hidden="true">
+        {Array.from({ length: 10 }, (_, index) => (
+          <span key={index} className={index < 3 ? 'on' : ''} style={{ '--i': index } as CSSProperties} />
+        ))}
+        <span className="nv-cells-note">Vowels · 3 of 10 right · 30%</span>
+      </div>
+      <Eq parts={[['Right', '3'], '÷', ['Answered', '10'], '=', ['Vowels', '30%']]} />
+    </>
+  );
+}
+
+function Status() {
+  const bands = [
+    { name: 'Needs work', from: 0, to: 50, tone: 'needs' },
+    { name: 'Getting there', from: 50, to: 80, tone: 'there' },
+    { name: 'Strong', from: 80, to: 100, tone: 'strong' },
+  ];
+  return (
+    <>
+      <div className="nv-bands">
+        {bands.map((band) => (
+          <span key={band.name} className={`nv-bandseg ${band.tone}`} style={{ width: pct(band.to - band.from) }}>
+            <span>{band.name}</span>
+          </span>
+        ))}
+        <span className="nv-pin" style={{ left: pct(30) }}>
+          3 of 10
         </span>
-        <span className="nv-planrow-nums sj-mono">
-          40% → <b>58%</b>
+        <span className="nv-pin" style={{ left: pct(60) }}>
+          6 of 10
         </span>
       </div>
-      <Eq parts={[['Share', '0.08'], '×', ['Lift', '18'], '=', ['Marks', '≈1.4']]} />
+      <div className="nv-keys">
+        <span>
+          <i className="nv-swatch few" /> Just started: fewer than 3 answered
+        </span>
+        <span>
+          <i className="nv-swatch none" /> Not tried yet: nothing answered
+        </span>
+      </div>
     </>
+  );
+}
+
+function Weakest() {
+  const rows = [
+    { name: 'Sets', value: 22 },
+    { name: 'Variation', value: 35 },
+    { name: 'Probability', value: 48 },
+  ];
+  return (
+    <ol className="nv-rank">
+      {rows.map((row, index) => (
+        <li key={row.name}>
+          <span className="nv-rank-n sj-mono">{index + 1}</span>
+          <span className="nv-rank-name">{row.name}</span>
+          <span className="nv-rank-bar">
+            <span style={{ width: pct(row.value) }} className="needs" />
+          </span>
+          <span className="nv-rank-val sj-mono">{row.value}%</span>
+        </li>
+      ))}
+      <li className="skip">
+        <span className="nv-rank-n sj-mono">–</span>
+        <span className="nv-rank-name">Not tried yet</span>
+        <span className="nv-rank-bar none" />
+        <span className="nv-rank-val sj-mono">never listed</span>
+      </li>
+    </ol>
+  );
+}
+
+function Comeback() {
+  return (
+    <div className="nv-flow">
+      <span className="nv-chip">
+        <Mark right={false} /> Monday
+      </span>
+      <span className="nv-arrow" aria-hidden="true" />
+      <span className="nv-chip soft">Same question, later run</span>
+      <span className="nv-arrow" aria-hidden="true" />
+      <span className="nv-chip">
+        <Mark right /> Tuesday
+      </span>
+      <span className="nv-arrow" aria-hidden="true" />
+      <span className="nv-chip ink">Score goes up</span>
+    </div>
   );
 }
 
@@ -180,129 +300,6 @@ function Days() {
         </li>
       ))}
     </ol>
-  );
-}
-
-function Sessions() {
-  return (
-    <>
-      <Eq parts={[['Weeks', '6.6'], '×', ['Days/wk', '5'], '×', ['Per day', '1'], '=', ['Sessions', '32']]} />
-      <p className="nv-note">46 days is 6.6 weeks. 60 minutes a day fits one 45-minute session. Rounded down.</p>
-    </>
-  );
-}
-
-function Mastery() {
-  const steps = [
-    { label: 'Start', value: 50, right: null as boolean | null },
-    { label: 'Middle', value: 55, right: true },
-    { label: 'Harder', value: 61, right: true },
-    { label: 'Hardest', value: 59, right: false },
-  ];
-  return (
-    <div className="nv-steps">
-      {steps.map((step, index) => (
-        <div key={step.label} className="nv-step" style={{ '--i': index } as CSSProperties}>
-          <span className="nv-step-val sj-mono">{step.value}%</span>
-          <span className="nv-step-bar">
-            <span style={{ height: pct((step.value - 30) * 2.5) }} className={step.right === false ? 'down' : ''} />
-          </span>
-          <span className="nv-step-label">
-            {step.right === null ? null : <Mark right={step.right} />}
-            {step.label}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function Bands() {
-  const bands = [
-    { name: 'Needs teaching', from: 0, to: 30, tone: 'teach' },
-    { name: 'Shaky', from: 30, to: 50, tone: 'shaky' },
-    { name: 'Holding', from: 50, to: 75, tone: 'holding' },
-    { name: 'Strong', from: 75, to: 100, tone: 'strong' },
-  ];
-  return (
-    <>
-      <div className="nv-bands">
-        {bands.map((band) => (
-          <span key={band.name} className={`nv-bandseg ${band.tone}`} style={{ width: pct(band.to - band.from) }}>
-            <span>{band.name}</span>
-          </span>
-        ))}
-        <span className="nv-pin" style={{ left: pct(28) }}>
-          Loci 28%
-        </span>
-        <span className="nv-pin" style={{ left: pct(62) }}>
-          Polynomials 62%
-        </span>
-      </div>
-      <div className="nv-keys">
-        <span>
-          <i className="nv-swatch none" /> Not checked: no answers yet, not a low score
-        </span>
-      </div>
-    </>
-  );
-}
-
-function Weakest() {
-  const rows = [
-    { name: 'Sets', value: 22 },
-    { name: 'Variation', value: 35 },
-    { name: 'Probability', value: 48 },
-  ];
-  return (
-    <ol className="nv-rank">
-      {rows.map((row, index) => (
-        <li key={row.name}>
-          <span className="nv-rank-n sj-mono">{index + 1}</span>
-          <span className="nv-rank-name">{row.name}</span>
-          <span className="nv-rank-bar">
-            <span style={{ width: pct(row.value) }} className={row.value < 30 ? 'teach' : 'shaky'} />
-          </span>
-          <span className="nv-rank-val sj-mono">{row.value}%</span>
-        </li>
-      ))}
-      <li className="skip">
-        <span className="nv-rank-n sj-mono">–</span>
-        <span className="nv-rank-name">Not reached</span>
-        <span className="nv-rank-bar none" />
-        <span className="nv-rank-val sj-mono">never listed</span>
-      </li>
-    </ol>
-  );
-}
-
-function Checkup() {
-  // Algebra's ladder: starts in the middle, up after a right answer, down after a wrong one.
-  const path = [
-    { level: 3, right: true },
-    { level: 4, right: false },
-    { level: 3, right: true },
-    { level: 4, right: null as boolean | null },
-  ];
-  return (
-    <div className="nv-ladder">
-      <div className="nv-ladder-axis sj-mono">
-        <span>Harder</span>
-        <span>Easier</span>
-      </div>
-      <div className="nv-ladder-grid">
-        {path.map((step, index) => (
-          <div key={index} className="nv-ladder-col">
-            {[5, 4, 3, 2, 1].map((level) => (
-              <span key={level} className={`nv-rung ${level === step.level ? 'on' : ''}`}>
-                {level === step.level ? step.right === null ? <b className="sj-mono">?</b> : <Mark right={step.right} /> : null}
-              </span>
-            ))}
-            <span className="nv-ladder-q sj-mono">Q{index + 1}</span>
-          </div>
-        ))}
-      </div>
-    </div>
   );
 }
 
@@ -379,6 +376,8 @@ function Taught() {
       </span>
       <span className="nv-arrow" aria-hidden="true" />
       <span className="nv-chip ink">Board: taught</span>
+      <span className="nv-arrow" aria-hidden="true" />
+      <span className="nv-chip soft">Comes back later</span>
     </div>
   );
 }
@@ -435,18 +434,17 @@ function Checked() {
 }
 
 export const VIZ: Record<MetricId, () => ReactNode> = {
+  score: Score,
+  started: Started,
   predicted: Predicted,
-  range: Range,
-  projected: Projected,
+  checkup: Checkup,
   target: Target,
   gap: Gap,
-  plan: Plan,
-  days: Days,
-  sessions: Sessions,
-  mastery: Mastery,
-  bands: Bands,
+  topic: Topic,
+  status: Status,
   weakest: Weakest,
-  checkup: Checkup,
+  comeback: Comeback,
+  days: Days,
   answered: Answered,
   right: Right,
   taught: Taught,

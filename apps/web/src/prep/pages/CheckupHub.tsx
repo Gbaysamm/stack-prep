@@ -1,22 +1,21 @@
 /**
- * /checkup: every subject as one row — whether it has been checked and when, its predicted score
- * against the target, what is holding it down, and the one button that fits (start, resume, take
- * again, or set a goal first) — then how a check-up works. The rows scale from one subject to
- * twenty; the subjects still to check come first.
+ * /checkup: every subject as one row — whether it has been checked and when, each check-up's
+ * result as a history (20% → 28% → 47%), what is holding it down, when the next check-up is due,
+ * and the one button that fits (start, resume, or check again) — then how a check-up works. The
+ * rows scale from one subject to twenty; the subjects still to check come first.
  *
- * A subject needs a goal before it can be checked, because the score is a projection against
- * the exam date and target; without one the row sends the student to set it first.
+ * Numbers follow docs/student-scoring.md: a check-up's result is right ÷ answered in that sitting,
+ * and the latest one is the predicted score.
  */
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
-import { api, type Goal } from '../../student/api.js';
+import { api, type CheckupResult } from '../../student/api.js';
 import { IconArrowRight, IconBook, IconReplay, IconTarget } from '../icons.js';
 import type { SubjectOverview } from '../progressApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
 import {
-  ScoreCell,
   SubjectName,
   SubjectRows,
   byUrgency,
@@ -27,7 +26,6 @@ import {
 } from '../SubjectSwitcher.js';
 import { progressApi } from '../progressApi.js';
 import { Button, CountUp, PageHero, Pager, Skeleton, Steps, cx, usePaged } from '../ui.js';
-import { MetricTip } from './HowItsWorkedOut.js';
 import './CheckupHub.css';
 
 function whenLabel(iso: string): string {
@@ -43,20 +41,33 @@ function whenLabel(iso: string): string {
   return `on ${then.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`;
 }
 
+/** "2026-10-19" as a short local date, "19 Oct". */
+function dayText(iso: string): string {
+  const [y = 1970, m = 1, d = 1] = iso.slice(0, 10).split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+
+/** Each finished check-up's result, oldest first. */
+function checkupsOf(subject: SubjectOverview): CheckupResult[] {
+  const history = subject.scores?.checkups.filter((c) => c.score !== null) ?? [];
+  if (history.length > 0) return history;
+  const latest = subject.latest_checkup;
+  return latest && latest.score !== null
+    ? [{ session_id: latest.session_id, finished_at: latest.finished_at, answered: latest.answered, right: latest.right, score: latest.score }]
+    : [];
+}
+
+/** Results shown in a row before the oldest fold away. */
+const TREND_SHOWN = 4;
+
 /** Rows per page. */
 const PAGE = 10;
 
 const STEPS = [
   { title: 'Answer about 15 questions', body: 'They get harder or easier to match you. No time limit, no pass mark.' },
-  { title: 'See your predicted score', body: 'What you’d likely get if you sat the exam today, with a range.' },
-  { title: 'Get your plan', body: 'The topics to practise first, to lift the score fastest.' },
+  { title: 'See your result', body: 'Right ÷ answered. Your latest check-up result is your predicted score.' },
+  { title: 'Practise, then check again', body: 'Work on your weakest topics. A new check-up is due every 7 days.' },
 ];
-
-/** A goal the check-up can measure against: a target and a date, from either source. */
-function hasGoal(subject: SubjectOverview, goal: Goal | undefined): boolean {
-  if (goal && goal.target_score !== null && goal.exam_date !== null) return true;
-  return !!subject.goal && subject.goal.target_score !== null && subject.goal.exam_date !== null;
-}
 
 /** A left-aligned message card: icon and title on one line, the words and the button beneath. */
 function NoteCard({ icon, title, children, action }: { icon: ReactNode; title: ReactNode; children?: ReactNode; action?: ReactNode }) {
@@ -89,13 +100,11 @@ export function CheckupHub() {
   );
 
   // One SubjectOverview per subject: the overview's, plus any subject with a goal it lacks.
-  const goals = new Map<string, Goal>();
   let subjects: SubjectOverview[] = [];
   if (data.data) {
     const [overview, goalList, catalogue] = data.data;
     const examOf = new Map<string, string>();
     for (const exam of catalogue) for (const subject of exam.subjects) examOf.set(subject.subject_id, exam.short_name);
-    for (const goal of goalList) goals.set(goal.subject_id, goal);
     subjects = [...overview.subjects];
     for (const goal of goalList) {
       if (subjects.some((s) => s.subject_id === goal.subject_id)) continue;
@@ -136,19 +145,20 @@ export function CheckupHub() {
     }
   };
 
-  // The hero's number: the most recent predicted score, if there is one.
+  // The hero's number: the most recent check-up result, if there is one.
   const scored = subjects
-    .filter((s) => s.latest_checkup?.score_now != null)
+    .filter((s) => s.latest_checkup?.score != null)
     .sort((a, b) => (b.latest_checkup!.finished_at > a.latest_checkup!.finished_at ? 1 : -1))[0];
   const last = scored?.latest_checkup ?? null;
   const checkedCount = subjects.filter((s) => s.latest_checkup).length;
 
   // The hero's button: the one thing to do next — a half-done check-up, else the first subject
-  // that has never been checked, else the one checked longest ago.
+  // that has never been checked, else one that is due, else the one checked longest ago.
   const openRow = subjects.find((s) => s.open_checkup_session_id);
-  const ready = subjects.filter((s) => hasGoal(s, goals.get(s.subject_id)) && !isDemoSubject(s.subject_id));
+  const ready = subjects.filter((s) => !isDemoSubject(s.subject_id));
   const readyRow =
     ready.find((s) => !s.latest_checkup) ??
+    ready.find((s) => s.scores?.checkup_due) ??
     [...ready].sort((a, b) => (a.latest_checkup!.finished_at < b.latest_checkup!.finished_at ? -1 : 1))[0];
   let heroAction: ReactNode = null;
   if (openRow) {
@@ -185,9 +195,9 @@ export function CheckupHub() {
       key: 'status',
       head: 'Check-up',
       width: 'minmax(0, 1fr)',
-      cell: (s) => <CheckStatus subject={s} goal={goals.get(s.subject_id)} />,
+      cell: (s) => <CheckStatus subject={s} />,
     },
-    { key: 'score', head: 'Predicted score', width: 'minmax(0, 1.2fr)', phone: 'inline', cell: (s) => <ScoreCell subject={s} /> },
+    { key: 'score', head: 'Check-up results', width: 'minmax(0, 1.2fr)', phone: 'inline', cell: (s) => <ResultsCell subject={s} /> },
     {
       key: 'weak',
       head: 'Holding it down',
@@ -217,7 +227,6 @@ export function CheckupHub() {
       cell: (s) => (
         <RowActions
           subject={s}
-          goal={goals.get(s.subject_id)}
           busy={starting === s.subject_id}
           disabled={(starting !== null && starting !== s.subject_id) || isDemoSubject(s.subject_id)}
           onStart={() => void start(s.subject_id)}
@@ -231,30 +240,30 @@ export function CheckupHub() {
       <PageHero
         eyebrow="Check-up"
         title="Find out where you stand"
-        sub="A short check that adapts to you. Nothing counts towards anything: it predicts your exam score today and finds what’s holding it down."
+        sub="A short, mixed set of questions with no help, like the real exam. Your latest result is your predicted score, and a new check-up is due every 7 days."
         actions={heroAction}
         aside={
-          last && last.score_now !== null && scored ? (
+          last && last.score !== null && scored ? (
             <div className="ch-stat">
-              <span className="ch-stat-label">
-                Last predicted · {scored.subject_name} <MetricTip id="predicted" onDark />
-              </span>
+              <span className="ch-stat-label">Last check-up · {scored.subject_name}</span>
               <span className="ch-stat-num">
                 <span className="sj-num">
-                  <CountUp value={last.score_now} />
+                  <CountUp value={last.score} />
                 </span>
-                <span className="unit">out of 100</span>
+                <span className="unit">% predicted score</span>
               </span>
               <span className="ch-stat-chips">
-                <span>Checked {whenLabel(last.finished_at)}</span>
+                <span>
+                  {last.right} of {last.answered} right {whenLabel(last.finished_at)}
+                </span>
                 {subjects.length > 1 ? (
                   <span>
                     {checkedCount} of {subjects.length} subjects checked
                   </span>
-                ) : last.score_low !== null && last.score_high !== null ? (
-                  <span>
-                    Likely {Math.round(last.score_low)}–{Math.round(last.score_high)}
-                  </span>
+                ) : scored.scores?.checkup_due ? (
+                  <span>Next check-up due now</span>
+                ) : scored.scores?.next_checkup_due ? (
+                  <span>Next check-up {dayText(scored.scores.next_checkup_due)}</span>
                 ) : null}
               </span>
             </div>
@@ -321,7 +330,7 @@ export function CheckupHub() {
               </Button>
             }
           >
-            A check-up measures you against a target on a date. Pick your exam and subjects, set a goal, and your first
+            Pick your exam and subjects, and your first
             check-up is one tap away.
           </NoteCard>
         ) : (
@@ -369,10 +378,12 @@ export function CheckupHub() {
   );
 }
 
-/** Whether a subject has been checked: when, or what stands in the way. */
-function CheckStatus({ subject, goal }: { subject: SubjectOverview; goal: Goal | undefined }) {
+/** Whether a subject has been checked: when, and when the next check-up is due. */
+function CheckStatus({ subject }: { subject: SubjectOverview }) {
   const latest = subject.latest_checkup;
-  let tone: 'lime' | 'yellow' | 'pink';
+  const due = subject.scores?.checkup_due ?? false;
+  const next = subject.scores?.next_checkup_due ?? null;
+  let tone: 'lime' | 'yellow';
   let words: string;
   let detail: string;
   if (subject.open_checkup_session_id) {
@@ -380,13 +391,9 @@ function CheckStatus({ subject, goal }: { subject: SubjectOverview; goal: Goal |
     words = 'Half done';
     detail = 'Your answers are saved';
   } else if (latest) {
-    tone = 'lime';
+    tone = due ? 'yellow' : 'lime';
     words = `Checked ${whenLabel(latest.finished_at)}`;
-    detail = `${latest.answered} questions`;
-  } else if (!hasGoal(subject, goal)) {
-    tone = 'pink';
-    words = 'Needs a goal first';
-    detail = 'A target and a date';
+    detail = due ? 'Next check-up due now' : next ? `Next check-up ${dayText(next)}` : `${latest.answered} questions`;
   } else {
     tone = 'yellow';
     words = 'Not checked yet';
@@ -403,15 +410,58 @@ function CheckStatus({ subject, goal }: { subject: SubjectOverview; goal: Goal |
   );
 }
 
+/** Each check-up's result as a history; the latest, the predicted score, large. */
+function ResultsCell({ subject }: { subject: SubjectOverview }) {
+  const history = checkupsOf(subject);
+  const latest = history[history.length - 1];
+  if (!latest || latest.score === null) {
+    return (
+      <span className="ss-scorecell empty">
+        <span className="ss-scorecell-num sj-num">—</span>
+        <small>After a check-up</small>
+      </span>
+    );
+  }
+  const shown = history.slice(-TREND_SHOWN);
+  const folded = history.length > shown.length;
+  const target = subject.goal?.target_score ?? null;
+  const gap = target !== null ? Math.round(target - latest.score) : null;
+  return (
+    <span
+      className="ss-scorecell ch-results"
+      aria-label={`Check-up results ${history.map((c) => `${c.score}%`).join(', ')}; predicted score ${latest.score}%${target !== null ? `, target ${target}%` : ''}`}
+    >
+      <span className="ss-scorecell-top">
+        <span className="ss-scorecell-num sj-num">{latest.score}%</span>
+        <small>
+          {latest.right} of {latest.answered} right
+        </small>
+      </span>
+      {shown.length > 1 ? (
+        <span className="ch-trend sj-mono" aria-hidden="true">
+          {folded ? <span>…</span> : null}
+          {shown.map((c, i) => (
+            <span key={c.session_id}>
+              {i > 0 || folded ? <span className="arrow">→</span> : null}
+              <b className={cx(i === shown.length - 1 && 'last')}>{c.score}%</b>
+            </span>
+          ))}
+        </span>
+      ) : null}
+      {gap !== null && target !== null ? (
+        <small className={cx('ss-gap', gap <= 0 && 'ok')}>{gap <= 0 ? `At your target of ${target}%` : `${gap} to go to ${target}%`}</small>
+      ) : null}
+    </span>
+  );
+}
+
 function RowActions({
   subject,
-  goal,
   busy,
   disabled,
   onStart,
 }: {
   subject: SubjectOverview;
-  goal: Goal | undefined;
   busy: boolean;
   disabled: boolean;
   onStart: () => void;
@@ -429,12 +479,8 @@ function RowActions({
         <Button size="sm" tone="dark" to={`/checkup/${openId}`} trailing={<IconArrowRight size={16} />}>
           Resume
         </Button>
-      ) : !hasGoal(subject, goal) ? (
-        <Button size="sm" tone="ghost" to={`/subjects/${subject.subject_id}/goal`}>
-          Set a goal
-        </Button>
       ) : latest ? (
-        <Button size="sm" tone="ghost" onClick={onStart} busy={busy} disabled={disabled}>
+        <Button size="sm" tone={subject.scores?.checkup_due ? 'dark' : 'ghost'} onClick={onStart} busy={busy} disabled={disabled}>
           {busy ? 'Starting…' : 'Check again'}
         </Button>
       ) : (

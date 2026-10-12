@@ -18,7 +18,7 @@ from typing import Any
 import httpx
 import pytest
 from sqlalchemy import text
-from test_practice import fixture
+from test_practice import checkup_done, fixture
 
 from app.db import get_engine
 from app.main import app
@@ -92,6 +92,7 @@ async def people(fixture: dict[str, str]) -> AsyncIterator[People]:
 
 
 async def start(client: httpx.AsyncClient, student: str, ids: dict[str, str]) -> httpx.Response:
+    await checkup_done(student, ids["subject_id"])
     return await client.post(
         "/v1/practice/start",
         json={"student_id": student, "subject_id": ids["subject_id"], "length": 2},

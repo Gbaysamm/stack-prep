@@ -3,9 +3,11 @@
  *
  * One place, so the room (the "saved" moment after a check-in) and the check-ins page say the
  * same thing. Written from what the code does, not what it might do:
- *   - how sure: the engine (guessed-right answers are capped and don't count as known;
- *     "I think so" moves mastery three quarters as far) — packages/engine mastery.py
- *   - two misses: recorded as taught, not known (routers/practice.py practice_taught)
+ *   - how sure: the scoring_attempts view and apps/api scoring.py (a guessed right answer
+ *     doesn't count yet; "I think so" counts in full) — docs/student-scoring.md §1
+ *   - comes back: a question whose latest answer was wrong, taught or guessed comes back in a
+ *     later run, the same question (routers/practice.py _comeback) — docs/student-scoring.md §5
+ *   - two misses: recorded as taught, and the first try counts as wrong (practice_taught)
  *   - "still unsure" / "too hard": listed under "Worth another look" on Progress
  *     (routers/progress.py lesson_feedback). They don't change which questions come next.
  */
@@ -28,19 +30,19 @@ export const WHY_BOARD: Record<LessonContext, Word> = {
   after_guess: {
     label: 'Right, but you guessed',
     means: 'You picked the right answer but said it was a guess.',
-    then: 'A lucky guess isn’t counted as knowing it. This idea comes back as a fresh question so you can prove it.',
+    then: 'A guess doesn’t count in your score yet. This same question comes back in a later run, so you can show you know it.',
     tone: 'yellow',
   },
   after_unsure: {
     label: 'Right, but unsure',
     means: 'You picked the right answer but weren’t fully sure.',
-    then: 'It counts, but for less than a sure answer: three quarters of the step up.',
+    then: 'It counts as right in your score. The lesson is there so you can be sure next time.',
     tone: 'purple',
   },
   after_second_guess: {
     label: 'Right after the hint, but unsure',
     means: 'You got it on the second try, with the hint, but said you guessed or weren’t sure.',
-    then: 'Counted as learnt with a hint, not known. A fresh question on this idea comes back later.',
+    then: 'Your first try counted as wrong. This same question comes back in a later run for you to get right.',
     tone: 'yellow',
   },
   after_right: {
@@ -52,7 +54,7 @@ export const WHY_BOARD: Record<LessonContext, Word> = {
   after_misses: {
     label: 'Missed twice',
     means: 'Both tries were wrong, so the coach worked it through with you.',
-    then: 'Counted as taught, not known. A fresh question on the same idea comes back later.',
+    then: 'Your first try counted as wrong. This same question comes back in a later run for you to get right.',
     tone: 'yellow',
   },
 };
@@ -82,7 +84,7 @@ export const UNDERSTOOD_WORD: Record<Understood, Word> = {
   got_it: {
     label: 'Got it',
     means: 'The lesson made sense and you could do one like it now.',
-    then: 'Nothing more to do. The next question on this idea will show whether it stuck.',
+    then: 'Nothing more to do. Your next questions on this topic will show whether it stuck.',
     tone: 'lime',
   },
   unsure: {

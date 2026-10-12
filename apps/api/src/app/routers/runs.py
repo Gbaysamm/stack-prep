@@ -143,7 +143,7 @@ async def practice_options(
 
     mastery = {
         standing.unit_id: standing.mastery
-        for standing in await _standings_from_history(conn, student_id, units)
+        for standing in await _standings_from_history(conn, student_id, subject_id, units)
     }
     topics: list[TopicOption] = []
     for unit in units:

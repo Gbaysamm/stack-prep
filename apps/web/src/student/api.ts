@@ -111,31 +111,72 @@ export interface SubtopicReport {
   confidence: string;
 }
 
-export interface PlanLine {
+/** Topic status labels (docs/student-scoring.md §2). */
+export type TopicStatus = 'not_tried' | 'just_started' | 'needs_work' | 'getting_there' | 'strong';
+
+/** One JAMB topic's score: right ÷ answered, over the latest answer to each question. */
+export interface TopicScore {
   subtopic_id: string;
   name: string;
-  /** JAMB's section (the DB topic); so is `section_name`. */
-  topic_name: string;
-  section_name?: string | null;
+  section_id: string;
+  section_name: string;
+  /** Share of the exam; orders the plan, never enters a score. */
   share: number;
-  mastery_now: number;
-  mastery_projected: number;
-  sessions: number;
-  marks_gained: number;
-  reason: string;
+  answered: number;
+  right: number;
+  /** Whole percentage, null when nothing answered. */
+  score: number | null;
+  /** The topic's score after the first sitting that touched it. */
+  started_score: number | null;
+  status: TopicStatus;
 }
 
-export interface ScoreProjection {
-  score_now: number;
-  score_low: number;
-  score_high: number;
-  score_projected: number;
-  target_score: number | null;
-  sessions_available: number;
-  shortfall_note: string | null;
-  unmeasured_share: number;
-  plan: PlanLine[];
-  caveat: string;
+export interface CheckupResult {
+  session_id: string;
+  finished_at: string;
+  answered: number;
+  right: number;
+  score: number | null;
+}
+
+/** Every number shown for a subject (docs/student-scoring.md). All whole percentages. */
+export interface SubjectScore {
+  subject_id: string;
+  /** Right ÷ answered, latest answer to each question, the whole subject. */
+  score: number | null;
+  answered: number;
+  right: number;
+  /** How many topics `score` averages. */
+  topics_tried: number;
+  /** The first check-up's result. */
+  started_score: number | null;
+  /** score − started_score */
+  change: number | null;
+  /** The latest check-up's result. */
+  predicted: number | null;
+  /** Oldest first. */
+  checkups: CheckupResult[];
+  /** ISO date. */
+  next_checkup_due: string | null;
+  checkup_due: boolean;
+  topics: TopicScore[];
+}
+
+export interface TopicChange {
+  subtopic_id: string;
+  name: string;
+  before: number | null;
+  after: number | null;
+  /** In this sitting. */
+  answered: number;
+  right: number;
+}
+
+/** What one sitting did to the scores. */
+export interface ScoreChange {
+  before: number | null;
+  after: number | null;
+  topics: TopicChange[];
 }
 
 /** One DB topic, which is JAMB's SECTION: a heading over its topics, not a unit of work. */
@@ -159,7 +200,13 @@ export interface CheckupReport {
   topics: TopicReport[];
   subtopics: SubtopicReport[];
   weights_source: string;
-  projection: ScoreProjection | null;
+  /** This sitting: right ÷ answered. */
+  right: number;
+  score: number | null;
+  /** The check-up before this one. */
+  previous_score: number | null;
+  /** The subject as it stands now, from every counted answer. */
+  standing: SubjectScore | null;
   unassessed_topics: string[];
   priority_topics: string[];
   caveat: string;
@@ -181,6 +228,8 @@ export interface PracticeQuestion {
   options: PracticeOption[];
   hints_used: number;
   figures?: QuestionFigure[];
+  /** From an earlier sitting, not yet got right without help. */
+  comeback?: boolean;
 }
 
 export interface Misconception {
@@ -203,6 +252,8 @@ export interface PracticeState {
   correct_option_key: string | null;
   misconception: Misconception | null;
   closing_note: string | null;
+  /** Once finished: the score before and after the run, and each topic it touched. */
+  score_change?: ScoreChange | null;
 }
 
 /** One beat of a taught lesson: what goes up on the board, and what is said meanwhile. */

@@ -3,21 +3,25 @@
  * check-ins mean, and the questions students ask, with one search box over all of it.
  *
  * Every answer here is written from what the code does, and says where:
- *   right answer didn't count   packages/engine mastery.py (guessed: capped, damped; "I think
- *                               so": UNSURE_K_FACTOR 0.75), the scoring_attempts view (hinted
- *                               and guessed answers earn nothing), checkinWords.ts
+ * The scoring rule is docs/student-scoring.md; the numbers' own words are in HowItsWorkedOut.tsx.
+ *   right answer didn't count   the scoring_attempts view (hinted and guessed-right answers don't
+ *                               count; "I think so" counts in full), apps/api scoring.py (latest
+ *                               counted answer to each question), checkinWords.ts
  *   board opened when right     PracticeRoom ReviewBoard (a guess, or "I think so")
  *   taught                      routers/practice.py (two misses → the board, `taught`)
- *   a question coming back      routers/practice.py (hint then the same question once;
- *                               EXCLUDED_POOL: a met question is never asked again; `taught`:
- *                               the skill comes back, not the item)
+ *   a question coming back      routers/practice.py (the hint, then the same question once; a
+ *                               wrong or guessed question comes back in a later run, _comeback,
+ *                               about one in three of a run)
  *   leaving half way            PracticeRoom / CheckupRoom leave dialogs, practice.py `current`
- *   predicted score             routers/checkup.py build_report (that check-up's answers only)
+ *   predicted score             scoring.py (the latest check-up's result, the average of its
+ *                               topic scores; due every 7 days)
+ *   practice locked             docs/student-scoring.md §3 (until the first check-up, and while
+ *                               one is due)
  *   countdown                   the exam date on the goal; the nearest paper for multi-day exams
  *   other devices               shell.tsx SandboxBanner, AuthForms (email or phone + password)
  *   coach's voice               student/Board.tsx (no voice → the words are written, read along)
  *   deleting a run              PracticeHub run list bin, RunReport Delete; routers/runs.py
- *                               (hides, still counts toward mastery)
+ *                               (hides, still counts toward your score)
  *   past questions              docs/questions/utme, README "Content review"
  * No support address exists in the repo, so none is shown.
  */
@@ -56,14 +60,14 @@ interface Step {
 const STEPS: Step[] = [
   {
     title: 'Take a check-up',
-    body: 'Up to 15 questions, no time limit and no pass mark. It shows where you stand in each topic of the syllabus.',
+    body: 'A short mixed test with no help, like the exam. Practice opens after your first one, and one is due every 7 days.',
     to: '/checkup',
     go: 'Check-up',
     icon: IconTarget,
   },
   {
     title: 'Practise',
-    body: 'Questions come from the topic where one more session adds the most marks.',
+    body: 'Questions come from your weakest topics first, and any question you missed comes back until you get it right.',
     to: '/practice',
     go: 'Practice',
     icon: IconBolt,
@@ -84,7 +88,7 @@ const STEPS: Step[] = [
   },
   {
     title: 'Track your progress',
-    body: 'Every run and check-up in one place. Take another check-up to see your score move.',
+    body: 'Your score, where you started, every check-up and every topic, all as plain percentages.',
     to: '/progress',
     go: 'Progress',
     icon: IconChart,
@@ -103,8 +107,8 @@ const FAQS: Faq[] = [
     id: 'right-not-counted',
     q: 'Why didn’t my right answer count?',
     a: [
-      'It depends on what you told us. If you said “I guessed”, a right answer counts as answered but not as right first time, and it isn’t counted as knowing it: the idea comes back as a fresh question so you can prove it.',
-      'If you said “I think so”, it counts, but for less than a sure answer: three quarters of the step up. And a right answer on your second try, after the hint, doesn’t count as right first time either.',
+      'If you said “I guessed”, a right answer doesn’t count in your score yet. The same question comes back in a later run, and when you get it right without guessing, it counts.',
+      'A right answer on your second try, after the hint or the board, doesn’t count either: your first try already counted as wrong. That question comes back later too. If you said “I think so”, a right answer counts in full.',
     ],
     link: { to: `${HOW_PATH}#right`, label: 'How “right first time” is worked out' },
   },
@@ -120,7 +124,7 @@ const FAQS: Faq[] = [
     id: 'taught',
     q: 'What does “taught” mean?',
     a: [
-      'You missed a question twice, so the coach worked the solution through with you on the board, step by step. It counts as taught, not as known, and a fresh question on the same idea comes back later.',
+      'You missed a question twice, so the coach worked the solution through with you on the board, step by step. It counts as wrong for now, and the same question comes back in a later run for you to get right.',
     ],
     link: { to: `${HOW_PATH}#taught`, label: 'How “taught” is counted' },
   },
@@ -128,8 +132,8 @@ const FAQS: Faq[] = [
     id: 'comes-back',
     q: 'Why does a question come back?',
     a: [
-      'The same question comes back once, straight after your first miss, with a hint. After that you never get a question you’ve already met.',
-      'What comes back is the idea. A topic you guessed on or were taught is still weak, so the plan keeps choosing it and brings you a fresh question on it.',
+      'Straight after your first miss, the same question comes back once with a hint.',
+      'After that, any question you got wrong, were taught on the board, or got right but guessed comes back in a later run, never the same one. About one question in three of a run is one of these. Once you get it right without help and without guessing, it stops coming back and your score goes up.',
     ],
   },
   {
@@ -145,9 +149,28 @@ const FAQS: Faq[] = [
     id: 'predicted-after-checkup',
     q: 'Why does my predicted score only change after a check-up?',
     a: [
-      'It’s worked out from the answers in your latest check-up. Practice builds what you know, but it doesn’t change this number. Take another check-up to see how far you’ve moved.',
+      'Your predicted score is your latest check-up’s result: the average of your topic scores from that check-up alone. A check-up is the closest thing to the exam, so only a check-up changes it.',
+      'Practice still counts: every question you get right raises its topic, and your score with it. A check-up is due every 7 days.',
     ],
     link: { to: `${HOW_PATH}#predicted`, label: 'How the predicted score is worked out' },
+  },
+  {
+    id: 'score-vs-predicted',
+    q: 'Why is my score different from my predicted score?',
+    a: [
+      'Your score is the average of your topic scores, and each topic counts every question you’ve answered there, in practice and check-ups, using your latest answer to each. Your predicted score is the same sum for your latest check-up alone.',
+      'So after a good week of practice your score can be higher than your predicted score. Your next check-up shows whether the exam-style result has caught up.',
+    ],
+    link: { to: `${HOW_PATH}#example`, label: 'See a worked example' },
+  },
+  {
+    id: 'practice-locked',
+    q: 'Why is practice locked?',
+    a: [
+      'Practice opens after your first check-up in a subject, because the check-up shows where you start and which topics to aim at.',
+      'After that, a check-up is due every 7 days. While one is due, practice in that subject waits until you take it, so your predicted score keeps up with you.',
+    ],
+    link: { to: `${HOW_PATH}#checkup`, label: 'How check-ups work' },
   },
   {
     id: 'countdown',
@@ -176,7 +199,7 @@ const FAQS: Faq[] = [
     id: 'delete-run',
     q: 'How do I delete a run?',
     a: [
-      'On Practice, use the bin beside the run in your list, or open the run’s report and choose Delete. It disappears from your history, but the answers in it still happened, so they still count towards your mastery.',
+      'On Practice, use the bin beside the run in your list, or open the run’s report and choose Delete. It disappears from your history, but the answers in it still happened, so they still count in your score.',
     ],
     link: { to: '/practice', label: 'Go to Practice' },
   },

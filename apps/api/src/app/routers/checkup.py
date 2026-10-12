@@ -1,9 +1,9 @@
 """The check-up: the first sitting, which establishes where a student stands.
 
-Not an exam. No score, no deadline, no fixed paper — the questions adapt to the answers,
-and the output is a picture of the student, not a mark. It is recorded as a study session
-(`session_type = 'checkup'`), and its answers are ordinary attempts, so the same evidence
-feeds mastery as everything else.
+A short, mixed sitting with no help, taken every week or so. Its result is plain: right ÷
+answered, and the latest check-up's result is the student's predicted score
+(docs/student-scoring.md §4). It is recorded as a study session (`session_type = 'checkup'`),
+and its answers are ordinary attempts, so they also count in every topic score.
 
 The sitting holds no server-side state of its own: the blueprint is a deterministic
 function of the syllabus, so the nth question is derived from the n-1 answers already
@@ -14,6 +14,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from datetime import date
 from typing import Annotated, Any
 from uuid import UUID, uuid4
 
@@ -23,10 +24,10 @@ from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncConnection
 
+from app import scoring
 from app.auth import require_session_owner, require_student
 from app.db import connection, fetch_all
 from app.figures import QuestionFigure, figures_for
-from app.routers.student import sessions_before
 from engine.checkup import (
     DEFAULT_LENGTH,
     BlueprintSlot,
@@ -38,11 +39,7 @@ from engine.checkup import (
     summarise,
 )
 from engine.mastery import Attempt
-from engine.projection import (
-    Projection,
-    UnitStanding,
-    project,
-)
+from engine.projection import UnitStanding
 from engine.version import ENGINE_VERSION
 
 router = APIRouter(prefix="/v1/checkup", tags=["checkup"])
@@ -146,35 +143,6 @@ class SubtopicReport(BaseModel):
     section_name: str | None = None
 
 
-class PlanLine(BaseModel):
-    subtopic_id: UUID
-    name: str
-    #: JAMB's section (the DB topic). Kept for older clients; `section_name` says it plainly.
-    topic_name: str
-    share: float
-    mastery_now: float
-    mastery_projected: float
-    sessions: int
-    #: Marks out of 100 these sessions are expected to add.
-    marks_gained: float
-    reason: str
-    section_name: str | None = None
-
-
-class ScoreProjection(BaseModel):
-    score_now: float
-    score_low: float
-    score_high: float
-    score_projected: float
-    target_score: float | None
-    sessions_available: int
-    #: Set when the projection still falls short of the target, said plainly.
-    shortfall_note: str | None
-    unmeasured_share: float
-    plan: list[PlanLine]
-    caveat: str
-
-
 class CheckupReport(BaseModel):
     session_id: UUID
     subject_id: UUID
@@ -186,8 +154,14 @@ class CheckupReport(BaseModel):
     #: a student can act on: "Idiomatic usage 35%", not "Lexis 62%".
     subtopics: list[SubtopicReport]
     weights_source: str
-    #: Present once the student has a goal; the whole point of the sitting.
-    projection: ScoreProjection | None
+    #: How many of this sitting's questions were right.
+    right: int
+    #: This sitting's result: the average of its topic scores (docs/student-scoring.md §3).
+    score: int | None
+    #: The check-up before this one, to show the change.
+    previous_score: int | None
+    #: The subject as it stands now, from every counted answer (docs/student-scoring.md §2).
+    standing: scoring.SubjectScore | None
     #: Section names (DB topics) the sitting did not reach.
     unassessed_topics: list[str]
     #: Section names (DB topics) to start with.
@@ -370,12 +344,15 @@ async def _pick_question(
     seen: list[UUID],
     student_id: UUID,
 ) -> dict[str, Any] | None:
-    """The nearest question to the level we want, in this topic, that this student has never
-    been asked.
+    """The nearest question to the level we want, in this topic, preferring one this student
+    has never been asked.
 
     "Never been asked" spans every earlier sitting and every practice answer, not just this
-    session: a question drilled last week would measure memory of it. Where a curated
-    diagnostic pool exists its questions come first; a subject without one still works.
+    session: a question drilled last week would measure memory of it. Weekly check-ups use up
+    a small topic's questions, though, and a check-up that stopped short would measure less.
+    So once a topic has nothing fresh left, it reuses the questions the student saw longest
+    ago (docs/student-scoring.md §3). Where a curated diagnostic pool exists its questions
+    come first; a subject without one still works.
     """
     rows = await fetch_all(
         conn,
@@ -400,15 +377,18 @@ async def _pick_question(
         JOIN curriculum_items skill ON skill.id = dq.primary_skill_id
         JOIN curriculum_items sub ON sub.id = skill.parent_id
         JOIN curriculum_items topic ON topic.id = sub.parent_id
+        -- When this student last met it, in any sitting or in practice; null if never.
+        LEFT JOIN LATERAL (
+          SELECT max(h.last_answered_at) AS last_seen
+          FROM student_question_history h
+          WHERE h.student_id = :student AND h.question_id = dq.question_id
+        ) before ON true
         WHERE topic.id = CAST(:topic AS uuid)
           AND (CARDINALITY(CAST(:seen AS uuid[])) = 0
                OR NOT (dq.question_version_id = ANY (CAST(:seen AS uuid[]))))
-          -- Anything this student has answered before, in any sitting or in practice.
-          AND NOT EXISTS (
-              SELECT 1 FROM student_question_history h
-              WHERE h.student_id = :student AND h.question_id = dq.question_id
-          )
-        ORDER BY (dq.usage_pool = 'diagnostic') DESC,
+        ORDER BY before.last_seen IS NOT NULL,
+                 before.last_seen,
+                 (dq.usage_pool = 'diagnostic') DESC,
                  -- A subtopic this sitting has not asked about yet comes first. A topic gets
                  -- two or three questions, and three from one subtopic would leave the rest
                  -- of the topic unmeasured while looking as though it had been.
@@ -704,80 +684,6 @@ def _standings(
     ]
 
 
-async def _forecast(
-    conn: AsyncConnection,
-    student_id: UUID,
-    subject_id: UUID,
-    standings: Sequence[UnitStanding],
-) -> ScoreProjection | None:
-    """What this stands to become, given the time the student says they have.
-
-    Returns nothing without a goal. A projection needs a date to count sessions towards and a
-    target to be measured against, and inventing either would turn a plan into a guess with a
-    number on it.
-    """
-    goal = (
-        (
-            await conn.execute(
-                text(
-                    """
-                    SELECT target_score, exam_date, minutes_per_day, study_days
-                    FROM student_exam_goals
-                    WHERE student_id = :student AND subject_id = :subject
-                      AND status = 'active'
-                    """
-                ),
-                {"student": student_id, "subject": subject_id},
-            )
-        )
-        .mappings()
-        .first()
-    )
-    if goal is None:
-        return None
-
-    sessions = sessions_before(
-        goal["exam_date"], goal["minutes_per_day"], list(goal["study_days"] or [])
-    )
-    result: Projection = project(standings, sessions_available=sessions or 0)
-    target = float(goal["target_score"]) if goal["target_score"] is not None else None
-    shortfall = None
-    if target is not None and result.score_projected < target:
-        gap = round(target - result.score_projected, 1)
-        shortfall = (
-            f"This plan gets to {result.score_projected} of the {target} you are aiming for — "
-            f"{gap} marks short. More study days, or a longer run-up, is what closes that; "
-            "a different plan on the same hours will not."
-        )
-
-    return ScoreProjection(
-        score_now=result.score_now,
-        score_low=result.range_now[0],
-        score_high=result.range_now[1],
-        score_projected=result.score_projected,
-        target_score=target,
-        sessions_available=result.sessions_available,
-        shortfall_note=shortfall,
-        unmeasured_share=result.unmeasured_share,
-        plan=[
-            PlanLine(
-                subtopic_id=UUID(line.unit_id),
-                name=line.name,
-                topic_name=line.topic_name,
-                share=round(line.share, 4),
-                mastery_now=round(line.mastery_now, 3),
-                mastery_projected=round(line.mastery_projected, 3),
-                sessions=line.sessions,
-                marks_gained=round(line.marks_gained, 2),
-                reason=line.reason,
-                section_name=line.topic_name,
-            )
-            for line in result.plan
-        ],
-        caveat=result.caveat,
-    )
-
-
 @router.get("/{session_id}/report", response_model=CheckupReport, summary="What the check-up found")
 async def report(
     request: Request, conn: Annotated[AsyncConnection, Depends(connection)], session_id: UUID
@@ -836,7 +742,31 @@ async def build_report(conn: AsyncConnection, session_id: UUID) -> CheckupReport
         if row["is_correct"]:
             key = str(row["subtopic_id"])
             correct_by_unit[key] = correct_by_unit.get(key, 0) + 1
-    forecast = await _forecast(conn, session["student_id"], session["subject_id"], standings)
+    right = sum(1 for row in answers if row["is_correct"])
+    every = await scoring.answers_for(conn, session["student_id"], session["subject_id"])
+    checkups = await scoring.checkups_for(conn, session["student_id"], session["subject_id"], every)
+    sitting = [answer for answer in every if answer.session_id == str(session_id)]
+    earlier = [line for line in checkups if line.session_id != session_id]
+    if session["ended_at"] is not None:
+        earlier = [line for line in earlier if line.finished_at < session["ended_at"]]
+    today: date = (
+        await conn.execute(
+            text(
+                """
+                SELECT (now() AT TIME ZONE coalesce(timezone, 'UTC'))::date
+                FROM students WHERE id = :id
+                """
+            ),
+            {"id": session["student_id"]},
+        )
+    ).scalar() or date.today()
+    standing = scoring.subject_score(
+        session["subject_id"],
+        units,
+        every,
+        checkups,
+        today,
+    )
 
     return CheckupReport(
         session_id=session_id,
@@ -849,7 +779,7 @@ async def build_report(conn: AsyncConnection, session_id: UUID) -> CheckupReport
                 name=estimate.name,
                 answered=estimate.answered,
                 correct=estimate.correct,
-                mastery=estimate.mastery,
+                mastery=(estimate.correct / estimate.answered) if estimate.answered else None,
                 confidence=estimate.confidence,
                 highest_level_correct=estimate.highest_level_correct,
                 lowest_level_wrong=estimate.lowest_level_wrong,
@@ -865,7 +795,11 @@ async def build_report(conn: AsyncConnection, session_id: UUID) -> CheckupReport
                 share=round(standing.share, 4),
                 answered=standing.answered,
                 correct=correct_by_unit.get(standing.unit_id, 0),
-                mastery=standing.mastery,
+                mastery=(
+                    correct_by_unit.get(standing.unit_id, 0) / standing.answered
+                    if standing.answered
+                    else None
+                ),
                 confidence=confidence_for(standing.answered),
                 section_id=UUID(standing.topic_id),
                 section_name=standing.topic_name,
@@ -873,13 +807,17 @@ async def build_report(conn: AsyncConnection, session_id: UUID) -> CheckupReport
             for standing in standings
         ],
         weights_source=weights_source,
-        projection=forecast,
+        right=right,
+        score=scoring.overall(sitting),
+        previous_score=earlier[-1].score if earlier else None,
+        standing=standing,
         unassessed_topics=[names.get(topic_id, topic_id) for topic_id in summary.unassessed_topics],
         priority_topics=[names.get(topic_id, topic_id) for topic_id in summary.priority_topics],
         caveat=(
             # A student reads this sentence, so it is written as a sentence: no "(s)".
-            f"Based on {summary.answered} question{'' if summary.answered == 1 else 's'}. "
-            "This is a starting point for planning, "
-            "not a measure of ability, and it says nothing about topics it did not reach."
+            f"{right} of {summary.answered} question{'' if summary.answered == 1 else 's'} right. "
+            "The result is the average of your topic scores from this check-up. Every answer "
+            "also counts in its topic score, and the next check-up is due in "
+            f"{scoring.CHECKUP_EVERY_DAYS} days."
         ),
     )

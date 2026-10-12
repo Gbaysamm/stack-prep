@@ -20,7 +20,6 @@ import {
   IconHome,
   IconPlay,
   IconTarget,
-  IconTrophy,
 } from '../icons.js';
 import type { Overview, PracticeRun, SubjectOverview, WeakSubtopic } from '../progressApi.js';
 import {
@@ -76,13 +75,16 @@ export function plural(n: number, one: string, many = `${one}s`): string {
   return `${n} ${n === 1 ? one : many}`;
 }
 
-/** The words for a mastery level; the same bands the check-up report uses. */
-export function masteryWord(m: number | null): string {
-  if (m === null) return 'Not checked yet';
-  if (m >= 0.75) return 'Strong';
-  if (m >= 0.5) return 'Holding';
-  if (m >= 0.3) return 'Shaky';
-  return 'Needs teaching';
+/**
+ * The words for a topic score (0..1), as docs/student-scoring.md §2 labels it. Pass `answered`
+ * where known: fewer than 3 answers is only "Just started", whatever the percentage.
+ */
+export function masteryWord(m: number | null, answered?: number): string {
+  if (m === null || answered === 0) return 'Not tried yet';
+  if (answered !== undefined && answered < 3) return 'Just started';
+  if (m >= 0.8) return 'Strong';
+  if (m >= 0.5) return 'Getting there';
+  return 'Needs work';
 }
 
 /** Where a run opens: an unfinished one back in the room, a finished one on its summary. */
@@ -145,6 +147,17 @@ export function useStartPractice() {
       navigate(`/practice/${run.session_id}`);
     } catch (failure) {
       setBusy(null);
+      // 423: practice is locked behind a check-up (first one, or one due). Go and take it.
+      if (failure instanceof Refused && failure.status === 423) {
+        toast(failure.message);
+        try {
+          const sitting = await api.start(student.studentId, subjectId);
+          navigate(`/checkup/${sitting.session_id}`);
+        } catch (again) {
+          setError(`${failure.message} We couldn't open it just now: ${(again as Error).message}`);
+        }
+        return;
+      }
       // 422 on a narrowed start is the API's "nothing matches": every question there is met.
       if (isNarrowed(focus) && failure instanceof Refused && failure.status === 422) {
         setExhausted({ subjectId, label: focus.label ?? 'that choice', key });
@@ -341,25 +354,72 @@ export function MasteryBar({ value, label }: { value: number | null; label?: str
 
 const TICKS = [0, 25, 50, 75, 100];
 
+/** "+10", "−3" or "±0": a change in whole percentage points. */
+export function signed(n: number): string {
+  if (n > 0) return `+${n}`;
+  if (n < 0) return `−${Math.abs(n)}`;
+  return '±0';
+}
+
+/** "in 3 days", "tomorrow", "today": when the next check-up falls due. */
+export function dueIn(iso: string | null): string {
+  if (!iso) return '';
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(`${iso}T00:00:00`);
+  const days = Math.round((due.getTime() - today.getTime()) / 86_400_000);
+  if (days <= 0) return 'today';
+  if (days === 1) return 'tomorrow';
+  return `in ${days} days`;
+}
+
 /**
- * Where the score stands: today's predicted score, where the plan gets to by exam day, and the
- * target, as three figures over one 0–100 scale. With nothing to show yet it says what fills it
- * in and offers the step that does.
+ * Where the student stands (docs/student-scoring.md): their score now, from every answer; their
+ * predicted score, from the latest check-up; and their target, as three figures over one 0–100%
+ * scale that also shows how far they've come since they started. With nothing to show yet it
+ * says what fills it in and offers the step that does.
  */
 export function Standing({ subject, className, sample }: { subject: SubjectOverview; className?: string; sample?: boolean }) {
   const checkup = useStartCheckup();
+  const scores = subject.scores ?? null;
   const latest = subject.latest_checkup;
-  const target = subject.goal?.target_score ?? latest?.target_score ?? null;
-  const now = latest?.score_now ?? null;
-  const projected = latest?.score_projected ?? null;
-  const low = latest?.score_low ?? null;
-  const high = latest?.score_high ?? null;
-  const gap = target !== null && projected !== null ? Math.round(target - projected) : null;
+  const target = subject.goal?.target_score ?? null;
+  const score = scores?.score ?? null;
+  const predicted = scores?.predicted ?? latest?.score ?? null;
+  const started = scores?.started_score ?? null;
+  const change = scores?.change ?? null;
+  const measure = predicted ?? score;
+  const gap = target !== null && measure !== null ? Math.round(target - measure) : null;
   const at = (v: number) => `${Math.max(0, Math.min(100, v))}%`;
+  const history = (scores?.checkups ?? []).map((line) => line.score).filter((v): v is number => v !== null);
 
   const figures: { key: string; label: string; value: number | null; line: ReactNode; badge?: ReactNode; tip: MetricId }[] = [
-    { key: 'now', label: 'Predicted today', value: now, line: 'If you sat the exam today', tip: 'predicted' },
-    { key: 'proj', label: 'By exam day', value: projected, line: 'If you keep to your plan', tip: 'projected' },
+    {
+      key: 'now',
+      label: 'Your score',
+      value: score,
+      tip: 'score',
+      line:
+        score === null || !scores
+          ? 'The average of your topic scores'
+          : `Average of ${scores.topics_tried} topic${scores.topics_tried === 1 ? '' : 's'} tried`,
+      badge:
+        change === null || started === null ? null : (
+          <span className="home-gap">
+            <Badge tone={change > 0 ? 'green' : change < 0 ? 'pink' : 'ghost'} dot>
+              {signed(change)} since you started at {started}%
+            </Badge>
+            {sample ? null : <MetricTip id="started" />}
+          </span>
+        ),
+    },
+    {
+      key: 'proj',
+      label: 'Predicted score',
+      value: predicted,
+      tip: 'predicted',
+      line: latest ? `Your check-up on ${shortDate(latest.finished_at)}` : 'Comes from your check-up',
+    },
     {
       key: 'target',
       tip: 'target',
@@ -371,11 +431,11 @@ export function Standing({ subject, className, sample }: { subject: SubjectOverv
           <span className="home-gap">
             {gap <= 0 ? (
               <Badge tone="green" dot>
-                On track
+                Target reached
               </Badge>
             ) : (
               <Badge tone="pink" dot>
-                {gap} short
+                {gap}% to go
               </Badge>
             )}
             {sample ? null : <MetricTip id="gap" />}
@@ -384,68 +444,72 @@ export function Standing({ subject, className, sample }: { subject: SubjectOverv
     },
   ];
 
+  const takeCheckup = (
+    <Button busy={checkup.busy} onClick={() => checkup.start(subject.subject_id)} trailing={<IconArrowRight size={18} />}>
+      Take a check-up
+    </Button>
+  );
+
   let footer: ReactNode;
   if (sample) {
     footer = <p className="home-sample-note">Your own numbers appear after your first check-up.</p>;
-  } else if (now !== null && latest) {
-    footer = (
-      <div className="home-stand-foot">
-        <p>
-          {low !== null && high !== null ? (
-            <>
-              Your score today is most likely between <b>{fmtScore(low)}</b> and <b>{fmtScore(high)}</b>, shaded on the
-              scale. <MetricTip id="range" />{' '}
-            </>
-          ) : null}
-          From your {latest.answered}-question check-up on {shortDate(latest.finished_at)}.
-        </p>
-        <Link className="sj-link" to={`/checkup/${latest.session_id}/report`}>
-          Read the report <IconArrowRight size={14} />
-        </Link>
-      </div>
-    );
-  } else if (latest) {
-    footer = (
-      <Note
-        icon={<IconTrophy size={18} />}
-        tone="yellow"
-        title="Add your goal to see your score"
-        action={
-          <Button to={`/subjects/${subject.subject_id}/goal`} trailing={<IconArrowRight size={18} />}>
-            Set my goal
-          </Button>
-        }
-      >
-        Your check-up is done. Tell us your target and exam date, and we turn your answers into a predicted score and a
-        plan to close the gap.
-      </Note>
-    );
   } else if (subject.open_checkup_session_id) {
     footer = (
       <Note
         icon={<IconTarget size={18} />}
-        title="Finish your check-up to fill this in"
+        title={latest ? 'Finish your check-up' : 'Finish your check-up to fill this in'}
         action={
           <Button to={`/checkup/${subject.open_checkup_session_id}`} trailing={<IconArrowRight size={18} />}>
             Resume check-up
           </Button>
         }
       >
-        Your answers so far are saved. When you finish, your predicted score lands on this scale.
+        Your answers so far are saved. When you finish, its result becomes your predicted score.
+      </Note>
+    );
+  } else if (latest && scores) {
+    footer = (
+      <div className="home-stand-foot">
+        <p>
+          {history.length > 1 ? (
+            <>
+              Your check-ups: <b>{history.map((v) => `${v}%`).join(' → ')}</b>.{' '}
+            </>
+          ) : (
+            <>
+              Your first check-up: <b>{latest.right} of {latest.answered} right</b>.{' '}
+            </>
+          )}
+          {scores.checkup_due ? (
+            <>
+              <b>A new check-up is due</b>. It updates your predicted score.
+            </>
+          ) : (
+            <>Next check-up {dueIn(scores.next_checkup_due)}.</>
+          )}{' '}
+          <MetricTip id="checkup" />
+        </p>
+        {scores.checkup_due ? (
+          takeCheckup
+        ) : (
+          <Link className="sj-link" to={`/checkup/${latest.session_id}/report`}>
+            Read the report <IconArrowRight size={14} />
+          </Link>
+        )}
+      </div>
+    );
+  } else if (score !== null) {
+    footer = (
+      <Note icon={<IconTarget size={18} />} title="Take a check-up for your predicted score" action={takeCheckup}>
+        Your score counts your practice. A check-up is a short mixed test with no help, like the exam, and its result is
+        your predicted score.
       </Note>
     );
   } else {
     footer = (
-      <Note
-        icon={<IconTarget size={18} />}
-        title="Your first check-up fills this in"
-        action={
-          <Button busy={checkup.busy} onClick={() => checkup.start(subject.subject_id)} trailing={<IconArrowRight size={18} />}>
-            Take a check-up
-          </Button>
-        }
-      >
-        A short set of {subject.subject_name} questions shows what you already know and predicts your score today.
+      <Note icon={<IconTarget size={18} />} title="Your first check-up fills this in" action={takeCheckup}>
+        A short set of {subject.subject_name} questions. The percentage you get right is where you start, and every
+        question you practise after that moves it.
       </Note>
     );
   }
@@ -459,11 +523,11 @@ export function Standing({ subject, className, sample }: { subject: SubjectOverv
             <span className="label">
               <i className={`k-${fig.key}`} aria-hidden="true" />
               {fig.label}
-              {sample ? null : <MetricTip id={fig.tip} title={fig.key === 'now' ? 'Predicted score' : undefined} />}
+              {sample ? null : <MetricTip id={fig.tip} />}
             </span>
             <span className="val">
               <span className="sj-num">{fig.value === null ? '—' : <CountUp value={Math.round(fig.value)} />}</span>
-              {fig.value !== null ? <span className="of sj-mono">/100</span> : null}
+              {fig.value !== null ? <span className="of sj-mono">%</span> : null}
             </span>
             <span className="line">{fig.line}</span>
             {fig.badge ? <span className="badge">{fig.badge}</span> : null}
@@ -473,15 +537,18 @@ export function Standing({ subject, className, sample }: { subject: SubjectOverv
 
       <div className="home-scale" aria-hidden="true">
         <div className="rail">
-          {low !== null && high !== null ? <span className="band" style={{ left: at(low), width: at(high - low) }} /> : null}
-          {now !== null ? <span className="now" style={{ width: at(now) }} /> : null}
-          {projected !== null ? <span className="proj" style={{ left: at(projected) }} /> : null}
+          {started !== null && score !== null && score > started ? (
+            <span className="band gain" style={{ left: at(started), width: at(score - started) }} />
+          ) : null}
+          {score !== null ? <span className="now" style={{ width: at(score) }} /> : null}
+          {started !== null && score !== null && started !== score ? <span className="start" style={{ left: at(started) }} /> : null}
+          {predicted !== null ? <span className="proj" style={{ left: at(predicted) }} /> : null}
           {target !== null ? <span className="target" style={{ left: at(target) }} /> : null}
         </div>
         <div className="ticks sj-mono">
           {TICKS.map((t) => (
             <span key={t} style={{ left: `${t}%` }}>
-              {t}
+              {t}%
             </span>
           ))}
         </div>
@@ -569,8 +636,10 @@ export function WeakList({
             <strong>{spot.name}</strong>
           </div>
           <div className="meter">
-            <MasteryBar value={spot.mastery} label={`${spot.name} mastery`} />
-            <span className="pct sj-mono">{Math.round(spot.mastery * 100)}%</span>
+            <MasteryBar value={spot.mastery} label={`${spot.name} score`} />
+            <span className="pct sj-mono" title={spot.answered ? `${spot.right} of ${spot.answered} right` : undefined}>
+              {Math.round(spot.mastery * 100)}%
+            </span>
           </div>
           <Button
             size="sm"
@@ -754,7 +823,7 @@ function Hero({ overview, step }: { overview: Overview; step: NextStep; focus?: 
         : `See where you stand in ${name}.`;
       body = overview.subjects.some((s) => s.latest_checkup)
         ? `${name} has no check-up yet, so it has no predicted score and no plan. About 15 questions fixes that.`
-        : "A short check-up finds what you know and what's holding your score down, then predicts your score.";
+        : "A short check-up finds what you know and what's holding your score down, then gives you your starting score.";
       action = (
         <Button
           tone="lime"
@@ -891,7 +960,7 @@ function Hero({ overview, step }: { overview: Overview; step: NextStep; focus?: 
 
 const STEPS = [
   { n: '01', title: 'Set your goal', body: 'Pick your exam, the score you want and the day you sit it.' },
-  { n: '02', title: 'Take a check-up', body: 'A short set of questions that predicts your score today.' },
+  { n: '02', title: 'Take a check-up', body: 'A short set of questions. The percentage you get right is where you start.' },
   { n: '03', title: 'Practise daily', body: 'Ten-question runs on your weakest topics, with a coach when you are stuck.' },
 ];
 
@@ -905,12 +974,26 @@ const SAMPLE: SubjectOverview = {
     session_id: 'sample',
     finished_at: '2026-01-01T00:00:00Z',
     answered: 15,
-    score_now: 48,
-    score_low: 40,
-    score_high: 56,
-    score_projected: 64,
-    target_score: 70,
+    right: 7,
+    score: 47,
     weakest_subtopics: [],
+  },
+  scores: {
+    subject_id: 'sample',
+    score: 58,
+    answered: 52,
+    right: 30,
+    topics_tried: 9,
+    started_score: 20,
+    change: 38,
+    predicted: 47,
+    checkups: [
+      { session_id: 'a', finished_at: '2026-01-01T00:00:00Z', answered: 15, right: 3, score: 20 },
+      { session_id: 'b', finished_at: '2026-01-08T00:00:00Z', answered: 15, right: 7, score: 47 },
+    ],
+    next_checkup_due: null,
+    checkup_due: false,
+    topics: [],
   },
   open_checkup_session_id: null,
   open_practice_session_id: null,
@@ -958,7 +1041,7 @@ function FirstRun({ overview }: { overview: Overview }) {
         title="Your score, on one scale"
         id="home-preview"
         className="sj-rise d2"
-        sub="Today's predicted score, where your plan gets you by exam day, and your target, side by side."
+        sub="Your score, your predicted score from your last check-up, and your target, side by side."
       >
         <Standing subject={SAMPLE} sample />
       </Section>
@@ -1198,7 +1281,7 @@ function HomeBody({
 
       {chosen ? (
         <Section
-          eyebrow={`Predicted score · ${chosen.examination_short_name} ${chosen.subject_name}`}
+          eyebrow={`Your score · ${chosen.examination_short_name} ${chosen.subject_name}`}
           title="Where you stand"
           id="home-stand"
           className="sj-rise d2"
@@ -1222,8 +1305,8 @@ function HomeBody({
           tip={<MetricTip id="weakest" />}
           sub={
             <>
-              Mastery is how often we think you'd get a question on it right, from your check-up answers.{' '}
-              <MetricTip id="mastery" />
+              Your score in each topic: the share of its questions you got right, counting your latest try at each.{' '}
+              <MetricTip id="score" />
             </>
           }
         >

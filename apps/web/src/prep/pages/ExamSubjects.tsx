@@ -222,10 +222,10 @@ function ExamBody({
       <p className="exs-legend sj-small sj-muted">
         <b>Questions ready</b>: questions our team has checked, ready to be asked.{' '}
         <b>Topics we teach</b>: syllabus topics where your coach can walk you through the working.
-        {overview?.subjects.some((item) => item.latest_checkup?.score_now != null) ? (
+        {overview?.subjects.some((item) => (item.scores?.predicted ?? item.latest_checkup?.score) != null) ? (
           <>
             {' '}
-            <b>Scoring about</b>: what your last check-up says you would likely get if you sat the exam today.
+            <b>Predicted</b>: your last check-up’s result, the average of your topic scores in it.
           </>
         ) : null}
       </p>
@@ -259,12 +259,13 @@ function SubjectCard({
   if (subject.ready) {
     if (hasGoal && goal) {
       const when = days != null && days >= 0 ? ` · ${days === 0 ? 'exam today' : `${days} ${days === 1 ? 'day' : 'days'} to go`}` : '';
-      facts.push({ key: 'goal', tone: 'yellow', icon: <IconTarget size={15} />, text: `Aiming for ${Math.round(goal.target_score ?? 0)}${when}` });
+      facts.push({ key: 'goal', tone: 'yellow', icon: <IconTarget size={15} />, text: `Aiming for ${Math.round(goal.target_score ?? 0)}%${when}` });
     } else {
       facts.push({ key: 'goal', tone: 'none', icon: <IconTarget size={15} />, text: 'No goal yet' });
     }
     if (checkup) {
-      const score = checkup.score_now != null ? ` · scoring about ${Math.round(checkup.score_now)}` : '';
+      const predicted = overview?.scores?.predicted ?? checkup.score;
+      const score = predicted != null ? ` · predicted ${Math.round(predicted)}%` : '';
       facts.push({ key: 'check', tone: 'green', icon: <IconCheck size={15} />, text: `Check-up done${score}` });
     } else if (openCheckup) {
       facts.push({ key: 'check', tone: 'purple', icon: <IconReplay size={15} />, text: 'Check-up in progress' });

@@ -159,8 +159,13 @@ async def test_the_home_page_reads_the_latest_check_up_through_the_report(
     assert subject["goal"]["days_to_exam"] in (59, 60, 61)
     latest = subject["latest_checkup"]
     assert latest["session_id"] == session
-    assert latest["score_now"] == report["projection"]["score_now"]
-    assert latest["score_projected"] == report["projection"]["score_projected"]
+    assert latest["score"] == report["score"]
+    # Two of three right (A, B, A against a key of A): 67%, the check-up and the score alike.
+    assert (report["right"], report["answered"], report["score"]) == (2, 3, 67)
+    scores = subject["scores"]
+    assert (scores["score"], scores["predicted"], scores["started_score"]) == (67, 67, 67)
+    assert scores["change"] == 0
+    assert scores["checkup_due"] is False
     assert [line["name"] for line in latest["weakest_subtopics"]] == ["The subtopic"]
     assert subject["open_checkup_session_id"] is None
 

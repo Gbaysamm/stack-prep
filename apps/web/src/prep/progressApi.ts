@@ -1,3 +1,5 @@
+import type { SubjectScore } from '../student/api';
+
 /**
  * The student's overview and run history: the calls the home dashboard and the progress page are
  * built on. Everything else the app needs is in student/api.ts.
@@ -24,21 +26,21 @@ export interface WeakSubtopic {
   topic_name: string;
   section_id?: string | null;
   section_name?: string | null;
-  /** 0..1 */
+  /** 0..1: the topic score as a fraction. */
   mastery: number;
   confidence: string;
+  answered?: number;
+  right?: number;
 }
 
 export interface LatestCheckup {
   session_id: string;
   finished_at: string;
   answered: number;
-  /** Null when the subject has no goal: the projection needs one. */
-  score_now: number | null;
-  score_low: number | null;
-  score_high: number | null;
-  score_projected: number | null;
-  target_score: number | null;
+  right: number;
+  /** That sitting's result, right ÷ answered: the predicted score. */
+  score: number | null;
+  /** Weakest first, by topic score now. */
   weakest_subtopics: WeakSubtopic[];
 }
 
@@ -48,6 +50,8 @@ export interface SubjectOverview {
   examination_short_name: string;
   goal: GoalSummary | null;
   latest_checkup: LatestCheckup | null;
+  /** Every number shown for this subject (docs/student-scoring.md). */
+  scores?: SubjectScore | null;
   open_checkup_session_id: string | null;
   open_practice_session_id: string | null;
   practice: { runs_finished: number; questions_answered: number; correct_unaided: number; taught: number };

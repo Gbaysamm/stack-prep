@@ -48,6 +48,7 @@ import json
 import secrets
 import time
 from collections.abc import AsyncIterator
+from datetime import timedelta
 from pathlib import Path
 from typing import Annotated, Any, Literal, get_args
 from uuid import UUID, uuid4
@@ -67,7 +68,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import kokoro_voice, tutor, voice_store
+from app import kokoro_voice, scoring, tutor, voice_store
 from app.auth import require_session_owner, require_student
 from app.config import Settings, get_settings
 from app.db import connection, fetch_all
@@ -254,6 +255,8 @@ class PracticeQuestion(BaseModel):
     hints_used: int
     #: The diagrams printed with the question, shown above it and again on the board.
     figures: list[QuestionFigure] = Field(default_factory=list)
+    #: A question from an earlier sitting the student has not yet got right on their own.
+    comeback: bool = False
 
 
 class PracticeState(BaseModel):
@@ -280,6 +283,8 @@ class PracticeState(BaseModel):
     closing_note: str | None = None
     #: The student's choice for a custom run; null for an ordinary one.
     filters: RunFilters | None = None
+    #: Once the run is finished: the score before and after it, and each topic it touched.
+    score_change: scoring.ScoreChange | None = None
 
 
 def session_filters(session: dict[str, Any]) -> RunFilters | None:
@@ -339,10 +344,22 @@ async def _plan(
     the most.
     """
     units, _ = await _subtopics(conn, subject_id)
-    standings = await _standings_from_history(conn, student_id, units)
+    standings = await _standings_from_history(conn, student_id, subject_id, units)
     result = project(standings, sessions_available=len(units))
     allowed = {unit.unit_id for unit in allowed_units(units, filters)}
-    return [line.unit_id for line in result.plan if line.unit_id in allowed]
+    order = [line.unit_id for line in result.plan if line.unit_id in allowed]
+    # A topic the student is already strong in goes to the back, for occasional review, so
+    # time moves on to the next weakest (docs/student-scoring.md §7).
+    settled = {
+        standing.unit_id
+        for standing in standings
+        if standing.mastery is not None
+        and standing.answered >= scoring.SETTLED_AFTER
+        and standing.mastery * 100 >= scoring.STRONG_FROM
+    }
+    return [unit for unit in order if unit not in settled] + [
+        unit for unit in order if unit in settled
+    ]
 
 
 async def _available(
@@ -394,35 +411,17 @@ async def _available(
 
 
 async def _standings_from_history(
-    conn: AsyncConnection, student_id: UUID, units: list[UnitWeight]
+    conn: AsyncConnection, student_id: UUID, subject_id: UUID, units: list[UnitWeight]
 ) -> list[UnitStanding]:
-    """Where this student stands per subtopic, from every attempt that counts.
+    """Where this student stands per subtopic: the topic score the student sees.
 
-    Every sitting and every practice answer, not just the check-up: a student who has been
-    taught a subtopic since their check-up should be planned for as they are now.
+    Right ÷ answered over the latest counted answer to each question, from every sitting, so a
+    student who has been taught a subtopic since their check-up is planned for as they are now.
     """
-    rows = await fetch_all(
-        conn,
-        """
-        SELECT sub.id::text AS unit_id,
-               count(*) AS answered,
-               count(*) FILTER (WHERE a.is_correct) AS correct
-        FROM scoring_attempts a
-        JOIN question_versions v ON v.id = a.question_version_id
-        JOIN question_classifications c
-          ON c.question_id = v.question_id AND c.classification_role = 'primary'
-         AND c.review_status = 'approved'
-        JOIN curriculum_items skill ON skill.id = c.curriculum_item_id
-        JOIN curriculum_items sub ON sub.id = skill.parent_id
-        WHERE a.student_id = :student
-        GROUP BY sub.id
-        """,
-        student=student_id,
-    )
-    seen = {row["unit_id"]: row for row in rows}
+    answers = await scoring.answers_for(conn, student_id, subject_id)
     standings: list[UnitStanding] = []
     for unit in units:
-        row = seen.get(unit.unit_id)
+        found = scoring.tally(answers, unit.unit_id)
         standings.append(
             UnitStanding(
                 unit_id=unit.unit_id,
@@ -430,8 +429,8 @@ async def _standings_from_history(
                 topic_id=unit.topic_id,
                 topic_name=unit.topic_name,
                 share=unit.share,
-                mastery=(int(row["correct"]) / int(row["answered"])) if row else None,
-                answered=int(row["answered"]) if row else 0,
+                mastery=(found.right / found.answered) if found.answered else None,
+                answered=found.answered,
             )
         )
     return standings
@@ -512,6 +511,85 @@ async def _pick(
         years=list(exam_years or []),
     )
     return rows[0] if rows else None
+
+
+#: One question in every this-many of a run is a comeback, when one is waiting: the second,
+#: the fifth, the eighth (docs/student-scoring.md §6).
+COMEBACK_EVERY = 3
+
+
+async def _comeback(
+    conn: AsyncConnection,
+    session: dict[str, Any],
+    subtopic_ids: list[str],
+    exam_years: list[int] | None = None,
+) -> dict[str, Any] | None:
+    """A question this student has not yet got, brought back from an earlier sitting.
+
+    Waiting means the latest counted answer to it was wrong (which includes every question
+    taught on the board), or it has never had a counted answer at all (a right answer the
+    student called a guess). Never one already met in this run, so the student is not asked
+    to remember what they were just told. The plan's order decides which topic goes first;
+    within a topic, the one waiting longest.
+    """
+    if not subtopic_ids:
+        return None
+    rows = await fetch_all(
+        conn,
+        """
+        WITH mine AS (
+          SELECT v.question_id,
+                 max(a.answered_at_client) AS last_at,
+                 bool_or(a.session_id = :session) AS this_run
+          FROM attempts a
+          JOIN question_versions v ON v.id = a.question_version_id
+          WHERE a.student_id = :student
+          GROUP BY v.question_id
+        ),
+        counted AS (
+          SELECT DISTINCT ON (v.question_id) v.question_id, sa.is_correct
+          FROM scoring_attempts sa
+          JOIN question_versions v ON v.id = sa.question_version_id
+          WHERE sa.student_id = :student AND sa.is_correct IS NOT NULL
+          ORDER BY v.question_id, sa.answered_at_client DESC, sa.received_at DESC
+        )
+        SELECT dq.question_version_id, v.stem, v.instructions,
+               pg.title AS passage_title, pg.body AS passage_body,
+               sub.name AS subtopic_name, topic.name AS topic_name
+        FROM mine
+        LEFT JOIN counted c ON c.question_id = mine.question_id
+        JOIN deliverable_questions dq
+          ON dq.question_id = mine.question_id AND dq.subject_id = :subject
+        JOIN questions q ON q.id = dq.question_id AND q.usage_pool <> :pool
+        JOIN question_versions v ON v.id = dq.question_version_id
+        LEFT JOIN passages pg ON pg.id = v.passage_id
+        JOIN curriculum_items skill ON skill.id = dq.primary_skill_id
+        JOIN curriculum_items sub ON sub.id = skill.parent_id
+        JOIN curriculum_items topic ON topic.id = sub.parent_id
+        WHERE NOT mine.this_run
+          AND coalesce(c.is_correct, false) = false
+          AND sub.id::text = ANY(CAST(:subs AS text[]))
+          AND (cardinality(CAST(:years AS int[])) = 0
+               OR q.exam_year = ANY(CAST(:years AS int[])))
+        ORDER BY array_position(CAST(:subs AS text[]), sub.id::text), mine.last_at,
+                 dq.question_version_id
+        LIMIT 1
+        """,
+        student=session["student_id"],
+        session=session["id"],
+        subject=session["subject_id"],
+        pool=EXCLUDED_POOL,
+        subs=subtopic_ids,
+        years=list(exam_years or []),
+    )
+    return rows[0] if rows else None
+
+
+async def _score_change(conn: AsyncConnection, session: dict[str, Any]) -> scoring.ScoreChange:
+    """What this run did to the student's scores, for the end-of-run screen."""
+    units, _ = await _subtopics(conn, session["subject_id"])
+    answers = await scoring.answers_for(conn, session["student_id"], session["subject_id"])
+    return scoring.session_change(units, answers, str(session["id"]))
 
 
 async def _options(conn: AsyncConnection, question_version_id: UUID) -> list[Option]:
@@ -634,7 +712,18 @@ async def _state(
             )
     elif stage == "asking" and seen < length:
         plan = await _plan(conn, session["student_id"], session["subject_id"], filters)
-        for subtopic_id in plan:
+        years = filters.exam_years if filters is not None else None
+        if seen % COMEBACK_EVERY == 1:
+            back = await _comeback(conn, session, plan, years)
+            if back is not None:
+                question = PracticeQuestion(
+                    **dict(back),
+                    options=await _options(conn, back["question_version_id"]),
+                    hints_used=0,
+                    figures=await figures_for(conn, back["question_version_id"]),
+                    comeback=True,
+                )
+        for subtopic_id in plan if question is None else []:
             level = await _level_for(conn, session["student_id"], subtopic_id)
             picked = await _pick(
                 conn,
@@ -655,6 +744,7 @@ async def _state(
 
     finished = question is None and stage == "asking"
     closing = None
+    score_change: scoring.ScoreChange | None = None
     if finished:
         guessed = int(counts["guessed_right"])
         lucky = ""
@@ -664,12 +754,18 @@ async def _state(
                 if guessed == 1
                 else f"{guessed} were right but guessed — they'll come back. "
             )
-        closing = (
-            f"{counts['unaided']} of {seen} answered without help. "
-            f"{lucky}"
-            f"{counts['taught']} were taught rather than answered, and none of those counts "
-            "as knowing it yet — the same ground comes back with fresh questions."
-        )
+        taught_note = ""
+        if int(counts["taught"]):
+            taught_note = (
+                f"{counts['taught']} {'was' if int(counts['taught']) == 1 else 'were'} "
+                "taught on the board — "
+                f"{'it comes' if int(counts['taught']) == 1 else 'they come'} back in a later "
+                "run, so you can get "
+                f"{'it' if int(counts['taught']) == 1 else 'them'} right yourself."
+            )
+        unaided = f"{counts['unaided']} of {seen} answered without help. "
+        closing = f"{unaided}{lucky}{taught_note}".strip()
+        score_change = await _score_change(conn, session)
     return PracticeState(
         session_id=session["id"],
         stage="finished" if finished else stage,
@@ -686,7 +782,48 @@ async def _state(
         misconception=misconception,
         closing_note=closing,
         filters=filters,
+        score_change=score_change,
     )
+
+
+#: Said when practice is locked behind a check-up (docs/student-scoring.md §3). The web app
+#: reads the 423 and takes the student to the check-up.
+CHECKUP_FIRST = "Take your first check-up. Practice opens once it's done."
+CHECKUP_DUE = "Your check-up is due. Practice opens again once you've taken it."
+
+
+async def checkup_lock(conn: AsyncConnection, student_id: UUID, subject_id: UUID) -> str | None:
+    """Why practice is locked in this subject, or nothing when it is open.
+
+    Locked until the first check-up is finished, and again once the next one falls due:
+    seven days after the last, counted in the student's own calendar.
+    """
+    row = (
+        (
+            await conn.execute(
+                text(
+                    """
+                    SELECT max(ss.ended_at) AS last_checkup,
+                           (now() AT TIME ZONE coalesce(s.timezone, 'UTC'))::date AS today,
+                           coalesce(s.timezone, 'UTC') AS tz
+                    FROM students s
+                    LEFT JOIN study_sessions ss
+                      ON ss.student_id = s.id AND ss.subject_id = :subject
+                     AND ss.session_type = 'checkup' AND ss.ended_at IS NOT NULL
+                    WHERE s.id = :student
+                    GROUP BY s.id, s.timezone
+                    """
+                ),
+                {"student": student_id, "subject": subject_id},
+            )
+        )
+        .mappings()
+        .first()
+    )
+    if row is None or row["last_checkup"] is None:
+        return CHECKUP_FIRST
+    due = row["last_checkup"].date() + timedelta(days=scoring.CHECKUP_EVERY_DAYS)
+    return CHECKUP_DUE if due <= row["today"] else None
 
 
 @router.post("/start", response_model=PracticeState, summary="Begin a guided session")
@@ -699,6 +836,9 @@ async def start(
     ).first()
     if student is None:
         raise HTTPException(status_code=404, detail="unknown student")
+    locked = await checkup_lock(conn, body.student_id, body.subject_id)
+    if locked is not None:
+        raise HTTPException(status_code=423, detail=locked)
     length = body.length
     filters = body.filters()
     if filters is not None:
@@ -969,10 +1109,9 @@ async def taught(
 ) -> PracticeState:
     """Close the taught question and ask for the next one.
 
-    Nothing is scored here: the question was explained, not answered. What comes back later is
-    the SKILL, not this item — the subtopic is still weak, so the plan keeps choosing it, and
-    the next question in it is one the student has not seen. Re-asking the same item would
-    test whether they remember being told, which is not the same as knowing.
+    Nothing is scored here: the question was explained, not answered. Its counted answer is
+    still the first miss, so it comes back in a later run (never this one) until the student
+    gets it right on their own (docs/student-scoring.md §6).
     """
     await require_session_owner(request, conn, session_id)
     session = await _session(conn, session_id)
@@ -1662,9 +1801,7 @@ PointKind = Literal[
 _POINT_KINDS = frozenset(get_args(PointKind))
 #: A mark on the working, and a mark on the diagram: the kinds each may be.
 _LINE_KINDS = frozenset({"circle", "underline", "arrow", "box", "highlight", "strike", "move"})
-_FIGURE_KINDS = frozenset(
-    {"circle", "underline", "arrow", "highlight", "strike", "arc", "label"}
-)
+_FIGURE_KINDS = frozenset({"circle", "underline", "arrow", "highlight", "strike", "arc", "label"})
 #: A mark in the question's passage (comprehension, cloze): the kinds it may be.
 _PASSAGE_KINDS = frozenset({"highlight", "underline", "circle", "strike", "label"})
 

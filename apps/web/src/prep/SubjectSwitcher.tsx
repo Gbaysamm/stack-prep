@@ -3,7 +3,7 @@
  * subject, four (UTME) or nine and more (WAEC) meets the same pattern everywhere:
  *
  * - `SubjectSwitcher`: a compact row of subject pills, each with a tiny status (a dot for the
- *   check-up, the predicted score when there is one). It scrolls sideways on a phone and, past
+ *   check-up, your score when there is one). It scrolls sideways on a phone and, past
  *   six subjects, collapses to one button that opens a searchable list.
  * - `useSubjectChoice`: which subject a page is focused on. It lives in the URL (`?subject=`), so
  *   back, refresh and a shared link keep it; with none there, the last subject the student chose
@@ -39,42 +39,96 @@ export type StatusKind = 'run-open' | 'checkup-open' | 'no-goal' | 'no-checkup' 
 
 export interface SubjectStatus {
   kind: StatusKind;
-  /** A few words: "No check-up yet", "Predicted 46". */
+  /** A few words: "No check-up yet", "Your score 43%". */
   label: string;
-  /** The dot's colour: lime once checked, yellow while a check-up is still to take. */
+  /** The dot's colour: lime once checked, yellow while a check-up is still to take or is due. */
   tone: 'lime' | 'yellow' | 'pink' | 'purple';
   checked: boolean;
+  /** Your score: the average of the topic scores over the topics tried, a whole percentage. */
   score: number | null;
+  /** Every question behind `score`, latest answer to each. */
+  answered: number;
+  right: number;
+  /** Predicted score: the latest check-up's result. */
+  predicted: number | null;
   target: number | null;
+  /** Target − predicted (or − your score before any check-up); null without both. */
+  gap: number | null;
+  /** A check-up is due (every 7 days). */
+  due: boolean;
 }
 
 /** Where a subject stands, read the same way on every page. */
 export function subjectStatus(s: SubjectOverview): SubjectStatus {
-  const latest = s.latest_checkup;
-  const score = latest?.score_now ?? null;
-  const target = s.goal?.target_score ?? latest?.target_score ?? null;
-  const base = { checked: !!latest, score: score === null ? null : Math.round(score), target: target === null ? null : Math.round(target) };
+  const sc = s.scores ?? null;
+  const score = sc?.score ?? null;
+  const predicted = sc?.predicted ?? s.latest_checkup?.score ?? null;
+  const target = s.goal?.target_score ?? null;
+  const checked = !!s.latest_checkup || (sc?.checkups.length ?? 0) > 0;
+  const against = predicted ?? score;
+  const base = {
+    checked,
+    score: score === null ? null : Math.round(score),
+    answered: sc?.answered ?? 0,
+    right: sc?.right ?? 0,
+    predicted: predicted === null ? null : Math.round(predicted),
+    target: target === null ? null : Math.round(target),
+    gap: target !== null && against !== null ? Math.round(target - against) : null,
+    due: !!sc?.checkup_due,
+  };
   if (s.open_checkup_session_id) return { ...base, kind: 'checkup-open', label: 'Check-up half done', tone: 'yellow' };
-  if (!latest && !s.goal) return { ...base, kind: 'no-goal', label: 'No goal yet', tone: 'pink' };
-  if (!latest) return { ...base, kind: 'no-checkup', label: 'No check-up yet', tone: 'yellow' };
-  if (score === null) return { ...base, kind: 'no-score', label: 'Checked · add a goal', tone: 'lime' };
-  return { ...base, kind: 'scored', label: `Predicted ${Math.round(score)}`, tone: 'lime' };
+  if (!checked && !s.goal) return { ...base, kind: 'no-goal', label: 'No goal yet', tone: 'pink' };
+  if (!checked) return { ...base, kind: 'no-checkup', label: 'No check-up yet', tone: 'yellow' };
+  if (base.score === null) return { ...base, kind: 'no-score', label: base.due ? 'Check-up due' : 'Checked', tone: base.due ? 'yellow' : 'lime' };
+  return { ...base, kind: 'scored', label: `Your score ${base.score}%`, tone: base.due ? 'yellow' : 'lime' };
 }
 
 /**
+ * What sits under "Your score": it is the average of the topic scores (docs/student-scoring.md
+ * §2), so the line names how many topics, not a right-of-answered count that wouldn't add up.
+ */
+export function scoreNote(s: SubjectOverview): string {
+  const sc = s.scores;
+  if (!sc || sc.answered === 0) return 'No answers yet';
+  const tried = sc.topics.filter((t) => t.answered > 0).length;
+  if (tried === 0) return `${sc.answered} questions answered`;
+  return tried === 1 ? 'From 1 topic tried' : `Average of ${tried} topics tried`;
+}
+
+/**
+ * Why practice is shut in a subject, or null when it is open (docs/student-scoring.md §3):
+ * it opens after the first check-up, and waits while a check-up is due. A run already open can
+ * still be finished.
+ */
+export function practiceLock(s: SubjectOverview): 'first-checkup' | 'checkup-due' | null {
+  const st = subjectStatus(s);
+  if (!st.checked) return 'first-checkup';
+  if (st.due) return 'checkup-due';
+  return null;
+}
+
+/** The lock in a few words, for a disabled button's neighbour. */
+export const PRACTICE_LOCK_WORDS = {
+  'first-checkup': 'Practice opens after your first check-up.',
+  'checkup-due': 'A check-up is due. Practice opens again once you take it.',
+} as const;
+
+/**
  * How much a subject needs doing now; lower comes first. A half-done check-up, then a subject
- * with no check-up (its whole plan is waiting on one), then an open run, then the widest gap
- * to the target, and the nearest exam breaks ties.
+ * with no check-up, then an open run, then the widest gap to the target (target − predicted),
+ * and the nearest exam breaks ties.
  */
 export function subjectUrgency(s: SubjectOverview): number {
   const days = s.goal?.days_to_exam;
   const soon = days !== null && days !== undefined && days >= 0 ? Math.min(days, 999) / 1000 : 0.999;
   if (s.open_checkup_session_id) return 0 + soon;
-  if (!s.latest_checkup && s.goal) return 1 + soon;
-  if (s.open_practice_session_id) return 2 + soon;
-  if (!s.latest_checkup) return 3 + soon;
   const st = subjectStatus(s);
-  if (st.score !== null && st.target !== null) return 4 + (1 - Math.max(0, Math.min(100, st.target - st.score)) / 100) + soon / 1000;
+  if (!st.checked && s.goal) return 1 + soon;
+  // A check-up due shuts practice, so it comes before an open run.
+  if (st.due) return 1.5 + soon / 2;
+  if (s.open_practice_session_id) return 2 + soon;
+  if (!st.checked) return 3 + soon;
+  if (st.gap !== null) return 4 + (1 - Math.max(0, Math.min(100, st.gap)) / 100) + soon / 1000;
   return 5 + soon;
 }
 
@@ -184,9 +238,27 @@ export function withDemoSubjects(overview: Overview): Overview {
   for (let i = 0; overview.subjects.length + fakes.length < total; i++) {
     const name = DEMO_NAMES[i % DEMO_NAMES.length]! + (i >= DEMO_NAMES.length ? ` ${Math.floor(i / DEMO_NAMES.length) + 1}` : '');
     const checked = i % 3 !== 1;
-    const score = 28 + ((i * 17) % 52);
     const target = 60 + ((i * 7) % 25);
     const days = 20 + ((i * 11) % 120);
+    // One to three check-ups, rising; your score sits near the latest one.
+    const sittings = checked ? 1 + (i % 3) : 0;
+    const first = 20 + ((i * 17) % 30);
+    const checkups = Array.from({ length: sittings }, (_, k) => {
+      const right = Math.round(((first + k * 9) / 100) * 15);
+      return {
+        session_id: `demo-checkup-done-${i}-${k}`,
+        finished_at: new Date(Date.now() - (sittings - k) * 7 * 86400000).toISOString(),
+        answered: 15,
+        right,
+        score: Math.round((right / 15) * 100),
+      };
+    });
+    const last = checkups[checkups.length - 1] ?? null;
+    const answered = checked ? 15 * sittings + ((i * 23) % 60) : 0;
+    const right = last ? Math.min(answered, Math.round((answered * Math.max(0, (last.score ?? 0) - 3 + (i % 7))) / 100)) : 0;
+    const score = answered > 0 ? Math.round((right / answered) * 100) : null;
+    const started = checkups[0]?.score ?? null;
+    const dueOn = new Date(Date.now() + ((i % 9) - 2) * 86400000);
     fakes.push({
       subject_id: `demo-${i}`,
       subject_name: name,
@@ -196,17 +268,23 @@ export function withDemoSubjects(overview: Overview): Overview {
           ? null
           : { ...(base.goal ?? { exam_date: null, minutes_per_day: 30, study_days: null, sessions_before_exam: null }), target_score: target, days_to_exam: days } as SubjectOverview['goal'],
       latest_checkup:
-        checked && base.latest_checkup
-          ? {
-              ...base.latest_checkup,
-              session_id: base.latest_checkup.session_id,
-              score_now: score,
-              score_low: score - 9,
-              score_high: score + 9,
-              score_projected: Math.min(100, score + 12),
-              target_score: target,
-            }
+        checked && base.latest_checkup && last
+          ? { ...base.latest_checkup, answered: last.answered, right: last.right, score: last.score }
           : null,
+      scores: {
+        subject_id: `demo-${i}`,
+        score,
+        answered,
+        right,
+        topics_tried: answered > 0 ? 3 + (i % 6) : 0,
+        started_score: started,
+        change: score !== null && started !== null ? score - started : null,
+        predicted: last?.score ?? null,
+        checkups,
+        next_checkup_due: checked ? dueOn.toISOString().slice(0, 10) : null,
+        checkup_due: checked && dueOn.getTime() <= Date.now(),
+        topics: [],
+      },
       // Every seventh one has a check-up left half done, so that state can be seen too.
       open_checkup_session_id: i % 7 === 3 ? `demo-checkup-${i}` : null,
       open_practice_session_id: i % 5 === 2 ? `demo-run-${i}` : null,
@@ -243,7 +321,7 @@ function SearchGlyph() {
   );
 }
 
-/** A subject's tiny status inside a pill: the check-up dot, then the predicted score. */
+/** A subject's tiny status inside a pill: the check-up dot, then your score. */
 function PillMeta({ status, runOpen }: { status: SubjectStatus; runOpen: boolean }) {
   return (
     <>
@@ -252,14 +330,19 @@ function PillMeta({ status, runOpen }: { status: SubjectStatus; runOpen: boolean
           <IconPlay size={10} />
         </span>
       ) : null}
-      {status.score !== null ? <span className="ss-score sj-mono">{status.score}</span> : null}
+      {status.score !== null ? <span className="ss-score sj-mono">{status.score}%</span> : null}
     </>
   );
 }
 
 function statusWords(s: SubjectOverview, status: SubjectStatus): string {
   const parts = [status.label];
-  if (status.score !== null && status.target !== null) parts[0] = `Predicted ${status.score} of a target ${status.target}`;
+  if (status.score !== null) {
+    parts[0] = `Your score ${status.score}%`;
+    if (status.predicted !== null) parts.push(`predicted ${status.predicted}%`);
+    if (status.target !== null) parts.push(`target ${status.target}%`);
+  }
+  if (status.due && status.kind !== 'checkup-open') parts.push('check-up due');
   if (s.open_practice_session_id) parts.push('run in progress');
   return parts.join(', ');
 }
@@ -442,7 +525,7 @@ function SwitcherMenu({
 
   const chosen = subjects.find((s) => s.subject_id === value);
   const isAll = value === ALL;
-  const unchecked = subjects.filter((s) => !s.latest_checkup).length;
+  const unchecked = subjects.filter((s) => !subjectStatus(s).checked).length;
 
   const items = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -534,7 +617,7 @@ function SwitcherMenu({
             <>
               <span className={cx('ss-dot', status!.tone)} aria-hidden="true" />
               <span className="ss-name">{chosen.subject_name}</span>
-              {status!.score !== null ? <span className="ss-score sj-mono">{status!.score}</span> : null}
+              {status!.score !== null ? <span className="ss-score sj-mono">{status!.score}%</span> : null}
             </>
           )}
         </span>
@@ -588,11 +671,15 @@ function SwitcherMenu({
                         <b>{s.subject_name}</b>
                         <small>
                           {showExam ? `${s.examination_short_name} · ` : ''}
-                          {st.score !== null && st.target !== null ? `Predicted ${st.score} · target ${st.target}` : st.label}
+                          {st.score !== null
+                            ? [`Your score ${st.score}%`, st.predicted !== null ? `predicted ${st.predicted}%` : null, st.target !== null ? `target ${st.target}%` : null]
+                                .filter(Boolean)
+                                .join(' · ')
+                            : st.label}
                           {s.open_practice_session_id ? ' · run in progress' : ''}
                         </small>
                       </span>
-                      {st.score !== null ? <span className="ss-score sj-mono">{st.score}</span> : null}
+                      {st.score !== null ? <span className="ss-score sj-mono">{st.score}%</span> : null}
                     </>
                   ) : (
                     <span className="ss-option-text">
@@ -700,8 +787,8 @@ export function SubjectName({ subject, to, sub }: { subject: SubjectOverview; to
 }
 
 /**
- * Predicted score against the target on one short 0–100 line: a filled bar to the score and a
- * tick at the target. "—" and the reason when there is no score yet.
+ * Your score on one short 0–100 line with a tick at the target, and beneath it the predicted
+ * score (the last check-up) and the gap to the target. "—" and the reason with no answers yet.
  */
 export function ScoreCell({ subject }: { subject: SubjectOverview }) {
   const st = subjectStatus(subject);
@@ -709,25 +796,35 @@ export function ScoreCell({ subject }: { subject: SubjectOverview }) {
     return (
       <span className="ss-scorecell empty">
         <span className="ss-scorecell-num sj-num">—</span>
-        <small>{st.checked ? 'Add a goal to see it' : 'After a check-up'}</small>
+        <small>{st.checked ? 'No answers yet' : 'After a check-up'}</small>
       </span>
     );
   }
-  // The gap the rest of the app quotes: where the plan gets to by exam day against the target.
-  const projected = subject.latest_checkup?.score_projected ?? null;
-  const gap = st.target !== null ? Math.round(st.target - (projected ?? st.score)) : null;
+  const gap = st.gap;
+  const words = [
+    `Your score ${st.score}%, ${scoreNote(subject).toLowerCase()}`,
+    st.predicted !== null ? `predicted ${st.predicted}%` : null,
+    st.target !== null ? `target ${st.target}%` : null,
+  ].filter(Boolean);
   return (
-    <span className="ss-scorecell" aria-label={`Predicted ${st.score} out of 100${st.target !== null ? `, target ${st.target}` : ''}`}>
+    <span className="ss-scorecell" aria-label={words.join(', ')}>
       <span className="ss-scorecell-top">
-        <span className="ss-scorecell-num sj-num">{st.score}</span>
-        {st.target !== null ? (
-          <small className={cx('ss-gap', gap !== null && gap <= 0 && 'ok')}>{gap !== null && gap <= 0 ? `on track for ${st.target}` : `${gap} short of ${st.target}`}</small>
-        ) : null}
+        <span className="ss-scorecell-num sj-num">{st.score}%</span>
+        <small>{scoreNote(subject)}</small>
       </span>
       <span className="ss-mini" aria-hidden="true">
         <span className="fill" style={{ width: `${Math.max(0, Math.min(100, st.score))}%` }} />
         {st.target !== null ? <span className="target" style={{ left: `${Math.max(0, Math.min(100, st.target))}%` }} /> : null}
       </span>
+      {st.predicted !== null || gap !== null ? (
+        <small>
+          {st.predicted !== null ? `Predicted ${st.predicted}%` : null}
+          {st.predicted !== null && gap !== null ? ' · ' : null}
+          {gap !== null && st.target !== null ? (
+            <span className={cx('ss-gap', gap <= 0 && 'ok')}>{gap <= 0 ? `on track for ${st.target}%` : `${gap} short of ${st.target}%`}</span>
+          ) : null}
+        </small>
+      ) : null}
     </span>
   );
 }
@@ -739,7 +836,7 @@ export function StatusCell({ subject, detail }: { subject: SubjectOverview; deta
     <span className="ss-statuscell">
       <span className="ss-statusline">
         <span className={cx('ss-dot', st.tone)} aria-hidden="true" />
-        {st.kind === 'scored' ? 'Checked' : st.label}
+        {st.kind === 'scored' ? (st.due ? 'Check-up due' : 'Checked') : st.label}
       </span>
       {detail ? <small>{detail}</small> : null}
     </span>
