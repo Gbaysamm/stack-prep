@@ -1259,9 +1259,9 @@ function Result({
     tone === "second" && check
       ? `That was the hint doing its job, but you said you ${
           outcome.confidence === "guessed" ? "guessed" : "weren’t sure"
-        }. See the working so it sticks. It won’t count as known yet — a fresh question on this idea comes back later.`
+        }. See the working so it sticks. It won’t count as known yet — this question comes back in a later run.`
       : tone === "second"
-      ? "That was the hint doing its job. It won’t count as known yet — a fresh question on this idea comes back later."
+      ? "That was the hint doing its job. It won’t count as known yet — this question comes back in a later run."
       : tone === "guessed"
         ? "Lucky guesses don’t count as knowing it. See the working, then tell us if it matches what you did."
         : tone === "unsure"
@@ -2041,8 +2041,8 @@ function BeforeBoard({
           Start the lesson
         </Button>
         <p className="pr-explain-note">
-          Counted as taught, not known. A fresh question on the same idea comes
-          back later.
+          Counted as taught, not known. This question comes back in a later run, so you can get it
+          right yourself.
         </p>
       </div>
     </section>

@@ -384,7 +384,7 @@ export function RunSummary() {
               <span className="sj-num rs-legend-num">
                 <CountUp value={taught} />
               </span>
-              <small>Taught, not known. They come back as fresh questions.</small>
+              <small>Taught, not known. They come back in a later run.</small>
             </li>
             {typeof guessedRight === "number" ? (
               <li>
