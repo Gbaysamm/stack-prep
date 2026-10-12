@@ -85,6 +85,10 @@ released_assessments AS (
     UPDATE assessments SET created_for_student_id = NULL
      WHERE created_for_student_id IN (SELECT id FROM doomed)
 ),
+cleared_mock_exams AS (
+    -- Its paper and integrity log go with it (ON DELETE CASCADE).
+    DELETE FROM mock_exams WHERE student_id IN (SELECT id FROM doomed)
+),
 cleared_sessions AS (
     DELETE FROM study_sessions WHERE student_id IN (SELECT id FROM doomed)
 ),
