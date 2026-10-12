@@ -402,25 +402,34 @@
   display: inline-grid;
   place-items: center;
   height: 40px;
+  margin: 0;
+  padding: 0;
+  border: 1.5px solid var(--gray-200);
   border-radius: var(--r-sm);
   background: #fafafc;
-  box-shadow: inset 0 0 0 1.5px var(--gray-200);
+  box-shadow: none;
+  -webkit-appearance: none;
+  appearance: none;
   font-family: var(--f-mono);
   font-weight: 700;
   font-size: 13px;
   color: var(--gray-700);
 }
 .sj button.mx-cell:hover {
-  box-shadow: inset 0 0 0 1.5px var(--purple-300);
+  border-color: var(--purple-300);
+}
+.sj button.mx-cell:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--purple-200, #ddd6fe);
 }
 .sj .mx-cell.answered {
+  border-color: var(--purple-600);
   background: var(--purple-600);
-  box-shadow: none;
   color: #fff;
 }
 .sj .mx-cell.flagged {
+  border-color: var(--yellow-500, #eab308);
   background: var(--yellow-400);
-  box-shadow: none;
   color: var(--ink-900);
 }
 .sj .mx-cell.answered.flagged::after {
@@ -434,9 +443,11 @@
   background: var(--purple-600);
   box-shadow: 0 0 0 1.5px #fff;
 }
+/* The current question: one solid ring drawn inside the cell, so the scrolling grid never
+   clips it and it never doubles up with the cell's own border. */
 .sj .mx-cell.current {
-  outline: 3px solid var(--ink-900);
-  outline-offset: 2px;
+  border-color: var(--ink-900);
+  box-shadow: inset 0 0 0 1.5px var(--ink-900);
 }
 .sj .mx-legend {
   display: grid;
@@ -460,8 +471,7 @@
   font-size: 10.5px;
 }
 .sj .mx-cell.sample.current {
-  outline-width: 2px;
-  outline-offset: 1px;
+  box-shadow: inset 0 0 0 1px var(--ink-900);
 }
 
 /* Phone palette sheet */
