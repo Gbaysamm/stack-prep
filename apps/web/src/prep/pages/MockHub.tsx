@@ -113,7 +113,7 @@ export function MockHub() {
   const best = done.length ? Math.max(...done.map((m) => m.overall!.percent!)) : null;
 
   return (
-    <div className="mk-page">
+    <div className="sj-page mk-page">
       <PageHero
         eyebrow="Mock exam"
         title="Sit a real test"

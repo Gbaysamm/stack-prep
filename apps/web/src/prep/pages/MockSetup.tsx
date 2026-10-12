@@ -134,7 +134,7 @@ export function MockSetup() {
 
   if (loaded.loading && !options) {
     return (
-      <div className="mk-page">
+      <div className="sj-page mk-page">
         {hero}
         <div className="mk-setup">
           <Skeleton height={140} />
@@ -145,7 +145,7 @@ export function MockSetup() {
   }
   if (loaded.error || !options) {
     return (
-      <div className="mk-page">
+      <div className="sj-page mk-page">
         {hero}
         <div className="sj-card mk-error">
           <p>{loaded.error ?? 'Something went wrong.'}</p>
@@ -158,7 +158,7 @@ export function MockSetup() {
   }
   if (options.open_mock_id) {
     return (
-      <div className="mk-page">
+      <div className="sj-page mk-page">
         {hero}
         <div className="sj-card mk-note">
           <h2 className="sj-display sj-h3">You have a mock running</h2>
@@ -172,7 +172,7 @@ export function MockSetup() {
   }
   if (!exam) {
     return (
-      <div className="mk-page">
+      <div className="sj-page mk-page">
         {hero}
         <div className="sj-card mk-note">
           <h2 className="sj-display sj-h3">No questions ready for a mock yet</h2>
@@ -184,7 +184,7 @@ export function MockSetup() {
   }
 
   return (
-    <div className="mk-page">
+    <div className="sj-page mk-page">
       {hero}
       <div className="mk-setup">
         <div className="mk-setup-main">

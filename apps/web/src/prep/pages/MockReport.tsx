@@ -172,16 +172,16 @@ function IntegrityPanel({ report }: { report: Report }) {
         <>
           <ul className="mk-integrity-counts">
             <li>
-              <b className="sj-num">{i.fullscreen_exits}</b> left full screen
+              <b className={cx('sj-num', !i.fullscreen_exits && 'zero')}>{i.fullscreen_exits}</b> left full screen
             </li>
             <li>
-              <b className="sj-num">{i.tab_switches}</b> tab switches
+              <b className={cx('sj-num', !i.tab_switches && 'zero')}>{i.tab_switches}</b> tab switches
             </li>
             <li>
-              <b className="sj-num">{i.window_blurs}</b> window switches
+              <b className={cx('sj-num', !i.window_blurs && 'zero')}>{i.window_blurs}</b> window switches
             </li>
             <li>
-              <b className="sj-num">{i.copy_blocked + i.paste_blocked + i.menu_blocked}</b> blocked copy, paste or menu
+              <b className={cx('sj-num', !(i.copy_blocked + i.paste_blocked + i.menu_blocked) && 'zero')}>{i.copy_blocked + i.paste_blocked + i.menu_blocked}</b> blocked copy, paste or menu
             </li>
           </ul>
           <details className="mk-timeline">
@@ -209,7 +209,7 @@ export function MockReport() {
 
   if (loaded.loading && report === undefined) {
     return (
-      <div className="mk-page">
+      <div className="sj-page mk-page">
         <Skeleton height={220} />
         <div className="mk-subgrid">
           <Skeleton height={130} />
@@ -220,7 +220,7 @@ export function MockReport() {
   }
   if (loaded.error) {
     return (
-      <div className="mk-page">
+      <div className="sj-page mk-page">
         <div className="sj-card mk-error">
           <p>{loaded.error}</p>
           <Button tone="soft" size="sm" onClick={loaded.reload}>
@@ -232,7 +232,7 @@ export function MockReport() {
   }
   if (!report) {
     return (
-      <div className="mk-page">
+      <div className="sj-page mk-page">
         <Empty icon={<IconClose size={24} />} title="This mock isn’t here" action={<Button to="/mock">Mock exams</Button>}>
           It doesn’t exist, or it was deleted.
         </Empty>
@@ -242,7 +242,7 @@ export function MockReport() {
 
   const used = Math.min(report.time_used_seconds, report.duration_minutes * 60);
   return (
-    <div className="mk-page">
+    <div className="sj-page mk-page">
       <PageHero
         back={{ to: '/mock', label: 'Mock exams' }}
         eyebrow={`${report.preset === 'utme' ? 'Real UTME' : 'Mock exam'} · ${dateLabel(report.started_at)}`}
