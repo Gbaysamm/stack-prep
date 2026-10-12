@@ -1,0 +1,856 @@
+/*
+ * The mock exam room: a JAMB-style CBT screen in Stack Prep's colours. An ink bar with the
+ * timer, subject tabs under it, the question on white, the palette at the side (a sheet on a
+ * phone). Nothing on the paper can be selected, copied or dragged.
+ */
+
+.sj .mx-room {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.sj .mx-centre {
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px 16px;
+}
+
+/* ---------------------------------------------------------------- bar */
+.sj .mx-bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 14px;
+  min-height: 64px;
+  padding: 10px max(16px, calc((100% - 1320px) / 2));
+  background: var(--ink-900);
+  color: #fff;
+}
+.sj .mx-bar-who {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.sj .mx-bar-who img {
+  border-radius: var(--r-sm);
+  flex: none;
+}
+.sj .mx-bar-who div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.sj .mx-bar-who strong {
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sj .mx-bar-eyebrow {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--purple-200);
+}
+.sj .mx-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.18);
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.sj .mx-timer.low {
+  background: var(--yellow-400);
+  color: var(--ink-900);
+  box-shadow: none;
+}
+.sj .mx-timer.last {
+  background: var(--pink-500);
+  color: #fff;
+  animation: mx-pulse 1s ease-in-out infinite;
+}
+@keyframes mx-pulse {
+  50% {
+    opacity: 0.75;
+  }
+}
+.sj .mx-bar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.sj .mx-save {
+  font-size: 12.5px;
+  color: var(--purple-200);
+  white-space: nowrap;
+}
+.sj .mx-save.retrying {
+  color: var(--yellow-300);
+}
+.sj .mx-barbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 8px 14px;
+  border-radius: var(--r-btn);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  transition: background var(--t-fast) var(--ease);
+}
+.sj .mx-barbtn:hover,
+.sj .mx-barbtn.on {
+  background: rgba(255, 255, 255, 0.2);
+}
+.sj .mx-barbtn.submit {
+  background: var(--green-400);
+  color: var(--ink-900);
+  box-shadow: 0 3px 0 var(--green-600);
+}
+.sj .mx-barbtn.submit:hover {
+  background: #97e766;
+}
+.sj .mx-barbtn.submit:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--green-600);
+}
+
+/* ---------------------------------------------------------------- subject tabs */
+.sj .mx-tabs {
+  position: sticky;
+  top: 64px;
+  z-index: 19;
+  display: flex;
+  gap: 6px;
+  padding: 8px max(16px, calc((100% - 1320px) / 2)) 0;
+  background: var(--ink-800);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.sj .mx-tabs::-webkit-scrollbar {
+  display: none;
+}
+.sj .mx-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  min-height: 44px;
+  padding: 8px 16px;
+  border-radius: var(--r-md) var(--r-md) 0 0;
+  color: var(--purple-100);
+  font-weight: 600;
+  font-size: 14.5px;
+  transition: background var(--t-fast) var(--ease);
+}
+.sj .mx-tab:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.sj .mx-tab.on {
+  background: var(--paper);
+  color: var(--ink-900);
+}
+.sj .mx-tab .count {
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 12px;
+  font-weight: 700;
+}
+.sj .mx-tab.on .count {
+  background: var(--purple-100);
+  color: var(--purple-700);
+}
+
+/* ---------------------------------------------------------------- notices */
+.sj .mx-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 12px auto 0;
+  width: min(1320px, calc(100% - 32px));
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  background: var(--yellow-100);
+  color: var(--ink-900);
+  font-size: 14px;
+  font-weight: 500;
+}
+.sj .mx-notice.soft {
+  background: var(--purple-050);
+}
+.sj .mx-notice button {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-sm);
+}
+
+/* ---------------------------------------------------------------- body */
+.sj .mx-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: start;
+  gap: 22px;
+  width: min(1320px, calc(100% - 32px));
+  margin: 18px auto 28px;
+}
+.sj .mx-main {
+  min-width: 0;
+}
+.sj .mx-qcard {
+  padding: 26px 30px 24px;
+  border-radius: var(--r-xl);
+  background: #fff;
+  box-shadow: var(--lift);
+}
+.sj .mx-qhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.sj .mx-qno {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--purple-600);
+}
+.sj .mx-qno span {
+  color: var(--gray-500);
+}
+.sj .mx-flagtag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  background: var(--orange-100);
+  color: var(--orange-500);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.sj .mx-passage {
+  margin-bottom: 18px;
+  padding: 14px 18px;
+  max-height: min(340px, 40vh);
+  overflow: auto;
+  border-radius: var(--r-md);
+  background: var(--purple-050);
+  font-size: 15px;
+  line-height: 1.7;
+}
+.sj .mx-passage-title {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.sj .mx-instructions {
+  margin-bottom: 10px;
+  font-size: 13.5px;
+  color: var(--gray-600);
+}
+.sj .mx-stem {
+  margin: 0 0 20px;
+  font-family: var(--f-body);
+  font-weight: 500;
+  font-size: clamp(18px, 1.6vw, 21px);
+  line-height: 1.5;
+  letter-spacing: 0;
+  text-wrap: pretty;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.sj .mx-figures {
+  margin: -6px 0 20px;
+}
+.sj .mx-option {
+  min-height: 56px;
+  font-size: 16.5px;
+}
+.sj .mx-option .key {
+  width: 36px;
+  height: 36px;
+  font-size: 14px;
+}
+.sj .mx-clear {
+  margin-top: 12px;
+  font-size: 13.5px;
+}
+.sj .mx-linkbtn {
+  color: var(--purple-600);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.sj .mx-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+.sj .mx-nav > :last-child {
+  margin-left: auto;
+}
+.sj .mx-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 10px 16px;
+  border-radius: var(--r-btn);
+  background: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--gray-200);
+  font-weight: 600;
+  color: var(--gray-700);
+}
+.sj .mx-flag.on {
+  background: var(--orange-100);
+  box-shadow: inset 0 0 0 1.5px var(--orange-500);
+  color: var(--orange-500);
+}
+.sj .mx-paletteBtn {
+  display: none;
+}
+.sj .mx-keys {
+  margin-top: 14px;
+  font-size: 12.5px;
+  color: var(--gray-500);
+}
+.sj .mx-keys kbd {
+  display: inline-block;
+  min-width: 22px;
+  margin: 0 3px 0 8px;
+  padding: 1px 6px;
+  border-radius: var(--r-xs);
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--gray-300), 0 1px 0 var(--gray-300);
+  font-family: var(--f-mono);
+  font-size: 11.5px;
+  text-align: center;
+  color: var(--gray-700);
+}
+.sj .mx-keys kbd:first-child {
+  margin-left: 0;
+}
+
+/* ---------------------------------------------------------------- palette */
+.sj .mx-side {
+  position: sticky;
+  top: 132px;
+  padding: 18px;
+  border-radius: var(--r-xl);
+  background: #fff;
+  box-shadow: var(--lift);
+}
+.sj .mx-palette-counts {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-size: 12.5px;
+  color: var(--gray-600);
+}
+.sj .mx-palette-counts span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sj .mx-palette-counts b {
+  font-size: 24px;
+  color: var(--ink-900);
+}
+.sj .mx-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+  gap: 6px;
+  max-height: calc(100dvh - 330px);
+  overflow-y: auto;
+  padding: 3px;
+}
+.sj .mx-cell {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--r-sm);
+  background: #fafafc;
+  box-shadow: none;
+  -webkit-appearance: none;
+  appearance: none;
+  font-family: var(--f-mono);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--gray-700);
+}
+.sj button.mx-cell:hover {
+  border-color: var(--purple-300);
+}
+.sj button.mx-cell:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--purple-200, #ddd6fe);
+}
+.sj .mx-cell.answered {
+  border-color: var(--purple-600);
+  background: var(--purple-600);
+  color: #fff;
+}
+.sj .mx-cell.flagged {
+  border-color: var(--yellow-500, #eab308);
+  background: var(--yellow-400);
+  color: var(--ink-900);
+}
+.sj .mx-cell.answered.flagged::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--purple-600);
+  box-shadow: 0 0 0 1.5px #fff;
+}
+/* The current question: one solid ring drawn inside the cell, so the scrolling grid never
+   clips it and it never doubles up with the cell's own border. */
+.sj .mx-cell.current {
+  border-color: var(--ink-900);
+  box-shadow: inset 0 0 0 1.5px var(--ink-900);
+}
+.sj .mx-legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  margin: 16px 0 0;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--gray-100);
+  list-style: none;
+  font-size: 12.5px;
+  color: var(--gray-600);
+}
+.sj .mx-legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sj .mx-cell.sample {
+  width: 24px;
+  height: 24px;
+  font-size: 10.5px;
+}
+.sj .mx-cell.sample.current {
+  box-shadow: inset 0 0 0 1px var(--ink-900);
+}
+
+/* Phone palette sheet */
+.sj .mx-sheetwrap {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(31, 0, 80, 0.4);
+}
+.sj .mx-sheet {
+  width: 100%;
+  max-height: 80dvh;
+  overflow-y: auto;
+  padding: 16px 16px calc(18px + env(safe-area-inset-bottom));
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  background: #fff;
+}
+.sj .mx-sheet .mx-grid {
+  max-height: none;
+}
+.sj .mx-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-family: var(--f-display);
+  font-size: 18px;
+}
+
+/* ---------------------------------------------------------------- submit + gates */
+.sj .mx-confirm-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--gray-100);
+}
+.sj .mx-confirm-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--gray-100);
+  color: var(--gray-800);
+}
+.sj .mx-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(31, 0, 80, 0.86);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.sj .mx-gate-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  width: min(460px, 100%);
+  padding: 28px;
+  border-radius: var(--r-xl);
+  background: #fff;
+  box-shadow: var(--st-purple);
+}
+.sj .mx-gate-card p {
+  color: var(--gray-700);
+}
+.sj .mx-gate-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--r-lg);
+  background: var(--purple-050);
+  color: var(--purple-600);
+}
+
+/* ---------------------------------------------------------------- calculator */
+.sj .mx-calc {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 45;
+  width: 372px;
+  padding: 12px;
+  border-radius: var(--r-xl);
+  background: var(--ink-900);
+  color: #fff;
+  box-shadow: 0 24px 60px rgba(31, 0, 80, 0.35);
+  transform: translate(var(--dx, 0), var(--dy, 0));
+  outline: none;
+}
+.sj .mx-calc:focus-visible {
+  box-shadow:
+    0 0 0 3px var(--purple-300),
+    0 24px 60px rgba(31, 0, 80, 0.35);
+}
+.sj .mx-calc-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 2px 10px;
+  cursor: grab;
+  touch-action: none;
+}
+.sj .mx-calc-head strong {
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: 16px;
+  margin-right: auto;
+}
+.sj .mx-calc-mode {
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 11px;
+  font-weight: 700;
+}
+.sj .mx-calc-close {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-sm);
+}
+.sj .mx-calc .mx-calc-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+.sj .mx-sheet .mx-calc-close:hover {
+  background: var(--gray-100);
+}
+.sj .mx-calc-screen {
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: #e9f3d8;
+  color: var(--ink-900);
+  text-align: right;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+.sj .mx-calc-expr {
+  min-height: 20px;
+  font-size: 13.5px;
+  overflow-wrap: anywhere;
+  color: var(--gray-700);
+}
+.sj .mx-calc-out {
+  min-height: 34px;
+  font-size: 26px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  line-height: 1.3;
+}
+.sj .mx-calc-out.error {
+  color: var(--danger);
+  font-size: 20px;
+}
+.sj .mx-calc-keys {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+}
+.sj .mx-key {
+  min-height: 38px;
+  padding: 4px 2px;
+  border-radius: var(--r-sm);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.1;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+  transition:
+    background var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease);
+}
+.sj .mx-key:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.sj .mx-key:active,
+.sj .mx-key.lit {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+.sj .mx-key.fn {
+  font-size: 13px;
+  background: rgba(183, 137, 255, 0.18);
+}
+.sj .mx-key.mem {
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--purple-200);
+}
+.sj .mx-key.num {
+  background: #fff;
+  color: var(--ink-900);
+  font-size: 16px;
+}
+.sj .mx-key.num:hover {
+  background: var(--purple-050);
+}
+.sj .mx-key.op {
+  background: var(--purple-500);
+}
+.sj .mx-key.clear {
+  background: var(--pink-500);
+}
+.sj .mx-key.eq {
+  background: var(--green-400);
+  color: var(--ink-900);
+  font-size: 18px;
+}
+.sj .mx-key.wide {
+  grid-column: span 2;
+}
+
+/* ---------------------------------------------------------------- tablet + phone */
+@media (max-width: 1080px) {
+  .sj .mx-body {
+    grid-template-columns: minmax(0, 1fr) 260px;
+  }
+  .sj .mx-save {
+    display: none;
+  }
+}
+@media (max-width: 860px) {
+  .sj .mx-bar {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 8px;
+    min-height: 56px;
+    padding: 8px 12px;
+    padding-top: calc(8px + env(safe-area-inset-top));
+  }
+  .sj .mx-bar-who img {
+    display: none;
+  }
+  .sj .mx-bar-who strong {
+    font-size: 15px;
+  }
+  .sj .mx-timer {
+    padding: 6px 12px;
+    font-size: 17px;
+  }
+  .sj .mx-bar-actions {
+    gap: 6px;
+  }
+  .sj .mx-barbtn {
+    min-height: 40px;
+    padding: 8px 10px;
+  }
+  .sj .mx-barbtn:not(.submit) span {
+    display: none;
+  }
+  .sj .mx-tabs {
+    top: 56px;
+    padding: 6px 8px 0;
+  }
+  .sj .mx-tab {
+    min-height: 40px;
+    padding: 6px 12px;
+    font-size: 13.5px;
+  }
+  .sj .mx-body {
+    display: block;
+    width: calc(100% - 24px);
+    margin: 12px auto 96px;
+  }
+  .sj .mx-side {
+    display: none;
+  }
+  .sj .mx-qcard {
+    padding: 18px 16px;
+    border-radius: var(--r-lg);
+  }
+  .sj .mx-passage {
+    max-height: 34vh;
+    padding: 12px 14px;
+    font-size: 14.5px;
+  }
+  .sj .mx-option {
+    min-height: 52px;
+    padding: 12px;
+    font-size: 15.5px;
+  }
+  .sj .mx-keys {
+    display: none;
+  }
+  /* Previous / Flag / palette / Next ride along the bottom, under the thumb. */
+  .sj .mx-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    margin: 0;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.92);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--gray-100);
+  }
+  .sj .mx-nav .sj-btn {
+    min-height: 46px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .sj .mx-nav .lbl {
+    display: none;
+  }
+  .sj .mx-nav > :last-child .lbl {
+    display: inline;
+    max-width: 92px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .sj .mx-paletteBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 46px;
+    padding: 8px 12px;
+    border-radius: var(--r-btn);
+    background: var(--purple-050);
+    color: var(--purple-700);
+    font-weight: 700;
+    font-size: 13.5px;
+  }
+  .sj .mx-flag {
+    padding: 10px 12px;
+  }
+  .sj .mx-calc {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    padding: 10px 10px calc(12px + env(safe-area-inset-bottom));
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+    transform: none;
+  }
+  .sj .mx-calc-head {
+    cursor: default;
+  }
+  /* Compact on a phone, so the question's top stays in view above it. */
+  .sj .mx-calc-head {
+    padding-bottom: 6px;
+  }
+  .sj .mx-calc-screen {
+    margin-bottom: 8px;
+    padding: 6px 10px;
+  }
+  .sj .mx-calc-expr {
+    min-height: 16px;
+    font-size: 12.5px;
+  }
+  .sj .mx-calc-keys {
+    gap: 5px;
+  }
+  .sj .mx-key {
+    min-height: 33px;
+    font-size: 13px;
+  }
+  .sj .mx-key.fn,
+  .sj .mx-key.mem {
+    font-size: 11.5px;
+  }
+  .sj .mx-calc-out {
+    min-height: 28px;
+    font-size: 21px;
+  }
+  .sj .mx-stem {
+    font-size: 17.5px;
+  }
+  .sj .mx-gate-card {
+    padding: 22px;
+  }
+}

@@ -2,8 +2,8 @@
  * Stack Prep: the student app, at /student.
  *
  * Every screen has its own address, so back, forward, refresh and a shared link all do what a
- * student expects. Pages inside AppShell carry the navigation; the check-up, a practice run and
- * the board are focus pages that have none.
+ * student expects. Pages inside AppShell carry the navigation; the check-up, a practice run, the
+ * board and the mock exam room are focus pages that have none.
  */
 
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
@@ -18,6 +18,10 @@ import { ExamSubjects } from './pages/ExamSubjects.js';
 import { Goal } from './pages/Goal.js';
 import { Home } from './pages/Home.js';
 import { Help } from './pages/Help.js';
+import { MockHub } from './pages/MockHub.js';
+import { MockReport } from './pages/MockReport.js';
+import { MockRoom } from './pages/MockRoom.js';
+import { MockSetup } from './pages/MockSetup.js';
 import { HelpNumbers, HowItsWorkedOutRedirect } from './pages/HelpNumbers.js';
 import { NotFound } from './pages/NotFound.js';
 import { Onboarding } from './pages/Onboarding.js';
@@ -65,6 +69,9 @@ export function PrepApp() {
                 <Route path="/practice/:sessionId/report" element={<RunReport />} />
                 <Route path="/checkup" element={<CheckupHub />} />
                 <Route path="/checkup/:sessionId/report" element={<CheckupReport />} />
+                <Route path="/mock" element={<MockHub />} />
+                <Route path="/mock/new" element={<MockSetup />} />
+                <Route path="/mock/:mockId/report" element={<MockReport />} />
                 <Route path="/progress" element={<Progress />} />
                 <Route path="/progress/check-ins" element={<CheckIns />} />
                 <Route path="/profile" element={<Profile />} />
@@ -86,6 +93,14 @@ export function PrepApp() {
                 element={
                   <RequireStudent>
                     <Onboarding />
+                  </RequireStudent>
+                }
+              />
+              <Route
+                path="/mock/:mockId"
+                element={
+                  <RequireStudent>
+                    <MockRoom />
                   </RequireStudent>
                 }
               />
