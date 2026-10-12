@@ -43,16 +43,27 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
   - web: types, the build and its 43 tests pass;
   - screenshots in progress.
 
-### CBT mock exam (started)
-- **What:** a JAMB-style computer-based test:
-  - up to 4 subjects, a timer and a question palette;
-  - flag for review and keyboard controls;
-  - a scientific calculator;
-  - anti-cheating: full screen, tab-switch logging, no copy or paste, a server-owned clock and
-    auto-submit.
-- **Where:** being built on the `cbt-exam-mode` branch in a separate worktree.
-- **Status:** in progress. The founder's UI notes were cut off mid-sentence and are still to
-  come.
+### CBT mock exam
+- **What:** a JAMB-style computer-based test at `/mock`.
+  - **Setup:** a Real UTME preset (English 60, the others 40, 2 hours) or a custom choice of
+    subjects, question counts and time.
+  - **The room:** the full paper loads at the start. It has subject tabs, a question palette,
+    flag for review, A–D/N/P/F/S keys and a scientific calculator (its own parser, 32 tests).
+  - **Anti-cheating:** full screen required and every exit logged; tab switches logged; no
+    copy, paste or text selection; the server owns the clock; it auto-submits at 0:00.
+  - **The report:** right ÷ answered per subject and overall, unanswered questions, and the
+    integrity log. The history list can resume or delete a test.
+  - Open to every student; no check-up is needed first.
+- **Where:**
+  - migration `029_mock_exams.sql`;
+  - the API: `apps/api/src/app/routers/mock.py`;
+  - the web: `apps/web/src/prep/mock/` and `pages/Mock*.tsx`;
+  - merged from the `cbt-exam-mode` branch.
+- **Status:** committed locally; 445 API tests and 32 calculator tests pass.
+- **Open:**
+  - the founder's UI notes were cut off mid-sentence;
+  - full screen can't be forced on iPhone Safari;
+  - mocks don't feed the predicted score yet.
 
 ### All 1,043 UTME Maths lessons taught the Nigerian classroom way
 - **What:** every Maths board lesson now reads like a Nigerian SS3 exercise book. Each one
