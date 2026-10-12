@@ -23,6 +23,7 @@ import {
   IconChart,
   IconCalendar,
   IconChevronDown,
+  IconClock,
   IconClose,
   IconHelp,
   IconHome,
@@ -50,6 +51,7 @@ const NAV = [
   { to: "/home", label: "Home", icon: IconHome },
   { to: "/practice", label: "Practice", icon: IconBolt },
   { to: "/checkup", label: "Check-up", icon: IconTarget },
+  { to: "/mock", label: "Mock exam", icon: IconClock },
   { to: "/progress", label: "Progress", icon: IconChart },
   { to: "/profile", label: "Profile", icon: IconUser },
 ] as const;
@@ -459,7 +461,8 @@ export function AppShell() {
         <ClaimDialog open={claiming} onClose={closeClaim} />
 
         <nav className="sj-bottomnav sj-glass dark" aria-label="Main">
-          {NAV.map(({ to, label, icon: Icon }) => (
+          {/* Five tabs fit a phone; the mock exam is in the menu there. */}
+          {NAV.filter(({ to }) => to !== "/mock").map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
