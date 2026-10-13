@@ -2468,7 +2468,12 @@ async def lesson(
                 write=beat.write,
                 write_at=beat.at,
                 say=beat.say,
-                voice_url=f"/v1/practice/{session_id}/lesson/{question_version_id}/voice/{index}",
+                # The line's own fingerprint in the address: the clip is cached for a day, so
+                # a rewritten line must be fetched afresh rather than replay the old recording.
+                voice_url=(
+                    f"/v1/practice/{session_id}/lesson/{question_version_id}/voice/{index}"
+                    f"?v={hashlib.sha256(beat.say.encode()).hexdigest()[:12]}"
+                ),
                 answer=beat.answer,
                 point=beat.point,
                 show_sketch=beat.show_sketch,

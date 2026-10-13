@@ -156,86 +156,44 @@
   background: rgba(255, 255, 255, 0.16);
 }
 
-/* Nothing answered: a clear state, never a lone dash. */
-.sj .mi-hero-none {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-top: 4px;
-}
-.sj .mi-hero-none-icon {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 54px;
-  height: 54px;
-  border-radius: 16px;
-  color: var(--ink-900);
-  background: var(--yellow-300);
-}
+/* Nothing answered: a plain sentence, never a dash or a row of zeros. */
 .sj .mi-hero-none-title {
-  font-size: 38px;
-  line-height: 1;
+  font-size: clamp(34px, 4.4vw, 48px);
+  line-height: 1.02;
   color: #fff;
 }
 .sj .mi-hero-none-sub {
-  max-width: 44ch;
-  margin-top: 6px;
-  font-size: 13.5px;
-  line-height: 1.5;
+  max-width: 46ch;
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.55;
   color: rgba(255, 255, 255, 0.74);
 }
 
+/* The counts and the time, as one quiet line of text. */
 .sj .mi-hero-facts {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin: 18px 0 0;
-  padding: 0;
-  list-style: none;
+  align-items: baseline;
+  gap: 4px 0;
+  margin: 16px 0 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
 }
-.sj .mi-hero-facts li {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 11px;
-  border-radius: var(--r-pill);
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.78);
-  background: rgba(255, 255, 255, 0.08);
-}
-.sj .mi-hero-facts li::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.35);
-}
-.sj .mi-hero-facts li.r::before {
-  background: var(--green-400);
-}
-.sj .mi-hero-facts li.w::before {
-  background: var(--pink-400);
-}
-.sj .mi-hero-facts li.t::before {
-  display: none;
+.sj .mi-hero-facts > span + span::before {
+  content: '·';
+  margin: 0 10px;
+  color: rgba(255, 255, 255, 0.35);
 }
 .sj .mi-hero-facts b {
-  font-size: 17px;
-  line-height: 1;
+  font-weight: 600;
   color: #fff;
 }
-.sj .mi-hero-facts .of {
-  color: rgba(255, 255, 255, 0.6);
+.sj .mi-hero-facts .r b {
+  color: var(--green-400);
 }
-.sj .mi-hero-tag {
-  margin-left: 2px;
-  padding: 1px 7px;
-  border-radius: var(--r-pill);
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--ink-900);
-  background: var(--yellow-300);
+.sj .mi-hero-facts .w b {
+  color: var(--pink-400);
 }
 
 .sj .mi-hero-subjects {
@@ -245,10 +203,7 @@
   display: grid;
   gap: 12px;
   margin: 0;
-  padding: 14px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--r-lg);
-  background: rgba(255, 255, 255, 0.06);
+  padding: 0;
   list-style: none;
 }
 .sj .mi-hero-subjects li {
@@ -272,13 +227,6 @@
 .sj .mi-hero-subjects .pct {
   font-size: 22px;
   color: var(--green-400);
-}
-.sj .mi-hero-subjects .pct.blank {
-  font-family: var(--f-body);
-  font-size: 12.5px;
-  font-weight: 500;
-  letter-spacing: 0;
-  color: rgba(255, 255, 255, 0.6);
 }
 .sj .mi-hero-subjects .mi-split {
   grid-column: 1 / -1;

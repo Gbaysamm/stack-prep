@@ -8,7 +8,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
-import { IconArrowLeft, IconArrowRight, IconBulb, IconCheck, IconClock, IconClose } from '../icons.js';
+import { IconArrowLeft, IconArrowRight, IconBulb, IconCheck, IconClock } from '../icons.js';
 import {
   JAMB_SECONDS_PER_QUESTION,
   PACE_WORD,
@@ -82,17 +82,12 @@ export function SummaryHero({ report, previous }: { report: Report; previous: Mo
         </div>
         {none ? (
           <div className="mi-hero-none">
-            <span className="mi-hero-none-icon" aria-hidden="true">
-              {report.auto_submitted ? <IconClock size={26} /> : <IconClose size={26} />}
-            </span>
-            <div>
-              <h1 className="sj-display mi-hero-none-title">No answers</h1>
-              <p className="mi-hero-none-sub">
-                {report.auto_submitted
-                  ? 'Time ran out before any answer was saved, so there is no score for this mock.'
-                  : 'It was handed in before any question was answered, so there is no score.'}
-              </p>
-            </div>
+            <h1 className="sj-display mi-hero-none-title">No answers this time</h1>
+            <p className="mi-hero-none-sub">
+              {report.auto_submitted
+                ? 'Time ran out before an answer was saved, so this mock has no score. Sit another when you are ready.'
+                : 'It was handed in before any question was answered, so this mock has no score.'}
+            </p>
           </div>
         ) : (
           <div className="mi-hero-score">
@@ -111,23 +106,29 @@ export function SummaryHero({ report, previous }: { report: Report; previous: Mo
             </span>
           </div>
         )}
-        <ul className="mi-hero-facts">
-          <li className="r">
-            <b className="sj-num">{o.correct}</b> right
-          </li>
-          <li className="w">
-            <b className="sj-num">{o.wrong}</b> wrong
-          </li>
-          <li className="s">
-            <b className="sj-num">{o.unanswered}</b> skipped
-          </li>
-          <li className="t">
-            <IconClock size={14} />
-            <b className="sj-num">{clock(used)}</b>
-            <span className="of">of {clock(total)}</span>
-            {report.auto_submitted ? <span className="mi-hero-tag">Time ran out</span> : null}
-          </li>
-        </ul>
+        <p className="mi-hero-facts">
+          {none ? (
+            <span>{o.questions} questions</span>
+          ) : (
+            <>
+              <span className="r">
+                <b>{o.correct}</b> right
+              </span>
+              <span className="w">
+                <b>{o.wrong}</b> wrong
+              </span>
+              {o.unanswered ? (
+                <span className="s">
+                  <b>{o.unanswered}</b> skipped
+                </span>
+              ) : null}
+            </>
+          )}
+          <span className="t">
+            {report.auto_submitted ? 'Time ran out at ' : 'Handed in at '}
+            <b>{clock(used)}</b> of {clock(total)}
+          </span>
+        </p>
       </div>
       <div className="mi-hero-actions">
         <Button to="/mock/new" tone="lime" trailing={<IconArrowRight size={18} />}>
@@ -141,15 +142,17 @@ export function SummaryHero({ report, previous }: { report: Report; previous: Mo
           return (
             <li key={subject.subject_id}>
               <span className="name">{subject.name}</span>
-              <span className={cx('pct sj-num', t.percent === null && 'blank')}>
-                {t.percent === null ? 'No answers' : `${t.percent}%`}
-              </span>
-              <SplitBar tally={t} className="on-dark" />
-              <span className="sub">
-                {t.answered === 0
-                  ? `All ${t.questions} skipped`
-                  : `${t.correct} of ${t.answered} right${t.unanswered ? ` · ${t.unanswered} skipped` : ''}`}
-              </span>
+              {t.answered === 0 ? (
+                <span className="sub">{t.questions} questions, none answered</span>
+              ) : (
+                <>
+                  <span className="pct sj-num">{t.percent}%</span>
+                  <SplitBar tally={t} className="on-dark" />
+                  <span className="sub">
+                    {t.correct} of {t.answered} right{t.unanswered ? ` · ${t.unanswered} skipped` : ''}
+                  </span>
+                </>
+              )}
             </li>
           );
         })}

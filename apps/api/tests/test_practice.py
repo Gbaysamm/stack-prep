@@ -6,6 +6,7 @@ one of these breaks, the product has started counting help as knowledge.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import uuid
 from collections.abc import AsyncIterator, Iterator
@@ -500,7 +501,13 @@ async def test_a_doubted_right_answer_opens_the_lesson(
 
     response = await client.get(lesson_url(session, version))
     assert response.status_code == 200, response.text
-    assert response.json()["beats"]
+    beats = response.json()["beats"]
+    assert beats
+    # Each clip's address carries its line's fingerprint, so a rewritten line is never served
+    # from a browser's cached copy of the old recording.
+    for beat in beats:
+        said = hashlib.sha256(beat["say"].encode()).hexdigest()[:12]
+        assert beat["voice_url"].endswith(f"?v={said}")
     warmed = await client.post(lesson_url(session, version, "/warm"))
     assert warmed.status_code == 202, warmed.text
     # The review board has the ask box, so the coach answers there too.

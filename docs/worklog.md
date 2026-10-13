@@ -15,6 +15,28 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-13
 
+### Lesson audio follows rewritten lines
+- **What:** each lesson clip's address now carries a short fingerprint of its spoken line
+  (`…/voice/3?v=<12 hex>`).
+- **Why:** after the spoken-line rewrite, the founder heard the old audio over the new
+  captions. Clips are cached by the browser for a day under a fixed address, so the old
+  recording replayed even though the server would have made the new one.
+- **Where:** `routers/practice.py` (the lesson's `voice_url`), with a test in
+  `test_practice.py`.
+- **Status:** committed locally.
+
+### Mock report: a calmer summary at the top
+- **What:**
+  - the counts and the time are one quiet line of text ("5 right · 22 wrong · 8 skipped ·
+    Handed in at 0:01 of 30:00"), not pill chips;
+  - the subjects sit on the right without a boxed panel;
+  - a mock with no answers says "No answers this time" with one sentence why. There is no
+    clock tile, no row of zeros and no empty bars; a subject reads "20 questions, none
+    answered".
+- **Why:** the founder disliked the busy summary, especially the no-answer version.
+- **Where:** `apps/web/src/prep/pages/MockInsights.tsx` and `MockInsights.css`.
+- **Status:** committed locally; checked at 1440 and 390, with and without answers.
+
 ### Mock report becomes an insights page
 - **What:**
   - the hero is the summary: the overall score big (with the change on the last mock),
