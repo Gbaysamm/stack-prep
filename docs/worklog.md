@@ -15,6 +15,16 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-13
 
+### Mock setup: one slider for the time allowed
+- **What:** the stepper, the chips and the pace box are replaced by:
+  - the chosen time shown large ("120 min · 2 hours");
+  - one slider in 5-minute steps, with a green tick at the real exam's pace;
+  - one line with the time per question against JAMB's 40 s, and a "Use exam pace" link.
+- **Why:** the founder found the previous card very poor, especially on phone, where the
+  chips wrapped.
+- **Where:** `apps/web/src/prep/pages/MockSetup.tsx` and `Mock.css`.
+- **Status:** committed locally; checked at 1440 and 390.
+
 ### Mock report: the subjects live in the summary only
 - **What:**
   - the "Subject by subject" section below the summary is removed;

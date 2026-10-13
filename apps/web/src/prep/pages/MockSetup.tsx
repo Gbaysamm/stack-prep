@@ -6,7 +6,7 @@
  * Starting asks for full screen in the same click, because a browser only grants it to a click.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { IconArrowRight, IconCheck, IconClock, IconLock } from '../icons.js';
@@ -18,7 +18,6 @@ import './Mock.css';
 
 type Preset = 'utme' | 'custom';
 
-const MINUTE_PICKS = [30, 60, 90, 120];
 /** JAMB gives 120 minutes for 180 questions: 40 seconds each. */
 const SECONDS_PER_QUESTION = 40;
 
@@ -34,8 +33,8 @@ function perQuestion(seconds: number): string {
 }
 
 /**
- * How long the test runs: a stepper for any length, quick picks with the exam's own pace first,
- * and a plain line saying what that means per question against JAMB's 40 seconds.
+ * How long the test runs: one slider in 5-minute steps, the time shown large, a tick where the
+ * real exam's pace falls, and one line saying what the time means per question.
  */
 function TimePicker({
   minutes,
@@ -50,60 +49,51 @@ function TimePicker({
   max: number;
   onChange: (value: number) => void;
 }) {
-  const picks = [...new Set([suggested, ...MINUTE_PICKS])].filter((value) => value <= max).sort((a, b) => a - b);
+  const low = 5;
   const each = total > 0 ? (minutes * 60) / total : 0;
   const pace = each === 0 ? null : each < SECONDS_PER_QUESTION * 0.9 ? 'tight' : each > SECONDS_PER_QUESTION * 1.25 ? 'relaxed' : 'exam';
-  const paceWords = {
-    tight: 'Tighter than the real exam',
-    exam: 'Same pace as the real exam',
-    relaxed: 'More time than the real exam',
-  } as const;
+  const paceWords = { tight: 'Tighter than the exam', exam: 'Exam pace', relaxed: 'More time than the exam' } as const;
+  const at = (value: number) => `${(100 * (Math.min(max, Math.max(low, value)) - low)) / (max - low)}%`;
   return (
     <div className="mk-time">
-      <div className="mk-stepper" role="group" aria-label="Minutes allowed">
-        <button type="button" className="mk-step" onClick={() => onChange(minutes - 5)} disabled={minutes <= 5} aria-label="5 minutes less">
-          −
-        </button>
-        <label className="mk-step-value">
-          <span className="sr-only">Minutes</span>
-          <input
-            type="text"
-            inputMode="numeric"
-            value={minutes}
-            onChange={(event) => onChange(Number(event.target.value.replace(/\D/g, '')))}
-          />
+      <div className="mk-time-top">
+        <span className="mk-time-value">
+          <b className="sj-num">{minutes}</b> min
           <small>{minutesText(minutes)}</small>
-        </label>
-        <button type="button" className="mk-step" onClick={() => onChange(minutes + 5)} disabled={minutes >= max} aria-label="5 minutes more">
-          +
-        </button>
+        </span>
+        {pace ? <span className={cx('mk-time-pace', pace)}>{paceWords[pace]}</span> : null}
       </div>
-
-      <div className="mk-picks" role="radiogroup" aria-label="Quick picks">
-        {picks.map((value) => (
-          <button
-            key={value}
-            type="button"
-            role="radio"
-            aria-checked={minutes === value}
-            className={cx('mk-pick', minutes === value && 'on', value === suggested && 'exam')}
-            onClick={() => onChange(value)}
-          >
-            {value === suggested ? <span className="mk-pick-tag">Exam pace</span> : null}
-            {value} min
+      <div className="mk-slider" style={{ '--fill': at(minutes) } as CSSProperties}>
+        <input
+          type="range"
+          min={low}
+          max={max}
+          step={5}
+          value={minutes}
+          onChange={(event) => onChange(Number(event.target.value))}
+          aria-label="Minutes allowed"
+          aria-valuetext={minutesText(minutes)}
+        />
+        {suggested >= low && suggested <= max ? (
+          <span className="mk-slider-mark" style={{ left: at(suggested) }} aria-hidden="true" />
+        ) : null}
+      </div>
+      <p className="mk-time-note">
+        {total > 0 ? (
+          <>
+            About {perQuestion(each)} a question. JAMB gives {SECONDS_PER_QUESTION}
+            {' '}s.
+          </>
+        ) : (
+          'Pick your subjects to see the time per question.'
+        )}
+        {total > 0 && minutes !== suggested ? (
+          <button type="button" className="mk-time-use" onClick={() => onChange(suggested)}>
+            Use exam pace ({suggested}
+            {' '}min)
           </button>
-        ))}
-      </div>
-
-      {pace ? (
-        <p className={cx('mk-pace', pace)}>
-          <span className="mk-pace-dot" aria-hidden="true" />
-          <b>{paceWords[pace]}</b>
-          <span>
-            About {perQuestion(each)} a question. JAMB gives {SECONDS_PER_QUESTION} s.
-          </span>
-        </p>
-      ) : null}
+        ) : null}
+      </p>
     </div>
   );
 }
@@ -390,7 +380,7 @@ export function MockSetup() {
                 total={total}
                 suggested={suggested}
                 max={options.max_minutes}
-                onChange={(value) => setMinutes(clampInt(value, 1, options.max_minutes))}
+                onChange={(value) => setMinutes(clampInt(value, 5, options.max_minutes))}
               />
             </section>
           ) : null}
