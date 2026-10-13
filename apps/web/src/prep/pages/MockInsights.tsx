@@ -1,5 +1,5 @@
 /**
- * The insight sections of a mock report: the summary hero, next steps, subject by subject, the
+ * The insight sections of a mock report: the summary hero (with each subject), next steps, the
  * topics that went wrong, where the time went, the trend across mocks and the topic breakdown.
  * Drawn with plain CSS and SVG. Every section has a state for "nothing to show" that reads as a
  * sentence, never as an empty box or a bar of zero.
@@ -21,7 +21,7 @@ import {
   type WeakTopic,
 } from '../mock/insights.js';
 import { clock, type MockReport as Report, type MockSummary, type SubjectResult, type Tally } from '../mockApi.js';
-import { Button, cx } from '../ui.js';
+import { cx } from '../ui.js';
 import { dateLabel } from './MockHub.js';
 
 const shortDate = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
@@ -55,7 +55,15 @@ function Delta({ value, suffix = '' }: { value: number | null; suffix?: string }
 /* ================================================================== the hero */
 
 /** The whole result at a glance: the score, the counts, the time, and each subject beside it. */
-export function SummaryHero({ report, previous }: { report: Report; previous: MockSummary | null }) {
+export function SummaryHero({
+  report,
+  previous,
+  time,
+}: {
+  report: Report;
+  previous: MockSummary | null;
+  time: TimeStats;
+}) {
   const o = report.overall;
   const none = o.answered === 0;
   const total = report.duration_minutes * 60;
@@ -130,15 +138,11 @@ export function SummaryHero({ report, previous }: { report: Report; previous: Mo
           </span>
         </p>
       </div>
-      <div className="mi-hero-actions">
-        <Button to="/mock/new" tone="lime" trailing={<IconArrowRight size={18} />}>
-          Sit another
-        </Button>
-      </div>
 
       <ul className="mi-hero-subjects" aria-label="Score by subject">
-        {report.subjects.map((subject) => {
+        {report.subjects.map((subject, index) => {
           const t = subject.tally;
+          const spent = time.recorded ? time.subjects[index]?.ms : undefined;
           return (
             <li key={subject.subject_id}>
               <span className="name">{subject.name}</span>
@@ -149,7 +153,14 @@ export function SummaryHero({ report, previous }: { report: Report; previous: Mo
                   <span className="pct sj-num">{t.percent}%</span>
                   <SplitBar tally={t} className="on-dark" />
                   <span className="sub">
-                    {t.correct} of {t.answered} right{t.unanswered ? ` · ${t.unanswered} skipped` : ''}
+                    <b className="r">{t.correct}</b> right · <b className="w">{t.wrong}</b> wrong
+                    {t.unanswered ? (
+                      <>
+                        {' '}
+                        · <b>{t.unanswered}</b> skipped
+                      </>
+                    ) : null}
+                    {spent ? <> · {durationText(spent)}</> : null}
                   </span>
                 </>
               )}
@@ -208,61 +219,6 @@ export function NextSteps({ steps }: { steps: string[] }) {
           </li>
         ))}
       </ol>
-    </div>
-  );
-}
-
-/* ================================================================== subject by subject */
-
-export function SubjectTable({ report, time }: { report: Report; time: TimeStats }) {
-  return (
-    <div className="sj-card mi-subjects">
-      <div className="mi-subjects-head" aria-hidden="true">
-        <span>Subject</span>
-        <span />
-        <span>Right</span>
-        <span>Wrong</span>
-        <span>Skipped</span>
-        <span>Time</span>
-        <span>Score</span>
-      </div>
-      <ul className="mi-subjects-list">
-        {report.subjects.map((subject, index) => {
-          const t = subject.tally;
-          const st = time.subjects[index]!;
-          return (
-            <li key={subject.subject_id} className="mi-subj">
-              <span className="mi-subj-name">
-                {subject.name}
-                <small>
-                  {t.answered} of {t.questions} answered
-                </small>
-              </span>
-              <SplitBar tally={t} className="mi-subj-bar" />
-              <span className="mi-subj-n r">
-                <b className="sj-num">{t.correct}</b>
-                <small>right</small>
-              </span>
-              <span className="mi-subj-n w">
-                <b className="sj-num">{t.wrong}</b>
-                <small>wrong</small>
-              </span>
-              <span className="mi-subj-n s">
-                <b className="sj-num">{t.unanswered}</b>
-                <small>skipped</small>
-              </span>
-              <span className="mi-subj-n t">
-                <b className="sj-num">{time.recorded ? durationText(st.ms) : '–'}</b>
-                <small>{st.avgMs !== null ? `${durationText(st.avgMs)} each` : 'not timed'}</small>
-              </span>
-              <span className={cx('mi-subj-pct sj-num', t.percent === null && 'blank')}>
-                {t.percent === null ? 'No answers' : `${t.percent}%`}
-              </span>
-            </li>
-          );
-        })}
-      </ul>
-      <p className="mi-foot">Score is right ÷ answered. A skipped question is not marked wrong.</p>
     </div>
   );
 }

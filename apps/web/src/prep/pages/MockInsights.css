@@ -98,7 +98,7 @@
 .sj .mi-hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: 'main' 'subjects' 'actions';
+  grid-template-areas: 'main' 'subjects';
   align-items: start;
   gap: 18px;
   min-height: 0;
@@ -236,26 +236,18 @@
   font-size: 12px;
   color: rgba(255, 255, 255, 0.6);
 }
-.sj .mi-hero-actions {
-  grid-area: actions;
-  position: relative;
-  z-index: 1;
-}
 @media (min-width: 861px) {
   .sj .mi-hero {
     grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
-    grid-template-areas: 'main subjects' 'actions subjects';
-    grid-template-rows: auto 1fr;
+    grid-template-areas: 'main subjects';
+    align-items: center;
     gap: 18px 36px;
     padding: 28px 30px;
   }
   .sj .mi-hero-pct {
     font-size: clamp(88px, 8vw, 112px);
   }
-  .sj .mi-hero-actions {
-    align-self: end;
-  }
-  .sj .mi-hero-subjects {
+    .sj .mi-hero-subjects {
     align-self: center;
   }
 }
@@ -359,133 +351,6 @@
     padding-left: 18px;
     border-top: 0;
     border-left: 1px solid var(--gray-100);
-  }
-}
-
-/* ---------------------------------------------------------------- subject by subject */
-.sj .mi-subjects {
-  padding: 6px 16px 14px;
-}
-.sj .mi-subjects-head {
-  display: none;
-}
-.sj .mi-subjects-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.sj .mi-subj {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-template-areas:
-    'name name name pct'
-    'bar bar bar bar'
-    'r w s t';
-  align-items: center;
-  gap: 8px 10px;
-  padding: 14px 0;
-}
-.sj .mi-subj + .mi-subj {
-  border-top: 1px solid var(--gray-100);
-}
-.sj .mi-subj-name {
-  grid-area: name;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  font-weight: 600;
-  font-size: 15px;
-  color: var(--ink-900);
-}
-.sj .mi-subj-name small {
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--gray-500);
-}
-.sj .mi-subj-bar {
-  grid-area: bar;
-}
-.sj .mi-subj-n {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-.sj .mi-subj-n.r {
-  grid-area: r;
-}
-.sj .mi-subj-n.w {
-  grid-area: w;
-}
-.sj .mi-subj-n.s {
-  grid-area: s;
-}
-.sj .mi-subj-n.t {
-  grid-area: t;
-}
-.sj .mi-subj-n b {
-  font-size: 19px;
-  line-height: 1;
-  color: var(--ink-900);
-}
-.sj .mi-subj-n.r b {
-  color: var(--green-600);
-}
-.sj .mi-subj-n.w b {
-  color: var(--danger);
-}
-.sj .mi-subj-n.s b {
-  color: var(--gray-600);
-}
-.sj .mi-subj-n small {
-  overflow: hidden;
-  font-size: 11.5px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  color: var(--gray-500);
-}
-.sj .mi-subj-pct {
-  grid-area: pct;
-  justify-self: end;
-  font-size: 26px;
-  color: var(--purple-700);
-}
-.sj .mi-subj-pct.blank {
-  font-family: var(--f-body);
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0;
-  color: var(--gray-500);
-}
-@media (min-width: 761px) {
-  .sj .mi-subjects {
-    padding: 4px 22px 16px;
-  }
-  .sj .mi-subjects-head,
-  .sj .mi-subj {
-    display: grid;
-    grid-template-columns: minmax(150px, 1.3fr) minmax(120px, 1.5fr) 60px 60px 66px minmax(110px, 0.9fr) 76px;
-    grid-template-areas: 'name bar r w s t pct';
-    gap: 8px 18px;
-  }
-  .sj .mi-subjects-head {
-    padding: 12px 0 8px;
-    border-bottom: 1px solid var(--gray-100);
-    font-family: var(--f-mono);
-    font-size: 10.5px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--gray-500);
-  }
-  .sj .mi-subjects-head span:last-child {
-    text-align: right;
-  }
-  .sj .mi-subj-n small {
-    display: none;
-  }
-  .sj .mi-subj-n.t small {
-    display: block;
   }
 }
 
@@ -1226,13 +1091,6 @@
   margin-left: 0;
 }
 @media (max-width: 760px) {
-  .sj .mi-subj {
-    grid-template-columns: minmax(0, 0.8fr) minmax(0, 0.8fr) minmax(0, 0.8fr) minmax(0, 1.5fr);
-  }
-  .sj .mi-subj-n.t b {
-    font-size: 16px;
-    white-space: nowrap;
-  }
   .sj .mi-legend-note {
     flex-basis: 100%;
     margin-left: 0;
@@ -1254,4 +1112,15 @@
   .sj .mi-section-title {
     font-size: 19px;
   }
+}
+
+.sj .mi-hero-subjects .sub b {
+  font-weight: 600;
+  color: #fff;
+}
+.sj .mi-hero-subjects .sub b.r {
+  color: var(--green-400);
+}
+.sj .mi-hero-subjects .sub b.w {
+  color: var(--pink-400);
 }

@@ -15,6 +15,18 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-13
 
+### Mock report: the subjects live in the summary only
+- **What:**
+  - the "Subject by subject" section below the summary is removed;
+  - each subject in the summary has its score, a bar and one brief line (right, wrong,
+    skipped, time);
+  - "Sit another" is off the summary, so it stays compact; it's still on the Mock exams
+    page.
+- **Why:** the founder wanted the summary to hold the subject breakdown, not repeat it
+  below, and found the button made the summary bigger than it needed to be.
+- **Where:** `MockInsights.tsx`, `MockInsights.css` and `MockReport.tsx`.
+- **Status:** committed locally; checked at 1440 and 390, with and without answers.
+
 ### Lesson audio follows rewritten lines
 - **What:** each lesson clip's address now carries a short fingerprint of its spoken line
   (`…/voice/3?v=<12 hex>`).

@@ -1,7 +1,7 @@
 /**
  * /mock/:mockId/report — how a mock went, as insights. The hero is the summary: the overall score
  * (right ÷ answered; a skipped question is never wrong), each subject beside it, the counts and
- * the time. Then the test conditions, what to do next, subject by subject, the topics that went
+ * the time. Then the test conditions, what to do next, the topics that went
  * wrong, where the time went, the trend across mocks, the topic breakdown, and every question
  * as a grid that opens each one with its answer, the working and the lesson.
  */
@@ -22,7 +22,6 @@ import { Button, Empty, Skeleton, cx } from '../ui.js';
 import {
   NextSteps,
   Section,
-  SubjectTable,
   SummaryHero,
   TimeInsights,
   TopicBreakdown,
@@ -446,15 +445,11 @@ function Insights({ report }: { report: Report }) {
 
   return (
     <div className="sj-page mk-page mi-page">
-      <SummaryHero report={report} previous={previous} />
+      <SummaryHero report={report} previous={previous} time={time} />
 
       <IntegrityPanel report={report} />
 
       <NextSteps steps={steps} />
-
-      <Section id="mi-subjects" title="Subject by subject">
-        <SubjectTable report={report} time={time} />
-      </Section>
 
       {answered ? (
         <Section
