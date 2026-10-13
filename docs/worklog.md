@@ -15,6 +15,18 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-13
 
+### Mock report: one result card that fits the subjects sat
+- **What:** the overall box and the fixed-width subject cards are now one card:
+  - a strip of four totals (questions, right, wrong, unanswered), each with its colour;
+  - one full-width row per subject: a right/wrong bar, "R right of A answered · U
+    unanswered", and the score;
+  - an "All subjects" total row when more than one subject was sat;
+  - a subject with no answers says "No answers" instead of a dash.
+- **Why:** the founder found too much empty space; the cards didn't adapt to how many
+  subjects were sat.
+- **Where:** `apps/web/src/prep/pages/MockReport.tsx` and `Mock.css`.
+- **Status:** committed locally; checked at 1440 and 390.
+
 ### Mock exam: a clearer "Time allowed"
 - **What:** the custom mock's time card has:
   - a −/+ stepper (5-minute steps) showing the minutes and the hours;

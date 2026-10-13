@@ -31,34 +31,61 @@ const EVENT_WORDS: Record<EventKind, string> = {
 
 type Filter = 'all' | 'wrong' | 'unanswered' | 'flagged';
 
-function TallyLine({ tally }: { tally: Tally }) {
+/** One subject (or the total) as a row: name, a right/wrong/unanswered bar, counts, score. */
+function ResultRow({ name, tally, total }: { name: string; tally: Tally; total?: boolean }) {
+  const width = (n: number) => `${tally.questions ? (100 * n) / tally.questions : 0}%`;
   return (
-    <p className="mk-tally">
-      <b>{tally.correct}</b> right of <b>{tally.answered}</b> answered
-      {tally.unanswered ? (
-        <>
-          {' '}
-          · <b>{tally.unanswered}</b> unanswered
-        </>
-      ) : null}
-    </p>
+    <li className={cx('mk-row', total && 'total')}>
+      <span className="mk-row-name">{name}</span>
+      <span className="mk-bar" role="img" aria-label={`${tally.correct} right, ${tally.wrong} wrong, ${tally.unanswered} unanswered`}>
+        <span className="right" style={{ width: width(tally.correct) }} />
+        <span className="wrong" style={{ width: width(tally.wrong) }} />
+      </span>
+      <span className="mk-row-counts">
+        <b>{tally.correct}</b> right of <b>{tally.answered}</b> answered
+        {tally.unanswered ? <span className="mk-row-left"> · {tally.unanswered} unanswered</span> : null}
+      </span>
+      <span className={cx('mk-row-pct sj-num', tally.percent === null && 'none')}>
+        {tally.percent === null ? 'No answers' : percentText(tally)}
+      </span>
+    </li>
   );
 }
 
-function SubjectCard({ subject }: { subject: SubjectResult }) {
-  const t = subject.tally;
-  const width = (n: number) => `${t.questions ? (100 * n) / t.questions : 0}%`;
+/** The whole result in one card that grows with the subjects sat, never a grid of half-empty boxes. */
+function ResultCard({ report }: { report: Report }) {
+  const o = report.overall;
+  const many = report.subjects.length > 1;
   return (
-    <div className="sj-card mk-subcard">
-      <div className="mk-subcard-head">
-        <h3 className="sj-display sj-h3">{subject.name}</h3>
-        <span className="sj-num mk-subcard-pct">{percentText(t)}</span>
-      </div>
-      <div className="mk-bar" aria-hidden="true">
-        <span className="right" style={{ width: width(t.correct) }} />
-        <span className="wrong" style={{ width: width(t.wrong) }} />
-      </div>
-      <TallyLine tally={t} />
+    <div className="sj-card mk-result">
+      <ul className="mk-result-stats">
+        <li>
+          <b className="sj-num">{o.questions}</b>
+          <small>questions</small>
+        </li>
+        <li className="right">
+          <b className="sj-num">{o.correct}</b>
+          <small>right</small>
+        </li>
+        <li className="wrong">
+          <b className="sj-num">{o.wrong}</b>
+          <small>wrong</small>
+        </li>
+        <li className="left">
+          <b className="sj-num">{o.unanswered}</b>
+          <small>unanswered</small>
+        </li>
+      </ul>
+      <ul className="mk-rows">
+        {report.subjects.map((subject) => (
+          <ResultRow key={subject.subject_id} name={subject.name} tally={subject.tally} />
+        ))}
+        {many ? <ResultRow name="All subjects" tally={o} total /> : null}
+      </ul>
+      <p className="mk-result-foot">
+        <span className="key right" /> Right <span className="key wrong" /> Wrong <span className="key left" /> Unanswered
+        <span className="mk-result-rule">Score = right ÷ answered. Questions you left are unanswered, not wrong.</span>
+      </p>
     </div>
   );
 }
@@ -211,10 +238,7 @@ export function MockReport() {
     return (
       <div className="sj-page mk-page">
         <Skeleton height={220} />
-        <div className="mk-subgrid">
-          <Skeleton height={130} />
-          <Skeleton height={130} />
-        </div>
+        <Skeleton height={200} />
       </div>
     );
   }
@@ -268,38 +292,7 @@ export function MockReport() {
       />
 
       <section className="mk-section">
-        <div className="mk-overall sj-card">
-          <div>
-            <span className="sj-eyebrow">Overall</span>
-            <TallyLine tally={report.overall} />
-          </div>
-          <ul className="mk-overall-stats">
-            <li>
-              <b className="sj-num">{report.overall.questions}</b>
-              <small>questions</small>
-            </li>
-            <li>
-              <b className="sj-num">{report.overall.correct}</b>
-              <small>right</small>
-            </li>
-            <li>
-              <b className="sj-num">{report.overall.wrong}</b>
-              <small>wrong</small>
-            </li>
-            <li>
-              <b className="sj-num">{report.overall.unanswered}</b>
-              <small>unanswered</small>
-            </li>
-          </ul>
-        </div>
-        <div className="mk-subgrid">
-          {report.subjects.map((subject) => (
-            <SubjectCard key={subject.subject_id} subject={subject} />
-          ))}
-        </div>
-        <p className="sj-small sj-muted mk-footnote">
-          Scores are right ÷ answered. Questions you left are counted as unanswered, not wrong.
-        </p>
+        <ResultCard report={report} />
       </section>
 
       <section className="mk-section">

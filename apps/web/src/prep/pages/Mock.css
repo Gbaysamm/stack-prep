@@ -539,57 +539,103 @@
 }
 
 /* ---------------------------------------------------------------- report */
-.sj .mk-overall {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  flex-wrap: wrap;
-  margin-bottom: 14px;
+.sj .mk-result {
+  display: grid;
+  gap: 18px;
 }
-.sj .mk-overall-stats {
-  display: flex;
-  gap: 26px;
+/* Totals across the top, each with its colour. */
+.sj .mk-result-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.sj .mk-overall-stats li {
+.sj .mk-result-stats li {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: var(--r-sm);
+  background: var(--gray-50, #fafafc);
+  border-left: 4px solid var(--gray-300);
 }
-.sj .mk-overall-stats b {
-  font-size: 32px;
+.sj .mk-result-stats li.right {
+  border-left-color: var(--green-500);
 }
-.sj .mk-overall-stats small {
+.sj .mk-result-stats li.wrong {
+  border-left-color: var(--pink-500);
+}
+.sj .mk-result-stats li.left {
+  border-left-color: var(--gray-200);
+}
+.sj .mk-result-stats b {
+  font-size: 30px;
+  line-height: 1.05;
+  color: var(--ink-900);
+}
+.sj .mk-result-stats small {
   font-size: 12.5px;
   color: var(--gray-600);
 }
-.sj .mk-tally {
-  margin-top: 6px;
-  font-size: 14px;
+/* One row per subject: as many rows as subjects, all full width. */
+.sj .mk-rows {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .mk-row {
+  display: grid;
+  grid-template-columns: minmax(130px, 1.1fr) minmax(120px, 2fr) minmax(0, 1.6fr) 96px;
+  align-items: center;
+  gap: 8px 20px;
+  padding: 14px 0;
+  border-top: 1px solid var(--gray-100);
+}
+.sj .mk-row:first-child {
+  border-top: 0;
+}
+.sj .mk-row.total {
+  border-top: 1.5px solid var(--gray-200);
+}
+.sj .mk-row-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink-900);
+}
+.sj .mk-row.total .mk-row-name {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--purple-700);
+}
+.sj .mk-row-counts {
+  font-size: 13.5px;
   color: var(--gray-700);
 }
-.sj .mk-subgrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 14px;
+.sj .mk-row-counts b {
+  color: var(--ink-900);
 }
-.sj .mk-subcard-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
+.sj .mk-row-left {
+  color: var(--gray-500);
 }
-.sj .mk-subcard-pct {
-  font-size: 40px;
+.sj .mk-row-pct {
+  font-size: 30px;
+  text-align: right;
   color: var(--purple-700);
+}
+.sj .mk-row-pct.none {
+  font-family: var(--f-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-500);
 }
 .sj .mk-bar {
   display: flex;
   height: 10px;
-  margin-top: 14px;
   border-radius: var(--r-pill);
   overflow: hidden;
   background: var(--gray-100);
@@ -600,8 +646,59 @@
 .sj .mk-bar .wrong {
   background: var(--pink-500);
 }
-.sj .mk-footnote {
-  margin-top: 12px;
+.sj .mk-result-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px dashed var(--gray-200);
+  font-size: 12.5px;
+  color: var(--gray-600);
+}
+.sj .mk-result-foot .key {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--gray-100);
+  box-shadow: inset 0 0 0 1px var(--gray-200);
+}
+.sj .mk-result-foot .key.right {
+  background: var(--green-500);
+  box-shadow: none;
+}
+.sj .mk-result-foot .key.wrong {
+  background: var(--pink-500);
+  box-shadow: none;
+}
+.sj .mk-result-rule {
+  margin-left: auto;
+}
+@media (max-width: 640px) {
+  .sj .mk-result-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sj .mk-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 12px;
+  }
+  .sj .mk-row .mk-bar {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .sj .mk-row-counts {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+  .sj .mk-row-pct {
+    grid-row: 1;
+    grid-column: 2;
+    font-size: 24px;
+  }
+  .sj .mk-result-rule {
+    margin-left: 0;
+  }
 }
 .sj .mk-integrity h3 {
   margin-bottom: 8px;
@@ -796,12 +893,6 @@
   }
   .sj .mk-presets {
     grid-template-columns: 1fr;
-  }
-  .sj .mk-overall-stats {
-    gap: 18px;
-  }
-  .sj .mk-overall-stats b {
-    font-size: 26px;
   }
   .sj .mk-hero-stat {
     align-items: flex-start;
