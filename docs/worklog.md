@@ -15,6 +15,34 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-13
 
+### Real UTME mock: JAMB's English layout and JAMB's pace
+- **What:**
+  - **Time:** the Real UTME preset gets 40 seconds a question, rounded up, so English
+    alone gets 40 min, English and one more subject 67 min, and all four 120 min. Custom
+    mocks keep the student's own time.
+  - **English order:** under the preset, Use of English is laid out in JAMB's order:
+    - comprehension passages (15);
+    - cloze passage (10);
+    - sentence interpretation (5);
+    - antonyms (5);
+    - synonyms (5);
+    - grammar (10);
+    - oral forms (10: 2 each of vowels, consonants, rhymes, word stress and emphatic
+      stress).
+
+    Passages come whole, in printed order, with unseen questions first.
+- **Why:** the founder pointed out that the real English paper has a set order and set
+  counts, and that fewer subjects should never get the full two hours.
+- **Where:** `routers/mock.py` (`UTME_ENGLISH_BLUEPRINT`, `utme_english_paper` and
+  `utme_minutes`), `MockSetup.tsx` and `MockHub.tsx`. The tests are in `test_mock.py`.
+- **Open:**
+  - Third-party guides differ by a question or two per part; there is no official JAMB
+    breakdown online.
+  - The bank has no questions yet on the approved reading text (5 in the real paper), so
+    comprehension stands in for them.
+- **Status:** committed locally. 17 mock tests pass, and a live English + Maths sitting got
+  67 minutes with the English parts in order.
+
 ### Mock setup: one slider for the time allowed
 - **What:** the stepper, the chips and the pace box are replaced by:
   - the chosen time shown large ("120 min · 2 hours");

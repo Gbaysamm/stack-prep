@@ -53,10 +53,126 @@ ANSWER_GRACE_SECONDS = 5
 #: Integrity events kept per mock, so a misbehaving page cannot fill the table.
 MAX_EVENTS_PER_MOCK = 2000
 
-#: The Real UTME preset: English 60 questions, every other subject 40, two hours.
+#: The Real UTME preset: English 60 questions, every other subject 40, two hours for all four.
 UTME_ENGLISH_QUESTIONS = 60
 UTME_OTHER_QUESTIONS = 40
 UTME_MINUTES = 120
+#: JAMB's pace: 180 questions in 120 minutes. A Real UTME mock with fewer subjects gets the time
+#: its questions would get in the real exam, never the whole two hours.
+UTME_SECONDS_PER_QUESTION = 40
+
+#: JAMB's Use of English paper in the order it is set, with how many questions each part has:
+#: (part, the JAMB topics it draws on, questions, whether it is read as passages). Third-party
+#: guides differ by a question or two per part; this is the most commonly published layout.
+#: The approved reading text's 5 questions are stood in for by comprehension until the bank
+#: holds questions on the current text.
+UTME_ENGLISH_BLUEPRINT: tuple[tuple[str, tuple[str, ...], int, bool], ...] = (
+    (
+        "Comprehension",
+        (
+            "Comprehension of a passage as a whole or in part",
+            "Comprehension of words, phrases, clauses, sentences, figures of speech and idioms "
+            "in context",
+            "Coherence and logical reasoning",
+            "Synthesis of ideas",
+            "Approved Reading Text",
+        ),
+        15,
+        True,
+    ),
+    ("Cloze", ("Cloze passage",), 10, True),
+    ("Sentence interpretation", ("Ordinary, figurative and idiomatic usage",), 5, False),
+    ("Antonyms", ("Antonyms",), 5, False),
+    ("Synonyms", ("Synonyms",), 5, False),
+    (
+        "Grammar",
+        (
+            "Clause and sentence patterns",
+            "Word classes and their functions",
+            "Mood, tense, aspect, number, concord, degree and question tags",
+            "Mechanics",
+        ),
+        10,
+        False,
+    ),
+    ("Vowels", ("Vowels (monophthongs, diphthongs and triphthongs)",), 2, False),
+    ("Consonants", ("Consonants (including clusters)",), 2, False),
+    ("Rhymes", ("Rhymes (including homophones)",), 2, False),
+    ("Word stress", ("Word stress (monosyllabic and polysyllabic)",), 2, False),
+    ("Emphatic stress", ("Emphatic stress (in connected speech)",), 2, False),
+)
+
+
+def utme_minutes(questions: int) -> int:
+    """The time a Real UTME sitting of this many questions gets, at JAMB's pace, rounded up."""
+    return max(1, math.ceil(questions * UTME_SECONDS_PER_QUESTION / 60))
+
+
+def _print_order(row: dict[str, Any]) -> tuple[int, str]:
+    number = str(row.get("question_number") or "")
+    digits = "".join(ch for ch in number if ch.isdigit())
+    return (int(digits) if digits else 10_000, number)
+
+
+def utme_english_paper(
+    pool: list[dict[str, Any]], rng: secrets.SystemRandom, size: int = UTME_ENGLISH_QUESTIONS
+) -> list[UUID]:
+    """A Use of English paper laid out the way JAMB sets it.
+
+    Each part in order, drawn from its topics, questions the student has not met first. A
+    passage comes whole, its questions in their printed order; when a passage has more
+    questions than the part has room for, its first ones are taken. Any part the bank cannot
+    fill is made up at the end from the rest of the subject, so the paper still has `size`.
+    """
+    used: set[Any] = set()
+    order: list[UUID] = []
+
+    def fresh_first(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        rows = list(rows)
+        rng.shuffle(rows)
+        return sorted(rows, key=lambda row: bool(row["seen"]))
+
+    for _, subtopics, count, passages in UTME_ENGLISH_BLUEPRINT:
+        names = set(subtopics)
+        candidates = [
+            row
+            for row in pool
+            if row["subtopic_name"] in names and row["question_version_id"] not in used
+        ]
+        left = count
+        if passages:
+            groups: dict[Any, list[dict[str, Any]]] = {}
+            for row in candidates:
+                groups.setdefault(row["passage_id"] or row["question_version_id"], []).append(row)
+            blocks = list(groups.values())
+            rng.shuffle(blocks)
+            blocks.sort(key=lambda block: any(row["seen"] for row in block))
+            # Whole passages while they fit; then the first questions of the smallest one left,
+            # to fill the last gap.
+            unused: list[list[dict[str, Any]]] = []
+            for block in blocks:
+                block = sorted(block, key=_print_order)
+                if len(block) <= left:
+                    order.extend(row["question_version_id"] for row in block)
+                    used.update(row["question_version_id"] for row in block)
+                    left -= len(block)
+                else:
+                    unused.append(block)
+            if left > 0 and unused:
+                block = min(unused, key=len)
+                order.extend(row["question_version_id"] for row in block[:left])
+                used.update(row["question_version_id"] for row in block[:left])
+        else:
+            for row in fresh_first(candidates)[:left]:
+                order.append(row["question_version_id"])
+                used.add(row["question_version_id"])
+
+    if len(order) < size:
+        rest = [row for row in pool if row["question_version_id"] not in used]
+        for row in fresh_first(rest)[: size - len(order)]:
+            order.append(row["question_version_id"])
+    return order[:size]
+
 
 EventKind = Literal[
     "fullscreen_enter",
@@ -841,7 +957,7 @@ async def start(
     subjects = await fetch_all(
         conn,
         """
-        SELECT s.id, s.examination_id, s.name,
+        SELECT s.id, s.examination_id, s.name, s.code, e.compulsory_subject_codes,
                coalesce(e.max_subjects, :max_subjects) AS max_subjects
         FROM subjects s JOIN examinations e ON e.id = s.examination_id
         WHERE s.id = ANY(CAST(:ids AS uuid[])) AND s.status = 'active'
@@ -859,10 +975,36 @@ async def start(
     if len(chosen) > min(int(subjects[0]["max_subjects"]), MAX_SUBJECTS):
         raise HTTPException(status_code=422, detail="That is more subjects than one sitting holds.")
     names = {row["id"]: row["name"] for row in subjects}
+    codes = {row["id"]: row["code"] for row in subjects}
+    compulsory = set(subjects[0]["compulsory_subject_codes"] or [])
 
     rng = secrets.SystemRandom()
     papers: list[tuple[UUID, list[UUID]]] = []
     for choice in body.subjects:
+        if body.preset == "utme" and codes.get(choice.subject_id) in compulsory:
+            pool = await fetch_all(
+                conn,
+                """
+                SELECT DISTINCT ON (dq.question_version_id)
+                       dq.question_version_id, dq.passage_id, q.question_number,
+                       sub.name AS subtopic_name,
+                       EXISTS (SELECT 1 FROM student_question_history h
+                                WHERE h.student_id = :student
+                                  AND h.question_id = dq.question_id) AS seen
+                FROM deliverable_questions dq
+                JOIN questions q ON q.id = dq.question_id AND q.usage_pool <> :pool
+                JOIN curriculum_items skill ON skill.id = dq.primary_skill_id
+                JOIN curriculum_items sub ON sub.id = skill.parent_id
+                WHERE dq.subject_id = :subject
+                """,
+                pool=EXCLUDED_POOL,
+                subject=choice.subject_id,
+                student=body.student_id,
+            )
+            laid_out = utme_english_paper(pool, rng, choice.questions)
+            if laid_out:
+                papers.append((choice.subject_id, laid_out))
+                continue
         picked = await fetch_all(
             conn,
             """
@@ -893,6 +1035,13 @@ async def start(
             )
         papers.append((choice.subject_id, shuffled_paper(picked, rng)))
 
+    # The Real UTME gets JAMB's time for the questions actually set; a custom mock, the
+    # student's own.
+    minutes = (
+        utme_minutes(sum(len(order) for _, order in papers))
+        if body.preset == "utme"
+        else body.minutes
+    )
     mock_id = (
         await conn.execute(
             text(
@@ -908,7 +1057,7 @@ async def start(
                 "student": body.student_id,
                 "exam": next(iter(exams)),
                 "preset": body.preset,
-                "minutes": body.minutes,
+                "minutes": minutes,
             },
         )
     ).scalar_one()
@@ -928,7 +1077,7 @@ async def start(
                 {
                     "student": body.student_id,
                     "subject": subject_id,
-                    "minutes": body.minutes,
+                    "minutes": minutes,
                     "items": len(order),
                     "engine": ENGINE_VERSION,
                     "mock": mock_id,

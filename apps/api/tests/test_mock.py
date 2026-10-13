@@ -7,6 +7,7 @@ answered. The subject in the fixture has three deliverable questions whose key i
 
 from __future__ import annotations
 
+import uuid
 from collections.abc import AsyncIterator
 from typing import Any
 
@@ -556,3 +557,43 @@ def test_topics_put_the_most_wrong_first() -> None:
         ("Vectors", 2, 0, 1, 1),
         ("Algebra", 2, 2, 0, 0),
     ]
+
+
+def test_a_real_utme_sitting_gets_jambs_time_for_its_questions() -> None:
+    """180 questions get two hours; fewer subjects never get the whole two hours."""
+    from app.routers.mock import utme_minutes
+
+    assert utme_minutes(180) == 120
+    assert utme_minutes(100) == 67
+    assert utme_minutes(60) == 40
+
+
+def test_real_utme_english_is_laid_out_in_jambs_order() -> None:
+    """Each part in order and at its size, passages whole and in printed order."""
+    import secrets
+
+    from app.routers.mock import UTME_ENGLISH_BLUEPRINT, utme_english_paper
+
+    pool: list[dict[str, Any]] = []
+    for part, subtopics, count, passages in UTME_ENGLISH_BLUEPRINT:
+        for n in range(count * 3):
+            pool.append(
+                {
+                    "question_version_id": uuid.uuid4(),
+                    "passage_id": f"{part}-{n // 5}" if passages else None,
+                    "question_number": str(n % 5 + 1),
+                    "subtopic_name": subtopics[0],
+                    "seen": False,
+                    "part": part,
+                }
+            )
+    part_of = {row["question_version_id"]: row for row in pool}
+    paper = utme_english_paper(pool, secrets.SystemRandom())
+    assert len(paper) == 60
+    parts = [part_of[version]["part"] for version in paper]
+    expected = [part for part, _, count, _ in UTME_ENGLISH_BLUEPRINT for _ in range(count)]
+    assert parts == expected
+    # A passage's questions sit together, in their printed order.
+    first = [part_of[version] for version in paper[:5]]
+    assert len({row["passage_id"] for row in first}) == 1
+    assert [row["question_number"] for row in first] == ["1", "2", "3", "4", "5"]

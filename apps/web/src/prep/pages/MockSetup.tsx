@@ -147,7 +147,8 @@ export function MockSetup() {
 
   const picked = chosen.map((id) => byId.get(id)).filter((s): s is MockSubjectOption => !!s);
   const total = picked.reduce((sum, s) => sum + countFor(s), 0);
-  const time = preset === 'utme' ? (options?.utme.minutes ?? 120) : minutes;
+  // Real UTME: JAMB's own pace for the questions set, so fewer subjects get less time.
+  const time = preset === 'utme' ? Math.max(1, Math.ceil((total * SECONDS_PER_QUESTION) / 60)) : minutes;
   const suggested = Math.max(5, Math.round((total * SECONDS_PER_QUESTION) / 60 / 5) * 5);
   const max = exam?.max_subjects ?? 4;
 
@@ -292,7 +293,8 @@ export function MockSetup() {
                 <strong>Real UTME</strong>
                 <span>
                   {options.utme.subjects} subjects. English {options.utme.english_questions} questions, the others{' '}
-                  {options.utme.other_questions} each. {minutesText(options.utme.minutes)}.
+                  {options.utme.other_questions} each, in JAMB's order. {minutesText(options.utme.minutes)} for four
+                  subjects, less for fewer.
                 </span>
               </button>
               <button type="button" role="radio" aria-checked={preset === 'custom'} className={cx('mk-preset', preset === 'custom' && 'on')} onClick={() => choosePreset('custom')}>

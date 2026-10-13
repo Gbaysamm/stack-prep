@@ -13,7 +13,7 @@ import { Button, Dialog, Empty, PageHero, Pager, Skeleton, Steps, cx, usePaged, 
 import './Mock.css';
 
 const STEPS = [
-  { title: 'Set it up', body: 'Up to four subjects, how many questions each, and how long. Or take the Real UTME: 180 questions in 2 hours.' },
+  { title: 'Set it up', body: 'Up to four subjects, how many questions each, and how long. Or take the Real UTME: JAMB’s layout and pace, 180 questions in 2 hours for four subjects.' },
   { title: 'Sit it, start to finish', body: 'Full screen, no hints and no coach. A calculator when you need one. At 0:00 it hands itself in.' },
   { title: 'See where you stand', body: 'Your score in each subject and overall, every question with its answer, and the questions you left.' },
 ];
