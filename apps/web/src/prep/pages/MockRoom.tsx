@@ -161,25 +161,34 @@ function Exam({ paper }: { paper: MockPaper }) {
   };
 
   /* ---------------------------------------------------------------- time on each question */
-  const shownAt = useRef(Date.now());
+  // A question's time is how long it was actually on screen, summed across visits. The count
+  // runs only while the paper is in view: it pauses while the tab is hidden, while the
+  // full-screen gate, the Submit dialog or the palette covers the paper, and once finishing.
+  // `openSince` is when the current stretch began, or null while paused.
+  const openSince = useRef<number | null>(null);
   const shownId = useRef(question.question_version_id);
-  useEffect(() => {
-    const previous = shownId.current;
-    const spent = Date.now() - shownAt.current;
-    if (previous !== question.question_version_id) {
-      setSheet((current) => {
-        const mark = current[previous];
-        return mark ? { ...current, [previous]: { ...mark, ms: mark.ms + spent } } : current;
-      });
-    }
-    shownId.current = question.question_version_id;
-    shownAt.current = Date.now();
-  }, [question.question_version_id]);
+  /** Close the current stretch: add it to the shown question. Returns that question, if any. */
+  const bankTime = useCallback((): string | null => {
+    const since = openSince.current;
+    openSince.current = null;
+    if (since === null) return null;
+    const spent = Math.round(Date.now() - since);
+    const id = shownId.current;
+    const mark = sheetRef.current[id];
+    if (spent <= 0 || !mark) return null;
+    sheetRef.current = { ...sheetRef.current, [id]: { ...mark, ms: mark.ms + spent } };
+    setSheet((current) => {
+      const now = current[id];
+      return now ? { ...current, [id]: { ...now, ms: now.ms + spent } } : current;
+    });
+    return id;
+  }, []);
 
-  /** The sheet as it would be saved now, with the open question's time counted in. */
+  /** The sheet as it would be saved now, with the open question's running stretch counted in. */
   const entry = useCallback((id: string): AnswerSave => {
     const mark = sheetRef.current[id]!;
-    const extra = id === shownId.current ? Date.now() - shownAt.current : 0;
+    const since = openSince.current;
+    const extra = id === shownId.current && since !== null ? Date.now() - since : 0;
     return { question_version_id: id, selected_option_key: mark.choice, flagged: mark.flagged, response_ms: Math.round(mark.ms + extra) };
   }, []);
 
@@ -257,8 +266,10 @@ function Exam({ paper }: { paper: MockPaper }) {
   }, [flushEvents]);
 
   const [awayNotice, setAwayNotice] = useState(false);
+  const [visible, setVisible] = useState(() => document.visibilityState !== 'hidden');
   useEffect(() => {
     const onVisibility = () => {
+      setVisible(document.visibilityState !== 'hidden');
       if (document.visibilityState === 'hidden') {
         log('tab_hidden');
         flushEvents();
@@ -394,6 +405,23 @@ function Exam({ paper }: { paper: MockPaper }) {
   const keysRef = useRef({ next, previous, choose, flag });
   keysRef.current = { next, previous, choose, flag };
   const blocked = gateOpen || confirming || !!finishing || paletteOpen;
+
+  // The question's clock runs while it is open and in view. Each time it stops (the student
+  // moves on, the tab hides, a dialog opens) the stretch is added to that question and the new
+  // total is saved, so a closed tab or the server's own submission still has the time.
+  const timing = visible && !blocked;
+  useEffect(() => {
+    shownId.current = question.question_version_id;
+    if (timing) openSince.current = Date.now();
+    return () => {
+      const id = bankTime();
+      if (id === null || finishingRef.current) return;
+      version.current += 1;
+      dirty.current.set(id, version.current);
+      window.clearTimeout(saveTimer.current);
+      saveTimer.current = window.setTimeout(() => void flushAnswers(), SAVE_DEBOUNCE_MS);
+    };
+  }, [bankTime, flushAnswers, question.question_version_id, timing]);
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (blocked || event.ctrlKey || event.metaKey || event.altKey) return;

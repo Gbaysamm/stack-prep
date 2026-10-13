@@ -15,6 +15,19 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-13
 
+### Mock room: time per question counts only time the question is in view
+- **What:**
+  - a question's time is now the time it was open and visible, summed across visits;
+  - the count pauses while the tab is hidden, and while the full-screen gate, the Submit
+    dialog or the palette covers the paper;
+  - leaving a question (or pausing) saves its new total straight away, so the time survives
+    a closed tab or the server submitting on the clock. Before, time was only saved with an
+    answer or a flag, and hidden-tab time was counted.
+- **Why:** the mock report now shows time per subject, per question and pace; the numbers
+  must be honest.
+- **Where:** `apps/web/src/prep/pages/MockRoom.tsx` (`bankTime`, the `timing` effect).
+- **Status:** done on branch `mock-insights`, not merged.
+
 ### Mock report API: each question's topic and time, each subject's topics
 - **What:**
   - report items carry `response_ms` (time the question was open in the room), and its JAMB
