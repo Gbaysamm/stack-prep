@@ -44,6 +44,8 @@ export interface StartMockIn {
 export interface PaperOption {
   option_key: string;
   body: string;
+  /** Why this wrong option tempts; only in a report. */
+  why?: string | null;
 }
 
 export interface PaperQuestion {
@@ -128,6 +130,8 @@ export interface ReportItem {
   correct_option_key: string | null;
   flagged: boolean;
   outcome: 'right' | 'wrong' | 'unanswered';
+  /** The reviewed working, step by step. */
+  solution_steps: string[];
 }
 
 export interface SubjectResult {

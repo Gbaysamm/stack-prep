@@ -15,6 +15,34 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-13
 
+### Mock report: question grids, a question modal, and the lesson from the report
+- **What:**
+  - "Every question" is now one grid per subject. Cells are green (right), pink (wrong) or
+    white (not answered), with a yellow dot for flagged.
+  - Tapping a number opens a modal with:
+    - the question, your answer, the correct answer, and why your choice tempts (when the
+      option has a note);
+    - the reviewed working, step by step;
+    - "Watch the lesson", which opens the full board lesson;
+    - ← → (buttons and keys) to move through the whole paper across subjects, and Esc to
+      close.
+  - On phone the modal is a bottom sheet.
+  - The old long list with subject tabs, filters and paging is gone.
+- **API:**
+  - report items carry `solution_steps`, and each wrong option carries `why` (its distractor
+    note or misconception);
+  - a submitted mock's questions open their lesson through the practice lesson endpoints,
+    using that subject's mock session.
+- **Why:** the founder found the old list hard to navigate and asked for a grid with clues
+  and a modal with the answer, the explanation and the lesson.
+- **Where:** `apps/web/src/prep/pages/MockReport.tsx`, `Mock.css`, `routers/mock.py`, and
+  `routers/practice.py` (`_in_a_finished_mock`).
+- **Status:**
+  - committed locally;
+  - 446 API tests pass, including a new test that the lesson opens only once the mock is
+    handed in;
+  - checked at 1440 and 390.
+
 ### Mock report: a slim "Test conditions" line
 - **What:** the card is now one row:
   - the title;

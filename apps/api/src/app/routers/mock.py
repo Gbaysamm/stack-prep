@@ -127,6 +127,8 @@ class StartMock(BaseModel):
 class PaperOption(BaseModel):
     option_key: str
     body: str
+    #: Why this wrong option tempts. Only in a submitted mock's report.
+    why: str | None = None
 
 
 class PaperQuestion(BaseModel):
@@ -222,6 +224,8 @@ class ReportItem(BaseModel):
     correct_option_key: str | None
     flagged: bool
     outcome: Outcome
+    #: The reviewed working, step by step. Only in a submitted mock's report.
+    solution_steps: list[str] = Field(default_factory=list)
 
 
 class SubjectResult(BaseModel):
@@ -491,6 +495,12 @@ async def _sheet(
     if not with_items or not subjects:
         return by_mock
 
+    why_column = (
+        "CASE WHEN o.is_correct THEN NULL ELSE coalesce(o.distractor_note, m.description) END"
+        if with_keys
+        else "NULL"
+    )
+    steps_column = "v.solution_steps" if with_keys else "'[]'::jsonb"
     key_column = (
         """(SELECT min(k.option_key) FROM question_options k
              WHERE k.question_version_id = i.question_version_id AND k.is_correct)"""
@@ -504,11 +514,14 @@ async def _sheet(
                i.flagged, i.response_ms, v.stem, v.instructions, v.passage_id,
                pg.title AS passage_title, pg.body AS passage_body,
                {key_column} AS correct_option_key,
+               {steps_column} AS solution_steps,
                coalesce((
                  SELECT jsonb_agg(jsonb_build_object('option_key', o.option_key,
-                                                     'body', o.body)
+                                                     'body', o.body, 'why', {why_column})
                                   ORDER BY o.display_order, o.option_key)
-                 FROM question_options o WHERE o.question_version_id = i.question_version_id
+                 FROM question_options o
+                 LEFT JOIN misconceptions m ON m.id = o.misconception_id
+                 WHERE o.question_version_id = i.question_version_id
                ), '[]'::jsonb) AS options
         FROM mock_exam_items i
         JOIN question_versions v ON v.id = i.question_version_id
@@ -571,6 +584,7 @@ def _subject_result(row: dict[str, Any], *, with_items: bool) -> SubjectResult:
                     correct_option_key=key,
                     flagged=item["flagged"],
                     outcome=outcome,
+                    solution_steps=[str(step) for step in (item["solution_steps"] or [])],
                 )
             )
     return SubjectResult(

@@ -2190,6 +2190,25 @@ async def _answered_right(conn: AsyncConnection, session_id: UUID, version_id: U
     return latest is not None and bool(latest["is_correct"])
 
 
+async def _in_a_finished_mock(conn: AsyncConnection, session_id: UUID, version_id: UUID) -> bool:
+    """A question on a mock exam that has been handed in: its lesson opens from the report."""
+    found = (
+        await conn.execute(
+            text(
+                """
+                SELECT 1
+                FROM mock_exam_items i
+                JOIN mock_exams m ON m.id = i.mock_exam_id
+                WHERE i.session_id = :session AND i.question_version_id = :version
+                  AND m.submitted_at IS NOT NULL
+                """
+            ),
+            {"session": session_id, "version": version_id},
+        )
+    ).first()
+    return found is not None
+
+
 async def _lesson_is_open(
     conn: AsyncConnection, session_id: UUID, version_id: UUID, *, whole: bool
 ) -> None:
@@ -2200,6 +2219,8 @@ async def _lesson_is_open(
     it too.
     """
     if await _answered_right(conn, session_id, version_id):
+        return
+    if await _in_a_finished_mock(conn, session_id, version_id):
         return
     if whole:
         await _must_be_at_the_board(conn, session_id, version_id)
@@ -2253,10 +2274,15 @@ async def _narration(
     the same mistake hears the same lesson without it being written again. Returns the
     narration, the reviewed steps it was written over, and where it came from.
     """
-    session = await _session(conn, session_id)
-    lesson = await _lesson_on_the_board(
-        conn, session_id, session["student_id"], version_id, None, settings
-    )
+    # Any sitting the student owns: a practice run, or a mock exam's subject once handed in.
+    student_id = (
+        await conn.execute(
+            text("SELECT student_id FROM study_sessions WHERE id = :id"), {"id": session_id}
+        )
+    ).scalar()
+    if student_id is None:
+        raise HTTPException(status_code=404, detail="unknown session")
+    lesson = await _lesson_on_the_board(conn, session_id, student_id, version_id, None, settings)
     chose, misconception = await _mistake(conn, session_id, version_id, first=True)
     lesson = dataclasses.replace(lesson, chose=chose, misconception=misconception)
     key = hashlib.sha256(

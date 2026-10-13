@@ -411,3 +411,24 @@ async def test_another_student_cannot_read_the_paper(
         )
     response = await client.get(f"/v1/mock/{paper['mock_id']}")
     assert response.status_code == 401
+
+
+async def test_the_report_explains_and_opens_the_lesson_once_handed_in(
+    client: httpx.AsyncClient,  # noqa: F811
+    ids: dict[str, str],
+) -> None:
+    """Each question on the report carries its working, and its lesson opens from the report."""
+    paper = await start(client, ids)
+    subject = paper["subjects"][0]
+    question = subject["questions"][0]
+    lesson_url = f"/v1/practice/{subject['session_id']}/lesson/{question['question_version_id']}"
+    assert (await client.get(lesson_url)).status_code == 409
+
+    response = await client.post(f"/v1/mock/{paper['mock_id']}/submit", json={"answers": []})
+    assert response.status_code == 200, response.text
+    [item, *_] = response.json()["subjects"][0]["items"]
+    assert item["solution_steps"], "the reviewed working comes with the report"
+    assert all("why" in option for option in item["options"])
+
+    opened = await client.get(lesson_url)
+    assert opened.status_code == 200, opened.text

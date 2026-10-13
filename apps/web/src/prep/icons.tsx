@@ -77,6 +77,7 @@ export const IconArrowLeft = make(
   </>,
 );
 export const IconChevronRight = make(<path d="m9 6 6 6-6 6" />);
+export const IconChevronLeft = make(<path d="m15 6-6 6 6 6" />);
 export const IconChevronDown = make(<path d="m6 9 6 6 6-6" />);
 export const IconClose = make(
   <>
