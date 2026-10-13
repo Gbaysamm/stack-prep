@@ -15,6 +15,22 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-13
 
+### Real UTME English: a passage is never cut
+- **What:**
+  - The comprehension and cloze parts now use whole passages only, choosing the mix of
+    passages whose total comes nearest the usual count (15 and 10). Exact is best.
+    Otherwise the nearest total is used: a shortfall before an excess, and unseen passages
+    first.
+  - Whatever that leaves of the 60 is shared across the other parts in proportion to their
+    usual sizes. For example, two 8-question passages give comprehension 16, so the other
+    parts give up 1 between them.
+- **Why:** the founder ruled that a passage must always be used completely, and that the
+  difference should be made up by the other sections.
+- **Where:** `routers/mock.py` (`nearest_whole_passages`, `share_out`,
+  `utme_english_paper`), with a test in `test_mock.py`.
+- **Status:** committed locally. 18 mock tests pass, and three live papers each used 4
+  whole passages, none cut, 60 questions.
+
 ### Real UTME mock: JAMB's English layout and JAMB's pace
 - **What:**
   - **Time:** the Real UTME preset gets 40 seconds a question, rounded up, so English
@@ -30,7 +46,8 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
     - oral forms (10: 2 each of vowels, consonants, rhymes, word stress and emphatic
       stress).
 
-    Passages come whole, in printed order, with unseen questions first.
+    Passages come whole, in printed order, with unseen questions first. (Superseded the same
+    day: see "a passage is never cut" above.)
 - **Why:** the founder pointed out that the real English paper has a set order and set
   counts, and that fewer subjects should never get the full two hours.
 - **Where:** `routers/mock.py` (`UTME_ENGLISH_BLUEPRINT`, `utme_english_paper` and

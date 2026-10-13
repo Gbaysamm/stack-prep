@@ -597,3 +597,44 @@ def test_real_utme_english_is_laid_out_in_jambs_order() -> None:
     first = [part_of[version] for version in paper[:5]]
     assert len({row["passage_id"] for row in first}) == 1
     assert [row["question_number"] for row in first] == ["1", "2", "3", "4", "5"]
+
+
+def test_real_utme_english_never_cuts_a_passage() -> None:
+    """Passages of 8 and a cloze of 12: whole passages, and the other parts give way."""
+    import secrets
+
+    from app.routers.mock import UTME_ENGLISH_BLUEPRINT, utme_english_paper
+
+    sizes = {"Comprehension": 8, "Cloze": 12}
+    pool: list[dict[str, Any]] = []
+    for part, subtopics, count, passages in UTME_ENGLISH_BLUEPRINT:
+        for n in range(count * 4):
+            size = sizes.get(part, 1)
+            pool.append(
+                {
+                    "question_version_id": uuid.uuid4(),
+                    "passage_id": f"{part}-{n // size}" if passages else None,
+                    "question_number": str(n % size + 1),
+                    "subtopic_name": subtopics[0],
+                    "seen": False,
+                    "part": part,
+                }
+            )
+    by_version = {row["question_version_id"]: row for row in pool}
+    paper = utme_english_paper(pool, secrets.SystemRandom())
+    assert len(paper) == 60
+    picked = [by_version[version] for version in paper]
+    passages: dict[str, int] = {}
+    for row in picked:
+        if row["passage_id"]:
+            passages[row["passage_id"]] = passages.get(row["passage_id"], 0) + 1
+    # Every passage used is used whole.
+    assert set(passages.values()) <= {8, 12}
+    parts = [row["part"] for row in picked]
+    assert parts.count("Comprehension") == 16  # two whole passages: nearest 15
+    assert parts.count("Cloze") == 12  # one whole passage: nearest 10
+    # The other parts share what is left: 60 - 28 = 32 instead of their usual 35.
+    assert len(parts) - parts.count("Comprehension") - parts.count("Cloze") == 32
+    # Still in JAMB's order.
+    order = [part for part, *_ in UTME_ENGLISH_BLUEPRINT]
+    assert parts == sorted(parts, key=order.index)

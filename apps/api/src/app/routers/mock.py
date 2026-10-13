@@ -65,7 +65,7 @@ UTME_SECONDS_PER_QUESTION = 40
 #: (part, the JAMB topics it draws on, questions, whether it is read as passages). Third-party
 #: guides differ by a question or two per part; this is the most commonly published layout.
 #: The approved reading text's 5 questions are stood in for by comprehension until the bank
-#: holds questions on the current text.
+#: holds questions on the current text. Passages are never cut: see `utme_english_paper`.
 UTME_ENGLISH_BLUEPRINT: tuple[tuple[str, tuple[str, ...], int, bool], ...] = (
     (
         "Comprehension",
@@ -114,63 +114,133 @@ def _print_order(row: dict[str, Any]) -> tuple[int, str]:
     return (int(digits) if digits else 10_000, number)
 
 
+def whole_passages(
+    blocks: list[list[dict[str, Any]]], target: int
+) -> list[list[dict[str, Any]]] | None:
+    """Whole passages adding up to exactly `target`, preferring those earlier in `blocks`.
+
+    A small depth-first search: the bank holds a few dozen passages per part, and the first
+    exact mix found, in preference order, is the one used. None when no mix adds up.
+    """
+    best: list[int] | None = None
+    sizes = [len(block) for block in blocks]
+    limit = [0]
+
+    def walk(start: int, left: int, picked: list[int]) -> bool:
+        limit[0] += 1
+        if left == 0:
+            nonlocal best
+            best = list(picked)
+            return True
+        if limit[0] > 20_000:
+            return False
+        for index in range(start, len(blocks)):
+            if sizes[index] <= left:
+                picked.append(index)
+                if walk(index + 1, left - sizes[index], picked):
+                    return True
+                picked.pop()
+        return False
+
+    walk(0, target, [])
+    return None if best is None else [blocks[index] for index in best]
+
+
+def nearest_whole_passages(
+    blocks: list[list[dict[str, Any]]], target: int
+) -> list[list[dict[str, Any]]]:
+    """Whole passages whose questions add up as near to `target` as the bank allows.
+
+    A passage is never cut. Exactly `target` is best; otherwise the nearest total, a shortfall
+    before an excess when they are equally near. Among mixes with the same total, passages
+    earlier in `blocks` (unseen ones, in this sitting's random order) are preferred.
+    """
+    ceiling = target + max(len(block) for block in blocks) if blocks else 0
+    # reach[t] = the first-found list of block indices adding up to t.
+    reach: dict[int, list[int]] = {0: []}
+    for index, block in enumerate(blocks):
+        size = len(block)
+        for total, picked in sorted(reach.items(), reverse=True):
+            new = total + size
+            if new <= ceiling and new not in reach:
+                reach[new] = [*picked, index]
+    best = min(reach, key=lambda total: (abs(total - target), total > target))
+    return [blocks[index] for index in reach[best]]
+
+
+def share_out(total: int, weights: list[int]) -> list[int]:
+    """`total` split across parts in proportion to `weights`, largest remainders first."""
+    whole = sum(weights)
+    if total <= 0 or whole <= 0:
+        return [0] * len(weights)
+    exact = [total * weight / whole for weight in weights]
+    counts = [math.floor(value) for value in exact]
+    for index in sorted(range(len(weights)), key=lambda i: exact[i] - counts[i], reverse=True)[
+        : total - sum(counts)
+    ]:
+        counts[index] += 1
+    return counts
+
+
 def utme_english_paper(
     pool: list[dict[str, Any]], rng: secrets.SystemRandom, size: int = UTME_ENGLISH_QUESTIONS
 ) -> list[UUID]:
     """A Use of English paper laid out the way JAMB sets it.
 
-    Each part in order, drawn from its topics, questions the student has not met first. A
-    passage comes whole, its questions in their printed order; when a passage has more
-    questions than the part has room for, its first ones are taken. Any part the bank cannot
-    fill is made up at the end from the rest of the subject, so the paper still has `size`.
+    The passage parts come first and always whole: each takes the mix of whole passages
+    nearest its usual count, so it may land a question or two over or under. Whatever that
+    leaves of `size` is shared across the other parts in proportion to their usual counts,
+    so the paper always has `size` questions. Within a part, questions the student has not
+    met come first, and a passage keeps its questions in their printed order. A part the
+    bank cannot fill is made up at the end from the rest of the subject.
     """
     used: set[Any] = set()
-    order: list[UUID] = []
 
     def fresh_first(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
         rows = list(rows)
         rng.shuffle(rows)
         return sorted(rows, key=lambda row: bool(row["seen"]))
 
-    for _, subtopics, count, passages in UTME_ENGLISH_BLUEPRINT:
+    def candidates(subtopics: tuple[str, ...]) -> list[dict[str, Any]]:
         names = set(subtopics)
-        candidates = [
+        return [
             row
             for row in pool
             if row["subtopic_name"] in names and row["question_version_id"] not in used
         ]
-        left = count
-        if passages:
-            groups: dict[Any, list[dict[str, Any]]] = {}
-            for row in candidates:
-                groups.setdefault(row["passage_id"] or row["question_version_id"], []).append(row)
-            blocks = list(groups.values())
-            rng.shuffle(blocks)
-            blocks.sort(key=lambda block: any(row["seen"] for row in block))
-            # Whole passages while they fit; then the first questions of the smallest one left,
-            # to fill the last gap.
-            unused: list[list[dict[str, Any]]] = []
-            for block in blocks:
-                block = sorted(block, key=_print_order)
-                if len(block) <= left:
-                    order.extend(row["question_version_id"] for row in block)
-                    used.update(row["question_version_id"] for row in block)
-                    left -= len(block)
-                else:
-                    unused.append(block)
-            if left > 0 and unused:
-                block = min(unused, key=len)
-                order.extend(row["question_version_id"] for row in block[:left])
-                used.update(row["question_version_id"] for row in block[:left])
-        else:
-            for row in fresh_first(candidates)[:left]:
-                order.append(row["question_version_id"])
-                used.add(row["question_version_id"])
 
+    scale = size / UTME_ENGLISH_QUESTIONS
+    parts: list[list[UUID]] = [[] for _ in UTME_ENGLISH_BLUEPRINT]
+
+    # 1. The passage parts, in whole passages.
+    for index, (_, subtopics, count, passages) in enumerate(UTME_ENGLISH_BLUEPRINT):
+        if not passages:
+            continue
+        groups: dict[Any, list[dict[str, Any]]] = {}
+        for row in candidates(subtopics):
+            groups.setdefault(row["passage_id"] or row["question_version_id"], []).append(row)
+        blocks = list(groups.values())
+        rng.shuffle(blocks)
+        blocks.sort(key=lambda block: any(row["seen"] for row in block))
+        blocks = [sorted(block, key=_print_order) for block in blocks]
+        for block in nearest_whole_passages(blocks, round(count * scale)):
+            parts[index].extend(row["question_version_id"] for row in block)
+            used.update(row["question_version_id"] for row in block)
+
+    # 2. The rest of the paper, shared across the other parts by their usual sizes.
+    others = [i for i, part in enumerate(UTME_ENGLISH_BLUEPRINT) if not part[3]]
+    room = size - sum(len(part) for part in parts)
+    for index, share in zip(
+        others, share_out(room, [UTME_ENGLISH_BLUEPRINT[i][2] for i in others]), strict=True
+    ):
+        for row in fresh_first(candidates(UTME_ENGLISH_BLUEPRINT[index][1]))[:share]:
+            parts[index].append(row["question_version_id"])
+            used.add(row["question_version_id"])
+
+    order = [version for part in parts for version in part]
     if len(order) < size:
         rest = [row for row in pool if row["question_version_id"] not in used]
-        for row in fresh_first(rest)[: size - len(order)]:
-            order.append(row["question_version_id"])
+        order.extend(row["question_version_id"] for row in fresh_first(rest)[: size - len(order)])
     return order[:size]
 
 
