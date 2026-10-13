@@ -132,6 +132,23 @@ export interface ReportItem {
   outcome: 'right' | 'wrong' | 'unanswered';
   /** The reviewed working, step by step. */
   solution_steps: string[];
+  /** Time the question was visibly open in the room, summed across visits. */
+  response_ms: number;
+  /** The JAMB topic (the curriculum's subtopic) it tests; null when not classified. */
+  subtopic_id: string | null;
+  subtopic_name: string | null;
+  /** The syllabus section the topic sits in. */
+  topic_name: string | null;
+}
+
+export interface TopicResult {
+  subtopic_id: string;
+  name: string;
+  topic_name: string | null;
+  questions: number;
+  correct: number;
+  wrong: number;
+  unanswered: number;
 }
 
 export interface SubjectResult {
@@ -141,6 +158,10 @@ export interface SubjectResult {
   name: string;
   tally: Tally;
   items: ReportItem[];
+  /** Time the subject's questions were open, summed; only in a report. */
+  time_ms: number;
+  /** The subject's topics, most wrong first; only in a report. */
+  topics: TopicResult[];
 }
 
 export interface Integrity {

@@ -1,31 +1,36 @@
 /**
- * /mock/:mockId/report — how a mock went: overall and per subject as right ÷ answered, with
- * the unanswered counted apart (never as wrong); how the time was used; the integrity log
- * (full screen left, tabs switched); then every question with the student's answer and the key.
+ * /mock/:mockId/report — how a mock went, as insights. The hero is the summary: the overall score
+ * (right ÷ answered; a skipped question is never wrong), each subject beside it, the counts and
+ * the time. Then the test conditions, what to do next, subject by subject, the topics that went
+ * wrong, where the time went, the trend across mocks, the topic breakdown, and every question
+ * as a grid that opens each one with its answer, the working and the lesson.
  */
 
-import { Suspense, lazy, useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams } from 'react-router-dom';
 
 import { Figures } from '../../Figures.js';
 import { Maths } from '../../Maths.js';
 import { api, type NarratedLesson } from '../../student/api.js';
-import { IconArrowRight, IconCheck, IconChevronLeft, IconChevronRight, IconClose, IconPlay } from '../icons.js';
-import {
-  clock,
-  mockApi,
-  percentText,
-  type EventKind,
-  type MockReport as Report,
-  type SubjectResult,
-  type Tally,
-} from '../mockApi.js';
+import { IconCheck, IconChevronLeft, IconChevronRight, IconClose, IconPlay } from '../icons.js';
+import { nextSteps, previousOf, timeStats, trendOf, weakTopics } from '../mock/insights.js';
+import { clock, mockApi, type EventKind, type MockReport as Report, type SubjectResult } from '../mockApi.js';
 import { orGone } from '../runsApi.js';
-import { useLoad, usePageTitle } from '../store.js';
-import { Button, Empty, PageHero, Skeleton, cx } from '../ui.js';
-import { dateLabel } from './MockHub.js';
+import { useLoad, usePageTitle, useStudent } from '../store.js';
+import { Button, Empty, Skeleton, cx } from '../ui.js';
+import {
+  NextSteps,
+  Section,
+  SubjectTable,
+  SummaryHero,
+  TimeInsights,
+  TopicBreakdown,
+  Trend,
+  WeakAreas,
+} from './MockInsights.js';
 import './Mock.css';
+import './MockInsights.css';
 
 const EVENT_WORDS: Record<EventKind, string> = {
   fullscreen_enter: 'Entered full screen',
@@ -38,70 +43,6 @@ const EVENT_WORDS: Record<EventKind, string> = {
   paste_blocked: 'Tried to paste (blocked)',
   menu_blocked: 'Opened the right-click menu (blocked)',
 };
-
-/** One subject (or the total) as a row: name, a right/wrong/unanswered bar, counts, score. */
-function ResultRow({ name, tally, total }: { name: string; tally: Tally; total?: boolean }) {
-  const width = (n: number) => `${tally.questions ? (100 * n) / tally.questions : 0}%`;
-  return (
-    <li className={cx('mk-res', total && 'total')}>
-      <span className="mk-res-name">{name}</span>
-      <span
-        className="mk-bar"
-        role="img"
-        aria-label={`${tally.correct} right, ${tally.wrong} wrong, ${tally.unanswered} unanswered`}
-      >
-        <span className="right" style={{ width: width(tally.correct) }} />
-        <span className="wrong" style={{ width: width(tally.wrong) }} />
-      </span>
-      <span className="mk-res-counts">
-        <b>{tally.correct}</b> right of <b>{tally.answered}</b> answered
-        {tally.unanswered ? <span className="mk-res-left"> · {tally.unanswered} unanswered</span> : null}
-      </span>
-      <span className={cx('mk-res-pct sj-num', tally.percent === null && 'none')}>
-        {tally.percent === null ? 'No answers' : percentText(tally)}
-      </span>
-    </li>
-  );
-}
-
-/** The whole result in one card that grows with the subjects sat, never a grid of half-empty boxes. */
-function ResultCard({ report }: { report: Report }) {
-  const o = report.overall;
-  const many = report.subjects.length > 1;
-  return (
-    <div className="sj-card mk-result">
-      <ul className="mk-result-stats">
-        <li>
-          <b className="sj-num">{o.questions}</b>
-          <small>questions</small>
-        </li>
-        <li className="right">
-          <b className="sj-num">{o.correct}</b>
-          <small>right</small>
-        </li>
-        <li className="wrong">
-          <b className="sj-num">{o.wrong}</b>
-          <small>wrong</small>
-        </li>
-        <li className="left">
-          <b className="sj-num">{o.unanswered}</b>
-          <small>unanswered</small>
-        </li>
-      </ul>
-      <ul className="mk-rows">
-        {report.subjects.map((subject) => (
-          <ResultRow key={subject.subject_id} name={subject.name} tally={subject.tally} />
-        ))}
-        {many ? <ResultRow name="All subjects" tally={o} total /> : null}
-      </ul>
-      <p className="mk-result-foot">
-        <span className="key right" /> Right <span className="key wrong" /> Wrong <span className="key left" />{' '}
-        Unanswered
-        <span className="mk-result-rule">Score = right ÷ answered. Questions you left are unanswered, not wrong.</span>
-      </p>
-    </div>
-  );
-}
 
 /** The board is a large module and only a lesson needs it, so it loads when first opened. */
 const Board = lazy(() =>
@@ -343,26 +284,35 @@ function QuestionModal({
   );
 }
 
-function Review({ subjects }: { subjects: SubjectResult[] }) {
-  const [open, setOpen] = useState<{ s: number; i: number } | null>(null);
+function Review({ subjects, onOpen }: { subjects: SubjectResult[]; onOpen: (at: At) => void }) {
   return (
-    <section className="mk-section" id="mk-review">
-      <div className="mk-review-top">
-        <h2 className="sj-display sj-h3 mk-section-title">Every question</h2>
-        <p className="mk-review-key">
-          <span className="mk-qcell sample right">1</span> Right <span className="mk-qcell sample wrong">2</span> Wrong{' '}
-          <span className="mk-qcell sample unanswered">3</span> Not answered{' '}
-          <span className="mk-qcell sample unanswered flagged">4</span> Flagged
-        </p>
-      </div>
+    <Section
+      id="mk-review"
+      title="Every question"
+      note={
+        <span className="mk-review-key mi-key">
+          <span>
+            <span className="mk-qcell sample right">1</span> Right
+          </span>
+          <span>
+            <span className="mk-qcell sample wrong">2</span> Wrong
+          </span>
+          <span>
+            <span className="mk-qcell sample unanswered">3</span> Not answered
+          </span>
+          <span>
+            <span className="mk-qcell sample unanswered flagged">4</span> Flagged
+          </span>
+        </span>
+      }
+    >
       <p className="sj-small sj-muted mk-review-tip">Tap a number to see the answer, why, and the lesson.</p>
       <div className="mk-qgrids">
         {subjects.map((subject, s) => (
-          <QuestionGrid key={subject.subject_id} subject={subject} onOpen={(i) => setOpen({ s, i })} />
+          <QuestionGrid key={subject.subject_id} subject={subject} onOpen={(i) => onOpen({ s, i })} />
         ))}
       </div>
-      {open ? <QuestionModal subjects={subjects} at={open} onMove={setOpen} onClose={() => setOpen(null)} /> : null}
-    </section>
+    </Section>
   );
 }
 
@@ -477,42 +427,77 @@ export function MockReport() {
     );
   }
 
-  const used = Math.min(report.time_used_seconds, report.duration_minutes * 60);
+  return <Insights report={report} />;
+}
+
+type At = { s: number; i: number };
+
+function Insights({ report }: { report: Report }) {
+  const student = useStudent();
+  const history = useLoad(() => mockApi.history(student.studentId), [student.studentId, report.mock_id]);
+  const [open, setOpen] = useState<At | null>(null);
+  const time = useMemo(() => timeStats(report), [report]);
+  const weak = useMemo(() => weakTopics(report), [report]);
+  const previous = history.data ? previousOf(history.data, report) : null;
+  const points = history.data ? trendOf(history.data, report) : [];
+  const steps = nextSteps(report, time, weak, previous);
+  const answered = report.overall.answered > 0;
+  const many = report.subjects.length > 1;
+
   return (
-    <div className="sj-page mk-page">
-      <PageHero
-        back={{ to: '/mock', label: 'Mock exams' }}
-        eyebrow={`${report.preset === 'utme' ? 'Real UTME' : 'Mock exam'} · ${dateLabel(report.started_at)}`}
-        title="Your result"
-        sub={
-          report.auto_submitted
-            ? `Time ran out, so it was handed in for you. You used the full ${clock(report.duration_minutes * 60)}.`
-            : `Handed in after ${clock(used)} of ${clock(report.duration_minutes * 60)}.`
-        }
-        actions={
-          <Button to="/mock/new" tone="lime" trailing={<IconArrowRight size={18} />}>
-            Sit another
-          </Button>
-        }
-        aside={
-          <div className="mk-hero-stat">
-            <span className="sj-num">{percentText(report.overall)}</span>
-            <small>
-              {report.overall.correct} right of {report.overall.answered} answered
-            </small>
-          </div>
-        }
-      />
+    <div className="sj-page mk-page mi-page">
+      <SummaryHero report={report} previous={previous} />
 
-      <section className="mk-section">
-        <ResultCard report={report} />
-      </section>
+      <IntegrityPanel report={report} />
 
-      <section className="mk-section">
-        <IntegrityPanel report={report} />
-      </section>
+      <NextSteps steps={steps} />
 
-      <Review subjects={report.subjects} />
+      <Section id="mi-subjects" title="Subject by subject">
+        <SubjectTable report={report} time={time} />
+      </Section>
+
+      {answered ? (
+        <Section
+          id="mi-weak"
+          title="Topics to work on"
+          note={weak.length ? 'The topics with the most wrong answers in this mock.' : undefined}
+        >
+          {weak.length ? (
+            <WeakAreas weak={weak} many={many} />
+          ) : (
+            <div className="sj-card mi-clear">
+              <IconCheck size={18} />
+              <p>No wrong answers in this mock, so no topic needs fixing. Well done.</p>
+            </div>
+          )}
+        </Section>
+      ) : null}
+
+      <Section
+        id="mi-time"
+        title="Your time"
+        note={time.recorded ? 'Time each question was open on screen, added up across visits.' : undefined}
+      >
+        <TimeInsights report={report} time={time} onOpen={setOpen} />
+      </Section>
+
+      {history.data ? (
+        <Section id="mi-trend" title="Your progress">
+          <Trend report={report} points={points} previous={previous} />
+        </Section>
+      ) : null}
+
+      {answered ? (
+        <Section id="mi-topics" title="Topic by topic" note="Every topic this mock tested, weakest first.">
+          <TopicBreakdown report={report} />
+        </Section>
+      ) : null}
+
+      <Review subjects={report.subjects} onOpen={setOpen} />
+
+      {open ? (
+        <QuestionModal subjects={report.subjects} at={open} onMove={setOpen} onClose={() => setOpen(null)} />
+      ) : null}
     </div>
   );
 }

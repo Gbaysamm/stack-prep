@@ -15,6 +15,54 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-13
 
+### Mock report becomes an insights page
+- **What:**
+  - the hero is the summary: the overall score big (with the change on the last mock),
+    right / wrong / skipped and time used as chips, and each subject's score with a small
+    bar on the right. The separate result card is gone.
+  - nothing answered shows "No answers" with why (time ran out, or handed in), not a dash;
+  - then: test conditions (slim line), "What to do next" (two or three sentences built from
+    the data), subject by subject (counts, time, score), topics to work on (most wrong
+    first, each with "Practise this topic"), your time (time used, average a question, JAMB
+    pace against 40s, time per subject, right vs wrong vs skipped, a time spread chart, and
+    the slowest questions, which open the question modal), your progress (a line chart of
+    every scored mock and this mock against the last, per subject with sparklines), topic by
+    topic per subject, and the existing question grid and modal;
+  - drawn with plain CSS and SVG; every class is `mi-`; phone first.
+- **Why:** the founder asked for the report to be a page of insights, not a duplicated
+  result card, and for it to never look broken (one subject or four, no answers, first
+  mock or many).
+- **Where:** `apps/web/src/prep/pages/MockReport.tsx`, `MockInsights.tsx`,
+  `MockInsights.css`, `apps/web/src/prep/mock/insights.ts` (+ `insights.test.ts`); the old
+  result-card CSS is removed from `Mock.css`.
+- **Status:** done on branch `mock-insights`, not merged.
+
+### Mock room: time per question counts only time the question is in view
+- **What:**
+  - a question's time is now the time it was open and visible, summed across visits;
+  - the count pauses while the tab is hidden, and while the full-screen gate, the Submit
+    dialog or the palette covers the paper;
+  - leaving a question (or pausing) saves its new total straight away, so the time survives
+    a closed tab or the server submitting on the clock. Before, time was only saved with an
+    answer or a flag, and hidden-tab time was counted.
+- **Why:** the mock report now shows time per subject, per question and pace; the numbers
+  must be honest.
+- **Where:** `apps/web/src/prep/pages/MockRoom.tsx` (`bankTime`, the `timing` effect).
+- **Status:** done on branch `mock-insights`, not merged.
+
+### Mock report API: each question's topic and time, each subject's topics
+- **What:**
+  - report items carry `response_ms` (time the question was open in the room), and its JAMB
+    topic: `subtopic_id`, `subtopic_name` and the syllabus section `topic_name`;
+  - each subject in a report carries `time_ms` (its questions' time, summed) and `topics`
+    (right / wrong / unanswered per topic, most wrong first);
+  - the paper still names no topic, and history stays light (no items, no topics).
+- **Why:** the report is becoming an insights page: weak areas with "Practise this topic",
+  a topic breakdown, and time per subject and per question.
+- **Where:** `apps/api/src/app/routers/mock.py` (`topics_of`, the topic join in `_sheet`),
+  `apps/api/tests/test_mock.py`, `apps/web/src/prep/mockApi.ts`.
+- **Status:** done on branch `mock-insights`, not merged.
+
 ### Every spoken lesson line now flows as one connected thought
 - **What:** 5,572 spoken (`say`) lines across all English and Maths lessons were rewritten so
   the voice never meets a colon, semicolon or dash.
@@ -107,6 +155,8 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
   number box and a detached "JAMB's pace" note.
 - **Where:** `apps/web/src/prep/pages/MockSetup.tsx` and `Mock.css`.
 - **Status:** committed locally; checked at 1440 and 390.
+
+## 2026-10-12
 
 ### Deployed: plain-percentage scoring and the CBT mock exam
 - CI run 38280711166 passed, and both servers were updated, including migration 029.

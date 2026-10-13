@@ -226,6 +226,26 @@ class ReportItem(BaseModel):
     outcome: Outcome
     #: The reviewed working, step by step. Only in a submitted mock's report.
     solution_steps: list[str] = Field(default_factory=list)
+    #: Time the question was visibly open in the room, summed across visits.
+    response_ms: int = 0
+    #: The JAMB topic (the curriculum's subtopic) the question tests, and the section above it.
+    #: Only in a report: the paper never names topics. Null when it is not classified.
+    subtopic_id: UUID | None = None
+    subtopic_name: str | None = None
+    topic_name: str | None = None
+
+
+class TopicResult(BaseModel):
+    """One JAMB topic within a subject of this mock: how its questions went."""
+
+    subtopic_id: UUID
+    name: str
+    #: The section of the syllabus it sits in.
+    topic_name: str | None
+    questions: int
+    correct: int
+    wrong: int
+    unanswered: int
 
 
 class SubjectResult(BaseModel):
@@ -235,6 +255,10 @@ class SubjectResult(BaseModel):
     name: str
     tally: Tally
     items: list[ReportItem] = Field(default_factory=list)
+    #: Time the subject's questions were open, summed. Only in a report.
+    time_ms: int = 0
+    #: The subject's topics, most wrong first. Only in a report.
+    topics: list[TopicResult] = Field(default_factory=list)
 
 
 class IntegrityEvent(BaseModel):
@@ -507,12 +531,36 @@ async def _sheet(
         if with_keys
         else "NULL"
     )
+    # Topic names would hint at what a question is about, so the paper never carries them.
+    topic_columns = (
+        "t.subtopic_id, t.subtopic_name, t.topic_name"
+        if with_keys
+        else "NULL::uuid AS subtopic_id, NULL::text AS subtopic_name, NULL::text AS topic_name"
+    )
+    topic_join = (
+        """
+        LEFT JOIN LATERAL (
+          SELECT sub.id AS subtopic_id, sub.name AS subtopic_name, topic.name AS topic_name
+          FROM question_classifications c
+          JOIN curriculum_items skill ON skill.id = c.curriculum_item_id
+          JOIN curriculum_items sub ON sub.id = skill.parent_id
+          LEFT JOIN curriculum_items topic ON topic.id = sub.parent_id
+          WHERE c.question_id = v.question_id AND c.classification_role = 'primary'
+            AND c.review_status <> 'rejected' AND c.review_status <> 'withdrawn'
+          ORDER BY c.review_status = 'approved' DESC, c.created_at DESC
+          LIMIT 1
+        ) t ON true
+        """
+        if with_keys
+        else ""
+    )
     items = await fetch_all(
         conn,
         f"""
         SELECT i.session_id, i.position, i.question_version_id, i.selected_option_key,
                i.flagged, i.response_ms, v.stem, v.instructions, v.passage_id,
                pg.title AS passage_title, pg.body AS passage_body,
+               {topic_columns},
                {key_column} AS correct_option_key,
                {steps_column} AS solution_steps,
                coalesce((
@@ -526,6 +574,7 @@ async def _sheet(
         FROM mock_exam_items i
         JOIN question_versions v ON v.id = i.question_version_id
         LEFT JOIN passages pg ON pg.id = v.passage_id
+        {topic_join}
         WHERE i.mock_exam_id = ANY(CAST(:ids AS uuid[]))
         ORDER BY i.session_id, i.position
         """,
@@ -561,6 +610,34 @@ async def _sheet(
     return by_mock
 
 
+def topics_of(items: list[ReportItem]) -> list[TopicResult]:
+    """The topics the questions test, most wrong first, then most questions, then by name."""
+    found: dict[UUID, TopicResult] = {}
+    for item in items:
+        if item.subtopic_id is None:
+            continue
+        topic = found.setdefault(
+            item.subtopic_id,
+            TopicResult(
+                subtopic_id=item.subtopic_id,
+                name=item.subtopic_name or "",
+                topic_name=item.topic_name,
+                questions=0,
+                correct=0,
+                wrong=0,
+                unanswered=0,
+            ),
+        )
+        topic.questions += 1
+        if item.outcome == "right":
+            topic.correct += 1
+        elif item.outcome == "wrong":
+            topic.wrong += 1
+        else:
+            topic.unanswered += 1
+    return sorted(found.values(), key=lambda t: (-t.wrong, -t.questions, t.name))
+
+
 def _subject_result(row: dict[str, Any], *, with_items: bool) -> SubjectResult:
     items: list[ReportItem] = []
     if with_items:
@@ -585,6 +662,10 @@ def _subject_result(row: dict[str, Any], *, with_items: bool) -> SubjectResult:
                     flagged=item["flagged"],
                     outcome=outcome,
                     solution_steps=[str(step) for step in (item["solution_steps"] or [])],
+                    response_ms=int(item["response_ms"]),
+                    subtopic_id=item["subtopic_id"],
+                    subtopic_name=item["subtopic_name"],
+                    topic_name=item["topic_name"],
                 )
             )
     return SubjectResult(
@@ -594,6 +675,8 @@ def _subject_result(row: dict[str, Any], *, with_items: bool) -> SubjectResult:
         name=row["name"],
         tally=tally(int(row["questions"]), int(row["answered"]), int(row["correct"])),
         items=items,
+        time_ms=sum(item.response_ms for item in items),
+        topics=topics_of(items),
     )
 
 
