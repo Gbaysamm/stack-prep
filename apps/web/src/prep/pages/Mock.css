@@ -323,10 +323,164 @@
   color: var(--gray-600);
 }
 .sj .mk-time {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
+  gap: 16px 20px;
+}
+/* The stepper: − [ 120 / 2 hours ] + */
+.sj .mk-stepper {
+  display: inline-flex;
+  align-items: stretch;
+  border-radius: var(--r-md);
+  background: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--gray-200);
+}
+.sj .mk-step {
+  width: 48px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--purple-700);
+  cursor: pointer;
+}
+.sj .mk-step:first-child {
+  border-radius: var(--r-md) 0 0 var(--r-md);
+}
+.sj .mk-step:last-child {
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+}
+.sj .mk-step:hover:not(:disabled) {
+  background: var(--purple-50, #f5f3ff);
+}
+.sj .mk-step:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--purple-600);
+}
+.sj .mk-step:disabled {
+  color: var(--gray-300);
+  cursor: default;
+}
+.sj .mk-step-value {
+  display: grid;
+  justify-items: center;
+  min-width: 92px;
+  padding: 8px 6px;
+  border-inline: 1.5px solid var(--gray-200);
+}
+.sj .mk-step-value input {
+  width: 72px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-family: var(--f-display, inherit);
+  font-weight: 600;
+  font-size: 28px;
+  line-height: 1.1;
+  text-align: center;
+  color: var(--ink-900);
+}
+.sj .mk-step-value input:focus {
+  outline: none;
+  color: var(--purple-700);
+}
+.sj .mk-step-value small {
+  font-size: 11.5px;
+  color: var(--gray-600);
+  white-space: nowrap;
+}
+/* Quick picks: chips, the exam's own pace marked. */
+.sj .mk-picks {
+  display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 8px;
+}
+.sj .mk-pick {
+  position: relative;
+  min-height: 40px;
+  margin: 0;
+  padding: 8px 14px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 999px;
+  background: #fff;
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--gray-700);
+  cursor: pointer;
+}
+.sj .mk-pick:hover {
+  border-color: var(--purple-300);
+}
+.sj .mk-pick:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--purple-200, #ddd6fe);
+}
+.sj .mk-pick.exam {
+  border-color: var(--green-400, #4ade80);
+}
+.sj .mk-pick.on {
+  border-color: var(--purple-600);
+  background: var(--purple-600);
+  color: #fff;
+}
+.sj .mk-pick-tag {
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--green-500, #22c55e);
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #fff;
+}
+/* What the time means per question. */
+.sj .mk-pace {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  background: var(--gray-50, #fafafc);
+  font-size: 13.5px;
+  color: var(--gray-600);
+}
+.sj .mk-pace b {
+  color: var(--ink-900);
+  font-weight: 600;
+}
+.sj .mk-pace-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--green-500, #22c55e);
+}
+.sj .mk-pace.tight .mk-pace-dot {
+  background: var(--pink-500, #ec4899);
+}
+.sj .mk-pace.relaxed .mk-pace-dot {
+  background: var(--yellow-400);
+}
+@media (max-width: 640px) {
+  .sj .mk-time {
+    grid-template-columns: 1fr;
+  }
+  .sj .mk-stepper {
+    justify-self: start;
+  }
 }
 .sj .mk-summary {
   position: sticky;

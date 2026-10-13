@@ -13,7 +13,22 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ---
 
-## 2026-10-12
+## 2026-10-13
+
+### Mock exam: a clearer "Time allowed"
+- **What:** the custom mock's time card has:
+  - a −/+ stepper (5-minute steps) showing the minutes and the hours;
+  - quick picks, with the real exam's pace for that many questions marked "Exam pace";
+  - a line saying what the time means per question ("About 1 min 12 s a question. JAMB
+    gives 40 s"), labelled tighter than, the same as, or more than the real exam.
+- **Why:** the founder found the old card unclear: a plain segmented control, a browser
+  number box and a detached "JAMB's pace" note.
+- **Where:** `apps/web/src/prep/pages/MockSetup.tsx` and `Mock.css`.
+- **Status:** committed locally; checked at 1440 and 390.
+
+### Deployed: plain-percentage scoring and the CBT mock exam
+- CI run 38280711166 passed, and both servers were updated, including migration 029.
+
 
 ### Scoring rebuilt as plain percentages
 - **What:**

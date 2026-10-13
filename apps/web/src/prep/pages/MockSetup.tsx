@@ -24,6 +24,90 @@ const SECONDS_PER_QUESTION = 40;
 
 const clampInt = (value: number, low: number, high: number) => Math.max(low, Math.min(high, Math.round(value) || low));
 
+/** "1 min 12 s", "40 s": the time each question gets. */
+function perQuestion(seconds: number): string {
+  const whole = Math.round(seconds);
+  if (whole < 60) return `${whole} s`;
+  const m = Math.floor(whole / 60);
+  const rest = whole % 60;
+  return rest ? `${m} min ${rest} s` : `${m} min`;
+}
+
+/**
+ * How long the test runs: a stepper for any length, quick picks with the exam's own pace first,
+ * and a plain line saying what that means per question against JAMB's 40 seconds.
+ */
+function TimePicker({
+  minutes,
+  total,
+  suggested,
+  max,
+  onChange,
+}: {
+  minutes: number;
+  total: number;
+  suggested: number;
+  max: number;
+  onChange: (value: number) => void;
+}) {
+  const picks = [...new Set([suggested, ...MINUTE_PICKS])].filter((value) => value <= max).sort((a, b) => a - b);
+  const each = total > 0 ? (minutes * 60) / total : 0;
+  const pace = each === 0 ? null : each < SECONDS_PER_QUESTION * 0.9 ? 'tight' : each > SECONDS_PER_QUESTION * 1.25 ? 'relaxed' : 'exam';
+  const paceWords = {
+    tight: 'Tighter than the real exam',
+    exam: 'Same pace as the real exam',
+    relaxed: 'More time than the real exam',
+  } as const;
+  return (
+    <div className="mk-time">
+      <div className="mk-stepper" role="group" aria-label="Minutes allowed">
+        <button type="button" className="mk-step" onClick={() => onChange(minutes - 5)} disabled={minutes <= 5} aria-label="5 minutes less">
+          −
+        </button>
+        <label className="mk-step-value">
+          <span className="sr-only">Minutes</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={minutes}
+            onChange={(event) => onChange(Number(event.target.value.replace(/\D/g, '')))}
+          />
+          <small>{minutesText(minutes)}</small>
+        </label>
+        <button type="button" className="mk-step" onClick={() => onChange(minutes + 5)} disabled={minutes >= max} aria-label="5 minutes more">
+          +
+        </button>
+      </div>
+
+      <div className="mk-picks" role="radiogroup" aria-label="Quick picks">
+        {picks.map((value) => (
+          <button
+            key={value}
+            type="button"
+            role="radio"
+            aria-checked={minutes === value}
+            className={cx('mk-pick', minutes === value && 'on', value === suggested && 'exam')}
+            onClick={() => onChange(value)}
+          >
+            {value === suggested ? <span className="mk-pick-tag">Exam pace</span> : null}
+            {value} min
+          </button>
+        ))}
+      </div>
+
+      {pace ? (
+        <p className={cx('mk-pace', pace)}>
+          <span className="mk-pace-dot" aria-hidden="true" />
+          <b>{paceWords[pace]}</b>
+          <span>
+            About {perQuestion(each)} a question. JAMB gives {SECONDS_PER_QUESTION} s.
+          </span>
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 function utmeCount(subject: MockSubjectOption, options: MockOptions): number {
   const wanted = subject.compulsory ? options.utme.english_questions : options.utme.other_questions;
   return Math.min(wanted, subject.available, options.max_questions_per_subject);
@@ -299,29 +383,15 @@ export function MockSetup() {
             <section className="sj-card mk-block">
               <div className="mk-block-head">
                 <h2 className="mk-block-title">Time allowed</h2>
-                <span className="mk-block-note">At JAMB’s pace: about {minutesText(suggested)}</span>
+                <span className="mk-block-note">For {total} question{total === 1 ? '' : 's'}</span>
               </div>
-              <div className="mk-time">
-                <div className="mk-seg" role="radiogroup" aria-label="Time allowed">
-                  {MINUTE_PICKS.map((value) => (
-                    <button key={value} type="button" role="radio" aria-checked={minutes === value} className={cx('mk-seg-btn', minutes === value && 'on')} onClick={() => setMinutes(value)}>
-                      {value} min
-                    </button>
-                  ))}
-                </div>
-                <label className="mk-count">
-                  <span className="sr-only">Minutes</span>
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    min={1}
-                    max={options.max_minutes}
-                    value={minutes}
-                    onChange={(event) => setMinutes(clampInt(Number(event.target.value), 1, options.max_minutes))}
-                  />
-                  <span>min</span>
-                </label>
-              </div>
+              <TimePicker
+                minutes={minutes}
+                total={total}
+                suggested={suggested}
+                max={options.max_minutes}
+                onChange={(value) => setMinutes(clampInt(value, 1, options.max_minutes))}
+              />
             </section>
           ) : null}
         </div>
