@@ -185,45 +185,55 @@ function Review({ subjects }: { subjects: SubjectResult[] }) {
   );
 }
 
+/**
+ * How the test was sat, in one slim card: a badge that says clean or how much was recorded,
+ * chips only for what actually happened, and the timeline behind a toggle.
+ */
 function IntegrityPanel({ report }: { report: Report }) {
+  const [open, setOpen] = useState(false);
   const i = report.integrity;
   const shown = i.events.filter((e) => e.kind !== 'window_focus' && e.kind !== 'tab_visible' && e.kind !== 'fullscreen_enter');
   const clean = shown.length === 0;
   const started = new Date(report.started_at).getTime();
+  const blocked = i.copy_blocked + i.paste_blocked + i.menu_blocked;
+  const chips = [
+    { n: i.fullscreen_exits, one: 'Left full screen once', many: `Left full screen ${i.fullscreen_exits} times` },
+    { n: i.tab_switches, one: 'Switched tab once', many: `Switched tab ${i.tab_switches} times` },
+    { n: i.window_blurs, one: 'Left the window once', many: `Left the window ${i.window_blurs} times` },
+    { n: blocked, one: 'Tried to copy or paste once', many: `Tried to copy or paste ${blocked} times` },
+  ].filter((chip) => chip.n > 0);
   return (
-    <div className={cx('sj-card mk-integrity', clean && 'clean')}>
-      <h3 className="sj-display sj-h3">Test conditions</h3>
-      {clean ? (
-        <p>You stayed in the test the whole time. Nothing was recorded.</p>
-      ) : (
-        <>
-          <ul className="mk-integrity-counts">
-            <li>
-              <b className={cx('sj-num', !i.fullscreen_exits && 'zero')}>{i.fullscreen_exits}</b> left full screen
-            </li>
-            <li>
-              <b className={cx('sj-num', !i.tab_switches && 'zero')}>{i.tab_switches}</b> tab switches
-            </li>
-            <li>
-              <b className={cx('sj-num', !i.window_blurs && 'zero')}>{i.window_blurs}</b> window switches
-            </li>
-            <li>
-              <b className={cx('sj-num', !(i.copy_blocked + i.paste_blocked + i.menu_blocked) && 'zero')}>{i.copy_blocked + i.paste_blocked + i.menu_blocked}</b> blocked copy, paste or menu
-            </li>
+    <div className={cx('sj-card mk-cond', clean && 'clean')}>
+      <div className="mk-cond-head">
+        <h3 className="mk-cond-title">Test conditions</h3>
+        <span className={cx('mk-cond-badge', clean ? 'ok' : 'warn')}>
+          {clean ? 'Clean' : `${shown.length} thing${shown.length === 1 ? '' : 's'} recorded`}
+        </span>
+        {clean ? (
+          <span className="mk-cond-note">You stayed in the test the whole time.</span>
+        ) : (
+          <ul className="mk-cond-chips">
+            {chips.map((chip) => (
+              <li key={chip.many}>{chip.n === 1 ? chip.one : chip.many}</li>
+            ))}
           </ul>
-          <details className="mk-timeline">
-            <summary>When it happened</summary>
-            <ol>
-              {shown.map((event, index) => (
-                <li key={index}>
-                  <span className="sj-mono">{clock((new Date(event.at).getTime() - started) / 1000)}</span>
-                  {EVENT_WORDS[event.kind]}
-                </li>
-              ))}
-            </ol>
-          </details>
-        </>
-      )}
+        )}
+        {clean ? null : (
+          <button type="button" className="mk-cond-toggle" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+            {open ? 'Hide times' : 'When it happened'}
+          </button>
+        )}
+      </div>
+      {open && !clean ? (
+        <ol className="mk-cond-times">
+          {shown.map((event, index) => (
+            <li key={index}>
+              <span className="sj-mono">{clock((new Date(event.at).getTime() - started) / 1000)}</span>
+              {EVENT_WORDS[event.kind]}
+            </li>
+          ))}
+        </ol>
+      ) : null}
     </div>
   );
 }

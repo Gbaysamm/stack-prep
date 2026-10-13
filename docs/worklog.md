@@ -15,6 +15,19 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-13
 
+### Mock report: a slim "Test conditions" line
+- **What:** the card is now one row:
+  - the title;
+  - a badge, "Clean" or "N things recorded";
+  - chips only for what actually happened ("Left full screen 2 times");
+  - a "When it happened" toggle that opens the timeline in columns.
+
+  The big zero counters are gone.
+- **Why:** the founder found the old panel poorly designed: four large counters, mostly
+  zeros, across empty space.
+- **Where:** `apps/web/src/prep/pages/MockReport.tsx` and `Mock.css`.
+- **Status:** committed locally; checked at 1440 and 390.
+
 ### Mock report: a slimmer result card
 - **What:**
   - The totals are one line with coloured dots, not four tall boxes with left borders.
