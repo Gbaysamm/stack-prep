@@ -15,6 +15,10 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-13
 
+### Deployed: the mock exam work, the spoken-lesson rewrite and its audio fix
+- 16 commits were pushed (up to c49dca7). CI run 38422063878 passed, and both servers were
+  updated.
+
 ### Real UTME English: a passage is never cut
 - **What:**
   - The comprehension and cloze parts now use whole passages only, choosing the mix of
