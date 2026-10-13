@@ -432,3 +432,127 @@ async def test_the_report_explains_and_opens_the_lesson_once_handed_in(
 
     opened = await client.get(lesson_url)
     assert opened.status_code == 200, opened.text
+
+
+async def test_the_report_names_each_question_topic_and_its_time(
+    client: httpx.AsyncClient,  # noqa: F811
+    ids: dict[str, str],
+) -> None:
+    """The report gives each question its JAMB topic and time, and each subject its topics."""
+    paper = await start(client, ids)
+    subject = paper["subjects"][0]
+    first, second, third = subject["questions"]
+    # The paper names no topic: it would hint at what a question is about.
+    assert "subtopic_name" not in first
+
+    # Time is the browser's running total for the question: a later, smaller figure (an
+    # out-of-order save) never lowers it.
+    await save(
+        client,
+        paper["mock_id"],
+        [
+            {
+                "question_version_id": first["question_version_id"],
+                "selected_option_key": "A",
+                "response_ms": 30_000,
+            },
+            {"question_version_id": third["question_version_id"], "response_ms": 5_000},
+        ],
+    )
+    await save(
+        client,
+        paper["mock_id"],
+        [
+            {
+                "question_version_id": first["question_version_id"],
+                "selected_option_key": "A",
+                "response_ms": 12_000,
+            }
+        ],
+    )
+    response = await client.post(
+        f"/v1/mock/{paper['mock_id']}/submit",
+        json={
+            "answers": [
+                {
+                    "question_version_id": second["question_version_id"],
+                    "selected_option_key": "C",
+                    "response_ms": 90_000,
+                }
+            ]
+        },
+    )
+    assert response.status_code == 200, response.text
+    result = response.json()["subjects"][0]
+    by_id = {item["question_version_id"]: item for item in result["items"]}
+    assert by_id[first["question_version_id"]]["response_ms"] == 30_000
+    assert by_id[second["question_version_id"]]["response_ms"] == 90_000
+    assert by_id[third["question_version_id"]]["response_ms"] == 5_000
+    assert result["time_ms"] == 125_000
+
+    async with get_engine().connect() as conn:
+        subtopic = (
+            await conn.execute(
+                text("SELECT parent_id FROM curriculum_items WHERE id = CAST(:skill AS uuid)"),
+                {"skill": ids["skill_id"]},
+            )
+        ).scalar()
+    for item in result["items"]:
+        assert item["subtopic_id"] == str(subtopic)
+        assert item["subtopic_name"] == "The subtopic"
+        assert item["topic_name"] == "The topic"
+    assert result["topics"] == [
+        {
+            "subtopic_id": str(subtopic),
+            "name": "The subtopic",
+            "topic_name": "The topic",
+            "questions": 3,
+            "correct": 1,
+            "wrong": 1,
+            "unanswered": 1,
+        }
+    ]
+
+    # History stays light: no questions, no topics.
+    history = (await client.get(f"/v1/mock/history/{ids['student']}")).json()
+    assert history[0]["subjects"][0]["items"] == []
+    assert history[0]["subjects"][0]["topics"] == []
+
+
+def test_topics_put_the_most_wrong_first() -> None:
+    import uuid
+
+    from app.routers.mock import ReportItem, topics_of
+
+    a, b = uuid.uuid4(), uuid.uuid4()
+
+    def item(subtopic: uuid.UUID | None, name: str, outcome: str) -> ReportItem:
+        return ReportItem(
+            position=1,
+            question_version_id=uuid.uuid4(),
+            stem="",
+            instructions=None,
+            passage_title=None,
+            passage_body=None,
+            options=[],
+            selected_option_key=None,
+            correct_option_key="A",
+            flagged=False,
+            outcome=outcome,  # type: ignore[arg-type]
+            subtopic_id=subtopic,
+            subtopic_name=name,
+        )
+
+    topics = topics_of(
+        [
+            item(a, "Algebra", "right"),
+            item(a, "Algebra", "right"),
+            item(b, "Vectors", "wrong"),
+            item(None, "", "wrong"),  # unclassified: left out, not invented
+            item(b, "Vectors", "unanswered"),
+        ]
+    )
+    assert [(t.name, t.questions, t.correct, t.wrong, t.unanswered) for t in topics] == [
+        ("Vectors", 2, 0, 1, 1),
+        ("Algebra", 2, 2, 0, 0),
+    ]

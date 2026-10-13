@@ -15,6 +15,19 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-13
 
+### Mock report API: each question's topic and time, each subject's topics
+- **What:**
+  - report items carry `response_ms` (time the question was open in the room), and its JAMB
+    topic: `subtopic_id`, `subtopic_name` and the syllabus section `topic_name`;
+  - each subject in a report carries `time_ms` (its questions' time, summed) and `topics`
+    (right / wrong / unanswered per topic, most wrong first);
+  - the paper still names no topic, and history stays light (no items, no topics).
+- **Why:** the report is becoming an insights page: weak areas with "Practise this topic",
+  a topic breakdown, and time per subject and per question.
+- **Where:** `apps/api/src/app/routers/mock.py` (`topics_of`, the topic join in `_sheet`),
+  `apps/api/tests/test_mock.py`, `apps/web/src/prep/mockApi.ts`.
+- **Status:** done on branch `mock-insights`, not merged.
+
 ### Mock report: question grids, a question modal, and the lesson from the report
 - **What:**
   - "Every question" is now one grid per subject. Cells are green (right), pink (wrong) or
