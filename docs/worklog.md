@@ -15,6 +15,28 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-13
 
+### Mock report becomes an insights page
+- **What:**
+  - the hero is the summary: the overall score big (with the change on the last mock),
+    right / wrong / skipped and time used as chips, and each subject's score with a small
+    bar on the right. The separate result card is gone.
+  - nothing answered shows "No answers" with why (time ran out, or handed in), not a dash;
+  - then: test conditions (slim line), "What to do next" (two or three sentences built from
+    the data), subject by subject (counts, time, score), topics to work on (most wrong
+    first, each with "Practise this topic"), your time (time used, average a question, JAMB
+    pace against 40s, time per subject, right vs wrong vs skipped, a time spread chart, and
+    the slowest questions, which open the question modal), your progress (a line chart of
+    every scored mock and this mock against the last, per subject with sparklines), topic by
+    topic per subject, and the existing question grid and modal;
+  - drawn with plain CSS and SVG; every class is `mi-`; phone first.
+- **Why:** the founder asked for the report to be a page of insights, not a duplicated
+  result card, and for it to never look broken (one subject or four, no answers, first
+  mock or many).
+- **Where:** `apps/web/src/prep/pages/MockReport.tsx`, `MockInsights.tsx`,
+  `MockInsights.css`, `apps/web/src/prep/mock/insights.ts` (+ `insights.test.ts`); the old
+  result-card CSS is removed from `Mock.css`.
+- **Status:** done on branch `mock-insights`, not merged.
+
 ### Mock room: time per question counts only time the question is in view
 - **What:**
   - a question's time is now the time it was open and visible, summed across visits;
