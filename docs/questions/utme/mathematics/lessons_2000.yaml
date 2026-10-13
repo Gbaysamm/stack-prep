@@ -24,7 +24,7 @@ lessons:
           - {id: v, op: fill, part: 'P∩Q∩R', text: '2, v', 'on': 'all three'}
           - {id: v, op: fill, part: 'P∩Q only', text: 'u, w', 'on': 'P and Q only'}
           - {id: v, op: fill, part: 'P∩R only', text: 'x', 'on': 'P and R only'}
-      - say: '3 and y are in Q and R only. The rest are in one set only: 1 in P only, 5 and 6 in Q only, and 4 in R only.'
+      - say: '3 and y are in Q and R only. The rest are in one set only, so 1 in P only, 5 and 6 in Q only, and 4 in R only.'
         diagram_do:
           - {id: v, op: fill, part: 'Q∩R only', text: '3, y', 'on': 'Q and R only'}
           - {id: v, op: fill, part: 'P only', text: '1', 'on': '1 in P only'}
@@ -33,17 +33,17 @@ lessons:
         diagram_do:
           - {id: v, op: fill, part: 'R only', text: '4', 'on': 'R only'}
       - section: 'Step 1: P minus Q'
-        say: 'Go through P and look for each element in Q. 1 is not in Q: keep it. 2, u, v and w are in Q: remove them. x is not in Q: keep it.'
+        say: 'Go through P and look for each element in Q. 1 is not in Q, so keep it. 2, u, v and w are in Q, so remove them. x is not in Q, so keep it.'
         write: '$P - Q = \{1, x\}$'
         diagram_do:
           - {id: v, op: shade, part: 'P−Q', colour: blue, text: 'P − Q', 'on': 'keep it', on_nth: 2}
       - section: 'Step 2: intersect with R'
-        say: 'Now intersect with R: keep only what is also in R. 1 is not in R, so it goes. x is in R, so it stays.'
+        say: 'Now intersect with R, keeping only what is also in R. 1 is not in R, so it goes. x is in R, so it stays.'
         write: '$(P - Q) \cap R = \{1, x\} \cap \{2, 3, 4, v, x, y\} = \{x\}$'
         diagram_do:
           - {id: v, op: shade, part: '(P−Q)∩R', colour: green, text: '(P − Q) ∩ R', 'on': 'it stays'}
       - section: 'Check'
-        say: 'Check x against each condition: x is in P, x is not in Q, and x is in R. All three hold.'
+        say: 'Check x against each condition. x is in P, x is not in Q, and x is in R. All three hold.'
         write: 'Check: $x \in P,\ x \notin Q,\ x \in R\ \checkmark$'
       - section: 'Answer'
         say: 'Therefore P minus Q, intersection R, is the set containing x, which is answer choice C.'
@@ -66,19 +66,19 @@ lessons:
       - say: 'The growth is taken on the new population each year, like compound interest. The formula is A equals P times bracket 1 plus R over 100, to the power n.'
         write: '$A = P\left(1 + \dfrac{R}{100}\right)^{n}$'
       - section: 'Substitute'
-        say: 'Substitute: P is 240,000, R is 2, and n is 2.'
+        say: 'Now substitute. P is 240,000, R is 2, and n is 2.'
         write: '$A = 240{,}000\left(1 + \dfrac{2}{100}\right)^{2}$'
         point:
           - {line: 2, kind: box, text: 'the formula'}
       - say: '2 over 100 is 0.02, and 1 plus 0.02 is 1.02.'
         write: '$= 240{,}000 \times (1.02)^{2}$'
-      - say: '1.02 squared is 1.02 times 1.02. 102 times 102 is 10,404, with 4 decimal places: 1.0404.'
+      - say: '1.02 squared is 1.02 times 1.02. 102 times 102 is 10,404, and with 4 decimal places that is 1.0404.'
         write: '$(1.02)^{2} = 1.02 \times 1.02 = 1.0404$'
       - say: 'So A is 240,000 times 1.0404.'
         write: '$A = 240{,}000 \times 1.0404$'
         point:
           - {line: 6, kind: move, from: {line: 5, at: '= [[1.0404]]'}, at: '× [[1.0404]]', text: 'from here'}
-      - say: '240,000 times 1 is 240,000, and 240,000 times 0.0404 is 9,696. Add them: 249,696.'
+      - say: '240,000 times 1 is 240,000, and 240,000 times 0.0404 is 9,696. Add them to get 249,696.'
         write: '$= 240{,}000 + 9{,}696 = 249{,}696$'
       - section: 'Check, year by year'
         say: 'Check year by year. 2% of 240,000 is 4,800. So January 1999 has 244,800 people.'
@@ -95,7 +95,7 @@ lessons:
         doodle_do:
           - {id: town, op: circle, part: step2, text: '+ 2% again'}
           - {id: town, op: label, part: h2000, text: '249,696'}
-      - say: 'Therefore the population in January 2000 is 249,696: option B.'
+      - say: 'Therefore the population in January 2000 is 249,696, which is option B.'
         write: '$\therefore$ population in Jan 2000 $= 249{,}696$ (B)'
         answer: true
     traps:
@@ -111,17 +111,17 @@ lessons:
       - say: 'Solution. Rationalise the left side, then compare it with $m$ plus $n$ root 6.'
         write: 'Solution'
       - section: 'The conjugate'
-        say: 'The conjugate of root 3 plus 2 root 2 is root 3 minus 2 root 2: the same terms with the sign changed.'
+        say: 'The conjugate of root 3 plus 2 root 2 is root 3 minus 2 root 2, which is the same terms with the sign changed.'
         write: 'Conjugate of $\sqrt{3} + 2\sqrt{2}$ is $\sqrt{3} - 2\sqrt{2}$'
       - say: 'Multiply the numerator and the denominator by it. Something over itself is 1, so the value does not change.'
         write: '$= \dfrac{2\sqrt{3} - \sqrt{2}}{\sqrt{3} + 2\sqrt{2}} \times \dfrac{\sqrt{3} - 2\sqrt{2}}{\sqrt{3} - 2\sqrt{2}}$'
       - section: 'The denominator'
-        say: 'The denominator is a difference of two squares: $a$ plus $b$, times $a$ minus $b$, is $a$ squared minus $b$ squared.'
+        say: 'The denominator is a difference of two squares, because $a$ plus $b$, times $a$ minus $b$, is $a$ squared minus $b$ squared.'
         write: '$(a + b)(a - b) = a^{2} - b^{2}$'
-      - say: 'Here $a$ is root 3 and $b$ is 2 root 2. Picture each as the side of a square: root 3 for the yellow one, 2 root 2 for the blue one.'
+      - say: 'Here $a$ is root 3 and $b$ is 2 root 2. Picture each as the side of a square, root 3 for the yellow one and 2 root 2 for the blue one.'
         doodle: {name: 'custom:2000_q03_a', id: tiles, caption: 'surds as sides of squares'}
         write: 'Denominator $= (\sqrt{3})^{2} - (2\sqrt{2})^{2}$'
-      - say: 'Root 3 squared is 3. 2 root 2 squared is 4 times 2, which is 8: the blue square holds four small squares of area 2.'
+      - say: 'Root 3 squared is 3. 2 root 2 squared is 4 times 2, which is 8, because the blue square holds four small squares of area 2.'
         doodle_do:
           - {id: tiles, op: circle, part: big, text: '4 × 2 = 8'}
         write: '$= 3 - 4 \times 2 = 3 - 8$'
@@ -183,15 +183,15 @@ lessons:
       - section: 'The equation'
         say: 'Every member is in exactly one region, so the four regions add up to the whole club, 94.'
         write: '$(60 - 3x) + 3x + (50 - 3x) + x = 94$'
-      - say: 'Collect like terms. The numbers: 60 plus 50 is 110. The x terms: minus 3x, plus 3x, minus 3x, plus x leaves minus 2x.'
+      - say: 'Collect like terms. For the numbers, 60 plus 50 is 110. For the x terms, minus 3x, plus 3x, minus 3x, plus x leaves minus 2x.'
         write: '$110 - 2x = 94$'
-      - say: 'Take 2x to the right and 94 to the left: 110 minus 94 equals 2x. 110 minus 94 is 16.'
+      - say: 'Take 2x to the right and 94 to the left, so 110 minus 94 equals 2x. 110 minus 94 is 16.'
         write: '$2x = 110 - 94 = 16$'
-      - say: 'Divide both sides by 2. x is 8: eight members like neither.'
+      - say: 'Divide both sides by 2. x is 8, so eight members like neither.'
         write: '$x = 8$'
         diagram_do:
           - {id: v, op: fill, part: outside, text: '8', 'on': neither}
-      - say: 'So the number who like both is 3x: 3 times 8 is 24.'
+      - say: 'So the number who like both is 3x, and 3 times 8 is 24.'
         write: '$n(M \cap T) = 3 \times 8 = 24$'
         diagram_do:
           - {id: v, op: fill, part: 'M∩T', text: '24', 'on': '24'}
@@ -203,7 +203,7 @@ lessons:
         diagram_do:
           - {id: v, op: fill, part: 'M only', text: '36', 'on': 'is 36'}
           - {id: v, op: fill, part: 'T only', text: '26', 'on': 'is 26'}
-      - say: 'Only one type means modern only plus traditional only: 36 plus 26 is 62.'
+      - say: 'Only one type means modern only plus traditional only, so 36 plus 26 is 62.'
         write: 'Only one type $= 36 + 26 = 62$'
         diagram_do:
           - {id: v, op: shade, part: 'M only', colour: green}
@@ -211,7 +211,7 @@ lessons:
         doodle_do:
           - {id: club, op: highlight, part: members, text: '62 like only one'}
       - section: 'Check'
-        say: 'Check: 36 plus 24 plus 26 plus 8 is 94, the whole club.'
+        say: 'To check, 36 plus 24 plus 26 plus 8 is 94, the whole club.'
         write: '$36 + 24 + 26 + 8 = 94\ \checkmark$'
       - section: 'Answer'
         say: 'Therefore 62 members like only one type of music, which is answer choice C.'
@@ -228,14 +228,14 @@ lessons:
         say: 'Round each number to two significant figures first, then work it out, and give the answer to two significant figures. The options differ only in the last digit, so follow the order exactly.'
         write: '$\dfrac{(2.813 \times 10^{-3}) \times 1.063}{5.637 \times 10^{-2}}$'
       - section: 'Each number to 2 s.f.'
-        say: 'Solution. 2.813: keep 2 and 8. The next digit is 1, less than 5, so leave it. 2.8. On its number line, 2.813 is nearer 2.8.'
+        say: 'Solution. For 2.813, keep 2 and 8. The next digit is 1, less than 5, so leave it, giving 2.8. On its number line, 2.813 is nearer 2.8.'
         write: '$2.813 = 2.8$ (2 s.f.)'
         doodle: {name: 'custom:2000_q05_a', id: lines, caption: 'Each number goes to the nearer end', size: scene}
-      - say: '1.063: keep 1 and 0. The next digit is 6, which is 5 or more, so add 1: 1.1.'
+      - say: 'For 1.063, keep 1 and 0. The next digit is 6, which is 5 or more, so add 1 to get 1.1.'
         write: '$1.063 = 1.1$ (2 s.f.)'
         doodle_do:
           - {id: lines, op: stage, stage: 'custom:2000_q05_a2'}
-      - say: '5.637: keep 5 and 6. The next digit is 3, less than 5, so leave it: 5.6. The powers of ten are exact and stay.'
+      - say: 'For 5.637, keep 5 and 6. The next digit is 3, less than 5, so leave it, giving 5.6. The powers of ten are exact and stay.'
         write: '$5.637 = 5.6$ (2 s.f.)'
         doodle_do:
           - {id: lines, op: stage, stage: 'custom:2000_q05_a3'}
@@ -246,18 +246,18 @@ lessons:
       - section: 'Cancel first'
         say: 'Cancel first. 2.8 is half of 5.6, so 2.8 over 5.6 is 1 over 2.'
         write: '$\dfrac{2.8}{5.6} = \dfrac{1}{2}$'
-      - say: 'For the powers of ten, use the law of indices: to divide powers of the same base, subtract the indices. Negative 3 minus negative 2 is negative 1.'
+      - say: 'For the powers of ten, use the law of indices, so to divide powers of the same base, subtract the indices. Negative 3 minus negative 2 is negative 1.'
         write: '$\dfrac{10^{-3}}{10^{-2}} = 10^{-3 - (-2)} = 10^{-1}$'
       - say: 'Therefore the value is 1 over 2, times 1.1, times 10 to the power negative 1.'
         write: '$\therefore$ value $= \dfrac{1}{2} \times 1.1 \times 10^{-1}$'
-      - say: 'Half of 1.1 is 0.55. Times 10 to the power negative 1 means divide by 10: 0.055.'
+      - say: 'Half of 1.1 is 0.55. Times 10 to the power negative 1 means divide by 10, which gives 0.055.'
         write: '$= 0.55 \times 10^{-1} = 0.055$'
-      - say: 'To two significant figures: count from the first non-zero digit, 5 and 5. 0.055 already has exactly two.'
+      - say: 'To two significant figures, we count from the first non-zero digit, 5 and 5. 0.055 already has exactly two.'
         write: '$= 0.055$ (2 s.f.)'
       - section: 'Check'
-        say: 'Check by multiplying back: 0.055 times 0.056 is 0.00308, and 0.0028 times 1.1 is also 0.00308. It agrees.'
+        say: 'Check by multiplying back. 0.055 times 0.056 is 0.00308, and 0.0028 times 1.1 is also 0.00308. It agrees.'
         write: 'Check: $0.055 \times 0.056 = 0.00308 = 0.0028 \times 1.1$ ✓'
-      - say: 'Therefore the value is 0.055, to two significant figures: option B.'
+      - say: 'Therefore the value is 0.055, to two significant figures, which is option B.'
         write: '$\therefore$ value $= 0.055$ (2 s.f.) (B)'
         answer: true
     traps:
@@ -274,10 +274,10 @@ lessons:
       - section: 'Solution'
         say: 'Solution. List the givens. A, the amount at the end, is 150,000. R is 25 percent. n is 3 years. P, the deposit, is what we want.'
         write: '$A = 150{,}000,\ R = 25,\ n = 3,\ P = ?$'
-      - say: 'The compound interest formula: A equals P times bracket 1 plus R over 100, to the power n.'
+      - say: 'The compound interest formula is A equals P times bracket 1 plus R over 100, to the power n.'
         write: '$A = P\left(1 + \dfrac{R}{100}\right)^{n}$'
       - section: 'Substitute'
-        say: 'Substitute: A is 150,000, R is 25, and n is 3.'
+        say: 'Now substitute. A is 150,000, R is 25, and n is 3.'
         write: '$150{,}000 = P\left(1 + \dfrac{25}{100}\right)^{3}$'
         point:
           - {line: 2, kind: box, text: 'the formula'}
@@ -285,11 +285,11 @@ lessons:
           - {id: jar, op: arrow, part: jar, to_part: car}
       - say: '25 over 100 is 1 over 4, and 1 plus 1 over 4 is 5 over 4.'
         write: '$150{,}000 = P\left(\dfrac{5}{4}\right)^{3}$'
-      - say: '5 over 4 cubed is 5 cubed over 4 cubed: 125 over 64.'
+      - say: '5 over 4 cubed is 5 cubed over 4 cubed, which is 125 over 64.'
         write: '$150{,}000 = P \times \dfrac{125}{64}$'
       - say: 'To make P the subject, multiply both sides by 64 over 125.'
         write: '$P = 150{,}000 \times \dfrac{64}{125}$'
-      - say: 'Cancel first: 125 into 150,000 is 1,200. Then 1,200 times 64 is 76,800. That is what goes into the jar now.'
+      - say: 'Cancel first, so 125 into 150,000 is 1,200. Then 1,200 times 64 is 76,800. That is what goes into the jar now.'
         write: '$= 1{,}200 \times 64 = 76{,}800$'
         point:
           - {line: 7, kind: highlight, at: '76,800', to: {doodle: jar, part: jar}}
@@ -303,7 +303,7 @@ lessons:
           - {id: jar, op: fill, to: 0.64}
           - {id: jar, op: fill, to: 0.8}
           - {id: jar, op: fill, to: 1}
-      - say: 'Therefore he needs to deposit ₦76,800 now: option D.'
+      - say: 'Therefore he needs to deposit ₦76,800 now, and that is option D.'
         write: '$\therefore P$ = ₦76,800.00 (D)'
         answer: true
         doodle_do:
@@ -321,7 +321,7 @@ lessons:
       - say: 'First, change two-five-six base seven to base ten.'
         write: 'Solution'
       - section: 'Step 1: base 7 to base 10'
-        say: 'Write the index numbers over the digits: two, one, nought. Each digit times seven to the power of its index.'
+        say: 'Write the index numbers two, one, nought over the digits. Each digit times seven to the power of its index.'
         write: '$\overset{2}{2}\,\overset{1}{5}\,\overset{0}{6}_{7} = 2 \times 7^{2} + 5 \times 7^{1} + 6 \times 7^{0}$'
       - say: 'Seven squared is 49, seven to the power 1 is 7, and seven to the power nought is 1.'
         write: '$= 2 \times 49 + 5 \times 7 + 6 \times 1$'
@@ -346,11 +346,11 @@ lessons:
           - {line: 9, kind: move, from: {line: 6, at: '=[[175]]'}, at: '175'}
       - say: 'Subtract 175 from both sides, to get a quadratic equal to 0.'
         write: '$3x^{2} + 4x - 175 = 0$'
-      - say: 'Factorise by product and sum. Product is a times c: 3 times minus 175 is minus 525. Sum is b, 4.'
+      - say: 'Factorise by product and sum. Product is a times c, so 3 times minus 175 is minus 525. Sum is b, 4.'
         write: 'Product $= 3 \times (-175) = -525$, Sum $= 4$'
       - say: 'We need two numbers that multiply to minus 525 and add to 4. They are 25 and minus 21.'
         write: 'Factors: $25$ and $-21$'
-      - say: 'Split the middle term: 4x becomes 25x minus 21x.'
+      - say: 'Split the middle term, so 4x becomes 25x minus 21x.'
         write: '$3x^{2} + 25x - 21x - 175 = 0$'
       - say: 'Group in pairs. x is common to the first pair, and minus 7 to the second.'
         write: '$x(3x + 25) - 7(3x + 25) = 0$'
@@ -390,33 +390,33 @@ lessons:
       - section: 'Femi''s cost price'
         say: 'Let Femi''s cost price be y naira.'
         write: 'Let Femi''s C.P. $= y$ naira'
-      - say: 'Substitute into the formula: Femi''s profit percent, 40, equals 10,000 over y, times 100.'
+      - say: 'Substitute into the formula, so Femi''s profit percent, 40, equals 10,000 over y, times 100.'
         write: '$40 = \dfrac{10{,}000}{y} \times 100$'
         point:
           - {line: 1, kind: box, text: 'the formula'}
-      - say: 'Cross multiply: 40 times y equals 10,000 times 100, which is 1,000,000.'
+      - say: 'Cross multiply, and 40 times y equals 10,000 times 100, which is 1,000,000.'
         write: '$40y = 1{,}000{,}000$'
       - say: 'Divide both sides by 40. 1,000,000 divided by 40 is 25,000.'
         write: '$y = \dfrac{1{,}000{,}000}{40} = 25{,}000$'
-      - say: 'Femi paid ₦25,000. What Femi paid is exactly what Audu sold it for: Audu''s selling price, S.P.'
+      - say: 'Femi paid ₦25,000. What Femi paid is exactly what Audu sold it for, which is Audu''s selling price, S.P.'
         write: 'Audu''s S.P. = Femi''s C.P. = ₦25,000'
         point:
           - {line: 6, kind: move, from: {line: 5, at: '= [[25,000]]'}, at: '₦[[25,000]]', text: 'Femi paid'}
         doodle_do:
           - {id: sale, op: label, part: femi, text: 'paid ₦25,000'}
       - section: 'Audu''s loss'
-        say: 'Audu''s loss is his C.P. minus his S.P.: 50,000 minus 25,000, which is 25,000.'
+        say: 'Audu''s loss is his C.P. minus his S.P., so 50,000 minus 25,000, which is 25,000.'
         write: 'Loss $=$ C.P. $-$ S.P. $= 50{,}000 - 25{,}000 = 25{,}000$'
         doodle_do:
           - {id: sale, op: label, part: audu, text: 'lost ₦25,000'}
       - say: 'Loss percent is the loss over Audu''s own C.P., times 100 percent.'
         write: 'Loss $\% = \dfrac{\text{loss}}{\text{C.P.}} \times 100\%$'
-      - say: 'Substitute: x is 25,000 over 50,000, times 100. 25,000 over 50,000 is 1 over 2, and half of 100 is 50.'
+      - say: 'Substitute, so x is 25,000 over 50,000, times 100. 25,000 over 50,000 is 1 over 2, and half of 100 is 50.'
         write: '$x = \dfrac{25{,}000}{50{,}000} \times 100 = 50$'
       - section: 'Check'
         say: 'Check forwards. A 50% loss on ₦50,000 means Audu sold for ₦25,000. 40% of 25,000 is 10,000, Femi''s profit. It agrees.'
         write: 'Check: $40\%$ of $25{,}000 = 10{,}000$ ✓'
-      - say: 'Therefore x is 50: option B.'
+      - say: 'Therefore x is 50, which is option B.'
         write: '$\therefore x = 50$ (B)'
         answer: true
         doodle_do:
@@ -434,14 +434,14 @@ lessons:
       - say: 'Solution. First, split each power using the laws of indices.'
         write: 'Solution'
       - section: 'Split the powers'
-        say: 'The law of indices for multiplying: when we multiply powers of the same base, we add the indices. Read backwards, it splits a power into two.'
+        say: 'The law of indices for multiplying says that when we multiply powers of the same base, we add the indices. Read backwards, it splits a power into two.'
         write: 'Law of indices: $a^{m} \times a^{n} = a^{m + n}$'
       - say: 'So 2 to the power $n$ plus 1 is 2 to the power $n$, times 2 to the power 1, which is 2 to the power $n$ times 2.'
         write: '$2^{n+1} = 2^{n} \times 2$'
       - say: '2 to the power $n$ minus 1 is 2 to the power $n$, times 2 to the power negative 1. And 2 to the power negative 1 is 1 over 2.'
         write: '$2^{n-1} = 2^{n} \times 2^{-1} = 2^{n} \times \tfrac{1}{2}$'
       - section: 'Let 2ⁿ = y'
-        say: 'Now every term has 2 to the power $n$ in it. Let 2 to the power $n$ be $y$: one block in the picture.'
+        say: 'Now every term has 2 to the power $n$ in it. Let 2 to the power $n$ be $y$, which is one block in the picture.'
         write: 'Let $2^{n} = y$'
         doodle: {name: 'custom:2000_q09_b', id: blocks, caption: 'y = 2ⁿ is one block', size: scene}
       - say: 'Then 2 to the power $n$ plus 1 is $2y$, two blocks, and 2 to the power $n$ minus 1 is $y$ over 2, half a block.'
@@ -449,7 +449,7 @@ lessons:
         doodle_do:
           - {id: blocks, op: stage, stage: 'custom:2000_q09_b2'}
       - section: 'Substitute'
-        say: 'Substitute into the fraction: on top, 3 times $2y$, minus 4 times $y$ over 2; underneath, $2y$ minus $y$.'
+        say: 'Substitute into the fraction. On top we have 3 times $2y$, minus 4 times $y$ over 2, and underneath, $2y$ minus $y$.'
         write: '$= \dfrac{3(2y) - 4\left(\dfrac{y}{2}\right)}{2y - y}$'
       - say: 'Open the brackets. 3 times $2y$ is $6y$, and 4 times $y$ over 2 is $2y$.'
         write: '$= \dfrac{6y - 2y}{2y - y}$'
@@ -464,7 +464,7 @@ lessons:
         doodle_do:
           - {id: blocks, op: circle, part: top, text: '4 blocks ÷ 1 block = 4'}
       - section: 'Check'
-        say: 'Check with $n$ equal to 1. On top, 3 times 2 squared is 12, minus 4 times 2 to the power 0, which is 4: 8. Underneath, 2 squared minus 2 is 2. 8 over 2 is 4.'
+        say: 'Check with $n$ equal to 1. On top, 3 times 2 squared is 12, minus 4 times 2 to the power 0, which is 4, giving 8. Underneath, 2 squared minus 2 is 2. 8 over 2 is 4.'
         write: 'Check, $n = 1$: $\dfrac{3(4) - 4(1)}{4 - 2} = \dfrac{8}{2} = 4\ \checkmark$'
       - section: 'Answer'
         say: 'Therefore the expression simplifies to 4, which is option C.'
@@ -483,19 +483,19 @@ lessons:
       - say: 'In base six the index numbers over four digits are three, two, one, nought. Six cubed is 216, and six squared is 36.'
         write: 'Solution'
       - section: 'Expand each numeral'
-        say: 'First numeral: P times 6 cubed, plus 3 times 6 squared, plus 4 times 6, plus 4 times 1.'
+        say: 'The first numeral is P times 6 cubed, plus 3 times 6 squared, plus 4 times 6, plus 4 times 1.'
         write: '$\overset{3}{P}\,\overset{2}{3}\,\overset{1}{4}\,\overset{0}{4}_{6} = P \times 6^{3} + 3 \times 6^{2} + 4 \times 6^{1} + 4 \times 6^{0}$'
       - say: 'P times 216 is 216P. 3 times 36 is 108, 4 times 6 is 24, and 4 times 1 is 4.'
         write: '$= 216P + 108 + 24 + 4$'
       - say: '108 plus 24 plus 4 is 136.'
         write: '$= 216P + 136$'
-      - say: 'Second numeral: 2 times 6 cubed, plus 3 times 6 squared, plus P times 6, plus 2.'
+      - say: 'The second numeral is 2 times 6 cubed, plus 3 times 6 squared, plus P times 6, plus 2.'
         write: '$\overset{3}{2}\,\overset{2}{3}\,\overset{1}{P}\,\overset{0}{2}_{6} = 2 \times 6^{3} + 3 \times 6^{2} + P \times 6^{1} + 2 \times 6^{0}$'
       - say: '2 times 216 is 432, 3 times 36 is 108, P times 6 is 6P, and then 2.'
         write: '$= 432 + 108 + 6P + 2$'
       - say: '432 plus 108 plus 2 is 542.'
         write: '$= 542 + 6P$'
-      - say: 'Third numeral: 2 times 6 cubed, plus P times 6 squared, plus P times 6, plus 2.'
+      - say: 'The third numeral is 2 times 6 cubed, plus P times 6 squared, plus P times 6, plus 2.'
         write: '$\overset{3}{2}\,\overset{2}{P}\,\overset{1}{P}\,\overset{0}{2}_{6} = 2 \times 6^{3} + P \times 6^{2} + P \times 6^{1} + 2 \times 6^{0}$'
       - say: '2 times 216 is 432, P times 36 is 36P, P times 6 is 6P, and then 2.'
         write: '$= 432 + 36P + 6P + 2$'
@@ -542,7 +542,7 @@ lessons:
       - say: 'Solution. We find the two factors one at a time, then multiply.'
         write: 'Solution'
       - section: 'The first factor'
-        say: 'Let the first factor be $P$: $P$ equals 5 to the power minus 3 log base 5 of 2.'
+        say: 'Let the first factor be $P$, so $P$ equals 5 to the power minus 3 log base 5 of 2.'
         write: 'Let $P = 5^{-3\log_{5}2}$'
       - say: 'Take log base 5 of both sides.'
         write: '$\log_{5}P = \log_{5}5^{-3\log_{5}2}$'
@@ -550,26 +550,26 @@ lessons:
         write: '$\log_{5}P = -3\log_{5}2 \times \log_{5}5 = -3\log_{5}2$'
       - say: 'By the power law again, the minus 3 in front goes up as an index of 2.'
         write: '$\log_{5}P = \log_{5}2^{-3}$ $\quad [n\log M = \log M^{n}]$'
-      - say: 'Both sides are logs to base 5, so the numbers inside are equal: $P$ is 2 to the power minus 3.'
+      - say: 'Both sides are logs to base 5, so the numbers inside are equal, and $P$ is 2 to the power minus 3.'
         write: '$P = 2^{-3}$'
       - say: 'By the negative index law, 2 to the minus 3 is 1 over 2 cubed, which is 1 over 8.'
         write: '$P = \dfrac{1}{2^{3}} = \dfrac{1}{8}$'
       - section: 'The second factor'
-        say: 'Let the second factor be $Q$: $Q$ equals 2 to the power 2 log base 2 of 3. Take log base 2 of both sides.'
+        say: 'Let the second factor be $Q$, so $Q$ equals 2 to the power 2 log base 2 of 3. Take log base 2 of both sides.'
         write: 'Let $Q = 2^{2\log_{2}3} \Rightarrow \log_{2}Q = 2\log_{2}3 \times \log_{2}2$'
       - say: 'Log base 2 of 2 is 1. By the power law, 2 log base 2 of 3 is log base 2 of 3 squared, which is log base 2 of 9.'
         write: '$\log_{2}Q = \log_{2}3^{2} = \log_{2}9$'
       - say: 'Both sides are logs to base 2, so $Q$ is 9.'
         write: '$Q = 9$'
       - section: 'Multiply'
-        say: 'Now multiply the two factors: 1 over 8, times 9.'
+        say: 'Now multiply the two factors, which gives 1 over 8, times 9.'
         write: '$5^{-3\log_{5}2} \times 2^{2\log_{2}3} = \dfrac{1}{8} \times 9$'
       - say: '1 over 8 times 9 is 9 over 8.'
         write: '$= \dfrac{9}{8}$'
       - say: '8 goes into 9 once, with 1 left over. So 9 over 8 is 1 and 1 over 8.'
         write: '$= 1\tfrac{1}{8}$'
       - section: 'Exam tip'
-        say: 'Exam tip: what we just did gives a rule. $a$ to the power log base $a$ of $k$ is just $k$. In the picture, 1 over 8 goes in, through log base 5, then 5 to the power, and comes out unchanged.'
+        say: 'Here is an exam tip. What we just did gives a rule, that $a$ to the power log base $a$ of $k$ is just $k$. In the picture, 1 over 8 goes in, through log base 5, then 5 to the power, and comes out unchanged.'
         doodle: {name: 'custom:2000_q11_a', id: mach, caption: 'log₅, then 5 to the power', size: scene}
         doodle_do:
           - {id: mach, op: move, part: card, path: through}
@@ -603,7 +603,7 @@ lessons:
       - section: 'Factorise'
         say: 'To factorise, find the product and the sum. The product is 1 times minus 2, which is minus 2. The sum is the coefficient of $a$, which is 1.'
         write: 'Product $= -2$, Sum $= 1$'
-      - say: 'We need two numbers that multiply to minus 2 and add to 1. They are 2 and minus 1: 2 times minus 1 is minus 2, and 2 plus minus 1 is 1.'
+      - say: 'We need two numbers that multiply to minus 2 and add to 1. They are 2 and minus 1, because 2 times minus 1 is minus 2, and 2 plus minus 1 is 1.'
         write: 'Factors: $2,\ -1$'
       - say: 'Replace the middle term, $a$, with $2a$ minus $a$.'
         write: '$a^{2} + 2a - a - 2 = 0$'
@@ -616,7 +616,7 @@ lessons:
       - say: 'So $a$ is minus 2 or 1.'
         write: '$\therefore a = -2$ or $a = 1$'
       - section: 'Check'
-        say: 'Check $a$ equals 1: 1 squared is 1, and 2 minus 1 is 1. Check $a$ equals minus 2: minus 2 squared is 4, and 2 minus minus 2 is 4.'
+        say: 'Check $a$ equals 1, where 1 squared is 1, and 2 minus 1 is 1. Check $a$ equals minus 2, where minus 2 squared is 4, and 2 minus minus 2 is 4.'
         write: 'Check: $1^{2} = 1 = 2 - 1,\ \ (-2)^{2} = 4 = 2 - (-2)\ \checkmark$'
       - section: 'Answer'
         say: 'Therefore the possible values of $a$ are 1 and minus 2, which is option D.'
@@ -659,9 +659,9 @@ lessons:
         doodle_do:
           - {id: stairs, op: label, part: rise, text: 'd = x − y'}
       - section: 'Check'
-        say: 'Check. Substitute $d$ in equation 1: $a$ is $4x$ minus $2y$, minus 2 times, $x$ minus $y$, which is $2x$.'
+        say: 'Check. Substitute $d$ in equation 1, so $a$ is $4x$ minus $2y$, minus 2 times, $x$ minus $y$, which is $2x$.'
         write: 'Check: $a = 4x - 2y - 2(x - y) = 2x$'
-      - say: 'Then the 9th term is $2x$ plus 8 times, $x$ minus $y$: $2x$ plus $8x$ minus $8y$, which is $10x$ minus $8y$. Correct.'
+      - say: 'Then the 9th term is $2x$ plus 8 times, $x$ minus $y$, which is $2x$ plus $8x$ minus $8y$, or $10x$ minus $8y$. Correct.'
         write: '$T_{9} = 2x + 8(x - y) = 10x - 8y\ \checkmark$'
       - say: 'Therefore the common difference is $x$ minus $y$, which is answer choice C.'
         write: '$\therefore\ d = x - y$'
@@ -677,19 +677,19 @@ lessons:
         say: 'The inverse of a letter, not a number. The answer is a formula in $p$, so the sign work must be careful. We find the identity first, then the inverse.'
         write: '$p * q = p + q - pq$, identity $= 0$. Find the inverse of $p$.'
       - section: 'The identity'
-        say: 'Solution. Let $e$ be the identity element: $p$ star $e$ equals $e$ star $p$ equals $p$.'
+        say: 'Solution. Let $e$ be the identity element, so $p$ star $e$ equals $e$ star $p$ equals $p$.'
         write: 'Solution: let $e$ be the identity: $p * e = e * p = p$'
       - say: 'Substitute $e$ for $q$ in the rule, and set it equal to $p$.'
         write: '$p + e - pe = p$'
       - say: 'Subtract $p$ from both sides. The $p$ on each side cancels.'
         write: '$e - pe = 0$'
-      - say: 'Factorise: $e$ times, bracket, 1 minus $p$, equals 0. This holds for every $p$, so $e$ is 0, as the question says.'
+      - say: 'Factorise, so $e$ times, bracket, 1 minus $p$, equals 0. This holds for every $p$, so $e$ is 0, as the question says.'
         write: '$e(1 - p) = 0$ $\therefore e = 0$'
       - section: 'The inverse'
         say: 'Let $p$ inverse be the inverse of $p$. Then $p$ star $p$ inverse equals the identity, 0.'
         write: 'Let $p^{-1}$ be the inverse of $p$: $p * p^{-1} = e = 0$'
         doodle: {name: 'custom:2000_q14_a', id: star, caption: 'p and its inverse give 0'}
-      - say: 'Use the rule with $p$ inverse in place of $q$: $p$ plus $p$ inverse, minus $p$ times $p$ inverse, equals 0.'
+      - say: 'Use the rule with $p$ inverse in place of $q$, so $p$ plus $p$ inverse, minus $p$ times $p$ inverse, equals 0.'
         write: '$p + p^{-1} - p\,p^{-1} = 0$'
       - say: 'Keep the $p$ inverse terms on the left. Subtract $p$ from both sides.'
         write: '$p^{-1} - p\,p^{-1} = -p$'
@@ -702,7 +702,7 @@ lessons:
         doodle_do:
           - {id: star, op: label, part: slotq, text: 'p/(p − 1)'}
       - section: 'Check'
-        say: 'Check: $p$ star $p$ over $p$ minus 1. By the rule, $p$ plus $p$ over $p$ minus 1, minus $p$ squared over $p$ minus 1.'
+        say: 'To check, take $p$ star $p$ over $p$ minus 1. By the rule, that is $p$ plus $p$ over $p$ minus 1, minus $p$ squared over $p$ minus 1.'
         write: 'Check: $p * \dfrac{p}{p - 1} = p + \dfrac{p}{p - 1} - \dfrac{p^{2}}{p - 1}$'
       - say: 'Put everything over $p$ minus 1. The top is $p$ squared minus $p$, plus $p$, minus $p$ squared, which is 0. So the result is the identity, 0.'
         write: '$= \dfrac{p^{2} - p + p - p^{2}}{p - 1} = 0\ \checkmark$'
@@ -726,14 +726,14 @@ lessons:
         write: '$P = \begin{pmatrix} a & b \\ c & d \end{pmatrix},\quad P^{T} = P,\quad b = 1$'
         doodle: {name: 'custom:2000_q15_a', id: grid, caption: 'rows become columns'}
       - section: 'Solution'
-        say: 'Solution. The transpose turns rows into columns: the first row, $a$, $b$, becomes the first column, and the second row, $c$, $d$, becomes the second column.'
+        say: 'Solution. The transpose turns rows into columns, so the first row, $a$, $b$, becomes the first column, and the second row, $c$, $d$, becomes the second column.'
         write: 'Solution: $P^{T} = \begin{pmatrix} a & c \\ b & d \end{pmatrix}$'
         doodle_do:
           - {id: grid, op: circle, part: diag, text: 'a and d stay', 'on': 'transpose'}
           - {id: grid, op: pulse, part: swap, 'on': 'second column'}
       - say: '$P$ transpose equals $P$, and two matrices are equal when their matching entries are equal.'
         write: '$\begin{pmatrix} a & c \\ b & d \end{pmatrix} = \begin{pmatrix} a & b \\ c & d \end{pmatrix}$'
-      - say: 'The entries on the leading diagonal match already: $a$ equals $a$, $d$ equals $d$. The top-right entries give the only condition: $c$ equals $b$.'
+      - say: 'The entries on the leading diagonal match already, since $a$ equals $a$ and $d$ equals $d$. The top-right entries give the only condition, which is $c$ equals $b$.'
         write: 'Top right: $c = b$'
       - say: 'We are given $b$ equals 1, so $c$ is 1 as well.'
         write: '$\therefore\ c = b = 1$'
@@ -744,7 +744,7 @@ lessons:
       - section: 'Check the options'
         say: 'Compare the options with this form. B, C and D all have negative 1 in the bottom left, so they fail.'
         write: 'B, C, D: bottom left $= -1 \neq 1$'
-      - say: 'Option A has 1 in both places. Check: transposing it swaps two 1s, so it gives back the same matrix.'
+      - say: 'Option A has 1 in both places. To check, transposing it swaps two 1s, so it gives back the same matrix.'
         write: 'Check: $\begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}^{T} = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}\ \checkmark$'
         doodle_do:
           - {id: grid, op: pulse, part: mirror}
@@ -759,7 +759,7 @@ lessons:
   16:
     moments:
       - section: 'The question'
-        say: 'Inside the bracket is a series that goes on forever: a half, minus a quarter, plus 1 over 8, minus 1 over 16, and so on. Then the whole bracket is raised to the power minus 1.'
+        say: 'Inside the bracket is a series that goes on forever, a half, minus a quarter, plus 1 over 8, minus 1 over 16, and so on. Then the whole bracket is raised to the power minus 1.'
         write: '$\left(\tfrac{1}{2} - \tfrac{1}{4} + \tfrac{1}{8} - \tfrac{1}{16} + \ldots\right)^{-1}$'
       - section: 'Solution'
         say: 'Solution. Each term is the one before it times the same number, so the series is a geometric progression, a G.P. The first term, $a$, is a half.'
@@ -781,7 +781,7 @@ lessons:
         doodle_do:
           - {id: walk, op: stage, stage: 'custom:2000_q16_a2'}
       - section: 'The power minus 1'
-        say: 'A power of minus 1 means the reciprocal: $a$ to the minus 1 is 1 over $a$. So we flip 1 over 3.'
+        say: 'A power of minus 1 means the reciprocal, so $a$ to the minus 1 is 1 over $a$. So we flip 1 over 3.'
         write: '$\left(\dfrac{1}{3}\right)^{-1} = \dfrac{3}{1} = 3$'
         doodle_do:
           - {id: walk, op: label, part: flag, text: 'flip ⅓: 3'}
@@ -804,14 +804,14 @@ lessons:
       - section: 'First inequality'
         say: 'Solution. Make $y$ the subject of each. The first says $y$ is at least $2x$ minus 2.'
         write: 'Solution: (1) $\ y \ge 2x - 2$'
-      - say: 'Its boundary is the line $y$ equals $2x$ minus 2: gradient 2, cutting the $y$-axis at minus 2. "At least" means the region above it.'
+      - say: 'Its boundary is the line $y$ equals $2x$ minus 2, with gradient 2, cutting the $y$-axis at minus 2. "At least" means the region above it.'
         write: 'Line $y = 2x - 2$: gradient 2, region above'
         point:
           - {figure: 0, kind: circle, target: {x: 60, y: 275}, text: 'cuts y-axis at −2'}
       - section: 'Second inequality'
-        say: 'The second: add 2 to both sides, then divide by 2. 2 is positive, so the sign stays.'
+        say: 'For the second, add 2 to both sides, then divide by 2. 2 is positive, so the sign stays.'
         write: '(2) $\ 2y \le x + 2 \Rightarrow y \le \tfrac{1}{2}x + 1$'
-      - say: 'Its boundary is $y$ equals a half $x$ plus 1: gradient a half, cutting the $y$-axis at 1. "At most" means the region below it.'
+      - say: 'Its boundary is $y$ equals a half $x$ plus 1, with gradient a half, cutting the $y$-axis at 1. "At most" means the region below it.'
         write: 'Line $y = \tfrac{1}{2}x + 1$: gradient $\tfrac{1}{2}$, region below'
         point:
           - {figure: 0, kind: circle, target: {x: 60, y: 245}, text: 'cuts y-axis at 1'}
@@ -820,9 +820,9 @@ lessons:
         point:
           - {figure: 0, kind: strike, target: 'B', text: 'slopes down'}
       - section: 'Where they cross'
-        say: 'Where do the lines cross? Solve them simultaneously: set the two right-hand sides equal, and multiply by 2.'
+        say: 'Where do the lines cross? Solve them simultaneously by setting the two right-hand sides equal, and multiplying by 2.'
         write: '$2x - 2 = \tfrac{1}{2}x + 1 \Rightarrow 4x - 4 = x + 2$'
-      - say: 'Subtract $x$ and add 4 on both sides: $3x$ equals 6, so $x$ is 2. Then $y$ is 2 times 2 minus 2, which is 2.'
+      - say: 'Subtract $x$ and add 4 on both sides, so $3x$ equals 6, and $x$ is 2. Then $y$ is 2 times 2 minus 2, which is 2.'
         write: '$3x = 6 \Rightarrow x = 2,\ \ y = 2(2) - 2 = 2$'
         point:
           - {figure: 0, kind: label, target: {x: 80, y: 235}, text: '(2, 2)'}
@@ -831,11 +831,11 @@ lessons:
         write: 'Test $(0,\ 0)$: $\ 0 \ge -2\ \checkmark,\ \ 0 \le 1\ \checkmark$'
         point:
           - {figure: 0, kind: circle, target: {x: 60, y: 255}, text: 'origin'}
-      - say: 'So the region is above the steep line and below the gentle one: the wedge with its point at 2, 2, opening to the left over the origin.'
+      - say: 'So the region is above the steep line and below the gentle one, which is the wedge with its point at 2, 2, opening to the left over the origin.'
         write: '$\therefore$ wedge from $(2,\ 2)$ containing the origin'
         point:
           - {figure: 0, kind: arrow, target: {x: 35, y: 280}, text: 'origin inside'}
-      - say: 'That is graph C: option C.'
+      - say: 'That is graph C, which is option C.'
         write: 'Graph C'
         answer: true
         point:
@@ -852,7 +852,7 @@ lessons:
         write: '$\begin{vmatrix} t - 4 & 0 & 0 \\ -1 & t + 1 & 1 \\ 3 & 4 & t - 2 \end{vmatrix} = 0$'
         doodle: {name: 'custom:2000_q18_a', id: grid, caption: 'first row: t − 4, then two zeros'}
       - section: 'Solution'
-        say: 'Solution. Expand along the first row: $t - 4$, 0 and 0, with the signs plus, minus, plus. Each entry multiplies its minor, and the two zeros give zero terms.'
+        say: 'Solution. Expand along the first row, which is $t - 4$, 0 and 0, with the signs plus, minus, plus. Each entry multiplies its minor, and the two zeros give zero terms.'
         write: 'Solution: $(t - 4)\begin{vmatrix} t + 1 & 1 \\ 4 & t - 2 \end{vmatrix} - 0 + 0 = 0$'
         doodle_do:
           - {id: grid, op: highlight, part: pivot, 'on': 'first row'}
@@ -862,12 +862,12 @@ lessons:
         doodle_do:
           - {id: grid, op: stage, stage: 'custom:2000_q18_a2', 'on': 'cover'}
           - {id: grid, op: circle, part: minor, 'on': 'cover'}
-      - say: 'Expand the bracket: $t$ times $t$ is $t^{2}$, $t$ times negative 2 is negative $2t$, 1 times $t$ is $t$, 1 times negative 2 is negative 2. Then minus 4.'
+      - say: 'Expand the bracket. $t$ times $t$ is $t^{2}$, $t$ times negative 2 is negative $2t$, 1 times $t$ is $t$, and 1 times negative 2 is negative 2. Then minus 4.'
         write: '$(t - 4)(t^{2} - 2t + t - 2 - 4) = 0$'
       - say: 'Collect like terms. Negative $2t$ plus $t$ is negative $t$, and negative 2 minus 4 is negative 6.'
         write: '$(t - 4)(t^{2} - t - 6) = 0$'
       - section: 'Factorise the quadratic'
-        say: 'Factorise $t^{2} - t - 6$. Product is negative 6, sum is negative 1. The factors are negative 3 and plus 2: they multiply to negative 6 and add to negative 1.'
+        say: 'Factorise $t^{2} - t - 6$. Product is negative 6, sum is negative 1. The factors are negative 3 and plus 2, because they multiply to negative 6 and add to negative 1.'
         write: 'Product $= -6$, Sum $= -1$; Factors: $-3,\ +2$'
       - say: 'Replace the middle term, negative $t$, with negative $3t$ plus $2t$.'
         write: '$t^{2} - t - 6 = t^{2} - 3t + 2t - 6$'
@@ -895,13 +895,13 @@ lessons:
   19:
     moments:
       - section: 'The question'
-        say: 'Three factors, three unknowns. Each factor gives us one equation, by the factor theorem. Picture the cubic as a machine: feed in the right number, and out comes 0.'
+        say: 'Three factors, three unknowns. Each factor gives us one equation, by the factor theorem. Picture the cubic as a machine, so when you feed in the right number, out comes 0.'
         write: '$(x - 1),\ (x + 1),\ (x - 2)$ are factors of $ax^{3} + bx^{2} + cx - 1$'
         doodle: {name: 'custom:2000_q19_a', id: cubic, caption: 'feed in a root, out comes 0', 'on': 'machine'}
       - section: 'Solution'
-        say: 'Solution. Give the polynomial a name: $f$ of $x$.'
+        say: 'Solution. Give the polynomial a name, $f$ of $x$.'
         write: 'Let $f(x) = ax^{3} + bx^{2} + cx - 1$'
-      - say: 'The factor theorem: $x - p$ is a factor of $f(x)$ when $f(p)$ is zero. So each factor gives an equation.'
+      - say: 'The factor theorem says $x - p$ is a factor of $f(x)$ when $f(p)$ is zero. So each factor gives an equation.'
         write: 'Factor theorem: $(x - p)$ is a factor $\Rightarrow f(p) = 0$'
       - section: 'Three equations'
         say: 'First factor, $x - 1$. Let $x - 1$ equal zero, therefore $x$ is 1.'
@@ -927,7 +927,7 @@ lessons:
       - say: 'That is $8a$ plus $4b$ plus $2c$ minus 1 equals zero. Add 1 to both sides. Call it equation 3.'
         write: '$8a + 4b + 2c = 1 \quad \ldots\ldots (3)$'
       - section: 'Solve the equations'
-        say: 'Look at equations 1 and 2: plus $a$ and minus $a$, plus $c$ and minus $c$. Add them, and both cancel.'
+        say: 'Look at equations 1 and 2, with plus $a$ and minus $a$, plus $c$ and minus $c$. Add them, and both cancel.'
         write: '(1) + (2): $\ 2b = 2$'
         point:
           - {line: 5, kind: circle, at: 'a + b + c'}
@@ -970,7 +970,7 @@ lessons:
         doodle: {name: 'custom:2000_q20_a', id: corn, caption: 'Profit ₦(10x − x²) on x bags'}
         write: 'Let the profit be $P$: $\ P = 10x - x^{2}$'
       - section: 'Solution'
-        say: 'Solution. Differentiate with respect to $x$. $10x$ gives 10. For $x$ squared, bring down the 2 and reduce the power by 1: $2x$.'
+        say: 'Solution. Differentiate with respect to $x$. $10x$ gives 10. For $x$ squared, bring down the 2 and reduce the power by 1, which gives $2x$.'
         write: 'Solution: $\dfrac{dP}{dx} = 10 - 2x$'
         diagram:
           id: g
@@ -983,10 +983,10 @@ lessons:
           plots:
             - {fn: '10x - x^2', label: 'P = 10x − x²', colour: blue}
       - section: 'Turning point'
-        say: 'At the turning point, the gradient is zero. So we write: at turning point, $\dfrac{dP}{dx}$ equals 0.'
+        say: 'At the turning point, the gradient is zero. So we write that at turning point, $\dfrac{dP}{dx}$ equals 0.'
         'on': 'turning point'
         write: 'At turning point, $\dfrac{dP}{dx} = 0$'
-      - say: 'So 10 minus $2x$ equals 0. Add $2x$ to both sides: $2x$ equals 10.'
+      - say: 'So 10 minus $2x$ equals 0. Add $2x$ to both sides, and $2x$ equals 10.'
         write: '$10 - 2x = 0 \Rightarrow 2x = 10$'
       - say: 'Divide both sides by 2. $x$ equals 5.'
         write: '$x = \dfrac{10}{2} = 5$'
@@ -995,17 +995,17 @@ lessons:
       - section: 'Maximum or minimum?'
         say: 'Differentiate again. 10 gives 0, and minus $2x$ gives minus 2.'
         write: '$\dfrac{d^{2}P}{dx^{2}} = -2$'
-      - say: 'The second derivative is negative, less than zero, so the turning point is a maximum: the top of the hill.'
+      - say: 'The second derivative is negative, less than zero, so the turning point is a maximum, the top of the hill.'
         'on': 'negative'
         write: '$\dfrac{d^{2}P}{dx^{2}} = -2 < 0$, $\ \therefore$ maximum'
         diagram_do:
           - {id: g, op: vertex, part: 'plot:1', text: 'maximum', 'on': 'maximum'}
-      - say: 'The maximum profit itself is 10 times 5, minus 5 squared: 50 minus 25, which is 25 naira.'
+      - say: 'The maximum profit itself is 10 times 5, minus 5 squared, so 50 minus 25, which is 25 naira.'
         write: '$P_{\max} = 10(5) - 5^{2} = 50 - 25 = 25$'
         doodle_do:
           - {id: corn, op: label, part: coin, text: '₦25, the most'}
       - section: 'Check'
-        say: 'Exam tip, as a check: for a quadratic, the turning point is at $x$ equals minus $b$ over $2a$. Here $a$ is minus 1 and $b$ is 10.'
+        say: 'Here is an exam tip, as a check. For a quadratic, the turning point is at $x$ equals minus $b$ over $2a$. Here $a$ is minus 1 and $b$ is 10.'
         write: 'Exam tip: $x = -\dfrac{b}{2a} = -\dfrac{10}{2(-1)} = 5\ \checkmark$'
       - say: 'Therefore 5 bags give the maximum profit, which is option B.'
         write: '$\therefore$ maximum profit at $x = 5$ bags'
@@ -1024,10 +1024,10 @@ lessons:
         write: '$2 - x > x^{2}$'
       - say: 'Solution. Bring everything to the right-hand side, so that $x$ squared stays positive. Subtract 2 and add $x$ on both sides.'
         write: 'Solution: $\ 0 > x^{2} + x - 2$'
-      - say: 'Read it the other way round: $x$ squared plus $x$ minus 2 is less than zero.'
+      - say: 'Read it the other way round, so $x$ squared plus $x$ minus 2 is less than zero.'
         write: '$x^{2} + x - 2 < 0$'
       - section: 'Factorise'
-        say: 'Product and sum. The product is minus 2 and the sum is 1. Plus 2 and minus 1 work: they multiply to minus 2 and add to 1.'
+        say: 'Product and sum. The product is minus 2 and the sum is 1. Plus 2 and minus 1 work, because they multiply to minus 2 and add to 1.'
         write: 'Product $= -2$, $\ $Sum $= 1$: $\ +2,\ -1$'
       - say: 'Split the middle term, $x$, into $2x$ minus $x$.'
         write: '$x^{2} + 2x - x - 2 < 0$'
@@ -1035,10 +1035,10 @@ lessons:
         write: '$x(x + 2) - 1(x + 2) < 0$'
       - say: 'Take out the common bracket, $x$ plus 2.'
         write: '$(x - 1)(x + 2) < 0$'
-      - say: 'Critical values: $x$ minus 1 is zero at 1, and $x$ plus 2 is zero at minus 2.'
+      - say: 'For the critical values, $x$ minus 1 is zero at 1, and $x$ plus 2 is zero at minus 2.'
         write: 'Critical values: $\ x = -2,\ \ x = 1$'
       - section: 'Sign table'
-        say: 'Now the sign table: three regions, one row for each bracket, then the product.'
+        say: 'Now the sign table, with three regions, one row for each bracket, then the product.'
         diagram:
           id: t
           kind: table
@@ -1054,7 +1054,7 @@ lessons:
           - {id: t, op: fill, part: 'cell:2,2', text: '−'}
           - {id: t, op: fill, part: 'cell:2,3', text: '−'}
           - {id: t, op: fill, part: 'cell:2,4', text: '+'}
-      - say: 'Multiply down each column: plus, minus, plus. The product is negative only in the middle.'
+      - say: 'Multiply down each column, which gives plus, minus, plus. The product is negative only in the middle.'
         diagram_do:
           - {id: t, op: fill, part: 'cell:3,2', text: '+'}
           - {id: t, op: fill, part: 'cell:3,3', text: '−', colour: green}
@@ -1062,14 +1062,14 @@ lessons:
       - section: 'Answer'
         say: 'We want less than zero, so the middle column.'
         write: '$\therefore\ -2 < x < 1$'
-      - say: 'On a number line: open circles at minus 2 and 1, and the stretch between.'
+      - say: 'On a number line, we draw open circles at minus 2 and 1, and the stretch between.'
         diagram: {id: n, kind: numberline, range: [-4, 3]}
         diagram_do:
           - {id: n, op: interval, from: -2, to: 1, from_open: true, to_open: true, text: '−2 < x < 1', answer: true, 'on': 'open circles'}
       - section: 'Check'
-        say: 'Check $x$ equals 0, inside: 2 minus 0 is 2, and 0 squared is 0. 2 is greater than 0. And $x$ equals 2, outside: 0 is not greater than 4.'
+        say: 'Check $x$ equals 0, inside. 2 minus 0 is 2, and 0 squared is 0. 2 is greater than 0. And for $x$ equals 2, outside, 0 is not greater than 4.'
         write: 'Check: $\ x = 0$: $2 > 0\ \checkmark$; $\ x = 2$: $0 > 4\ \times$'
-      - say: 'So $x$ lies between minus 2 and 1: option D.'
+      - say: 'So $x$ lies between minus 2 and 1, which is option D.'
         write: '$-2 < x < 1$'
         answer: true
     traps:
@@ -1080,15 +1080,15 @@ lessons:
   22:
     moments:
       - section: 'The question'
-        say: 'Alpha and beta are the roots of this quadratic, and we want 1 over alpha plus 1 over beta. We never need the roots themselves: the coefficients tell us enough.'
+        say: 'Alpha and beta are the roots of this quadratic, and we want 1 over alpha plus 1 over beta. We never need the roots themselves, because the coefficients tell us enough.'
         write: '$3x^{2} + 5x - 2 = 0$, find $\dfrac{1}{\alpha} + \dfrac{1}{\beta}$'
       - section: 'Solution'
         say: 'Solution. Compare the equation with the general quadratic, $a$ $x$ squared plus $b$ $x$ plus $c$ equals zero, and list $a$, $b$ and $c$ first.'
         write: 'Compare with $ax^{2} + bx + c = 0$:'
-      - say: '$a$, the coefficient of $x$ squared, is 3. $b$, the number in front of $x$, is 5. $c$, the constant term, is minus 2: keep its sign.'
+      - say: '$a$, the coefficient of $x$ squared, is 3. $b$, the number in front of $x$, is 5. $c$, the constant term, is minus 2, so keep its sign.'
         write: '$a = 3,\ b = 5,\ c = -2$'
       - section: 'Sum and product of roots'
-        say: 'Recall: the sum of the roots, alpha plus beta, is minus $b$ over $a$.'
+        say: 'Recall that the sum of the roots, alpha plus beta, is minus $b$ over $a$.'
         write: '$\alpha + \beta = -\dfrac{b}{a}$'
       - say: 'Substitute $b$ equals 5 and $a$ equals 3. So alpha plus beta is minus 5 over 3. Keep the minus sign in front.'
         write: '$= -\dfrac{5}{3}$'
@@ -1106,7 +1106,7 @@ lessons:
         write: '$\dfrac{1}{\alpha} + \dfrac{1}{\beta} = \dfrac{\beta + \alpha}{\alpha\beta}$'
       - say: 'Beta plus alpha is the same as alpha plus beta. So what we want is the sum of the roots over the product of the roots.'
         write: '$= \dfrac{\alpha + \beta}{\alpha\beta}$'
-      - say: 'Substitute: minus 5 over 3 for the sum, divided by minus 2 over 3 for the product. Keep each one in brackets.'
+      - say: 'Substitute minus 5 over 3 for the sum, divided by minus 2 over 3 for the product. Keep each one in brackets.'
         write: '$= \left(-\dfrac{5}{3}\right) \div \left(-\dfrac{2}{3}\right)$'
         point:
           - {line: 9, kind: move, from: {line: 4, at: '−35'}, at: '(−35)', text: 'sum'}
@@ -1133,7 +1133,7 @@ lessons:
   23:
     moments:
       - section: 'The question'
-        say: 'We want the smallest value of $f$ of $\theta$: 2 over, 3 minus cos $\theta$, for $\theta$ from 0 to 2 pi. Only cos $\theta$ changes, so we start from its range.'
+        say: 'We want the smallest value of $f$ of $\theta$, which is 2 over, 3 minus cos $\theta$, for $\theta$ from 0 to 2 pi. Only cos $\theta$ changes, so we start from its range.'
         write: '$f(\theta) = \dfrac{2}{3 - \cos\theta}$, $\ 0 \le \theta \le 2\pi$'
       - section: 'Solution'
         say: 'Solution. For every angle, cos $\theta$ lies between minus 1 and 1.'
@@ -1145,7 +1145,7 @@ lessons:
       - say: 'So the denominator lies between 2 and 4.'
         write: '$2 \le 3 - \cos\theta \le 4$'
       - section: 'Smallest value'
-        say: 'The top is fixed at 2. A fraction with a fixed top is smallest when its bottom is biggest: 2 pizzas shared by more people give each a smaller share.'
+        say: 'The top is fixed at 2. A fraction with a fixed top is smallest when its bottom is biggest, just as 2 pizzas shared by more people give each a smaller share.'
         'on': 'smallest when'
         write: '$f$ is least when $3 - \cos\theta$ is greatest'
         doodle: {name: 'custom:2000_q23_a', id: pizza, caption: '2 pizzas, shared out', size: scene}
@@ -1155,12 +1155,12 @@ lessons:
           - {id: pizza, op: stage, stage: 'custom:2000_q23_a2'}
       - say: 'So the least value of $f$ is 2 over 4.'
         write: '$f_{\min} = \dfrac{2}{4}$'
-      - say: '2 over 4 reduces to 1 over 2: half a pizza each, the smallest share.'
+      - say: '2 over 4 reduces to 1 over 2, which is half a pizza each, the smallest share.'
         write: '$= \dfrac{1}{2}$'
         doodle_do:
           - {id: pizza, op: circle, part: four, text: 'the smallest share'}
       - section: 'Check'
-        say: 'Check by substituting $\theta$ equals pi: 3 minus minus 1 is 4, and 2 over 4 is a half. At the other end, the denominator 2 gives 1, the maximum.'
+        say: 'Check by substituting $\theta$ equals pi. 3 minus minus 1 is 4, and 2 over 4 is a half. At the other end, the denominator 2 gives 1, the maximum.'
         write: 'Check: $f(\pi) = \dfrac{2}{3 - (-1)} = \dfrac{2}{4} = \dfrac{1}{2}\ \checkmark$'
       - say: 'Therefore the minimum value is 1 over 2, which is answer choice A.'
         write: '$\therefore f_{\min} = \dfrac{1}{2}$'
@@ -1176,7 +1176,7 @@ lessons:
         say: 'A frustum is a big pyramid with a small pyramid cut off the top. The small pyramid has the same shape as the big one, so their sides and heights are in the same ratio.'
         write: 'Find the height of the pyramid.'
       - section: 'Solution'
-        say: 'Write Solution, then sketch the frustum: a 2 metre square on top, a 5 metre square at the bottom, 6 metres apart.'
+        say: 'Write Solution, then sketch the frustum, with a 2 metre square on top and a 5 metre square at the bottom, 6 metres apart.'
         write: 'Solution'
         show_sketch: true
         point:
@@ -1193,7 +1193,7 @@ lessons:
         write: 'Let the height of the pyramid be $h$ m'
         point:
           - {figure: sketch_b, kind: circle, target: 'h = ?', text: 'big pyramid', 'on': 'whole pyramid'}
-      - say: 'The small pyramid on top is the whole height minus the 6 metres of the frustum: $h$ minus 6.'
+      - say: 'The small pyramid on top is the whole height minus the 6 metres of the frustum, which is $h$ minus 6.'
         write: 'Height of small pyramid $= h - 6$'
         point:
           - {figure: sketch_b, kind: circle, target: 'h − 6', text: 'small pyramid', 'on': 'small pyramid'}
@@ -1203,12 +1203,12 @@ lessons:
       - section: 'The ratio'
         say: 'For similar solids, corresponding lengths are in the same ratio. So base side over base side equals height over height.'
         write: '$\dfrac{\text{side of small}}{\text{side of big}} = \dfrac{\text{height of small}}{\text{height of big}}$'
-      - say: 'Substitute: the small side is 2, the big side is 5, the small height is $h$ minus 6, the big height is $h$.'
+      - say: 'Now substitute. The small side is 2, the big side is 5, the small height is $h$ minus 6, and the big height is $h$.'
         write: '$\dfrac{2}{5} = \dfrac{h - 6}{h}$'
-      - say: 'Cross-multiply: 2 times $h$ equals 5 times, $h$ minus 6.'
+      - say: 'Cross-multiply, so 2 times $h$ equals 5 times, $h$ minus 6.'
         write: '$2h = 5(h - 6)$'
         'on': 'Cross-multiply'
-      - say: 'Expand the bracket: 5 times $h$ is $5h$, and 5 times 6 is 30.'
+      - say: 'Expand the bracket. 5 times $h$ is $5h$, and 5 times 6 is 30.'
         write: '$2h = 5h - 30$'
       - say: 'Collect the $h$ terms on one side and the numbers on the other.'
         write: '$30 = 5h - 2h$'
@@ -1221,7 +1221,7 @@ lessons:
         point:
           - {figure: sketch_b, kind: label, target: 'h = ?', text: '10 m', 'on': 'Therefore'}
       - section: 'Check'
-        say: 'Check: the small pyramid is 10 minus 6, which is 4 metres high. 4 over 10 is 2 over 5, the same ratio as the sides.'
+        say: 'To check, the small pyramid is 10 minus 6, which is 4 metres high. 4 over 10 is 2 over 5, the same ratio as the sides.'
         write: 'Check: $\dfrac{10 - 6}{10} = \dfrac{4}{10} = \dfrac{2}{5}$ ✓'
       - section: 'Answer'
         say: 'So the pyramid was 10.0 metres high, which is answer choice D.'
@@ -1252,7 +1252,7 @@ lessons:
         point:
           - {figure: sketch, kind: highlight, target: ST}
           - {figure: sketch, kind: highlight, target: UV}
-      - say: '$US$ crosses both parallel lines. Angles $VUS$ and $UST$ are between the parallels, on the same side of $US$: co-interior angles, which add up to 180.'
+      - say: '$US$ crosses both parallel lines. Angles $VUS$ and $UST$ are between the parallels, on the same side of $US$, so they are co-interior angles, which add up to 180.'
         write: '$\angle VUS + \angle UST = 180^{\circ}$ (co-int. $\angle$s, $ST \parallel UV$)'
         point:
           - {figure: sketch, kind: underline, target: US, text: 'transversal'}
@@ -1264,9 +1264,9 @@ lessons:
         point:
           - {figure: sketch, kind: label, target: '?', text: '130°'}
       - section: 'Check'
-        say: 'Check: 130 plus 50 is 180. And the angle at $S$ is obtuse while the angle at $U$ is acute, as co-interior angles are when they are not both 90.'
+        say: 'To check, 130 plus 50 is 180. And the angle at $S$ is obtuse while the angle at $U$ is acute, as co-interior angles are when they are not both 90.'
         write: 'Check: $130^{\circ} + 50^{\circ} = 180^{\circ}\ \checkmark$'
-      - say: 'Exam tip: alternate angles, the Z shape, are equal; co-interior angles, the C shape, add up to 180. Here we have a C shape.'
+      - say: 'Here is an exam tip. Alternate angles, the Z shape, are equal, and co-interior angles, the C shape, add up to 180. Here we have a C shape.'
         write: 'Z shape: equal; $\ $C shape: sum $= 180^{\circ}$'
       - say: 'Therefore angle $UST$ is 130 degrees, which is option B.'
         write: '$\therefore \angle UST = 130^{\circ}$'
@@ -1282,19 +1282,19 @@ lessons:
         say: 'A ship sails 50 km on S 50 degrees E, then 50 km on N 40 degrees E. Many students just add or subtract the two bearings. A bearing question needs a triangle.'
         write: '$50$ km on $S50^{\circ}E$, then $50$ km on $N40^{\circ}E$'
       - section: 'Solution'
-        say: 'Solution. Let me draw the voyage: start at $A$, turn at $B$, end at $C$. I put a North line at $A$ and at $B$. North lines are always parallel.'
+        say: 'Solution. Let me draw the voyage, starting at $A$, turning at $B$, and ending at $C$. I put a North line at $A$ and at $B$. North lines are always parallel.'
         write: 'Solution: N lines at $A$ and $B$ ($\parallel$)'
         show_sketch: true
         'on': 'North line'
         point:
           - {figure: sketch, kind: highlight, target: AB, text: '50 km'}
           - {figure: sketch, kind: highlight, target: BC, text: '50 km'}
-      - say: 'S 50 degrees E means: stand at $A$, face South, then turn 50 degrees towards East. So the angle between the South line at $A$ and $AB$ is 50 degrees.'
+      - say: 'S 50 degrees E means we stand at $A$, face South, then turn 50 degrees towards East. So the angle between the South line at $A$ and $AB$ is 50 degrees.'
         write: '$\angle SAB = 50^{\circ}$ (given, $S50^{\circ}E$)'
         point:
           - {figure: sketch, kind: arc, target: SAB, text: '50°'}
       - section: 'The angle inside at B'
-        say: 'Now stand at $B$. The North line at $B$ is parallel to the line $SA$, and $AB$ cuts both. So the angle between North at $B$ and $BA$ is also 50 degrees. The reason: alternate angles.'
+        say: 'Now stand at $B$. The North line at $B$ is parallel to the line $SA$, and $AB$ cuts both. So the angle between North at $B$ and $BA$ is also 50 degrees, because they are alternate angles.'
         write: '$\angle ABN = 50^{\circ}$ (alt. $\angle$s, N lines $\parallel$)'
         point:
           - {figure: sketch, kind: label, target: B, text: 'N to BA: 50° (alt.)'}
@@ -1302,7 +1302,7 @@ lessons:
         write: '$\angle NBC = 40^{\circ}$ (given, $N40^{\circ}E$)'
         point:
           - {figure: sketch, kind: circle, target: '40°', text: 'from N at B'}
-      - say: 'The angle inside the triangle at $B$ is the two together: 50 plus 40 is 90 degrees. A right angle.'
+      - say: 'The angle inside the triangle at $B$ is the two together, so 50 plus 40 is 90 degrees. A right angle.'
         write: '$\angle ABC = 50^{\circ} + 40^{\circ} = 90^{\circ}$'
         point:
           - {figure: sketch, kind: arc, target: ABC, text: '90°'}
@@ -1320,14 +1320,14 @@ lessons:
       - section: 'Back to a bearing'
         say: 'Now turn it back into a bearing, measured clockwise from North at $A$. $AB$ is 50 degrees short of South, and South is 180. So 180 minus 50 is 130.'
         write: 'Bearing of $B$ from $A = 180^{\circ} - 50^{\circ} = 130^{\circ}$'
-      - say: 'Let me join $A$ to $C$. $AC$ lies 45 degrees on the North side of $AB$, so we turn back 45 degrees: 130 minus 45 is 85.'
+      - say: 'Let me join $A$ to $C$. $AC$ lies 45 degrees on the North side of $AB$, so we turn back 45 degrees, and 130 minus 45 is 85.'
         write: 'Bearing of $C$ from $A = 130^{\circ} - 45^{\circ} = 085^{\circ}$'
         show_sketch: sketch_b
         'on': 'join'
         point:
           - {line: 9, kind: move, from: {line: 7, at: '= [[45∘]]'}, at: '− [[45∘]]', text: '∠BAC'}
           - {figure: sketch_b, kind: circle, target: '?', text: '085°'}
-      - say: 'A bearing is written in three figures: zero-eight-five degrees. In the compass form, 85 degrees from North towards East is N 85 degrees E.'
+      - say: 'A bearing is written in three figures, so it is zero-eight-five degrees. In the compass form, 85 degrees from North towards East is N 85 degrees E.'
         write: '$085^{\circ}$ is $N85^{\circ}E$'
       - section: 'Check'
         say: 'Check with SOH CAH TOA. Going North, the ship gains 50 cos 40. Going South, it loses 50 cos 50. The difference is 6.2 km North.'
@@ -1356,7 +1356,7 @@ lessons:
         write: 'Solution: $\angle BAC = 60^{\circ}$ (equilateral $\triangle$)'
         point:
           - {figure: sketch, kind: arc, target: BAC, text: '60°'}
-      - say: 'Join $O$ to $B$ and $C$. Angle $BOC$ at the centre stands on the same arc as angle $BAC$. The reason: the angle at the centre is twice the angle at the circumference.'
+      - say: 'Join $O$ to $B$ and $C$. Angle $BOC$ at the centre stands on the same arc as angle $BAC$. The reason is that the angle at the centre is twice the angle at the circumference.'
         show_sketch: sketch_b
         write: '$\angle BOC = 2 \times 60^{\circ} = 120^{\circ}$ ($\angle$ at centre $= 2 \times \angle$ at circumference)'
         point:
@@ -1381,7 +1381,7 @@ lessons:
         point:
           - {figure: sketch_b, kind: label, target: 'R = ?', text: '1 cm'}
       - section: 'Check'
-        say: 'Check with the sine rule: a side over the sine of the opposite angle equals the diameter, $2R$. Root 3 over sin 60 is root 3 over root 3 over 2, which is 2. So $2R$ is 2, and $R$ is 1.'
+        say: 'Check with the sine rule, where a side over the sine of the opposite angle equals the diameter, $2R$. Root 3 over sin 60 is root 3 over root 3 over 2, which is 2. So $2R$ is 2, and $R$ is 1.'
         write: 'Check: $\dfrac{\sqrt{3}}{\sin 60^{\circ}} = 2 = 2R\ \checkmark$'
       - say: 'Therefore the radius of the circle is 1 cm, which is option C.'
         write: '$\therefore R = 1$ cm'
@@ -1401,7 +1401,7 @@ lessons:
         write: 'Solution: for $\perp$ lines, $m_{1}m_{2} = -1$'
       - say: 'First line. Divide 3 $y$ equals 4 $x$ minus 1 all through by 3, to make $y$ the subject.'
         write: '$y = \dfrac{4}{3}x - \dfrac{1}{3}$ (divide by 3)'
-      - say: 'The gradient is the coefficient of $x$. So $m$ 1 is 4 over 3: the line goes up 4 for every 3 along.'
+      - say: 'The gradient is the coefficient of $x$. So $m$ 1 is 4 over 3, meaning the line goes up 4 for every 3 along.'
         write: '$\therefore m_{1} = \dfrac{4}{3}$'
         point:
           - {line: 3, kind: move, from: {line: 2, at: '= [[34]]x'}, at: '= [[34]]', text: 'gradient'}
@@ -1419,16 +1419,16 @@ lessons:
           - {line: 6, kind: move, from: {line: 5, at: '= [[K1]]'}, at: '× [[K1]]', text: 'm₂'}
         doodle_do:
           - {id: hill, op: pulse, part: hill1}
-      - say: 'Multiply the fractions: 4 times 1 over 3 times $K$ gives 4 over 3 $K$.'
+      - say: 'Multiply the fractions, and 4 times 1 over 3 times $K$ gives 4 over 3 $K$.'
         write: '$\dfrac{4}{3K} = -1$'
-      - say: 'Cross-multiply: 4 equals negative 1 times 3 $K$, which is negative 3 $K$.'
+      - say: 'Cross-multiply, so 4 equals negative 1 times 3 $K$, which is negative 3 $K$.'
         write: '$4 = -3K$'
       - say: 'Divide both sides by negative 3.'
         write: '$K = -\dfrac{4}{3}$'
         point:
           - {line: 9, kind: move, from: {line: 8, at: '[[−3]]K'}, at: 'K = [[−3]]4', text: 'divide'}
       - section: 'Check'
-        say: 'Check. With $K$ as negative 4 over 3, $m$ 2 is 1 over $K$, which is negative 3 over 4: down 3 for every 4 along. And 4 over 3 times negative 3 over 4 is negative 1.'
+        say: 'Check. With $K$ as negative 4 over 3, $m$ 2 is 1 over $K$, which is negative 3 over 4, so down 3 for every 4 along. And 4 over 3 times negative 3 over 4 is negative 1.'
         write: 'Check: $m_{2} = -\dfrac{3}{4}$, $\ \dfrac{4}{3} \times \left(-\dfrac{3}{4}\right) = -1\ \checkmark$'
         doodle_do:
           - {id: hill, op: stage, stage: 'custom:2000_q28_a2'}
@@ -1448,7 +1448,7 @@ lessons:
         point:
           - {figure: 0, kind: circle, target: '?', text: 'find'}
       - section: 'Solution'
-        say: 'Solution. The givens on the diagram: angle $RPS$ is 50 degrees, angle $RPQ$ is 30 degrees, and $PQ$ equals $QR$.'
+        say: 'Solution. The givens on the diagram are that angle $RPS$ is 50 degrees, angle $RPQ$ is 30 degrees, and $PQ$ equals $QR$.'
         write: 'Solution: $\angle RPS = 50^{\circ},\ \angle RPQ = 30^{\circ}$'
         point:
           - {figure: 0, kind: highlight, target: PQ}
@@ -1495,7 +1495,7 @@ lessons:
           - {figure: 0, kind: highlight, target: FH, text: 'diameter'}
           - {figure: 0, kind: highlight, target: GE, text: 'chord'}
       - section: 'Solution'
-        say: 'Solution. The givens on the diagram: $NH$ is 8 cm and the chord $GE$ is 24 cm.'
+        say: 'Solution. The givens on the diagram are that $NH$ is 8 cm and the chord $GE$ is 24 cm.'
         write: 'Solution: $NH = 8$ cm, $\ GE = 24$ cm'
         point:
           - {figure: 0, kind: circle, target: '8 cm'}
@@ -1505,7 +1505,7 @@ lessons:
         point:
           - {figure: 0, kind: underline, target: GN, text: '12'}
           - {figure: 0, kind: underline, target: NE, text: '12'}
-      - say: 'Chords $GE$ and $FH$ cross at $N$. The products of their parts are equal. The reason: intersecting chords.'
+      - say: 'Chords $GE$ and $FH$ cross at $N$. The products of their parts are equal, and the reason is intersecting chords.'
         write: '$FN \times NH = GN \times NE$ (intersecting chords)'
         point:
           - {figure: 0, kind: highlight, target: FN}
@@ -1514,11 +1514,11 @@ lessons:
         write: '$FN \times 8 = 12 \times 12$'
         point:
           - {line: 4, kind: move, from: {line: 2, at: '= [[12]] cm'}, at: '[[12]] × 12', text: 'GN, NE'}
-      - say: '12 times 12 is 144. Divide both sides by 8: 144 over 8 is 18.'
+      - say: '12 times 12 is 144. Divide both sides by 8, and 144 over 8 is 18.'
         write: '$FN = \dfrac{144}{8} = 18$ cm'
         point:
           - {figure: 0, kind: label, target: FN, text: '18'}
-      - say: 'The diameter is the two pieces either side of $N$: $FN$ plus $NH$.'
+      - say: 'The diameter is the two pieces either side of $N$, which is $FN$ plus $NH$.'
         write: '$FH = FN + NH = 18 + 8 = 26$ cm'
         point:
           - {figure: 0, kind: label, target: 'FH = ?', text: '26 cm'}
@@ -1547,7 +1547,7 @@ lessons:
       - section: 'Solution'
         say: 'Solution. A locus is the path traced by a moving point under a given condition. Here $X$ is equidistant, that is, at equal distances, from $P$ and $Q$.'
         write: 'Solution: $X$ is equidistant from $P$ and $Q$'
-      - say: 'Recall the four standard loci: a circle, the perpendicular bisector, a pair of parallel lines, and the angle bisector.'
+      - say: 'Recall the four standard loci. They are a circle, the perpendicular bisector, a pair of parallel lines, and the angle bisector.'
         write: 'Standard loci: circle; $\perp$ bisector; parallel lines; $\angle$ bisector'
       - say: 'The locus of points equidistant from two fixed points is the perpendicular bisector of the line joining them.'
         write: 'Equidistant from two points $\Rightarrow$ $\perp$ bisector of $PQ$'
@@ -1567,12 +1567,12 @@ lessons:
           - {figure: sketch, kind: arc, target: QMS, text: '90°'}
           - {figure: sketch, kind: circle, target: 'locus of X'}
       - section: 'Check'
-        say: 'Check one point: $M$ itself is halfway along $PQ$, so $MP$ equals $MQ$. And any $X$ on the line makes two mirror-image triangles, $XMP$ and $XMQ$.'
+        say: 'Check one point. $M$ itself is halfway along $PQ$, so $MP$ equals $MQ$. And any $X$ on the line makes two mirror-image triangles, $XMP$ and $XMQ$.'
         write: 'Check: $MP = MQ$; $\ XP = XQ$ for $X$ on $RS\ \checkmark$'
         point:
           - {figure: sketch, kind: highlight, target: XP}
           - {figure: sketch, kind: highlight, target: XQ}
-      - say: 'Leave the construction arcs showing in the exam: they are the evidence that earns the marks.'
+      - say: 'Leave the construction arcs showing in the exam, because they are the evidence that earns the marks.'
         write: 'Keep the arcs: they earn the marks'
       - say: 'Therefore the locus of $X$ is the perpendicular bisector of $PQ$, which is option D.'
         write: '$\therefore$ locus of $X$: the perpendicular bisector of $PQ$'
@@ -1585,7 +1585,7 @@ lessons:
   32:
     moments:
       - section: 'The question'
-        say: 'A regular polygon whose interior angle is double its exterior angle. Many students go for 3 or 4. Work through the exterior angle: it is the simpler one.'
+        say: 'We have a regular polygon whose interior angle is double its exterior angle. Many students go for 3 or 4. Work through the exterior angle, because it is the simpler one.'
         write: 'Regular polygon: int. $\angle = 2 \times$ ext. $\angle$; $n = ?$'
       - section: 'Solution'
         say: 'Solution. Let me sketch one corner of the polygon, with its interior and exterior angles.'
@@ -1600,7 +1600,7 @@ lessons:
           - {figure: sketch, kind: highlight, target: AD, text: 'straight line'}
       - say: 'Substitute $2e$ and $e$.'
         write: '$2e + e = 180^{\circ}$'
-      - say: '$2e$ plus $e$ is $3e$. Divide both sides by 3: 180 over 3 is 60.'
+      - say: '$2e$ plus $e$ is $3e$. Divide both sides by 3, and 180 over 3 is 60.'
         write: '$3e = 180^{\circ} \Rightarrow e = 60^{\circ}$'
         point:
           - {figure: sketch, kind: label, target: e, text: '60°'}
@@ -1613,7 +1613,7 @@ lessons:
         point:
           - {figure: sketch, kind: circle, target: 'n = ?', text: '6'}
       - section: 'Check'
-        say: 'Check with the interior angle formula: $n$ minus 2, times 180, over $n$. 4 times 180 over 6 is 120, and 120 is twice 60.'
+        say: 'Check with the interior angle formula, which is $n$ minus 2, times 180, over $n$. 4 times 180 over 6 is 120, and 120 is twice 60.'
         write: 'Check: $\dfrac{(6 - 2) \times 180^{\circ}}{6} = 120^{\circ} = 2 \times 60^{\circ}\ \checkmark$'
       - say: 'Therefore the polygon has 6 sides, a hexagon, which is option B.'
         write: '$\therefore n = 6$'
@@ -1642,7 +1642,7 @@ lessons:
       - say: 'The line is $y = x$. Call it equation 2.'
         write: '$y = x$ ... (2)'
       - section: 'Solve together'
-        say: 'Substitute equation 2 into equation 1: replace $y$ with $x$.'
+        say: 'Substitute equation 2 into equation 1, which means we replace $y$ with $x$.'
         write: 'Put (2) in (1): $x^{2} + x^{2} = 2$'
       - say: '$x$ squared plus $x$ squared is $2x$ squared.'
         write: '$2x^{2} = 2$'
@@ -1650,7 +1650,7 @@ lessons:
         write: '$x^{2} = 1$'
       - say: 'Take the square root of both sides, and remember both signs.'
         write: '$x = 1$ or $x = -1$'
-      - say: 'But the question says $x$ is from 0 to 2. 1 is in that range; negative 1 is not, so we reject it.'
+      - say: 'But the question says $x$ is from 0 to 2. 1 is in that range, but negative 1 is not, so we reject it.'
         write: 'Since $0 \le x \le 2$: $x = 1$ only'
         point:
           - {line: 8, kind: strike, at: 'x = −1', text: 'out of range', 'on': 'reject'}
@@ -1662,7 +1662,7 @@ lessons:
         point:
           - {figure: sketch, kind: circle, target: '(1, 1)', text: 'they meet', 'on': 'Therefore'}
       - section: 'Check'
-        say: 'Check in equation 1: 1 squared plus 1 squared is 2. And 1, 1 is on $y = x$.'
+        say: 'Check in equation 1. 1 squared plus 1 squared is 2. And 1, 1 is on $y = x$.'
         write: 'Check: $1^{2} + 1^{2} = 2$ ✓'
       - section: 'Answer'
         say: 'So they meet only at the point 1, 1, which is answer choice A.'
@@ -1692,14 +1692,14 @@ lessons:
           - {figure: 0, kind: circle, target: '0', text: 'from 0', 'on': 'equals 0'}
           - {figure: 0, kind: circle, target: '4', text: 'to 4', 'on': 'equals 4'}
       - section: 'The formula'
-        say: 'Area between two curves: the integral from $a$ to $b$ of the upper $y$ minus the lower $y$, $dx$.'
+        say: 'Area between two curves is the integral from $a$ to $b$ of the upper $y$ minus the lower $y$, $dx$.'
         write: 'Area $= \displaystyle\int_{a}^{b}\left(y_{\text{upper}} - y_{\text{lower}}\right)dx$'
         'on': 'Area between'
       - say: 'Each thin upright strip of the shading has height 16 minus $x$ squared, so substitute.'
         write: '$= \displaystyle\int_{0}^{4}\left(16 - x^{2}\right)dx$'
         point:
           - {figure: 0, kind: highlight, target: {x: 170, y: 95}, text: '16 − x²', 'on': 'strip'}
-      - say: 'The rule: add 1 to the power, and divide by the new power.'
+      - say: 'The rule is to add 1 to the power, and divide by the new power.'
         write: '$\displaystyle\int x^{n}\,dx = \dfrac{x^{n + 1}}{n + 1} + c$'
       - section: 'Integrate'
         say: 'So 16 integrates to $16x$, and $x$ squared integrates to $x$ cubed over 3. The limits go on the square bracket.'
@@ -1708,7 +1708,7 @@ lessons:
         write: '$= \left(16(4) - \dfrac{4^{3}}{3}\right) - \left(16(0) - \dfrac{0^{3}}{3}\right)$'
       - say: '16 times 4 is 64, and 4 cubed is 64. The second bracket is all zeros.'
         write: '$= 64 - \dfrac{64}{3}$'
-      - say: 'Write 64 over 3, the common denominator: 64 times 3 is 192.'
+      - say: 'Write 64 over 3 with the common denominator, so 64 times 3 is 192.'
         write: '$= \dfrac{192}{3} - \dfrac{64}{3}$'
       - say: '192 minus 64 is 128.'
         write: '$= \dfrac{128}{3}$'
@@ -1734,7 +1734,7 @@ lessons:
         say: 'We want the integral from 0 to $\pi$ of cos squared theta minus 1, over sin squared theta. The fraction looks hard, so we simplify it first with an identity.'
         write: '$\displaystyle\int_{0}^{\pi} \dfrac{\cos^{2}\theta - 1}{\sin^{2}\theta}\,d\theta$'
       - section: 'Solution'
-        say: 'Solution. The identity: sin squared theta plus cos squared theta is 1.'
+        say: 'Solution. The identity says sin squared theta plus cos squared theta is 1.'
         write: 'Solution: $\sin^{2}\theta + \cos^{2}\theta = 1$'
       - say: 'Subtract 1 and subtract sin squared theta from both sides. Cos squared theta minus 1 is minus sin squared theta.'
         write: '$\cos^{2}\theta - 1 = -\sin^{2}\theta$'
@@ -1775,19 +1775,19 @@ lessons:
   36:
     moments:
       - section: 'The question'
-        say: 'Differentiate first, then put $x$ equals pi over 4. Watch: two of the terms will cancel, which makes the substitution easy.'
+        say: 'Differentiate first, then put $x$ equals pi over 4. Watch closely, because two of the terms will cancel, which makes the substitution easy.'
         write: '$y = 2x\cos 2x - \sin 2x$'
       - section: 'Solution'
         say: 'Solution. The first term is a product. For $2x$ cos $2x$, let $u$ be $2x$ and $v$ be cos $2x$.'
         write: 'For $2x\cos 2x$: let $u = 2x$, $\ v = \cos 2x$'
       - say: '$\dfrac{du}{dx}$ is 2. Cos $ax$ differentiates to minus $a$ sine $ax$, so cos $2x$ gives minus 2 sine $2x$.'
         write: '$\dfrac{du}{dx} = 2$, $\ \dfrac{dv}{dx} = -2\sin 2x$'
-      - say: 'The product rule: $u$ $\dfrac{dv}{dx}$ plus $v$ $\dfrac{du}{dx}$. That is $2x$ times minus 2 sine $2x$, plus cos $2x$ times 2.'
+      - say: 'The product rule gives $u$ $\dfrac{dv}{dx}$ plus $v$ $\dfrac{du}{dx}$. That is $2x$ times minus 2 sine $2x$, plus cos $2x$ times 2.'
         'on': 'product rule'
         write: '$\dfrac{d}{dx}(2x\cos 2x) = u\dfrac{dv}{dx} + v\dfrac{du}{dx} = 2x(-2\sin 2x) + \cos 2x(2)$'
       - say: '$2x$ times minus 2 is minus $4x$.'
         write: '$= -4x\sin 2x + 2\cos 2x$'
-      - say: 'The second term: sine $ax$ differentiates to $a$ cos $ax$. So minus sine $2x$ gives minus 2 cos $2x$.'
+      - say: 'For the second term, sine $ax$ differentiates to $a$ cos $ax$. So minus sine $2x$ gives minus 2 cos $2x$.'
         write: '$\dfrac{d}{dx}(-\sin 2x) = -2\cos 2x$'
       - say: 'Add the two results. Plus 2 cos $2x$ and minus 2 cos $2x$ cancel.'
         write: '$\dfrac{dy}{dx} = -4x\sin 2x + 2\cos 2x - 2\cos 2x = -4x\sin 2x$'
@@ -1824,7 +1824,7 @@ lessons:
         write: '$V = \pi\displaystyle\int_{a}^{b} x^{2}\,dy$'
         doodle_do:
           - {id: bowl, op: circle, part: disc, text: 'area πx²', 'on': 'Each disc'}
-      - say: 'We integrate with respect to $y$, so make $x$ squared the subject of the curve: add 1 to both sides.'
+      - say: 'We integrate with respect to $y$, so make $x$ squared the subject of the curve by adding 1 to both sides.'
         write: '$y = x^{2} - 1 \Rightarrow x^{2} = y + 1$'
       - say: 'The bowl runs from its bottom, $y$ equals 0, to its rim, $y$ equals 3. Those are the limits.'
         write: 'Limits: $y = 0$ to $y = 3$'
@@ -1833,7 +1833,7 @@ lessons:
       - say: 'Substitute $y$ plus 1 for $x$ squared, with the limits 0 and 3.'
         write: '$V = \pi\displaystyle\int_{0}^{3} (y + 1)\,dy$'
       - section: 'Integrate'
-        say: 'The rule: add 1 to the power, and divide by the new power.'
+        say: 'The rule is to add 1 to the power, then divide by the new power.'
         write: '$\displaystyle\int y^{n}\,dy = \dfrac{y^{n + 1}}{n + 1} + c$'
       - say: 'So $y$ integrates to $y$ squared over 2, and 1 integrates to $y$.'
         write: '$= \pi\left[\dfrac{y^{2}}{2} + y\right]_{0}^{3}$'
@@ -1850,7 +1850,7 @@ lessons:
         doodle_do:
           - {id: bowl, op: label, part: discs, text: '15π/2', 'on': 'Therefore'}
       - section: 'Check'
-        say: 'Check the integration by differentiating back: $y$ squared over 2 plus $y$ differentiates to $y$ plus 1, which is what we integrated.'
+        say: 'Check the integration by differentiating back. $y$ squared over 2 plus $y$ differentiates to $y$ plus 1, which is what we integrated.'
         write: 'Check: $\dfrac{d}{dy}\left(\dfrac{y^{2}}{2} + y\right) = y + 1$ ✓'
       - section: 'Answer'
         say: 'So the volume of the bowl is 15 pi over 2 cubic units, which is answer choice B.'
@@ -1864,7 +1864,7 @@ lessons:
   38:
     moments:
       - section: 'The question'
-        say: 'Two things change with time: the volume and the radius. Picture two dials. The chain rule links how fast they turn.'
+        say: 'Two things change with time, the volume and the radius. Picture two dials. The chain rule links how fast they turn.'
         write: 'Find the rate of change of the radius when $r = 6$ m.'
         doodle: {name: 'custom:2000_q38_a', id: dials, caption: 'two rates, linked by the chain rule'}
       - section: 'Solution'
@@ -1874,17 +1874,17 @@ lessons:
         point:
           - {figure: sketch, kind: circle, target: 'r = 6 m', 'on': 'radius 6'}
           - {figure: sketch, kind: circle, target: 'dV/dt = 8π m³/s', 'on': 'growing'}
-      - say: 'List the givens: $\dfrac{dV}{dt}$ is 8 pi, $r$ is 6, and we want $\dfrac{dr}{dt}$.'
+      - say: 'List the givens. $\dfrac{dV}{dt}$ is 8 pi, $r$ is 6, and we want $\dfrac{dr}{dt}$.'
         write: '$\dfrac{dV}{dt} = 8\pi\ \text{m}^{3}\text{s}^{-1}$, $\ r = 6$ m, $\ \dfrac{dr}{dt} = ?$'
       - section: 'Link V and r'
         say: 'A hemisphere is half a sphere. A sphere is 4 over 3 pi $r$ cubed, so the hemisphere is half of that.'
         write: '$V = \dfrac{1}{2} \times \dfrac{4}{3}\pi r^{3} = \dfrac{2}{3}\pi r^{3}$'
-      - say: 'Differentiate with respect to $r$: bring the power 3 down and reduce it by 1.'
+      - say: 'Differentiate with respect to $r$, so bring the power 3 down and reduce it by 1.'
         write: '$\dfrac{dV}{dr} = \dfrac{2}{3}\pi \times 3r^{2}$'
       - say: '2 over 3 times 3 is 2, so $\dfrac{dV}{dr}$ is $2\pi r^{2}$.'
         write: '$\dfrac{dV}{dr} = 2\pi r^{2}$'
       - section: 'Chain rule'
-        say: 'The chain rule: $\dfrac{dV}{dt}$ equals $\dfrac{dV}{dr}$ times $\dfrac{dr}{dt}$.'
+        say: 'The chain rule says $\dfrac{dV}{dt}$ equals $\dfrac{dV}{dr}$ times $\dfrac{dr}{dt}$.'
         write: '$\dfrac{dV}{dt} = \dfrac{dV}{dr} \times \dfrac{dr}{dt}$'
         doodle_do:
           - {id: dials, op: pulse, part: rad, 'on': 'chain rule'}
@@ -1905,7 +1905,7 @@ lessons:
         doodle_do:
           - {id: dials, op: stage, stage: 'custom:2000_q38_a2', 'on': 'growing'}
       - section: 'Check'
-        say: 'Check: $\dfrac{dV}{dr}$ times $\dfrac{dr}{dt}$ is 72 pi times 1 over 9, which is 8 pi, the rate we were given.'
+        say: 'To check, $\dfrac{dV}{dr}$ times $\dfrac{dr}{dt}$ is 72 pi times 1 over 9, which is 8 pi, the rate we were given.'
         write: 'Check: $72\pi \times \dfrac{1}{9} = 8\pi$ ✓'
       - section: 'Answer'
         say: 'So the radius is changing at 1 over 9 metres per second, which is answer choice D.'
@@ -1924,10 +1924,10 @@ lessons:
       - section: 'Solution'
         say: 'Solution. Since $\dfrac{dy}{dx}$ is $3x$ plus 2, $y$ is the integral of $3x$ plus 2, with respect to $x$.'
         write: '$y = \displaystyle\int (3x + 2)\,dx$'
-      - say: 'The rule: add 1 to the power, and divide by the new power. Plus $c$, the constant of integration, because a constant disappears when we differentiate.'
+      - say: 'The rule is to add 1 to the power, and divide by the new power. Plus $c$, the constant of integration, because a constant disappears when we differentiate.'
         'on': 'add 1'
         write: '$\displaystyle\int x^{n}\,dx = \dfrac{x^{n+1}}{n+1} + c$'
-      - say: 'Term by term. $3x$ is $3x$ to the power 1: the power becomes 2, and we divide by 2. The constant 2 integrates to $2x$.'
+      - say: 'Term by term. $3x$ is $3x$ to the power 1, so the power becomes 2, and we divide by 2. The constant 2 integrates to $2x$.'
         write: '$y = \dfrac{3x^{1+1}}{1+1} + 2x + c$'
         point:
           - {line: 2, kind: box, text: 'the rule'}
@@ -1954,28 +1954,28 @@ lessons:
   40:
     moments:
       - section: 'The question'
-        say: 'Three unknowns, $a$, $b$ and $c$, and two facts: the derivative, and the value 5 at $x$ equals 1. The derivative gives $a$ and $b$; the value gives $c$.'
+        say: 'There are three unknowns, $a$, $b$ and $c$, and two facts, the derivative and the value 5 at $x$ equals 1. The derivative gives $a$ and $b$, and the value gives $c$.'
         write: '$ax^{2} + bx + c = 5$ at $x = 1$; derivative $= 2x + 1$'
       - section: 'Solution'
         say: 'Solution. Let $y$ be the expression.'
         write: 'Let $y = ax^{2} + bx + c$'
-      - say: 'Differentiate term by term: multiply by the power, then reduce the power by 1. $ax$ squared gives $2ax$, $bx$ gives $b$, and the constant $c$ gives 0.'
+      - say: 'Differentiate term by term, multiplying by the power, then reducing the power by 1. $ax$ squared gives $2ax$, $bx$ gives $b$, and the constant $c$ gives 0.'
         write: '$\dfrac{dy}{dx} = 2ax + b$'
       - say: 'But the question says the derivative is $2x$ plus 1. So the two are equal.'
         write: '$\therefore 2ax + b = 2x + 1$'
-      - say: 'Compare the coefficients of $x$ on both sides: $2a$ equals 2. Divide both sides by 2.'
+      - say: 'Compare the coefficients of $x$ on both sides, so $2a$ equals 2. Divide both sides by 2.'
         'on': 'coefficients'
         write: 'Comparing coefficients of $x$: $\ 2a = 2 \Rightarrow a = 1$'
-      - say: 'Compare the constant terms: $b$ on the left, 1 on the right.'
+      - say: 'Compare the constant terms, with $b$ on the left and 1 on the right.'
         write: 'Comparing constants: $\ b = 1$'
       - section: 'Find c'
-        say: 'The derivative cannot give $c$, because $c$ differentiated to 0. So use the other fact: at $x$ equals 1, $y$ is 5.'
+        say: 'The derivative cannot give $c$, because $c$ differentiated to 0. So use the other fact, that at $x$ equals 1, $y$ is 5.'
         write: 'At $x = 1$, $y = 5$: $\ a(1)^{2} + b(1) + c = 5$'
       - say: '1 squared is 1, so this is $a$ plus $b$ plus $c$ equals 5.'
         write: '$a + b + c = 5$'
       - say: 'Substitute $a$ equals 1 and $b$ equals 1.'
         write: '$1 + 1 + c = 5$'
-      - say: '1 plus 1 is 2. Take 2 from both sides: 5 minus 2 is 3.'
+      - say: '1 plus 1 is 2. Take 2 from both sides, and 5 minus 2 is 3.'
         write: '$c = 5 - 2 = 3$'
       - section: 'Check'
         say: 'Check. The expression is $x$ squared plus $x$ plus 3. Its derivative is $2x$ plus 1, and at $x$ equals 1 it is 1 plus 1 plus 3, which is 5.'
@@ -1996,10 +1996,10 @@ lessons:
       - say: 'Solution. Let P of $Y$ be $p$.'
         write: 'Solution: let $P(Y) = p$'
       - section: 'The two rules'
-        say: 'First, independent events: P of $X$ and $Y$ is P of $X$ times P of $Y$. Picture two separate spinners: how one lands does not change the other.'
+        say: 'First, for independent events, P of $X$ and $Y$ is P of $X$ times P of $Y$. Picture two separate spinners, where how one lands does not change the other.'
         write: 'Independent: $P(X \cap Y) = P(X) \times P(Y) = 0.4p$'
         doodle: {name: 'custom:2000_q41_a', id: spin, caption: 'Two spinners, spun separately'}
-      - say: 'Second, the addition rule: P of $X$ or $Y$ is P of $X$, plus P of $Y$, minus P of both. In the Venn diagram, both is the overlap, counted twice when we add.'
+      - say: 'Second, the addition rule says P of $X$ or $Y$ is P of $X$, plus P of $Y$, minus P of both. In the Venn diagram, both is the overlap, counted twice when we add.'
         write: '$P(X \cup Y) = P(X) + P(Y) - P(X \cap Y)$'
         diagram:
           id: v
@@ -2021,7 +2021,7 @@ lessons:
         write: '$0.7 = 0.4 + 0.6p$'
       - say: 'Subtract 0.4 from both sides. 0.7 minus 0.4 is 0.3.'
         write: '$0.6p = 0.7 - 0.4 = 0.3$'
-      - say: 'Divide both sides by 0.6. 0.3 is half of 0.6, so $p$ is 0.5: spinner $Y$ is half shaded.'
+      - say: 'Divide both sides by 0.6. 0.3 is half of 0.6, so $p$ is 0.5, and spinner $Y$ is half shaded.'
         write: '$\therefore p = \dfrac{0.3}{0.6} = 0.5$'
         doodle_do:
           - {id: spin, op: stage, stage: 'custom:2000_q41_a2'}
@@ -2031,7 +2031,7 @@ lessons:
         doodle_do:
           - {id: spin, op: label, part: half, text: 'both: 0.4 × 0.5 = 0.2'}
       - section: 'Answer'
-        say: 'Therefore the probability of $Y$ is 0.50: option B.'
+        say: 'Therefore the probability of $Y$ is 0.50, which is option B.'
         write: '$\therefore P(Y) = 0.50$'
         answer: true
     traps:
@@ -2047,11 +2047,11 @@ lessons:
       - section: 'Solution'
         say: 'Solution. The numbers have $x$ in them, so first we use the mean to find $x$. The mean is the sum over $n$, and $n$ is 4.'
         write: '$\dfrac{0 + (x + 2) + (3x + 6) + (4x + 8)}{4} = 4$'
-      - say: 'Collect like terms on top: $x$ plus $3x$ plus $4x$ is $8x$, and 2 plus 6 plus 8 is 16.'
+      - say: 'Collect like terms on top. $x$ plus $3x$ plus $4x$ is $8x$, and 2 plus 6 plus 8 is 16.'
         write: '$\dfrac{8x + 16}{4} = 4$'
-      - say: 'Multiply both sides by 4: 4 times 4 is 16.'
+      - say: 'Multiply both sides by 4, and 4 times 4 is 16.'
         write: '$8x + 16 = 16$'
-      - say: 'Subtract 16 from both sides: $8x$ is 0, so $x$ is 0.'
+      - say: 'Subtract 16 from both sides, so $8x$ is 0, and $x$ is 0.'
         write: '$8x = 0$, $\ \therefore x = 0$'
       - say: 'Put $x$ equals 0 back in. The numbers are 0, 2, 6 and 8. On a see-saw they balance at the mean, 4.'
         write: 'The numbers: $0,\ 2,\ 6,\ 8$'
@@ -2059,7 +2059,7 @@ lessons:
       - section: 'The mean deviation'
         say: 'The M.D. is the sum of the absolute deviations over $n$. Absolute means we ignore the minus signs.'
         write: 'M.D. $= \dfrac{\sum |x - \bar{x}|}{n}$'
-      - say: 'Now the deviation table: each number, minus the mean, then the absolute value.'
+      - say: 'Now the deviation table, where we take each number, minus the mean, then the absolute value.'
         write: '$\bar{x} = 4$, $\ n = 4$'
         diagram:
           id: d
@@ -2073,29 +2073,29 @@ lessons:
           - {id: d, op: fill, part: 'cell:1,2', text: '−4'}
           - {id: d, op: fill, part: 'cell:2,2', text: '−2'}
           - {id: d, op: fill, part: 'cell:3,2', text: '2'}
-      - say: 'And 8 minus 4 is 4. Ignore the minus signs: the absolute deviations are 4, 2, 2 and 4.'
+      - say: 'And 8 minus 4 is 4. Ignore the minus signs, so the absolute deviations are 4, 2, 2 and 4.'
         write: '$8 - 4 = 4$'
         diagram_do:
           - {id: d, op: fill, part: 'cell:4,2', text: '4'}
           - {id: d, op: fill, part: 'cell:1,3', text: '4'}
           - {id: d, op: fill, part: 'cell:2,3', text: '2'}
-      - say: 'The last two: 2 and 4.'
+      - say: 'The last two are 2 and 4.'
         write: '$|2| = 2,\ |4| = 4$'
         diagram_do:
           - {id: d, op: fill, part: 'cell:3,3', text: '2'}
           - {id: d, op: fill, part: 'cell:4,3', text: '4'}
         doodle_do:
           - {id: seesaw, op: stage, stage: 'custom:2000_q42_a2'}
-      - say: 'Add the last column: 4 plus 2 plus 2 plus 4 is 12.'
+      - say: 'Add the last column, so 4 plus 2 plus 2 plus 4 is 12.'
         write: '$\sum |x - \bar{x}| = 12$'
         diagram_do:
           - {id: d, op: total, part: 'col:3', 'on': 'Add'}
-      - say: 'Substitute: 12 over 4, which is 3.'
+      - say: 'Substitute, which gives 12 over 4, or 3.'
         write: '$\therefore$ M.D. $= \dfrac{12}{4} = 3$'
         doodle_do:
           - {id: seesaw, op: circle, part: pivot, text: '12 ÷ 4 = 3'}
       - section: 'Check'
-        say: 'Check the mean: with their signs, the deviations must add to 0. Minus 4, minus 2, plus 2, plus 4 is 0. It agrees.'
+        say: 'Check the mean, because with their signs, the deviations must add to 0. Minus 4, minus 2, plus 2, plus 4 is 0. It agrees.'
         write: 'Check: $-4 - 2 + 2 + 4 = 0$ ✓'
       - section: 'Answer'
         say: 'So the mean deviation is 3, which is option C.'
@@ -2112,20 +2112,20 @@ lessons:
         say: 'In how many ways can the letters of MATHEMATICS be arranged? Some letters repeat, and swapping two of the same letter gives the same word.'
         write: 'Arrangements of MATHEMATICS $= ?$'
         doodle: {name: 'custom:2000_q43_a', id: tiles, caption: 'M, A and T each appear twice'}
-      - say: 'Solution. Count the letters: M, A, T, H, E, M, A, T, I, C, S. That is 11.'
+      - say: 'Solution. Count the letters M, A, T, H, E, M, A, T, I, C, S. That is 11.'
         write: 'Solution: $n = 11$ letters'
         doodle_do:
           - {id: tiles, op: underline, part: count}
       - section: 'The repeated letters'
-        say: 'Now list the repeats. Look at the pink tiles: M appears twice.'
+        say: 'Now list the repeats. Look at the pink tiles, where M appears twice.'
         write: 'M: $2$ times'
         doodle_do:
           - {id: tiles, op: circle, part: pair-m, text: '2 Ms'}
-      - say: 'The yellow tiles: A appears twice as well.'
+      - say: 'In the yellow tiles, A appears twice as well.'
         write: 'A: $2$ times'
         doodle_do:
           - {id: tiles, op: circle, part: pair-a, text: '2 As'}
-      - say: 'And the blue tiles: T also appears twice. H, E, I, C and S appear once each.'
+      - say: 'And in the blue tiles, T also appears twice. H, E, I, C and S appear once each.'
         write: 'T: $2$ times; H, E, I, C, S: once each'
         doodle_do:
           - {id: tiles, op: circle, part: pair-t, text: '2 Ts'}
@@ -2143,7 +2143,7 @@ lessons:
         say: 'Check the size. 2 factorial times 2 factorial times 2 factorial is 8. 11 factorial is 39,916,800, and 39,916,800 divided by 8 is 4,989,600 words.'
         write: 'Check: $2!\,2!\,2! = 8$, $\ \dfrac{39\,916\,800}{8} = 4\,989\,600$'
       - section: 'Answer'
-        say: 'Therefore the letters of MATHEMATICS can be arranged in 11 factorial over 2 factorial, 2 factorial, 2 factorial ways: option C.'
+        say: 'Therefore the letters of MATHEMATICS can be arranged in 11 factorial over 2 factorial, 2 factorial, 2 factorial ways, which is option C.'
         write: '$\therefore$ arrangements $= \dfrac{11!}{2!\,2!\,2!}$'
         answer: true
     traps:
@@ -2174,7 +2174,7 @@ lessons:
         point:
           - {line: 5, kind: move, from: {line: 4, at: '= 40'}, at: '240[[40]]', text: 'frequency'}
           - {line: 5, kind: move, from: {line: 3, at: '= 240'}, at: '[[240]]40', text: 'total'}
-      - say: '40 over 240: divide the top and the bottom by 40, which gives 1 over 6. So 4 came up on 1 roll in every 6.'
+      - say: 'For 40 over 240, divide the top and the bottom by 40, which gives 1 over 6. So 4 came up on 1 roll in every 6.'
         write: '$= \dfrac{1}{6} \times 360^{\circ}$'
         doodle_do:
           - {id: die, op: circle, part: rolls, text: '1 roll in 6'}
@@ -2195,10 +2195,10 @@ lessons:
         diagram_do:
           - {id: p, op: angle, part: 'sector:4', answer: true}
       - section: 'Check'
-        say: 'Check: 360 degrees over 240 rolls is 1.5 degrees for each roll. 40 rolls times 1.5 degrees is 60 degrees.'
+        say: 'To check, 360 degrees over 240 rolls is 1.5 degrees for each roll. 40 rolls times 1.5 degrees is 60 degrees.'
         write: 'Check: $\dfrac{360^{\circ}}{240} = 1.5^{\circ}$, $\ 40 \times 1.5^{\circ} = 60^{\circ}\ \checkmark$'
       - section: 'Answer'
-        say: 'Therefore the angle for 4 is 60 degrees: option D.'
+        say: 'Therefore the angle for 4 is 60 degrees, option D.'
         write: '$\therefore$ angle for $4 = 60^{\circ}$'
         answer: true
     traps:
@@ -2217,7 +2217,7 @@ lessons:
       - say: 'There are 20 numbers in $U$, all equally likely. So n of $U$ is 20.'
         write: '$n(U) = 20$'
       - section: 'The event E2'
-        say: '$E_2$ is the multiples of 4. Counting in fours up to 20: 4, 8, 12, 16 and 20. Watch those slips turn pink.'
+        say: '$E_2$ is the multiples of 4. Counting in fours up to 20 gives 4, 8, 12, 16 and 20. Watch those slips turn pink.'
         write: '$E_2 = \{4,\ 8,\ 12,\ 16,\ 20\}$'
         doodle_do:
           - {id: slips, op: stage, stage: 'custom:2000_q45_a2'}
@@ -2235,12 +2235,12 @@ lessons:
             - {key: E2, name: 'E₂: multiples of 4'}
           counts: {'E1 only': '5', 'E1∩E2': '1', 'E2 only': '4', outside: '10'}
       - section: 'The probability'
-        say: 'P of $E_2$ is n of $E_2$ over n of $U$: 5 over 20, which is 1 over 4.'
+        say: 'P of $E_2$ is n of $E_2$ over n of $U$, which is 5 over 20, or 1 over 4.'
         write: '$P(E_2) = \dfrac{n(E_2)}{n(U)} = \dfrac{5}{20} = \dfrac{1}{4}$'
         point:
           - {line: 5, kind: move, from: {line: 4, at: '= 5'}, at: '20[[5]]', text: 'n(E₂)'}
           - {line: 5, kind: move, from: {line: 2, at: '= 20'}, at: '[[20]]5', text: 'n(U)'}
-      - say: 'A number is either in $E_2$ or not, so the complement rule applies: P of $E_2$ prime is 1 minus P of $E_2$.'
+      - say: 'A number is either in $E_2$ or not, so the complement rule applies, and P of $E_2$ prime is 1 minus P of $E_2$.'
         write: '$P(E_2^{\prime}) = 1 - P(E_2)$'
         diagram_do:
           - {id: v, op: shade, part: "E2'", text: "E₂′: outside E₂", 'on': 'complement rule'}
@@ -2249,12 +2249,12 @@ lessons:
         point:
           - {line: 7, kind: move, from: {line: 5, at: '= [[41]]'}, at: '− [[41]]', text: 'P(E₂)'}
       - section: 'Check'
-        say: 'Check by counting the shaded part: 5 plus 10 is 15 numbers not in $E_2$. And 15 over 20 is 3 over 4.'
+        say: 'Check by counting the shaded part. 5 plus 10 is 15 numbers not in $E_2$. And 15 over 20 is 3 over 4.'
         write: 'Check: $n(E_2^{\prime}) = 20 - 5 = 15$, $\ \dfrac{15}{20} = \dfrac{3}{4}\ \checkmark$'
         doodle_do:
           - {id: slips, op: label, part: slips, text: '15 not pink'}
       - section: 'Answer'
-        say: 'Therefore the probability that the number is not in $E_2$ is 3 over 4: option A.'
+        say: 'Therefore the probability that the number is not in $E_2$ is 3 over 4, which is option A.'
         write: '$\therefore P(E_2^{\prime}) = \dfrac{3}{4}$'
         answer: true
     traps:
@@ -2274,7 +2274,7 @@ lessons:
         write: 'Solution. cf at an age $=$ number of students at or below it'
         point:
           - {figure: 0, kind: arrow, target: {x: 210, y: 159}, text: 'cf = count so far'}
-      - say: 'The total, $N$, is where the curve levels off at the top: 100 students. Each figure here stands for 2.'
+      - say: 'The total, $N$, is where the curve levels off at the top, which is 100 students. Each figure here stands for 2.'
         write: '$N = 100$'
         point:
           - {figure: 0, kind: circle, target: '100', text: 'levels off'}
@@ -2293,13 +2293,13 @@ lessons:
       - say: 'The number in an age group is the cf at its upper end minus the cf at its lower end.'
         write: 'Number in group $=$ cf at upper end $-$ cf at lower end'
       - section: 'Test the groups'
-        say: 'Option A, 15.5 to 18.5: 52 minus 10 is 42. Not 70.'
+        say: 'For option A, 15.5 to 18.5, 52 minus 10 is 42. Not 70.'
         write: '$15.5 - 18.5$: $\ 52 - 10 = 42$'
-      - say: 'Option B, 15.5 to 19.5: 78 minus 10 is 68. Close, but not 70.'
+      - say: 'For option B, 15.5 to 19.5, 78 minus 10 is 68. Close, but not 70.'
         write: '$15.5 - 19.5$: $\ 78 - 10 = 68$'
-      - say: 'Option C, 16.5 to 19.5: 78 minus 20 is 58. Not 70.'
+      - say: 'For option C, 16.5 to 19.5, 78 minus 20 is 58. Not 70.'
         write: '$16.5 - 19.5$: $\ 78 - 20 = 58$'
-      - say: 'Option D, 17.5 to 20.5: 100 minus 30 is 70. That is exactly 70% of the students.'
+      - say: 'For option D, 17.5 to 20.5, 100 minus 30 is 70. That is exactly 70% of the students.'
         write: '$17.5 - 20.5$: $\ 100 - 30 = 70$ ✓'
         diagram_do:
           - {id: r, op: highlight, part: 'row:3', text: 'lower end: 30'}
@@ -2325,7 +2325,7 @@ lessons:
         write: 'Variance of $x,\ 2x,\ 3x,\ 4x,\ 5x$'
         doodle: {name: 'custom:2000_q47_a', id: towers, caption: 'x, 2x, 3x, 4x, 5x as towers'}
       - section: 'Solution'
-        say: 'Solution. The variance is the sum of the squared deviations over $n$. We call each deviation $d$: the value minus the mean.'
+        say: 'Solution. The variance is the sum of the squared deviations over $n$. We call each deviation $d$, which is the value minus the mean.'
         write: 'Variance $= \dfrac{\sum d^{2}}{n}$, where $d = $ value $- \bar{x}$'
       - section: 'The mean'
         say: 'The mean first. $x$ plus $2x$ plus $3x$ plus $4x$ plus $5x$ is $15x$, and $n$ is 5.'
@@ -2335,7 +2335,7 @@ lessons:
         doodle_do:
           - {id: towers, op: stage, stage: 'custom:2000_q47_a2'}
       - section: 'The deviation table'
-        say: 'Now the table: each value, its deviation $d$ from $3x$, then $d$ squared.'
+        say: 'Now the table, with each value, its deviation $d$ from $3x$, then $d$ squared.'
         write: '$\bar{x} = 3x$, $\ n = 5$'
         diagram:
           id: d
@@ -2367,15 +2367,15 @@ lessons:
         diagram_do:
           - {id: d, op: fill, part: 'cell:4,3', text: 'x²'}
           - {id: d, op: fill, part: 'cell:5,3', text: '4x²'}
-      - say: 'Add the last column: 4 plus 1 plus 0 plus 1 plus 4 is 10, so the sum is $10x$ squared.'
+      - say: 'Add the last column, and 4 plus 1 plus 0 plus 1 plus 4 is 10, so the sum is $10x$ squared.'
         write: '$\sum d^{2} = 4x^{2} + x^{2} + 0 + x^{2} + 4x^{2} = 10x^{2}$'
         doodle_do:
           - {id: towers, op: label, part: devs, text: 'squared: 4 + 1 + 0 + 1 + 4'}
       - section: 'The variance'
-        say: 'Substitute: $10x$ squared over 5, which is $2x$ squared.'
+        say: 'Substitute, and we get $10x$ squared over 5, which is $2x$ squared.'
         write: '$\therefore$ Variance $= \dfrac{10x^{2}}{5} = 2x^{2}$'
       - section: 'Check'
-        say: 'Check with $x$ equals 1: the numbers 1 to 5 have mean 3, and squared deviations 4, 1, 0, 1, 4. 10 over 5 is 2, and $2x$ squared is 2.'
+        say: 'Check with $x$ equals 1. The numbers 1 to 5 have mean 3, and squared deviations 4, 1, 0, 1, 4. 10 over 5 is 2, and $2x$ squared is 2.'
         write: 'Check $x = 1$: $\ \dfrac{4 + 1 + 0 + 1 + 4}{5} = 2 = 2(1)^{2}$ ✓'
       - section: 'Answer'
         say: 'So the variance is $2x$ squared, which is option B.'
@@ -2389,10 +2389,10 @@ lessons:
   48:
     moments:
       - section: 'The question'
-        say: 'A list of 22 numbers. We want the range plus the mode. The range is a measure of spread; the mode is the value that appears most often.'
+        say: 'We have a list of 22 numbers, and we want the range plus the mode. The range is a measure of spread, and the mode is the value that appears most often.'
         write: 'Range $+$ mode $= ?$'
       - section: 'Solution'
-        say: 'Solution. With this many numbers, make a frequency table: each value, and how many times it appears. Go through the list and count.'
+        say: 'Solution. With this many numbers, make a frequency table showing each value and how many times it appears. Go through the list and count.'
         write: 'Solution: frequency table'
         diagram:
           id: t
@@ -2416,7 +2416,7 @@ lessons:
         write: '$10 \to 7$'
         diagram_do:
           - {id: t, op: fill, part: 'cell:7,2', text: '7'}
-      - say: 'Check the count: the $f$ column must add to 22. 1 plus 2 plus 2 plus 3 plus 3 plus 4 plus 7 is 22. Good.'
+      - say: 'Check the count, because the $f$ column must add to 22. 1 plus 2 plus 2 plus 3 plus 3 plus 4 plus 7 is 22. Good.'
         write: '$\sum f = 22$ ✓'
         diagram_do:
           - {id: t, op: total, part: 'col:2', 'on': 'add'}
@@ -2432,7 +2432,7 @@ lessons:
         diagram_do:
           - {id: t, op: label, part: 'cell:7,2', text: 'mode: 10'}
       - section: 'The sum'
-        say: 'Now add them: the range, 6, plus the mode, 10, is 16.'
+        say: 'Now add them, so the range, 6, plus the mode, 10, is 16.'
         write: 'Range $+$ mode $= 6 + 10 = 16$'
         point:
           - {line: 8, kind: move, from: {line: 6, at: '= [[6]]'}, at: '= [[6]] +', text: 'range'}
@@ -2452,18 +2452,18 @@ lessons:
         say: 'A delegation of 3 is chosen from 5 men and 3 women, with at least one man and at least one woman. In how many ways? List the cases first.'
         write: '$5$ men, $3$ women; choose $3$, at least one of each'
         doodle: {name: 'custom:2000_q49_a', id: people, caption: 'At least one man and one woman'}
-      - say: 'Solution. A delegation is a selection, so we use combinations: n C r is n factorial over n minus r factorial, times r factorial.'
+      - say: 'Solution. A delegation is a selection, so we use combinations, where n C r is n factorial over n minus r factorial, times r factorial.'
         write: 'Solution: ${}^{n}C_{r} = \dfrac{n!}{(n - r)!\,r!}$'
-      - say: 'At least one of each, from 3 people, leaves two cases: 2 men and 1 woman, or 1 man and 2 women.'
+      - say: 'At least one of each, from 3 people, leaves two cases, which are 2 men and 1 woman, or 1 man and 2 women.'
         write: 'Cases: (2 men, 1 woman) or (1 man, 2 women)'
       - section: 'Case 1: 2 men, 1 woman'
-        say: '2 men from 5 is 5 C 2: 5 factorial over 3 factorial times 2 factorial. Expand 5 factorial down to 3 factorial, and the 3 factorials cancel.'
+        say: '2 men from 5 is 5 C 2, which is 5 factorial over 3 factorial times 2 factorial. Expand 5 factorial down to 3 factorial, and the 3 factorials cancel.'
         write: '${}^{5}C_{2} = \dfrac{5!}{3!\,2!} = \dfrac{5 \times 4 \times 3!}{3! \times 2 \times 1} = 10$'
         doodle_do:
           - {id: people, op: circle, part: men, text: '2 of 5 men: 10'}
       - say: '1 woman from 3 is 3 C 1, which is 3.'
         write: '${}^{3}C_{1} = \dfrac{3!}{2!\,1!} = 3$'
-      - say: 'The men AND the woman: multiply. 10 times 3 is 30.'
+      - say: 'The men AND the woman means we multiply. 10 times 3 is 30.'
         write: 'Case 1 $= {}^{5}C_{2} \times {}^{3}C_{1} = 10 \times 3 = 30$'
       - section: 'Case 2: 1 man, 2 women'
         say: '1 man from 5 is 5 C 1, which is 5. 2 women from 3 is 3 C 2, which is 3. 5 times 3 is 15.'
@@ -2471,18 +2471,18 @@ lessons:
         doodle_do:
           - {id: people, op: circle, part: women, text: '2 of 3 women: 3'}
       - section: 'Total'
-        say: 'Case 1 OR case 2: add. 30 plus 15 is 45.'
+        say: 'Case 1 OR case 2 means we add. 30 plus 15 is 45.'
         write: 'Total $= 30 + 15 = 45$'
         point:
           - {line: 7, kind: move, from: {line: 5, at: '= 30'}, at: '[[30]] +', text: 'case 1'}
           - {line: 7, kind: move, from: {line: 6, at: '= 15'}, at: '+ [[15]]', text: 'case 2'}
       - section: 'Check'
-        say: 'Check by subtraction: all delegations of 3 from 8, minus those with no woman, minus those with no man.'
+        say: 'Check by subtraction. Take all delegations of 3 from 8, minus those with no woman, minus those with no man.'
         write: 'Check: ${}^{8}C_{3} - {}^{5}C_{3} - {}^{3}C_{3}$'
       - say: '8 C 3 is 56, 5 C 3 is 10, and 3 C 3 is 1. 56 minus 10 minus 1 is 45, the same.'
         write: '$= 56 - 10 - 1 = 45\ \checkmark$'
       - section: 'Answer'
-        say: 'Therefore the delegation can be chosen in 45 ways: option D.'
+        say: 'Therefore the delegation can be chosen in 45 ways, which is option D.'
         write: '$\therefore$ 45 ways'
         answer: true
     traps:
@@ -2513,10 +2513,10 @@ lessons:
         diagram_do:
           - {id: t, op: highlight, part: 'row:3', 'on': '16 to 18'}
           - {id: t, op: highlight, part: 'row:4', 'on': '19 to 20'}
-      - say: 'Add their frequencies: 15 plus 10 is 25 pupils.'
+      - say: 'Add their frequencies, and 15 plus 10 is 25 pupils.'
         write: 'Number wanted $= 15 + 10 = 25$'
       - section: 'The percentage'
-        say: 'Substitute: 25 pupils wanted, out of 50.'
+        say: 'Substitute, so 25 pupils wanted, out of 50.'
         write: 'Percentage $= \dfrac{25}{50} \times 100\%$'
         point:
           - {line: 7, kind: move, from: {line: 6, at: '= 25'}, at: '50[[25]]', text: 'wanted'}
@@ -2524,7 +2524,7 @@ lessons:
       - say: '25 over 50 is a half, and a half of 100 is 50 percent.'
         write: '$= \dfrac{1}{2} \times 100\% = 50\%$'
       - section: 'Check'
-        say: 'Check with the pupils left out: 6 plus 14 plus 5 is 25, the other half. 25 plus 25 is 50 pupils.'
+        say: 'Check with the pupils left out. 6 plus 14 plus 5 is 25, the other half. 25 plus 25 is 50 pupils.'
         write: 'Check: others $= 6 + 14 + 5 = 25$; $25 + 25 = 50\ \checkmark$'
         doodle: {name: student-small, id: pupils, caption: '50 pupils', repeat: 50, layout: grid}
         doodle_do:

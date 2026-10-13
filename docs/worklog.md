@@ -15,6 +15,25 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-13
 
+### Every spoken lesson line now flows as one connected thought
+- **What:** 5,572 spoken (`say`) lines across all English and Maths lessons were rewritten so
+  the voice never meets a colon, semicolon or dash.
+  - Ideas are joined with words ("which is", "so", "because", "that is") or split into two
+    sentences.
+  - Facts, numbers, `$…$` maths, answer letters and every word a board mark is timed to were
+    kept.
+  - Mismatches with the board were fixed: Lemoti's lesson now says "sculptor", not "statue",
+    and 1984 Q40 says "second die".
+  - All 16,949 spoken lines are now free of these marks outside quotations and maths.
+- **Why:** the founder found a lesson confusing because the voice stopped mid-thought at
+  colons ("the first gift, the painting: as a painter").
+- **How:** eight helpers rewrote the lines in batches. A merge script refused any line that
+  broke a rule. The rule is now in `docs/lesson-style-guide.md` §2.
+- **Where:** `docs/questions/utme/*/lessons_*.yaml`.
+- **Status:** committed locally. Both loaders pass (1,043 Maths and 736 English
+  deliverable), and the 158 lesson-content tests pass. The new lines are re-voiced the
+  first time each lesson plays.
+
 ### Mock report: question grids, a question modal, and the lesson from the report
 - **What:**
   - "Every question" is now one grid per subject. Cells are green (right), pink (wrong) or

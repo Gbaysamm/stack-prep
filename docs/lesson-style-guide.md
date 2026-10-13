@@ -42,6 +42,18 @@ follow every step, the lesson is wrong.**
   just happened…") is better than rushing on.
 - **Hard topics get more moments, not denser ones.** Set theory, probability, logs, matrices
   and variation start from the picture and build the symbols out of it.
+- **Spoken lines flow as one connected thought.** The `say` line is heard, not read, and a
+  colon, dash or semicolon makes the voice stop mid-thought. So the voice never meets `:`,
+  `;`, `—`, `–` or ` - `.
+  - Join ideas with words: "which is", "that is", "so", "because", "then".
+  - Or split them into two full sentences.
+  - Ratios are said in words ("2 to 3").
+  - A colon may stay only inside an exact quotation from the passage.
+  - Say the same word the board shows: "sculptor" on the board is "sculptor" in the voice,
+    never "statue".
+
+  > ✗ "Not only" goes before the first gift, the painting: as a painter.
+  > ✓ "Not only" goes before the first gift, which is the painting, so we say "as a painter".
 
 ## 3. How we say maths in Nigeria
 
