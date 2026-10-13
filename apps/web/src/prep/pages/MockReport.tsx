@@ -35,17 +35,17 @@ type Filter = 'all' | 'wrong' | 'unanswered' | 'flagged';
 function ResultRow({ name, tally, total }: { name: string; tally: Tally; total?: boolean }) {
   const width = (n: number) => `${tally.questions ? (100 * n) / tally.questions : 0}%`;
   return (
-    <li className={cx('mk-row', total && 'total')}>
-      <span className="mk-row-name">{name}</span>
+    <li className={cx('mk-res', total && 'total')}>
+      <span className="mk-res-name">{name}</span>
       <span className="mk-bar" role="img" aria-label={`${tally.correct} right, ${tally.wrong} wrong, ${tally.unanswered} unanswered`}>
         <span className="right" style={{ width: width(tally.correct) }} />
         <span className="wrong" style={{ width: width(tally.wrong) }} />
       </span>
-      <span className="mk-row-counts">
+      <span className="mk-res-counts">
         <b>{tally.correct}</b> right of <b>{tally.answered}</b> answered
-        {tally.unanswered ? <span className="mk-row-left"> · {tally.unanswered} unanswered</span> : null}
+        {tally.unanswered ? <span className="mk-res-left"> · {tally.unanswered} unanswered</span> : null}
       </span>
-      <span className={cx('mk-row-pct sj-num', tally.percent === null && 'none')}>
+      <span className={cx('mk-res-pct sj-num', tally.percent === null && 'none')}>
         {tally.percent === null ? 'No answers' : percentText(tally)}
       </span>
     </li>

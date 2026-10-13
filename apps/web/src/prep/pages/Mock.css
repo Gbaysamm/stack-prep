@@ -541,42 +541,49 @@
 /* ---------------------------------------------------------------- report */
 .sj .mk-result {
   display: grid;
-  gap: 18px;
+  gap: 4px;
+  padding-block: 16px 14px;
 }
-/* Totals across the top, each with its colour. */
+/* Totals in one slim line, each with a coloured dot. */
 .sj .mk-result-stats {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 22px;
   margin: 0;
-  padding: 0;
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--gray-100);
   list-style: none;
 }
 .sj .mk-result-stats li {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 12px 14px;
-  border-radius: var(--r-sm);
-  background: var(--gray-50, #fafafc);
-  border-left: 4px solid var(--gray-300);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
 }
-.sj .mk-result-stats li.right {
-  border-left-color: var(--green-500);
+.sj .mk-result-stats li::before {
+  content: '';
+  align-self: center;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink-900);
 }
-.sj .mk-result-stats li.wrong {
-  border-left-color: var(--pink-500);
+.sj .mk-result-stats li.right::before {
+  background: var(--green-500);
 }
-.sj .mk-result-stats li.left {
-  border-left-color: var(--gray-200);
+.sj .mk-result-stats li.wrong::before {
+  background: var(--pink-500);
+}
+.sj .mk-result-stats li.left::before {
+  background: var(--gray-300);
 }
 .sj .mk-result-stats b {
-  font-size: 30px;
-  line-height: 1.05;
+  font-size: 20px;
+  line-height: 1;
   color: var(--ink-900);
 }
 .sj .mk-result-stats small {
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--gray-600);
 }
 /* One row per subject: as many rows as subjects, all full width. */
@@ -586,48 +593,48 @@
   padding: 0;
   list-style: none;
 }
-.sj .mk-row {
+.sj .mk-res {
   display: grid;
   grid-template-columns: minmax(130px, 1.1fr) minmax(120px, 2fr) minmax(0, 1.6fr) 96px;
   align-items: center;
-  gap: 8px 20px;
-  padding: 14px 0;
+  gap: 6px 20px;
+  padding: 9px 0;
   border-top: 1px solid var(--gray-100);
 }
-.sj .mk-row:first-child {
+.sj .mk-res:first-child {
   border-top: 0;
 }
-.sj .mk-row.total {
+.sj .mk-res.total {
   border-top: 1.5px solid var(--gray-200);
 }
-.sj .mk-row-name {
+.sj .mk-res-name {
   font-weight: 600;
-  font-size: 15px;
+  font-size: 14px;
   color: var(--ink-900);
 }
-.sj .mk-row.total .mk-row-name {
+.sj .mk-res.total .mk-res-name {
   font-family: var(--f-mono);
   font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--purple-700);
 }
-.sj .mk-row-counts {
+.sj .mk-res-counts {
   font-size: 13.5px;
   color: var(--gray-700);
 }
-.sj .mk-row-counts b {
+.sj .mk-res-counts b {
   color: var(--ink-900);
 }
-.sj .mk-row-left {
+.sj .mk-res-left {
   color: var(--gray-500);
 }
-.sj .mk-row-pct {
-  font-size: 30px;
+.sj .mk-res-pct {
+  font-size: 20px;
   text-align: right;
   color: var(--purple-700);
 }
-.sj .mk-row-pct.none {
+.sj .mk-res-pct.none {
   font-family: var(--f-body);
   font-size: 13px;
   font-weight: 500;
@@ -635,7 +642,7 @@
 }
 .sj .mk-bar {
   display: flex;
-  height: 10px;
+  height: 8px;
   border-radius: var(--r-pill);
   overflow: hidden;
   background: var(--gray-100);
@@ -652,9 +659,9 @@
   align-items: center;
   gap: 6px 8px;
   margin: 0;
-  padding-top: 12px;
+  padding-top: 10px;
   border-top: 1px dashed var(--gray-200);
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--gray-600);
 }
 .sj .mk-result-foot .key {
@@ -676,25 +683,22 @@
   margin-left: auto;
 }
 @media (max-width: 640px) {
-  .sj .mk-result-stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .sj .mk-row {
+  .sj .mk-res {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 6px 12px;
   }
-  .sj .mk-row .mk-bar {
+  .sj .mk-res .mk-bar {
     grid-column: 1 / -1;
     grid-row: 2;
   }
-  .sj .mk-row-counts {
+  .sj .mk-res-counts {
     grid-column: 1 / -1;
     grid-row: 3;
   }
-  .sj .mk-row-pct {
+  .sj .mk-res-pct {
     grid-row: 1;
     grid-column: 2;
-    font-size: 24px;
+    font-size: 18px;
   }
   .sj .mk-result-rule {
     margin-left: 0;

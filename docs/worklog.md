@@ -15,6 +15,16 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-13
 
+### Mock report: a slimmer result card
+- **What:**
+  - The totals are one line with coloured dots, not four tall boxes with left borders.
+  - The subject rows are tighter, with smaller scores and bars.
+  - The report's row styles were renamed (`mk-res`). They had reused the history list's
+    `mk-row` name and changed its layout.
+- **Why:** the founder found the card too big and didn't like the left borders.
+- **Where:** `apps/web/src/prep/pages/MockReport.tsx` and `Mock.css`.
+- **Status:** committed locally; the report and history were checked at 1440 and 390.
+
 ### Mock report: one result card that fits the subjects sat
 - **What:** the overall box and the fixed-width subject cards are now one card:
   - a strip of four totals (questions, right, wrong, unanswered), each with its colour;
