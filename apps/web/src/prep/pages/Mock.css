@@ -44,18 +44,21 @@
 
 /* ---------------------------------------------------------------- history */
 .sj .mk-list {
+  display: grid;
+  gap: 10px;
   margin: 0;
-  padding: 4px 0;
+  padding: 0;
   list-style: none;
-  overflow: hidden;
 }
-.sj .mk-row + .mk-row {
-  border-top: 1px solid var(--gray-100);
+.sj .mk-row {
+  padding: 0;
+  overflow: hidden;
 }
 /* A row: the score tile, what it was, each subject's bar, the way in. */
 .sj .mk-row-link {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) minmax(200px, 300px) auto;
+  border-radius: inherit;
   align-items: center;
   gap: 16px;
   padding: 14px 20px;
@@ -122,6 +125,16 @@
   display: grid;
   gap: 6px;
 }
+/* Three or four subjects: two columns, so the row stays as short as a two-subject one. */
+@media (min-width: 761px) {
+  .sj .mk-row-link:has(.mk-row-bars.many) {
+    grid-template-columns: auto minmax(0, 1fr) minmax(360px, 520px) auto;
+  }
+  .sj .mk-row-bars.many {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 22px;
+  }
+}
 .sj .mk-row-bar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 70px 38px;
@@ -173,7 +186,7 @@
     padding: 14px 16px;
   }
   .sj .mk-row-bars {
-    grid-column: 2 / 3;
+    grid-column: 1 / -1;
     grid-row: 2;
   }
   .sj .mk-row-go {
@@ -225,7 +238,7 @@
   opacity: 0.55;
   pointer-events: none;
 }
-.sj .mk-first .mk-list {
+.sj .mk-first .mk-row {
   border: 1.5px dashed var(--gray-200);
   box-shadow: none;
 }

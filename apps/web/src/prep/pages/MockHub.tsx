@@ -65,7 +65,7 @@ function HistoryRow({ mock, example }: { mock: MockSummary; example?: boolean })
         </small>
       </span>
       {running ? null : (
-        <span className="mk-row-bars">
+        <span className={cx('mk-row-bars', mock.subjects.length > 2 && 'many')}>
           {mock.subjects.map((s) => (
             <span key={s.subject_id} className="mk-row-bar">
               <span className="name">{s.name}</span>
@@ -81,7 +81,7 @@ function HistoryRow({ mock, example }: { mock: MockSummary; example?: boolean })
     </>
   );
   return (
-    <li className={cx('mk-row', example && 'example')} aria-hidden={example || undefined}>
+    <li className={cx('mk-row sj-card', example && 'example')} aria-hidden={example || undefined}>
       {example ? (
         <div className="mk-row-link">{body}</div>
       ) : (
@@ -195,13 +195,13 @@ export function MockHub() {
             <p className="mk-first-text">
               <b>No mock exams yet.</b> Each one you sit is listed here like this, and opens to its full report.
             </p>
-            <ul className="mk-list sj-card">
+            <ul className="mk-list">
               <HistoryRow mock={EXAMPLE} example />
             </ul>
           </div>
         ) : (
           <>
-            <ul className="mk-list sj-card">
+            <ul className="mk-list">
               {paged.items.map((mock) => (
                 <HistoryRow key={mock.mock_id} mock={mock} />
               ))}

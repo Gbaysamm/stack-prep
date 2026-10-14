@@ -15,6 +15,18 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-14
 
+### Mock exams list: separate cards, four subjects in two columns, phone alignment
+- **What:**
+  - Each attempt is its own card again, not rows joined in one box.
+  - On a laptop, a mock with three or four subjects shows its bars in two columns, so the
+    card is no taller than a two-subject one.
+  - On phone, the subject bars start at the card's left edge, lined up with the score tile,
+    instead of being indented under the title.
+- **Why:** founder feedback on the redesign.
+- **Where:** `MockHub.tsx` and `Mock.css`.
+- **Status:** committed locally. Checked at 1440 and 390, with a four-subject row faked in
+  the browser because the bank only has English and Maths.
+
 ### Mock exams list redesigned as one clean list
 - **What:**
   - Past mocks are rows in a single list card, not stacked boxes.
