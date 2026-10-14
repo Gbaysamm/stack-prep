@@ -897,6 +897,9 @@ export function Board({
   //: The lesson's own voice is sounding, so the coach's face shows it is talking.
   const [voicing, setVoicing] = useState(false);
   const clips = useRef(new Map<number, HTMLAudioElement>());
+  //: A clip the narration effect let go of, still sounding until the next run claims it (the
+  //: same beat carrying on) or, just after, it is paused (the beat changed, or a real pause).
+  const handoff = useRef<HTMLAudioElement | null>(null);
   //: A moment's clip, if it has been fetched: the talking mouth keeps time with it (Mouth.tsx).
   const clipAt = useCallback((index: number) => clips.current.get(index) ?? null, []);
   const narrating = useRef<number | null>(null);
@@ -1133,6 +1136,8 @@ export function Board({
       missed(index);
       readAlong(entry, index);
     };
+    // The same beat's voice, still sounding from the run before: it carries straight on.
+    if (handoff.current === clip) handoff.current = null;
     clip
       .play()
       .then(() => {
@@ -1161,7 +1166,16 @@ export function Board({
       stopClock?.();
       clip.onended = null;
       clip.onerror = null;
-      clip.pause();
+      // Not paused at once. This effect also runs again when something it reads changes only
+      // its identity; pausing and resuming then is heard as the voice stopping mid-line. The
+      // next run claims the clip if it is the same beat, still to be heard; if nothing claims
+      // it (the beat changed, the lesson was paused, the board closed), it is paused here.
+      handoff.current = clip;
+      queueMicrotask(() => {
+        if (handoff.current !== clip) return;
+        handoff.current = null;
+        clip.pause();
+      });
       unfollow();
       setVoicing(false);
     };
@@ -1181,6 +1195,13 @@ export function Board({
     unfollow,
     whiteboard,
   ]);
+
+  // Make the sound effects' audio engine as the board opens, not as the first voice starts:
+  // creating it can block the page for a second, and mid-line that is heard as the voice
+  // stopping and starting again.
+  useEffect(() => {
+    sharedAudioContext();
+  }, []);
 
   // Nothing left playing once the board is closed.
   useEffect(

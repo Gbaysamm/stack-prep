@@ -15,6 +15,40 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-14
 
+### Exact lip-sync for the talking mouth (British RP)
+- **What:**
+  - **Server:**
+    - each word's sounds come from espeak-ng's British RP voice, normalised to the 44 RP
+      phonemes, with a checked lexicon on top;
+    - the sounds are fitted exactly into the word's time in the clip;
+    - older clips are converted on first read.
+  - **Web:**
+    - a measured shape for every one of the 44 phonemes (jaw, rounding, spreading,
+      protrusion, teeth, tongue; sources Cruttenden and Roach), with diphthongs gliding;
+    - coarticulation 60–120 ms ahead, and p b m held closed;
+    - a front view of the lips as the main view, with the side view a small inset for
+      consonant place;
+    - a voice box that buzzes for voiced sounds;
+    - a word strip showing one small mouth per phoneme, lit as it is said.
+  - **Voice stops mid-line:**
+    - the board no longer pauses and restarts a clip when its narration effect re-runs;
+    - the sound engine is made when the board opens, not as the first voice starts. Making
+      it then blocked the page for up to a second.
+- **Why:** the founder's requirement: the mouth must show each word's exact lip sequence.
+  The founder also heard the voice stop between words, and found the side cross-section did
+  not show the lips.
+- **Where:**
+  - server: `apps/api/src/app/phonemes_rp.py` and `mouth_voice.py`;
+  - web: `apps/web/src/student/mouthShapes.ts`, `mouthTimeline.ts`, `Mouth.tsx`,
+    `mouth.css` and `Board.tsx`;
+  - the plan: `docs/plans/2026-10-01-exact-lip-sync.md`.
+- **Status:**
+  - committed locally;
+  - 61 mouth API tests and 53 web tests pass;
+  - screenshots of sheep, ship, vision, enclosure and think at 1440 and 390;
+  - the shape table still needs an English teacher's or phonetician's sign-off, as the plan
+    says.
+
 ### Mock exams list: separate cards, four subjects in two columns, phone alignment
 - **What:**
   - Each attempt is its own card again, not rows joined in one box.

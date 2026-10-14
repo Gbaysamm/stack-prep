@@ -5,8 +5,12 @@
  * Kokoro voice's own timings, or the studio voice's estimated. The mouth says one word of the
  * clip, so the sounds inside that word's window are taken (`speechFor`), its taught sound found
  * among them (`findTarget`, which knows the papers' British IPA and the American forms espeak
- * gives), and its syllables placed over them (`syllableSpans`). `visemeAt` then reads the shape
- * for any time, holding the taught sound's shape for HOLD_S however briefly the voice says it.
+ * gives), and its syllables placed over them (`syllableSpans`). `poseAt` then reads the mouth's
+ * position for any time from the RP shape table (mouthShapes.ts), holding the taught sound's
+ * shape for HOLD_S however briefly the voice says it, with COARTICULATION: in the last 60 to
+ * 120 ms before a sound the lips and jaw move towards its rounding and opening, as real lips do
+ * ("enclosure" rounds before its vowel), while p, b and m keep the lips sealed for their whole
+ * hold.
  *
  * A moment's SCRIPT (`scriptFor`) is every time the mouth says a word in that moment's clip:
  * each word it is given there (its own, or a later `say`), every time the voice says it after
@@ -16,28 +20,14 @@
 
 import { foldWord, spokenWords, type SpokenWord } from "./wordClock.js";
 import type { LessonCue } from "./api.js";
-
-/** A mouth shape. */
-export type Viseme =
-  | "rest"
-  | "closed"
-  | "fv"
-  | "th"
-  | "slight"
-  | "spread"
-  | "lax"
-  | "wide"
-  | "round"
-  | "roundLax"
-  | "sh"
-  | "r"
-  | "back"
-  | "mid";
+import { mix, poseOf, REST, rpPhoneme, SHAPES, smooth, type Pose } from "./mouthShapes.js";
 
 export interface Phone {
   p: string;
   start: number;
   end: number;
+  /** The index of the word it belongs to in the clip's words, where the API gives it. */
+  w?: number;
 }
 
 /**
@@ -50,33 +40,7 @@ const LONG = "ː";
 
 /** The sound without its length mark. */
 function bare(p: string): string {
-  return p.replaceAll(LONG, "");
-}
-
-const VISEMES: [Viseme, string[]][] = [
-  ["closed", ["p", "b", "m"]],
-  ["fv", ["f", "v"]],
-  ["th", ["θ", "ð"]],
-  ["sh", ["ʃ", "ʒ", "tʃ", "dʒ", "ʧ", "ʤ"]],
-  ["slight", ["t", "d", "n", "s", "z", "l", "ɾ", "ɫ", "ʔ"]],
-  ["spread", ["i", "j"]],
-  ["lax", ["ɪ", "ᵻ", "e", "ɛ"]],
-  ["wide", ["æ", "a", "ɑ", "ʌ", "ɐ"]],
-  ["round", ["u", "o", "ɔ", "ɒ", "w"]],
-  ["roundLax", ["ʊ"]],
-  ["r", ["ɹ", "r", "ɚ"]],
-  ["back", ["k", "g", "ɡ", "ŋ", "h", "x"]],
-  ["mid", ["ə", "ɜ"]],
-];
-const BY_SOUND = new Map<string, Viseme>(
-  VISEMES.flatMap(([viseme, sounds]) => sounds.map((sound) => [sound, viseme] as [string, Viseme])),
-);
-
-/** The mouth shape of a sound (IPA). An affricate is its own; a diphthong is its first part. */
-export function visemeOf(p: string): Viseme {
-  const sound = bare(p.trim());
-  if (!sound) return "rest";
-  return BY_SOUND.get(sound) ?? BY_SOUND.get(sound[0]!) ?? "slight";
+  return p.replaceAll(LONG, "").replaceAll(":", "");
 }
 
 /**
@@ -126,6 +90,10 @@ export function findTarget(phones: Phone[], sound: string | null | undefined): [
   if (!sound) return null;
   const want = bare(sound.trim().replace(/^\/|\/$/g, ""));
   const accepts = HEARD_AS[want] ?? [want];
+  // The voice's sounds in RP: the taught sound itself, mapped as they are.
+  const rp = rpPhoneme(want);
+  const exact = phones.findIndex((phone) => rpPhoneme(phone.p) === rp);
+  if (exact >= 0) return [exact, exact];
   for (let k = 0; k < phones.length; k += 1) {
     const heard = bare(phones[k]!.p);
     if (accepts.includes(heard) || accepts.includes(heard[0] ?? "")) {
@@ -235,6 +203,8 @@ export interface Speech {
   /** The taught sound's first and last index in `phones`, if it is heard. */
   target: [number, number] | null;
   syllables: [number, number][];
+  /** Its sounds were guessed from the spelling, not given by the voice. */
+  guessed?: boolean;
 }
 
 /** The sounds of `phones` inside [start, end] (with a little slack), as the word's speech. */
@@ -243,9 +213,15 @@ export function speechFor(
   window: [number, number],
   sound: string | null | undefined,
   syllables: string[] | null | undefined,
+  /** The word's first and last index in the clip's words: where every sound says which word it
+   *  is in (`w`), those words' sounds exactly. */
+  words?: [number, number],
 ): Speech {
   const [start, end] = window;
-  const mine = phones.filter((phone) => phone.end > start - 0.015 && phone.start < end + 0.015);
+  const indexed = words && phones.length > 0 && phones.every((phone) => typeof phone.w === "number");
+  const mine = indexed
+    ? phones.filter((phone) => phone.w! >= words[0] && phone.w! <= words[1])
+    : phones.filter((phone) => phone.end > start - 0.015 && phone.start < end + 0.015);
   const from = mine.length ? Math.min(start, mine[0]!.start) : start;
   const until = mine.length ? Math.max(end, mine[mine.length - 1]!.end) : end;
   return {
@@ -261,11 +237,12 @@ export function speechFor(
 export function shifted(speech: Speech, at: number, scale = 1): Speech {
   const move = (t: number) => at + (t - speech.start) * scale;
   return {
-    phones: speech.phones.map((phone) => ({ p: phone.p, start: move(phone.start), end: move(phone.end) })),
+    phones: speech.phones.map((phone) => ({ ...phone, start: move(phone.start), end: move(phone.end) })),
     start: at,
     end: move(speech.end),
     target: speech.target,
     syllables: speech.syllables.map(([a, b]) => [move(a), move(b)] as [number, number]),
+    guessed: speech.guessed,
   };
 }
 
@@ -283,21 +260,81 @@ export function finishedAt(speech: Speech): number {
   return Math.max(speech.end, hold ? hold[1] : speech.end);
 }
 
-/** The mouth shape at time `t`, and whether it is the taught sound held. */
-export function visemeAt(speech: Speech, t: number): { viseme: Viseme; holding: boolean } {
+/** The mouth at a moment: its position, the sound being said, and whether it is voiced. */
+export interface MouthState {
+  pose: Pose;
+  /** The sound being said, in RP ("" at rest). */
+  p: string;
+  /** Its index in the speech's sounds, or -1 at rest. */
+  index: number;
+  voiced: boolean;
+  /** The taught sound, held. */
+  holding: boolean;
+}
+
+export const RESTING: MouthState = { pose: REST, p: "", index: -1, voiced: false, holding: false };
+
+/** Coarticulation: how long before a sound the lips and jaw start moving towards it. */
+export const ANTICIPATE_MIN_S = 0.06;
+export const ANTICIPATE_MAX_S = 0.12;
+/** What is anticipated: the lips' rounding and spreading, their protrusion, the jaw. */
+const ANTICIPATED: (keyof Pose)[] = ["jaw", "round", "spread", "protrude"];
+/** Two sounds closer than this are one stretch of speech (a later one is anticipated). */
+const JOINED_S = 0.08;
+
+/** What the lips aim for ahead of a sound: its start. */
+function aimFor(p: string): Pose {
+  return poseOf(p, 0);
+}
+
+/** A sound's own pose `frac` of the way through it; h takes the shape of what follows. */
+function ownPose(phones: Phone[], k: number, frac: number): Pose {
+  const rp = rpPhoneme(phones[k]!.p);
+  const next = phones[k + 1];
+  if (SHAPES[rp]?.adapts && next && next.start - phones[k]!.end < JOINED_S) return { ...poseOf(next.p, 0), close: 0 };
+  return poseOf(rp, frac);
+}
+
+/**
+ * The mouth at time `t`: the sound being said, its shape (a diphthong gliding, an affricate
+ * releasing), moved towards the next sound's lips and jaw in the last 60 to 120 ms before it.
+ * p, b and m keep their lips sealed (`close` 1) for their whole span: closure is never blended.
+ * A short gap between two sounds keeps the shape before it; a longer one rests.
+ */
+export function poseAt(speech: Speech, t: number): MouthState {
+  const phones = speech.phones;
   const hold = holdSpan(speech);
   if (hold && t >= hold[0] && t <= hold[1]) {
-    return { viseme: visemeOf(speech.phones[speech.target![0]]!.p), holding: true };
+    const [a, b] = speech.target!;
+    const frac = (t - hold[0]) / Math.max(0.001, hold[1] - hold[0]);
+    const pose =
+      a === b
+        ? poseOf(phones[a]!.p, frac)
+        : mix(poseOf(phones[a]!.p, 0), poseOf(phones[b]!.p, 1), smooth((frac - 0.25) / 0.55));
+    const p = rpPhoneme(phones[a]!.p);
+    return { pose, p, index: a, voiced: SHAPES[p]?.voiced ?? false, holding: true };
   }
-  let last: Phone | null = null;
-  for (const phone of speech.phones) {
-    if (t < phone.start) break;
-    if (t < phone.end) return { viseme: visemeOf(phone.p), holding: false };
-    last = phone;
+  let k = phones.findIndex((phone) => t >= phone.start && t < phone.end);
+  if (k < 0) {
+    let last = -1;
+    phones.forEach((phone, j) => {
+      if (phone.end <= t) last = j;
+    });
+    if (last < 0 || t - phones[last]!.end >= 0.06 || t > speech.end) return RESTING;
+    k = last;
   }
-  // A short gap between two sounds keeps the shape before it; a longer one rests.
-  if (last && t - last.end < 0.06 && t <= speech.end) return { viseme: visemeOf(last.p), holding: false };
-  return { viseme: "rest", holding: false };
+  const phone = phones[k]!;
+  const span = Math.max(0.001, phone.end - phone.start);
+  const frac = Math.max(0, Math.min(1, (t - phone.start) / span));
+  let pose = ownPose(phones, k, frac);
+  const next = phones[k + 1];
+  if (next && next.start - phone.end < JOINED_S) {
+    const lead = Math.min(ANTICIPATE_MAX_S, Math.max(ANTICIPATE_MIN_S, span * 0.6));
+    const from = next.start - lead;
+    if (t > from) pose = mix(pose, aimFor(next.p), smooth((t - from) / lead), ANTICIPATED);
+  }
+  const p = rpPhoneme(phone.p);
+  return { pose, p, index: k, voiced: SHAPES[p]?.voiced ?? false, holding: false };
 }
 
 /** Which syllable is being said at `t` (from 0), or -1. */
@@ -391,7 +428,7 @@ export function fittedGuess(
   const length = guess[guess.length - 1]?.end ?? 0.4;
   const base = speechFor(guess, [0, length], sound, syllables);
   const span = Math.max(0.12, window[1] - window[0]);
-  return shifted(base, window[0], span / Math.max(0.05, length));
+  return { ...shifted(base, window[0], span / Math.max(0.05, length)), guessed: true };
 }
 
 /** Where the cue's words start in `words` (their nth time, else the first), or null. */
@@ -435,7 +472,7 @@ export function scriptFor(
     }
     for (const [first, last] of said) {
       const window: [number, number] = [words[first]!.start, words[last]!.end];
-      let speech = phones?.length ? speechFor(phones, window, one.sound, own) : null;
+      let speech = phones?.length ? speechFor(phones, window, one.sound, own, [first, last]) : null;
       if (!speech || !speech.phones.length) speech = fittedGuess(one.word, window, one.sound, own);
       parts.push({ word: one.word, sound: one.sound, own: one.own, speech });
       floor = window[1];

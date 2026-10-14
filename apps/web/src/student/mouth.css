@@ -1,6 +1,7 @@
 /*
  * The talking mouth (Mouth.tsx): drawn in by the pen as it comes in, its sound's symbol written
- * beside it, its syllables under it with the stressed one growing as it is said.
+ * beside it, its syllables under it with the stressed one growing as it is said, a voice box
+ * that buzzes for voiced sounds, and the word strip (one small mouth per sound) at the bottom.
  */
 
 .mo {
@@ -28,6 +29,11 @@
   display: block;
   overflow: visible;
 }
+/* The drawing and, over its bottom band, the word strip. */
+.mo-stage {
+  position: relative;
+  max-width: 100%;
+}
 
 /* Coming in: the outlines drawn by the pen, the colour washed in after. */
 .mo-draw path[pathLength] {
@@ -48,14 +54,6 @@
     opacity: 0;
     transform: scale(0.92);
   }
-}
-
-/* The side view's names for its parts (roof, teeth, tongue, lips), in the face's own units. */
-.mo-note {
-  font-family: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive;
-  font-size: 11.5px;
-  font-weight: 700;
-  opacity: 0.85;
 }
 
 /* The sound's symbol, written left to right by the pen as the mouth reaches it. */
@@ -115,6 +113,134 @@
   to {
     font-size: 38px;
   }
+}
+
+/* The voice box: folds open and still for a voiceless sound; closed and buzzing for a voiced
+   one, with the buzz drawn either side. */
+.mo-folds {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transition: transform 0.06s ease-out;
+}
+.mo-buzz {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: opacity 0.06s;
+}
+.mo-voice-label {
+  font-family: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive;
+  font-size: 12.5px;
+  font-weight: 700;
+  fill: #8b87a3;
+  transition: fill 0.06s;
+}
+.mo[data-voiced='1'] .mo-folds {
+  transform: scaleX(0.18);
+  animation: mo-folds 0.07s linear infinite alternate;
+}
+.mo[data-voiced='1'] .mo-buzz {
+  opacity: 1;
+  animation: mo-buzz 0.09s linear infinite alternate;
+}
+.mo[data-voiced='1'] .mo-voice-label {
+  fill: #db2777;
+}
+@keyframes mo-folds {
+  from {
+    transform: scaleX(0.1);
+  }
+  to {
+    transform: scaleX(0.3);
+  }
+}
+@keyframes mo-buzz {
+  from {
+    transform: scale(0.94);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+
+/* The word strip: one small mouth per sound of the word, its IPA under it, the one being said
+   lit. A long word scrolls sideways inside the strip, never the page. */
+.mo-strip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  touch-action: pan-x;
+  font-size: max(10px, calc(var(--dd-size, 160px) * 0.05));
+}
+.mo-strip::-webkit-scrollbar {
+  display: none;
+}
+.mo-strip-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.2em;
+  width: max-content;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 0.3em;
+}
+.mo-strip-word {
+  align-self: center;
+  font-family: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive;
+  font-size: 1.5em;
+  font-weight: 700;
+  color: #8b87a3;
+}
+.mo-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: none;
+  width: 2.5em;
+  padding: 0.2em 0 0.1em;
+  border: 1px solid transparent;
+  border-radius: 0.6em;
+  background: none;
+  color: #1d1b3a;
+  cursor: pointer;
+  transition: background-color 0.08s, border-color 0.08s, transform 0.08s;
+  -webkit-tap-highlight-color: transparent;
+}
+.mo-tile:hover {
+  background: rgba(124, 58, 237, 0.06);
+}
+.mo-tile:focus-visible {
+  outline: 2px solid var(--purple-500, #7c3aed);
+  outline-offset: 1px;
+}
+.mo-tile.on {
+  background: rgba(236, 72, 153, 0.12);
+  border-color: #db2777;
+}
+.mo-tile-svg {
+  display: block;
+  width: 2.2em;
+  height: 1.45em;
+  opacity: 0.7;
+  transition: opacity 0.08s;
+}
+.mo-tile.on .mo-tile-svg {
+  opacity: 1;
+}
+.mo-tile-ipa {
+  margin-top: 0.1em;
+  font-family: 'Charis SIL', 'Doulos SIL', 'Gentium Plus', 'Noto Serif', 'Cambria', 'Times New Roman', serif;
+  font-size: 1.05em;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #8b87a3;
+}
+.mo-tile.on .mo-tile-ipa {
+  color: #db2777;
 }
 
 .mo.pulsing .mo-svg {

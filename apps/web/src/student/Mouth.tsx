@@ -3,13 +3,26 @@
  * the board that says a word in time with the voice, so the student sees the shape of each
  * sound as they hear it.
  *
- * - THE SHAPES. Fourteen visemes (mouthTimeline.ts) drawn in the doodles' style: ink #1d1b3a
- *   with round caps, soft pink lips and tongue, white teeth. From the front (`view: front`):
- *   lips, teeth and tongue. From the side (`view: side`): a cut-away of the head, labelled
- *   (roof, teeth, tongue, lips), with the tongue's place and a ring where it touches, for
- *   consonants such as θ, ð, n, l, r. Each shape is a set of numbers (how wide, how open, how
- *   round, where the tongue tip is...), and the drawing is made from them every frame, so one
- *   shape becomes the next by easing the numbers: a smooth morph, never a cut.
+ * - THE SHAPES. One per British RP phoneme, 44 in all (mouthShapes.ts): each a set of measured
+ *   numbers (jaw opening, lip rounding, spreading and protrusion, lips sealed, lip to teeth,
+ *   tongue between the teeth, teeth showing, tongue tip and body), from Cruttenden's Gimson and
+ *   Roach. Diphthongs glide between two targets; the lips start moving towards the next sound
+ *   60 to 120 ms before it; p, b and m stay sealed for their whole hold (mouthTimeline.ts,
+ *   `poseAt`). Drawn in the doodles' style: ink #1d1b3a with round caps, soft pink lips and
+ *   tongue, white teeth. THE LIPS FROM THE FRONT are always the main, large view: a Cupid's bow
+ *   upper lip and a full lower lip, the teeth as they show, the tongue tip between the teeth
+ *   (θ ð) or up behind the top teeth (t d n l), the lips' inner rim turned out as they push
+ *   forward (ʃ ʒ uː w). For consonant place (`view: side`) a small cut-away of the head sits
+ *   beside it as well, with the tongue's place and a ring where it touches. Both views are
+ *   drawn from the same numbers (`frontShape`, `sideShape`), eased every frame: a smooth
+ *   morph, never a cut.
+ * - THE VOICE BOX beside the mouth: its folds close and buzz for a voiced sound (b d g v ð z ʒ
+ *   dʒ m n ŋ l r w j and every vowel) and stand open and still for a voiceless one, so nation
+ *   and vision, or f and v, visibly differ.
+ * - THE WORD STRIP under the mouth: one small mouth per sound of the word being said, its IPA
+ *   under it, the one being said lit. Tapping a tile shows that sound's shape on the big mouth,
+ *   slowly, for PIN_MS (the free voice says whole words only, so the tile is not voiced).
+ *   It scrolls sideways inside itself when a word is long; the page never does.
  * - IN TIME WITH THE VOICE, ALWAYS. The shape due is read every frame from the clock of what is
  *   actually being heard: the playing clip's own `currentTime` (so a pause holds the mouth and
  *   the board's speed carries it), or, where the line has no voice (none here, or it failed),
@@ -30,7 +43,8 @@
  * - Less movement asked for: the taught sound's shape, still, with its symbol.
  * - Sound effects (a pop as it comes in, the pen as the symbol is written) only in the
  *   whiteboard style.
- * - `data-viseme`, `data-word` and `data-clock` on the figure say what it is doing, for checks.
+ * - `data-viseme` (the RP phoneme being said, or "rest"), `data-voiced`, `data-word` and
+ *   `data-clock` on the figure say what it is doing, for checks.
  */
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
@@ -51,16 +65,17 @@ import {
   fittedGuess,
   guessedPhones,
   partAt,
+  poseAt,
+  RESTING,
   scriptFor,
   shifted,
   speechFor,
   syllableAt,
-  visemeAt,
-  visemeOf,
   type MouthSaying,
+  type MouthState,
   type Part,
-  type Viseme,
 } from "./mouthTimeline.js";
+import { isVoiced, POSE_KEYS, poseOf, rpPhoneme, type Pose } from "./mouthShapes.js";
 import { alignToSpeech, clipSegments, retimed, type Segments } from "./clipSpeech.js";
 import { playSfx } from "./sfx.js";
 import { estimatedSpoken, typicalSeconds, wordSpans } from "./wordClock.js";
@@ -69,70 +84,74 @@ import "./mouth.css";
 /* ---- The shapes, as numbers ---------------------------------------------------------------- */
 
 /** From the front: [half-width, half-opening, roundness, lip, upper teeth, lower teeth, tongue
- *  height, tongue tip out, bite (teeth on lip), pushed out]. */
-type FrontShape = [number, number, number, number, number, number, number, number, number, number];
+ *  height, tongue tip out, bite (teeth on lip), pushed out, tongue tip up behind the teeth]. */
+type FrontShape = [number, number, number, number, number, number, number, number, number, number, number];
 
-const FRONT: Record<Viseme, FrontShape> = {
-  rest: [30, 1.5, 0.15, 7, 0, 0, 0, 0, 0, 0],
-  closed: [28, 0, 0.1, 7.4, 0, 0, 0, 0, 0, 0],
-  fv: [32, 4.5, 0.1, 6.6, 1, 0, 0, 0, 1, 0],
-  th: [32, 8, 0.2, 7, 1, 0.8, 0.6, 1, 0, 0],
-  slight: [32, 7.5, 0.25, 7, 0.9, 0.8, 0.5, 0, 0, 0],
-  spread: [43, 6, 0.08, 5.6, 1, 0.9, 0.4, 0, 0, 0],
-  lax: [34, 11, 0.3, 7, 0.9, 0.5, 0.45, 0, 0, 0],
-  wide: [33, 23, 0.45, 7, 0.7, 0.3, 0.45, 0, 0, 0],
-  round: [13, 13, 0.55, 9.5, 0.2, 0, 0.2, 0, 0, 1],
-  roundLax: [19, 12, 0.5, 9, 0.4, 0.2, 0.3, 0, 0, 0.6],
-  sh: [19, 9, 0.5, 10, 1, 1, 0.2, 0, 0, 1],
-  r: [21, 9, 0.45, 8.5, 0.6, 0.3, 0.3, 0, 0, 0.5],
-  back: [30, 14, 0.35, 7, 0.6, 0.4, 0.95, 0, 0, 0],
-  mid: [30, 12.5, 0.35, 7, 0.6, 0.4, 0.45, 0, 0, 0],
-};
+const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 
-/** From the side: [jaw (degrees), lips sealed, lower lip to teeth, lips pushed out], then the
- *  tongue's back, top, front, tip, underside and floor, as x, y pairs. */
-type SideShape = number[];
-const TONGUE: Record<string, number[]> = {
-  rest: [48, 66, 68, 58, 88, 60, 99, 63, 93, 70, 84, 78],
-  alveolar: [48, 66, 70, 56, 88, 50, 98, 46, 92, 56, 84, 74],
-  th: [50, 66, 72, 58, 92, 56, 109, 56, 98, 62, 86, 76],
-  r: [48, 62, 66, 54, 82, 50, 88, 43, 86, 52, 80, 72],
-  back: [50, 45, 60, 43, 80, 58, 98, 66, 92, 72, 84, 80],
-  sh: [48, 62, 70, 52, 88, 46, 95, 50, 90, 58, 84, 74],
-  spread: [48, 60, 72, 48, 90, 52, 99, 62, 93, 68, 84, 76],
-  lax: [48, 62, 72, 52, 90, 56, 99, 64, 93, 70, 84, 78],
-  wide: [44, 76, 66, 74, 88, 78, 100, 80, 94, 87, 84, 92],
-  round: [48, 52, 58, 48, 80, 60, 97, 66, 92, 72, 84, 80],
-  mid: [46, 67, 68, 64, 88, 66, 99, 70, 93, 76, 84, 84],
-};
-const SIDE: Record<Viseme, SideShape> = {
-  rest: [2, 0.6, 0, 0, ...TONGUE.rest!],
-  closed: [0, 1, 0, 0, ...TONGUE.rest!],
-  fv: [3, 0, 1, 0, ...TONGUE.rest!],
-  th: [6, 0, 0, 0, ...TONGUE.th!],
-  slight: [4, 0, 0, 0, ...TONGUE.alveolar!],
-  spread: [4, 0, 0, 0, ...TONGUE.spread!],
-  lax: [8, 0, 0, 0, ...TONGUE.lax!],
-  wide: [16, 0, 0, 0, ...TONGUE.wide!],
-  round: [6, 0, 0, 1, ...TONGUE.round!],
-  roundLax: [7, 0, 0, 0.6, ...TONGUE.round!],
-  sh: [3, 0, 0, 1, ...TONGUE.sh!],
-  r: [6, 0, 0, 0.5, ...TONGUE.r!],
-  back: [9, 0, 0, 0, ...TONGUE.back!],
-  mid: [10, 0, 0, 0, ...TONGUE.mid!],
-};
+/** The front view's numbers for a pose (mouthShapes.ts). */
+export function frontShape(a: Pose): FrontShape {
+  // Spread lips are wide; rounded and protruded lips narrow to a small round opening.
+  // Pressed together (p b m) the lips thin and stretch a little.
+  const w = Math.max(12, 31 + 11 * a.spread - 16 * a.round - 6 * a.protrude + 2 * a.close);
+  let open = 4 + 22 * a.jaw;
+  if (a.round > 0) open = Math.max(open * (1 - 0.25 * a.round), 9 * a.round + 4 * a.protrude);
+  const h = open * (1 - a.close);
+  const roundness = 0.12 + 0.43 * a.round + 0.2 * a.protrude;
+  const lip = 7 - 1.4 * a.spread + 1.2 * a.protrude - 0.8 * a.close;
+  const open01 = 1 - a.close;
+  const tongue = 0.2 + 0.75 * Math.max(a.bodyY * (1 - a.bodyX), a.tipY * 0.6, a.bodyY * 0.4);
+  return [
+    w,
+    h,
+    roundness,
+    lip,
+    a.upperTeeth * open01,
+    a.lowerTeeth * open01 * (1 - a.labiodental),
+    clamp01(tongue),
+    a.interdental,
+    a.labiodental,
+    a.protrude,
+    clamp01((a.tipY - 0.6) / 0.4) * (1 - a.interdental) * open01,
+  ];
+}
+
+/** The side view's numbers for a pose: [jaw (degrees), lips sealed, lower lip to teeth, lips
+ *  pushed out], then the tongue's back, top, front, tip, underside and floor, as x, y pairs. */
+export function sideShape(a: Pose): number[] {
+  const back: [number, number] = [48 + 4 * (1 - a.bodyX) * a.bodyY, 72 - 28 * a.bodyY * (1 - 0.7 * a.bodyX)];
+  const top: [number, number] = [58 + 14 * a.bodyX, 72 - 26 * a.bodyY];
+  const tip: [number, number] = [89 + 20 * a.tipX, 66 - 20 * a.tipY + 18 * (0.5 - a.bodyY) * (1 - a.tipY)];
+  const front: [number, number] = [80 + 8 * a.bodyX + 4 * a.tipX, (top[1] + tip[1]) / 2 - 1.5];
+  const under: [number, number] = [tip[0] - 6, tip[1] + 7 + 3 * a.tipY];
+  const floor: [number, number] = [84, Math.max(tip[1] + 12, 76 + 8 * (0.5 - a.bodyY))];
+  return [
+    1 + 17 * a.jaw,
+    a.close,
+    a.labiodental,
+    Math.max(a.protrude, a.round * 0.4),
+    ...back,
+    ...top,
+    ...front,
+    ...tip,
+    ...under,
+    ...floor,
+  ];
+}
 
 const INK = "#1d1b3a";
 const LIP = "#f6a5c8";
 const TONGUE_FILL = "#f472b6";
 const INSIDE = "#4a1d3f";
 const TOUCH = "#db2777";
+/** The wet inner rim of the lips, seen as they push forward. */
+const LIP_RIM = "#e0679f";
 
 const f = (n: number) => n.toFixed(1);
 
 /** The front view's paths for a shape, about (cx, cy) in the face's own units. */
 function frontPaths(shape: number[], cx: number, cy: number) {
-  const [w, h, round, lip, up, lo, tongue, tip, bite, push] = shape as FrontShape;
+  const [w, h, round, lip, up, lo, tongue, tip, bite, push, tipUp = 0] = shape as FrontShape;
   const top = cy - 0.85 * h;
   const bot = cy + 1.15 * h;
   const L = cx - w;
@@ -151,15 +170,16 @@ function frontPaths(shape: number[], cx: number, cy: number) {
   const Lo = L - 3 - push * 1.5;
   const Ro = R + 3 + push * 1.5;
   const T = lip + push * 1.5;
-  const peak = top - T - 1.5;
-  const dip = top - T + 1.4;
-  const PL = cx - Math.max(5, w * 0.3);
-  const PR = cx + Math.max(5, w * 0.3);
+  // The Cupid's bow: two peaks either side of a V-shaped dip under the philtrum.
+  const peak = top - T - 2.6;
+  const dip = top - T + 1.8;
+  const PL = cx - Math.max(4.5, w * 0.27);
+  const PR = cx + Math.max(4.5, w * 0.27);
   const upper =
-    `M${f(Lo)} ${f(cy)}C${f(Lo + 2)} ${f(cy - (cy - peak) * 0.55)} ${f(PL - w * 0.3)} ${f(peak)} ${f(PL)} ${f(peak)}` +
-    `C${f(PL + 3)} ${f(peak)} ${f(cx - 3)} ${f(dip - 1)} ${f(cx)} ${f(dip)}` +
-    `C${f(cx + 3)} ${f(dip - 1)} ${f(PR - 3)} ${f(peak)} ${f(PR)} ${f(peak)}` +
-    `C${f(PR + w * 0.3)} ${f(peak)} ${f(Ro - 2)} ${f(cy - (cy - peak) * 0.55)} ${f(Ro)} ${f(cy)}` +
+    `M${f(Lo)} ${f(cy)}C${f(Lo + 2)} ${f(cy - (cy - peak) * 0.5)} ${f(PL - w * 0.35)} ${f(peak + 0.6)} ${f(PL)} ${f(peak)}` +
+    `C${f(PL + 1.5)} ${f(peak - 0.2)} ${f(cx - 1.6)} ${f(dip - 0.6)} ${f(cx)} ${f(dip)}` +
+    `C${f(cx + 1.6)} ${f(dip - 0.6)} ${f(PR - 1.5)} ${f(peak - 0.2)} ${f(PR)} ${f(peak)}` +
+    `C${f(PR + w * 0.35)} ${f(peak + 0.6)} ${f(Ro - 2)} ${f(cy - (cy - peak) * 0.5)} ${f(Ro)} ${f(cy)}` +
     `L${f(R)} ${f(cy)}${topBack}Z`;
   const low = bot + T * 1.3;
   const lower =
@@ -178,6 +198,10 @@ function frontPaths(shape: number[], cx: number, cy: number) {
     gaps: `M${f(cx - 8)} ${f(top)}v${f(upH - 2)}M${f(cx)} ${f(top)}v${f(upH - 2)}M${f(cx + 8)} ${f(top)}v${f(upH - 2)}`,
     tongue: { cx, cy: tongueTop + 8, rx: Math.max(6, w * 0.72), ry: 8 },
     tip: { cx, cy: cy + 2.2, rx: 9 + tip, ry: 4.6, opacity: tip },
+    // The tongue tip up behind the top teeth (t d n l), seen through the opening.
+    tipUp: { cx, cy: top + upH + 1.5, rx: Math.max(4, Math.min(9, w * 0.32)), ry: 3.6, opacity: tipUp },
+    // The lips' inner rim, turned out as they push forward.
+    rim: { width: 1 + 3 * push, opacity: 0.85 * push },
     bite: { x: cx - 13, y: cy - 2.5, width: 26, height: 5.5, opacity: bite },
     corners: `M${f(Lo - 1)} ${f(cy - 4)}q-3 4 0 8M${f(Ro + 1)} ${f(cy - 4)}q3 4 0 8`,
   };
@@ -232,6 +256,31 @@ function sidePaths(shape: number[]) {
     lip: `rotate(${f(jaw)} 44 46) translate(${f(-4 * bite)} ${f(-5 * seal - 6 * bite)})`,
     touch,
   };
+}
+
+/** One sound of the word strip: a small front view of its shape, drawn once. */
+function ShapeTile({ p }: { p: string }) {
+  const id = useId().replace(/[^a-zA-Z0-9]/g, "");
+  const s = frontPaths(frontShape(poseOf(p, 0.2)), 66, 54);
+  return (
+    <svg className="mo-tile-svg" viewBox="18 22 96 64" aria-hidden="true">
+      <clipPath id={`mo-t-${id}`}>
+        <path d={s.inner} />
+      </clipPath>
+      <path d={s.inner} fill={INSIDE} />
+      <g clipPath={`url(#mo-t-${id})`}>
+        <ellipse {...s.tongue} fill={TONGUE_FILL} />
+        <rect {...s.upperTeeth} fill="#fff" rx={2} />
+        <rect {...s.lowerTeeth} fill="#fff" rx={2} />
+        <ellipse {...s.tipUp} fill={TONGUE_FILL} />
+        <path d={s.inner} fill="none" stroke={LIP_RIM} strokeWidth={s.rim.width * 2} opacity={s.rim.opacity} />
+      </g>
+      <path d={s.lower} fill={LIP} stroke={INK} strokeWidth={3} strokeLinejoin="round" />
+      <ellipse {...s.tip} fill={TONGUE_FILL} stroke={INK} strokeWidth={2} />
+      <rect {...s.bite} fill="#fff" stroke={INK} strokeWidth={1.6} rx={2} />
+      <path d={s.upper} fill={LIP} stroke={INK} strokeWidth={3} strokeLinejoin="round" />
+    </svg>
+  );
 }
 
 /* ---- The voice's sounds ---------------------------------------------------------------------- */
@@ -349,15 +398,24 @@ interface Replay {
 const VIEW_W = 240;
 const MOUTH_H = 132;
 const SYLLABLE_H = 38;
-/** The face is drawn in its own units (about 100 across) and scaled up by this. */
-const FACE_SCALE = 1.28;
-const FACE_Y = 66;
+/** The word strip under it all: one small mouth per sound of the word. */
+const STRIP_H = 52;
+/** How long a tapped tile's shape is shown on the big mouth. */
+const PIN_MS = 600;
+/** The voice box, beside the mouth: right of the face and below its middle. */
+const VOICE_DX = 70;
+const VOICE_Y = 116;
+/** The lips are drawn in their own units (about 100 across) and scaled up by this. */
+const FACE_SCALE = 1.5;
+const FACE_Y = 64;
+/** The small side view (consonant place), in the right-hand column under the symbol. */
+const INSET = { x: 196, y: 104, scale: 0.5 };
 /** The column the symbol and the compared word are written in. */
 const NOTE_X = 196;
 
 /** The mouth's drawing box (viewBox units): the face, its symbol, and its syllables. */
 export function mouthBox(spec: LessonMouth): { w: number; h: number } {
-  return { w: VIEW_W, h: MOUTH_H + (spec.syllables?.length ? SYLLABLE_H : 0) };
+  return { w: VIEW_W, h: MOUTH_H + (spec.syllables?.length ? SYLLABLE_H : 0) + STRIP_H };
 }
 
 export function Mouth({
@@ -414,8 +472,7 @@ export function Mouth({
   const manyWords = [...byMoment.values()].flat().length > 1;
   //: Whether anything is written beside the mouth; where nothing is, the face is centred.
   const labelled = manyWords || Boolean(spec.sound) || [...byMoment.values()].flat().some((one) => one.sound);
-  // The side view's names for its parts reach further left ("tongue"), so it sits a little right.
-  const faceX = labelled ? (side ? 92 : 78) : VIEW_W / 2;
+  const faceX = labelled ? 74 : VIEW_W / 2;
   const pulses = useMemo(() => tasks.filter((task) => task.op.op === "pulse" && task.live).map((task) => task.key).join(","), [tasks]);
   //: The word a tap says again: the latest the mouth has been given by now.
   const tapWord = useMemo(() => {
@@ -432,6 +489,13 @@ export function Mouth({
   const [syllable, setSyllable] = useState(-1);
   const [said, setSaid] = useState<Set<number>>(() => new Set());
   const [pulsing, setPulsing] = useState(false);
+  //: The word strip: the sounds of the word being said (or last said), and the one lit.
+  const [strip, setStrip] = useState<{ key: string; word: string; tiles: { p: string; k: number }[] } | null>(null);
+  const [stripAt, setStripAt] = useState(-1);
+  const stripLive = useRef<{ key: string; tiles: { p: string; k: number }[] } | null>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
+  //: A tapped tile: its shape shown on the big mouth for PIN_MS.
+  const pin = useRef<{ p: string; k: number; from: number } | null>(null);
 
   // What the frame loop reads, kept current without restarting it.
   const live = useRef({ current, paused, clipAt, moments, byMoment, whiteboard, syllables: spec.syllables ?? null });
@@ -446,7 +510,7 @@ export function Mouth({
   const reading = useRef({ moment: -1, seconds: 0 });
   const replay = useRef<Replay | null>(null);
   const wroteRef = useRef<string | null>(null);
-  const shape = useRef<number[] | null>(null);
+  const shape = useRef<Pose | null>(null);
   const lastFrame = useRef(0);
   const figureRef = useRef<HTMLElement>(null);
   const refs = {
@@ -459,6 +523,8 @@ export function Mouth({
     gaps: useRef<SVGPathElement>(null),
     tongue: useRef<SVGEllipseElement>(null),
     tip: useRef<SVGEllipseElement>(null),
+    tipUp: useRef<SVGEllipseElement>(null),
+    rim: useRef<SVGPathElement>(null),
     bite: useRef<SVGRectElement>(null),
     corners: useRef<SVGPathElement>(null),
     sTongue: useRef<SVGPathElement>(null),
@@ -474,10 +540,11 @@ export function Mouth({
 
   /** Draw a shape (numbers) into the SVG. */
   const draw = useCallback(
-    (now: number[]) => {
+    (pose: Pose) => {
       const r = refsRef.current;
       if (side) {
-        const s = sidePaths(now);
+        // The small side view, beside the lips.
+        const s = sidePaths(sideShape(pose));
         r.sTongue.current?.setAttribute("d", s.tongue);
         r.sUpperLip.current?.setAttribute("d", s.upperLip);
         r.sLowerLip.current?.setAttribute("d", s.lowerLip);
@@ -490,9 +557,8 @@ export function Mouth({
           ring.setAttribute("cy", f(s.touch.y));
           ring.setAttribute("opacity", s.touch.o.toFixed(2));
         }
-        return;
       }
-      const p = frontPaths(now, 66, 54);
+      const p = frontPaths(frontShape(pose), 66, 54);
       r.inner.current?.setAttribute("d", p.inner);
       r.clip.current?.setAttribute("d", p.inner);
       r.upper.current?.setAttribute("d", p.upper);
@@ -507,19 +573,23 @@ export function Mouth({
       set(r.lowerTeeth.current, p.lowerTeeth);
       set(r.tongue.current, p.tongue);
       set(r.tip.current, p.tip);
+      set(r.tipUp.current, p.tipUp);
       set(r.bite.current, p.bite);
+      const rim = r.rim.current;
+      if (rim) {
+        rim.setAttribute("d", p.inner);
+        rim.setAttribute("stroke-width", f(p.rim.width * 2));
+        rim.setAttribute("opacity", p.rim.opacity.toFixed(2));
+      }
     },
     [side],
   );
 
-  /** The numbers of a mouth shape in this view. */
-  const shapeOf = useCallback((viseme: Viseme) => [...(side ? SIDE[viseme] : FRONT[viseme])], [side]);
-
   // Less movement: the taught sound's shape, still.
   const stillShape = useMemo(() => {
     const sound = spec.sound ?? guessedPhones(spec.word).find((phone) => /[aeiouæɑɒɔəɛɜɪʊʌ]/.test(phone.p))?.p ?? "";
-    return shapeOf(sound ? visemeOf(sound) : "rest");
-  }, [shapeOf, spec.sound, spec.word]);
+    return sound ? poseOf(sound, 0.5) : RESTING.pose;
+  }, [spec.sound, spec.word]);
 
   /** A moment's script, as it is heard now: from its clip (its sounds, or its length) or read. */
   const scriptNow = useCallback((at: number, duration: number | null): Part[] => {
@@ -546,6 +616,7 @@ export function Mouth({
     }
     let frame = 0;
     let lastSyllable = -2;
+    let lastLit = -2;
     let lastShown = "";
     const tick = (now: number) => {
       frame = requestAnimationFrame(tick);
@@ -587,11 +658,28 @@ export function Mouth({
       }
       if (clock === "clip" || clock === "replay") t += LOOK_AHEAD_S;
       const part = parts ? partAt(parts, t) : null;
-      let viseme: Viseme = "rest";
+      let state: MouthState = RESTING;
       let syll = -1;
+      // The word strip: the word being said, from the voice's own sounds (never a spelling guess,
+      // which would teach the wrong sounds); before the first, the mouth's own word as heard.
+      const forStrip =
+        part && !part.speech.guessed ? part : !stripLive.current ? parts?.find((one) => one.own && !one.speech.guessed) ?? null : null;
+      if (forStrip) {
+        const key = `${forStrip.word}|${forStrip.speech.start.toFixed(3)}|${forStrip.speech.phones.length}`;
+        if (stripLive.current?.key !== key) {
+          const tiles = forStrip.speech.phones
+            .map((phone, k) => ({ p: rpPhoneme(phone.p), k }))
+            .filter((tile) => tile.p);
+          stripLive.current = { key, tiles };
+          setStrip({ key, word: forStrip.word, tiles });
+        }
+      }
+      let lit = -1;
       if (part) {
-        const due = visemeAt(part.speech, t);
-        viseme = due.viseme;
+        const due = poseAt(part.speech, t);
+        state = due;
+        if (stripLive.current && part === forStrip && due.index >= 0)
+          lit = stripLive.current.tiles.findIndex((tile) => tile.k === due.index);
         if (part.own) syll = syllableAt(part.speech, t);
         // The symbol is written as the taught sound is reached; a word without one as it starts.
         const reached = part.sound ? due.holding : t >= part.speech.start;
@@ -602,10 +690,27 @@ export function Mouth({
           if (live.current.whiteboard && part.sound) playSfx("scribble", 0, clock === "replay");
         }
       }
-      const shown = `${viseme}|${part?.word ?? ""}|${clock}`;
+      // A tapped tile: its shape, shown slowly, over whatever else is due.
+      const pinned = pin.current;
+      if (pinned && now - pinned.from < PIN_MS) {
+        state = {
+          pose: poseOf(pinned.p, (now - pinned.from) / PIN_MS),
+          p: pinned.p,
+          index: pinned.k,
+          voiced: isVoiced(pinned.p),
+          holding: true,
+        };
+        lit = pinned.k;
+      } else if (pinned) pin.current = null;
+      if (lit !== lastLit) {
+        lastLit = lit;
+        setStripAt(lit);
+      }
+      const shown = `${state.p || "rest"}|${state.voiced && state.p ? 1 : 0}|${part?.word ?? ""}|${clock}`;
       if (shown !== lastShown && figureRef.current) {
         lastShown = shown;
-        figureRef.current.dataset.viseme = viseme;
+        figureRef.current.dataset.viseme = state.p || "rest";
+        figureRef.current.dataset.voiced = state.voiced && state.p ? "1" : "0";
         figureRef.current.dataset.word = part?.word ?? "";
         figureRef.current.dataset.clock = clock;
       }
@@ -614,16 +719,19 @@ export function Mouth({
         setSyllable(syll);
         if (syll >= 0) setSaid((was) => (was.has(syll) ? was : new Set([...was, syll])));
       }
-      const target = shapeOf(viseme);
+      const target = state.pose;
       const was = shape.current ?? target;
-      // About 30 ms to move most of the way: quick enough for speech, never a jump.
+      // About 30 ms to move most of the way: quick enough for speech, never a jump. The lips
+      // seal and part a little quicker (20 ms), so p, b and m close as they are heard.
       const ease = 1 - Math.exp(-dt / 0.03);
+      const seal = 1 - Math.exp(-dt / 0.02);
       let moved = 0;
-      const next = was.map((value, k) => {
-        const step = ((target[k] ?? value) - value) * ease;
+      const next = { ...was };
+      for (const key of POSE_KEYS) {
+        const step = (target[key] - was[key]) * (key === "close" ? seal : ease);
         moved = Math.max(moved, Math.abs(step));
-        return value + step;
-      });
+        next[key] = was[key] + step;
+      }
       if (shape.current === null || moved > 0.002) {
         shape.current = next;
         draw(next);
@@ -631,7 +739,7 @@ export function Mouth({
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [draw, scriptNow, shapeOf, still, stillShape]);
+  }, [draw, scriptNow, still, stillShape]);
 
   // In comes the mouth: a pop in the whiteboard style.
   useEffect(() => {
@@ -711,7 +819,27 @@ export function Mouth({
   }, [current, moment, moments, spec.syllables, tapWord, whiteboard]);
   useEffect(() => () => replay.current?.audio?.pause(), []);
 
+  // A TILE TAPPED: its sound's shape on the big mouth, slowly. (The free voice's say endpoint
+  // takes whole words, so a single sound cannot be voiced alone: the shape is shown instead.)
+  const showSound = useCallback(
+    (k: number, p: string) => {
+      pin.current = { p, k, from: performance.now() };
+      if (whiteboard) playSfx("click", 0, true);
+    },
+    [whiteboard],
+  );
+
+  // The lit tile kept in view inside the strip (the strip scrolls, never the page).
+  useEffect(() => {
+    const row = stripRef.current;
+    const tile = row?.querySelectorAll<HTMLElement>(".mo-tile")[stripAt];
+    if (!row || !tile || row.scrollWidth <= row.clientWidth) return;
+    const left = tile.offsetLeft - (row.clientWidth - tile.offsetWidth) / 2;
+    row.scrollTo({ left: Math.max(0, left), behavior: still ? "auto" : "smooth" });
+  }, [still, stripAt]);
+
   const box = mouthBox(spec);
+  const stripTop = box.h - STRIP_H;
   const syllables = spec.syllables ?? [];
   const stressed = (spec.stress ?? 0) - 1;
   // The syllables laid out under the mouth, centred, by their letters.
@@ -730,7 +858,7 @@ export function Mouth({
   const symbol = written?.symbol ? `/${written.symbol}/` : null;
   const showWord = Boolean(written) && manyWords;
   const label = `A mouth saying "${tapWord.word}"${tapWord.sound ? `, showing the sound /${tapWord.sound}/` : ""}. Tap to hear it again.`;
-  // The face, drawn in its own units about (66, 54) front or (78, 56) side, scaled up into place.
+  // The lips, drawn in their own units about (66, 54), scaled up into place.
   const place = (x: number, y: number) =>
     `translate(${faceX} ${FACE_Y}) scale(${FACE_SCALE}) translate(${-x} ${-y})`;
   return (
@@ -739,73 +867,20 @@ export function Mouth({
       className={`mo${pulsing ? " pulsing" : ""}${side ? " side" : ""}${paused ? " paused" : ""}`}
       style={{ "--dd-size": `${width}px` } as CSSProperties}
       data-viseme="rest"
+      data-voiced="0"
     >
-      <button type="button" className="mo-tap" onClick={tap} aria-label={label} title="Tap to hear it again">
-        <svg
-          className="mo-svg"
-          viewBox={`0 0 ${box.w} ${box.h}`}
-          width={width}
-          height={height}
-          role="img"
-          aria-hidden="true"
-        >
-          {side ? (
-            <g
-              className="mo-draw"
-              fill="none"
-              stroke={INK}
-              strokeWidth={2.4}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              transform={place(80, 58)}
-            >
-              <circle cx={80} cy={58} r={51} fill="#7c3aed" fillOpacity={0.06} stroke="none" />
-              {/* The head: nose, the roof of the mouth with its ridge, the throat. */}
-              <path d="M92 4C98 14 104 22 116 30L112 35C109 36 108 37 109 38" pathLength={1} />
-              <path d="M100 45C96 41 92 39 86 38C74 35 62 36 54 40C50 42 48 46 47 50" pathLength={1} />
-              <path d="M40 40C38 56 38 76 40 102" pathLength={1} />
-              <path ref={refs.sUpperLip} fill={LIP} fillOpacity={0.9} d="" />
-              <polygon points="100,44 106,45 105,53 101,52" fill="#fff" />
-              <g ref={refs.sJaw}>
-                <polygon points="100,58 105,57 104,64 100,64" fill="#fff" />
-              </g>
-              <path ref={refs.sTongue} fill={TONGUE_FILL} fillOpacity={0.75} d="" />
-              <g ref={refs.sLower}>
-                <path ref={refs.sLowerLip} fill={LIP} fillOpacity={0.9} d="" />
-                <path ref={refs.sChin} d="" />
-              </g>
-              <circle ref={refs.sTouch} r={4.2} fill="none" stroke={TOUCH} strokeWidth={1.8} opacity={0} />
-              {/* What each part is, with a short line to it. */}
-              <g className="mo-notes" strokeWidth={0.9} stroke={INK} opacity={0.75}>
-                <path d="M66 25L70 36" />
-                <path d="M117 18L104 44" />
-                <path d="M30 84L56 74" />
-                <path d="M128 64L117 60" />
-              </g>
-              <text x={56} y={22} className="mo-note" stroke="none" fill={INK}>
-                roof
-              </text>
-              <text x={110} y={14} className="mo-note" stroke="none" fill={INK}>
-                teeth
-              </text>
-              <text x={2} y={93} className="mo-note" stroke="none" fill={INK}>
-                tongue
-              </text>
-              <text x={124} y={74} className="mo-note" stroke="none" fill={INK}>
-                lips
-              </text>
-            </g>
-          ) : (
+      <div className="mo-stage">
+        <button type="button" className="mo-tap" onClick={tap} aria-label={label} title="Tap to hear it again">
+          <svg
+            className="mo-svg"
+            viewBox={`0 0 ${box.w} ${box.h}`}
+            width={width}
+            height={height}
+            role="img"
+            aria-hidden="true"
+          >
             <g className="mo-draw" transform={place(66, 54)}>
-              <circle cx={66} cy={54} r={48} fill="#ec4899" fillOpacity={0.08} />
-              <path
-                d="M58 22Q66 30 74 22"
-                fill="none"
-                stroke={INK}
-                strokeWidth={2.2}
-                strokeLinecap="round"
-                pathLength={1}
-              />
+              <circle cx={66} cy={54} r={44} fill="#ec4899" fillOpacity={0.08} />
               <clipPath id={`mo-in-${id}`}>
                 <path ref={refs.clip} d="" />
               </clipPath>
@@ -815,6 +890,8 @@ export function Mouth({
                 <rect ref={refs.upperTeeth} fill="#fff" stroke={INK} strokeWidth={1.1} rx={2} />
                 <rect ref={refs.lowerTeeth} fill="#fff" stroke={INK} strokeWidth={1.1} rx={2} />
                 <path ref={refs.gaps} stroke="#b9b4cc" strokeWidth={0.9} fill="none" />
+                <ellipse ref={refs.tipUp} fill={TONGUE_FILL} stroke={INK} strokeWidth={1.1} opacity={0} />
+                <path ref={refs.rim} fill="none" stroke={LIP_RIM} opacity={0} d="" />
               </g>
               <path ref={refs.lower} fill={LIP} stroke={INK} strokeWidth={2.3} strokeLinejoin="round" d="" />
               <ellipse ref={refs.tip} fill={TONGUE_FILL} stroke={INK} strokeWidth={1.6} />
@@ -822,36 +899,104 @@ export function Mouth({
               <path ref={refs.upper} fill={LIP} stroke={INK} strokeWidth={2.3} strokeLinejoin="round" d="" />
               <path ref={refs.corners} fill="none" stroke={INK} strokeWidth={1.6} strokeLinecap="round" d="" />
             </g>
-          )}
-          {symbol || showWord ? (
-            <g className="mo-symbol" key={`${written?.n ?? 0}`}>
-              <text x={NOTE_X} y={side ? 58 : 66} textAnchor="middle" className="mo-ipa">
-                {symbol}
+            {side ? (
+              // The small side view, for where the tongue goes (consonant place).
+              <g
+                className="mo-draw mo-inset"
+                fill="none"
+                stroke={INK}
+                strokeWidth={3}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                transform={`translate(${INSET.x} ${INSET.y}) scale(${INSET.scale}) translate(-78 -62)`}
+              >
+                <circle cx={78} cy={62} r={48} fill="#7c3aed" fillOpacity={0.07} stroke="none" />
+                {/* The head: nose, the roof of the mouth with its ridge, the throat. */}
+                <path d="M92 4C98 14 104 22 116 30L112 35C109 36 108 37 109 38" pathLength={1} />
+                <path d="M100 45C96 41 92 39 86 38C74 35 62 36 54 40C50 42 48 46 47 50" pathLength={1} />
+                <path d="M40 40C38 56 38 76 40 102" pathLength={1} />
+                <path ref={refs.sUpperLip} fill={LIP} fillOpacity={0.9} d="" />
+                <polygon points="100,44 106,45 105,53 101,52" fill="#fff" />
+                <g ref={refs.sJaw}>
+                  <polygon points="100,58 105,57 104,64 100,64" fill="#fff" />
+                </g>
+                <path ref={refs.sTongue} fill={TONGUE_FILL} fillOpacity={0.75} d="" />
+                <g ref={refs.sLower}>
+                  <path ref={refs.sLowerLip} fill={LIP} fillOpacity={0.9} d="" />
+                  <path ref={refs.sChin} d="" />
+                </g>
+                <circle ref={refs.sTouch} r={5} fill="none" stroke={TOUCH} strokeWidth={2.6} opacity={0} />
+              </g>
+            ) : null}
+            {/* The voice box: folds closed and buzzing for a voiced sound, open and still if not. */}
+            <g className="mo-voice" transform={`translate(${faceX + VOICE_DX} ${VOICE_Y})`}>
+              <rect x={-6.5} y={-9} width={13} height={18} rx={5.5} fill="#fff" stroke={INK} strokeWidth={1.5} />
+              <path className="mo-folds" d="M-3.8 -5.2L0 5.2L3.8 -5.2" fill="none" stroke={INK} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+              <g className="mo-buzz" fill="none" stroke={TOUCH} strokeWidth={1.5} strokeLinecap="round">
+                <path d="M10 -4.5q2.6 4.5 0 9M14 -7q4 7 0 14" />
+                <path d="M-10 -4.5q-2.6 4.5 0 9M-14 -7q-4 7 0 14" />
+              </g>
+              <text y={21} textAnchor="middle" className="mo-voice-label">
+                voice
               </text>
-              {showWord ? (
-                <text x={NOTE_X} y={side ? 112 : 94} textAnchor="middle" className="mo-word">
-                  {written?.word}
-                </text>
-              ) : null}
             </g>
-          ) : null}
-          {syllables.length ? (
-            <g className="mo-syllables">
-              {syllables.map((part, k) => (
-                <text
-                  key={k}
-                  x={laid[k]}
-                  y={MOUTH_H + 26}
-                  textAnchor="middle"
-                  className={`mo-syl${k === stressed ? " stress" : ""}${k === syllable ? " saying" : ""}${said.has(k) || still ? " said" : ""}`}
+            {symbol || showWord ? (
+              <g className="mo-symbol" key={`${written?.n ?? 0}`}>
+                <text x={NOTE_X} y={side ? 50 : 66} textAnchor="middle" className="mo-ipa">
+                  {symbol}
+                </text>
+                {showWord ? (
+                  <text x={NOTE_X} y={side ? 74 : 94} textAnchor="middle" className="mo-word">
+                    {written?.word}
+                  </text>
+                ) : null}
+              </g>
+            ) : null}
+            {syllables.length ? (
+              <g className="mo-syllables">
+                {syllables.map((part, k) => (
+                  <text
+                    key={k}
+                    x={laid[k]}
+                    y={MOUTH_H + 26}
+                    textAnchor="middle"
+                    className={`mo-syl${k === stressed ? " stress" : ""}${k === syllable ? " saying" : ""}${said.has(k) || still ? " said" : ""}`}
+                  >
+                    {part}
+                  </text>
+                ))}
+              </g>
+            ) : null}
+          </svg>
+        </button>
+        <div
+          ref={stripRef}
+          className="mo-strip"
+          style={{ top: `${(100 * stripTop) / box.h}%`, height: `${(100 * STRIP_H) / box.h}%` }}
+          role="group"
+          aria-label={strip ? `The sounds of "${strip.word}". Tap one to see its shape.` : undefined}
+        >
+          <div className="mo-strip-row">
+            {strip ? (
+              strip.tiles.map((tile, k) => (
+                <button
+                  key={`${strip.key}:${k}`}
+                  type="button"
+                  className={`mo-tile${k === stripAt ? " on" : ""}`}
+                  onClick={() => showSound(k, tile.p)}
+                  aria-label={`/${tile.p}/: show its shape`}
+                  title={`/${tile.p}/`}
                 >
-                  {part}
-                </text>
-              ))}
-            </g>
-          ) : null}
-        </svg>
-      </button>
+                  <ShapeTile p={tile.p} />
+                  <span className="mo-tile-ipa">{tile.p}</span>
+                </button>
+              ))
+            ) : (
+              <span className="mo-strip-word">{spec.word}</span>
+            )}
+          </div>
+        </div>
+      </div>
       {caption ? <figcaption className="dd-caption">{caption}</figcaption> : null}
     </figure>
   );

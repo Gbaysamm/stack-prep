@@ -742,9 +742,13 @@ export interface VoiceWords {
 
 /** One sound of a spoken line (IPA) and when it is said, in seconds from the clip's start. */
 export interface VoicePhone {
+  /** One British RP phoneme (diphthongs and affricates as one symbol); an older response may
+   *  give other IPA, which the mouth maps to the nearest (mouthShapes.ts `rpPhoneme`). */
   p: string;
   start: number;
   end: number;
+  /** The index in `words` of the word it is in (absent from older responses). */
+  w?: number;
 }
 
 /** A beat's sounds, for the talking mouth: the voice's own (Kokoro) or estimated (studio). */
@@ -752,6 +756,8 @@ export interface VoicePhones {
   engine: 'kokoro' | 'studio';
   duration: number;
   estimated: boolean;
+  /** The accent the phonemes are in: British RP (absent from older responses). */
+  accent?: 'rp';
   words: VoiceWord[];
   phones: VoicePhone[];
 }

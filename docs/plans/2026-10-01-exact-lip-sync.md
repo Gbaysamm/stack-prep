@@ -1,6 +1,6 @@
 # Plan: the talking mouth shows each word's exact lip sequence
 
-Status: **documented, not started** (founder, 1 October 2026: "document it, don't build it now").
+Status: **built 14 October 2026** (decisions: British RP throughout, keep the af_heart voice, the word strip on every oral lesson, no scrubbing yet). Still to do: the expert sign-off of the shape table.
 
 ## The requirement
 The founder watched the mouth say "enclosure". The lips moved, but not through that word's
