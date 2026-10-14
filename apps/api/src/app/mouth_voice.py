@@ -1,23 +1,25 @@
 """The talking mouth's sounds: when each phoneme of a spoken line is said.
 
-The lesson board's mouth (docs/plans/doodles-v2-contract.md section 7) moves through the shapes
-of a word's sounds in time with the voice, so it needs the line's phonemes and their times:
-`phones: [{p, start, end}]`, in IPA, in seconds into the clip.
+The lesson board's mouth (docs/plans/doodles-v2-contract.md section 7, and
+docs/plans/2026-10-01-exact-lip-sync.md) shows each word's lip sequence in time with the voice,
+so it needs the line's words and their sounds: `words: [{w, start, end}]` and
+`phones: [{p, start, end, w}]`, in seconds into the clip. The sounds are British RP whatever the
+voice (`accent: "rp"`, app/phonemes_rp.py): one RP phoneme each, `w` the index of their word,
+and each word's sounds tile its window.
 
-* THE KOKORO VOICE knows them: the model reports how long it holds every phoneme. They are
-  kept from the synthesis that makes the clip, as it is made, so asking for them is a file
-  read (a clip made before that has the model run again: it is deterministic, so the times
-  are the same, but it takes a second or more, which the board covers with an estimate),
-  merged from the model's
-  one-character tokens into sounds (a stress mark goes with the vowel after it, a length mark
-  with the vowel before it, t+ʃ is one sound), and kept beside the clip as
-  `<name>.phones.json`.
-* THE STUDIO VOICE gives no timings. Its line is phonemized with the espeak that comes with
-  Kokoro (free, on this server) and the sounds are spread over the clip's real length, read
-  from the mp3's frames, by how long each kind of sound usually takes. `estimated` says so.
+* THE KOKORO VOICE knows when each word is said: the model reports how long it holds every
+  phoneme. The words' windows are kept from the synthesis that makes the clip, and its own
+  (American) phonemes, merged from one-character tokens into sounds, guide how a word's
+  window is shared among its RP sounds where they line up one for one. They are kept beside
+  the clip as `<name>.phones.json` as it is made, so asking for them is a file read (a clip
+  made before that has the model run again: it is deterministic, so the times are the same).
+* THE STUDIO VOICE gives no timings. Its words are spread over the clip's real length, read
+  from the mp3's frames, by their RP sounds' typical lengths and the pauses their punctuation
+  makes. `estimated` says so.
 
 And `say_word`: a short word said slowly by Kokoro, for a student who taps the mouth to hear
-it again. Free, kept once made, letters only, and never the paid voice.
+it again, with its RP sounds timed the same way. Free, kept once made, letters only, and
+never the paid voice.
 """
 
 from __future__ import annotations
@@ -30,7 +32,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from app import kokoro_voice, tutor, voice_store
+from app import kokoro_voice, phonemes_rp, tutor, voice_store
 from app.config import Settings
 
 _log = logging.getLogger(__name__)
@@ -58,9 +60,6 @@ _SPELLED = {
     "\u1d4a": "\u0259",
 }
 _AFFRICATES = {("t", "\u0283"): "t\u0283", ("d", "\u0292"): "d\u0292"}
-_VOWELS = frozenset(
-    "aeiou\u00e6\u0251\u0252\u0254\u0259\u025a\u025b\u025c\u026a\u028a\u028c\u0250\u1d7b"
-)
 
 
 def merge_phones(timed: list[tuple[str, float, float]]) -> list[dict[str, Any]]:
@@ -98,101 +97,68 @@ def merge_phones(timed: list[tuple[str, float, float]]) -> list[dict[str, Any]]:
     return out
 
 
-# --- the studio voice: phonemized here, spread over the clip --------------------------------
+# --- the RP sounds, in each word's window ----------------------------------------------------
 
-_tokenizer: Any = None
-
-
-def phonemize(text: str) -> str | None:
-    """The line in IPA, by the espeak that comes with Kokoro. None where it is not installed."""
-    global _tokenizer
-    if not kokoro_voice._installed():
-        return None
-    try:
-        if _tokenizer is None:
-            from kokoro_onnx.tokenizer import Tokenizer
-
-            _tokenizer = Tokenizer()
-        return str(_tokenizer.phonemize(text))
-    except Exception as failed:
-        _log.warning("phonemizer failed: %s: %s", type(failed).__name__, failed)
-        return None
-
-
-#: How long a pause the punctuation makes, against an ordinary consonant's 1.
+#: How long a pause the punctuation after a word makes, against an ordinary consonant's 1.
 _PAUSES = {",": 2.2, ";": 2.6, ":": 2.6, ".": 3.2, "!": 3.2, "?": 3.2, "—": 2.2}
-
-
-def _weighed(phonemes: str) -> list[tuple[str | None, float]]:
-    """Each sound with how long it usually takes, and None for a gap with its length."""
-    timed: list[tuple[str, float, float]] = []
-    at = 0.0
-    for token in phonemes:
-        if token in _PAUSES:
-            span = _PAUSES[token]
-        elif token == " ":
-            span = 0.35
-        elif token in _STRESS:
-            span = 0.3
-        elif token == _LONG:
-            span = 0.7
-        elif token in _GAPS:
-            span = 0.0
-        else:
-            span = 1.35 if token in _VOWELS else 1.0
-        timed.append((token, at, at + span))
-        at += span
-    sounds = merge_phones(timed)
-    out: list[tuple[str | None, float]] = []
-    at = 0.0
-    for sound in sounds:
-        if sound["start"] > at:
-            out.append((None, sound["start"] - at))
-        out.append((sound["p"], sound["end"] - sound["start"]))
-        at = sound["end"]
-    return out
-
+_BETWEEN_WORDS = 0.35
 
 #: The studio clip's speech is taken to start this far in and end this far from the end.
 STUDIO_LEAD_S = 0.08
 STUDIO_TAIL_S = 0.12
 
 
-def estimated_phones(phonemes: str, duration: float) -> list[dict[str, Any]]:
-    """The sounds spread over the clip's speech by how long each kind usually takes."""
-    weighed = _weighed(phonemes)
-    total = sum(span for _, span in weighed)
+def studio_words(words: list[str], duration: float) -> list[dict[str, Any]]:
+    """The studio clip's words placed over its speech by their RP sounds' typical lengths,
+    with the pauses their punctuation makes. The paid voice gives no timings."""
     start, end = STUDIO_LEAD_S, max(STUDIO_LEAD_S, duration - STUDIO_TAIL_S)
-    if total <= 0 or end <= start:
+    sounds = phonemes_rp.words_phonemes(words)
+    spans: list[tuple[float, float]] = []
+    for index, (word, mine) in enumerate(zip(words, sounds, strict=True)):
+        length = sum(phonemes_rp.weights(mine)) if mine else 0.5
+        gap = 0.0
+        if index + 1 < len(words):
+            trail = word.rstrip()[-1:]
+            gap = _BETWEEN_WORDS + _PAUSES.get(trail, 0.0)
+        spans.append((length, gap))
+    total = sum(length + gap for length, gap in spans)
+    if not words or total <= 0 or end <= start:
         return []
     scale = (end - start) / total
-    out: list[dict[str, Any]] = []
+    placed: list[dict[str, Any]] = []
     at = start
-    for sound, span in weighed:
-        if sound is not None:
-            out.append({"p": sound, "start": round(at, 3), "end": round(at + span * scale, 3)})
-        at += span * scale
-    return out
+    for word, (length, gap) in zip(words, spans, strict=True):
+        finish = min(end, at + length * scale)
+        placed.append({"w": word, "start": round(at, 3), "end": round(finish, 3)})
+        at = finish + gap * scale
+    return placed
 
 
-def estimated_word_times(
-    said: str, phonemes: str, phones: list[dict[str, Any]], duration: float
-) -> list[dict[str, Any]]:
-    """The words placed over the estimated sounds where espeak kept them one for one, else
-    shared out by length."""
-    words = said.split()
-    groups = [group for group in phonemes.split(" ") if any(c not in _GAPS for c in group)]
-    if len(groups) == len(words) and phones:
-        placed, k = [], 0
-        for word, group in zip(words, groups, strict=True):
-            count = len(merge_phones([(c, 0.0, 0.0) for c in group]))
-            mine = phones[k : k + count]
-            k += count
-            if not mine:
-                return kokoro_voice.estimated_words(words, STUDIO_LEAD_S, duration - STUDIO_TAIL_S)
-            placed.append({"w": word, "start": mine[0]["start"], "end": mine[-1]["end"]})
-        return placed
-    return kokoro_voice.estimated_words(words, STUDIO_LEAD_S, duration - STUDIO_TAIL_S)
+def rp_sounds(
+    engine: str,
+    duration: float,
+    estimated: bool,
+    words: list[dict[str, Any]],
+    guide: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """`{engine, duration, estimated, accent, words, phones}`, the phones British RP.
+
+    The Kokoro voice was given some words respelled (kokoro_voice.SAY_AS), so it is those
+    the mouth says; `guide` is the voice's own timed sounds, which share a word's window out
+    where they line up one for one with its RP sounds.
+    """
+    heard = [
+        kokoro_voice.say_as(str(word["w"])) if engine == "kokoro" else str(word["w"])
+        for word in words
+    ]
+    return {
+        "engine": engine,
+        "duration": round(duration, 3),
+        "estimated": estimated,
+        "accent": phonemes_rp.ACCENT,
+        "words": words,
+        "phones": phonemes_rp.align(words, heard, guide),
+    }
 
 
 _BITRATES = {
@@ -277,63 +243,61 @@ def _read(path: Path) -> dict[str, Any] | None:
 
 def keep_kokoro_phones(clip_path: Path, clip: kokoro_voice.Clip) -> None:
     """Keep a Kokoro clip's sounds beside it as it is made (voice_store._made_by_kokoro)."""
-    phones = merge_phones(clip.tokens)
-    if not phones:
+    if not clip.words:
         return
-    found = {
-        "engine": "kokoro",
-        "duration": round(clip.duration, 3),
-        "estimated": False,
-        "words": clip.words,
-        "phones": phones,
-    }
+    found = rp_sounds("kokoro", clip.duration, False, clip.words, merge_phones(clip.tokens))
+    if not found["phones"]:
+        return
     voice_store.write_atomically(
         phones_path(clip_path), json.dumps(found, ensure_ascii=False).encode()
     )
 
 
-def beat_phones(line: str, settings: Settings, engine: voice_store.Engine) -> dict[str, Any] | None:
-    """`{engine, duration, estimated, words, phones}` for a line whose clip is already made.
+def _from_before(kept: dict[str, Any]) -> dict[str, Any] | None:
+    """Sounds kept before the mouth spoke RP, made RP: their words' windows are kept, and
+    their (American) sounds are the guide."""
+    words = kept.get("words") or []
+    if not words:
+        return None
+    return rp_sounds(
+        str(kept.get("engine", "kokoro")),
+        float(kept.get("duration", 0.0)),
+        bool(kept.get("estimated", False)),
+        words,
+        kept.get("phones") or [] if kept.get("engine") == "kokoro" else [],
+    )
 
-    Blocking (it may run the model or espeak): run it in a thread. None when the clip is not
-    there, or its sounds cannot be had. Never calls the paid voice: a studio clip is only read.
+
+def beat_phones(line: str, settings: Settings, engine: voice_store.Engine) -> dict[str, Any] | None:
+    """`{engine, duration, estimated, accent, words, phones}` for a line whose clip is made.
+
+    `phones` are British RP, one phoneme each, with `w` the index of their word in `words`;
+    each word's phones tile its window. Blocking (it may run the model or espeak): run it in
+    a thread. None when the clip is not there, or its sounds cannot be had. Never calls the
+    paid voice: a studio clip is only read.
     """
     heard_by = voice_store.engine_for(engine, settings)
     clip = voice_store.path_for(line, settings, heard_by)
     kept = _read(phones_path(clip))
-    if kept is not None:
+    if kept is not None and kept.get("accent") == phonemes_rp.ACCENT:
         return kept
     if not clip.is_file():
         return None
+    found: dict[str, Any] | None = _from_before(kept) if kept is not None else None
     said = tutor.for_the_voice(line)
-    found: dict[str, Any] | None = None
-    if heard_by == "kokoro":
-        made = _kokoro_timed(said, settings, settings.kokoro_speed)
-        words = _read(voice_store.words_path(clip))
+    if found is not None:
+        pass
+    elif heard_by == "kokoro":
+        # Written with the clip, before it (voice_store._made_by_kokoro).
+        words = (_read(voice_store.words_path(clip)) or {}).get("words") or []
+        made = _kokoro_timed(said, settings, settings.kokoro_speed) if words else None
         if made is not None:
             _, _, duration, timed = made
-            phones = merge_phones(timed)
-            found = {
-                "engine": "kokoro",
-                "duration": round(duration, 3),
-                "estimated": False,
-                # Written with the clip, before it (voice_store._made_by_kokoro).
-                "words": (words or {}).get("words") or [],
-                "phones": phones,
-            }
+            found = rp_sounds("kokoro", duration, False, words, merge_phones(timed))
     else:
         length = mp3_duration(clip.read_bytes())
-        phonemes = phonemize(said)
-        if length is not None and phonemes:
-            duration = length
-            phones = estimated_phones(phonemes, duration)
-            found = {
-                "engine": "studio",
-                "duration": duration,
-                "estimated": True,
-                "words": estimated_word_times(said, phonemes, phones, duration),
-                "phones": phones,
-            }
+        if length is not None:
+            found = rp_sounds("studio", length, True, studio_words(said.split(), length), [])
     if found is None or not found["phones"]:
         return None
     voice_store.write_atomically(phones_path(clip), json.dumps(found, ensure_ascii=False).encode())
@@ -360,12 +324,47 @@ def word_path(word: str, settings: Settings) -> Path:
     return voice_store.folder() / f"{hashlib.sha256(key.encode()).hexdigest()}.mp3"
 
 
+def word_windows(words: list[str], timed: list[tuple[str, float, float]]) -> list[dict[str, Any]]:
+    """A tapped word's (or short phrase's) words in time, from the model's timed tokens: its
+    spaces part the words where they are as many as the words, else the words share the span
+    of its sounds by length."""
+    groups: list[list[tuple[str, float, float]]] = [[]]
+    for token in timed:
+        if token[0] == " ":
+            groups.append([])
+        elif token[0] not in _GAPS:
+            groups[-1].append(token)
+    groups = [group for group in groups if group]
+    if not groups:
+        return []
+    if len(groups) == len(words):
+        return [
+            {"w": word, "start": round(group[0][1], 3), "end": round(group[-1][2], 3)}
+            for word, group in zip(words, groups, strict=True)
+        ]
+    return kokoro_voice.estimated_words(words, groups[0][0][1], groups[-1][-1][2])
+
+
 def word_kept(word: str, settings: Settings) -> dict[str, Any] | None:
-    """The word as already said and kept, if it has been."""
+    """The word as already said and kept, if it has been (made RP if kept before that)."""
     clip = word_path(word, settings)
     kept = _read(phones_path(clip))
     if kept is None or not clip.is_file():
         return None
+    if kept.get("accent") != phonemes_rp.ACCENT:
+        phones = kept.get("phones") or []
+        if not phones:
+            return None
+        windows = kokoro_voice.estimated_words(
+            word.split(), float(phones[0]["start"]), float(phones[-1]["end"])
+        )
+        kept = {
+            **rp_sounds("kokoro", float(kept.get("duration", 0.0)), False, windows, phones),
+            "word": word,
+        }
+        voice_store.write_atomically(
+            phones_path(clip), json.dumps(kept, ensure_ascii=False).encode()
+        )
     return {**kept, "audio": _data_url(clip.read_bytes())}
 
 
@@ -374,7 +373,8 @@ def _data_url(mp3: bytes) -> str:
 
 
 def say_word(word: str, settings: Settings) -> dict[str, Any] | None:
-    """`{engine, word, duration, phones, audio}`: the word said slowly by Kokoro, kept.
+    """`{engine, word, duration, estimated, accent, words, phones, audio}`: the word said
+    slowly by Kokoro, kept, with its British RP sounds timed as `beat_phones` times a line's.
 
     Blocking: run it in a thread. `word` is already through `clean_word`. None when Kokoro is
     not on offer here; the board then moves the mouth without a voice.
@@ -391,12 +391,8 @@ def say_word(word: str, settings: Settings) -> dict[str, Any] | None:
     except Exception as failed:
         _log.warning("kokoro encoding failed: %s: %s", type(failed).__name__, failed)
         return None
-    found = {
-        "engine": "kokoro",
-        "word": word,
-        "duration": round(duration, 3),
-        "phones": merge_phones(timed),
-    }
+    windows = word_windows(word.split(), timed)
+    found = {**rp_sounds("kokoro", duration, False, windows, merge_phones(timed)), "word": word}
     clip = word_path(word, settings)
     voice_store.write_atomically(phones_path(clip), json.dumps(found, ensure_ascii=False).encode())
     voice_store.write_atomically(clip, mp3)

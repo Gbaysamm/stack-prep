@@ -107,7 +107,8 @@ async def _made_by_kokoro(line: str, settings: Settings, cached: Path) -> Path |
     # a file read, never the model run again while the student is already hearing the line.
     from app import mouth_voice
 
-    mouth_voice.keep_kokoro_phones(cached, clip)
+    # In a thread: its British sounds come from espeak (app/phonemes_rp.py).
+    await asyncio.to_thread(mouth_voice.keep_kokoro_phones, cached, clip)
     write_atomically(cached, clip.mp3)
     return cached
 
