@@ -117,7 +117,7 @@ export function MockHub() {
       <PageHero
         eyebrow="Mock exam"
         title="Sit a real test"
-        sub="A JAMB-style computer-based test: timed, full screen, nothing to help you until it’s over."
+        sub="Practice under exam conditions: a JAMB-style computer-based test, timed and full screen, with no help until it’s over. Your predicted score comes from your check-ups, not from mocks."
         actions={
           running ? (
             <Button to={`/mock/${running.mock_id}`} tone="lime" size="lg" trailing={<IconArrowRight size={18} />}>

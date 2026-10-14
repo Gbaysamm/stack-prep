@@ -13,6 +13,21 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ---
 
+## 2026-10-14
+
+### Mock exams and check-ups each have one job
+- **What:**
+  - **Check-ups** alone set the predicted score and unlock practice.
+  - **Mocks** are practice under exam conditions, with their own report.
+  - **Before the first check-up nothing is scored,** so a mock no longer fills "Your score"
+    or "Started at". After that, mock answers count in topic scores like practice answers.
+  - The Mock exams page now says so.
+- **Why:** the founder saw a mock showing up like a check-up on an account that had never
+  taken one, while the app still asked for the first check-up. The two had overlapped.
+- **Where:** `apps/api/src/app/scoring.py` (`subject_score`), `MockHub.tsx` and
+  `docs/student-scoring.md` §3a. The test is in `test_scoring.py`.
+- **Status:** committed locally.
+
 ## 2026-10-13
 
 ### Deployed: the mock exam work, the spoken-lesson rewrite and its audio fix

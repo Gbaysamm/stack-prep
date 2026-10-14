@@ -49,6 +49,17 @@ A check-up is a short mixed test with no help, like the exam.
 - **Which questions:** questions you haven't seen yet come first. If a topic has none left,
   it reuses the ones you saw longest ago.
 
+## 3a. Mock exams are practice, not check-ups
+
+A mock exam is practice under exam conditions: the full timed paper in the CBT room, with its
+own report.
+- It **never** sets the predicted score, never counts as a check-up and never unlocks
+  practice. Only check-ups do those.
+- **Before the first check-up nothing is scored,** not even a mock's answers. The scores start
+  at the first check-up.
+- **After that, a mock's answers count in the topic scores** like practice answers, and its
+  wrong questions come back in practice.
+
 ## 4. What the student sees
 
 - **Home:** your score with "+N since you started at X%", your predicted score, your target,

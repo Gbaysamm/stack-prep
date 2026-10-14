@@ -141,3 +141,13 @@ def test_a_topic_is_labelled_by_its_score() -> None:
     assert status(Tally(1, 3)) == "needs_work"
     assert status(Tally(3, 5)) == "getting_there"
     assert status(Tally(4, 5)) == "strong"
+
+
+def test_nothing_is_scored_before_the_first_check_up() -> None:
+    """A mock exam's answers before any check-up give no score: scoring starts at a check-up."""
+    found = answers(("q1", VOWELS, "mock1", True), ("q2", STRESS, "mock1", False))
+    score = subject_score(UUID(int=9), UNITS, found, [], START.date())
+    assert (score.score, score.started_score, score.predicted) == (None, None, None)
+    assert score.answered == 0
+    assert all(line.status == "not_tried" for line in score.topics)
+    assert score.checkup_due is True

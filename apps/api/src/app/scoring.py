@@ -292,7 +292,9 @@ def subject_score(
     today: date,
 ) -> SubjectScore:
     known = {unit.unit_id for unit in units}
-    answers = [answer for answer in answers if answer.unit_id in known]
+    # The check-up is where scoring starts. Before the first one, nothing is scored, not even
+    # a mock exam's answers: a mock is practice under exam conditions, never a check-up.
+    answers = [answer for answer in answers if answer.unit_id in known] if checkups else []
     counted = tally(answers)
     topics = topic_scores(units, answers)
     score = average(line.score for line in topics)
