@@ -15,6 +15,17 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-14
 
+### Mock exams list redesigned as one clean list
+- **What:**
+  - Past mocks are rows in a single list card, not stacked boxes.
+  - Each row has a score tile coloured by result (green 70%+, yellow 50%+, pink below),
+    the type and one details line (date · time allowed · answered · exits), each subject as
+    a small labelled bar, and an arrow. The whole row opens the report.
+  - Delete moved off the list to a quiet "Delete this mock" at the foot of each report.
+- **Why:** the founder found the card design itself poor, not just where Delete sat.
+- **Where:** `MockHub.tsx`, `MockReport.tsx` (`DeleteMock`) and `Mock.css`.
+- **Status:** committed locally; checked with 4 mocks at 1440 and 390, and empty at 390.
+
 ### Mock exams list: Delete moved onto the details line
 - **What:** "Delete" is now the last quiet item on each card's details line ("30 minutes ·
   27/35 answered · Left the test 3 times · Delete"). It no longer floats in the bottom-right

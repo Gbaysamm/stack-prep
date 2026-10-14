@@ -8,7 +8,7 @@
 
 import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { Figures } from '../../Figures.js';
 import { Maths } from '../../Maths.js';
@@ -18,16 +18,8 @@ import { nextSteps, previousOf, timeStats, trendOf, weakTopics } from '../mock/i
 import { clock, mockApi, type EventKind, type MockReport as Report, type SubjectResult } from '../mockApi.js';
 import { orGone } from '../runsApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
-import { Button, Empty, Skeleton, cx } from '../ui.js';
-import {
-  NextSteps,
-  Section,
-  SummaryHero,
-  TimeInsights,
-  TopicBreakdown,
-  Trend,
-  WeakAreas,
-} from './MockInsights.js';
+import { Button, Dialog, Empty, Skeleton, cx, useToast } from '../ui.js';
+import { NextSteps, Section, SummaryHero, TimeInsights, TopicBreakdown, Trend, WeakAreas } from './MockInsights.js';
 import './Mock.css';
 import './MockInsights.css';
 
@@ -493,6 +485,52 @@ function Insights({ report }: { report: Report }) {
       {open ? (
         <QuestionModal subjects={report.subjects} at={open} onMove={setOpen} onClose={() => setOpen(null)} />
       ) : null}
+
+      <DeleteMock mockId={report.mock_id} />
+    </div>
+  );
+}
+
+/** Deleting a mock, kept quietly at the foot of its report rather than on the list. */
+function DeleteMock({ mockId }: { mockId: string }) {
+  const navigate = useNavigate();
+  const toast = useToast();
+  const [asking, setAsking] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const remove = async () => {
+    setBusy(true);
+    try {
+      await mockApi.remove(mockId);
+      toast('Mock deleted');
+      navigate('/mock');
+    } catch (error) {
+      toast((error as Error).message || 'It could not be deleted.');
+      setBusy(false);
+      setAsking(false);
+    }
+  };
+  return (
+    <div className="mk-foot">
+      <button type="button" className="mk-delete" onClick={() => setAsking(true)}>
+        Delete this mock
+      </button>
+      <Dialog
+        open={asking}
+        onClose={() => setAsking(false)}
+        title="Delete this mock?"
+        actions={
+          <>
+            <Button tone="ghost" onClick={() => setAsking(false)}>
+              Keep it
+            </Button>
+            <Button tone="danger" busy={busy} onClick={() => void remove()}>
+              Delete
+            </Button>
+          </>
+        }
+      >
+        It comes off your list. The answers you gave still count towards your progress.
+      </Dialog>
     </div>
   );
 }
