@@ -15,6 +15,14 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-14
 
+### Mock exams list: Delete moved onto the details line
+- **What:** "Delete" is now the last quiet item on each card's details line ("30 minutes ·
+  27/35 answered · Left the test 3 times · Delete"). It no longer floats in the bottom-right
+  corner, where it sat under the score on short cards. The card still opens its report from
+  anywhere, through a link stretched over the whole card.
+- **Where:** `MockHub.tsx` and `Mock.css`.
+- **Status:** committed locally; checked at 1440.
+
 ### Mock exams page: tidier list, a proper first-time state, average and improvement
 - **What:**
   - Each past mock is one clickable card that opens its report: the subjects, then the score

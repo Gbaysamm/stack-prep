@@ -15,79 +15,94 @@ import { Button, Dialog, PageHero, Pager, Skeleton, Steps, cx, usePaged, useToas
 import './Mock.css';
 
 const STEPS = [
-  { title: 'Set it up', body: 'Up to four subjects, how many questions each, and how long. Or take the Real UTME: JAMB’s layout and pace, 180 questions in 2 hours for four subjects.' },
-  { title: 'Sit it, start to finish', body: 'Full screen, no hints and no coach. A calculator when you need one. At 0:00 it hands itself in.' },
-  { title: 'See where you stand', body: 'Your score in each subject and overall, every question with its answer, and the questions you left.' },
+  {
+    title: 'Set it up',
+    body: 'Up to four subjects, how many questions each, and how long. Or take the Real UTME: JAMB’s layout and pace, 180 questions in 2 hours for four subjects.',
+  },
+  {
+    title: 'Sit it, start to finish',
+    body: 'Full screen, no hints and no coach. A calculator when you need one. At 0:00 it hands itself in.',
+  },
+  {
+    title: 'See where you stand',
+    body: 'Your score in each subject and overall, every question with its answer, and the questions you left.',
+  },
 ];
 
 export function dateLabel(iso: string): string {
-  return new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return new Date(iso).toLocaleString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 /** One mock as one clickable card: what it was, how each subject went, and the score. */
 function HistoryRow({ mock, onDelete, example }: { mock: MockSummary; onDelete?: () => void; example?: boolean }) {
   const running = mock.status === 'in_progress';
   const href = running ? `/mock/${mock.mock_id}` : `/mock/${mock.mock_id}/report`;
-  const body = (
-    <>
-      <div className="mk-row-main">
-        <div className="mk-row-top">
-          <span className="sj-eyebrow">{mock.preset === 'utme' ? 'Real UTME' : 'Custom mock'}</span>
-          <span className="mk-row-date">{example ? 'Example' : dateLabel(mock.started_at)}</span>
-        </div>
-        <div className="mk-row-subjects">
-          {running ? (
-            <span className="sj-badge yellow">
-              <span className="dot" />
-              Running, tap to resume
-            </span>
-          ) : (
-            mock.subjects.map((s) => (
-              <span key={s.subject_id} className="mk-chip">
-                {s.name} <b>{percentText(s.tally)}</b>
-              </span>
-            ))
-          )}
-        </div>
-        <div className="mk-row-meta">
-          <span>{minutesText(mock.duration_minutes)}</span>
-          {mock.overall ? (
-            <span>
-              {mock.overall.answered}/{mock.overall.questions} answered
-            </span>
-          ) : null}
-          {mock.auto_submitted ? <span>Time ran out</span> : null}
-          {mock.integrity_flags ? (
-            <span className="mk-flagged">
-              Left the test {mock.integrity_flags} {mock.integrity_flags === 1 ? 'time' : 'times'}
-            </span>
-          ) : null}
-        </div>
-      </div>
-      <div className={cx('mk-row-score', running && 'muted')}>
-        <span className="sj-num">{running ? '—' : percentText(mock.overall)}</span>
-        <small>{running ? 'in progress' : 'overall'}</small>
-      </div>
-      <IconChevronRight size={20} className="mk-row-go" aria-hidden="true" />
-    </>
-  );
-  if (example) {
-    return (
-      <li className="mk-row sj-card example" aria-hidden="true">
-        <div className="mk-row-link">{body}</div>
-      </li>
-    );
-  }
+  const kind = mock.preset === 'utme' ? 'Real UTME' : 'Custom mock';
   return (
-    <li className="mk-row sj-card">
-      <Link className="mk-row-link" to={href} aria-label={running ? 'Resume this mock' : 'Open this mock’s report'}>
-        {body}
-      </Link>
-      {onDelete ? (
-        <button type="button" className="mk-delete" onClick={onDelete}>
-          Delete
-        </button>
-      ) : null}
+    <li className={cx('mk-row sj-card', example && 'example')} aria-hidden={example || undefined}>
+      <div className="mk-row-link">
+        <div className="mk-row-main">
+          <div className="mk-row-top">
+            {/* The whole card opens it: this link's ::after covers the card. */}
+            {example ? (
+              <span className="sj-eyebrow">{kind}</span>
+            ) : (
+              <Link
+                className="sj-eyebrow mk-row-open"
+                to={href}
+                aria-label={`${kind}: ${running ? 'resume' : 'open its report'}`}
+              >
+                {kind}
+              </Link>
+            )}
+            <span className="mk-row-date">{example ? 'Example' : dateLabel(mock.started_at)}</span>
+          </div>
+          <div className="mk-row-subjects">
+            {running ? (
+              <span className="sj-badge yellow">
+                <span className="dot" />
+                Running, tap to resume
+              </span>
+            ) : (
+              mock.subjects.map((s) => (
+                <span key={s.subject_id} className="mk-chip">
+                  {s.name} <b>{percentText(s.tally)}</b>
+                </span>
+              ))
+            )}
+          </div>
+          <div className="mk-row-meta">
+            <span>{minutesText(mock.duration_minutes)}</span>
+            {mock.overall ? (
+              <span>
+                {mock.overall.answered}/{mock.overall.questions} answered
+              </span>
+            ) : null}
+            {mock.auto_submitted ? <span>Time ran out</span> : null}
+            {mock.integrity_flags ? (
+              <span className="mk-flagged">
+                Left the test {mock.integrity_flags} {mock.integrity_flags === 1 ? 'time' : 'times'}
+              </span>
+            ) : null}
+            {onDelete ? (
+              <button type="button" className="mk-delete" onClick={onDelete}>
+                Delete
+              </button>
+            ) : null}
+          </div>
+        </div>
+        <div className={cx('mk-row-score', running && 'muted')}>
+          <span className="sj-num">{running ? '—' : percentText(mock.overall)}</span>
+          <small>{running ? 'in progress' : 'overall'}</small>
+        </div>
+        <IconChevronRight size={20} className="mk-row-go" aria-hidden="true" />
+      </div>
     </li>
   );
 }
@@ -103,8 +118,16 @@ const EXAMPLE: MockSummary = {
   integrity_flags: 0,
   overall: { questions: 100, answered: 92, correct: 55, wrong: 37, unanswered: 8, percent: 60 },
   subjects: [
-    { subject_id: 'a', name: 'Use of English', tally: { questions: 60, answered: 56, correct: 36, wrong: 20, unanswered: 4, percent: 64 } },
-    { subject_id: 'b', name: 'Mathematics', tally: { questions: 40, answered: 36, correct: 19, wrong: 17, unanswered: 4, percent: 53 } },
+    {
+      subject_id: 'a',
+      name: 'Use of English',
+      tally: { questions: 60, answered: 56, correct: 36, wrong: 20, unanswered: 4, percent: 64 },
+    },
+    {
+      subject_id: 'b',
+      name: 'Mathematics',
+      tally: { questions: 40, answered: 36, correct: 19, wrong: 17, unanswered: 4, percent: 53 },
+    },
   ],
 } as unknown as MockSummary;
 
@@ -181,7 +204,9 @@ export function MockHub() {
       />
 
       <section className="mk-section">
-        <h2 className="sj-display sj-h3 mk-section-title" id="mk-history">Your mock exams</h2>
+        <h2 className="sj-display sj-h3 mk-section-title" id="mk-history">
+          Your mock exams
+        </h2>
         {history.loading && !history.data ? (
           <div className="mk-list">
             <Skeleton height={96} />

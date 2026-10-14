@@ -69,10 +69,6 @@
   color: inherit;
   text-decoration: none;
 }
-.sj .mk-row-link:focus-visible {
-  outline: none;
-  box-shadow: inset 0 0 0 2px var(--purple-600);
-}
 .sj .mk-row-top {
   display: flex;
   align-items: baseline;
@@ -106,7 +102,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px 14px;
-  padding-right: 64px;
   font-size: 13px;
   color: var(--gray-600);
 }
@@ -138,17 +133,31 @@
 .sj .mk-row:hover .mk-row-go {
   color: var(--purple-600);
 }
-/* Delete: quiet text in the card's bottom-right corner, never beside the score. */
-.sj .mk-delete {
+/* The card opens through its title link, stretched over the whole card. */
+.sj .mk-row-open {
+  text-decoration: none;
+}
+.sj .mk-row-open::after {
+  content: '';
   position: absolute;
-  right: 18px;
-  bottom: 14px;
+  inset: 0;
+  border-radius: inherit;
+}
+.sj .mk-row-open:focus-visible {
+  outline: none;
+}
+.sj .mk-row-open:focus-visible::after {
+  box-shadow: inset 0 0 0 2px var(--purple-600);
+}
+/* Delete: the last quiet item on the details line, above the stretched link. */
+.sj .mk-delete {
+  position: relative;
+  z-index: 1;
   margin: 0;
-  padding: 2px 4px;
+  padding: 0;
   border: 0;
   background: none;
   font: inherit;
-  font-size: 12.5px;
   color: var(--gray-500);
   cursor: pointer;
 }
