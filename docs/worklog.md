@@ -15,6 +15,19 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-14
 
+### Mock exams page: tidier list, a proper first-time state, average and improvement
+- **What:**
+  - Each past mock is one clickable card that opens its report: the subjects, then the score
+    with an arrow. The soft "Report" button is gone, and Delete is quiet text in the corner
+    instead of a floating ×.
+  - Before the first mock, a faded example card shows what the list will look like.
+  - The top section shows your best mock score, then one line with your average and the
+    change since your first mock.
+- **Why:** the founder disliked the button on white, the misaligned score and ×, and the
+  empty state, and asked for an average and progress without cluttering the top.
+- **Where:** `apps/web/src/prep/pages/MockHub.tsx` and `Mock.css`.
+- **Status:** committed locally; checked empty at 1440 and with a mock at 390.
+
 ### Mock exams and check-ups each have one job
 - **What:**
   - **Check-ups** alone set the predicted score and unlock practice.

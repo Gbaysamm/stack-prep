@@ -6,10 +6,12 @@
 
 import { useState } from 'react';
 
-import { IconArrowRight, IconClock, IconClose } from '../icons.js';
+import { Link } from 'react-router-dom';
+
+import { IconArrowRight, IconChevronRight } from '../icons.js';
 import { mockApi, minutesText, percentText, type MockSummary } from '../mockApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
-import { Button, Dialog, Empty, PageHero, Pager, Skeleton, Steps, cx, usePaged, useToast } from '../ui.js';
+import { Button, Dialog, PageHero, Pager, Skeleton, Steps, cx, usePaged, useToast } from '../ui.js';
 import './Mock.css';
 
 const STEPS = [
@@ -22,20 +24,22 @@ export function dateLabel(iso: string): string {
   return new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
-function HistoryRow({ mock, onDelete }: { mock: MockSummary; onDelete: () => void }) {
+/** One mock as one clickable card: what it was, how each subject went, and the score. */
+function HistoryRow({ mock, onDelete, example }: { mock: MockSummary; onDelete?: () => void; example?: boolean }) {
   const running = mock.status === 'in_progress';
-  return (
-    <li className="mk-row sj-card">
+  const href = running ? `/mock/${mock.mock_id}` : `/mock/${mock.mock_id}/report`;
+  const body = (
+    <>
       <div className="mk-row-main">
         <div className="mk-row-top">
           <span className="sj-eyebrow">{mock.preset === 'utme' ? 'Real UTME' : 'Custom mock'}</span>
-          <span className="mk-row-date">{dateLabel(mock.started_at)}</span>
+          <span className="mk-row-date">{example ? 'Example' : dateLabel(mock.started_at)}</span>
         </div>
         <div className="mk-row-subjects">
           {running ? (
             <span className="sj-badge yellow">
               <span className="dot" />
-              Running
+              Running, tap to resume
             </span>
           ) : (
             mock.subjects.map((s) => (
@@ -50,7 +54,6 @@ function HistoryRow({ mock, onDelete }: { mock: MockSummary; onDelete: () => voi
           {mock.overall ? (
             <span>
               {mock.overall.answered}/{mock.overall.questions} answered
-              {mock.overall.unanswered ? ` · ${mock.overall.unanswered} unanswered` : ''}
             </span>
           ) : null}
           {mock.auto_submitted ? <span>Time ran out</span> : null}
@@ -65,23 +68,45 @@ function HistoryRow({ mock, onDelete }: { mock: MockSummary; onDelete: () => voi
         <span className="sj-num">{running ? '—' : percentText(mock.overall)}</span>
         <small>{running ? 'in progress' : 'overall'}</small>
       </div>
-      <div className="mk-row-actions">
-        {running ? (
-          <Button to={`/mock/${mock.mock_id}`} size="sm" trailing={<IconArrowRight size={16} />}>
-            Resume
-          </Button>
-        ) : (
-          <Button to={`/mock/${mock.mock_id}/report`} size="sm" tone="soft" trailing={<IconArrowRight size={16} />}>
-            Report
-          </Button>
-        )}
-        <button type="button" className="mk-delete" aria-label="Delete this mock" title="Delete" onClick={onDelete}>
-          <IconClose size={18} />
+      <IconChevronRight size={20} className="mk-row-go" aria-hidden="true" />
+    </>
+  );
+  if (example) {
+    return (
+      <li className="mk-row sj-card example" aria-hidden="true">
+        <div className="mk-row-link">{body}</div>
+      </li>
+    );
+  }
+  return (
+    <li className="mk-row sj-card">
+      <Link className="mk-row-link" to={href} aria-label={running ? 'Resume this mock' : 'Open this mock’s report'}>
+        {body}
+      </Link>
+      {onDelete ? (
+        <button type="button" className="mk-delete" onClick={onDelete}>
+          Delete
         </button>
-      </div>
+      ) : null}
     </li>
   );
 }
+
+/** A made-up finished mock, shown faded before the first one so the list's shape is clear. */
+const EXAMPLE: MockSummary = {
+  mock_id: 'example',
+  status: 'submitted',
+  preset: 'utme',
+  started_at: new Date().toISOString(),
+  duration_minutes: 67,
+  auto_submitted: false,
+  integrity_flags: 0,
+  overall: { questions: 100, answered: 92, correct: 55, wrong: 37, unanswered: 8, percent: 60 },
+  subjects: [
+    { subject_id: 'a', name: 'Use of English', tally: { questions: 60, answered: 56, correct: 36, wrong: 20, unanswered: 4, percent: 64 } },
+    { subject_id: 'b', name: 'Mathematics', tally: { questions: 40, answered: 36, correct: 19, wrong: 17, unanswered: 4, percent: 53 } },
+  ],
+} as unknown as MockSummary;
 
 export function MockHub() {
   usePageTitle('Mock exam');
@@ -109,8 +134,14 @@ export function MockHub() {
     }
   };
 
-  const done = mocks.filter((m) => m.overall && m.overall.percent !== null);
-  const best = done.length ? Math.max(...done.map((m) => m.overall!.percent!)) : null;
+  // Scored mocks, oldest first: the best, the average, and the change since the first.
+  const done = mocks
+    .filter((m) => m.overall && m.overall.percent !== null)
+    .sort((a, b) => a.started_at.localeCompare(b.started_at));
+  const scores = done.map((m) => m.overall!.percent!);
+  const best = scores.length ? Math.max(...scores) : null;
+  const average = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
+  const moved = scores.length > 1 ? scores[scores.length - 1]! - scores[0]! : null;
 
   return (
     <div className="sj-page mk-page">
@@ -134,6 +165,16 @@ export function MockHub() {
             <div className="mk-hero-stat">
               <span className="sj-num">{best}%</span>
               <small>your best overall</small>
+              {scores.length > 1 ? (
+                <p className="mk-hero-line">
+                  Average <b>{average}%</b> over {scores.length} mocks
+                  {moved !== null && moved !== 0 ? (
+                    <span className={cx('mk-hero-move', moved > 0 ? 'up' : 'down')}>
+                      {moved > 0 ? '▲' : '▼'} {Math.abs(moved)} since your first
+                    </span>
+                  ) : null}
+                </p>
+              ) : null}
             </div>
           ) : undefined
         }
@@ -154,17 +195,14 @@ export function MockHub() {
             </Button>
           </div>
         ) : mocks.length === 0 ? (
-          <Empty
-            icon={<IconClock size={26} />}
-            title="No mock exams yet"
-            action={
-              <Button to="/mock/new" trailing={<IconArrowRight size={18} />}>
-                Set up your first mock
-              </Button>
-            }
-          >
-            When you sit one, it’s listed here with its score and the full report.
-          </Empty>
+          <div className="mk-first">
+            <p className="mk-first-text">
+              <b>No mock exams yet.</b> Each one you sit is listed here like this, and opens to its full report.
+            </p>
+            <ul className="mk-list">
+              <HistoryRow mock={EXAMPLE} example />
+            </ul>
+          </div>
         ) : (
           <>
             <ul className="mk-list">
