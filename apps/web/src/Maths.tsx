@@ -25,6 +25,8 @@
  */
 
 import katex from 'katex';
+// mhchem adds \ce{...} for Chemistry: formulae, equations and nuclides ($\ce{H2SO4}$).
+import 'katex/contrib/mhchem';
 import { useLayoutEffect, useRef, type ReactNode } from 'react';
 
 import 'katex/dist/katex.min.css';

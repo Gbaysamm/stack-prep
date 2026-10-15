@@ -13,6 +13,27 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ---
 
+## 2026-10-15
+
+### UTME Chemistry loader: the subject, its curriculum, 403 questions and their lessons
+- **What:**
+  - `database/load_retranscribed_chemistry.py`, on the Mathematics loader's pattern
+    (`--reviewer`, `--reviewer-name`, `--apply`, `--pending` exit 10/0, one transaction,
+    a new version on change with the old withdrawn, every row naming the reviewer);
+  - when CHEM is missing it makes it: both source PDFs recorded and licensed, 18 topics,
+    69 subtopics (subtopics.yaml) with one skill each, citations to syllabus.pdf pages,
+    the `utme-2027` version published, and the subject switched on;
+  - questions per year (both files present and sound), `why` stored as each option's
+    distractor_note, JPG figures as image/jpeg assets and drawn ones exported to
+    figures/svg (with PNGs for the coach), `drop: true` skipped (retired if
+    already in the bank); lessons, cues and doodles loaded as in Mathematics;
+  - added to CONTENT_LOADERS in both release.sh files; the API image ships the JPGs and SVGs;
+  - mhchem: `render_maths.js` loads it, and `spoken_maths` reads `\ce{...}` aloud.
+- **Why:** Chemistry selectable everywhere Mathematics is, reaching servers only by deploy.
+- **Where:** uncommitted; `database/load_retranscribed_chemistry.py`,
+  `apps/api/tests/test_chemistry_content.py`, `deploy/*/release.sh`, `apps/api/Dockerfile`.
+- **Status:** loaded locally (scorepilot_int); not deployed.
+
 ## 2026-10-14
 
 ### Exact lip-sync for the talking mouth (British RP)

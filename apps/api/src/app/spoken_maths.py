@@ -303,6 +303,202 @@ def _matrix(body: str, kind: str) -> str:
     return f"{lead} {spoken}"
 
 
+# ------------------------------------------------------------------------------- chemistry
+#
+# Chemistry is written with KaTeX's mhchem: $\ce{H2SO4}$, $\ce{N2 + 3H2 <=> 2NH3}$. Read as
+# ordinary LaTeX, "->" came out "minus is greater than" and "Ca" as the letters c and a run
+# together. A chemistry teacher spells a formula out a symbol at a time ("H two S O four"),
+# says the charge after the ion ("S O four, two minus") and reads an arrow as "gives".
+
+#: Arrows, longest first so "<=>" is not read as "<" then "=>".
+_CE_ARROWS = (
+    ("<=>>", "is in equilibrium with"),
+    ("<<=>", "is in equilibrium with"),
+    ("<=>", "is in equilibrium with"),
+    ("<-->", "is in equilibrium with"),
+    ("<->", "is in equilibrium with"),
+    ("->", "gives"),
+    ("<-", "is formed from"),
+)
+_CE_STATES = {"aq": "aqueous", "s": "solid", "l": "liquid", "g": "gas"}
+_CE_COUNTS = {"2": "twice", "3": "three times"}
+
+
+def _ce_condition(text: str) -> str:
+    """What is written over or under an arrow: words as they are, LaTeX read as usual."""
+    text = text.strip()
+    if text.startswith("{") and text.endswith("}"):
+        text = text[1:-1]
+    if text.strip() in (r"\Delta", r"\triangle"):
+        return "heat"  # a delta over the arrow means heating
+    if text.startswith("$") and text.endswith("$"):
+        return speak(text.strip("$"))
+    return speak_chemistry(text)
+
+
+def _ce_charge(sign: str) -> str:
+    """'2-' as 'two minus', '+' as 'plus'; also '-2' and the dot/sign-less forms."""
+    sign = sign.strip().strip("{}")
+    found = re.fullmatch(r"(\d*)([+-]?)(\d*)", sign)
+    if not found:
+        return speak(sign)
+    number = found.group(1) or found.group(3)
+    word = {"+": "plus", "-": "minus", "": ""}[found.group(2)]
+    return " ".join(part for part in (number, word) if part)
+
+
+def _ce_species(token: str) -> str:
+    """One formula, ion or nuclide: "CaCO3", "SO4^2-", "^{235}_{92}U", "2e-", "NaCl(aq)"."""
+    out: list[str] = []
+    i = 0
+    # A nuclide's mass number and atomic number come first: ^{235}_{92}U.
+    nuclide = re.match(r"\^\{?(\d+)\}?_\{?(-?\d+)\}?", token)
+    if nuclide:
+        rest = _ce_species(token[nuclide.end() :])
+        atomic = nuclide.group(2).replace("-", "minus ")
+        return f"{rest}, mass number {nuclide.group(1)}, atomic number {atomic}"
+    coefficient = re.match(r"\d+(?:/\d+)?(?:\.\d+)?", token)
+    if coefficient and coefficient.end() < len(token):
+        out.append(coefficient.group(0))
+        i = coefficient.end()
+    if token[i:] in ("e-", "e^-", "e^{-}"):
+        many = bool(out) and out[-1] != "1"
+        return " ".join([*out, "electrons" if many else "an electron"])
+    while i < len(token):
+        c = token[i]
+        rest = token[i:]
+        if c.isupper():
+            symbol = re.match(r"[A-Z][a-z]?", rest)
+            assert symbol
+            out.append(" ".join(symbol.group(0).upper()))
+            i += symbol.end()
+        elif c.isdigit():
+            number = re.match(r"\d+", rest)
+            assert number
+            out.append(number.group(0))
+            i += number.end()
+        elif c.islower():
+            word = re.match(r"[a-z]+", rest)
+            assert word
+            out.append(word.group(0))
+            i += word.end()
+        elif c == "(":
+            close = _matching(token, i)
+            inner = token[i + 1 : close]
+            i = close + 1
+            if inner in _CE_STATES:
+                out.append(_CE_STATES[inner])
+                continue
+            count = re.match(r"\d+", token[i:])
+            out.append(_ce_species(inner))
+            if count:
+                out.append(_CE_COUNTS.get(count.group(0), f"{count.group(0)} times"))
+                i += count.end()
+        elif c == "[":
+            close = _matching(token, i)
+            out.append(_ce_species(token[i + 1 : close]))
+            i = close + 1
+        elif c == "^":
+            charge = re.match(r"\^(\{[^}]*\}|\d*[+-]|[+-]?\d*)", rest)
+            assert charge
+            out.append(_ce_charge(charge.group(1)))
+            i += charge.end()
+        elif c == "_":
+            sub = re.match(r"_(\{[^}]*\}|.)", rest)
+            assert sub
+            out.append(_ce_species(sub.group(1).strip("{}")))
+            i += sub.end()
+        elif c in "+-" and (i + 1 == len(token) or token[i + 1] in "+-"):
+            # Na+, Cl-, and the doubled O2-- some books write: a charge with no caret
+            out.append("plus" if c == "+" else "minus")
+            i += 1
+        elif rest.startswith(("°C", "℃")):
+            out.append("degrees Celsius")
+            i += 2 if rest.startswith("°C") else 1
+        elif c == "°":
+            out.append("degrees")
+            i += 1
+        elif c in ".*·":
+            out.append("dot")  # the dot in a hydrate: CuSO4.5H2O
+            i += 1
+        elif c == "=":
+            out.append("double bond")
+            i += 1
+        elif c == "#":
+            out.append("triple bond")
+            i += 1
+        elif c == "\\":
+            command = re.match(r"\\[a-zA-Z]+(?:\{[^{}]*\})*", rest)
+            end = command.end() if command else 2
+            out.append(speak(rest[:end]))
+            i += end
+        elif c == "{":
+            close = token.find("}", i)
+            close = len(token) if close == -1 else close
+            out.append(_ce_species(token[i + 1 : close]))
+            i = close + 1
+        else:
+            i += 1  # a single bond's "-" and anything else on the board is not said
+    return " ".join(part for part in out if part)
+
+
+def speak_chemistry(body: str) -> str:
+    """The inside of \\ce{...} as a chemistry teacher says it."""
+    out: list[str] = []
+    i = 0
+    s = body.strip()
+    while i < len(s):
+        if s[i].isspace():
+            i += 1
+            continue
+        arrow = next(((a, w) for a, w in _CE_ARROWS if s.startswith(a, i)), None)
+        if arrow:
+            i += len(arrow[0])
+            conditions = []
+            while i < len(s) and s[i] == "[":
+                close = _matching(s, i)
+                conditions.append(_ce_condition(s[i + 1 : close]))
+                i = close + 1
+            said = [c for c in conditions if c]
+            if not said:
+                out.append(arrow[1])
+            elif arrow[1].endswith(" with"):
+                # "is in equilibrium, with V 2 O 5 and 450 degrees Celsius, with"
+                out.append(f"{arrow[1][: -len(' with')]}, with {' and '.join(said)}, with")
+            else:
+                out.append(f"{arrow[1]}, with {' and '.join(said)},")
+            continue
+        if s[i] == "+" and (i + 1 == len(s) or s[i + 1].isspace()):
+            out.append("plus")
+            i += 1
+            continue
+        if s[i] == "$":
+            close = s.find("$", i + 1)
+            close = len(s) if close == -1 else close
+            out.append(speak(s[i + 1 : close]))
+            i = close + 1
+            continue
+        # One species runs to the next space, keeping brackets and braces whole.
+        start, depth = i, 0
+        while i < len(s) and (depth or not s[i].isspace()):
+            if s[i] in "({[":
+                depth += 1
+            elif s[i] in ")}]":
+                depth = max(0, depth - 1)
+            if not depth and any(s.startswith(a, i) for a, _ in _CE_ARROWS) and i > start:
+                break
+            i += 1
+        token = s[start:i]
+        if token in ("v", "(v)"):
+            out.append("which is precipitated")
+        elif token in ("^", "(^)"):
+            out.append("which is given off")
+        else:
+            out.append(_ce_species(token))
+    text = " ".join(part for part in out if part)
+    return re.sub(r"\s{2,}", " ", text).strip(" ,")
+
+
 _BETWEEN = re.compile(r"^\s*(-?[\w.\\{}]+)\s*<\s*([a-zA-Z])\s*<\s*(-?[\w.\\{}]+)\s*$")
 
 
@@ -360,6 +556,10 @@ def speak(latex: str) -> str:
                     r.i += 1
                     limits[mark] = speak(r.group())
                 emit(f"the integral from {limits.get('_', '')} to {limits.get('^', '')} of")
+            elif name == "ce":
+                emit(speak_chemistry(r.group()))  # mhchem: \ce{H2SO4}
+            elif name == "pu":
+                emit(speak(r.group()))  # mhchem's physical unit: \pu{25 cm^3}
             elif name == "lim" and r.peek() == "_":
                 r.i += 1
                 emit(f"the limit as {speak(r.group())}, of")

@@ -59,3 +59,22 @@ def test_a_sentence_keeps_its_words_and_loses_screen_marks() -> None:
     )
     assert speak_text(r"It costs $₦26{,}400$ in all.") == "It costs 26,400 naira in all."
     assert speak_text("A *key* idea.") == "A key idea."
+
+
+def test_chemistry_formulae_are_spelled_a_symbol_at_a_time() -> None:
+    assert speak(r"\ce{H2SO4}") == "H 2 S O 4"
+    assert speak(r"\ce{CuSO4.5H2O}") == "C U S O 4 dot 5 H 2 O"
+    assert speak(r"\ce{Ca(NO3)2}") == "C A N O 3 twice"
+    assert speak(r"\ce{NaCl(aq)}") == "N A C L aqueous"
+
+
+def test_chemistry_charges_arrows_and_nuclides() -> None:
+    assert speak(r"\ce{SO4^2-}") == "S O 4 2 minus"
+    assert speak(r"\ce{Fe^3+ + e- -> Fe^2+}") == "F E 3 plus plus an electron gives F E 2 plus"
+    assert speak(r"\ce{N2 + 3H2 <=> 2NH3}") == "N 2 plus 3 H 2 is in equilibrium with 2 N H 3"
+    assert speak(r"\ce{CaCO3 ->[heat] CaO + CO2}") == "C A C O 3 gives, with heat, C A O plus C O 2"
+    assert speak(r"\ce{^{235}_{92}U}") == "U, mass number 235, atomic number 92"
+
+
+def test_chemistry_inside_a_sentence() -> None:
+    assert speak_text(r"Sulphuric acid is $\ce{H2SO4}$.") == "Sulphuric acid is H 2 S O 4."

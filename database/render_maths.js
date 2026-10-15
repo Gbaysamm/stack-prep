@@ -3,6 +3,11 @@
 // student will actually see -- not a second renderer that agrees most of the time.
 const katex = require(process.argv[2]);
 const fs = require('fs');
+const path = require('path');
+// Chemistry is written with mhchem ($\ce{H2SO4}$), which the app loads beside KaTeX. Loading
+// it here registers \ce and \pu on the same KaTeX instance, so a review page shows formulae
+// as students see them rather than as red errors.
+require(path.join(process.argv[2], 'dist', 'contrib', 'mhchem.js'));
 
 const SEGMENT = /\$\$([\s\S]+?)\$\$|\$([^$\n]+?)\$/g;
 const escapeHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

@@ -74,12 +74,14 @@ echo "==> Loading re-transcribed content"
 # only after a backup. A failure is reported, not fatal: the load is one transaction, so a
 # failed one has changed nothing, and the release still goes out.
 #
-# Mathematics first, then Use of English. One backup covers both, taken only if either has
-# work; each loads only if it has work, and one failing does not stop the other.
-# English also repairs mojibake (a curly quote stored as three garbled characters) in any
-# English text its files do not cover.
+# Mathematics first, then Use of English, then Chemistry. One backup covers all three, taken
+# only if any has work; each loads only if it has work, and one failing does not stop the
+# others. English also repairs mojibake (a curly quote stored as three garbled characters) in
+# any English text its files do not cover. Chemistry also creates the CHEM subject and its
+# curriculum, approved in the same name, the first time it runs on a server without them.
 CONTENT_REVIEWER="${CONTENT_REVIEWER:-Abdulmalik}"
-CONTENT_LOADERS=("load_retranscribed_maths.py" "load_retranscribed_english.py --fix-encoding")
+CONTENT_LOADERS=("load_retranscribed_maths.py" "load_retranscribed_english.py --fix-encoding"
+  "load_retranscribed_chemistry.py")
 load_content() {
   local script=$1
   shift
