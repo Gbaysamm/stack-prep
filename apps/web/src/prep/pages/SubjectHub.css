@@ -82,6 +82,32 @@
   font-size: 28px;
   letter-spacing: -0.02em;
   line-height: 46px;
+  /* One line always: a wrapped date spills out of the fixed-height row onto the countdown. */
+  white-space: nowrap;
+}
+/* On a phone each figure has half of a narrow card, so both shrink to fit it. */
+@media (max-width: 520px) {
+  .sj .hub-plan {
+    padding: 16px;
+  }
+  .sj .hub-plan-figs > div {
+    padding: 0 14px;
+  }
+  .sj .hub-plan-figs dd {
+    height: 36px;
+  }
+  .sj .hub-plan-figs .sj-num {
+    font-size: 40px;
+    line-height: 36px;
+  }
+  .sj .hub-plan-figs .date {
+    font-size: 21px;
+    line-height: 36px;
+  }
+  .sj .hub-plan-figs .hub-under,
+  .sj .hub-days {
+    font-size: 12px;
+  }
 }
 /* The line under each figure, the same height in both columns. */
 .sj .hub-plan-figs .hub-under {
