@@ -84,7 +84,7 @@ process.stdin.on('end', () => {
 
 
 #: What the voice must never meet in a spoken line (docs/lesson-style-guide.md §2).
-SPOKEN_BREAKS = re.compile(r"[:;—–$\\]| - ")
+SPOKEN_BREAKS = re.compile("[:;\u2014\u2013$\\\\]| - ")
 LETTER_SAID = re.compile(r"\boption ([ABCD])\b")
 
 
@@ -95,7 +95,9 @@ def check_lessons(year: int, paper: dict, expressions: list[tuple[str, str]]) ->
         return [f"{year}: no {path.name}"]
     lessons = {
         int(k): v
-        for k, v in (yaml.safe_load(path.read_text(encoding="utf-8")) or {}).get("lessons", {}).items()
+        for k, v in (yaml.safe_load(path.read_text(encoding="utf-8")) or {})
+        .get("lessons", {})
+        .items()
     }
     problems: list[str] = []
     kept = {int(q["number"]): q for q in paper["questions"] if not q.get("drop")}
@@ -120,7 +122,9 @@ def check_lessons(year: int, paper: dict, expressions: list[tuple[str, str]]) ->
             if not say.strip():
                 problems.append(f"{where} moment {i}: empty say")
             if SPOKEN_BREAKS.search(say):
-                problems.append(f"{where} moment {i}: say has a symbol the voice stops on: {say[:80]!r}")
+                problems.append(
+                    f"{where} moment {i}: say has a symbol the voice stops on: {say[:80]!r}"
+                )
             if FORBIDDEN.search(say):
                 problems.append(f"{where} moment {i}: mentions the key or a correction")
             name = (m.get("doodle") or {}).get("name", "")
@@ -130,10 +134,14 @@ def check_lessons(year: int, paper: dict, expressions: list[tuple[str, str]]) ->
         traps = lesson.get("traps") or {}
         wrong = {letter for letter in LETTERS if letter != q["answer"]}
         if set(traps) != wrong:
-            problems.append(f"{where}: traps must cover exactly {sorted(wrong)}, has {sorted(traps)}")
+            problems.append(
+                f"{where}: traps must cover exactly {sorted(wrong)}, has {sorted(traps)}"
+            )
         for text in traps.values():
             if SPOKEN_BREAKS.search(str(text)) or FORBIDDEN.search(str(text)):
-                problems.append(f"{where}: a trap line the voice cannot say cleanly: {str(text)[:80]!r}")
+                problems.append(
+                    f"{where}: a trap line the voice cannot say cleanly: {str(text)[:80]!r}"
+                )
     for n in sorted(set(lessons) - set(kept)):
         problems.append(f"{year} Q{n} lesson: no such kept question")
     return problems
@@ -149,8 +157,10 @@ def check_year(year: int, codes: set[str], lessons_wanted: bool = False) -> list
     explained = {}
     if notes_path.exists():
         explained = {
-            int(k): v for k, v in (yaml.safe_load(notes_path.read_text(encoding="utf-8")) or {})
-            .get("explanations", {}).items()
+            int(k): v
+            for k, v in (yaml.safe_load(notes_path.read_text(encoding="utf-8")) or {})
+            .get("explanations", {})
+            .items()
         }
     else:
         problems.append(f"{year}: no {notes_path.name}")
@@ -221,8 +231,10 @@ def check_year(year: int, codes: set[str], lessons_wanted: bool = False) -> list
         taught = [*steps, note.get("hint") or "", *map(str, why.values())]
         for text in taught:
             if FORBIDDEN.search(text):
-                problems.append(f"{where}: tells the student about the key or a correction: {text[:90]!r}")
-            if "—" in text or "–" in text and not re.search(r"\d–\d", text):
+                problems.append(
+                    f"{where}: tells the student about the key or a correction: {text[:90]!r}"
+                )
+            if "\u2014" in text or ("\u2013" in text and not re.search("\\d\u2013\\d", text)):
                 problems.append(f"{where}: a dash in {text[:60]!r}; use a comma or full stop")
             expressions += [(f"{where} explanation", f) for f in formulas(text)]
 
