@@ -36,7 +36,7 @@ from sqlalchemy.ext.asyncio import AsyncConnection
 
 from app.auth import require_student
 from app.db import connection, fetch_all
-from app.figures import DISPLAYABLE, QuestionFigure
+from app.figures import DISPLAYABLE, OptionFigure, QuestionFigure, option_figure
 from app.routers.practice import EXCLUDED_POOL
 from engine.version import ENGINE_VERSION
 
@@ -313,6 +313,8 @@ class StartMock(BaseModel):
 class PaperOption(BaseModel):
     option_key: str
     body: str
+    #: The option's drawing, when the option is a picture; its `body` is then only a label.
+    figure: OptionFigure | None = None
     #: Why this wrong option tempts. Only in a submitted mock's report.
     why: str | None = None
 
@@ -769,7 +771,8 @@ async def _sheet(
     figures = await fetch_all(
         conn,
         """
-        SELECT a.question_version_id, a.id, a.mime_type, a.alt_text, a.width, a.height
+        SELECT DISTINCT a.question_version_id, a.id, a.option_key, a.mime_type, a.alt_text,
+               a.width, a.height, a.display_order
         FROM question_assets a
         JOIN mock_exam_items i ON i.question_version_id = a.question_version_id
         WHERE i.mock_exam_id = ANY(CAST(:ids AS uuid[])) AND a.licence_status = 'verified'
@@ -778,8 +781,15 @@ async def _sheet(
         ids=[str(mock_id) for mock_id in mock_ids],
     )
     figures_of: dict[UUID, list[QuestionFigure]] = {}
+    # A drawn option's picture belongs to its option, never to the question's figures.
+    pictures: dict[tuple[UUID, str], OptionFigure] = {}
     for figure in figures:
         if figure["mime_type"] not in DISPLAYABLE:
+            continue
+        if figure["option_key"] is not None:
+            pictures.setdefault(
+                (figure["question_version_id"], str(figure["option_key"])), option_figure(figure)
+            )
             continue
         figures_of.setdefault(figure["question_version_id"], []).append(
             QuestionFigure(
@@ -792,6 +802,8 @@ async def _sheet(
     sessions = {row["session_id"]: row for rows in by_mock.values() for row in rows}
     for item in items:
         item["figures"] = figures_of.get(item["question_version_id"], [])
+        for option in item["options"]:
+            option["figure"] = pictures.get((item["question_version_id"], option["option_key"]))
         sessions[item["session_id"]]["items"].append(item)
     return by_mock
 

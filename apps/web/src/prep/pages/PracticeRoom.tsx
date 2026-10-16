@@ -32,6 +32,7 @@ import {
 
 import { Figures } from "../../Figures.js";
 import { Maths } from "../../Maths.js";
+import { OptionBody, hasOptionPictures } from "../../OptionBody.js";
 import {
   api,
   type NarratedLesson,
@@ -857,7 +858,7 @@ export function PracticeRoom() {
                   <span className="pr-conf-echo-row">
                     <span className="key">{picked.option_key}</span>
                     <span className="body">
-                      <Maths text={picked.body} />
+                      <OptionBody body={picked.body} figure={picked.figure} size="small" />
                     </span>
                   </span>
                 </div>
@@ -1040,7 +1041,10 @@ function Asking({
         ) : null}
 
         <div
-          className="sj-options pr-options"
+          className={cx(
+            "sj-options pr-options",
+            hasOptionPictures(question.options) && "sp-pic-options",
+          )}
           role="radiogroup"
           aria-labelledby="pr-stem"
           onKeyDown={onGroupKey}
@@ -1069,7 +1073,7 @@ function Asking({
               >
                 <span className="key">{option.option_key}</span>
                 <span className="body">
-                  <Maths text={option.body} />
+                  <OptionBody body={option.body} figure={option.figure} />
                 </span>
                 {isWrong ? (
                   <span className="pr-first sj-mono">First try</span>
@@ -1323,7 +1327,7 @@ function Result({
             <span className="pr-yours-row">
               <span className="key">{option.option_key}</span>
               <span className="body">
-                <Maths text={option.body} />
+                <OptionBody body={option.body} figure={option.figure} size="small" />
               </span>
               <span className="pr-yours-tick" aria-label="correct">
                 <IconCheck size={18} />
@@ -1497,7 +1501,7 @@ function MissedTwiceDialog({
               <span className="pr-twice-row">
                 <span className="key">{item.option!.option_key}</span>
                 <span className="body">
-                  <Maths text={item.option!.body} />
+                  <OptionBody body={item.option!.body} figure={item.option!.figure} size="small" />
                 </span>
               </span>
             </li>
@@ -1508,7 +1512,7 @@ function MissedTwiceDialog({
               <span className="pr-twice-row">
                 <span className="key">{answer.option_key}</span>
                 <span className="body">
-                  <Maths text={answer.body} />
+                  <OptionBody body={answer.body} figure={answer.figure} size="small" />
                 </span>
               </span>
             </li>
@@ -2025,7 +2029,7 @@ function BeforeBoard({
             <span className="pr-answer-row">
               <span className="key">{answer.option_key}</span>
               <span>
-                <Maths text={answer.body} />
+                <OptionBody body={answer.body} figure={answer.figure} size="small" />
               </span>
             </span>
           </div>

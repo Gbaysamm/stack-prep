@@ -15,6 +15,11 @@ export interface QuestionFigure {
   height: number | null;
 }
 
+/** The drawing that is one option's answer, for a question whose options are pictures. */
+export interface OptionFigure extends QuestionFigure {
+  id: string;
+}
+
 export function Figures({ figures, compact = false }: { figures?: QuestionFigure[]; compact?: boolean }) {
   if (!figures || figures.length === 0) return null;
   return (

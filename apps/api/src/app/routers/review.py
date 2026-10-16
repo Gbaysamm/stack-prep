@@ -16,12 +16,14 @@ from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from app.db import connection, fetch_all
+from app.figures import OptionFigure, option_figures_for, serve
 
 router = APIRouter(prefix="/v1/review", tags=["review"])
 
@@ -56,6 +58,9 @@ class Option(BaseModel):
     body: str
     is_correct: bool
     display_order: int
+    #: The option's drawing, when the option is a picture; its `body` is then only a label.
+    #: Served from this router, since a figure under review is not yet cleared for students.
+    figure: OptionFigure | None = None
 
 
 class Report(BaseModel):
@@ -368,11 +373,37 @@ async def question_detail(
         """,
         version=detail["question_version_id"],
     )
+    version = detail["question_version_id"]
+    pictures = await option_figures_for(
+        conn, [version], cleared_only=False, url_prefix="/v1/review/figures"
+    )
     return QuestionDetail(
         **detail,
-        options=[Option(**row) for row in options],
+        options=[
+            Option(**row, figure=pictures.get((str(version), str(row["option_key"]))))
+            for row in options
+        ],
         reports=[Report(**row) for row in reports],
     )
+
+
+@router.get("/figures/{asset_id}", summary="A figure as a reviewer sees it, cleared or not")
+async def review_figure(
+    conn: Annotated[AsyncConnection, Depends(connection)], asset_id: UUID
+) -> FileResponse:
+    """Any question's figure, before its licence or its question is approved.
+
+    The student route serves only what is cleared; a reviewer has to see a figure in order to
+    clear it. Same store, same path check, same image-only rule.
+    """
+    rows = await fetch_all(
+        conn,
+        "SELECT storage_uri, mime_type FROM question_assets WHERE id = :asset",
+        asset=asset_id,
+    )
+    if not rows:
+        raise HTTPException(status_code=404, detail="no such figure")
+    return serve(str(rows[0]["storage_uri"]), str(rows[0]["mime_type"]))
 
 
 @router.post(

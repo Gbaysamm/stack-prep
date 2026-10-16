@@ -13,6 +13,52 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ---
 
+## 2026-10-16
+
+### Picture options: each drawn option shows its own figure, never the question's
+- **What:**
+  - API: every option a client is sent (check-up, practice, practice-run review, mock paper
+    and report, reviewer detail) carries `figure: {id, url, alt_text, width, height} | null`
+    from `question_assets.option_key` (`app.figures.option_figures_for`); old shapes are kept,
+    `figure` is only added. Every question-figure query now keeps to `option_key IS NULL`
+    (`figures_for`, the coach's `_figures`, the mock's batch). The coach reads a drawn option
+    as its label plus its alt text. A reviewer route, `/v1/review/figures/{id}`, serves a
+    figure before it is approved, since the student route serves only cleared ones;
+  - web: `OptionBody.tsx` puts the picture in the option after the letter, the label small
+    under it (still read aloud); `sp-pic-options` turns the list into a 2×2 grid, one column
+    under 560 px. Used in the check-up, practice (and its echo rows), mock room, mock report
+    modal, run report, the reviewer page and the bare check-up page. The board shows no
+    options, so it is unchanged.
+- **Why:** UTME Physics has questions whose options are drawings (transistor symbols).
+- **Where:** uncommitted; `apps/api/src/app/figures.py`, `routers/{checkup,practice,mock,review}.py`,
+  `apps/api/tests/test_option_figures.py`, `apps/web/src/OptionBody.tsx`, `apps/web/src/styles.css`.
+- **Status:** tests pass; checked in headless Edge at 1440 and 390 against loaded Physics data.
+
+### UTME Physics loader, sharing Chemistry's: 40 topics, 404 questions, option pictures
+- **What:**
+  - the Chemistry loader split into `database/retranscribed_loader.py` (all the loading)
+    and a per-subject `Subject` settings object; `load_retranscribed_chemistry.py` and the
+    new `load_retranscribed_physics.py` are each their settings plus the same command line.
+    Chemistry's rows, hashes and messages are unchanged (`--pending` still exits 0);
+  - Physics's syllabus page map read off `source/syllabus.pdf` page by page; Physics
+    refuses JPG figures (drawn only);
+  - migration 030: `question_assets.option_key` (A to E, or NULL for the question's own
+    figure), one picture per option of a version; the loader exports `option_figures` to
+    `figures/svg/YYYY_qNN_<letter>.svg` (+ PNG), writes one asset row each and puts them in
+    the version hash (only when present, so no existing question re-versions);
+  - added to CONTENT_LOADERS after Chemistry in both release.sh files; the API image ships
+    `physics/figures/svg` (a `.gitkeep` keeps the folder) and no longer copies Chemistry
+    JPGs, which no longer exist;
+  - `spoken_maths` reads Physics units: "metres per second", "joules per kilogram per
+    kelvin", ohms, microfarads, degrees Celsius, nuclides; a lone capital is a unit only
+    after a number, and not in an expression that uses capitals as names.
+- **Why:** Physics selectable everywhere Chemistry is, reaching servers only by deploy.
+- **Where:** uncommitted; `database/retranscribed_loader.py`,
+  `database/load_retranscribed_physics.py`, `database/migrations/030_option_figures.sql`,
+  `apps/api/src/app/spoken_maths.py`, `apps/api/tests/test_physics_content.py`.
+- **Status:** loaded locally (scorepilot_int): PHY in the catalogue with 404 questions and
+  68 teachable skills; not deployed.
+
 ## 2026-10-15
 
 ### UTME Chemistry loader: the subject, its curriculum, 403 questions and their lessons

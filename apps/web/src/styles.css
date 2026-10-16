@@ -497,3 +497,66 @@ button.primary {
 .sp-textbook .katex {
   font-size: 1.04em;
 }
+
+/* Options that are pictures (OptionBody.tsx): a 2×2 grid of drawings, one column on a phone.
+   Doubled class and `:is(.sj, body)` so this outranks each page's own column of options. The
+   option keeps its own border and state colours; only its contents change. */
+:is(.sj, body) .sp-pic-options.sp-pic-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  max-width: none;
+}
+:is(.sj, body) .sp-pic-options.sp-pic-options > * {
+  height: 100%;
+}
+:is(.sj, body) .sp-pic-options.sp-pic-options > li > button {
+  height: 100%;
+}
+@media (max-width: 560px) {
+  :is(.sj, body) .sp-pic-options.sp-pic-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sp-pic-options .sp-option-pic img {
+    max-height: 124px;
+  }
+}
+.sp-option-pic {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
+.sp-option-pic img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 150px;
+  object-fit: contain;
+  padding: 8px;
+  border-radius: 8px;
+  background: #fff;
+  box-sizing: border-box;
+}
+.sp-option-pic.small {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+}
+.sp-option-pic.small img {
+  max-height: 72px;
+  max-width: 160px;
+  padding: 4px;
+}
+.sp-option-pic .sp-option-label {
+  font-family: var(--f-body, 'Poppins', system-ui, sans-serif);
+  font-size: 12px;
+  line-height: 1.3;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--gray-500, #6b6b7b);
+}

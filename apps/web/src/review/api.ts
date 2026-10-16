@@ -1,5 +1,7 @@
 /** Thin typed wrapper over the review endpoints. */
 
+import type { OptionFigure } from '../Figures.js';
+
 export interface Reviewer {
   id: string;
   display_name: string;
@@ -27,6 +29,8 @@ export interface Option {
   body: string;
   is_correct: boolean;
   display_order: number;
+  /** The option's drawing, when the option is a picture; `body` is then only its label. */
+  figure?: OptionFigure | null;
 }
 
 export interface Report {

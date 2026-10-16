@@ -56,6 +56,15 @@ _WORDS = {
     "omega": "omega",
     "rho": "rho",
     "epsilon": "epsilon",
+    "varepsilon": "epsilon",
+    "eta": "eta",
+    "nu": "nu",
+    "tau": "tau",
+    "kappa": "kappa",
+    "zeta": "zeta",
+    "Phi": "phi",
+    "Theta": "theta",
+    "Lambda": "lambda",
     "cup": "union",
     "cap": "intersection",
     "in": "is in",
@@ -157,6 +166,163 @@ _UNITS = {
     "ml": "millilitres",
     "cl": "centilitres",
 }
+
+# --------------------------------------------------------------------------------- physics
+#
+# Physics writes its units as JAMB prints them: $20\ \text{m s}^{-1}$, $4\ \Omega$,
+# $2\ \mu\text{F}$, $4200\ \text{J kg}^{-1}\ \text{K}^{-1}$, and in plain text "20 m s⁻¹". A
+# physics teacher says "twenty metres per second", "four ohms", "two microfarads", "joules per
+# kilogram per kelvin". A negative power is "per", and only the last symbol of a group carries
+# the power the group is written with.
+#
+# The single capitals are where this has to be careful. N is a newton in Physics and naira or
+# north in Mathematics; F is a farad in Physics and a faraday in Chemistry; A is an ampere or
+# a point. So a lone capital is read as a unit only straight after a number (or after another
+# unit), and not at all in an expression that also uses a lone capital that is no unit (the
+# Mathematics currency puzzle, $0.225\,\text{N} = 0.171\,\text{M}$). In plain text a unit is
+# read only where nothing else could be meant: a power (m s⁻¹, cm³), Ω, or a μ prefix.
+
+#: Unit symbols as they are said, singular and plural.
+_UNIT_NAMES: dict[str, tuple[str, str]] = {
+    "m": ("metre", "metres"),
+    "cm": ("centimetre", "centimetres"),
+    "mm": ("millimetre", "millimetres"),
+    "km": ("kilometre", "kilometres"),
+    "dm": ("decimetre", "decimetres"),
+    "nm": ("nanometre", "nanometres"),
+    "μm": ("micrometre", "micrometres"),
+    "s": ("second", "seconds"),
+    "ms": ("millisecond", "milliseconds"),
+    "μs": ("microsecond", "microseconds"),
+    "min": ("minute", "minutes"),
+    "h": ("hour", "hours"),
+    "hr": ("hour", "hours"),
+    "g": ("gram", "grams"),
+    "kg": ("kilogram", "kilograms"),
+    "mg": ("milligram", "milligrams"),
+    "N": ("newton", "newtons"),
+    "kN": ("kilonewton", "kilonewtons"),
+    "J": ("joule", "joules"),
+    "kJ": ("kilojoule", "kilojoules"),
+    "MJ": ("megajoule", "megajoules"),
+    "W": ("watt", "watts"),
+    "kW": ("kilowatt", "kilowatts"),
+    "MW": ("megawatt", "megawatts"),
+    "kWh": ("kilowatt-hour", "kilowatt-hours"),
+    "Pa": ("pascal", "pascals"),
+    "kPa": ("kilopascal", "kilopascals"),
+    "Hz": ("hertz", "hertz"),
+    "kHz": ("kilohertz", "kilohertz"),
+    "MHz": ("megahertz", "megahertz"),
+    "V": ("volt", "volts"),
+    "kV": ("kilovolt", "kilovolts"),
+    "mV": ("millivolt", "millivolts"),
+    "A": ("ampere", "amperes"),
+    "mA": ("milliampere", "milliamperes"),
+    "μA": ("microampere", "microamperes"),
+    "C": ("coulomb", "coulombs"),
+    "μC": ("microcoulomb", "microcoulombs"),
+    "F": ("farad", "farads"),
+    "μF": ("microfarad", "microfarads"),
+    "nF": ("nanofarad", "nanofarads"),
+    "pF": ("picofarad", "picofarads"),
+    "Ω": ("ohm", "ohms"),
+    "kΩ": ("kilohm", "kilohms"),
+    "MΩ": ("megohm", "megohms"),
+    "K": ("kelvin", "kelvin"),
+    "T": ("tesla", "teslas"),
+    "Wb": ("weber", "webers"),
+    "H": ("henry", "henries"),
+    "mH": ("millihenry", "millihenries"),
+    "eV": ("electronvolt", "electronvolts"),
+    "keV": ("kiloelectronvolt", "kiloelectronvolts"),
+    "MeV": ("megaelectronvolt", "megaelectronvolts"),
+    "mol": ("mole", "moles"),
+    "rad": ("radian", "radians"),
+    "dB": ("decibel", "decibels"),
+    "l": ("litre", "litres"),
+    "L": ("litre", "litres"),
+    "ml": ("millilitre", "millilitres"),
+    "mL": ("millilitre", "millilitres"),
+    "cl": ("centilitre", "centilitres"),
+    "atm": ("atmosphere", "atmospheres"),
+    "mmHg": ("millimetre of mercury", "millimetres of mercury"),
+    "cmHg": ("centimetre of mercury", "centimetres of mercury"),
+}
+_POWERS = {"": "", "1": "", "2": " squared", "3": " cubed"}
+
+
+def _unit_words(tokens: list[str], exponent: str | None = None) -> str:
+    """'m s' to the power -1 as 'metres per second'; the power belongs to the last symbol."""
+    powers = [""] * (len(tokens) - 1) + [(exponent or "").strip().strip("{}")]
+    words: list[str] = []
+    for i, (token, power) in enumerate(zip(tokens, powers, strict=True)):
+        singular, plural = _UNIT_NAMES[token]
+        if power.startswith("-"):
+            words.append(f"per {singular}" + _POWERS.get(power[1:], f" to the power {power[1:]}"))
+            continue
+        # a product says all but its last symbol in the singular: "newton metres"
+        followed = i + 1 < len(tokens) and not powers[i + 1].startswith("-")
+        words.append(
+            (singular if followed else plural) + _POWERS.get(power, f" to the power {power}")
+        )
+    return " ".join(words)
+
+
+_SUPERSCRIPTS = str.maketrans("⁻⁰¹²³⁴⁵⁶⁷⁸⁹", "-0123456789")
+_PLAIN_SYMBOL = "|".join(re.escape(u) for u in sorted(_UNIT_NAMES, key=len, reverse=True))
+_PLAIN_TOKEN = rf"(?:{_PLAIN_SYMBOL})(?![A-Za-zΩ])[⁻⁰¹²³⁴⁵⁶⁷⁸⁹]*"
+_PLAIN_UNITS = re.compile(
+    rf"(?<![\w.])(\d[\d,]*(?:\.\d+)?)[ \u00a0]?({_PLAIN_TOKEN}(?: {_PLAIN_TOKEN})*)"
+)
+
+
+def _plain_units(line: str) -> str:
+    """ "20 m s⁻¹" as "20 metres per second", "4 Ω" as "4 ohms", "2 μF" as "2 microfarads".
+
+    Only a run with a negative power, an Ω or a μ in it, where nothing else could be meant. The
+    rest ("96 500 C", "3 F per mole", "25 cm³", "30°") is left as written, which the voice
+    already reads well, so the lines Mathematics and Chemistry were voiced with stay the same.
+    """
+
+    def said(m: re.Match[str]) -> str:
+        run = m.group(2)
+        if not re.search(r"[⁻Ωμ]", run):
+            return m.group(0)
+        tokens, powers = [], []
+        for part in run.split(" "):
+            symbol = part.rstrip("⁻⁰¹²³⁴⁵⁶⁷⁸⁹")
+            tokens.append(symbol)
+            powers.append(part[len(symbol) :].translate(_SUPERSCRIPTS))
+        words = [_unit_words([t], p) for t, p in zip(tokens, powers, strict=True)]
+        # "newton metres": all but the last of a product in the singular
+        for i in range(len(words) - 1):
+            if not powers[i] and not powers[i + 1].startswith("-"):
+                words[i] = _UNIT_NAMES[tokens[i]][0] + _POWERS.get(powers[i], "")
+        return f"{m.group(1)} {' '.join(words)}"
+
+    line = _PLAIN_UNITS.sub(said, line)
+    return re.sub(r" {2,}", " ", line)
+
+
+_NUCLIDE = re.compile(
+    r"\^\{?\s*(\d+)\s*\}?\s*_\{?\s*(-?\d+)\s*\}?\s*"
+    r"(?:\\(?:text|mathrm)\{\s*([A-Za-z]{1,2})\s*\}|([A-Za-z]{1,2})(?![A-Za-z]))"
+)
+
+
+def _nuclide_at(latex: str, i: int) -> re.Match[str] | None:
+    """A nuclide's ^{A}_{Z}X starting at `i`, when the ^ raises nothing before it."""
+    before = latex[:i].rstrip()
+    attached = (
+        bool(before) and not before.endswith("{}") and (before[-1].isalnum() or before[-1] in ")]}")
+    )
+    return None if attached else _NUCLIDE.match(latex, i)
+
+
+_LONE_CAPITAL = re.compile(r"\\(?:text|mathrm)\{\s*([A-Z])\s*\}")
+_MICRO_TEXT = re.compile(r"(?:\s|\\[,;! ])*\\(?:text|mathrm)\{\s*([A-Za-z]+)\s*\}")
+_MICRO_LETTER = re.compile(r"(?:\s|\\[,;! ])*([A-Za-z])(?![A-Za-z])")
 
 
 class _Reader:
@@ -508,12 +674,86 @@ def speak(latex: str) -> str:
     if between:
         low, var, high = between.groups()
         return f"{var} is between {speak(low)} and {speak(high)}"
+    latex = latex.replace("µ", "μ")  # the micro sign and the Greek letter look the same
     r = _Reader(latex)
     out: list[str] = []
+    # A lone capital that is no unit means this expression's capitals are names (see above).
+    names = any(m.group(1) not in _UNIT_NAMES for m in _LONE_CAPITAL.finditer(latex))
+    unit_at = [-1]  # where in `out` the last unit was said
 
     def emit(text: str) -> None:
         if text:
             out.append(text)
+
+    def unit(text: str) -> None:
+        emit(text)
+        unit_at[0] = len(out) - 1
+
+    def counted() -> bool:
+        """True straight after a number, a power of ten or another unit: a unit's place."""
+        if not out:
+            return False
+        last = out[-1]
+        return (
+            bool(re.fullmatch(r"-?\d[\d,]*(?:\.\d+)?|10 to the power (?:minus )?\d+", last))
+            or unit_at[0] == len(out) - 1
+        )
+
+    def said_as_units(plain: str) -> bool:
+        """Say a \\text{...} that is units ("m s" and the power after it). False if it is not."""
+        start, exponent = r.i, None
+        if r.peek() == "^":
+            r.i += 1
+            exponent = r.group().strip()
+            if not re.fullmatch(r"-?\d", exponent):
+                r.i, exponent = start, None
+        negative = bool(exponent and exponent.startswith("-"))
+        if plain == "C" and out and out[-1].endswith("degrees"):
+            if negative:  # {}^{\circ}\text{C}^{-1}
+                out[-1] = out[-1][: -len("degrees")].rstrip()
+                if not out[-1]:
+                    out.pop()
+                unit("per degree Celsius")
+            else:
+                r.i = start
+                out[-1] += " Celsius"
+                unit_at[0] = len(out) - 1
+            return True
+        tokens = ["m", "s"] if plain == "ms" and negative else plain.split()
+        known = bool(tokens) and all(t in _UNIT_NAMES for t in tokens)
+        if known and len(tokens) == 1:
+            t = tokens[0]
+            known = t in _UNITS or len(t) > 1 or t == "Ω" or (counted() and not names)
+        elif known and all(len(t) == 1 and t.isupper() for t in tokens):
+            known = counted() and not names  # "J K" after a number; "L T" alone is dimensions
+        if not known:
+            r.i = start
+            return False
+        unit(_unit_words(tokens, exponent))
+        return True
+
+    def micro() -> None:
+        """\\mu: the prefix of a unit (2 \\mu\\text{F}), or the letter (F = \\mu R)."""
+        text = _MICRO_TEXT.match(latex, r.i)
+        if text and f"μ{text.group(1)}" in _UNIT_NAMES:
+            r.i = text.end()
+            unit(_UNIT_NAMES[f"μ{text.group(1)}"][1])
+            return
+        letter = _MICRO_LETTER.match(latex, r.i)
+        if letter and f"μ{letter.group(1)}" in _UNIT_NAMES and counted():
+            r.i = letter.end()
+            unit(_UNIT_NAMES[f"μ{letter.group(1)}"][1])
+            return
+        emit("mu")
+
+    def ohms() -> None:
+        """\\Omega is the ohm; a k or M written against it is its prefix."""
+        prefix = out[-1] if out else ""
+        if prefix in ("k", "M") and len(out) > 1 and unit_at[0] != len(out) - 1:
+            out[-1] = "kilohms" if prefix == "k" else "megohms"
+            unit_at[0] = len(out) - 1
+        else:
+            unit("ohms")
 
     while not r.done():
         c = r.peek()
@@ -570,7 +810,12 @@ def speak(latex: str) -> str:
                 else:
                     # \text{cm} is a word, not the letters c and m
                     plain = body.strip()
-                    emit(_UNITS.get(plain, plain))
+                    if not said_as_units(plain):
+                        emit(_UNITS.get(plain, plain))
+            elif name == "mu":
+                micro()
+            elif name == "Omega":
+                ohms()
             elif name in ("overline", "bar"):
                 emit(f"{speak(r.group())} bar")
             elif name == "hat":
@@ -596,6 +841,13 @@ def speak(latex: str) -> str:
             # anything else is dropped rather than spelled out
         elif c == "{":
             emit(speak(r.group()))
+        elif c == "^" and (nuclide := _nuclide_at(latex, r.i)):
+            # ^{238}_{92}\text{U}, as Chemistry says it: "U, mass number 238, atomic number 92"
+            symbol = nuclide.group(3) or nuclide.group(4)
+            said = " ".join(symbol.upper()) if len(symbol) == 2 else symbol
+            atomic = nuclide.group(2).replace("-", "minus ")
+            emit(f"{said}, mass number {nuclide.group(1)}, atomic number {atomic}")
+            r.i = nuclide.end()
         elif c == "^":
             r.i += 1
             exponent = r.group()
@@ -624,6 +876,26 @@ def speak(latex: str) -> str:
                 number += "," + more.group(0)
                 r.i += len(more.group(0))
             emit(number)
+        elif c == "Ω":
+            r.i += 1
+            ohms()
+        elif c == "μ":
+            r.i += 1
+            micro()
+        elif c == "°":
+            r.i += 1
+            if out:
+                out[-1] += " degrees"
+            else:
+                emit("degrees")
+        elif (
+            c == "C"
+            and out
+            and out[-1].endswith("degrees")
+            and not latex[r.i + 1 : r.i + 2].isalpha()
+        ):
+            r.i += 1
+            out[-1] += " Celsius"  # 20°C
         elif c.isalpha():
             r.i += 1
             emit(c)
@@ -723,6 +995,7 @@ def speak_text(line: str) -> str:
     spoken = _INLINE.sub(lambda m: " " + speak(m.group(1) or m.group(2)) + " ", line)
     # ₦26,400 is said "26,400 naira", number first
     spoken = re.sub(r"₦\s*([\d,]+(?:\.\d+)?)", r"\1 naira", spoken)
+    spoken = _plain_units(spoken)  # "20 m s⁻¹", "4 Ω", "30 °C" in the words around the maths
     spoken = spoken.replace("✓", "").replace("✗", "")
     spoken = re.sub(r"\*([^*]+)\*", r"\1", spoken)
     spoken = re.sub(r"\s+([,.;:?!])", r"\1", spoken)

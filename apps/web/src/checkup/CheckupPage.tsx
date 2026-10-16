@@ -25,6 +25,7 @@ import {
 
 import { Figures } from '../Figures.js';
 import { Maths } from '../Maths.js';
+import { OptionBody, hasOptionPictures } from '../OptionBody.js';
 
 type Phase = 'choosing' | 'asking' | 'finished' | 'failed';
 
@@ -221,7 +222,7 @@ export function CheckupPage() {
       </h1>
       <Figures figures={question.figures} />
 
-      <ul className="options">
+      <ul className={hasOptionPictures(question.options) ? 'options sp-pic-options' : 'options'}>
         {question.options.map((option) => (
           <li key={option.option_key}>
             <button
@@ -232,7 +233,7 @@ export function CheckupPage() {
             >
               <span className="option-key">{option.option_key}</span>
               <span className="sp-textbook">
-                <Maths text={option.body} />
+                <OptionBody body={option.body} figure={option.figure} />
               </span>
             </button>
           </li>

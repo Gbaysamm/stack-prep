@@ -5,7 +5,7 @@
  * The paper never carries the answer key; `correct_option_key` exists only on the report.
  */
 
-import type { QuestionFigure } from '../Figures.js';
+import type { OptionFigure, QuestionFigure } from '../Figures.js';
 import { NotFound, Refused } from './runsApi.js';
 
 export interface MockSubjectOption {
@@ -46,6 +46,8 @@ export interface PaperOption {
   body: string;
   /** Why this wrong option tempts; only in a report. */
   why?: string | null;
+  /** The option's drawing, when the option is a picture; `body` is then only its label. */
+  figure?: OptionFigure | null;
 }
 
 export interface PaperQuestion {

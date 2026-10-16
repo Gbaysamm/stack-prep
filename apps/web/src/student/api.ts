@@ -6,7 +6,7 @@
  * the tab loses nothing and reopening it finds the sitting where it stopped.
  */
 
-import type { QuestionFigure } from '../Figures.js';
+import type { OptionFigure, QuestionFigure } from '../Figures.js';
 import type { BoardVoice } from './boardPrefs.js';
 
 export interface SubjectOffer {
@@ -69,6 +69,8 @@ export interface Sitting {
 export interface CheckupOption {
   option_key: string;
   body: string;
+  /** The option's drawing, when the option is a picture; `body` is then only its label. */
+  figure?: OptionFigure | null;
 }
 
 export interface CheckupQuestion {
@@ -215,6 +217,8 @@ export interface CheckupReport {
 export interface PracticeOption {
   option_key: string;
   body: string;
+  /** The option's drawing, when the option is a picture; `body` is then only its label. */
+  figure?: OptionFigure | null;
 }
 
 export interface PracticeQuestion {

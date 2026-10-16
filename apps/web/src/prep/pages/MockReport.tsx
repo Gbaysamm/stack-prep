@@ -12,6 +12,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import { Figures } from '../../Figures.js';
 import { Maths } from '../../Maths.js';
+import { OptionBody, hasOptionPictures } from '../../OptionBody.js';
 import { api, type NarratedLesson } from '../../student/api.js';
 import { IconCheck, IconChevronLeft, IconChevronRight, IconClose, IconPlay } from '../icons.js';
 import { nextSteps, previousOf, timeStats, trendOf, weakTopics } from '../mock/insights.js';
@@ -209,7 +210,7 @@ function QuestionModal({
             </div>
             {item.figures.length ? <Figures figures={item.figures} compact /> : null}
 
-            <div className="sj-options mk-review-options">
+            <div className={cx('sj-options mk-review-options', hasOptionPictures(item.options) && 'sp-pic-options')}>
               {item.options.map((option) => {
                 const key = option.option_key === item.correct_option_key;
                 const mine = option.option_key === item.selected_option_key;
@@ -217,7 +218,7 @@ function QuestionModal({
                   <div key={option.option_key} className={cx('sj-option', key && 'correct', mine && !key && 'wrong')}>
                     <span className="key">{option.option_key}</span>
                     <span className="body">
-                      <Maths text={option.body} />
+                      <OptionBody body={option.body} figure={option.figure} />
                     </span>
                     {key ? (
                       <span className="mk-yours sj-mono">Correct</span>

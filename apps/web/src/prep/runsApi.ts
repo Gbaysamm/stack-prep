@@ -6,7 +6,7 @@
  * from a network hiccup and say so plainly instead of offering a retry that cannot work.
  */
 
-import type { QuestionFigure } from '../Figures.js';
+import type { OptionFigure, QuestionFigure } from '../Figures.js';
 import type { PracticeState } from '../student/api.js';
 
 export interface PracticeOptions {
@@ -69,7 +69,7 @@ export interface ReviewItem {
   passage_body: string | null;
   instructions: string | null;
   stem: string;
-  options: { option_key: string; body: string }[];
+  options: { option_key: string; body: string; figure?: OptionFigure | null }[];
   figures: QuestionFigure[];
   correct_option_key: string;
   attempts: ReviewAttempt[];

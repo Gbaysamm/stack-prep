@@ -12,6 +12,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import { Figures } from '../../Figures.js';
 import { Maths } from '../../Maths.js';
+import { OptionBody, hasOptionPictures } from '../../OptionBody.js';
 import { IconArrowRight, IconBulb, IconCheck, IconChevronDown, IconLayers, IconPlay, IconReplay, IconSpark } from '../icons.js';
 import { orGone, runsApi, type Outcome, type ReviewItem, type RunReview } from '../runsApi.js';
 import { useLoad, usePageTitle } from '../store.js';
@@ -575,7 +576,7 @@ function QuestionCard({
             </div>
           ) : null}
 
-          <ul className="rr-opts" aria-label="Options">
+          <ul className={cx('rr-opts', hasOptionPictures(item.options) && 'sp-pic-options')} aria-label="Options">
             {item.options.map((option) => {
               const correct = option.option_key === item.correct_option_key;
               const pickedFirst = first?.selected_option_key === option.option_key;
@@ -588,7 +589,7 @@ function QuestionCard({
                 <li key={option.option_key} className={cx('rr-opt', correct && 'correct', picked && !correct && 'wrong')}>
                   <span className="key sj-mono">{option.option_key}</span>
                   <span className="body">
-                    <Maths text={option.body} />
+                    <OptionBody body={option.body} figure={option.figure} />
                   </span>
                   {correct || labels.length > 0 ? (
                     <span className="rr-opt-tags">

@@ -20,6 +20,7 @@ import {
 } from './api.js';
 
 import { Maths } from '../Maths.js';
+import { OptionBody, hasOptionPictures } from '../OptionBody.js';
 
 
 const QUEUES: { value: QueueState; label: string }[] = [
@@ -336,7 +337,7 @@ function QuestionPanel({ detail, skills, reviewerId, busy, onAct, onTyping }: Pa
         <Maths text={detail.stem} />
       </p>
 
-      <ol className="options">
+      <ol className={hasOptionPictures(detail.options) ? 'options sp-pic-options' : 'options'}>
         {detail.options.map((option) => (
           <li key={option.id}>
             <button
@@ -347,7 +348,7 @@ function QuestionPanel({ detail, skills, reviewerId, busy, onAct, onTyping }: Pa
             >
               <span className="key">{option.option_key}</span>
               <span className="sp-textbook">
-                <Maths text={option.body} />
+                <OptionBody body={option.body} figure={option.figure} />
               </span>
             </button>
           </li>

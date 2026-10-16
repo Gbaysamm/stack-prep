@@ -72,7 +72,7 @@ from app import kokoro_voice, scoring, tutor, voice_store
 from app.auth import require_session_owner, require_student
 from app.config import Settings, get_settings
 from app.db import connection, fetch_all
-from app.figures import QuestionFigure, figures_for, resolve
+from app.figures import OptionFigure, QuestionFigure, figures_for, option_figures_for, resolve
 from app.lesson_cues import LessonCue, cue_of
 from app.lesson_diagrams import (
     DiagramOp,
@@ -234,6 +234,8 @@ class TutorReply(BaseModel):
 class Option(BaseModel):
     option_key: str
     body: str
+    #: The option's drawing, when the option is a picture; its `body` is then only a label.
+    figure: OptionFigure | None = None
 
 
 class Misconception(BaseModel):
@@ -601,7 +603,11 @@ async def _options(conn: AsyncConnection, question_version_id: UUID) -> list[Opt
         """,
         version=question_version_id,
     )
-    return [Option(**dict(row)) for row in rows]
+    pictures = await option_figures_for(conn, [question_version_id])
+    return [
+        Option(**dict(row), figure=pictures.get((str(question_version_id), str(row["option_key"]))))
+        for row in rows
+    ]
 
 
 async def _hints_used(conn: AsyncConnection, session_id: UUID, version_id: UUID) -> int:
@@ -1276,6 +1282,13 @@ async def _practice_history(
     ]
 
 
+def _option_for_coach(option: Option) -> tuple[str, str]:
+    """An option as the coach reads it: a drawn option's label alone says nothing, so its
+    picture's description goes with it."""
+    alt = option.figure.alt_text.strip() if option.figure and option.figure.alt_text else ""
+    return option.option_key, f"{option.body} (drawn: {alt})" if alt else option.body
+
+
 async def _figures(conn: AsyncConnection, version_id: UUID) -> list[tutor.Figure]:
     """The reviewed diagrams printed with this question.
 
@@ -1290,6 +1303,7 @@ async def _figures(conn: AsyncConnection, version_id: UUID) -> list[tutor.Figure
         SELECT storage_uri, mime_type, alt_text
         FROM question_assets
         WHERE question_version_id = :version AND licence_status = 'verified'
+          AND option_key IS NULL
         ORDER BY display_order, id
         """,
         version=version_id,
@@ -1440,7 +1454,7 @@ async def _lesson_on_the_board(
         subtopic_name=str(found["subtopic_name"]),
         topic_name=str(found["topic_name"]),
         stem=str(found["stem"]),
-        options=[(option.option_key, option.body) for option in await _options(conn, version_id)],
+        options=[_option_for_coach(option) for option in await _options(conn, version_id)],
         correct_option_key=str(key),
         steps=steps,
         hints=[str(hint) for hint in (found["hints"] or [])],

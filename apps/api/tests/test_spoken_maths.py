@@ -78,3 +78,75 @@ def test_chemistry_charges_arrows_and_nuclides() -> None:
 
 def test_chemistry_inside_a_sentence() -> None:
     assert speak_text(r"Sulphuric acid is $\ce{H2SO4}$.") == "Sulphuric acid is H 2 S O 4."
+
+
+# ---------------------------------------------------------------------------------- physics
+
+
+def test_physics_units_are_said_with_per_for_a_negative_power() -> None:
+    assert speak(r"20\ \text{m s}^{-1}") == "20 metres per second"
+    assert speak(r"9.8\,\text{m s}^{-2}") == "9.8 metres per second squared"
+    assert speak(r"1000\ \text{kg m}^{-3}") == "1000 kilograms per metre cubed"
+    assert speak(r"4200\ \text{J kg}^{-1}\ \text{K}^{-1}") == "4200 joules per kilogram per kelvin"
+    assert speak(r"\text{N m}^{-2}") == "newtons per metre squared"
+    assert speak(r"100\ \text{km h}^{-1}") == "100 kilometres per hour"
+    assert speak(r"6.6 \times 10^{-34}\ \text{J s}") == (
+        "6.6 times 10 to the power minus 34 joule seconds"
+    )
+    # JAMB's jammed "ms⁻¹" is metres per second, not milliseconds
+    assert speak(r"\text{ms}^{-1}") == "metres per second"
+
+
+def test_powers_of_ten_ohms_microfarads_and_degrees() -> None:
+    assert speak(r"3.0 \times 10^{8}\ \text{m s}^{-1}") == (
+        "3.0 times 10 to the power 8 metres per second"
+    )
+    assert speak(r"4\ \Omega") == "4 ohms"
+    assert speak(r"2\ \text{k}\Omega") == "2 kilohms"
+    assert speak(r"2\,\mu\text{F}") == "2 microfarads"
+    assert speak(r"14 \times 10^{-6}\ \text{F}") == "14 times 10 to the power minus 6 farads"
+    assert speak(r"30^{\circ}") == "30 degrees"
+    assert speak(r"20\ ^{\circ}\text{C}") == "20 degrees Celsius"
+    assert speak(r"2 \times 10^{-5}\ {}^{\circ}\text{C}^{-1}") == (
+        "2 times 10 to the power minus 5 per degree Celsius"
+    )
+    assert speak(r"273\ \text{K}") == "273 kelvin"
+
+
+def test_physics_formulae_and_greek_letters() -> None:
+    assert speak(r"\dfrac{1}{f} = \dfrac{1}{u} + \dfrac{1}{v}") == (
+        "1 over f equals 1 over u plus 1 over v"
+    )
+    assert speak(r"v = f\lambda") == "v equals f lambda"
+    assert speak(r"\sin\theta") == "sine theta"
+    assert speak(r"\eta = 75\%") == "eta equals 75 percent"
+    assert speak(r"F = \mu R") == "F equals mu R"  # mu the coefficient, not a prefix
+    assert speak(r"^{238}_{92}\text{U}") == "U, mass number 238, atomic number 92"
+    assert speak(r"{}^{0}_{-1}\text{e}") == "e, mass number 0, atomic number minus 1"
+
+
+def test_a_lone_capital_is_a_unit_only_where_a_unit_goes() -> None:
+    assert speak(r"5\ \text{N}") == "5 newtons"
+    assert speak(r"\text{F} = ma") == "F equals m a"
+    # Mathematics' currency puzzle writes naira and its rival currency as capitals
+    assert speak(r"0.225\,\text{N} = 0.171\,\text{M}") == "0.225 N equals 0.171 M"
+    assert speak(r"60^{\circ}\text{N}") == "60 degrees N"  # north
+    # dimensions are letters, not teslas
+    assert (
+        speak(r"\text{ML}^{-1}\text{T}^{-2}") == "ML to the power minus one T to the power minus 2"
+    )
+
+
+def test_plain_text_units_are_said_only_where_nothing_else_is_meant() -> None:
+    assert speak_text("It moves at 20 m s⁻¹ through 4 Ω and 2 μF.") == (
+        "It moves at 20 metres per second through 4 ohms and 2 microfarads."
+    )
+    assert speak_text("c = 4200 J kg⁻¹ K⁻¹ and R = 2 kΩ") == (
+        "c = 4200 joules per kilogram per kelvin and R = 2 kilohms"
+    )
+    # what the voice already reads well is left as it is, so voiced lines keep their audio
+    assert speak_text("Add 25 cm³ of acid at 30 °C.") == "Add 25 cm³ of acid at 30 °C."
+    # a faraday and a charge in Chemistry stay as they are written
+    assert speak_text("96 500 C is one faraday, so 3 F per mole.") == (
+        "96 500 C is one faraday, so 3 F per mole."
+    )

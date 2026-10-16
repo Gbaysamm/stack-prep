@@ -16,6 +16,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import { Figures } from '../../Figures.js';
 import { Maths } from '../../Maths.js';
+import { OptionBody, hasOptionPictures } from '../../OptionBody.js';
 import { api, type CheckupState } from '../../student/api.js';
 import { IconArrowRight, IconCheck, IconClock, IconChart } from '../icons.js';
 import { FocusShell } from '../shell.js';
@@ -332,7 +333,11 @@ export function CheckupRoom() {
               </div>
               <Figures figures={question.figures} />
 
-              <div className="cr-options sj-options" role="radiogroup" aria-labelledby="cr-stem">
+              <div
+                className={cx('cr-options sj-options', hasOptionPictures(question.options) && 'sp-pic-options')}
+                role="radiogroup"
+                aria-labelledby="cr-stem"
+              >
                 {question.options.map((option, index) => {
                   const on = selected === option.option_key;
                   const focusable = selected ? on : index === 0;
@@ -355,7 +360,7 @@ export function CheckupRoom() {
                     >
                       <span className="key">{option.option_key}</span>
                       <span className="body sp-textbook">
-                        <Maths text={option.body} />
+                        <OptionBody body={option.body} figure={option.figure} />
                       </span>
                     </button>
                   );

@@ -1,7 +1,8 @@
 """The UTME Chemistry loader's pure parts, and the content files read the way it reads them.
 
-database/load_retranscribed_chemistry.py skips a year with a problem and a deploy only reports
-that as a warning; these run its reading without a database, so a broken year fails here first.
+database/load_retranscribed_chemistry.py (through retranscribed_loader.py) skips a year with a
+problem and a deploy only reports that as a warning; these run its reading without a database,
+so a broken year fails here first.
 """
 
 from __future__ import annotations
@@ -15,11 +16,12 @@ import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "database"))
 
-import load_retranscribed_chemistry as chem
+import retranscribed_loader as chem
+from load_retranscribed_chemistry import CHEMISTRY
 
 
 def subtopic_codes() -> list[str]:
-    doc = yaml.safe_load((chem.CHEM / "subtopics.yaml").read_text(encoding="utf-8"))
+    doc = yaml.safe_load((CHEMISTRY.dir / "subtopics.yaml").read_text(encoding="utf-8"))
     return [code for topic in doc["topics"].values() for code in topic["subtopics"]]
 
 
@@ -28,12 +30,12 @@ def subtopic_codes() -> list[str]:
 
 def test_every_subtopic_has_its_syllabus_page() -> None:
     codes = subtopic_codes()
-    assert set(codes) == set(chem.SYLLABUS_PAGES)
-    assert all(1 <= page <= 15 for page in chem.SYLLABUS_PAGES.values())
+    assert set(codes) == set(CHEMISTRY.syllabus_pages)
+    assert all(1 <= page <= 15 for page in CHEMISTRY.syllabus_pages.values())
 
 
 def test_curriculum_is_topics_subtopics_and_one_skill_each_parents_first() -> None:
-    items = chem.read_curriculum()
+    items = chem.read_curriculum(CHEMISTRY)
     kinds = [item["type"] for item in items]
     codes = subtopic_codes()
     assert kinds.count("topic") == 18
@@ -49,7 +51,7 @@ def test_curriculum_is_topics_subtopics_and_one_skill_each_parents_first() -> No
 
 
 def test_what_is_ours_is_marked_implied_and_says_why() -> None:
-    items = {item["code"]: item for item in chem.read_curriculum()}
+    items = {item["code"]: item for item in chem.read_curriculum(CHEMISTRY)}
     # Topics 2, 5, 13, 17 and 18 print no lettered contents: their one subtopic is ours.
     for topic in (2, 5, 13, 17, 18):
         sub = items[f"CHEM.{topic}.a"]
@@ -77,7 +79,7 @@ def test_jpeg_size_reads_the_frame_header() -> None:
 
 
 def test_every_figure_file_has_a_size() -> None:
-    for path in sorted((chem.CHEM / "figures").glob("*.jpg")):
+    for path in sorted((CHEMISTRY.dir / "figures").glob("*.jpg")):
         width, height = chem.jpeg_size(path.read_bytes())
         assert width and height, path.name
 
@@ -191,22 +193,22 @@ def test_check_question_names_each_problem() -> None:
         "level": 2,
     }
     note = {"answer": "A", "steps": ["s"], "hint": "h", "why": {"B": "", "C": "", "D": ""}}
-    assert chem.check_question(raw, note, codes, 2010) == []
-    assert chem.check_question({**raw, "subtopic": "CHEM.99.z"}, note, codes, 2010)
-    assert chem.check_question({**raw, "level": 7}, note, codes, 2010)
-    assert chem.check_question(raw, {**note, "answer": "B"}, codes, 2010)
-    assert chem.check_question(raw, {**note, "why": {"B": ""}}, codes, 2010)
-    assert chem.check_question(raw, None, codes, 2010)
+    assert chem.check_question(CHEMISTRY, raw, note, codes, 2010) == []
+    assert chem.check_question(CHEMISTRY, {**raw, "subtopic": "CHEM.99.z"}, note, codes, 2010)
+    assert chem.check_question(CHEMISTRY, {**raw, "level": 7}, note, codes, 2010)
+    assert chem.check_question(CHEMISTRY, raw, {**note, "answer": "B"}, codes, 2010)
+    assert chem.check_question(CHEMISTRY, raw, {**note, "why": {"B": ""}}, codes, 2010)
+    assert chem.check_question(CHEMISTRY, raw, None, codes, 2010)
 
 
 # ---------------------------------------------------------------------------- the real files
 
 
 def test_every_complete_year_reads_without_a_problem() -> None:
-    years, _ = chem.years_ready()
+    years, _ = chem.years_ready(CHEMISTRY)
     if not years:
         pytest.skip("no complete Chemistry year yet")
-    questions, _dropped, notes, loaded = chem.read_papers()
+    questions, _dropped, notes, loaded = chem.read_papers(CHEMISTRY)
     assert loaded == years, notes
     assert len({(q["year"], q["number"]) for q in questions}) == len(questions)
     for q in questions:
@@ -216,8 +218,8 @@ def test_every_complete_year_reads_without_a_problem() -> None:
 
 
 def test_every_written_lesson_reads() -> None:
-    questions, _dropped, _notes, _years = chem.read_papers()
-    lessons = chem.read_lessons()
+    questions, _dropped, _notes, _years = chem.read_papers(CHEMISTRY)
+    lessons = chem.read_lessons(CHEMISTRY)
     kept = {(q["year"], q["number"]) for q in questions}
     for key, lesson in lessons.items():
         assert key in kept, f"{key}: a lesson for a question that is not loaded"

@@ -16,6 +16,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import { Figures } from '../../Figures.js';
 import { Maths } from '../../Maths.js';
+import { OptionBody, hasOptionPictures } from '../../OptionBody.js';
 import { IconArrowLeft, IconArrowRight, IconClock, IconClose } from '../icons.js';
 import { Calculator } from '../mock/Calculator.js';
 import {
@@ -786,7 +787,11 @@ function QuestionCard({
         </div>
       ) : null}
 
-      <div className="sj-options mx-options" role="radiogroup" aria-labelledby={stemId}>
+      <div
+        className={cx('sj-options mx-options', hasOptionPictures(question.options) && 'sp-pic-options')}
+        role="radiogroup"
+        aria-labelledby={stemId}
+      >
         {question.options.map((option) => {
           const on = choice === option.option_key;
           return (
@@ -800,7 +805,7 @@ function QuestionCard({
             >
               <span className="key">{option.option_key}</span>
               <span className="body">
-                <Maths text={option.body} />
+                <OptionBody body={option.body} figure={option.figure} />
               </span>
             </button>
           );

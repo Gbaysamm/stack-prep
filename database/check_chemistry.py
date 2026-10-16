@@ -207,6 +207,13 @@ def check_year(year: int, codes: set[str], lessons_wanted: bool = False) -> list
                 problems.append(f"{where}: figure {q['figure']} not found")
             if not q.get("figure_alt"):
                 problems.append(f"{where}: figure without figure_alt")
+        pictures = q.get("option_figures")
+        if pictures is not None:
+            if set(pictures) != set(LETTERS):
+                problems.append(f"{where}: option_figures must draw exactly A, B, C, D")
+            for letter, svg in pictures.items():
+                if "<svg" not in str(svg) or 'aria-label="' not in str(svg):
+                    problems.append(f"{where}: option_figures {letter} needs an aria-label svg")
         if q.get("figure_svg") and 'aria-label="' not in q["figure_svg"]:
             problems.append(f"{where}: figure_svg needs an aria-label")
         expressions += [(where, f) for f in formulas(stem)]

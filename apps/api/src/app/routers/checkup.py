@@ -27,7 +27,7 @@ from sqlalchemy.ext.asyncio import AsyncConnection
 from app import scoring
 from app.auth import require_session_owner, require_student
 from app.db import connection, fetch_all
-from app.figures import QuestionFigure, figures_for
+from app.figures import OptionFigure, QuestionFigure, figures_for, option_figures_for
 from engine.checkup import (
     DEFAULT_LENGTH,
     BlueprintSlot,
@@ -74,6 +74,13 @@ class AnswerIn(BaseModel):
     response_ms: int = Field(ge=0, le=3_600_000)
 
 
+class CheckupOption(BaseModel):
+    option_key: str
+    body: str
+    #: The option's drawing, when the option is a picture; its `body` is then only a label.
+    figure: OptionFigure | None = None
+
+
 class QuestionOut(BaseModel):
     position: int
     of: int
@@ -88,7 +95,7 @@ class QuestionOut(BaseModel):
     instructions: str | None
     passage_title: str | None
     passage_body: str | None
-    options: list[dict[str, str]]
+    options: list[CheckupOption]
     figures: list[QuestionFigure] = Field(default_factory=list)
 
 
@@ -416,7 +423,7 @@ async def _pick_question(
     return rows[0] if rows else None
 
 
-async def _options(conn: AsyncConnection, question_version_id: UUID) -> list[dict[str, str]]:
+async def _options(conn: AsyncConnection, question_version_id: UUID) -> list[CheckupOption]:
     rows = await fetch_all(
         conn,
         """
@@ -425,7 +432,15 @@ async def _options(conn: AsyncConnection, question_version_id: UUID) -> list[dic
         """,
         v=question_version_id,
     )
-    return [{"option_key": row["option_key"], "body": row["body"]} for row in rows]
+    pictures = await option_figures_for(conn, [question_version_id])
+    return [
+        CheckupOption(
+            option_key=row["option_key"],
+            body=row["body"],
+            figure=pictures.get((str(question_version_id), str(row["option_key"]))),
+        )
+        for row in rows
+    ]
 
 
 async def _next_state(
