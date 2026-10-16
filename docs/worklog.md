@@ -18,7 +18,7 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 ### Phone: the plan card's exam date no longer runs into its countdown
 - **What:** on a subject's page at phone width, "Mon 26 Apr" wrapped onto two lines inside a
   row of fixed height and spilled over "192 days to go". The date now stays on one line, and
-  under 520 px both figures (the target and the date) and their padding shrink to fit half a
+  under 520 px both figures and their padding shrink, the target to 28 px so it reads as a pair with the 21 px date, to fit half a
   narrow card (`SubjectHub.css`).
 - **Checked:** screenshots of the Physics subject page at 390 and 1440.
 
