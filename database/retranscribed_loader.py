@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Put the hand transcription of a UTME subject into the bank, approved, with its lessons.
 
-What the subjects that start from nothing (Chemistry, Physics) share. Each subject's own
-loader (load_retranscribed_chemistry.py, load_retranscribed_physics.py) names its folder, its
-codes, its documents and where on its syllabus each subtopic is printed in a `Subject`, and
-hands that to `main`. Everything below is the same for every one of them.
+What the subjects that start from nothing (Chemistry, Physics, Biology) share. Each subject's
+own loader (load_retranscribed_chemistry.py, load_retranscribed_physics.py,
+load_retranscribed_biology.py) names its folder, its codes, its documents and where on its
+syllabus each subtopic is printed in a `Subject`, and hands that to `main`. Everything below is
+the same for every one of them. Topic codes are either numbered straight through (PHY.3) or
+numbered within a lettered section (BIO.B2); `topic_label` reads both, and the order is always
+the order of subtopics.yaml.
 
     uv run python database/load_retranscribed_<subject>.py                      # dry run
     uv run python database/load_retranscribed_<subject>.py --reviewer-name Abdulmalik --apply
@@ -193,6 +196,20 @@ def repo_path(path: Path) -> str:
     return path.resolve().relative_to(ROOT).as_posix()
 
 
+def topic_label(topic_code: str) -> tuple[str, str]:
+    """How the syllabus names a topic: (where it is, the number it prints).
+
+    Chemistry and Physics number their topics straight through (CHEM.3 is "topic 3", printed
+    "3."). Biology numbers them afresh in each lettered section (BIO.B2 is "section B, topic
+    2", printed "2.").
+    """
+    number = topic_code.split(".", 1)[1]
+    sectioned = re.fullmatch(r"([A-Z]+)(\d+)", number)
+    if sectioned:
+        return f"section {sectioned.group(1)}, topic {sectioned.group(2)}", sectioned.group(2)
+    return f"topic {number}", number
+
+
 def read_curriculum(s: Subject, path: Path | None = None) -> list[dict[str, Any]]:
     """Topics, subtopics and one skill per subtopic, parents before children.
 
@@ -203,7 +220,7 @@ def read_curriculum(s: Subject, path: Path | None = None) -> list[dict[str, Any]
     doc = yaml.safe_load((path or s.dir / "subtopics.yaml").read_text(encoding="utf-8"))
     items: list[dict[str, Any]] = []
     for t_order, (topic_code, topic) in enumerate(doc["topics"].items(), 1):
-        number = topic_code.split(".")[1]
+        heading, number = topic_label(topic_code)
         subtopics = topic["subtopics"]
         pages = sorted({s.syllabus_pages[code] for code in subtopics})
         lettered = not (len(subtopics) == 1 and next(iter(subtopics)).endswith(".a"))
@@ -214,7 +231,7 @@ def read_curriculum(s: Subject, path: Path | None = None) -> list[dict[str, Any]
                 "parent": None,
                 "name": str(topic["name"]).strip(),
                 "order": t_order,
-                "location": f"PDF page {pages[0]}, topic {number}",
+                "location": f"PDF page {pages[0]}, {heading}",
                 "excerpt": f"{number}. {str(topic['name']).strip()}",
                 "status": "explicit",
             }
@@ -223,7 +240,7 @@ def read_curriculum(s: Subject, path: Path | None = None) -> list[dict[str, Any]
             letter = code.rsplit(".", 1)[1]
             page = s.syllabus_pages[code]
             name = str(name).strip()
-            where = f"PDF page {page}, topic {number}" + (f" ({letter})" if lettered else "")
+            where = f"PDF page {page}, {heading}" + (f" ({letter})" if lettered else "")
             sub = {
                 "code": code,
                 "type": "subtopic",
@@ -236,8 +253,9 @@ def read_curriculum(s: Subject, path: Path | None = None) -> list[dict[str, Any]
                 "rationale": None
                 if lettered
                 else (
-                    f"Topic {number} prints its contents without lettering them; the whole "
-                    "topic is recorded as one subtopic so questions can be filed under it."
+                    f"{heading[0].upper()}{heading[1:]} prints its contents without lettering "
+                    "them; the whole topic is recorded as one subtopic so questions can be filed "
+                    "under it."
                 ),
             }
             items.append(sub)

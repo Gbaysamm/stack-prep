@@ -13,7 +13,53 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ---
 
+## 2026-10-18
+
+### UTME Biology 2010-2018: questions, explanations, lessons and drawings that make sense
+- **What:** 415 questions from the JAMB papers, each answer worked out, broken stems and
+  options repaired at the source, with a worked explanation, a true reason for every wrong
+  option and a board lesson in the Biology method (structure, how it works, a Nigerian
+  example, a way to remember it). Six are held back because the PDF never printed their
+  diagram (2012 Q24-25, 2014 Q12-13, 2015 Q45, Q47).
+- **Drawings:** every organism, organ, cell and plant is an SVG drawn over the exam's own
+  picture with `database/figure_trace.py` (guide, contours, red-over-original overlay), then
+  made anatomically right: the founder rejected sketches from memory, scan crops and outside
+  images, and caught a crocodile read as a lizard, a stuck-on rabbit tail, an oversized head,
+  stick limbs and toes without webbing. Where a scan is too poor (the toads in amplexus), the
+  drawing is a realistic textbook composition with the same labels.
+- **Why:** students must see accurate pictures and be taught only right answers.
+- **Where:** docs/questions/utme/biology/ (README.md holds the drawing standard),
+  database/check_biology.py, database/figure_trace.py.
+- **Checked:** check_biology.py --lessons OK for all nine years; loaded locally (415
+  questions, 415 lessons, 73 skills); a Biology check-up, practice run and mock at 390 and
+  1440, with a traced figure in the mock report; ruff, mypy and 538 tests pass.
+- **Status:** committed, not pushed.
+
 ## 2026-10-16
+
+### UTME Biology: a loader on the shared core, shipped by every release
+- **What:** `database/load_retranscribed_biology.py` is `retranscribed_loader.py` with
+  Biology's settings, copied from Physics: subject BIO, papers UTME-YYYY-BIO, syllabus label
+  utme-2027, drawn figures only (`jpg_figures=False`, `figure_svg` and `option_figures`). Its
+  `SYLLABUS_PAGES` map gives each of the 73 subtopics the page of source/syllabus.pdf (12 pages)
+  its content starts on, read off one page at a time with pdftotext; section E ends on page
+  11, and page 12 is the recommended texts.
+  - Core: Biology's topics are numbered within lettered sections (BIO.A1 ... BIO.E2), so a
+    topic is now named by `topic_label`: "section B, topic 2", excerpt "2. Nutrition". Numbered
+    codes (CHEM.3, PHY.12) read exactly as before, so no Chemistry or Physics citation changes.
+    Order was already the order of subtopics.yaml, never a sort of the codes.
+  - Release: both `deploy/*/release.sh` run it after Physics. The API image ships
+    `docs/questions/utme/biology/figures/svg` (Dockerfile, .dockerignore, a .gitkeep).
+  - Tests: `apps/api/tests/test_biology_content.py`, modelled on Physics's; the checks of the
+    real files skip a year that is not written yet.
+- **Why:** Biology is being written up 2010-2018 and needs the same path into the bank as
+  Chemistry and Physics.
+- **Where:** `database/load_retranscribed_biology.py`, `database/retranscribed_loader.py`.
+- **Checked:** all nine years pass `check_biology.py`; 15 figures exported; loaded into the
+  local integration bank (416 questions, 5 dropped, 73 skills, 9 papers), and a second run is
+  "Nothing to do"; Chemistry and Physics `--pending` still exit 0; `/v1/student/catalogue`
+  lists BIO as ready.
+- **Status:** done locally, not committed. No Biology lessons yet.
 
 ### Phone: the plan card's exam date no longer runs into its countdown
 - **What:** on a subject's page at phone width, "Mon 26 Apr" wrapped onto two lines inside a

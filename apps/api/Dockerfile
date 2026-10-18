@@ -32,10 +32,11 @@ COPY --from=builder --chown=app:app /srv/database /srv/database
 # The figures students are shown. Asset rows store repo-relative paths, so they keep the same
 # path under /srv, which ASSET_ROOT then names as the root.
 COPY --chown=app:app docs/questions/utme/mathematics/figures/svg /srv/docs/questions/utme/mathematics/figures/svg
-# Chemistry's and Physics's figures, all drawn as SVG (neither subject has a cropped JPG; a
-# figures/svg holding only its .gitkeep copies as an empty folder).
+# Chemistry's, Physics's and Biology's figures, all drawn as SVG (none of them has a cropped
+# JPG; a figures/svg holding only its .gitkeep copies as an empty folder).
 COPY --chown=app:app docs/questions/utme/chemistry/figures/svg /srv/docs/questions/utme/chemistry/figures/svg
 COPY --chown=app:app docs/questions/utme/physics/figures/svg /srv/docs/questions/utme/physics/figures/svg
+COPY --chown=app:app docs/questions/utme/biology/figures/svg /srv/docs/questions/utme/biology/figures/svg
 ENV PATH="/srv/.venv/bin:$PATH" PYTHONUNBUFFERED=1 MIGRATIONS_DIR=/srv/database/migrations \
     ASSET_ROOT=/srv SPEECH_CACHE_DIR=/srv/speech KOKORO_DIR=/srv/kokoro
 USER app
