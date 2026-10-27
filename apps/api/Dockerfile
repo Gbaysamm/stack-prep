@@ -39,6 +39,7 @@ COPY --chown=app:app docs/questions/utme/physics/figures/svg /srv/docs/questions
 COPY --chown=app:app docs/questions/utme/biology/figures/svg /srv/docs/questions/utme/biology/figures/svg
 COPY --chown=app:app docs/questions/utme/economics/figures/svg /srv/docs/questions/utme/economics/figures/svg
 COPY --chown=app:app docs/questions/utme/commerce/figures/svg /srv/docs/questions/utme/commerce/figures/svg
+COPY --chown=app:app docs/questions/utme/accounts/figures/svg /srv/docs/questions/utme/accounts/figures/svg
 ENV PATH="/srv/.venv/bin:$PATH" PYTHONUNBUFFERED=1 MIGRATIONS_DIR=/srv/database/migrations \
     ASSET_ROOT=/srv SPEECH_CACHE_DIR=/srv/speech KOKORO_DIR=/srv/kokoro
 USER app

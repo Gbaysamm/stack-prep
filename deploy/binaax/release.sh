@@ -75,18 +75,18 @@ echo "==> Loading re-transcribed content"
 # failed one has changed nothing, and the release still goes out.
 #
 # Mathematics first, then Use of English, then the sciences, Government, Economics,
-# Literature and Commerce. One backup covers all nine, taken only if any has work; each loads
-# only if it has work, and one failing does not stop the others. English also repairs mojibake
-# (a curly quote stored as three garbled characters) in any English text its files do not
-# cover. Chemistry, Physics, Biology, Government, Economics, Literature and Commerce also create
-# their subject (CHEM, PHY, BIO, GOV, ECO, LIT, COM) and its curriculum, approved in the same
-# name, the first time each runs on a server without them.
+# Literature, Commerce and Accounts. One backup covers all ten, taken only if any has work;
+# each loads only if it has work, and one failing does not stop the others. English also
+# repairs mojibake (a curly quote stored as three garbled characters) in any English text its
+# files do not cover. Chemistry, Physics, Biology, Government, Economics, Literature, Commerce
+# and Accounts also create their subject (CHEM, PHY, BIO, GOV, ECO, LIT, COM, ACC) and its
+# curriculum, approved in the same name, the first time each runs on a server without them.
 CONTENT_REVIEWER="${CONTENT_REVIEWER:-Abdulmalik}"
 CONTENT_LOADERS=("load_retranscribed_maths.py" "load_retranscribed_english.py --fix-encoding"
   "load_retranscribed_chemistry.py" "load_retranscribed_physics.py"
   "load_retranscribed_biology.py" "load_retranscribed_government.py"
   "load_retranscribed_economics.py" "load_retranscribed_literature.py"
-  "load_retranscribed_commerce.py")
+  "load_retranscribed_commerce.py" "load_retranscribed_accounts.py")
 load_content() {
   local script=$1
   shift

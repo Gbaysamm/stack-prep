@@ -15,6 +15,29 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-27
 
+### UTME Principles of Accounts 2010-2018: questions, explanations and lessons
+- **What:** 405 questions from the JAMB papers, none held back, each with an explanation, a
+  true reason for every wrong option and a board lesson in the Accounts method (name it, the
+  rule or formula, the working or double entry, a Nigerian example, a way to remember it, the
+  trap). Every calculation was worked in full; 76 answers differ from the compilation's printed
+  keys (some keys are blank or say "no option"), and 350 questions were repaired or rebuilt:
+  missing or garbled data rewritten as clean figures, options added where none matched the
+  working, second right options replaced. Repeated questions are answered the same way in
+  every year.
+- **Curriculum:** the syllabus's 18 topics and 84 subtopics in its own lettering, coded
+  ACC.15.d.
+- **Tables:** ledger, cash book and trading extracts are KaTeX T accounts and tables;
+  formula options are KaTeX.
+- **Where:** docs/questions/utme/accounts/, database/load_retranscribed_accounts.py,
+  database/check_accounts.py, apps/api/tests/test_accounts_content.py; both
+  `deploy/*/release.sh` run the loader after Commerce.
+- **Checked:** check_accounts.py --lessons OK for all nine years; the hardest sums reworked by
+  hand (control accounts, statement of affairs, provisions, FIFO and simple average, bank
+  reconciliation, interest on drawings, ratios); loaded locally (405 questions, 84 skills); the
+  Accounts subject page at 390 and a mock review at 1440; ruff, mypy and the content tests
+  pass.
+- **Status:** committed, not pushed.
+
 ### Phone hero stats made smaller and calmer
 - **Why:** the founder found the subject page hero at phone width too packed: three 40px numbers,
   labels forced onto one line and the info buttons pressed against the dividers.
