@@ -15,6 +15,24 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-27
 
+### UTME Economics 2010-2018: worked answers, drawn graphs, explanations and lessons
+- **What:** 425 questions from the JAMB papers, none held back, each with a worked explanation,
+  a true reason for every wrong option and a board lesson in the Economics method (name it,
+  the rule, how it works or the worked calculation, a Nigerian example, a way to remember it,
+  the trap). Every answer is worked out afresh: 154 differ from the compilation's printed keys
+  (the 2012 key is a copy of 2011's). Broken or unanswerable questions are rebuilt on the same
+  concept. 33 graphs, cost curves, indifference maps, pie charts and histograms are drawn as
+  SVG; tables are KaTeX arrays in the stem.
+- **Curriculum:** the syllabus's 23 topics and 110 subtopics, coded ECO.4.c.
+- **Where:** docs/questions/utme/economics/ (README.md holds Economics' rules),
+  database/load_retranscribed_economics.py, database/check_economics.py,
+  apps/api/tests/test_economics_content.py; both `deploy/*/release.sh` run the loader after
+  Government, and the API image ships economics/figures/svg (Dockerfile, .dockerignore).
+- **Checked:** check_economics.py --lessons OK for all nine years; loaded locally (425
+  questions, 425 lessons, 110 skills); all 33 figures rendered and looked at; an Economics
+  check-up at 390 and a mock at 1440 with a pie-chart question; ruff, mypy and 561 tests pass.
+- **Status:** committed, not pushed.
+
 ### Never drop a past question: the 16 held back are rebuilt
 - **What:** every question that was held back is now a sound question on the same concept,
   with its explanation and lesson: Government 7 (cut-off or several-right options, a repeat),
