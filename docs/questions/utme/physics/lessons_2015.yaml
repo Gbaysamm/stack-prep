@@ -9,7 +9,7 @@
 #   write:  the one line written while it is said, with LaTeX between dollar signs.
 #   answer: true on the moment that gives the answer.
 #
-# Keyed on question number, like explanations_2015.yaml. Answers match that file. Q3 is dropped.
+# Keyed on question number, like explanations_2015.yaml. Answers match that file.
 format_version: 1
 exam_year: 2015
 lessons:
@@ -71,6 +71,41 @@ lessons:
       A: 'You went for the compound microscope. It also uses two convex lenses, but it views a near object, so the rays entering it spread out. Here they arrive parallel.'
       B: 'You chose the binocular. Prism binoculars turn the light with prisms, and there are no prisms in this diagram.'
       D: 'You picked the periscope. A periscope uses two plane mirrors or prisms at forty-five degrees, not two lenses.'
+  3:
+    moments:
+      - section: 'The data'
+        say: 'Two twenty ohm resistors are in parallel, and that pair is in series with a fifteen ohm resistor. We want the total resistance.'
+        write: '$20\ \Omega \parallel 20\ \Omega$, then in series with $15\ \Omega$,  $R = ?$'
+      - section: 'The plan'
+        say: 'Always do the parallel part first. Turn the pair into one resistor, then add the series one.'
+        write: 'parallel pair first, then series'
+      - section: 'The rule for parallel'
+        say: 'For resistors in parallel, one over R p equals one over R one plus one over R two.'
+        write: '$\dfrac{1}{R_p} = \dfrac{1}{R_1} + \dfrac{1}{R_2}$'
+      - section: 'Substitute'
+        say: 'One over R p equals one over twenty plus one over twenty, which is two over twenty.'
+        write: '$\dfrac{1}{R_p} = \dfrac{1}{20} + \dfrac{1}{20} = \dfrac{2}{20}$'
+      - say: 'Turn it upside down. R p is twenty over two, which is ten ohms.'
+        write: '$R_p = \dfrac{20}{2} = 10\ \Omega$'
+      - section: 'The rule for series'
+        say: 'Resistors in series simply add. So R equals fifteen plus ten.'
+        write: '$R = 15 + R_p = 15 + 10$'
+      - say: 'That gives twenty-five ohms.'
+        write: '$R = 25\ \Omega$'
+      - section: 'Check'
+        say: 'Check. The pair gives less than either twenty ohm resistor, because the current has two paths. And the total is more than fifteen ohms, because a series resistor only adds.'
+        write: '$10\ \Omega < 20\ \Omega$ ✓,  $25\ \Omega > 15\ \Omega$ ✓'
+      - section: 'An example'
+        say: 'Think of two bulbs wired side by side in a parlour. Each new path lets more current through, so the pair resists less than one bulb alone.'
+        write: 'more paths, less resistance'
+      - section: 'Answer'
+        say: 'So the total resistance is twenty-five ohms, which is option B.'
+        write: '$\therefore R = 25\ \Omega$'
+        answer: true
+    traps:
+      A: 'You went for five ohms. The total can never be smaller than the fifteen ohm resistor in series, because a series resistor only adds.'
+      C: 'You chose fifteen ohms. That is the series resistor alone. You still have to add the ten ohms from the parallel pair.'
+      D: 'You picked thirty-five ohms. That adds fifteen to just one twenty ohm branch. Two equal resistors in parallel give half, which is ten ohms.'
   4:
     moments:
       - section: 'The data'

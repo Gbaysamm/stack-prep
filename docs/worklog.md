@@ -15,6 +15,21 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-27
 
+### Never drop a past question: the 16 held back are rebuilt
+- **What:** every question that was held back is now a sound question on the same concept,
+  with its explanation and lesson: Government 7 (cut-off or several-right options, a repeat),
+  Biology 6 (diagrams missing from the PDF, now asked in words), Chemistry 2 and Physics 1
+  (missing graph or circuit, now asked in words). Counts: Chemistry 405, Physics 405, Biology
+  421, Government 425. The subject READMEs now say "rebuild, never drop" in place of
+  `drop: true`.
+- **Why:** the founder's rule: if a question has any problem, reconstruct it; students only
+  ever see a good question and the concept, never that anything was wrong.
+- **Where:** docs/questions/utme/{government,biology,chemistry,physics}/ (year files and
+  READMEs).
+- **Checked:** every subject's checker OK for all nine years; reloaded locally; content tests
+  pass.
+- **Status:** committed, not pushed.
+
 ### UTME Government 2010-2018: questions, explanations and lessons, with the printed keys put right
 - **What:** 418 questions from the JAMB papers, each with a worked explanation, a true reason
   for every wrong option and a board lesson in the Government method (name it, state the fact,

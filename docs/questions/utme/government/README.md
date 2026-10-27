@@ -49,10 +49,10 @@ The checker:
      on" is "the formation of the Organization of African Unity");
    - a fifth option such as "E. none of the above": remove it, so there are four;
    - a missing fourth option: restore the one the paper clearly meant, if it can be known;
-     otherwise drop the question;
+     otherwise rebuild the question on the same concept;
    - plain typos ("Herbert Marcaulay", "Rilwan Lukwan", "Indignant system").
-4. **A question printed twice in one paper** keeps its first number; the repeat is
-   `drop: true` with `drop_reason: repeats Qnn`.
+4. **A question printed twice in one paper** keeps its first number; the repeat is rebuilt as
+   a new question on the same topic, so the paper keeps its full count. Never drop a question.
 5. **Facts that have changed since the exam.** Teach the answer that was right when the paper was
    set, and add one step saying how it stands now if it has changed. For example, the ECOWAS
    Executive Secretary became the President of the ECOWAS Commission in 2007, and the OAU became

@@ -44,8 +44,12 @@ Each year has two files:
        slipped digit), and say what you changed in `corrected`;
      - if the stem itself is broken, repair it the smallest way that makes it a sound
        question, and say so in `corrected`.
-   - If a question cannot be repaired honestly (for example, its figure is missing and cannot
-     be described), set `drop: true` with a one-line `drop_reason`.
+   - **Never drop a question (founder's rule).** If a question cannot be repaired by a small
+     fix (its figure is missing, no option is right, several are right, an option is lost, or
+     it repeats another question), rebuild it into a new, sound question on the same concept:
+     keep the stem and options where they still work, rewrite the rest, and give it one
+     right answer. A missing figure is drawn simply (a graph, a circuit) or the question is
+     rewritten in words. Record what you rebuilt in `corrected`.
    - The explanation always teaches the right answer. It must **never** say the key, JAMB, the
      paper or the examiner is wrong, and never mention a correction. Students only see the
      right question and the right answer.
@@ -85,7 +89,7 @@ Each year has two files:
 
 ```yaml
 # UTME 2010 Chemistry, written up by hand from source/past-questions-2010-2018.pdf, pages 2-11.
-# <one short paragraph: what was repaired, which keys were wrong or missing, what was dropped>
+# <one short paragraph: what was repaired, which keys were wrong or missing, what was rebuilt>
 format_version: 1
 source:
   file: docs/questions/utme/chemistry/source/past-questions-2010-2018.pdf
@@ -108,7 +112,7 @@ questions:
     subtopic: CHEM.2.a
     level: 3
     level_reason: one molar-mass calculation
-    # optional: corrected, key_note, figure, figure_alt, figure_svg, drop, drop_reason
+    # optional: corrected, key_note, figure, figure_alt, figure_svg
 ```
 
 ## explanations_YYYY.yaml

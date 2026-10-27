@@ -54,8 +54,8 @@ The checker:
    - Keep every part and label the question depends on: the letters I, II, III or P, Q, R and
      the arrows.
    - The drawing must let a student answer the question just as the printed one did.
-   - If the original drawing cannot be read well enough to redraw it honestly, set
-     `drop: true` with a `drop_reason`.
+   - If the original drawing is missing or cannot be read well enough to redraw it honestly,
+     rebuild the question in words on the same concept (never drop it).
 3. **Explanations and lessons for Biology.** Build each one in this order:
    1. Name the structure or process.
    2. Give its function, or how it works, in simple steps.
@@ -109,7 +109,7 @@ structure at a glance, without its label.
    - rewrite the question in words, if it can be answered without the picture (for example,
      "Which of these is the excretory organ of an earthworm?" with text options), and record
      the change in `corrected`; or
-   - set `drop: true`.
+   - rebuild it as a new question in words on the same concept. Never drop it.
 
 ## Organisms and organs: drawn over the original (founder's decision, 16 Oct 2026)
 

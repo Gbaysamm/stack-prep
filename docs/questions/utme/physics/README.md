@@ -53,8 +53,8 @@ The checker:
      `uv run --frozen --with resvg-py python -c "import resvg_py; ..."`. Or open it in
      headless Edge and look at the PNG.
    - If the image is only the options, or text, type it in.
-   - If a question's figure is missing from the PDF and cannot be rebuilt from the stem,
-     set `drop: true` with a `drop_reason`.
+   - If a question's figure is missing from the PDF, draw one that fits the stem and
+     options, or rebuild the question in words on the same concept. Never drop it.
 3. **The Nigerian classroom method for Physics:**
    1. List the data with symbols and units: "u = 0, a = 2 m s⁻², t = 5 s, v = ?".
    2. Name the law or formula in words, then write it.
