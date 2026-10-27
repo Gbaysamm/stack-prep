@@ -15,6 +15,16 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-27
 
+### Phone hero stats made smaller and calmer
+- **Why:** the founder found the subject page hero at phone width too packed: three 40px numbers,
+  labels forced onto one line and the info buttons pressed against the dividers.
+- **What:** at 560px and below (apps/web/src/prep/pages/Home.css) the hero stats use 28px
+  numbers, 10px labels that may wrap under their info button, 12px units and notes and 12px
+  column padding; the "Where you stand" figures drop from 64px/44px to 48px/34px. Desktop is
+  unchanged.
+- **Checked:** the Commerce subject page and Home at 390.
+- **Status:** committed, not pushed.
+
 ### UTME Commerce 2010-2018: questions, explanations and lessons
 - **What:** 405 questions from the JAMB papers, none held back, each with an explanation, a
   true reason for every wrong option and a board lesson in the Commerce method (name it,
