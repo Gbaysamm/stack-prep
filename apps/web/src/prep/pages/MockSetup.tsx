@@ -15,6 +15,7 @@ import { Refused } from '../runsApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
 import { Button, PageHero, Skeleton, cx } from '../ui.js';
 import './Mock.css';
+import { friendly } from '../../lib/friendlyError.js';
 
 type Preset = 'utme' | 'custom';
 
@@ -192,7 +193,7 @@ export function MockSetup() {
       navigate(`/mock/${paper.mock_id}`);
     } catch (error) {
       if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined);
-      setIssue(error instanceof Refused || error instanceof Error ? error.message : 'The mock could not start.');
+      setIssue(error instanceof Refused || error instanceof Error ? friendly(error) : 'The mock could not start.');
       setStarting(false);
       loaded.reload();
     }

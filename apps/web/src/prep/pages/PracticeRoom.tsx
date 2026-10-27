@@ -71,6 +71,7 @@ import {
 } from "../ui.js";
 import "./CheckIns.css";
 import "./PracticeRoom.css";
+import { friendly } from '../../lib/friendlyError.js';
 
 type Confidence = "sure" | "unsure" | "guessed";
 
@@ -325,7 +326,7 @@ export function PracticeRoom() {
       })
       .catch(
         (error: Error) =>
-          !cancelled && setIssue(error.message || "Something went wrong."),
+          !cancelled && setIssue(friendly(error) || "Something went wrong."),
       );
     return () => {
       cancelled = true;
@@ -457,7 +458,7 @@ export function PracticeRoom() {
           setOutcome(right);
         }
       } catch (error) {
-        toast(`That did not send: ${(error as Error).message || "try again"}`);
+        toast(`That did not send: ${friendly(error) || "try again"}`);
       } finally {
         setBusy(false);
       }
@@ -515,7 +516,7 @@ export function PracticeRoom() {
         askedAt.current = Date.now();
       })
       .catch((error: Error) =>
-        setIssue(error.message || "Something went wrong."),
+        setIssue(friendly(error) || "Something went wrong."),
       )
       .finally(() => setBusy(false));
   };
@@ -1705,7 +1706,7 @@ function CheckIn({
           toast("Thanks — noted");
           onDone();
         })
-        .catch((error: Error) => setFailed(error.message || "It didn’t save."))
+        .catch((error: Error) => setFailed(friendly(error) || "It didn’t save."))
         .finally(() => setSending(false));
     };
     return (
@@ -1782,7 +1783,7 @@ function CheckIn({
         toast("Check-in saved");
       })
       .catch((error: Error) =>
-        setFailed(error.message || "It didn’t save."),
+        setFailed(friendly(error) || "It didn’t save."),
       )
       .finally(() => setSending(false));
   };

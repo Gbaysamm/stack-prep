@@ -2,6 +2,7 @@
  * What a student says after a lesson on the board: whether it landed, and (after a right answer
  * they were not sure of) whether the working was how they had thought it through.
  */
+import { failure, reach } from '../lib/friendlyError.js';
 
 export type LessonContext =
   | 'after_guess'
@@ -69,19 +70,11 @@ export interface CheckinEntry {
 }
 
 async function send<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`/v1${path}`, {
+  const response = await reach(`/v1${path}`, {
     headers: { 'content-type': 'application/json', accept: 'application/json' },
     ...init,
   });
-  if (!response.ok) {
-    let detail = await response.text();
-    try {
-      detail = (JSON.parse(detail) as { detail?: string }).detail ?? detail;
-    } catch {
-      /* not JSON */
-    }
-    throw new Error(detail || `HTTP ${response.status}`);
-  }
+  if (!response.ok) throw await failure(response);
   const body = await response.text();
   return (body ? JSON.parse(body) : null) as T;
 }

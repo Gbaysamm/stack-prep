@@ -17,6 +17,7 @@ import { Maths } from "../../Maths.js";
 import type { CheckupResult, SubjectScore, TopicScore, TopicStatus } from "../../student/api.js";
 import { IconArrowRight, IconBolt, IconBook, IconChart, IconTarget } from "../icons.js";
 import { lessonFeedbackApi, type LessonToRevisit, type Understood } from "../lessonFeedbackApi.js";
+import { mockApi, percentText, type MockSummary } from "../mockApi.js";
 import { progressApi, type PracticeRunPage, type SubjectOverview } from "../progressApi.js";
 import { useLoad, usePageTitle, useStudent } from "../store.js";
 import { Badge, Button, CountUp, PageHero, Pager, Skeleton, cx, usePaged } from "../ui.js";
@@ -45,6 +46,7 @@ import {
   useStartPractice,
 } from "./Home.js";
 import "./Progress.css";
+import { friendly } from '../../lib/friendlyError.js';
 
 const PAGE = 20;
 /** The strip always shows at least this many slots, so a first run has room to grow into. */
@@ -776,6 +778,59 @@ function LessonsLanded({ studentId, subjectId }: { studentId: string; subjectId:
   );
 }
 
+/** Mock exams count in a student's record too: the latest few, each opening its report. */
+function MockHistory({ studentId }: { studentId: string }) {
+  const load = useLoad(() => mockApi.history(studentId), [studentId]);
+  const finished = (load.data ?? []).filter((mock: MockSummary) => mock.overall).slice(0, 5);
+  const when = (iso: string) =>
+    new Date(iso).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" });
+  return (
+    <Section
+      eyebrow="Mock exams"
+      title="Your mock exams"
+      id="prog-mocks"
+      className="sj-rise d3"
+      sub="Timed and marked like the real UTME. Open one to see every question, the right answer and why."
+      action={
+        <Link className="sj-link" to="/mock">
+          All mocks <IconArrowRight size={14} />
+        </Link>
+      }
+    >
+      {!load.data && !load.error ? (
+        <Skeleton height={120} radius={14} />
+      ) : load.error ? (
+        <p className="prog-mocks-empty">{load.error}</p>
+      ) : finished.length === 0 ? (
+        <div className="sj-card prog-mocks-empty">
+          <p>You haven&apos;t finished a mock exam yet. A mock shows how you&apos;d do on the day.</p>
+          <Link className="sj-btn sm" to="/mock/new">
+            Sit a mock
+          </Link>
+        </div>
+      ) : (
+        <ul className="sj-card prog-mocks">
+          {finished.map((mock: MockSummary) => (
+            <li key={mock.mock_id}>
+              <Link to={`/mock/${mock.mock_id}/report`}>
+                <span className="prog-mocks-when">
+                  <b>{mock.preset === "utme" ? "UTME mock" : "Custom mock"}</b>
+                  <small>{when(mock.submitted_at ?? mock.started_at)}</small>
+                </span>
+                <span className="prog-mocks-subjects">
+                  {mock.subjects.map((subject) => subject.name).join(" · ")}
+                </span>
+                <span className="prog-mocks-score sj-num">{percentText(mock.overall)}</span>
+                <IconArrowRight size={16} />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Section>
+  );
+}
+
 export function Progress() {
   usePageTitle("Progress");
   const student = useStudent();
@@ -802,7 +857,7 @@ export function Progress() {
       setExtra((current) => [...current, ...page.runs]);
       setNext(page.next_before);
     } catch (failure) {
-      setMoreError((failure as Error).message || "Something went wrong.");
+      setMoreError(friendly(failure) || "Something went wrong.");
     } finally {
       setLoadingMore(false);
     }
@@ -997,6 +1052,8 @@ export function Progress() {
           <StrengthsCard key={strengthSubject.subject_id} subject={strengthSubject} />
         </Section>
       ) : null}
+
+      <MockHistory studentId={student.studentId} />
 
       <LessonsLanded studentId={student.studentId} subjectId={filterSubject ? filterSubject.subject_id : null} />
 

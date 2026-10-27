@@ -23,6 +23,7 @@ import {
 import { useLoad, usePageTitle, useStudent } from '../store.js';
 import { Button, CountUp, Dialog, PageHero, Skeleton, Steps, cx, daysUntil, useToast } from '../ui.js';
 import './Goal.css';
+import { friendly } from '../../lib/friendlyError.js';
 
 const STEPS = [
   { key: 'score', label: 'Target score', icon: IconTarget },
@@ -324,7 +325,7 @@ function GoalStepper({
         setSaved(result);
       }
     } catch (error) {
-      setIssue((error as Error).message || 'We could not save your goal. Try again.');
+      setIssue(friendly(error) || 'We could not save your goal. Try again.');
     } finally {
       setSaving(false);
     }
@@ -341,7 +342,7 @@ function GoalStepper({
       const state = await api.start(student.studentId, subjectId);
       navigate(`/checkup/${state.session_id}`);
     } catch (error) {
-      setIssue((error as Error).message || 'We could not start your check-up. Try again.');
+      setIssue(friendly(error) || 'We could not start your check-up. Try again.');
       setStarting(false);
     }
   };
@@ -973,7 +974,7 @@ function FullExam({
       setRemoving(null);
       onChanged();
     } catch (error) {
-      setIssue((error as Error).message || 'We could not remove it just now. Try again.');
+      setIssue(friendly(error) || 'We could not remove it just now. Try again.');
     } finally {
       setBusy(false);
     }

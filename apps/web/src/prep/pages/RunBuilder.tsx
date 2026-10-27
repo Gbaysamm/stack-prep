@@ -22,6 +22,7 @@ import { Button, CountUp, PageHero, Skeleton, cx } from '../ui.js';
 import { MasteryBar, masteryWord } from './Home.js';
 import { yearsLabel } from './RunReport.js';
 import './RunBuilder.css';
+import { friendly } from '../../lib/friendlyError.js';
 
 const LENGTHS = [
   { value: 5, label: 'Quick' },
@@ -208,8 +209,8 @@ function Builder({
         setStarting(false);
         setProblem(
           error instanceof Refused && error.status === 422
-            ? error.message
-            : `We couldn’t start the run: ${error.message || 'try again'}`,
+            ? friendly(error)
+            : `We couldn’t start the run: ${friendly(error) || 'try again'}`,
         );
       });
   };

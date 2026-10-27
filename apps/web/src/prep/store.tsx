@@ -23,6 +23,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 
 import { authApi, type AuthUser, type Role } from './authApi.js';
 import { Splash } from './Splash.js';
+import { SESSION_ENDED, friendly } from '../lib/friendlyError.js';
 
 export interface Identity {
   studentId: string;
@@ -39,6 +40,8 @@ export interface Identity {
 const SANDBOX_KEY = 'scorepilot.student';
 /** The last signed-in account, kept only so the splash can greet them; never trusted. */
 const HINT_KEY = 'stackprep.session-hint';
+/** Set when a session ended under the student; the sign-in form reads it, and clears it on success. */
+export const ENDED_KEY = 'stackprep.session-ended';
 
 function store(key: string, value: unknown) {
   try {
@@ -149,6 +152,26 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
 
   const identity = status.state === 'ready' ? status.identity : null;
 
+  // A call came back 401 (lib/friendlyError SESSION_ENDED): the session ran out or was signed
+  // out elsewhere. Drop the identity, so RequireStudent sends them to sign in and back here after,
+  // and leave their login for the form to fill in.
+  useEffect(() => {
+    const ended = () => {
+      setStatus((current) => {
+        const was = current.state === 'ready' ? current.identity : null;
+        if (!was || was.sandbox) return current;
+        try {
+          window.sessionStorage.setItem(ENDED_KEY, was.login ?? '');
+        } catch {
+          /* private mode: the form just starts empty */
+        }
+        return { state: 'ready', identity: null };
+      });
+    };
+    window.addEventListener(SESSION_ENDED, ended);
+    return () => window.removeEventListener(SESSION_ENDED, ended);
+  }, []);
+
   const signIn = useCallback((next: Identity) => {
     if (next.sandbox) {
       store(SANDBOX_KEY, { studentId: next.studentId, displayName: next.displayName });
@@ -254,7 +277,7 @@ export function useLoad<T>(fetcher: () => Promise<T>, key: unknown[]): Loaded<T>
         if (call === latest.current) setData(value);
       })
       .catch((failure: Error) => {
-        if (call === latest.current) setError(failure.message || 'Something went wrong.');
+        if (call === latest.current) setError(friendly(failure) || 'Something went wrong.');
       })
       .finally(() => {
         if (call === latest.current) setLoading(false);
@@ -295,7 +318,7 @@ export function useCachedLoad<T>(cacheKey: string, fetcher: () => Promise<T>): L
       })
       .catch((failure: Error) => {
         if (call === latest.current)
-          setState((current) => ({ ...current, error: failure.message || 'Something went wrong.', loading: false }));
+          setState((current) => ({ ...current, error: friendly(failure) || 'Something went wrong.', loading: false }));
       });
   }, [cacheKey, tick]);
 

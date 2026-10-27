@@ -27,6 +27,7 @@ import {
 import { progressApi } from '../progressApi.js';
 import { Button, CountUp, PageHero, Pager, Skeleton, Steps, cx, usePaged } from '../ui.js';
 import './CheckupHub.css';
+import { friendly } from '../../lib/friendlyError.js';
 
 function whenLabel(iso: string): string {
   const then = new Date(iso);
@@ -140,7 +141,7 @@ export function CheckupHub() {
       const state = await api.start(student.studentId, subjectId);
       navigate(`/checkup/${state.session_id}`);
     } catch (error) {
-      setStartIssue({ subjectId, text: (error as Error).message || 'The check-up could not start.' });
+      setStartIssue({ subjectId, text: friendly(error) || 'The check-up could not start.' });
       setStarting(null);
     }
   };

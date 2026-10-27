@@ -23,6 +23,7 @@ import { Button, Dialog, Empty, Skeleton, cx, useToast } from '../ui.js';
 import { NextSteps, Section, SummaryHero, TimeInsights, TopicBreakdown, Trend, WeakAreas } from './MockInsights.js';
 import './Mock.css';
 import './MockInsights.css';
+import { friendly } from '../../lib/friendlyError.js';
 
 const EVENT_WORDS: Record<EventKind, string> = {
   fullscreen_enter: 'Entered full screen',
@@ -505,7 +506,7 @@ function DeleteMock({ mockId }: { mockId: string }) {
       toast('Mock deleted');
       navigate('/mock');
     } catch (error) {
-      toast((error as Error).message || 'It could not be deleted.');
+      toast(friendly(error) || 'It could not be deleted.');
       setBusy(false);
       setAsking(false);
     }

@@ -1,3 +1,4 @@
+import { failure, reach } from '../lib/friendlyError.js';
 import type { SubjectScore } from '../student/api';
 
 /**
@@ -108,16 +109,8 @@ export interface PracticeRunPage {
 }
 
 async function get<T>(path: string): Promise<T> {
-  const response = await fetch(`/v1${path}`, { headers: { accept: 'application/json' } });
-  if (!response.ok) {
-    let detail = await response.text();
-    try {
-      detail = (JSON.parse(detail) as { detail?: string }).detail ?? detail;
-    } catch {
-      /* not JSON */
-    }
-    throw new Error(detail);
-  }
+  const response = await reach(`/v1${path}`, { headers: { accept: 'application/json' } });
+  if (!response.ok) throw await failure(response);
   return (await response.json()) as T;
 }
 

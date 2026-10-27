@@ -39,6 +39,7 @@ import { usePageTitle, useStudent } from '../store.js';
 import { Badge, Button, CountUp, PageHero, ShowMore, Steps, Skeleton, Track, cx, greeting, useShowMore, useToast } from '../ui.js';
 import { HOW_PATH, MetricTip, type MetricId } from './HowItsWorkedOut.js';
 import './Home.css';
+import { friendly } from '../../lib/friendlyError.js';
 
 /* ================================================================== shared helpers */
 
@@ -149,12 +150,12 @@ export function useStartPractice() {
       setBusy(null);
       // 423: practice is locked behind a check-up (first one, or one due). Go and take it.
       if (failure instanceof Refused && failure.status === 423) {
-        toast(failure.message);
+        toast(friendly(failure));
         try {
           const sitting = await api.start(student.studentId, subjectId);
           navigate(`/checkup/${sitting.session_id}`);
         } catch (again) {
-          setError(`${failure.message} We couldn't open it just now: ${(again as Error).message}`);
+          setError(`${friendly(failure)} We couldn't open it just now: ${friendly(again)}`);
         }
         return;
       }
@@ -163,7 +164,7 @@ export function useStartPractice() {
         setExhausted({ subjectId, label: focus.label ?? 'that choice', key });
         return;
       }
-      setError(`We couldn't start a run just now: ${(failure as Error).message}`);
+      setError(`We couldn't start a run just now: ${friendly(failure)}`);
     }
   };
   return { busy, error, exhausted, lastKey, start };
@@ -205,7 +206,7 @@ export function useStartCheckup() {
       const sitting = await api.start(student.studentId, subjectId);
       navigate(`/checkup/${sitting.session_id}`);
     } catch (failure) {
-      setError(`We couldn't start the check-up just now: ${(failure as Error).message}`);
+      setError(`We couldn't start the check-up just now: ${friendly(failure)}`);
       setBusy(false);
     }
   };

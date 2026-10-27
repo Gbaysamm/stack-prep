@@ -23,6 +23,7 @@ import { FocusShell } from '../shell.js';
 import { usePageTitle, useStudent } from '../store.js';
 import { Badge, Button, Ring, Skeleton, Spinner, cx } from '../ui.js';
 import './CheckupRoom.css';
+import { friendly } from '../../lib/friendlyError.js';
 
 const clockOf = (seconds: number) =>
   `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
@@ -83,7 +84,7 @@ export function CheckupRoom() {
         setState(current);
         askedAt.current = Date.now();
       })
-      .catch((error: Error) => !cancelled && setLoadIssue(error.message || 'The check-up could not be opened.'));
+      .catch((error: Error) => !cancelled && setLoadIssue(friendly(error) || 'The check-up could not be opened.'));
     return () => {
       cancelled = true;
     };
@@ -131,7 +132,7 @@ export function CheckupRoom() {
       setState(next);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
-      setSendIssue((error as Error).message || 'Your answer did not go through.');
+      setSendIssue(friendly(error) || 'Your answer did not go through.');
     } finally {
       sendingRef.current = false;
       setSending(false);

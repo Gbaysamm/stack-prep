@@ -31,6 +31,7 @@ import { NotFound, Refused } from '../runsApi.js';
 import { usePageTitle, useStudent } from '../store.js';
 import { Button, Dialog, Spinner, cx } from '../ui.js';
 import './MockRoom.css';
+import { friendly } from '../../lib/friendlyError.js';
 
 interface Mark {
   choice: string | null;
@@ -96,7 +97,7 @@ export function MockRoom() {
       })
       .catch((error: Error) => {
         if (!live) return;
-        setProblem(error instanceof NotFound ? 'This mock exam does not exist, or it was deleted.' : error.message);
+        setProblem(error instanceof NotFound ? 'This mock exam does not exist, or it was deleted.' : friendly(error));
       });
     return () => {
       live = false;
@@ -368,7 +369,7 @@ function Exam({ paper }: { paper: MockPaper }) {
       } catch (error) {
         setFinishing(false);
         finishingRef.current = false;
-        setSubmitError((error as Error).message || 'The submission did not go through.');
+        setSubmitError(friendly(error) || 'The submission did not go through.');
       }
     },
     [entry, flushEvents, goToReport, mockId],

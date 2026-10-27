@@ -5,6 +5,7 @@
  * the goal, the sitting, every answer — is written to the database as it happens, so closing
  * the tab loses nothing and reopening it finds the sitting where it stopped.
  */
+import { failure, reach } from '../lib/friendlyError.js';
 
 import type { OptionFigure, QuestionFigure } from '../Figures.js';
 import type { BoardVoice } from './boardPrefs.js';
@@ -783,17 +784,6 @@ export interface StudentIdentity {
   consent_recorded: boolean;
 }
 
-/** The message behind a failed response, unwrapped from FastAPI's `detail` when it is there. */
-async function readError(response: Response): Promise<string> {
-  let detail = await response.text();
-  try {
-    detail = (JSON.parse(detail) as { detail?: string }).detail ?? detail;
-  } catch {
-    /* the body was not JSON; show it as it came */
-  }
-  return detail;
-}
-
 /** Fired on the window whenever a goal is saved or removed, so a countdown drawn elsewhere on
  *  the page (the sidebar, the top bar) can fetch the new dates instead of showing the old. */
 export const GOALS_CHANGED = 'sj:goals-changed';
@@ -802,13 +792,11 @@ function announceGoalsChanged() {
 }
 
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`/v1${path}`, {
+  const response = await reach(`/v1${path}`, {
     headers: { 'content-type': 'application/json' },
     ...init,
   });
-  if (!response.ok) {
-    throw new Error(await readError(response));
-  }
+  if (!response.ok) throw await failure(response);
   return (await response.json()) as T;
 }
 
@@ -831,8 +819,8 @@ export const api = {
     }),
   /** Take a subject off the student's list. Its runs and answers are kept. */
   removeGoal: async (studentId: string, subjectId: string) => {
-    const response = await fetch(`/v1/student/${studentId}/goals/${subjectId}`, { method: 'DELETE' });
-    if (!response.ok) throw new Error(await readError(response));
+    const response = await reach(`/v1/student/${studentId}/goals/${subjectId}`, { method: 'DELETE' });
+    if (!response.ok) throw await failure(response);
     announceGoalsChanged();
   },
   /** What this deployment has switched on. Asked rather than assumed, so a client never
@@ -937,11 +925,11 @@ export const api = {
     const form = new FormData();
     form.append('question_version_id', questionVersionId);
     form.append('audio', recording, 'question.webm');
-    const response = await fetch(`/v1/practice/${sessionId}/listen`, {
+    const response = await reach(`/v1/practice/${sessionId}/listen`, {
       method: 'POST',
       body: form,
     });
-    if (!response.ok) throw new Error(await readError(response));
+    if (!response.ok) throw await failure(response);
     return ((await response.json()) as { asked: string }).asked;
   },
 
@@ -968,7 +956,7 @@ export const api = {
       onReset: () => void;
     },
   ): Promise<TutorReply> => {
-    const response = await fetch(`/v1/practice/${sessionId}/ask/stream`, {
+    const response = await reach(`/v1/practice/${sessionId}/ask/stream`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
@@ -978,7 +966,7 @@ export const api = {
       }),
     });
     if (!response.ok || !response.body) {
-      throw new Error(await readError(response));
+      throw await failure(response);
     }
 
     const reader = response.body.getReader();

@@ -11,7 +11,7 @@ import { Link, useLocation, useNavigate, useSearchParams } from "react-router-do
 
 import { LoginForm, SignupForm } from "../AuthForms.js";
 import { IconBolt, IconSparkles, IconTarget } from "../icons.js";
-import { useIdentity, usePageTitle, type Identity } from "../store.js";
+import { ENDED_KEY, useIdentity, usePageTitle, type Identity } from "../store.js";
 import { cx } from "../ui.js";
 import "./Welcome.css";
 
@@ -47,7 +47,15 @@ export function Welcome() {
   const location = useLocation();
   const from = (location.state as { from?: string } | null)?.from;
   // "Log in instead" carries the email or phone across and puts the caret in the password box.
-  const [carry, setCarry] = useState<{ login: string; key: number }>({ login: "", key: 0 });
+  // A session that ran out under the student: say so, and fill in who they were.
+  const [ended] = useState<string | null>(() => {
+    try {
+      return window.sessionStorage.getItem(ENDED_KEY);
+    } catch {
+      return null;
+    }
+  });
+  const [carry, setCarry] = useState<{ login: string; key: number }>({ login: ended ?? "", key: ended ? 1 : 0 });
   const headings = useRef<Record<Mode, HTMLHeadingElement | null>>({ signup: null, login: null });
   const switched = useRef(false);
 
@@ -67,6 +75,11 @@ export function Welcome() {
     navigate("/onboarding", { replace: true });
   };
   const loggedIn = (identity: Identity) => {
+    try {
+      window.sessionStorage.removeItem(ENDED_KEY);
+    } catch {
+      /* nothing to clear */
+    }
     signIn(identity);
     navigate(from && from !== "/" ? from : "/home", { replace: true });
   };
@@ -132,6 +145,11 @@ export function Welcome() {
                     {copy.title}
                   </h2>
                   <p className="wel-formsub">{copy.sub}</p>
+                  {panel === "login" && ended !== null && (
+                    <p className="wel-ended" role="status">
+                      Your session ended, so we signed you out. Sign in again to carry on where you were.
+                    </p>
+                  )}
                   {panel === "signup" ? (
                     <SignupForm
                       onDone={signedUp}

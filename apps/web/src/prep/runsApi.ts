@@ -5,6 +5,7 @@
  * A run that does not exist, or was deleted, answers 404; `NotFound` lets a page tell that apart
  * from a network hiccup and say so plainly instead of offering a retry that cannot work.
  */
+import { failure, reach } from '../lib/friendlyError.js';
 
 import type { OptionFigure, QuestionFigure } from '../Figures.js';
 import type { PracticeState } from '../student/api.js';
@@ -116,23 +117,15 @@ export class Refused extends Error {
 }
 
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`/v1${path}`, {
+  const response = await reach(`/v1${path}`, {
     headers: { 'content-type': 'application/json', accept: 'application/json' },
     ...init,
   });
   if (!response.ok) {
-    let detail = await response.text();
-    try {
-      const parsed = (JSON.parse(detail) as { detail?: unknown }).detail;
-      if (typeof parsed === 'string') detail = parsed;
-      else if (Array.isArray(parsed)) detail = 'That choice was not accepted.';
-    } catch {
-      /* not JSON */
-    }
-    const message = detail || `Something went wrong (${response.status}).`;
-    if (response.status === 404) throw new NotFound(message);
-    if (response.status >= 400 && response.status < 500) throw new Refused(message, response.status);
-    throw new Error(message);
+    const problem = await failure(response);
+    if (response.status === 404) throw new NotFound(problem.message);
+    if (response.status >= 400 && response.status < 500) throw new Refused(problem.message, response.status);
+    throw problem;
   }
   const body = await response.text();
   return (body ? JSON.parse(body) : null) as T;

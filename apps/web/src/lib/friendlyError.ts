@@ -26,6 +26,7 @@ const ENDED = 'Your session has ended. Please sign in again.';
 const NOT_ALLOWED = "Your account can't open this.";
 const NOT_FOUND = "We couldn't find that. It may have been removed.";
 const INVALID = 'Some of what was entered is not quite right. Please check it and try again.';
+const TOO_MANY = 'Too many tries. Wait a minute, then try again.';
 
 /** A server detail is shown only when it is plainly a sentence meant for people. */
 function readable(detail: unknown): string | null {
@@ -41,6 +42,7 @@ function readable(detail: unknown): string | null {
 export function messageFor(status: number, body: unknown): string {
   const detail = body && typeof body === 'object' ? (body as { detail?: unknown }).detail : body;
   if (status === 401) return ENDED;
+  if (status === 429) return TOO_MANY;
   if (status >= 500) return SERVER;
   const said = readable(detail);
   if (said) return said;
@@ -86,4 +88,29 @@ export async function request<T>(url: string, init: RequestInit = {}, quiet401 =
   }
   if (response.status === 401 && !quiet401) window.dispatchEvent(new Event(SESSION_ENDED));
   throw new FriendlyError(messageFor(response.status, body), response.status);
+}
+
+/** fetch, but a dropped connection becomes a FriendlyError instead of "Failed to fetch". */
+export async function reach(url: string, init?: RequestInit): Promise<Response> {
+  try {
+    return await fetch(url, { credentials: 'same-origin', ...init });
+  } catch {
+    throw new FriendlyError(OFFLINE, 0);
+  }
+}
+
+/**
+ * The FriendlyError for a response that is not ok, reading its body once. A 401 announces
+ * SESSION_ENDED (the app then asks the person to sign in again), unless `quiet401`.
+ */
+export async function failure(response: Response, quiet401 = false): Promise<FriendlyError> {
+  let body: unknown = null;
+  const raw = await response.text().catch(() => '');
+  try {
+    body = JSON.parse(raw);
+  } catch {
+    body = raw;
+  }
+  if (response.status === 401 && !quiet401) window.dispatchEvent(new Event(SESSION_ENDED));
+  return new FriendlyError(messageFor(response.status, body), response.status);
 }

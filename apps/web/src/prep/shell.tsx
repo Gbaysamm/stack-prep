@@ -484,8 +484,9 @@ export function AppShell() {
         <ClaimDialog open={claiming} onClose={closeClaim} />
 
         <nav className="sj-bottomnav sj-glass dark" aria-label="Main">
-          {/* Five tabs fit a phone; the mock exam is in the menu there. */}
-          {NAV.filter(({ to }) => to !== "/mock").map(({ to, label, icon: Icon }) => (
+          {/* Five tabs fit a phone. Profile is the avatar in the top bar there, so the mock exam
+              gets its own tab: a candidate should never have to hunt for it. */}
+          {NAV.filter(({ to }) => to !== "/profile").map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
@@ -496,7 +497,7 @@ export function AppShell() {
               <span className="pip">
                 <Icon size={20} />
               </span>
-              <span>{label}</span>
+              <span>{to === "/mock" ? "Mock" : label}</span>
             </NavLink>
           ))}
         </nav>

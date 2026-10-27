@@ -62,6 +62,7 @@ import {
 import { plural, useStartCheckup, useStartPractice } from "./Home.js";
 import { DeleteRunDialog, IconTrash } from "./RunReport.js";
 import "./PracticeHub.css";
+import { friendly } from '../../lib/friendlyError.js';
 
 /** Runs per page in the history, as on the progress page. */
 const PAGE = 12;
@@ -128,7 +129,7 @@ export function PracticeHub() {
       setExtra((current) => [...current, ...page.runs]);
       setNext(page.next_before);
     } catch (failure) {
-      setMoreError((failure as Error).message || "Something went wrong.");
+      setMoreError(friendly(failure) || "Something went wrong.");
     } finally {
       setLoadingMore(false);
     }
@@ -150,7 +151,7 @@ export function PracticeHub() {
           back.delete(sessionId);
           return back;
         });
-        toast(`Couldn’t delete the run: ${error.message || "try again"}`);
+        toast(`Couldn’t delete the run: ${friendly(error) || "try again"}`);
       });
   };
 

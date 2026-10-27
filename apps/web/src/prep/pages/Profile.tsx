@@ -10,6 +10,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { api, type Features, type Goal } from '../../student/api.js';
 import { ClaimDialog } from '../AuthForms.js';
+import { mockApi, type MockSummary } from '../mockApi.js';
 import { progressApi, type Overview } from '../progressApi.js';
 import { IconArrowRight, IconCalendar, IconChevronRight, IconClock, IconLock, IconLogout, IconTarget } from '../icons.js';
 import { useIdentity, useLoad, usePageTitle, useStudent } from '../store.js';
@@ -112,6 +113,7 @@ export function Profile() {
         api.goals(student.studentId),
         progressApi.overview(student.studentId).catch(() => null as Overview | null),
         api.features().catch(() => null as Features | null),
+        mockApi.history(student.studentId).catch(() => [] as MockSummary[]),
       ]),
     [student.studentId],
   );
@@ -120,7 +122,10 @@ export function Profile() {
   const features = load.data?.[2] ?? null;
   const examOf = (subjectId: string) => overview?.subjects.find((s) => s.subject_id === subjectId)?.examination_short_name;
 
-  const answered = overview?.subjects.reduce((sum, subject) => sum + subject.practice.questions_answered, 0) ?? 0;
+  // Every finished mock counts in the record too: its questions, and the mock itself.
+  const mocks = (load.data?.[3] ?? []).filter((mock) => mock.overall);
+  const mockAnswered = mocks.reduce((sum, mock) => sum + (mock.overall?.answered ?? 0), 0);
+  const answered = (overview?.subjects.reduce((sum, subject) => sum + subject.practice.questions_answered, 0) ?? 0) + mockAnswered;
   const runs = overview?.subjects.reduce((sum, subject) => sum + subject.practice.runs_finished, 0) ?? 0;
   const checkups = overview?.subjects.filter((subject) => subject.latest_checkup).length ?? 0;
 
@@ -141,13 +146,23 @@ export function Profile() {
   const record: { label: string; value: number | undefined; line: string; tone: string; tip: MetricId }[] = [
     { label: 'Day streak', value: overview?.streak_days, line: 'Days in a row with at least one answer', tone: 'yellow', tip: 'streak' },
     {
-      label: 'Questions practised',
+      label: 'Questions answered',
       value: answered,
-      line: runs === 0 ? 'No runs finished yet' : `Across ${runs} finished ${runs === 1 ? 'run' : 'runs'}`,
+      line:
+        runs + mocks.length === 0
+          ? 'No runs or mocks finished yet'
+          : `Across ${runs} ${runs === 1 ? 'run' : 'runs'} and ${mocks.length} ${mocks.length === 1 ? 'mock' : 'mocks'}`,
       tone: 'lime',
       tip: 'answered',
     },
     { label: 'Subjects checked', value: checkups, line: 'Subjects with a check-up done', tone: 'ink', tip: 'checked' },
+    {
+      label: 'Mock exams',
+      value: mocks.length,
+      line: mocks.length === 0 ? 'None sat yet' : 'Full mock exams finished',
+      tone: 'pink',
+      tip: 'mocks',
+    },
   ];
   const moreGoals = useShowMore(goals, GOALS_SHOWN);
 
@@ -193,7 +208,7 @@ export function Profile() {
               <dt>
                 <i aria-hidden="true" />
                 {stat.label}
-                <MetricTip id={stat.tip} title={stat.tip === 'answered' ? 'Questions practised' : undefined} />
+                <MetricTip id={stat.tip} />
               </dt>
               <dd className="sj-num">{overview ? <CountUp value={stat.value ?? 0} /> : load.data ? '—' : <Skeleton height={40} width={56} />}</dd>
               <p>{stat.line}</p>

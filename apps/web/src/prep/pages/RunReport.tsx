@@ -18,6 +18,7 @@ import { orGone, runsApi, type Outcome, type ReviewItem, type RunReview } from '
 import { useLoad, usePageTitle } from '../store.js';
 import { Button, Dialog, PageHero, Ring, Skeleton, cx, useToast } from '../ui.js';
 import './RunReport.css';
+import { friendly } from '../../lib/friendlyError.js';
 
 /* ------------------------------------------------------------------ icons only these pages use */
 
@@ -152,7 +153,7 @@ export function RunReport() {
       .catch((error: Error) => {
         setDeleting(false);
         setAsking(false);
-        toast(`Couldn’t delete the run: ${error.message || 'try again'}`);
+        toast(`Couldn’t delete the run: ${friendly(error) || 'try again'}`);
       });
   };
 

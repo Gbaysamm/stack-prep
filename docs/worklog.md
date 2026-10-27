@@ -15,6 +15,22 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-27
 
+### Friendly errors, sign-in when a session ends, Mock in the phone bar (plan phase 2)
+- **Why:** the audit found raw server text reaching students ("Failed to fetch", "[object
+  Object]", proxy pages), an ended session showing as errors inside a page, the mock exam missing
+  from the phone's bottom bar, and mocks not counted in Progress or Profile.
+- **What:** every student API client (progress, runs, mock, lesson feedback, the student API)
+  now goes through `lib/friendlyError.ts`: a dropped connection, a server fault, a 422 list or
+  an HTML page each becomes one plain sentence, and every page shows that sentence. A 401 from
+  any call signs the student out on the spot and sends them to "Welcome back" with a note and
+  their login filled in; after signing in they return to the page they were on. The phone's
+  bottom bar is Home, Practice, Check-up, Mock, Progress (Profile is the avatar at the top).
+  Profile's record counts mock questions and finished mocks; Progress has a "Your mock exams"
+  section opening each report.
+- **Checked:** the web build and tests pass; Profile, Progress, Home and the ended-session
+  sign-in at 1440 and 390 with a seeded student who sat a mock.
+- **Status:** committed, not pushed.
+
 ### Staff roles: admin and reviewer dashboards with real sign-in (plan phase 1)
 - **Why:** the founder asked for an admin dashboard and a reviewer dashboard with roles (admin
   can use everything; reviewer only the reviewer dashboard; a student only the student app), and

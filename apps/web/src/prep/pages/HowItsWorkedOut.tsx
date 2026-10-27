@@ -42,7 +42,8 @@ export type MetricId =
   | 'right'
   | 'taught'
   | 'streak'
-  | 'checked';
+  | 'checked'
+  | 'mocks';
 
 interface Metric {
   /** The name as the student sees it on the page. */
@@ -147,9 +148,9 @@ export const METRICS: Record<MetricId, Metric> = {
   },
   answered: {
     title: 'Questions answered',
-    plain: 'Every different question you’ve met in practice, however many tries it took.',
+    plain: 'Every different question you’ve met in practice and in mock exams, however many tries it took.',
     short:
-      'Every different question you’ve met in practice, added up across all your runs. A question counts once in a run however many tries it took, and a question the coach taught you still counts. Check-up questions aren’t included.',
+      'Every different question you’ve met in practice, added up across all your runs, plus every question you answered in a finished mock exam. A question counts once in a run however many tries it took, and a question the coach taught you still counts. Check-up questions aren’t included.',
     example:
       'A 10-question run where you got 7 right first time, needed a hint on 2 and were taught 1 adds 10 to this number.',
   },
@@ -181,6 +182,13 @@ export const METRICS: Record<MetricId, Metric> = {
     short:
       'Subjects where you’ve finished at least one check-up. A check-up you’ve started but not finished doesn’t count until you finish it.',
     example: 'Finished a Mathematics check-up and half-way through English: 1 subject checked.',
+  },
+  mocks: {
+    title: 'Mock exams',
+    plain: 'Full mock exams you’ve finished, timed and marked like the real UTME.',
+    short:
+      'Every mock exam you handed in or that ended when its time ran out. A mock you started but left before the end doesn’t count until it is over.',
+    example: 'Sat two UTME mocks and handed both in: 2 mock exams.',
   },
 };
 

@@ -29,6 +29,7 @@ import { Button, CountUp, Skeleton, Steps, cx, daysUntil, useToast } from '../ui
 import { examTitle, isHiddenExam } from './Exams.js';
 import { CountdownTip } from '../countdown.js';
 import './Onboarding.css';
+import { friendly } from '../../lib/friendlyError.js';
 
 const STEPS = [
   { key: 'exam', label: 'Exam', icon: IconTarget },
@@ -358,7 +359,7 @@ function Flow({
       for (const subject of dropped) await api.removeGoal(student.studentId, subject.subject_id);
     } catch (error) {
       setSaving(false);
-      setIssue(`We could not update your subjects just now: ${(error as Error).message || 'try again'}.`);
+      setIssue(`We could not update your subjects just now: ${friendly(error) || 'try again'}.`);
       return;
     }
     // Only the subjects not yet saved: a retry after a half-finished save does not repeat work.
@@ -1300,7 +1301,7 @@ function Finish({
       const state = await api.start(student.studentId, picked.subject_id);
       navigate(`/checkup/${state.session_id}`);
     } catch (error) {
-      setIssue(`We could not start your check-up just now: ${(error as Error).message || 'try again'}.`);
+      setIssue(`We could not start your check-up just now: ${friendly(error) || 'try again'}.`);
       setStarting(false);
     }
   };

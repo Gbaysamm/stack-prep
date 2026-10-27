@@ -433,6 +433,40 @@ function Checked() {
   );
 }
 
+/** Two mocks handed in and one left open: only the finished ones count. */
+function Mocks() {
+  return (
+    <>
+      <ul className="nv-subjects">
+        <li>
+          <span>UTME mock, Monday</span>
+          <span className="nv-subjects-bar">
+            <span style={{ width: '100%' }} />
+          </span>
+          <b className="done">Handed in</b>
+        </li>
+        <li>
+          <span>UTME mock, Thursday</span>
+          <span className="nv-subjects-bar">
+            <span style={{ width: '100%' }} />
+          </span>
+          <b className="done">Time ran out</b>
+        </li>
+        <li>
+          <span>Custom mock, today</span>
+          <span className="nv-subjects-bar">
+            <span style={{ width: '40%' }} className="half" />
+          </span>
+          <b>Still open</b>
+        </li>
+      </ul>
+      <div className="nv-sum">
+        <span className="sj-mono">Mock exams</span> <b>2</b>
+      </div>
+    </>
+  );
+}
+
 export const VIZ: Record<MetricId, () => ReactNode> = {
   score: Score,
   started: Started,
@@ -450,4 +484,5 @@ export const VIZ: Record<MetricId, () => ReactNode> = {
   taught: Taught,
   streak: Streak,
   checked: Checked,
+  mocks: Mocks,
 };
