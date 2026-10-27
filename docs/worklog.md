@@ -15,6 +15,26 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-27
 
+### UTME Literature in English 2010-2018: questions, explanations and lessons
+- **What:** 425 questions from the JAMB papers, none held back, each with an explanation, a
+  true reason for every wrong option and a board lesson in the Literature method (name it,
+  define it, show it in the words, why it matters, a way to remember it, the trap). 116
+  answers differ from the compilation's printed keys. Set-text questions of the time (Sons and
+  Daughters, Romeo and Juliet, Othello, Purple Hibiscus and others) are kept and name their
+  text; a plot detail that could not be confirmed is rebuilt on the printed extract, the
+  theme or the device; garbled quotations are restored to the authors' words.
+- **Curriculum:** the syllabus's 5 topics and 11 subtopics (drama, prose, poetry, terms,
+  appreciation), coded LIT.3.b.
+- **Copyright:** extracts are kept to the few lines the paper prints; the README says so,
+  after a helper writing out long passages was refused.
+- **Where:** docs/questions/utme/literature/, database/load_retranscribed_literature.py,
+  database/check_literature.py, apps/api/tests/test_literature_content.py; both
+  `deploy/*/release.sh` run the loader after Economics.
+- **Checked:** check_literature.py --lessons OK for all nine years; loaded locally (425
+  questions, 425 lessons, 11 skills); a Literature check-up at 390 and a mock at 1440;
+  ruff, mypy and the content tests pass.
+- **Status:** committed, not pushed.
+
 ### UTME Economics 2010-2018: worked answers, drawn graphs, explanations and lessons
 - **What:** 425 questions from the JAMB papers, none held back, each with a worked explanation,
   a true reason for every wrong option and a board lesson in the Economics method (name it,
