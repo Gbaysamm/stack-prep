@@ -12,6 +12,7 @@ from collections.abc import AsyncIterator
 import httpx
 import pytest
 from sqlalchemy import text
+from staff import remove, signed_up, staff_login
 
 from app.db import database_is_reachable, get_engine
 from app.main import app
@@ -292,9 +293,14 @@ async def fixture_question() -> AsyncIterator[dict[str, str]]:
 
 
 @pytest.fixture
-async def client() -> AsyncIterator[httpx.AsyncClient]:
+async def client(fixture_question: dict[str, str]) -> AsyncIterator[httpx.AsyncClient]:
+    """Signed in as the fixture's reviewer: the review dashboard needs a reviewer or admin."""
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+    reviewer = fixture_question["reviewer"]
+    async with (
+        httpx.AsyncClient(transport=transport, base_url="http://test") as client,
+        staff_login(client, "reviewer", reviewer_id=reviewer),
+    ):
         yield client
 
 
@@ -404,12 +410,24 @@ async def test_changing_the_skill_records_a_human_decision(
     assert body["classification_status"] == "approved"
 
 
-async def test_an_unknown_reviewer_is_rejected(
+async def test_only_a_signed_in_reviewer_or_admin_may_review(
     client: httpx.AsyncClient, fixture_question: dict[str, str]
 ) -> None:
-    response = await client.post(
-        f"/v1/review/questions/{fixture_question['question']}/level",
+    question = fixture_question["question"]
+    # A reviewer_id in the body is ignored: the decision is recorded under the session.
+    decided = await client.post(
+        f"/v1/review/questions/{question}/level",
         json={"reviewer_id": str(uuid.uuid4()), "level": 3},
     )
+    assert decided.status_code == 200
 
-    assert response.status_code == 400
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as other:
+        assert (await other.get("/v1/review/queue")).status_code == 401
+        student = await signed_up(other)
+        try:
+            assert (await other.get("/v1/review/queue")).status_code == 403
+        finally:
+            await remove([student])
+        async with staff_login(other, "admin"):
+            assert (await other.get("/v1/review/queue")).status_code == 200

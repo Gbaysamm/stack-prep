@@ -13,9 +13,10 @@ from __future__ import annotations
 
 import hashlib
 import secrets
+from dataclasses import dataclass
 from datetime import timedelta
 from functools import lru_cache
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
 from argon2 import PasswordHasher
@@ -167,7 +168,12 @@ async def require_student(request: Request, conn: AsyncConnection, student_id: U
     let past, so the route's own 404 still answers.
     """
     me = await current_student(request, conn)
-    if me == student_id:
+    if me is not None and me == student_id:
+        # A reviewer account is for the reviewer dashboard only; an admin may use the app.
+        if await role_of(conn, me) == "reviewer":
+            raise HTTPException(
+                status_code=403, detail="Reviewer accounts can't use the student app."
+            )
         return
     if me is not None:
         raise HTTPException(status_code=403, detail="That isn't your account.")
@@ -205,3 +211,95 @@ async def require_session_owner(request: Request, conn: AsyncConnection, session
     ).scalar_one_or_none()
     if owner is not None:
         await require_student(request, conn, owner)
+
+
+# --------------------------------------------------------------------------- staff roles
+
+#: What an account is: a student unless account_roles says otherwise (migration 031).
+Role = Literal["student", "reviewer", "admin"]
+
+
+async def role_of(conn: AsyncConnection, student_id: UUID) -> Role:
+    role = (
+        await conn.execute(
+            text("SELECT role FROM account_roles WHERE student_id = :id"), {"id": student_id}
+        )
+    ).scalar_one_or_none()
+    return role or "student"
+
+
+@dataclass(frozen=True)
+class Staff:
+    """A signed-in reviewer or admin, and the reviewer row their decisions are recorded under."""
+
+    student_id: UUID
+    role: Role
+    reviewer_id: UUID
+    display_name: str
+
+
+async def _reviewer_row(conn: AsyncConnection, student_id: UUID) -> tuple[UUID, str]:
+    """The academic_reviewers row linked to this account, made the first time it is needed.
+
+    Decisions are recorded against academic_reviewers, so a staff account needs one. It is
+    created from the account's display name and committed by the caller's transaction.
+    """
+    row = (
+        (
+            await conn.execute(
+                text(
+                    """
+                    SELECT r.id, r.display_name FROM academic_reviewers r
+                    WHERE r.student_id = :id
+                    """
+                ),
+                {"id": student_id},
+            )
+        )
+        .mappings()
+        .first()
+    )
+    if row is not None:
+        return row["id"], row["display_name"]
+    created = (
+        (
+            await conn.execute(
+                text(
+                    """
+                    INSERT INTO academic_reviewers (display_name, student_id)
+                    SELECT display_name, id FROM students WHERE id = :id
+                    RETURNING id, display_name
+                    """
+                ),
+                {"id": student_id},
+            )
+        )
+        .mappings()
+        .one()
+    )
+    return created["id"], created["display_name"]
+
+
+async def _staff(request: Request, conn: AsyncConnection, allowed: tuple[Role, ...]) -> Staff:
+    me = await current_student(request, conn)
+    if me is None:
+        raise HTTPException(status_code=401, detail="Log in to continue.")
+    role = await role_of(conn, me)
+    if role not in allowed:
+        raise HTTPException(status_code=403, detail="Your account can't open this page.")
+    reviewer_id, display_name = await _reviewer_row(conn, me)
+    return Staff(student_id=me, role=role, reviewer_id=reviewer_id, display_name=display_name)
+
+
+async def reviewer_session(
+    request: Request, conn: Annotated[AsyncConnection, Depends(connection)]
+) -> Staff:
+    """A dependency: the signed-in reviewer or admin, or 401 / 403."""
+    return await _staff(request, conn, ("reviewer", "admin"))
+
+
+async def admin_session(
+    request: Request, conn: Annotated[AsyncConnection, Depends(connection)]
+) -> Staff:
+    """A dependency: the signed-in admin, or 401 / 403."""
+    return await _staff(request, conn, ("admin",))

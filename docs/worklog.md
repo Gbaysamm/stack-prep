@@ -15,6 +15,28 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-27
 
+### Staff roles: admin and reviewer dashboards with real sign-in (plan phase 1)
+- **Why:** the founder asked for an admin dashboard and a reviewer dashboard with roles (admin
+  can use everything; reviewer only the reviewer dashboard; a student only the student app), and
+  for the student app to move to the bare address. The review tool had no sign-in at all
+  (a reviewer picked a name from a list), so only the server's shared password protected it.
+- **What:** migration 031 adds `account_roles` (reviewer, admin) and links academic_reviewers
+  to an account. Staff sign in like anyone; `/v1/review/*` needs a reviewer or admin session and
+  records each decision under the signed-in reviewer (the name list is gone); new `/v1/admin/*`
+  needs an admin, starting with staff management (list, grant by login, remove; an admin cannot
+  remove their own role). A reviewer account is kept out of the student app with a clear note.
+  `database/create_admin.py` makes the first admin on a server. Web: the student app is at `/`
+  (old `/student/...` links redirect), the reviewer dashboard at `/review`, the admin dashboard
+  at `/admin`, each behind its own sign-in that comes back over the page when a session ends;
+  admins see a Staff section in the student app's menu. A shared friendly-error helper turns
+  every failure into one plain sentence.
+- **Checked:** all 512 API tests pass against the local database (the review tests now sign in
+  as a reviewer; signed-out is refused 401, a student 403); the web build and tests pass; sign-in,
+  staff, reviewer-refused and admin-menu screens at 1440 and 390.
+- **Server step (after deploy):** run `create_admin.py` once for the founder's account; then the
+  shared password in the Caddy block can come off.
+- **Status:** committed, not pushed.
+
 ### Lesson doodles cut to the pictures that teach
 - **Why:** the founder found the board doodles in Use of English and Mathematics lessons too many
   and often beside the point (a teacher with a book on a mean-age sum, Amina beside a plane on

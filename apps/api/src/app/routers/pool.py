@@ -276,8 +276,7 @@ async def _already_reserved(
         pool=DIAGNOSTIC,
     )
     return {
-        str(row["topic_id"]): (int(row["reserved"]), sorted(row["levels"] or []))
-        for row in rows
+        str(row["topic_id"]): (int(row["reserved"]), sorted(row["levels"] or [])) for row in rows
     }
 
 

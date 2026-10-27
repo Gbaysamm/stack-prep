@@ -13,7 +13,7 @@ locations, because the sign-up screen shows them as they are.
 from __future__ import annotations
 
 import re
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
@@ -31,6 +31,7 @@ from app.auth import (
     hash_token,
     needs_rehash,
     open_session,
+    role_of,
     set_session_cookie,
     verify_against_nothing,
     verify_password,
@@ -76,6 +77,8 @@ class Account(BaseModel):
     display_name: str
     #: The email address or +234 phone number the student signs in with.
     login: str
+    #: student, reviewer or admin (migration 031). Staff are sent to their dashboard.
+    role: Literal["student", "reviewer", "admin"] = "student"
 
 
 def normalise_login(raw: str) -> tuple[str, str] | None:
@@ -340,7 +343,12 @@ async def login(
     await conn.commit()
 
     set_session_cookie(response, request, token)
-    return Account(student_id=student_id, display_name=row["display_name"], login=key)
+    return Account(
+        student_id=student_id,
+        display_name=row["display_name"],
+        login=key,
+        role=await role_of(conn, student_id),
+    )
 
 
 @router.post("/logout", status_code=204, summary="Sign out")
@@ -409,4 +417,9 @@ async def me(
         await conn.commit()
         set_session_cookie(response, request, token)
 
-    return Account(student_id=row["id"], display_name=row["display_name"], login=row["login"])
+    return Account(
+        student_id=row["id"],
+        display_name=row["display_name"],
+        login=row["login"],
+        role=await role_of(conn, row["id"]),
+    )

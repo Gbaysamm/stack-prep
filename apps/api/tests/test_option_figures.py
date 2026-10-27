@@ -15,6 +15,7 @@ from typing import Any
 import httpx
 import pytest
 from sqlalchemy import text
+from staff import staff_login
 from test_practice import client, fixture  # noqa: F401  (pytest fixtures)
 
 from app import figures as figures_module
@@ -284,20 +285,21 @@ async def test_the_reviewer_sees_each_option_picture(
     client: httpx.AsyncClient,  # noqa: F811
     drawn: dict[str, Any],
 ) -> None:
-    async with get_engine().connect() as conn:
-        question_id = (
-            await conn.execute(
-                text("SELECT question_id FROM question_versions WHERE id = CAST(:v AS uuid)"),
-                {"v": drawn["versions"][0]},
-            )
-        ).scalar_one()
-    response = await client.get(f"/v1/review/questions/{question_id}")
-    assert response.status_code == 200, response.text
-    options = response.json()["options"]
-    assert [option["option_key"] for option in options] == list("ABCD")
-    for option in options:
-        assert option["figure"]["alt_text"] == f"Transistor symbol {option['option_key']}"
-        assert option["figure"]["url"] == f"/v1/review/figures/{option['figure']['id']}"
-    served = await client.get(options[0]["figure"]["url"])
-    assert served.status_code == 200
-    assert (await client.get(f"/v1/review/figures/{uuid.uuid4()}")).status_code == 404
+    async with staff_login(client, "reviewer"):
+        async with get_engine().connect() as conn:
+            question_id = (
+                await conn.execute(
+                    text("SELECT question_id FROM question_versions WHERE id = CAST(:v AS uuid)"),
+                    {"v": drawn["versions"][0]},
+                )
+            ).scalar_one()
+        response = await client.get(f"/v1/review/questions/{question_id}")
+        assert response.status_code == 200, response.text
+        options = response.json()["options"]
+        assert [option["option_key"] for option in options] == list("ABCD")
+        for option in options:
+            assert option["figure"]["alt_text"] == f"Transistor symbol {option['option_key']}"
+            assert option["figure"]["url"] == f"/v1/review/figures/{option['figure']['id']}"
+        served = await client.get(options[0]["figure"]["url"])
+        assert served.status_code == 200
+        assert (await client.get(f"/v1/review/figures/{uuid.uuid4()}")).status_code == 404

@@ -1,0 +1,523 @@
+/* The staff dashboards (admin and reviewer): the student app's tokens, in a working layout. */
+
+.sj.st-root {
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--gray-900);
+  font-family: var(--f-body);
+}
+
+/* ------------------------------------------------------------------ sign-in and notices */
+
+.sj .st-center {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+}
+.sj .st-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 12px 34px rgba(31, 0, 80, 0.08);
+}
+.sj .st-brand,
+.sj .st-side-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--ink-900);
+  margin-bottom: 22px;
+}
+.sj .st-brand small,
+.sj .st-side-brand small {
+  display: block;
+  font-family: var(--f-body);
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--gray-500);
+}
+.sj .st-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--purple-600), var(--pink-500));
+  color: var(--white);
+  font-family: var(--f-display);
+  font-weight: 700;
+}
+.sj .st-title {
+  font-family: var(--f-display);
+  font-size: 26px;
+  color: var(--ink-900);
+  margin: 0 0 6px;
+}
+.sj .st-lead {
+  color: var(--gray-600);
+  line-height: 1.6;
+  margin: 0 0 18px;
+}
+.sj .st-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.sj .st-form {
+  display: grid;
+  gap: 14px;
+}
+.sj .st-field {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-700);
+}
+.sj .st-field input,
+.sj .st-field select,
+.sj .st-field textarea {
+  font: inherit;
+  font-weight: 400;
+  padding: 11px 13px;
+  border: 1px solid var(--gray-300);
+  border-radius: 12px;
+  background: var(--white);
+  color: var(--gray-900);
+}
+.sj .st-field input:focus,
+.sj .st-field select:focus,
+.sj .st-field textarea:focus {
+  outline: 2px solid var(--purple-300);
+  border-color: var(--purple-500);
+}
+.sj .st-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--danger-100);
+  color: var(--danger);
+  font-size: 14px;
+}
+.sj .st-wide {
+  width: 100%;
+  justify-content: center;
+}
+.sj .st-loading {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid var(--purple-100);
+  border-top-color: var(--purple-600);
+  animation: st-spin 0.8s linear infinite;
+}
+@keyframes st-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.sj .st-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(19, 0, 50, 0.55);
+  backdrop-filter: blur(3px);
+}
+
+/* ------------------------------------------------------------------ the frame */
+
+.sj .st-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 252px 1fr;
+}
+.sj .st-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px 16px;
+  background: var(--ink-900);
+  color: var(--white);
+  overflow-y: auto;
+}
+.sj .st-sidebar .st-side-brand {
+  color: var(--white);
+  margin: 0 6px 4px;
+}
+.sj .st-sidebar .st-side-brand small {
+  color: var(--purple-200);
+}
+.sj .st-nav {
+  display: grid;
+  gap: 4px;
+}
+.sj .st-nav a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.78);
+  text-decoration: none;
+  font-size: 14.5px;
+  font-weight: 500;
+}
+.sj .st-nav a:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--white);
+}
+.sj .st-nav a.on {
+  background: var(--white);
+  color: var(--ink-900);
+}
+.sj .st-nav-icon {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+}
+.sj .st-nav-icon svg {
+  width: 19px;
+  height: 19px;
+}
+.sj .st-nav-label {
+  flex: 1;
+}
+.sj .st-nav-count {
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--pink-500);
+  color: var(--white);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+.sj .st-switch {
+  display: grid;
+  gap: 2px;
+  margin-top: auto;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 13.5px;
+}
+.sj .st-switch-label {
+  color: var(--purple-200);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+.sj .st-switch a {
+  color: var(--white);
+  text-decoration: none;
+  padding: 4px 0;
+}
+.sj .st-switch a:hover {
+  text-decoration: underline;
+}
+.sj .st-me {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+.sj .st-switch + .st-me {
+  margin-top: 0;
+}
+.sj .st-sidebar > .st-nav + .st-me {
+  margin-top: auto;
+}
+.sj .st-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--purple-500);
+  font-weight: 600;
+  flex: none;
+}
+.sj .st-me-text {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.25;
+}
+.sj .st-me-text strong {
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sj .st-me-text small {
+  color: var(--purple-200);
+  font-size: 12px;
+}
+.sj .st-signout {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: var(--white);
+  border-radius: 999px;
+  padding: 6px 11px;
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.sj .st-signout:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.sj .st-topbar {
+  display: none;
+}
+.sj .st-main {
+  min-width: 0;
+  padding: 30px 34px 60px;
+}
+
+/* ------------------------------------------------------------------ page parts */
+
+.sj .st-pagehead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+.sj .st-pagehead h1 {
+  font-family: var(--f-display);
+  font-size: 30px;
+  color: var(--ink-900);
+  margin: 0;
+}
+.sj .st-pagehead p {
+  color: var(--gray-600);
+  margin: 6px 0 0;
+}
+.sj .st-pagehead-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.sj .st-panel {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 18px;
+  padding: 20px;
+}
+.sj .st-panel + .st-panel {
+  margin-top: 18px;
+}
+.sj .st-panel h2 {
+  font-family: var(--f-display);
+  font-size: 18px;
+  color: var(--ink-900);
+  margin: 0 0 14px;
+}
+.sj .st-table-wrap {
+  overflow-x: auto;
+}
+.sj .st-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.sj .st-table th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--gray-500);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--gray-200);
+  white-space: nowrap;
+}
+.sj .st-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--gray-100);
+  vertical-align: middle;
+}
+.sj .st-table tr:last-child td {
+  border-bottom: 0;
+}
+.sj .st-table tr.st-clickable {
+  cursor: pointer;
+}
+.sj .st-table tr.st-clickable:hover td {
+  background: var(--purple-050);
+}
+.sj .st-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--gray-100);
+  color: var(--gray-700);
+}
+.sj .st-pill.admin {
+  background: var(--purple-100);
+  color: var(--purple-700);
+}
+.sj .st-pill.reviewer {
+  background: var(--mint-300);
+  color: var(--ink-800);
+}
+.sj .st-pill.good {
+  background: var(--green-100);
+  color: var(--green-600);
+}
+.sj .st-pill.warn {
+  background: var(--orange-100);
+  color: var(--orange-500);
+}
+.sj .st-pill.bad {
+  background: var(--danger-100);
+  color: var(--danger);
+}
+.sj .st-muted {
+  color: var(--gray-500);
+}
+.sj .st-empty {
+  padding: 26px;
+  text-align: center;
+  color: var(--gray-500);
+}
+.sj .st-inline-form {
+  display: grid;
+  grid-template-columns: 1fr 180px auto;
+  gap: 10px;
+  align-items: end;
+}
+
+/* ------------------------------------------------------------------ phones */
+
+@media (max-width: 900px) {
+  .sj .st-shell {
+    grid-template-columns: 1fr;
+  }
+  .sj .st-shell > .st-sidebar {
+    display: none;
+  }
+  .sj .st-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--ink-900);
+    color: var(--white);
+  }
+  .sj .st-topbar-title {
+    font-family: var(--f-display);
+    font-weight: 600;
+  }
+  .sj .st-menubtn {
+    display: grid;
+    gap: 4px;
+    width: 38px;
+    height: 38px;
+    place-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: 0;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .sj .st-menubtn span {
+    width: 18px;
+    height: 2px;
+    background: var(--white);
+    border-radius: 2px;
+  }
+  .sj .st-drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+  }
+  .sj .st-drawer-scrim {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    background: rgba(19, 0, 50, 0.5);
+  }
+  .sj .st-drawer-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: min(300px, 86vw);
+  }
+  .sj .st-main {
+    padding: 20px 16px 48px;
+  }
+  .sj .st-pagehead h1 {
+    font-size: 24px;
+  }
+  .sj .st-inline-form {
+    grid-template-columns: 1fr;
+  }
+  .sj .st-panel {
+    padding: 16px;
+  }
+}
+
+/* A table that becomes stacked cards on a phone: each cell shows its column's name (data-label). */
+@media (max-width: 900px) {
+  .sj .st-table.st-stack thead {
+    display: none;
+  }
+  .sj .st-table.st-stack,
+  .sj .st-table.st-stack tbody,
+  .sj .st-table.st-stack tr,
+  .sj .st-table.st-stack td {
+    display: block;
+    width: 100%;
+  }
+  .sj .st-table.st-stack tr {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .sj .st-table.st-stack tr:last-child {
+    border-bottom: 0;
+  }
+  .sj .st-table.st-stack td {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 5px 0;
+    border: 0;
+    text-align: right !important;
+    overflow-wrap: anywhere;
+  }
+  .sj .st-table.st-stack td::before {
+    content: attr(data-label);
+    flex: none;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--gray-500);
+  }
+  .sj .st-table.st-stack td[data-label='']::before {
+    content: none;
+  }
+  .sj .st-table.st-stack td:first-child {
+    font-size: 15px;
+  }
+}

@@ -21,6 +21,7 @@ import {
   IconBolt,
   IconBook,
   IconChart,
+  IconCheck,
   IconCalendar,
   IconChevronDown,
   IconClock,
@@ -194,6 +195,28 @@ function NavList({ onPick }: { onPick?: () => void }) {
             {label}
           </NavLink>
         ))}
+      </nav>
+      <StaffLinks />
+    </>
+  );
+}
+
+/** An admin using the student app can step across to the dashboards (migration 031). */
+function StaffLinks() {
+  const { identity } = useIdentity();
+  if (identity?.role !== "admin") return null;
+  return (
+    <>
+      <div className="sj-navlabel">Staff</div>
+      <nav style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        <a className="sj-navitem" href="/admin">
+          <IconChart size={20} />
+          Admin dashboard
+        </a>
+        <a className="sj-navitem" href="/review">
+          <IconCheck size={20} />
+          Reviewer dashboard
+        </a>
       </nav>
     </>
   );

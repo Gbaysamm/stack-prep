@@ -21,7 +21,7 @@ import {
 } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 
-import { authApi, type AuthUser } from './authApi.js';
+import { authApi, type AuthUser, type Role } from './authApi.js';
 import { Splash } from './Splash.js';
 
 export interface Identity {
@@ -31,6 +31,8 @@ export interface Identity {
   login?: string;
   /** True for a device-only student with no login yet. */
   sandbox: boolean;
+  /** student, reviewer or admin; a sandbox identity is always a student. */
+  role?: Role;
 }
 
 /** The first version's key: a sandbox student with no password, on this device only. */
@@ -78,7 +80,13 @@ function devIdentity(): Identity | null {
 }
 
 export function identityFrom(user: AuthUser): Identity {
-  return { studentId: user.student_id, displayName: user.display_name, login: user.login, sandbox: false };
+  return {
+    studentId: user.student_id,
+    displayName: user.display_name,
+    login: user.login,
+    sandbox: false,
+    role: user.role ?? 'student',
+  };
 }
 
 /** The name the splash greets, from the last visit; null when we have never met. */
@@ -186,7 +194,32 @@ export function RequireStudent({ children }: { children: ReactNode }) {
   const { identity } = useIdentity();
   const location = useLocation();
   if (!identity) return <Navigate to="/?mode=login" replace state={{ from: location.pathname + location.search }} />;
+  if (identity.role === 'reviewer') return <ReviewerHere />;
   return <>{children}</>;
+}
+
+/** A reviewer account is for the reviewer dashboard only (migration 031): say so, kindly. */
+function ReviewerHere() {
+  const { identity, signOut } = useIdentity();
+  return (
+    <main className="sj-staffnote">
+      <div className="sj-staffnote-card">
+        <h1>This is a reviewer account</h1>
+        <p>
+          {identity?.displayName}, your account reviews questions, so it opens the reviewer
+          dashboard rather than the student app.
+        </p>
+        <div className="sj-staffnote-actions">
+          <a className="sj-btn" href="/review">
+            Go to the reviewer dashboard
+          </a>
+          <button type="button" className="sj-btn ghost" onClick={() => void signOut()}>
+            Sign out
+          </button>
+        </div>
+      </div>
+    </main>
+  );
 }
 
 /* ------------------------------------------------------------------ data */

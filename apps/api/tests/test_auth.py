@@ -97,7 +97,8 @@ async def test_signup_with_an_email(client: httpx.AsyncClient, tracker: Tracker)
     response = await signup(client, tracker, f"  {email.upper()} ")
     assert response.status_code == 201, response.text
     body = response.json()
-    assert set(body) == {"student_id", "display_name", "login"}
+    assert set(body) == {"student_id", "display_name", "login", "role"}
+    assert body["role"] == "student"
     assert body["display_name"] == "Ada Obi"
     assert body["login"] == email
 
@@ -331,6 +332,7 @@ async def test_a_sandbox_student_can_be_claimed(
         "student_id": sandbox["student_id"],
         "display_name": "Ada Obi",
         "login": email,
+        "role": "student",
     }
     async with get_engine().connect() as conn:
         row = (

@@ -1,4 +1,5 @@
 /** Thin typed wrapper over the review endpoints. */
+import { request as send } from '../lib/friendlyError.js';
 
 import type { OptionFigure } from '../Figures.js';
 
@@ -101,24 +102,10 @@ export type QueueState =
   | 'ready'
   | 'approved';
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`/v1/review${path}`, {
-    ...init,
-    headers: { 'content-type': 'application/json', ...(init?.headers ?? {}) },
-  });
-  if (!response.ok) {
-    // FastAPI puts the useful message in `detail`; the database's own wording reaches
-    // the reviewer unchanged, because it says exactly what is still missing.
-    const body = (await response.json().catch(() => null)) as { detail?: unknown } | null;
-    const detail = body?.detail;
-    throw new Error(typeof detail === 'string' ? detail : `Request failed (${response.status})`);
-  }
-  return (await response.json()) as T;
-}
+/** Every review call, signed in: a failure is a sentence, and an ended session asks to sign in. */
+const request = <T,>(path: string, init?: RequestInit) => send<T>(`/v1/review${path}`, init);
 
 export const api = {
-  reviewers: () => request<Reviewer[]>('/reviewers'),
-
   queue: (state: QueueState, examYear: number | null) => {
     const params = new URLSearchParams({ state, limit: '200' });
     if (examYear !== null) params.set('exam_year', String(examYear));
@@ -135,47 +122,45 @@ export const api = {
   skills: (syllabusVersionId: string) =>
     request<Skill[]>(`/skills?syllabus_version_id=${syllabusVersionId}`),
 
-  setAnswer: (id: string, reviewerId: string, optionKey: string) =>
+  setAnswer: (id: string, optionKey: string) =>
     request<QuestionDetail>(`/questions/${id}/answer`, {
       method: 'POST',
-      body: JSON.stringify({ reviewer_id: reviewerId, option_key: optionKey }),
+      body: JSON.stringify({ option_key: optionKey }),
     }),
 
-  setLevel: (id: string, reviewerId: string, level: number) =>
+  setLevel: (id: string, level: number) =>
     request<QuestionDetail>(`/questions/${id}/level`, {
       method: 'POST',
-      body: JSON.stringify({ reviewer_id: reviewerId, level }),
+      body: JSON.stringify({ level }),
     }),
 
-  decideSkill: (id: string, reviewerId: string, curriculumItemId?: string, reason?: string) =>
+  decideSkill: (id: string, curriculumItemId?: string, reason?: string) =>
     request<QuestionDetail>(`/questions/${id}/skill`, {
       method: 'POST',
       body: JSON.stringify({
-        reviewer_id: reviewerId,
         curriculum_item_id: curriculumItemId ?? null,
         reason: reason ?? null,
       }),
     }),
 
-  setContent: (id: string, reviewerId: string, solutionSteps: string[], hints: string[]) =>
+  setContent: (id: string, solutionSteps: string[], hints: string[]) =>
     request<QuestionDetail>(`/questions/${id}/content`, {
       method: 'POST',
       body: JSON.stringify({
-        reviewer_id: reviewerId,
         solution_steps: solutionSteps,
         hints,
       }),
     }),
 
-  approve: (id: string, reviewerId: string) =>
+  approve: (id: string) =>
     request<QuestionDetail>(`/questions/${id}/approve`, {
       method: 'POST',
-      body: JSON.stringify({ reviewer_id: reviewerId }),
+      body: JSON.stringify({}),
     }),
 
-  resolveReport: (reportId: string, reviewerId: string, note: string) =>
+  resolveReport: (reportId: string, note: string) =>
     request<{ status: string }>(`/reports/${reportId}/resolve`, {
       method: 'POST',
-      body: JSON.stringify({ reviewer_id: reviewerId, note }),
+      body: JSON.stringify({ note }),
     }),
 };

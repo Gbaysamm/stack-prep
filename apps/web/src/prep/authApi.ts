@@ -3,10 +3,14 @@
  * (`sp_session`) the browser keeps for us; every call is same-origin, so fetch sends it by default.
  */
 
+export type Role = 'student' | 'reviewer' | 'admin';
+
 export interface AuthUser {
   student_id: string;
   display_name: string;
   login: string;
+  /** student, reviewer or admin. A reviewer uses /review only; an admin may use everything. */
+  role?: Role;
 }
 
 export interface SignupBody {

@@ -22,10 +22,11 @@ from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncConnection
 
+from app.auth import Staff, reviewer_session
 from app.db import connection, fetch_all
 from app.figures import OptionFigure, option_figures_for, serve
 
-router = APIRouter(prefix="/v1/review", tags=["review"])
+router = APIRouter(prefix="/v1/review", tags=["review"], dependencies=[Depends(reviewer_session)])
 
 OptionKey = Literal["A", "B", "C", "D", "E", "F"]
 QueueFilter = Literal["needs_review", "needs_answer", "needs_level", "flagged", "ready", "approved"]
@@ -124,33 +125,39 @@ class Skill(BaseModel):
 
 
 class AnswerDecision(BaseModel):
-    reviewer_id: UUID
+    #: Ignored: the decision is recorded under the signed-in reviewer.
+    reviewer_id: UUID | None = None
     option_key: OptionKey
 
 
 class LevelDecision(BaseModel):
-    reviewer_id: UUID
+    #: Ignored: the decision is recorded under the signed-in reviewer.
+    reviewer_id: UUID | None = None
     level: int = Field(ge=1, le=5)
 
 
 class SkillDecision(BaseModel):
-    reviewer_id: UUID
+    #: Ignored: the decision is recorded under the signed-in reviewer.
+    reviewer_id: UUID | None = None
     curriculum_item_id: UUID | None = None
     reason: str | None = None
 
 
 class ContentEdit(BaseModel):
-    reviewer_id: UUID
+    #: Ignored: the decision is recorded under the signed-in reviewer.
+    reviewer_id: UUID | None = None
     solution_steps: list[str] | None = None
     hints: list[str] | None = None
 
 
 class Approval(BaseModel):
-    reviewer_id: UUID
+    #: Ignored: the decision is recorded under the signed-in reviewer.
+    reviewer_id: UUID | None = None
 
 
 class ReportDecision(BaseModel):
-    reviewer_id: UUID
+    #: Ignored: the decision is recorded under the signed-in reviewer.
+    reviewer_id: UUID | None = None
     note: str
 
 
@@ -169,15 +176,6 @@ class PaperSection(BaseModel):
     #: Where in the source this claim came from. A reviewer checks this, not our word.
     source_location: str
     review_status: str
-
-
-async def _reviewer(conn: AsyncConnection, reviewer_id: UUID) -> None:
-    row = await conn.execute(
-        text("SELECT 1 FROM academic_reviewers WHERE id = :id AND active"),
-        {"id": reviewer_id},
-    )
-    if row.first() is None:
-        raise HTTPException(status_code=400, detail="unknown or inactive reviewer")
 
 
 async def _draft_version(conn: AsyncConnection, question_id: UUID) -> UUID:
@@ -411,10 +409,11 @@ async def review_figure(
 )
 async def verify_answer(
     conn: Annotated[AsyncConnection, Depends(connection)],
+    staff: Annotated[Staff, Depends(reviewer_session)],
     question_id: UUID,
     decision: AnswerDecision,
 ) -> QuestionDetail:
-    await _reviewer(conn, decision.reviewer_id)
+    decision.reviewer_id = staff.reviewer_id
     version_id = await _draft_version(conn, question_id)
 
     exists = await conn.execute(
@@ -461,10 +460,11 @@ async def verify_answer(
 )
 async def verify_level(
     conn: Annotated[AsyncConnection, Depends(connection)],
+    staff: Annotated[Staff, Depends(reviewer_session)],
     question_id: UUID,
     decision: LevelDecision,
 ) -> QuestionDetail:
-    await _reviewer(conn, decision.reviewer_id)
+    decision.reviewer_id = staff.reviewer_id
     version_id = await _draft_version(conn, question_id)
     await conn.execute(
         text(
@@ -488,10 +488,11 @@ async def verify_level(
 )
 async def decide_skill(
     conn: Annotated[AsyncConnection, Depends(connection)],
+    staff: Annotated[Staff, Depends(reviewer_session)],
     question_id: UUID,
     decision: SkillDecision,
 ) -> QuestionDetail:
-    await _reviewer(conn, decision.reviewer_id)
+    decision.reviewer_id = staff.reviewer_id
     await _draft_version(conn, question_id)
 
     existing = (
@@ -557,10 +558,11 @@ async def decide_skill(
 )
 async def edit_content(
     conn: Annotated[AsyncConnection, Depends(connection)],
+    staff: Annotated[Staff, Depends(reviewer_session)],
     question_id: UUID,
     edit: ContentEdit,
 ) -> QuestionDetail:
-    await _reviewer(conn, edit.reviewer_id)
+    edit.reviewer_id = staff.reviewer_id
     version_id = await _draft_version(conn, question_id)
     if edit.solution_steps is not None:
         await conn.execute(
@@ -585,10 +587,11 @@ async def edit_content(
 )
 async def approve(
     conn: Annotated[AsyncConnection, Depends(connection)],
+    staff: Annotated[Staff, Depends(reviewer_session)],
     question_id: UUID,
     approval: Approval,
 ) -> QuestionDetail:
-    await _reviewer(conn, approval.reviewer_id)
+    approval.reviewer_id = staff.reviewer_id
     version_id = await _draft_version(conn, question_id)
     try:
         await conn.execute(
@@ -612,10 +615,11 @@ async def approve(
 @router.post("/reports/{report_id}/resolve", summary="Close a problem report")
 async def resolve_report(
     conn: Annotated[AsyncConnection, Depends(connection)],
+    staff: Annotated[Staff, Depends(reviewer_session)],
     report_id: UUID,
     decision: ReportDecision,
 ) -> dict[str, str]:
-    await _reviewer(conn, decision.reviewer_id)
+    decision.reviewer_id = staff.reviewer_id
     result = await conn.execute(
         text(
             """
@@ -706,6 +710,7 @@ async def sections(
 )
 async def approve_section(
     conn: Annotated[AsyncConnection, Depends(connection)],
+    staff: Annotated[Staff, Depends(reviewer_session)],
     section_id: UUID,
     decision: Approval,
 ) -> PaperSection:
@@ -714,7 +719,7 @@ async def approve_section(
     Approving every section of a paper at once is deliberately not offered: each carries its
     own citation, and the point of the citation is that someone read it.
     """
-    await _reviewer(conn, decision.reviewer_id)
+    decision.reviewer_id = staff.reviewer_id
     updated = (
         await conn.execute(
             text(

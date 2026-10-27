@@ -15,7 +15,6 @@ import {
   type QueueItem,
   type QueueState,
   type QuestionDetail,
-  type Reviewer,
   type Skill,
 } from './api.js';
 
@@ -32,11 +31,7 @@ const QUEUES: { value: QueueState; label: string }[] = [
   { value: 'approved', label: 'Approved' },
 ];
 
-const REVIEWER_KEY = 'score-pilot.reviewer';
-
 export function ReviewPage() {
-  const [reviewers, setReviewers] = useState<Reviewer[]>([]);
-  const [reviewerId, setReviewerId] = useState<string>('');
   const [queueState, setQueueState] = useState<QueueState>('needs_review');
   const [examYear, setExamYear] = useState<number | null>(null);
   const [years, setYears] = useState<PaperYear[]>([]);
@@ -50,12 +45,6 @@ export function ReviewPage() {
   const typingRef = useRef(false);
 
   useEffect(() => {
-    api.reviewers().then((list) => {
-      setReviewers(list);
-      const saved = localStorage.getItem(REVIEWER_KEY);
-      const known = saved && list.some((r) => r.id === saved) ? saved : list[0]?.id;
-      if (known) setReviewerId(known);
-    }, reportError);
     // Read from the bank rather than listed here, so a newly loaded paper shows up.
     api.years().then(setYears, reportError);
   }, []);
@@ -99,7 +88,7 @@ export function ReviewPage() {
 
   const act = useCallback(
     async (action: () => Promise<QuestionDetail>) => {
-      if (!reviewerId || busy) return;
+      if (busy) return;
       setBusy(true);
       setError(null);
       try {
@@ -111,7 +100,7 @@ export function ReviewPage() {
         setBusy(false);
       }
     },
-    [reviewerId, busy, loadQueue],
+    [busy, loadQueue],
   );
 
   const move = useCallback(
@@ -138,16 +127,16 @@ export function ReviewPage() {
 
       if (['A', 'B', 'C', 'D', 'E', 'F'].includes(key) && detail.options.some((o) => o.option_key === key)) {
         event.preventDefault();
-        void act(() => api.setAnswer(detail.question_id, reviewerId, key));
+        void act(() => api.setAnswer(detail.question_id, key));
       } else if (['1', '2', '3', '4', '5'].includes(key)) {
         event.preventDefault();
-        void act(() => api.setLevel(detail.question_id, reviewerId, Number(key)));
+        void act(() => api.setLevel(detail.question_id, Number(key)));
       } else if (key === 'S') {
         event.preventDefault();
-        void act(() => api.decideSkill(detail.question_id, reviewerId));
+        void act(() => api.decideSkill(detail.question_id));
       } else if (event.key === 'Enter') {
         event.preventDefault();
-        void act(() => api.approve(detail.question_id, reviewerId));
+        void act(() => api.approve(detail.question_id));
       } else if (key === 'J') {
         move(1);
       } else if (key === 'K') {
@@ -156,7 +145,7 @@ export function ReviewPage() {
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [detail, reviewerId, act, move]);
+  }, [detail, act, move]);
 
   const summary = useMemo(() => {
     if (!progress) return `${items.length} in queue`;
@@ -173,22 +162,6 @@ export function ReviewPage() {
     <div className="review">
       <header className="review-bar">
         <strong>Question review</strong>
-        <label>
-          Reviewer
-          <select
-            value={reviewerId}
-            onChange={(event) => {
-              setReviewerId(event.target.value);
-              localStorage.setItem(REVIEWER_KEY, event.target.value);
-            }}
-          >
-            {reviewers.map((reviewer) => (
-              <option key={reviewer.id} value={reviewer.id}>
-                {reviewer.display_name}
-              </option>
-            ))}
-          </select>
-        </label>
         <label>
           Queue
           <select value={queueState} onChange={(event) => setQueueState(event.target.value as QueueState)}>
@@ -254,7 +227,6 @@ export function ReviewPage() {
           <QuestionPanel
             detail={detail}
             skills={skills}
-            reviewerId={reviewerId}
             busy={busy}
             onAct={act}
             onTyping={(value) => {
@@ -276,13 +248,12 @@ function Flag({ on, label }: { on: boolean; label: string }) {
 interface PanelProps {
   detail: QuestionDetail;
   skills: Skill[];
-  reviewerId: string;
   busy: boolean;
   onAct: (action: () => Promise<QuestionDetail>) => Promise<void>;
   onTyping: (value: boolean) => void;
 }
 
-function QuestionPanel({ detail, skills, reviewerId, busy, onAct, onTyping }: PanelProps) {
+function QuestionPanel({ detail, skills, busy, onAct, onTyping }: PanelProps) {
   const [solution, setSolution] = useState('');
   const [hint, setHint] = useState('');
 
@@ -344,7 +315,7 @@ function QuestionPanel({ detail, skills, reviewerId, busy, onAct, onTyping }: Pa
               type="button"
               disabled={approved || busy}
               className={option.is_correct ? 'chosen' : undefined}
-              onClick={() => onAct(() => api.setAnswer(detail.question_id, reviewerId, option.option_key))}
+              onClick={() => onAct(() => api.setAnswer(detail.question_id, option.option_key))}
             >
               <span className="key">{option.option_key}</span>
               <span className="sp-textbook">
@@ -366,7 +337,7 @@ function QuestionPanel({ detail, skills, reviewerId, busy, onAct, onTyping }: Pa
             type="button"
             disabled={approved || busy}
             className={detail.mastery_level_number === level ? 'chosen' : undefined}
-            onClick={() => onAct(() => api.setLevel(detail.question_id, reviewerId, level))}
+            onClick={() => onAct(() => api.setLevel(detail.question_id, level))}
           >
             L{level}
           </button>
@@ -384,7 +355,7 @@ function QuestionPanel({ detail, skills, reviewerId, busy, onAct, onTyping }: Pa
             value={detail.primary_skill_id ?? ''}
             disabled={approved || busy}
             onChange={(event) =>
-              onAct(() => api.decideSkill(detail.question_id, reviewerId, event.target.value))
+              onAct(() => api.decideSkill(detail.question_id, event.target.value))
             }
           >
             {skills.map((skill) => (
@@ -398,7 +369,7 @@ function QuestionPanel({ detail, skills, reviewerId, busy, onAct, onTyping }: Pa
         <button
           type="button"
           disabled={approved || busy || detail.classification_status === 'approved'}
-          onClick={() => onAct(() => api.decideSkill(detail.question_id, reviewerId))}
+          onClick={() => onAct(() => api.decideSkill(detail.question_id))}
         >
           {detail.classification_status === 'approved' ? 'Skill approved' : 'Approve skill (S)'}
         </button>
@@ -435,7 +406,6 @@ function QuestionPanel({ detail, skills, reviewerId, busy, onAct, onTyping }: Pa
             onAct(() =>
               api.setContent(
                 detail.question_id,
-                reviewerId,
                 solution.split('\n').filter((line) => line.trim()),
                 hint.split('\n').filter((line) => line.trim()),
               ),
@@ -451,7 +421,7 @@ function QuestionPanel({ detail, skills, reviewerId, busy, onAct, onTyping }: Pa
           type="button"
           className="primary"
           disabled={approved || busy || missing.length > 0}
-          onClick={() => onAct(() => api.approve(detail.question_id, reviewerId))}
+          onClick={() => onAct(() => api.approve(detail.question_id))}
         >
           Approve question (⏎)
         </button>

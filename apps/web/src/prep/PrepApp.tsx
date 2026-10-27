@@ -45,7 +45,7 @@ function Start() {
 
 export function PrepApp() {
   return (
-    <BrowserRouter basename="/student">
+    <BrowserRouter>
       <IdentityProvider>
         <div className="sj">
           <ToastProvider>
