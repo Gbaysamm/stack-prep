@@ -15,6 +15,24 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-27
 
+### The 15 "unrecoverable" Use of English questions rebuilt
+- **Why:** the English loader left 15 items marked `unrecoverable` exactly as they were in the
+  bank, and some were live and broken: 2013 Q67's stem stopped mid-sentence with two identical
+  options, stress items had lost the capitals that mark stress, five printed only three options,
+  and 2015 Q7-10 were set on a passage the paper never printed. The founder's rule is that a
+  broken question is rebuilt, never left or dropped.
+- **What:** each is now a normal question with an explanation and a lesson: a sound fourth
+  option for the three-option items (2010 Q18, 2016 Q14, Q15, Q19, Q43); the duplicates
+  replaced and Q67's stem completed (2013 Q67, Q85); stress capitals restored so one option is
+  right (2013 Q97 inforMAtion, 2018 Q60 enCOUragement); a short original passage on native
+  language and the language of instruction for 2015 Q7-10; 2015 Q20 a word-meaning item on the
+  cloze passage; 2015 Q71 a preposition item. The last three bank rows that named paper
+  question numbers were among these.
+- **Checked:** the loader reports 0 unrecoverable and nothing pending after loading locally;
+  the local bank's current versions hold no paper question numbers; all API tests pass.
+- **For a teacher:** the two stress patterns, and the new 2015 passage with its four questions.
+- **Status:** committed, not pushed.
+
 ### Paper question numbers taken out of shared-data stems
 - **Why:** a stem such as "Use the information below to answer questions 11 and 12" showed up as
   Q1 of 15 in a mock, pointing the student at questions that are not there. Mocks, practice and
