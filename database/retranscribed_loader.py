@@ -201,12 +201,15 @@ def topic_label(topic_code: str) -> tuple[str, str]:
 
     Chemistry and Physics number their topics straight through (CHEM.3 is "topic 3", printed
     "3."). Biology numbers them afresh in each lettered section (BIO.B2 is "section B, topic
-    2", printed "2.").
+    2", printed "2."), and Government in each Roman-numbered part (GOV.II3 is "part II, topic
+    3").
     """
     number = topic_code.split(".", 1)[1]
     sectioned = re.fullmatch(r"([A-Z]+)(\d+)", number)
     if sectioned:
-        return f"section {sectioned.group(1)}, topic {sectioned.group(2)}", sectioned.group(2)
+        part, n = sectioned.groups()
+        kind = "part" if re.fullmatch(r"[IVX]+", part) else "section"
+        return f"{kind} {part}, topic {n}", n
     return f"topic {number}", number
 
 

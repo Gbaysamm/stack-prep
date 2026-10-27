@@ -13,6 +13,28 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ---
 
+## 2026-10-27
+
+### UTME Government 2010-2018: questions, explanations and lessons, with the printed keys put right
+- **What:** 418 questions from the JAMB papers, each with a worked explanation, a true reason
+  for every wrong option and a board lesson in the Government method (name it, state the fact,
+  why, a Nigerian link, a way to remember it, the trap). Every answer is worked out afresh:
+  101 differ from the compilation's printed keys (42 of 49 in 2011). Broken options are
+  repaired at the source; seven questions are held back because they cannot be made sound
+  (2010 Q45, 2011 Q17 and Q45, 2013 Q50, 2015 Q7 and Q32, and 2016 Q43, which repeats Q37).
+- **Curriculum:** 33 topics and 94 subtopics from the JAMB syllabus, coded by its Roman parts
+  (GOV.II3 is part II, topic 3); `topic_label` now cites these as "part II, topic 3".
+- **Why:** arts and social-science students need their subjects, and the printed keys were
+  too unreliable to teach from.
+- **Where:** docs/questions/utme/government/ (README.md holds Government's rules),
+  database/load_retranscribed_government.py, database/check_government.py,
+  apps/api/tests/test_government_content.py; both `deploy/*/release.sh` run the loader after
+  Biology.
+- **Checked:** check_government.py --lessons OK for all nine years; loaded locally (418
+  questions, 418 lessons, 94 skills); a Government check-up at 390 and a mock with Government
+  at 1440; ruff, mypy and 530 tests pass.
+- **Status:** committed, not pushed.
+
 ## 2026-10-18
 
 ### UTME Biology 2010-2018: questions, explanations, lessons and drawings that make sense
