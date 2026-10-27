@@ -15,6 +15,21 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-27
 
+### Paper question numbers taken out of shared-data stems
+- **Why:** a stem such as "Use the information below to answer questions 11 and 12" showed up as
+  Q1 of 15 in a mock, pointing the student at questions that are not there. Mocks, practice and
+  check-ups all shuffle questions, so a paper number in what a student reads is always wrong.
+- **What:** 252 lead-ins across every subject's retranscribed files now end without the numbers
+  ("Use the information below."); "Questions 21 to 30 are based on ..." became "This question
+  is based on ..."; six stems that named the numbers mid-sentence were trimmed; and seven
+  explanation lines that sent the student to "question 25" now say what they meant in their own
+  words (Accounts, Economics, Mathematics).
+- **Checked:** every subject's checker passes; each loader picked the changes up and the local
+  bank's current versions hold no paper numbers outside English. English's last three (2013 Q67,
+  Q85, Q97, from its older transcription) are among the questions its loader leaves as they
+  are.
+- **Status:** committed, not pushed.
+
 ### UTME Principles of Accounts 2010-2018: questions, explanations and lessons
 - **What:** 405 questions from the JAMB papers, none held back, each with an explanation, a
   true reason for every wrong option and a board lesson in the Accounts method (name it, the
