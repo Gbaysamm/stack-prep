@@ -15,6 +15,27 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-27
 
+### UTME Commerce 2010-2018: questions, explanations and lessons
+- **What:** 405 questions from the JAMB papers, none held back, each with an explanation, a
+  true reason for every wrong option and a board lesson in the Commerce method (name it,
+  define it, how it works or the worked sum, a Nigerian example, a way to remember it, the
+  trap). 70 answers differ from the compilation's printed keys (the compilation prints no key
+  for 2011); 269 questions were repaired or rebuilt, mostly by replacing a second defensible
+  option. The 49 questions the later papers reuse are answered the same way in every year.
+  Changed facts (the Nigerian Exchange, the Alternative Securities Market, the FCCPC, ECOWAS
+  members) are taught as they stood, with one step on how they stand now.
+- **Curriculum:** the syllabus's 16 topics and 71 subtopics, coded COM.6.d.
+- **Figures and tables:** the tree of commerce (2011 Q9, 2015 Q31) and the marketing mix (2018
+  Q32) are drawn as SVG; the insurance table, trading figures and the 2016 balance sheet are
+  KaTeX tables. The API image now copies commerce/figures/svg.
+- **Where:** docs/questions/utme/commerce/, database/load_retranscribed_commerce.py,
+  database/check_commerce.py, apps/api/tests/test_commerce_content.py; both
+  `deploy/*/release.sh` run the loader after Literature.
+- **Checked:** check_commerce.py --lessons OK for all nine years; every calculation reworked by
+  hand; loaded locally (405 questions, 71 skills); the Commerce subject page at 390 and a mock
+  review at 1440; ruff, mypy and the content tests pass.
+- **Status:** committed, not pushed.
+
 ### UTME Literature in English 2010-2018: questions, explanations and lessons
 - **What:** 425 questions from the JAMB papers, none held back, each with an explanation, a
   true reason for every wrong option and a board lesson in the Literature method (name it,

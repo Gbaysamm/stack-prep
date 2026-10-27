@@ -58,18 +58,19 @@ echo "==> Loading re-transcribed content"
 # transcriptions this is one quick check. A failure here is reported, not fatal -- the load
 # is one transaction, so a failed one has changed nothing, and the release still goes out.
 #
-# Mathematics first, then Use of English, then the sciences, Government, Economics and
-# Literature. One backup covers all eight, taken only if any has work; each loads only if it has
-# work, and one failing does not stop the others. English also repairs mojibake (a curly quote
-# stored as three garbled characters) in any English text its files do not cover. Chemistry,
-# Physics, Biology, Government, Economics and Literature also create their subject (CHEM, PHY,
-# BIO, GOV, ECO, LIT) and its curriculum, approved in the same name, the first time each runs on
-# a server without them.
+# Mathematics first, then Use of English, then the sciences, Government, Economics,
+# Literature and Commerce. One backup covers all nine, taken only if any has work; each loads
+# only if it has work, and one failing does not stop the others. English also repairs mojibake
+# (a curly quote stored as three garbled characters) in any English text its files do not
+# cover. Chemistry, Physics, Biology, Government, Economics, Literature and Commerce also create
+# their subject (CHEM, PHY, BIO, GOV, ECO, LIT, COM) and its curriculum, approved in the same
+# name, the first time each runs on a server without them.
 CONTENT_REVIEWER="${CONTENT_REVIEWER:-Abdulmalik}"
 CONTENT_LOADERS=("load_retranscribed_maths.py" "load_retranscribed_english.py --fix-encoding"
   "load_retranscribed_chemistry.py" "load_retranscribed_physics.py"
   "load_retranscribed_biology.py" "load_retranscribed_government.py"
-  "load_retranscribed_economics.py" "load_retranscribed_literature.py")
+  "load_retranscribed_economics.py" "load_retranscribed_literature.py"
+  "load_retranscribed_commerce.py")
 DB_URL=$(grep '^DATABASE_URL=' .env | cut -d= -f2- | sed 's/+asyncpg//')
 load_content() {
   local script=$1
