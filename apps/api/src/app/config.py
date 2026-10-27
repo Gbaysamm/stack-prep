@@ -83,6 +83,16 @@ class Settings(BaseSettings):
     kokoro_voice: str = "af_heart"
     kokoro_speed: float = Field(default=1.0, ge=0.5, le=2.0)
 
+    #: Outgoing email (password-reset codes). Empty host: nothing is sent, and outside
+    #: production the code is written to the log instead, so it can be used locally.
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    #: TLS from the first byte (port 465) instead of STARTTLS (port 587).
+    smtp_ssl: bool = False
+    mail_from: str = "Stack Prep <no-reply@stackjunior.com>"
+
     @field_validator("database_schema")
     @classmethod
     def _schema_is_a_bare_identifier(cls, value: str) -> str:

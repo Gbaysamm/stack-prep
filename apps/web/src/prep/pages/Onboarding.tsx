@@ -1,6 +1,6 @@
 /**
  * Onboarding: the first thing a new student sees after typing their name. Four short steps on
- * one focus page — the exam, the subjects, one goal for all of them, a look over it — and then a
+ * one focus page — the exam (with, optionally, their school and aim), the subjects, one goal for all of them, a look over it — and then a
  * finish that hands them straight to their first check-up. Nothing is discovered later from the
  * sidebar, and nobody lands on a dashboard full of "set this up" cards.
  *
@@ -11,7 +11,14 @@
 import { useEffect, useId, useRef, useState, type CSSProperties, type FormEvent, type ReactNode, type RefObject } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { api, type ExaminationOffer, type Goal as GoalRow, type SubjectOffer } from '../../student/api.js';
+import {
+  api,
+  type ExaminationOffer,
+  type Goal as GoalRow,
+  type StudentProfile,
+  type SubjectOffer,
+} from '../../student/api.js';
+import { AboutFields, aboutChange, draftOf, type AboutDraft } from '../AboutFields.js';
 import {
   IconArrowLeft,
   IconArrowRight,
@@ -122,6 +129,7 @@ export function Onboarding() {
         api.catalogue(),
         api.goals(student.studentId),
         progressApi.overview(student.studentId).catch(() => null as Overview | null),
+        api.profile(student.studentId).catch(() => null as StudentProfile | null),
       ]),
     [student.studentId],
   );
@@ -149,12 +157,13 @@ export function Onboarding() {
   } else if (!load.data) {
     body = <OnboardingSkeleton />;
   } else {
-    const [catalogue, goals, overview] = load.data;
+    const [catalogue, goals, overview, profile] = load.data;
     body = (
       <Flow
         exams={catalogue.filter((exam) => !isHiddenExam(exam))}
         goals={goals}
         overview={overview}
+        profile={profile}
         name={overview?.student.display_name || student.displayName}
         onFinished={() => setFinished(true)}
       />
@@ -227,12 +236,15 @@ function Flow({
   exams,
   goals,
   overview,
+  profile,
   name,
   onFinished,
 }: {
   exams: ExaminationOffer[];
   goals: GoalRow[];
   overview: Overview | null;
+  /** What they have told us about themselves; null when it could not be loaded. */
+  profile: StudentProfile | null;
   name: string;
   onFinished: () => void;
 }) {
@@ -261,6 +273,9 @@ function Flow({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState<Record<string, GoalRow>>({});
   const [done, setDone] = useState(hasDev && devStep >= 4);
+  // School, class and aim, asked beside the exam; all optional, saved with the goals.
+  const [about, setAbout] = useState<AboutDraft>(() => draftOf(profile));
+  const [aboutSaved, setAboutSaved] = useState<AboutDraft>(() => draftOf(profile));
   useEffect(() => {
     if (done) onFinished();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -361,6 +376,17 @@ function Flow({
       setSaving(false);
       setIssue(`We could not update your subjects just now: ${friendly(error) || 'try again'}.`);
       return;
+    }
+    const aboutNow = aboutChange(about, aboutSaved);
+    if (profile && Object.keys(aboutNow).length) {
+      try {
+        await api.updateProfile(student.studentId, aboutNow);
+        setAboutSaved(about);
+      } catch (error) {
+        setSaving(false);
+        setIssue(`We could not save your school and aim just now: ${friendly(error)}`);
+        return;
+      }
     }
     // Only the subjects not yet saved: a retry after a half-finished save does not repeat work.
     const todo = chosen.filter((subject) => !saved[subject.subject_id]);
@@ -497,6 +523,20 @@ function Flow({
                     update({ examId, selected: next?.max_subjects ? keep.slice(0, next.max_subjects) : keep });
                   }}
                 />
+                {profile ? (
+                  <section className="onb-about" aria-labelledby="onb-about-title">
+                    <div className="onb-about-head">
+                      <h2 className="sj-display sj-h3" id="onb-about-title">
+                        A little about you
+                      </h2>
+                      <span className="sj-small sj-muted">Optional. Fill in what you know.</span>
+                    </div>
+                    <AboutFields
+                      draft={about}
+                      onChange={(key, value) => setAbout((current) => ({ ...current, [key]: value }))}
+                    />
+                  </section>
+                ) : null}
                 <div className="onb-next">
                   <span className="sj-eyebrow">Then</span>
                   <Steps

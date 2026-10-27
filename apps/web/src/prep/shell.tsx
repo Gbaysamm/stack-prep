@@ -32,6 +32,7 @@ import {
   IconLogout,
   IconMenu,
   IconTarget,
+  IconSettings,
   IconUser,
 } from "./icons.js";
 import {
@@ -282,6 +283,10 @@ function ProfileMenu({
           <Link to="/profile" role="menuitem" className="sj-account-item">
             <IconUser size={18} />
             Profile
+          </Link>
+          <Link to="/settings" role="menuitem" className="sj-account-item">
+            <IconSettings size={18} />
+            Account settings
           </Link>
           <Link to="/exams" role="menuitem" className="sj-account-item">
             <IconBook size={18} />

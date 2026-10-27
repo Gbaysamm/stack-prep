@@ -15,6 +15,30 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-27
 
+### Forgot password, account settings, school and aim in onboarding (plan phase 4)
+- **Why:** the founder asked for "forget password" and account settings on the student side,
+  and for fuller student profiles (school, target school and course) for the admin dashboard.
+  Until now "Forgot password?" only said to ask a teacher.
+- **What:** "Forgot password?" opens a two-step dialog: the account's email, then the 6-digit
+  code from it and a new password, which signs the student in. Codes (migration 033) last 15
+  minutes, allow 5 wrong tries, are kept only as hashes, and a reply never says whether an
+  account has that email; at most 3 are sent an hour. Resetting signs out every other device.
+  New page `/settings` ("Account settings", in the account menu and on Profile): name, class,
+  school, state, university and course aimed for; how mock results are shown and the UTME
+  target (moved here from Profile); email and phone (changing either needs the current
+  password, one must remain); and a password change that signs out other devices. Onboarding's
+  first step asks the same school-and-aim questions, all optional, saved with the goals.
+- **Server setup needed:** reset emails go out over SMTP, set by `SMTP_HOST`, `SMTP_PORT`,
+  `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_SSL` and `MAIL_FROM` (see `.env.example`). Without a
+  host nothing is sent; locally the code is written to the API log instead.
+- **Where:** `apps/api/src/app/routers/accounts.py`, `app/mailer.py`, `app/config.py`,
+  `database/migrations/033_password_resets.sql`, `apps/web/src/prep/AuthForms.tsx`,
+  `AboutFields.tsx`, `profileFields.ts`, `pages/Settings.tsx`, `pages/Onboarding.tsx`; tests
+  in `tests/test_account_settings.py`.
+- **Checked:** all 521 API tests against the local database, the web tests and build;
+  screenshots of both reset steps, Settings, onboarding and Profile at 1440 and 390.
+- **Status:** committed, not pushed (deploys wait on GitHub billing).
+
 ### Mock scores counted over every question, the UTME aggregate, an overall target (plan phase 3)
 - **Why:** a mock's score was right ÷ answered, so skipping hard questions raised it (12 of 20
   answered with 2 right showed 17% instead of 10%). The founder asked for results out of 400 as

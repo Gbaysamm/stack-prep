@@ -17,7 +17,6 @@ import { useIdentity, useLoad, usePageTitle, useStudent } from '../store.js';
 import { Button, CountUp, Dialog, PageHero, ShowMore, Skeleton, cx, daysUntil, initials, useShowMore, useToast } from '../ui.js';
 import { MetricTip, type MetricId } from './HowItsWorkedOut.js';
 import { Note, Section } from './Home.js';
-import { ResultSettings } from './ResultSettings.js';
 import './Profile.css';
 
 /** Goal tickets shown before "Show all". */
@@ -281,10 +280,6 @@ export function Profile() {
         )}
       </Section>
 
-      <Section eyebrow="Mock results" title="How your scores are shown" id="pro-results" className="sj-rise d3">
-        <ResultSettings studentId={student.studentId} />
-      </Section>
-
       <Section eyebrow="Account" title="About this account" id="pro-account" className="sj-rise d3">
         <div className="sj-card pro-account">
           <dl className="pro-facts">
@@ -312,6 +307,17 @@ export function Profile() {
                 <button type="button" className="pro-copy" onClick={() => void copyId()}>
                   Copy
                 </button>
+              </dd>
+            </div>
+            <div>
+              <dt>
+                Account settings
+                <small>Your school and aim, how mock results are shown, your login and password.</small>
+              </dt>
+              <dd>
+                <Button tone="ghost" size="sm" to="/settings">
+                  Open settings
+                </Button>
               </dd>
             </div>
             <div>

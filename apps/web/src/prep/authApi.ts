@@ -3,7 +3,14 @@
  * (`sp_session`) the browser keeps for us; every call is same-origin, so fetch sends it by default.
  */
 
+import { request } from '../lib/friendlyError.js';
+
 export type Role = 'student' | 'reviewer' | 'admin';
+
+export interface LoginDetails {
+  email: string | null;
+  phone: string | null;
+}
 
 export interface AuthUser {
   student_id: string;
@@ -96,6 +103,26 @@ export const authApi = {
   logout: async () => {
     await send('/logout', { method: 'POST' });
   },
+  /** Emails a six-digit reset code, when an account uses that email. Says the same either way. */
+  forgot: async (login: string) =>
+    ((await (await send('/forgot', { method: 'POST', body: JSON.stringify({ login }) })).json()) as { detail: string })
+      .detail,
+  /** Sets a new password with the emailed code, and signs in. */
+  reset: async (login: string, code: string, password: string) =>
+    (await (
+      await send('/reset', { method: 'POST', body: JSON.stringify({ login, code, password }) })
+    ).json()) as AuthUser,
+  /** The signed-in person's email and phone (either can be a login). */
+  loginDetails: () => request<LoginDetails>('/v1/auth/login-details'),
+  /** Change or remove the email or phone; one must remain. Needs the current password. */
+  changeLoginDetails: (change: { current_password: string; email?: string | null; phone?: string | null }) =>
+    request<LoginDetails>('/v1/auth/login-details', { method: 'POST', body: JSON.stringify(change) }),
+  /** A new password; other devices are signed out, this one stays in. */
+  changePassword: (currentPassword: string, newPassword: string) =>
+    request<void>('/v1/auth/password', {
+      method: 'POST',
+      body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+    }),
   /** The signed-in student, or null when there is no session (401). Other failures throw. */
   me: async (): Promise<AuthUser | null> => {
     try {

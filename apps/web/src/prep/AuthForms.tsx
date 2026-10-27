@@ -1,6 +1,6 @@
 /**
  * The account forms, on light surfaces only (the welcome page's form side and the white dialog):
- * create an account, log in, and the claim dialog that turns a device-only sandbox student into a
+ * create an account, log in, reset a forgotten password, and the claim dialog that turns a device-only sandbox student into a
  * real account without losing their progress.
  */
 
@@ -524,6 +524,216 @@ export function SignupForm({
   );
 }
 
+/* ------------------------------------------------------------------ forgotten password */
+
+/**
+ * Two steps in the dialog: the email on the account, then the six-digit code from that email
+ * and a new password. Setting it signs the student in.
+ */
+function ForgotPassword({
+  defaultLogin,
+  onDone,
+}: {
+  defaultLogin: string;
+  onDone: (identity: Identity) => void;
+}) {
+  const ids = useId();
+  const emailId = `${ids}-email`;
+  const codeId = `${ids}-code`;
+  const pwId = `${ids}-newpw`;
+  const emailRef = useRef<HTMLInputElement>(null);
+  const codeRef = useRef<HTMLInputElement>(null);
+  const pwRef = useRef<HTMLInputElement>(null);
+  const [email, setEmail] = useState(looksLikePhone(defaultLogin) ? '' : defaultLogin);
+  const [sentTo, setSentTo] = useState<string | null>(null);
+  const [code, setCode] = useState('');
+  const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState<{ email?: string; code?: string; password?: string }>({});
+  const [alert, setAlert] = useState<string | null>(null);
+  const [note, setNote] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => (sentTo ? codeRef : emailRef).current?.focus());
+    return () => window.cancelAnimationFrame(frame);
+  }, [sentTo]);
+
+  const ask = async (event?: FormEvent) => {
+    event?.preventDefault();
+    if (busy) return;
+    const typed = email.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(typed)) {
+      setErrors({ email: typed ? 'Enter a valid email address.' : 'Enter the email address on your account.' });
+      emailRef.current?.focus();
+      return;
+    }
+    setErrors({});
+    setAlert(null);
+    setBusy(true);
+    try {
+      setNote(await authApi.forgot(typed));
+      setSentTo(typed);
+      setCode('');
+    } catch (failure) {
+      setAlert(failure instanceof AuthError ? failure.message : 'Something went wrong. Try again.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const reset = async (event: FormEvent) => {
+    event.preventDefault();
+    if (busy || !sentTo) return;
+    const digits = code.replace(/\s/g, '');
+    const found: typeof errors = {};
+    if (!/^\d{6}$/.test(digits)) found.code = 'Enter the 6-digit code from the email.';
+    if (password.length < 8) found.password = 'Use at least 8 characters.';
+    setErrors(found);
+    setAlert(null);
+    if (found.code || found.password) {
+      (found.code ? codeRef : pwRef).current?.focus();
+      return;
+    }
+    setBusy(true);
+    try {
+      onDone(identityFrom(await authApi.reset(sentTo, digits, password)));
+    } catch (failure) {
+      setBusy(false);
+      const message = failure instanceof AuthError ? failure.message : 'Something went wrong. Try again.';
+      if (failure instanceof AuthError && failure.field === 'password') setErrors({ password: message });
+      else setAlert(message);
+    }
+  };
+
+  if (!sentTo) {
+    return (
+      <form className="auth-form" onSubmit={ask} noValidate aria-busy={busy || undefined}>
+        <p className="auth-dialog-lede">
+          Enter the email address on your account and we&rsquo;ll send you a 6-digit code to set a new password.
+        </p>
+        {alert ? <FormAlert>{alert}</FormAlert> : null}
+        <Field
+          id={emailId}
+          label="Email address"
+          error={errors.email}
+          message="Signed up with a phone number? Ask Stack Prep support to reset it for you."
+        >
+          <input
+            id={emailId}
+            ref={emailRef}
+            type="email"
+            className="sj-input auth-input"
+            inputMode="email"
+            autoComplete="email"
+            autoCapitalize="none"
+            spellCheck={false}
+            placeholder="you@example.com"
+            value={email}
+            maxLength={120}
+            onChange={(event) => {
+              setEmail(event.target.value);
+              if (errors.email) setErrors({});
+            }}
+            aria-invalid={Boolean(errors.email) || undefined}
+            aria-describedby={`${emailId}-msg`}
+            disabled={busy}
+          />
+        </Field>
+        <Button
+          type="submit"
+          block
+          busy={busy}
+          className="auth-submit"
+          trailing={busy ? undefined : <IconArrowRight size={18} />}
+        >
+          {busy ? 'Sending…' : 'Send me a code'}
+        </Button>
+      </form>
+    );
+  }
+
+  return (
+    <form className="auth-form" onSubmit={reset} noValidate aria-busy={busy || undefined}>
+      <p className="auth-dialog-lede">
+        {note} Check <strong>{sentTo}</strong>, including the spam folder.
+      </p>
+      {alert ? <FormAlert>{alert}</FormAlert> : null}
+      <Field
+        id={codeId}
+        label="6-digit code"
+        error={errors.code}
+        aside={
+          <button type="button" className="auth-inline" onClick={() => void ask()} disabled={busy}>
+            Send a new code
+          </button>
+        }
+      >
+        <input
+          id={codeId}
+          ref={codeRef}
+          className="sj-input auth-input auth-code"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          placeholder="123456"
+          value={code}
+          maxLength={7}
+          onChange={(event) => {
+            setCode(event.target.value.replace(/[^\d ]/g, ''));
+            if (errors.code) setErrors((current) => ({ ...current, code: undefined }));
+            if (alert) setAlert(null);
+          }}
+          aria-invalid={Boolean(errors.code) || undefined}
+          aria-describedby={errors.code ? `${codeId}-msg` : undefined}
+          disabled={busy}
+        />
+      </Field>
+      <Field id={pwId} label="New password" bad={Boolean(errors.password)}>
+        <PasswordInput
+          id={pwId}
+          inputRef={pwRef}
+          value={password}
+          onChange={(event) => {
+            setPassword(event.target.value);
+            if (errors.password) setErrors((current) => ({ ...current, password: undefined }));
+          }}
+          autoComplete="new-password"
+          maxLength={128}
+          invalid={Boolean(errors.password)}
+          describedBy={`${pwId}-strength`}
+          disabled={busy}
+        />
+        <Strength
+          password={password}
+          flagShort={Boolean(errors.password)}
+          id={`${pwId}-strength`}
+          error={errors.password}
+        />
+      </Field>
+      <Button
+        type="submit"
+        block
+        busy={busy}
+        className="auth-submit"
+        trailing={busy ? undefined : <IconArrowRight size={18} />}
+      >
+        {busy ? 'Saving…' : 'Set password and log in'}
+      </Button>
+      <button
+        type="button"
+        className="auth-inline auth-back"
+        onClick={() => {
+          setSentTo(null);
+          setAlert(null);
+          setErrors({});
+        }}
+        disabled={busy}
+      >
+        Use a different email
+      </button>
+    </form>
+  );
+}
+
 /* ------------------------------------------------------------------ log in */
 
 export function LoginForm({
@@ -581,72 +791,65 @@ export function LoginForm({
   const closeForgot = useCallback(() => setForgot(false), []);
 
   return (
-    <form className="auth-form" onSubmit={submit} noValidate aria-busy={busy || undefined}>
-      {alert ? <FormAlert>{alert}</FormAlert> : null}
-      <Field id={loginId} label="Email or phone number" error={errors.login}>
-        <LoginInput
-          id={loginId}
-          inputRef={loginRef}
-          value={login}
-          onChange={(value) => {
-            setLogin(value);
-            if (errors.login) setErrors((current) => ({ ...current, login: undefined }));
-            if (alert) setAlert(null);
-          }}
-          invalid={Boolean(errors.login)}
-          describedBy={errors.login ? `${loginId}-msg` : undefined}
-          disabled={busy}
-        />
-      </Field>
-      <Field
-        id={pwId}
-        label="Password"
-        error={errors.password}
-        aside={
-          <button type="button" className="auth-inline" onClick={() => setForgot(true)}>
-            Forgot password?
-          </button>
-        }
-      >
-        <PasswordInput
+    <>
+      <form className="auth-form" onSubmit={submit} noValidate aria-busy={busy || undefined}>
+        {alert ? <FormAlert>{alert}</FormAlert> : null}
+        <Field id={loginId} label="Email or phone number" error={errors.login}>
+          <LoginInput
+            id={loginId}
+            inputRef={loginRef}
+            value={login}
+            onChange={(value) => {
+              setLogin(value);
+              if (errors.login) setErrors((current) => ({ ...current, login: undefined }));
+              if (alert) setAlert(null);
+            }}
+            invalid={Boolean(errors.login)}
+            describedBy={errors.login ? `${loginId}-msg` : undefined}
+            disabled={busy}
+          />
+        </Field>
+        <Field
           id={pwId}
-          inputRef={pwRef}
-          value={password}
-          onChange={(event) => {
-            setPassword(event.target.value);
-            if (errors.password) setErrors((current) => ({ ...current, password: undefined }));
-            if (alert) setAlert(null);
-          }}
-          autoComplete="current-password"
-          maxLength={128}
-          invalid={Boolean(errors.password)}
-          describedBy={errors.password ? `${pwId}-msg` : undefined}
-          disabled={busy}
-        />
-      </Field>
-      <Button
-        type="submit"
-        block
-        busy={busy}
-        className="auth-submit"
-        trailing={busy ? undefined : <IconArrowRight size={18} />}
-      >
-        {busy ? 'Logging you in…' : 'Log in'}
-      </Button>
-      <Dialog
-        open={forgot}
-        onClose={closeForgot}
-        title="Forgot your password?"
-        actions={
-          <Button tone="primary" onClick={closeForgot}>
-            Got it
-          </Button>
-        }
-      >
-        Ask your teacher or Stack Prep support to reset it for now. Once it's reset, log in here with your email or
-        phone number and the new password.
+          label="Password"
+          error={errors.password}
+          aside={
+            <button type="button" className="auth-inline" onClick={() => setForgot(true)}>
+              Forgot password?
+            </button>
+          }
+        >
+          <PasswordInput
+            id={pwId}
+            inputRef={pwRef}
+            value={password}
+            onChange={(event) => {
+              setPassword(event.target.value);
+              if (errors.password) setErrors((current) => ({ ...current, password: undefined }));
+              if (alert) setAlert(null);
+            }}
+            autoComplete="current-password"
+            maxLength={128}
+            invalid={Boolean(errors.password)}
+            describedBy={errors.password ? `${pwId}-msg` : undefined}
+            disabled={busy}
+          />
+        </Field>
+        <Button
+          type="submit"
+          block
+          busy={busy}
+          className="auth-submit"
+          trailing={busy ? undefined : <IconArrowRight size={18} />}
+        >
+          {busy ? 'Logging you in…' : 'Log in'}
+        </Button>
+      </form>
+      {/* Outside the form: a submit inside the dialog would otherwise reach the login form too. */}
+      <Dialog open={forgot} onClose={closeForgot} title="Reset your password">
+        <ForgotPassword defaultLogin={login.trim()} onDone={onDone} />
       </Dialog>
-    </form>
+    </>
   );
 }
 

@@ -1,0 +1,52 @@
+/* /settings — account settings. Each section is one card holding a form. */
+
+.sj .set-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px 24px;
+}
+.sj .set-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.sj .about-grid.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.sj .set-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--gray-100);
+}
+.sj .set-quiet,
+.sj .set-error {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.sj .set-quiet {
+  color: var(--gray-600);
+}
+.sj .set-error {
+  font-weight: 600;
+  color: var(--danger);
+}
+
+@media (max-width: 760px) {
+  .sj .about-grid.three {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 520px) {
+  .sj .set-card {
+    padding: 18px 16px;
+  }
+  .sj .set-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
