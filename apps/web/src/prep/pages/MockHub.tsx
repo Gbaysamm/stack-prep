@@ -8,7 +8,9 @@ import { Link } from 'react-router-dom';
 
 import { IconArrowRight, IconChevronRight, IconClock } from '../icons.js';
 import { mockApi, minutesText, percentText, type MockSummary } from '../mockApi.js';
+import { useResultSettings } from '../scoreDisplay.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
+import type { ScoreDisplay } from '../../student/api.js';
 import { Button, PageHero, Pager, Skeleton, Steps, cx, usePaged } from '../ui.js';
 import './Mock.css';
 
@@ -23,7 +25,7 @@ const STEPS = [
   },
   {
     title: 'See where you stand',
-    body: 'Your score in each subject and overall, every question with its answer, and the questions you left.',
+    body: 'Your score in each subject and overall, as a percentage or out of 400. A question you leave earns nothing, as in the real exam.',
   },
 ];
 
@@ -45,15 +47,27 @@ const band = (percent: number | null | undefined) =>
  * One mock as one row of the list: a score tile coloured by how it went, what it was and
  * when, each subject as a small bar, and the way in. The whole row opens it.
  */
-function HistoryRow({ mock, example }: { mock: MockSummary; example?: boolean }) {
+function HistoryRow({ mock, example, display }: { mock: MockSummary; example?: boolean; display: ScoreDisplay }) {
   const running = mock.status === 'in_progress';
+  const asAggregate = display === 'aggregate' && mock.overall?.aggregate != null;
   const href = running ? `/mock/${mock.mock_id}` : `/mock/${mock.mock_id}/report`;
   const kind = mock.preset === 'utme' ? 'Real UTME' : 'Custom mock';
   const percent = mock.overall?.percent ?? null;
   const body = (
     <>
       <span className={cx('mk-tile', running ? 'live' : band(percent))} aria-hidden="true">
-        {running ? <IconClock size={20} /> : percent === null ? '–' : `${percent}%`}
+        {running ? (
+          <IconClock size={20} />
+        ) : percent === null ? (
+          '–'
+        ) : asAggregate ? (
+          <>
+            {mock.overall?.aggregate}
+            <small>/400</small>
+          </>
+        ) : (
+          `${percent}%`
+        )}
       </span>
       <span className="mk-row-what">
         <b>{kind}</b>
@@ -61,6 +75,7 @@ function HistoryRow({ mock, example }: { mock: MockSummary; example?: boolean })
           {example ? 'Example' : shortDate(mock.started_at)} · {minutesText(mock.duration_minutes)}
           {running ? ' · in progress, tap to resume' : null}
           {mock.overall && !running ? ` · ${mock.overall.answered}/${mock.overall.questions} answered` : null}
+          {asAggregate && !running ? ` · ${percent}%` : null}
           {mock.integrity_flags ? <span className="mk-flagged"> · left {mock.integrity_flags}×</span> : null}
         </small>
       </span>
@@ -123,6 +138,7 @@ const EXAMPLE: MockSummary = {
 export function MockHub() {
   usePageTitle('Mock exam');
   const student = useStudent();
+  const { display } = useResultSettings(student.studentId);
   const history = useLoad(() => mockApi.history(student.studentId), [student.studentId]);
   const mocks = history.data ?? [];
   const paged = usePaged(mocks, 8);
@@ -132,7 +148,10 @@ export function MockHub() {
   const done = mocks
     .filter((m) => m.overall && m.overall.percent !== null)
     .sort((a, b) => a.started_at.localeCompare(b.started_at));
-  const scores = done.map((m) => m.overall!.percent!);
+  // Out of 400 when the student chose it; percentages otherwise.
+  const asAggregate = display === 'aggregate' && done.every((m) => m.overall!.aggregate != null);
+  const scores = done.map((m) => (asAggregate ? m.overall!.aggregate! : m.overall!.percent!));
+  const unit = asAggregate ? '/400' : '%';
   const best = scores.length ? Math.max(...scores) : null;
   const average = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
   const moved = scores.length > 1 ? scores[scores.length - 1]! - scores[0]! : null;
@@ -157,14 +176,17 @@ export function MockHub() {
         aside={
           best !== null ? (
             <div className="mk-hero-stat">
-              <span className="sj-num">{best}%</span>
-              <small>your best overall</small>
+              <span className="sj-num">
+                {best}
+                {asAggregate ? <small className="mk-hero-of">/400</small> : '%'}
+              </span>
+              <small>{asAggregate ? 'your best UTME aggregate' : 'your best overall'}</small>
               {scores.length > 1 ? (
                 <p className="mk-hero-line">
-                  Average <b>{average}%</b> over {scores.length} mocks
+                  Average <b>{average}{unit}</b> over {scores.length} mocks
                   {moved !== null && moved !== 0 ? (
                     <span className={cx('mk-hero-move', moved > 0 ? 'up' : 'down')}>
-                      {moved > 0 ? '▲' : '▼'} {Math.abs(moved)} since your first
+                      {moved > 0 ? '▲' : '▼'} {Math.abs(moved)}{asAggregate ? ' pts' : ''} since your first
                     </span>
                   ) : null}
                 </p>
@@ -196,14 +218,14 @@ export function MockHub() {
               <b>No mock exams yet.</b> Each one you sit is listed here like this, and opens to its full report.
             </p>
             <ul className="mk-list">
-              <HistoryRow mock={EXAMPLE} example />
+              <HistoryRow mock={EXAMPLE} example display={display} />
             </ul>
           </div>
         ) : (
           <>
             <ul className="mk-list">
               {paged.items.map((mock) => (
-                <HistoryRow key={mock.mock_id} mock={mock} />
+                <HistoryRow key={mock.mock_id} mock={mock} display={display} />
               ))}
             </ul>
             <Pager paged={paged} noun="mock exams" label="Pages of mock exams" anchorId="mk-history" />

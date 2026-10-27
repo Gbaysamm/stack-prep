@@ -17,7 +17,8 @@ import { Maths } from "../../Maths.js";
 import type { CheckupResult, SubjectScore, TopicScore, TopicStatus } from "../../student/api.js";
 import { IconArrowRight, IconBolt, IconBook, IconChart, IconTarget } from "../icons.js";
 import { lessonFeedbackApi, type LessonToRevisit, type Understood } from "../lessonFeedbackApi.js";
-import { mockApi, percentText, type MockSummary } from "../mockApi.js";
+import { mockApi, type MockSummary } from "../mockApi.js";
+import { ResultScore, useResultSettings } from "../scoreDisplay.js";
 import { progressApi, type PracticeRunPage, type SubjectOverview } from "../progressApi.js";
 import { useLoad, usePageTitle, useStudent } from "../store.js";
 import { Badge, Button, CountUp, PageHero, Pager, Skeleton, cx, usePaged } from "../ui.js";
@@ -781,6 +782,7 @@ function LessonsLanded({ studentId, subjectId }: { studentId: string; subjectId:
 /** Mock exams count in a student's record too: the latest few, each opening its report. */
 function MockHistory({ studentId }: { studentId: string }) {
   const load = useLoad(() => mockApi.history(studentId), [studentId]);
+  const { display } = useResultSettings(studentId);
   const finished = (load.data ?? []).filter((mock: MockSummary) => mock.overall).slice(0, 5);
   const when = (iso: string) =>
     new Date(iso).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" });
@@ -820,7 +822,7 @@ function MockHistory({ studentId }: { studentId: string }) {
                 <span className="prog-mocks-subjects">
                   {mock.subjects.map((subject) => subject.name).join(" · ")}
                 </span>
-                <span className="prog-mocks-score sj-num">{percentText(mock.overall)}</span>
+                <ResultScore tally={mock.overall} display={display} className="prog-mocks-score" />
                 <IconArrowRight size={16} />
               </Link>
             </li>

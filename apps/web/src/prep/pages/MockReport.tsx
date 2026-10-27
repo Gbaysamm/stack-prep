@@ -1,6 +1,6 @@
 /**
  * /mock/:mockId/report — how a mock went, as insights. The hero is the summary: the overall score
- * (right ÷ answered; a skipped question is never wrong), each subject beside it, the counts and
+ * (right ÷ every question set, as in the real exam: a skipped question earns nothing), each subject beside it, the counts and
  * the time. Then the test conditions, what to do next, the topics that went
  * wrong, where the time went, the trend across mocks, the topic breakdown, and every question
  * as a grid that opens each one with its answer, the working and the lesson.

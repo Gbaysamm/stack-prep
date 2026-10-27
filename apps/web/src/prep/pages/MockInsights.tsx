@@ -21,6 +21,8 @@ import {
   type WeakTopic,
 } from '../mock/insights.js';
 import { clock, type MockReport as Report, type MockSummary, type SubjectResult, type Tally } from '../mockApi.js';
+import { useResultSettings } from '../scoreDisplay.js';
+import { useStudent } from '../store.js';
 import { cx } from '../ui.js';
 import { dateLabel } from './MockHub.js';
 
@@ -68,7 +70,14 @@ export function SummaryHero({
   const none = o.answered === 0;
   const total = report.duration_minutes * 60;
   const used = Math.min(report.time_used_seconds, total);
-  const moved = change(o, previous?.overall);
+  const student = useStudent();
+  const { display, target } = useResultSettings(student.studentId);
+  const asAggregate = display === 'aggregate' && o.aggregate != null;
+  const moved = asAggregate
+    ? previous?.overall?.aggregate != null
+      ? (o.aggregate ?? 0) - previous.overall.aggregate
+      : null
+    : change(o, previous?.overall);
   const many = report.subjects.length > 1;
   return (
     <section
@@ -93,19 +102,35 @@ export function SummaryHero({
             <h1 className="sj-display mi-hero-none-title">No answers this time</h1>
             <p className="mi-hero-none-sub">
               {report.auto_submitted
-                ? 'Time ran out before an answer was saved, so this mock has no score. Sit another when you are ready.'
-                : 'It was handed in before any question was answered, so this mock has no score.'}
+                ? 'Time ran out before an answer was saved, so this mock scores 0. Sit another when you are ready.'
+                : 'It was handed in before any question was answered, so this mock scores 0.'}
             </p>
           </div>
         ) : (
           <div className="mi-hero-score">
-            <h1 className="sr-only">Your result: {o.percent}%</h1>
+            <h1 className="sr-only">
+              Your result: {asAggregate ? `${o.aggregate} out of 400, ${o.percent}%` : `${o.percent}%`}
+            </h1>
             <span className="sj-num mi-hero-pct" aria-hidden="true">
-              {o.percent}
-              <small>%</small>
+              {asAggregate ? o.aggregate : o.percent}
+              <small>{asAggregate ? '/400' : '%'}</small>
             </span>
             <span className="mi-hero-scorecap">
-              <span>Overall score</span>
+              <span>
+                {asAggregate ? (
+                  <>
+                    UTME aggregate · <b>{o.percent}%</b> of questions right
+                  </>
+                ) : (
+                  'Overall score'
+                )}
+              </span>
+              {asAggregate && target !== null ? (
+                <span className="mi-hero-target">
+                  Your target {target}/400 ·{' '}
+                  {(o.aggregate ?? 0) >= target ? 'reached' : `${target - (o.aggregate ?? 0)} to go`}
+                </span>
+              ) : null}
               {moved !== null ? (
                 <span className="mi-hero-move">
                   <Delta value={moved} suffix=" pts" /> on your last mock

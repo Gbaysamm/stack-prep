@@ -116,8 +116,10 @@ export interface Tally {
   correct: number;
   wrong: number;
   unanswered: number;
-  /** Right ÷ answered as a whole percentage; null when nothing was answered. */
+  /** Right ÷ every question set (a skip scores nothing), as a whole percentage. */
   percent: number | null;
+  /** Overall only: the UTME aggregate out of 400 (each subject out of 100, averaged, times 4). */
+  aggregate?: number | null;
 }
 
 export interface ReportItem {

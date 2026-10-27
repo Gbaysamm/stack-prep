@@ -19,7 +19,7 @@ here needs rewriting.
 from __future__ import annotations
 
 from datetime import date
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
@@ -437,3 +437,82 @@ async def sittings(
         student=student_id,
     )
     return [SittingSummary(**dict(row)) for row in rows]
+
+
+# --------------------------------------------------------------------------- profile
+
+
+ClassLevel = Literal["ss1", "ss2", "ss3", "graduated", "other"]
+ScoreDisplay = Literal["percentage", "aggregate"]
+
+
+class Profile(BaseModel):
+    """What a student tells us about themselves, and how they like their results shown."""
+
+    display_name: str
+    email: str | None
+    phone: str | None
+    school_name: str | None
+    state: str | None
+    class_level: ClassLevel | None
+    target_institution: str | None
+    target_course: str | None
+    #: Whether a mock result leads with the percentage or the UTME aggregate out of 400.
+    score_display: ScoreDisplay
+    #: The overall UTME score aimed for, out of 400.
+    target_aggregate: int | None
+
+
+class ProfileChange(BaseModel):
+    """Only the fields sent change; send null to clear one. Login details change elsewhere."""
+
+    display_name: str | None = Field(default=None, min_length=1, max_length=80)
+    school_name: str | None = Field(default=None, max_length=160)
+    state: str | None = Field(default=None, max_length=60)
+    class_level: ClassLevel | None = None
+    target_institution: str | None = Field(default=None, max_length=160)
+    target_course: str | None = Field(default=None, max_length=120)
+    score_display: ScoreDisplay | None = None
+    target_aggregate: int | None = Field(default=None, ge=0, le=400)
+
+
+PROFILE_SQL = """
+    SELECT display_name, email, phone, school_name, state, class_level, target_institution,
+           target_course, score_display, target_aggregate
+    FROM students WHERE id = :student
+"""
+
+
+@router.get("/{student_id}/profile", response_model=Profile, summary="About the student")
+async def profile(
+    request: Request, conn: Annotated[AsyncConnection, Depends(connection)], student_id: UUID
+) -> Profile:
+    await require_student(request, conn, student_id)
+    rows = await fetch_all(conn, PROFILE_SQL, student=student_id)
+    if not rows:
+        raise HTTPException(status_code=404, detail="We couldn't find that account.")
+    return Profile(**rows[0])
+
+
+@router.patch("/{student_id}/profile", response_model=Profile, summary="Change the profile")
+async def change_profile(
+    request: Request,
+    conn: Annotated[AsyncConnection, Depends(connection)],
+    student_id: UUID,
+    body: ProfileChange,
+) -> Profile:
+    await require_student(request, conn, student_id)
+    changes = body.model_dump(exclude_unset=True)
+    if changes.get("display_name", "") is None or changes.get("score_display", "") is None:
+        raise HTTPException(status_code=422, detail="Your name and results setting can't be empty.")
+    for key in ("display_name", "school_name", "state", "target_institution", "target_course"):
+        if isinstance(changes.get(key), str):
+            changes[key] = " ".join(changes[key].split()) or None
+    if changes:
+        assignments = ", ".join(f"{key} = :{key}" for key in changes)
+        await conn.execute(
+            text(f"UPDATE students SET {assignments}, updated_at = now() WHERE id = :student"),
+            {**changes, "student": student_id},
+        )
+        await conn.commit()
+    return await profile(request, conn, student_id)

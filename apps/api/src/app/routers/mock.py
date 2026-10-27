@@ -16,9 +16,12 @@ shuffled per sitting (keeping a passage's questions together); option order stay
 because a JAMB key is a letter.
 
 WHAT COUNTS. On submission each answered question becomes exactly one attempt with
-`context = 'full_mock'`, its final answer, unaided. An unanswered question gets no attempt: it
-is reported as unanswered, never as wrong. The result per subject and overall is plain right
-divided by answered, as a whole percentage.
+`context = 'full_mock'`, its final answer, unaided. An unanswered question gets no attempt (it is
+listed as unanswered in the report), but it scores as the real exam scores it: nothing. So the
+result per subject and overall is right divided by every question set, as a whole percentage,
+and skipping can never raise it. Overall there is also the UTME aggregate out of 400: each
+subject's percentage is its score out of 100, and their average is scaled to 400, so the total is
+out of 400 whatever the number of subjects (the student chooses which of the two leads).
 """
 
 from __future__ import annotations
@@ -395,8 +398,11 @@ class Tally(BaseModel):
     correct: int
     wrong: int
     unanswered: int
-    #: Right divided by answered, as a whole percentage; null when nothing was answered.
+    #: Right over every question set (a skip scores nothing), as a whole percentage; null when
+    #: nothing was set.
     percent: int | None
+    #: The UTME aggregate out of 400 (overall only): the subjects' average percentage times 4.
+    aggregate: int | None = None
 
 
 class ReportItem(BaseModel):
@@ -497,8 +503,8 @@ class MockSummary(BaseModel):
 
 
 def tally(questions: int, answered: int, correct: int) -> Tally:
-    """Right over answered, rounded half up to a whole percentage."""
-    percent = None if answered == 0 else math.floor(100 * correct / answered + 0.5)
+    """Right over questions set (a skip scores nothing), rounded half up to a whole percentage."""
+    percent = None if questions == 0 else math.floor(100 * correct / questions + 0.5)
     return Tally(
         questions=questions,
         answered=answered,
@@ -878,12 +884,26 @@ def _subject_result(row: dict[str, Any], *, with_items: bool) -> SubjectResult:
     )
 
 
+def aggregate(subjects: list[Tally]) -> int | None:
+    """The UTME score out of 400: each subject out of 100, their average scaled to 400.
+
+    JAMB marks each of the four subjects out of 100 and adds them up. A mock with fewer subjects
+    is scaled to the same 400, so a student can read it against their UTME target.
+    """
+    marked = [100 * s.correct / s.questions for s in subjects if s.questions]
+    if not marked:
+        return None
+    return math.floor(4 * sum(marked) / len(marked) + 0.5)
+
+
 def _overall(subjects: list[SubjectResult]) -> Tally:
-    return tally(
+    overall = tally(
         sum(s.tally.questions for s in subjects),
         sum(s.tally.answered for s in subjects),
         sum(s.tally.correct for s in subjects),
     )
+    overall.aggregate = aggregate([s.tally for s in subjects])
+    return overall
 
 
 async def _integrity(conn: AsyncConnection, mock_ids: list[UUID]) -> dict[UUID, Integrity]:

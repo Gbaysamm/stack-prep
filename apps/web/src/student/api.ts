@@ -787,6 +787,27 @@ export interface StudentIdentity {
 /** Fired on the window whenever a goal is saved or removed, so a countdown drawn elsewhere on
  *  the page (the sidebar, the top bar) can fetch the new dates instead of showing the old. */
 export const GOALS_CHANGED = 'sj:goals-changed';
+/** Fired when the profile is saved, so the result display and anything reading it update. */
+export const PROFILE_CHANGED = 'sj:profile-changed';
+
+export type ClassLevel = 'ss1' | 'ss2' | 'ss3' | 'graduated' | 'other';
+export type ScoreDisplay = 'percentage' | 'aggregate';
+
+/** What a student tells us about themselves (migration 032). */
+export interface StudentProfile {
+  display_name: string;
+  email: string | null;
+  phone: string | null;
+  school_name: string | null;
+  state: string | null;
+  class_level: ClassLevel | null;
+  target_institution: string | null;
+  target_course: string | null;
+  /** Whether a mock result leads with the percentage or the UTME aggregate out of 400. */
+  score_display: ScoreDisplay;
+  /** The overall UTME score aimed for, out of 400. */
+  target_aggregate: number | null;
+}
 function announceGoalsChanged() {
   if (typeof window !== 'undefined') window.dispatchEvent(new Event(GOALS_CHANGED));
 }
@@ -808,6 +829,15 @@ export const api = {
       body: JSON.stringify(displayName ? { display_name: displayName } : {}),
     }),
   catalogue: () => call<ExaminationOffer[]>('/student/catalogue'),
+  profile: (studentId: string) => call<StudentProfile>(`/student/${studentId}/profile`),
+  updateProfile: (studentId: string, change: Partial<Omit<StudentProfile, 'email' | 'phone'>>) =>
+    call<StudentProfile>(`/student/${studentId}/profile`, {
+      method: 'PATCH',
+      body: JSON.stringify(change),
+    }).then((saved) => {
+      if (typeof window !== 'undefined') window.dispatchEvent(new Event(PROFILE_CHANGED));
+      return saved;
+    }),
   goals: (studentId: string) => call<Goal[]>(`/student/${studentId}/goals`),
   setGoal: (studentId: string, subjectId: string, goal: GoalIn) =>
     call<Goal>(`/student/${studentId}/goals/${subjectId}`, {

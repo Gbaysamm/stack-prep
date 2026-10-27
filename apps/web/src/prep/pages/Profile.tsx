@@ -17,6 +17,7 @@ import { useIdentity, useLoad, usePageTitle, useStudent } from '../store.js';
 import { Button, CountUp, Dialog, PageHero, ShowMore, Skeleton, cx, daysUntil, initials, useShowMore, useToast } from '../ui.js';
 import { MetricTip, type MetricId } from './HowItsWorkedOut.js';
 import { Note, Section } from './Home.js';
+import { ResultSettings } from './ResultSettings.js';
 import './Profile.css';
 
 /** Goal tickets shown before "Show all". */
@@ -278,6 +279,10 @@ export function Profile() {
           <ShowMore more={moreGoals} noun="goals" controls="pro-goal-list" />
           </>
         )}
+      </Section>
+
+      <Section eyebrow="Mock results" title="How your scores are shown" id="pro-results" className="sj-rise d3">
+        <ResultSettings studentId={student.studentId} />
       </Section>
 
       <Section eyebrow="Account" title="About this account" id="pro-account" className="sj-rise d3">

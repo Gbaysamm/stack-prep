@@ -59,6 +59,12 @@ own report.
   at the first check-up.
 - **After that, a mock's answers count in the topic scores** like practice answers, and its
   wrong questions come back in practice.
+- **A mock's own result is right ÷ every question set,** as in the real exam: a question left
+  unanswered earns nothing, so skipping never raises the score. Each subject is marked out of
+  100; the **aggregate** is the average of the subject percentages × 4, out of 400, however
+  many subjects the mock had. The student chooses on their profile whether results lead with
+  the percentage or the aggregate; the percentage is always shown beside the aggregate, and
+  their overall UTME target (out of 400) is shown against it.
 
 ## 4. What the student sees
 

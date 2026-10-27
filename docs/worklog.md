@@ -15,6 +15,29 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-27
 
+### Mock scores counted over every question, the UTME aggregate, an overall target (plan phase 3)
+- **Why:** a mock's score was right ÷ answered, so skipping hard questions raised it (12 of 20
+  answered with 2 right showed 17% instead of 10%). The founder asked for results out of 400 as
+  well as percentages, chosen by the student, and for an overall UTME target.
+- **What:** a mock's score, per subject and overall, is now right ÷ every question set; a
+  skipped question earns nothing, as in the real exam. Each result also carries the aggregate:
+  the average of the subject percentages × 4, out of 400, however many subjects the mock had.
+  Migration 032 adds profile columns to `students` (school, state, class, target institution and
+  course for phase 4; `score_display`; `target_aggregate`), read and changed through
+  `GET`/`PATCH /v1/student/{id}/profile`. Profile has a "Mock results" section: show results as
+  Percentage or Out of 400, and "My UTME target" out of 400. In aggregate mode the report, the
+  mock hub and Progress lead with the aggregate with the percentage beside it, and the report
+  shows the target and how far there is to go. `docs/student-scoring.md` §3a states the rule.
+  Check-ups keep right ÷ answered.
+- **Where:** `apps/api/src/app/routers/mock.py`, `routers/student.py`,
+  `database/migrations/032_student_profile.sql`, `apps/web/src/prep/scoreDisplay.tsx`,
+  `pages/ResultSettings.tsx`, `MockInsights.tsx`, `MockHub.tsx`, `Progress.tsx`; tests in
+  `test_mock.py` and `test_profile.py`.
+- **Checked:** all 516 API tests against the local database, the web tests and build; a seeded
+  mock (4 right of 20, 8 skipped) shows 20% and 80/400; screenshots of Profile, the hub, the
+  report and Progress in both modes at 1440 and 390.
+- **Status:** committed, not pushed (deploys wait on GitHub billing).
+
 ### Friendly errors, sign-in when a session ends, Mock in the phone bar (plan phase 2)
 - **Why:** the audit found raw server text reaching students ("Failed to fetch", "[object
   Object]", proxy pages), an ended session showing as errors inside a page, the mock exam missing

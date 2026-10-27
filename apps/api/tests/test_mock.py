@@ -17,7 +17,7 @@ from sqlalchemy import text
 from test_practice import client, fixture  # noqa: F401  (pytest fixtures)
 
 from app.db import get_engine
-from app.routers.mock import shuffled_paper, tally
+from app.routers.mock import aggregate, shuffled_paper, tally
 
 pytestmark = pytest.mark.integration
 
@@ -98,10 +98,20 @@ async def move_clock(mock_id: str, seconds_ago: int) -> None:
         )
 
 
-def test_right_over_answered_rounds_to_a_whole_percent() -> None:
-    assert tally(10, 3, 2).percent == 67
-    assert tally(10, 8, 1).percent == 13  # 12.5 rounds up
-    assert tally(10, 0, 0).percent is None
+def test_a_skip_scores_nothing_and_the_percent_rounds_half_up() -> None:
+    assert tally(10, 3, 2).percent == 20  # 2 right of 10 set; the 7 skipped score nothing
+    assert tally(8, 8, 1).percent == 13  # 12.5 rounds up
+    assert tally(10, 0, 0).percent == 0  # nothing answered is nothing scored
+    assert tally(0, 0, 0).percent is None
+
+
+def test_the_aggregate_is_out_of_400_whatever_the_number_of_subjects() -> None:
+    english = tally(60, 60, 45)  # 75 out of 100
+    maths = tally(40, 30, 20)  # 50 out of 100
+    assert aggregate([english, maths]) == 250  # (75 + 50) / 2 x 4
+    assert aggregate([english]) == 300
+    assert aggregate([english, maths, tally(40, 40, 40), tally(40, 0, 0)]) == 225  # 75+50+100+0
+    assert aggregate([]) is None
     assert tally(10, 4, 3).unanswered == 6
     assert tally(10, 4, 3).wrong == 1
 
@@ -265,7 +275,8 @@ async def test_submit_marks_right_over_answered_and_leaves_unanswered_alone(
         "correct": 1,
         "wrong": 1,
         "unanswered": 1,
-        "percent": 50,
+        "percent": 33,
+        "aggregate": 133,
     }
     outcomes = sorted(item["outcome"] for item in report["subjects"][0]["items"])
     assert outcomes == ["right", "unanswered", "wrong"]
@@ -359,7 +370,8 @@ async def test_an_abandoned_mock_is_submitted_by_the_clock(
     history = (await client.get(f"/v1/mock/history/{ids['student']}")).json()
     assert history[0]["auto_submitted"] is True
     assert history[0]["overall"]["unanswered"] == 3
-    assert history[0]["overall"]["percent"] is None
+    assert history[0]["overall"]["percent"] == 0
+    assert history[0]["overall"]["aggregate"] == 0
 
 
 async def test_history_lists_and_delete_hides(
