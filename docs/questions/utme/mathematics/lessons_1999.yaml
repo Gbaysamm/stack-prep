@@ -63,10 +63,7 @@ lessons:
       - section: 'Cross-multiply'
         say: 'Root 2 times $x$ minus root 2, equals 1 times $x$ plus root 2.'
         write: '$\sqrt{2}(x - \sqrt{2}) = 1(x + \sqrt{2})$'
-      - say: 'Open the bracket. Root 2 times $x$ is root 2 $x$. Root 2 times root 2 is 2, because a square of side root 2 is half of this block of four tiles, so its area is 2.'
-        doodle: {name: 'custom:1999_q02_a', id: tiles, caption: 'side √2, area 2'}
-        doodle_do:
-          - {id: tiles, op: highlight, part: inner}
+      - say: 'Open the bracket. Root 2 times $x$ is root 2 $x$. Root 2 times root 2 is 2, because squaring a square root gives back the number under it.'
         write: '$\sqrt{2}x - 2 = x + \sqrt{2}$'
       - section: 'Collect like terms'
         say: 'Collect the $x$ terms on the left and the rest on the right. Subtract $x$ from both sides, and add 2 to both sides.'
@@ -80,13 +77,9 @@ lessons:
         write: '$x = \dfrac{2 + \sqrt{2}}{\sqrt{2} - 1} \times \dfrac{\sqrt{2} + 1}{\sqrt{2} + 1}$'
       - say: 'The denominator is a difference of two squares, because $a$ minus $b$, times $a$ plus $b$, is $a$ squared minus $b$ squared.'
         write: '$(a - b)(a + b) = a^{2} - b^{2}$'
-      - say: 'So the denominator is root 2 squared minus 1 squared. Root 2 squared is the square of area 2 again, so this is 2 minus 1, which is 1.'
-        doodle_do:
-          - {id: tiles, op: pulse, part: inner}
+      - say: 'So the denominator is root 2 squared minus 1 squared. Root 2 squared is 2 again, so this is 2 minus 1, which is 1.'
         write: 'Denominator $= (\sqrt{2})^{2} - 1^{2} = 2 - 1 = 1$'
       - say: 'Now the numerator. 2 times root 2 is 2 root 2, 2 times 1 is 2, root 2 times root 2 is 2, and root 2 times 1 is root 2.'
-        doodle_do:
-          - {id: tiles, op: circle, part: side, text: '√2 × √2 = 2'}
         write: 'Numerator $= 2\sqrt{2} + 2 + 2 + \sqrt{2}$'
       - say: 'Collect like terms. 2 plus 2 is 4, and 2 root 2 plus root 2 is 3 root 2.'
         write: '$= 4 + 3\sqrt{2}$'
@@ -109,25 +102,18 @@ lessons:
       - section: 'The question'
         say: 'A trader bought 100 oranges at 5 for ₦1.20. 20 got spoilt, and he sold the rest at 4 for ₦1.50. Gain or loss, and what percentage? Spoilt oranges still cost money.'
         write: 'Bought 100 at 5 for ₦1.20; 20 spoilt; rest sold at 4 for ₦1.50'
-        doodle: {name: 'custom:1999_q03_a', id: stall, caption: '20 of the 100 oranges spoilt'}
       - section: 'Cost price'
         say: 'Solution. First the cost price, C.P., what he paid. 5 oranges cost 1 naira 20 kobo, so 100 oranges cost 100 over 5, times 1.20.'
         write: 'C.P. $= \dfrac{100}{5} \times 1.20$'
       - say: '100 over 5 is 20, and 20 times 1.20 is 24. He paid ₦24.00, for all 100 oranges, spoilt ones included.'
         write: '$= 20 \times 1.20 = 24$, so C.P. = ₦24.00'
-        doodle_do:
-          - {id: stall, op: label, part: tag-buy, text: 'C.P. = ₦24'}
       - section: 'Selling price'
         say: 'Now the selling price, S.P. Cross out the spoilt ones, and 100 minus 20 leaves 80 oranges to sell.'
         write: 'Oranges sold $= 100 - 20 = 80$'
-        doodle_do:
-          - {id: stall, op: cross, part: spoilt, text: '80 left'}
       - say: '4 oranges sell for 1 naira 50 kobo, so 80 oranges sell for 80 over 4, times 1.50.'
         write: 'S.P. $= \dfrac{80}{4} \times 1.50$'
       - say: '80 over 4 is 20, and 20 times 1.50 is 30. He received ₦30.00.'
         write: '$= 20 \times 1.50 = 30$, so S.P. = ₦30.00'
-        doodle_do:
-          - {id: stall, op: label, part: tag-sell, text: 'S.P. = ₦30'}
       - section: 'Gain'
         say: 'S.P. is more than C.P., so he made a gain. The gain is S.P. minus C.P.'
         write: 'Gain $=$ S.P. $-$ C.P.'
@@ -411,12 +397,9 @@ lessons:
       - section: 'The question'
         say: 'Market women sell yam, plantain and maize, and many sell more than one. 10 plus 14 plus 12 is 36, but the group is smaller. We fill a three-circle Venn diagram from the middle out.'
         write: 'Number of women in the group $= ?$'
-        doodle: {name: 'custom:1999_q09_a', id: stall, caption: 'every woman sells at least one'}
       - section: 'Solution'
         say: 'Solution. The givens. n of Y, yam, is 10. n of P, plantain, is 14. n of M, maize, is 12.'
         write: '$n(Y) = 10,\ n(P) = 14,\ n(M) = 12$'
-        point:
-          - {line: 1, kind: travel, at: '10', from: {doodle: stall, part: yam}, text: 'yam'}
       - say: 'n of P intersection M is 5, and n of Y intersection M is 4. Be careful, because these include the women who sell all three.'
         write: '$n(P \cap M) = 5,\ n(Y \cap M) = 4$'
       - say: 'Yam and plantain only is 2. The word only means those 2 sell no maize. And n of Y intersection P intersection M, all three, is 3.'
@@ -448,20 +431,14 @@ lessons:
         write: 'Yam only $= 10 - (2 + 1 + 3) = 10 - 6 = 4$'
         diagram_do:
           - {id: v, op: fill, part: 'Y only', text: '4', 'on': 'which is 4'}
-        doodle_do:
-          - {id: stall, op: circle, part: yam}
       - say: 'Plantain only. The plantain circle holds 14, and already has 2, 2 and 3, which is 7. 14 minus 7 is 7.'
         write: 'Plantain only $= 14 - (2 + 2 + 3) = 14 - 7 = 7$'
         diagram_do:
           - {id: v, op: fill, part: 'P only', text: '7', 'on': '14 minus 7'}
-        doodle_do:
-          - {id: stall, op: circle, part: plantain}
       - say: 'Maize only. The maize circle holds 12, and already has 2, 1 and 3, which is 6. 12 minus 6 is 6.'
         write: 'Maize only $= 12 - (2 + 1 + 3) = 12 - 6 = 6$'
         diagram_do:
           - {id: v, op: fill, part: 'M only', text: '6', 'on': '12 minus 6'}
-        doodle_do:
-          - {id: stall, op: circle, part: maize}
       - section: 'Add every region'
         say: 'Every woman is now in exactly one of the seven regions. So the group is the sum of the seven regions.'
         write: '$n(\varepsilon) = 4 + 7 + 6 + 2 + 2 + 1 + 3$'
@@ -469,8 +446,6 @@ lessons:
           - {id: v, op: shade, part: 'Y∪P∪M', colour: green, 'on': 'seven regions'}
       - say: 'For the singles, 4 plus 7 plus 6 is 17. For the pairs and the middle, 2 plus 2 plus 1 plus 3 is 8. 17 plus 8 is 25.'
         write: '$= 17 + 8 = 25$'
-        doodle_do:
-          - {id: stall, op: pulse, part: table}
       - section: 'Check by the formula'
         say: 'Check with the three-set formula. Add the three circles, take away the three pairs, and add back the middle. Yam and plantain altogether is 2 plus 3, which is 5.'
         write: '$n(Y \cup P \cup M) = 10 + 14 + 12 - (5 + 4 + 5) + 3$'
@@ -493,32 +468,22 @@ lessons:
       - section: 'Solution: find P'
         say: 'Solution. Take $Q$ away from $Q$ plus $P$, and only $P$ is left.'
         write: 'Solution: $P = (Q + P) - Q$'
-      - say: 'Matrices are subtracted element by element, so each entry minus the entry in the same place. Picture the two blocks of four entries.'
-        doodle: {name: 'custom:1999_q10_a', id: seats, caption: 'element by element', size: scene}
+      - say: 'Matrices are subtracted element by element, so each entry minus the entry in the same place.'
         write: '$= \begin{pmatrix} 7 & 2 \\ 6 & 8 \end{pmatrix} - \begin{pmatrix} 6 & 0 \\ 4 & 5 \end{pmatrix} = \begin{pmatrix} 7 - 6 & 2 - 0 \\ 6 - 4 & 8 - 5 \end{pmatrix}$'
       - say: '7 minus 6 is 1, 2 minus 0 is 2, 6 minus 4 is 2, and 8 minus 5 is 3.'
         write: '$\therefore P = \begin{pmatrix} 1 & 2 \\ 2 & 3 \end{pmatrix}$'
-        doodle_do:
-          - {id: seats, op: stage, stage: 'custom:1999_q10_a2'}
       - section: 'Build Q + 2P'
         say: 'To find $2P$, multiply every element of $P$ by 2.'
         write: '$2P = \begin{pmatrix} 2 \times 1 & 2 \times 2 \\ 2 \times 2 & 2 \times 3 \end{pmatrix} = \begin{pmatrix} 2 & 4 \\ 4 & 6 \end{pmatrix}$'
       - say: 'Now add $Q$ and $2P$, element by element. 6 plus 2 is 8, 0 plus 4 is 4, 4 plus 4 is 8, and 5 plus 6 is 11.'
         write: '$Q + 2P = \begin{pmatrix} 6 + 2 & 0 + 4 \\ 4 + 4 & 5 + 6 \end{pmatrix} = \begin{pmatrix} 8 & 4 \\ 8 & 11 \end{pmatrix}$'
-        doodle_do:
-          - {id: seats, op: stage, stage: 'custom:1999_q10_a3'}
       - section: 'The determinant'
         say: 'The determinant of a 2 by 2 matrix is $ad$ minus $bc$, which is the product of the leading diagonal, minus the product of the other diagonal.'
         write: '$\begin{vmatrix} a & b \\ c & d \end{vmatrix} = ad - bc$'
       - say: 'Here $a$ is 8, $d$ is 11, $b$ is 4 and $c$ is 8. So it is 8 times 11, minus 4 times 8.'
         write: '$|Q + 2P| = 8 \times 11 - 4 \times 8$'
-        doodle_do:
-          - {id: seats, op: highlight, part: diag, text: '8 × 11'}
-          - {id: seats, op: circle, part: other, text: '4 × 8'}
       - say: '8 times 11 is 88, and 4 times 8 is 32. 88 minus 32 is 56.'
         write: '$= 88 - 32 = 56$'
-        doodle_do:
-          - {id: seats, op: label, part: q2p, text: '88 − 32 = 56'}
       - section: 'Check'
         say: 'Check $P$ by adding it back to $Q$. 6 plus 1 is 7, 0 plus 2 is 2, 4 plus 2 is 6, and 5 plus 3 is 8. That is $Q$ plus $P$ as given.'
         write: 'Check: $Q + P = \begin{pmatrix} 6 + 1 & 0 + 2 \\ 4 + 2 & 5 + 3 \end{pmatrix} = \begin{pmatrix} 7 & 2 \\ 6 & 8 \end{pmatrix}\ \checkmark$'
@@ -628,7 +593,6 @@ lessons:
       - section: 'The question'
         say: 'Tope bought $x$ oranges at ₦5 each, and twice as many mangoes at ₦4 each. She spent at least ₦65 and at most ₦130. We want the range of values of $x$.'
         write: 'Oranges: $x$ at ₦5; mangoes: twice as many at ₦4'
-        doodle: {name: 'custom:1999_q13_a', id: fruit, caption: 'Twice as many mangoes as oranges'}
       - section: 'Solution'
         say: 'Solution. Let $x$ be the number of oranges. Twice as many mangoes means $2x$ mangoes.'
         write: 'Let oranges $= x$, then mangoes $= 2x$'
@@ -636,12 +600,8 @@ lessons:
           - {line: 0, kind: underline, at: 'twice as many', text: 'so 2x'}
       - say: 'The cost of the oranges is $x$ of them at ₦5 each, which is 5 times $x$, $5x$.'
         write: 'Cost of oranges $= 5 \times x = 5x$'
-        doodle_do:
-          - {id: fruit, op: label, part: orange, text: '5x'}
       - say: 'The cost of the mangoes is $2x$ of them at ₦4 each, which is 4 times $2x$, or $8x$.'
         write: 'Cost of mangoes $= 4 \times 2x = 8x$'
-        doodle_do:
-          - {id: fruit, op: label, part: mangoes, text: '4 × 2x = 8x'}
       - say: 'The total cost is $5x$ plus $8x$, which is $13x$ naira.'
         write: 'Total cost $= 5x + 8x = 13x$'
       - section: 'The inequality'
@@ -715,7 +675,6 @@ lessons:
       - section: 'The question'
         say: 'We want a matrix $T$ such that $S$ times $T$ is the identity matrix. A matrix that does this is the inverse of $S$.'
         write: '$S = \begin{pmatrix} -1 & 1 \\ 1 & -2 \end{pmatrix},\quad ST = I$'
-        doodle: {name: 'custom:1999_q15_a', id: grid, caption: 'T undoes S', size: scene}
       - section: 'Solution'
         say: 'Solution. Since $S$ times $T$ is $I$, $T$ is $S$ inverse.'
         write: 'Solution: $ST = I \Rightarrow T = S^{-1}$'
@@ -725,12 +684,8 @@ lessons:
         write: '$a = -1,\ b = 1,\ c = 1,\ d = -2$'
       - say: 'The determinant is $ad$ minus $bc$. Negative 1 times negative 2 is 2, and 1 times 1 is 1.'
         write: '$|S| = (-1)(-2) - (1)(1) = 2 - 1 = 1$'
-        doodle_do:
-          - {id: grid, op: highlight, part: lead, text: 'a × d', 'on': 'determinant'}
       - say: 'For the adjoint, swap $a$ and $d$, so negative 2 goes top left and negative 1 bottom right. Then change the signs of $b$ and $c$, so each 1 becomes negative 1.'
         write: '$\text{adj } S = \begin{pmatrix} -2 & -1 \\ -1 & -1 \end{pmatrix}$'
-        doodle_do:
-          - {id: grid, op: stage, stage: 'custom:1999_q15_a2', 'on': 'swap'}
       - say: 'Now 1 over the determinant, times the adjoint. The determinant is 1, and dividing by 1 changes nothing.'
         write: '$T = \dfrac{1}{1}\begin{pmatrix} -2 & -1 \\ -1 & -1 \end{pmatrix}$'
       - say: 'Therefore $T$ is negative 2, negative 1, negative 1, negative 1.'
@@ -743,8 +698,6 @@ lessons:
       - say: 'Therefore $T$ is negative 2, negative 1, negative 1, negative 1, which is answer choice B.'
         write: '$\therefore\ T = \begin{pmatrix} -2 & -1 \\ -1 & -1 \end{pmatrix}$'
         answer: true
-        doodle_do:
-          - {id: grid, op: pulse, part: t}
     traps:
       A: 'You went for negative 2, 1, negative 1, 1. Multiply it back by $S$ and the bottom-right entry comes out as negative 1, not 1. Swap $a$ and $d$, and change the signs of $b$ and $c$ only.'
       C: 'You went for negative 1, negative 1, 0, negative 1. That is not the inverse: swapping $a$ and $d$ puts negative 2 in the top left. Build the adjoint, divide by the determinant, and check by multiplying.'
@@ -824,12 +777,8 @@ lessons:
       - section: 'Solution'
         say: 'Solution. Consecutive integers go up by 1, like house numbers next door. Let the middle one be $n$. The one before is $n - 1$ and the one after is $n + 1$.'
         write: 'Let $k = n - 1,\ l = n,\ m = n + 1$'
-        doodle: {name: 'custom:1999_q17_a', id: houses, caption: 'next-door numbers: n − 1, n, n + 1', 'on': 'house'}
       - say: 'Substitute into $l^{2} = 3(k + m)$. $l$ becomes $n$, and $k + m$ becomes $n - 1$ plus $n + 1$.'
         write: 'Sub.: $\ n^{2} = 3(n - 1 + n + 1)$'
-        doodle_do:
-          - {id: houses, op: highlight, part: hk}
-          - {id: houses, op: highlight, part: hm}
       - say: 'Collect like terms in the bracket. Minus 1 and plus 1 cancel, and $n$ plus $n$ is $2n$.'
         write: '$n^{2} = 3(2n)$'
       - say: '3 times $2n$ is $6n$.'
@@ -851,17 +800,13 @@ lessons:
       - say: 'Now the three numbers. $k$ is 6 minus 1, which is 5. $l$ is 6. $m$ is 6 plus 1, which is 7.'
         write: '$k = 5,\ l = 6,\ m = 6 + 1 = 7$'
         point:
-          - {line: 10, kind: highlight, at: 'm = 6 + 1 = 7', to: {doodle: houses, part: hm}}
-        doodle_do:
-          - {id: houses, op: stage, stage: 'custom:1999_q17_a2', 'on': 'numbers'}
+          - {line: 10, kind: highlight, at: 'm = 6 + 1 = 7'}
       - section: 'Check'
         say: 'Check in the condition. $l^{2}$ is 6 squared, 36. And 3 times 5 plus 7 is 3 times 12, also 36.'
         write: 'Check: $6^{2} = 36$; $\ 3(5 + 7) = 3 \times 12 = 36$'
       - say: 'Therefore $m$, the largest of the three, is 7, which is answer choice D.'
         write: '$\therefore m = 7$'
         answer: true
-        doodle_do:
-          - {id: houses, op: circle, part: hm, text: 'm = 7'}
     traps:
       A: 'You went for 4. Try 3, 4, 5: 4 squared is 16, but 3 times 3 plus 5 is 24. Solving $n^{2} = 6n$ gives the middle number 6, so $m$ is 7.'
       B: 'You went for 5. That is $k$, the smallest of 5, 6 and 7. The question wants $m$, the largest.'
@@ -1022,9 +967,8 @@ lessons:
       - say: 'Can $x^{2} + x + 1$ factorise further? Its discriminant, $b^{2} - 4ac$, is 1 minus 4, minus 3. Negative, so no.'
         write: '$b^{2} - 4ac = 1^{2} - 4(1)(1) = -3 < 0$'
       - section: 'Set up the fractions'
-        say: 'The linear factor gets a constant on top, $A$. The quadratic factor gets a linear top, $Bx + C$. Picture splitting one pizza into two slices.'
+        say: 'The linear factor gets a constant on top, $A$. The quadratic factor gets a linear top, $Bx + C$.'
         write: 'Let $\dfrac{1}{x^{3} - 1} \equiv \dfrac{A}{x - 1} + \dfrac{Bx + C}{x^{2} + x + 1}$'
-        doodle: {name: 'custom:1999_q21_a', id: pizza, caption: 'one pizza, two slices', 'on': 'pizza'}
       - say: 'Multiply through by $(x - 1)(x^{2} + x + 1)$. Each fraction keeps the factor it did not have.'
         write: '$1 \equiv A(x^{2} + x + 1) + (Bx + C)(x - 1)$'
       - section: 'Find A'
@@ -1032,10 +976,8 @@ lessons:
         write: 'Put $x = 1$: $\ 1 = A(1 + 1 + 1) + (B + C)(0)$'
       - say: '1 plus 1 plus 1 is 3, and anything times zero is zero.'
         write: '$1 = 3A$'
-      - say: 'Divide both sides by 3. $A$ is 1 over 3, the top of the first slice.'
+      - say: 'Divide both sides by 3. $A$ is 1 over 3, the top of the first fraction.'
         write: '$A = \dfrac{1}{3}$'
-        doodle_do:
-          - {id: pizza, op: label, part: slice1, text: 'A = 1/3'}
       - section: 'Equate coefficients'
         say: 'No other value wipes out a term, so we equate coefficients. Expand the second part first.'
         write: '$(Bx + C)(x - 1) = Bx^{2} - Bx + Cx - C$'
@@ -1047,8 +989,6 @@ lessons:
         write: 'Constant terms: $\ 1 = A - C$'
       - say: 'So $C$ is $A$ minus 1. 1 over 3 minus 1 is minus 2 over 3.'
         write: '$C = A - 1 = \dfrac{1}{3} - 1 = -\dfrac{2}{3}$'
-        doodle_do:
-          - {id: pizza, op: label, part: slice2, text: 'B = −1/3, C = −2/3'}
       - section: 'Put them together'
         say: 'The top of the second fraction is minus 1 over 3 $x$, minus 2 over 3. Take out minus 1 over 3, and that is minus $x + 2$, over 3.'
         write: '$Bx + C = -\dfrac{1}{3}x - \dfrac{2}{3} = -\dfrac{x + 2}{3}$'
@@ -1060,8 +1000,6 @@ lessons:
       - say: 'Therefore the partial fractions are 1 over $3(x - 1)$, minus $x + 2$ over $3(x^{2} + x + 1)$, which is answer choice C.'
         write: '$\therefore \dfrac{1}{3(x - 1)} - \dfrac{x + 2}{3(x^{2} + x + 1)}$'
         answer: true
-        doodle_do:
-          - {id: pizza, op: pulse, part: whole}
     traps:
       A: 'You went for A. It drops the factor of 3, as if $A$ were 1. Putting $x = 1$ gives $3A = 1$, so $A$ is 1 over 3.'
       B: 'You went for B. The sign between the fractions is wrong. $B$ is minus 1 over 3 and $C$ is minus 2 over 3, so the second fraction is subtracted.'
@@ -2011,7 +1949,6 @@ lessons:
       - section: 'The question'
         say: 'Three boys play a game of luck. Their probabilities of winning are 1 over 2, 1 over 3 and 1 over 4. What is the probability that one and only one of them wins? There are three ways that can happen.'
         write: '$P(A) = \tfrac{1}{2},\ \ P(B) = \tfrac{1}{3},\ \ P(C) = \tfrac{1}{4}$'
-        doodle: {name: 'custom:1999_q41_a', id: boys, caption: 'Exactly one of the three wins'}
       - say: 'Solution. Call the boys $A$, $B$ and $C$. $A$ prime, A complement, means $A$ does not win, so P of $A$ prime is 1 minus 1 over 2, which is 1 over 2.'
         write: 'Solution: $P(A^{\prime}) = 1 - \tfrac{1}{2} = \tfrac{1}{2}$'
       - say: 'P of $B$ prime is 1 minus 1 over 3, which is 2 over 3.'
@@ -2045,20 +1982,14 @@ lessons:
         write: '$P(AB^{\prime}C^{\prime}) = \tfrac{1}{2} \times \tfrac{2}{3} \times \tfrac{3}{4} = \tfrac{6}{24}$'
         diagram_do:
           - {id: t, op: path, part: 'Wins/Loses/Loses', text: 'A only: 6/24'}
-        doodle_do:
-          - {id: boys, op: circle, part: boy1, text: 'A only: 6/24'}
       - say: 'For $B$ only, we have 1 over 2, times 1 over 3, times 3 over 4. On top, 1 times 1 times 3 is 3. So 3 over 24.'
         write: '$P(A^{\prime}BC^{\prime}) = \tfrac{1}{2} \times \tfrac{1}{3} \times \tfrac{3}{4} = \tfrac{3}{24}$'
         diagram_do:
           - {id: t, op: path, part: 'Loses/Wins/Loses', text: 'B only: 3/24'}
-        doodle_do:
-          - {id: boys, op: circle, part: boy2, text: 'B only: 3/24'}
       - say: 'For $C$ only, we have 1 over 2, times 2 over 3, times 1 over 4. On top, 1 times 2 times 1 is 2. So 2 over 24.'
         write: '$P(A^{\prime}B^{\prime}C) = \tfrac{1}{2} \times \tfrac{2}{3} \times \tfrac{1}{4} = \tfrac{2}{24}$'
         diagram_do:
           - {id: t, op: path, part: 'Loses/Loses/Wins', text: 'C only: 2/24'}
-        doodle_do:
-          - {id: boys, op: circle, part: boy3, text: 'C only: 2/24'}
       - section: 'Add across the paths'
         say: 'Now add the three paths. 6 plus 3 plus 2 is 11, over 24.'
         write: '$P(\text{one only}) = \tfrac{6}{24} + \tfrac{3}{24} + \tfrac{2}{24} = \tfrac{11}{24}$'
@@ -2089,11 +2020,8 @@ lessons:
       - say: 'Solution. Let $E$ be the event that the number is an odd prime.'
         write: 'Solution: let $E$ = an odd prime'
       - section: 'The sample space'
-        say: 'From 0 to 20 includes both ends. n of $S$ is 20 minus 0, plus 1, which is 21. Count them, and there are 21 slips.'
+        say: 'From 0 to 20 includes both ends. n of $S$ is 20 minus 0, plus 1, which is 21. So there are 21 slips in the hat.'
         write: '$n(S) = 20 - 0 + 1 = 21$'
-        doodle: {name: ball-white, id: nums, caption: '21 numbers: 0 to 20', repeat: 21, layout: grid}
-        doodle_do:
-          - {id: nums, op: count}
       - section: 'The favourable outcomes'
         say: 'A prime has exactly two factors, 1 and itself. So 0 and 1 are not prime. The primes up to 20 are 2, 3, 5, 7, 11, 13, 17 and 19.'
         write: 'Primes: $2, 3, 5, 7, 11, 13, 17, 19$'
@@ -2101,10 +2029,8 @@ lessons:
         write: '$E = \{3, 5, 7, 11, 13, 17, 19\}$'
         point:
           - {line: 3, kind: strike, at: '2,', text: 'even'}
-      - say: 'Count what is left, and n of $E$ is 7. Move them to one side, away from the other 14 numbers.'
+      - say: 'Count what is left, and n of $E$ is 7.'
         write: '$n(E) = 7$'
-        doodle_do:
-          - {id: nums, op: split, n: 7, text: '7 odd primes | 14 others'}
       - section: 'The probability'
         say: 'The probability of $E$ is n of $E$ over n of $S$, meaning the number of favourable outcomes over the total number of possible outcomes.'
         write: '$P(E) = \dfrac{n(E)}{n(S)}$'
@@ -2298,9 +2224,8 @@ lessons:
   46:
     moments:
       - section: 'The question'
-        say: 'The pie chart shows the grades of 36 students in a class test, and here they all are. We want the number who had Excellent.'
+        say: 'The pie chart shows the grades of 36 students in a class test. We want the number who had Excellent.'
         write: 'Total $= 36$ students. Excellent $= ?$'
-        doodle: {name: student-small, id: class, caption: 'the 36 students', repeat: 36, layout: grid}
       - section: 'Solution'
         say: 'Solution. From the chart, Pass is 120 degrees, Credit is 80 degrees, and Very Good has the right-angle mark, so it is 90 degrees.'
         write: 'Pass $= 120^{\circ}$, Credit $= 80^{\circ}$, Very Good $= 90^{\circ}$'
@@ -2327,12 +2252,10 @@ lessons:
           - {line: 5, kind: move, from: {line: 0, at: '= 36'}, at: '× 36', text: 'total'}
       - say: '36 over 360 is 1 over 10, so this is 70 over 10.'
         write: '$= \dfrac{70}{10}$'
-      - say: '70 over 10 is 7 students. Ring 7 of the 36.'
+      - say: '70 over 10 is 7 students.'
         write: '$= 7$'
         diagram_do:
           - {id: t, op: fill, part: 'cell:4,3', text: '7', 'on': '7 students'}
-        doodle_do:
-          - {id: class, op: group, n: 7, text: '7 Excellent'}
       - section: 'Check'
         say: 'Check that everyone is counted. In the same way, Pass is 120 over 10, 12. Credit is 8, and Very Good is 9.'
         write: 'Pass $= 12$, Credit $= 8$, Very Good $= 9$'
@@ -2340,10 +2263,8 @@ lessons:
           - {id: t, op: fill, part: 'cell:1,3', text: '12', 'on': '12'}
           - {id: t, op: fill, part: 'cell:2,3', text: '8', 'on': '8'}
           - {id: t, op: fill, part: 'cell:3,3', text: '9', 'on': '9'}
-      - say: '12 plus 8 plus 9 plus 7 is 36. Count the class, and everyone is there.'
+      - say: '12 plus 8 plus 9 plus 7 is 36, so every student is counted.'
         write: '$12 + 8 + 9 + 7 = 36\ \checkmark$'
-        doodle_do:
-          - {id: class, op: count}
       - section: 'Answer'
         say: 'Therefore 7 students had Excellent, which is answer choice A.'
         write: '$\therefore$ Excellent $= 7$ students'
@@ -2411,7 +2332,6 @@ lessons:
       - section: 'The question'
         say: 'A student found the mean of 5 numbers as 45.3, but his total was short by 20.5. We want the correct mean.'
         write: 'Correct mean $= ?$'
-        doodle: {name: 'custom:1999_q48_a', id: book, caption: 'His total was 20.5 too small'}
       - section: 'Solution'
         say: 'Solution. The givens are that $n$, the number of values, is 5, his mean, $x$ bar, is 45.3, and his total was short by 20.5.'
         write: 'Solution. $n = 5$, $\ \bar{x} = 45.3$, total short by $20.5$'
@@ -2419,21 +2339,14 @@ lessons:
         write: '$\bar{x} = \dfrac{\sum x}{n} \Rightarrow \sum x = n\bar{x}$'
       - say: 'Substitute his figures, so 5 times 45.3. 5 times 45 is 225, and 5 times 0.3 is 1.5. So his total was 226.5.'
         write: 'His $\sum x = 5 \times 45.3 = 226.5$'
-        doodle_do:
-          - {id: book, op: label, part: mean, text: 'total 5 × 45.3 = 226.5'}
       - say: 'Short by means too small, so the missing 20.5 is added back. 226.5 plus 20.5 is 247.'
         write: 'Correct $\sum x = 226.5 + 20.5 = 247$'
         point:
           - {line: 4, kind: move, from: {line: 3, at: '[[226.5]]'}, at: '=[[226.5]]+', text: 'his total'}
-        doodle_do:
-          - {id: book, op: move, part: note, path: back}
-          - {id: book, op: label, part: book, text: 'true total 247'}
       - say: 'There are still 5 numbers. So the correct mean is the correct sum over 5.'
         write: 'Correct $\bar{x} = \dfrac{247}{5}$'
       - say: 'Divide 247 by 5. 5 into 24 goes 4, remainder 4, then 5 into 47 goes 9, remainder 2, then 5 into 20 goes 4. So 49.4.'
         write: '$\therefore$ Correct $\bar{x} = 49.4$'
-        doodle_do:
-          - {id: book, op: circle, part: mean, text: 'should be 49.4'}
       - section: 'Check'
         say: 'To check, the missing 20.5, shared among 5 numbers, raises the mean by 20.5 over 5, which is 4.1. And 45.3 plus 4.1 is 49.4.'
         write: 'Check: $45.3 + \dfrac{20.5}{5} = 45.3 + 4.1 = 49.4$ ✓'

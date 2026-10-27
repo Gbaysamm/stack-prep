@@ -1924,9 +1924,6 @@ lessons:
       - section: 'Check'
         say: 'Check by adding in a different order. 2 plus 5 is 7, 3 plus 4 is 7, and 3 plus 1 plus 2 is 6. 7 plus 7 plus 6 is 20 students.'
         write: 'Check: $(2 + 5) + (3 + 4) + (3 + 1 + 2) = 7 + 7 + 6 = 20\ \checkmark$'
-        doodle: {name: 'student-small', id: cls, repeat: 20, layout: grid, caption: 'one figure per student'}
-        doodle_do:
-          - {id: cls, op: count}
       - section: 'Answer'
         say: 'Therefore 20 students took the test, which is answer choice B.'
         write: '$\therefore$ number of students $= 20$'
@@ -1960,12 +1957,8 @@ lessons:
           - {line: 6, kind: move, from: {line: 4, at: '6 + [[7]]'}, at: '[[7]] + 7', text: '2nd line'}
           - {line: 6, kind: move, from: {line: 4, at: '7 + [[7]] ='}, at: '7 + [[7]] =', text: '3rd line'}
       - section: 'Check'
-        say: 'Check by sorting the scripts into two trays at 50. Below 50 are the first six marks, and 20 minus 6 is 14.'
+        say: 'Check by splitting the 20 scripts at 50. Below 50 are the first six marks, and 20 minus 6 is 14.'
         write: 'Check: below 50: $6$; $\ 20 - 6 = 14\ \checkmark$'
-        doodle: {name: 'custom:1993_q44_a', id: trays, caption: 'sort the 20 scripts at 50'}
-        doodle_do:
-          - {id: trays, op: label, part: below, text: '6'}
-          - {id: trays, op: label, part: atleast, text: '14'}
       - section: 'Answer'
         say: 'Therefore 14 students scored at least 50 marks, which is option D.'
         write: '$\therefore 14$ students scored at least 50'
@@ -2047,21 +2040,15 @@ lessons:
       - section: 'The question'
         say: 'Ten pupils have a mean age of 16. Their teacher joins them and the mean jumps to 19. One person lifted the mean by 3 years, so the teacher must be much older. How old?'
         write: 'Mean of 10 pupils $= 16$; with the teacher, mean of 11 $= 19$'
-        doodle: {name: 'student-small', id: pupils, repeat: 10, layout: row, caption: '10 pupils, mean 16'}
       - section: 'Solution'
         say: 'Solution. The mean is the sum divided by the number of people. So the sum is the mean times the number.'
         write: 'Solution. Sum $=$ mean $\times$ number'
       - say: 'The sum of the pupils'' ages is 16 times 10, which is 160.'
         write: 'Sum of 10 pupils'' ages $= 16 \times 10 = 160$'
-        doodle_do:
-          - {id: pupils, op: count}
       - say: 'With the teacher there are 11 people, and their mean is 19. 19 times 11 is 209.'
         write: 'Sum of 11 ages $= 19 \times 11 = 209$'
-        doodle: {name: 'custom:1993_q46_a', id: teacher, caption: 'then their teacher joins'}
       - say: 'Let the teacher''s age be $x$ years.'
         write: 'Let the teacher''s age be $x$ years'
-        doodle_do:
-          - {id: teacher, op: label, part: age, text: 'x years'}
       - say: 'The pupils'' sum plus $x$ makes the new sum, so 160 plus $x$ equals 209.'
         write: '$160 + x = 209$'
         point:
@@ -2071,10 +2058,6 @@ lessons:
         write: '$x = 209 - 160$'
       - say: '209 minus 160 is 49.'
         write: '$\therefore x = 49$ years'
-        doodle_do:
-          - {id: teacher, op: label, part: age, text: '49 years'}
-        point:
-          - {line: 7, kind: highlight, at: '49', to: {doodle: teacher, part: age}}
       - section: 'Check'
         say: 'Check. 160 plus 49 is 209, and 209 divided by 11 is 19, the new mean.'
         write: 'Check: $\dfrac{160 + 49}{11} = \dfrac{209}{11} = 19$ ✓'

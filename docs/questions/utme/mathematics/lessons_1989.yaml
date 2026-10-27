@@ -481,8 +481,7 @@ lessons:
         write: '$9^{y} = (3^{2})^{y} = 3^{2y} = (3^{y})^{2}$ $\quad [(a^{m})^{n} = a^{mn}]$'
       - say: 'Put that into the equation.'
         write: '$(3^{y})^{2} - 4(3^{y}) + 3 = 0$'
-      - say: 'Let $u$ be 3 to the $y$. Picture a box labelled $u$, with 3 to the $y$ inside.'
-        doodle: {name: 'custom:1989_q12_a', id: box, caption: 'u stands for 3 to the y'}
+      - say: 'Let $u$ be 3 to the $y$. The letter $u$ stands in for 3 to the $y$.'
         write: 'Let $u = 3^{y}$'
       - say: 'Then the equation becomes $u$ squared minus $4u$ plus 3 equals 0.'
         write: '$u^{2} - 4u + 3 = 0$'
@@ -497,11 +496,9 @@ lessons:
         write: '$(u - 1)(u - 3) = 0$'
       - say: 'Either $u$ minus 1 is zero or $u$ minus 3 is zero. So $u$ is 1 or $u$ is 3.'
         write: 'Either $u = 1$ or $u = 3$'
-        doodle_do: [{id: box, op: label, part: inside, text: 'u = 1 or 3'}]
       - section: 'Back to y'
         say: 'But we want $y$, not $u$. Go back to $u$ equals 3 to the $y$. First, 3 to the $y$ equals 1. By the zero index law, 1 is 3 to the power 0, so equating the indices, $y$ is 0.'
         write: '$3^{y} = 1 = 3^{0} \quad \therefore y = 0$ $\quad [a^{0} = 1]$'
-        doodle_do: [{id: box, op: circle, part: tag}]
         point:
           - {line: 4, kind: underline, at: 'u=3y', text: 'back to y'}
           - {line: 10, kind: circle, at: 'u=1'}
@@ -607,7 +604,6 @@ lessons:
     moments:
       - section: 'The question'
         say: 'Dinner costs ₦74 for 20 students and ₦96 for 30. Part of the bill is fixed, and part grows with the number of students. What do 15 students pay?'
-        doodle: {name: 'custom:1989_q15_a', id: bill, caption: 'Dinner: ₦74 for 20, ₦96 for 30'}
         write: '₦74 for 20 students; ₦96 for 30 students'
       - say: 'Solution. Let $C$ be the cost in naira and $n$ the number of students.'
         write: 'Solution: let $C$ = cost (₦), $n$ = number of students'
@@ -624,20 +620,17 @@ lessons:
           - {line: 0, kind: underline, at: '₦96 for 30', text: 'given'}
       - section: 'Solve for the constants'
         say: 'Equation two minus equation one. The $k$ ones cancel. 96 minus 74 is 22, and 30 $k$ two minus 20 $k$ two is 10 $k$ two.'
-        doodle_do: [{id: bill, op: highlight, part: row20}, {id: bill, op: highlight, part: row30}]
         write: '$(2) - (1)$: $\ 22 = 10k_{2}$'
       - say: 'Divide both sides by 10. Each student adds ₦2.20.'
-        doodle_do: [{id: bill, op: label, part: each, text: '₦2.20'}]
         write: '$\therefore\ k_{2} = \dfrac{22}{10} = 2.2$'
       - say: 'Substitute $k$ two equals 2.2 in equation one. 20 times 2.2 is 44.'
         write: 'Sub. in (1): $\ 74 = k_{1} + 20(2.2) = k_{1} + 44$'
         point:
           - {line: 7, kind: move, from: {line: 6, at: '= 2.2'}, at: '(2.2)', text: 'k₂'}
       - say: '74 minus 44 is 30. So the fixed part of the bill is ₦30.'
-        doodle_do: [{id: bill, op: label, part: fixed, text: '₦30'}]
         write: '$\therefore\ k_{1} = 74 - 44 = 30$'
         point:
-          - {line: 8, kind: highlight, at: '30', to: {doodle: bill, part: fixed}}
+          - {line: 8, kind: highlight, at: '30'}
       - section: 'The equation'
         say: 'The law of variation is that cost equals 30, plus 2.2 times the number of students.'
         write: '$\therefore\ C = 30 + 2.2n$'
@@ -645,7 +638,6 @@ lessons:
         say: 'Substitute $n$ equals 15. 2.2 times 15 is 33.'
         write: 'When $n = 15$: $\ C = 30 + 2.2(15) = 30 + 33$'
       - say: '30 plus 33 is 63.'
-        doodle_do: [{id: bill, op: label, part: row15, text: '₦63'}]
         write: '$= 63$'
       - section: 'Check'
         say: 'Check equation two. 2.2 times 30 is 66, and 30 plus 66 is 96. That matches the question.'
@@ -1799,7 +1791,6 @@ lessons:
       - section: 'The question'
         say: 'A pilot flies 10 km above the ground towards a landmark. He sees it first at an angle of depression of 35 degrees, then later at 55 degrees. We want the distance between the two points of observation.'
         write: 'Height $10$ km; depression $35^{\circ}$, then $55^{\circ}$'
-        doodle: {name: 'custom:1989_q41_a', id: plane, caption: 'the plane flies on towards the landmark', size: scene}
       - section: 'Solution'
         say: 'Solution. Let me draw the plane at $A$, the landmark $L$ on the ground, and the 10 km height. The angle of depression is measured down from the plane''s horizontal line of flight.'
         write: 'Solution: plane at $A$, landmark $L$, height $10$ km'
@@ -1824,9 +1815,6 @@ lessons:
         write: 'Let $d_{2}$ = horiz. dist. at $B$: $\tan 55^{\circ} = \dfrac{10}{d_{2}}$ (TOA)'
         show_sketch: sketch_b
         'on': 'second sighting'
-        doodle_do:
-          - {id: plane, op: move, part: plane, path: fly}
-          - {id: plane, op: circle, part: pb}
         point:
           - {figure: sketch_b, kind: circle, target: B, text: 'later'}
           - {figure: sketch_b, kind: circle, target: '55°', text: 'from B'}
@@ -1835,8 +1823,6 @@ lessons:
       - section: 'The distance AB'
         say: '$A$ is farther from the landmark than $B$, so the distance flown, $AB$, is $d_1$ minus $d_2$.'
         write: '$AB = d_{1} - d_{2} = 10\cot 35^{\circ} - 10\cot 55^{\circ}$'
-        doodle_do:
-          - {id: plane, op: highlight, part: gap}
         point:
           - {line: 7, kind: move, from: {line: 4, at: '=10cot35∘'}, at: '=[[10cot35∘]]−', text: 'd₁'}
           - {line: 7, kind: move, from: {line: 6, at: '=10cot55∘'}, at: '−[[10cot55∘]]', text: 'd₂'}
@@ -1848,8 +1834,6 @@ lessons:
       - section: 'Check'
         say: 'Check with the tables. Tan 35 is 0.7002, so cot 35 is 1.4281. Tan 55 is 1.4281, so cot 55 is 0.7002. 10 times the difference is about 7.3 km, which is sensible.'
         write: 'Check: $10(1.4281 - 0.7002) = 7.279 \approx 7.3$ km $> 0\ \checkmark$'
-        doodle_do:
-          - {id: plane, op: label, part: gap, text: 'about 7.3 km'}
       - section: 'Answer'
         say: 'So the distance is 10 times, cot 35 minus cot 55, kilometres, which is answer choice D.'
         write: '$\therefore 10(\cot 35^{\circ} - \cot 55^{\circ})$ km'
@@ -2075,7 +2059,6 @@ lessons:
       - section: 'The question'
         say: 'A cook used 75 g of rice, 40 g of margarine, 105 g of meat and 20 g of bread crumbs. We want the angle of the meat sector in a pie chart.'
         write: 'Meat sector $= ?$'
-        doodle: {name: 'custom:1989_q46_a', id: cook, caption: 'Ingredients for rice cutlets'}
       - section: 'Solution'
         say: 'Solution. Draw the table of ingredients and masses. Each sectoral angle is the mass over the total mass, times 360 degrees.'
         write: 'Sectoral angle $= \dfrac{\text{mass}}{\text{total}} \times 360^{\circ}$'
@@ -2087,16 +2070,12 @@ lessons:
       - section: 'The meat sector'
         say: 'Meat is 105 grams out of 240. Substitute into the formula.'
         write: 'Meat $= \dfrac{105}{240} \times 360^{\circ}$'
-        doodle_do:
-          - {id: cook, op: circle, part: meat}
       - say: 'Simplify 360 over 240. Divide both by 120, and it is 3 over 2. So it is 105 times 3 over 2.'
         write: '$= 105 \times \dfrac{3}{2} = \dfrac{315}{2}$'
       - say: '315 divided by 2 is 157.5 degrees.'
         write: '$= 157.5^{\circ}$'
         diagram_do:
           - {id: t, op: fill, part: 'cell:3,3', text: '157.5°', 'on': '157.5 degrees'}
-        doodle_do:
-          - {id: cook, op: label, part: meat, text: '157.5°'}
       - section: 'Check'
         say: 'Check the full circle with the same 3 over 2. Rice is 112.5 degrees, margarine 60, and crumbs 30.'
         write: 'Rice $112.5^{\circ}$, margarine $60^{\circ}$, crumbs $30^{\circ}$'
@@ -2119,7 +2098,6 @@ lessons:
       - section: 'The question'
         say: 'A histogram shows the marks of 30 students. We want the percentage who scored more than 40.'
         write: 'Percentage scoring more than 40 $= ?$'
-        doodle: {name: student-small, id: cls, repeat: 30, layout: grid, caption: 'the class of 30'}
       - section: 'Solution'
         say: 'Solution. The classes all have the same width, 20 marks, so the height of each bar is the frequency of its class. Read the bars into a frequency table.'
         write: 'Equal class widths: height of bar $=$ frequency $f$'
@@ -2148,8 +2126,6 @@ lessons:
           - {id: t, op: highlight, part: 'row:3', 'on': 'last three bars'}
           - {id: t, op: highlight, part: 'row:4'}
           - {id: t, op: highlight, part: 'row:5', text: 'more than 40: 14'}
-        doodle_do:
-          - {id: cls, op: split, n: 16, text: '40 or less: 16 | more than 40: 14'}
       - say: 'A percentage is the part over the whole, times 100.'
         write: 'Percentage $= \dfrac{14}{30} \times 100\%$'
       - say: 'Divide top and bottom by 2 to get 7 over 15. 7 times 100 is 700, so it is 700 over 15.'
@@ -2170,22 +2146,17 @@ lessons:
   48:
     moments:
       - section: 'The question'
-        say: 'A family of 21 people has an average age of 14. Without the grandfather, the average drops to 12. We want the grandfather''s age. Picture all 21 of them.'
+        say: 'A family of 21 people has an average age of 14. Without the grandfather, the average drops to 12. We want the grandfather''s age.'
         write: '21 people: mean 14; without the grandfather, 20 people: mean 12'
-        doodle: {name: 'person-small', id: fam, repeat: 21, layout: grid, caption: '21 people, mean 14', 'on': 'Picture'}
       - section: 'Solution'
         say: 'Solution. Turn the averages into totals. The mean is the total over the number of people, so the sum is the mean times the number.'
         write: 'Solution. Sum $=$ mean $\times$ number'
       - say: 'The sum of the ages of all 21 is 21 times 14. 20 times 14 is 280, and one more 14 makes 294.'
         write: 'Sum for 21 people $= 21 \times 14 = 294$'
-        doodle_do:
-          - {id: fam, op: count}
       - say: 'Let the grandfather''s age be $x$ years.'
         write: 'Let the grandfather''s age $= x$ years'
-      - say: 'Without him there are 20 people, with mean 12. Their sum is 20 times 12, which is 240. Watch him step aside.'
+      - say: 'Without him there are 20 people, with mean 12. Their sum is 20 times 12, which is 240.'
         write: 'Sum for the other 20 $= 20 \times 12 = 240$'
-        doodle_do:
-          - {id: fam, op: split, n: 20, text: '20 people, mean 12 | grandfather', 'on': 'aside'}
       - say: 'The other 20 plus the grandfather make all 21. So 240 plus $x$ is 294.'
         write: '$240 + x = 294$'
         point:
@@ -2195,9 +2166,6 @@ lessons:
         write: '$x = 294 - 240$'
       - say: '294 minus 240 is 54.'
         write: '$\therefore x = 54$'
-        doodle: {name: 'custom:1989_q48_a', id: gp, caption: 'the grandfather on his own'}
-        doodle_do:
-          - {id: gp, op: label, part: age, text: '54 years'}
       - section: 'Check'
         say: 'To check, 240 plus 54 is 294, and 294 over 21 is 14, the average we were given.'
         write: 'Check: $\dfrac{240 + 54}{21} = \dfrac{294}{21} = 14$ ✓'

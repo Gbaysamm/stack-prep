@@ -284,7 +284,6 @@ lessons:
       - section: 'The question'
         say: 'A class of 42 students, and each one offers Maths, or Physics, or both. 28 offer Maths and 22 offer Physics. But 28 plus 22 is 50, more than 42. Find those in both first, then Physics only is easy.'
         write: 'Class 42: Maths 28, Physics 22. Physics only $= ?$'
-        doodle: {name: student-small, id: cls, repeat: 42, layout: grid, caption: 'the class of 42'}
       - section: 'Solution'
         say: 'Solution. The givens. The class is the universal set, epsilon, so n of epsilon is 42. n of M, the Maths set, is 28, and n of P, the Physics set, is 22.'
         write: '$n(\varepsilon) = 42,\ n(M) = 28,\ n(P) = 22$'
@@ -330,9 +329,6 @@ lessons:
         write: 'Maths only $= 28 - 8 = 20$; $\ 20 + 8 + 14 = 42\ \checkmark$'
         diagram_do:
           - {id: v, op: fill, part: 'M only', text: '20', 'on': 'is 20'}
-        doodle_do:
-          - {id: cls, op: group, n: 8, text: '8 in both'}
-          - {id: cls, op: split, n: 28, text: 'Maths only | Physics only', 'on': 'whole class'}
       - section: 'Or by the formula'
         say: 'Or use the formula, n of M union P equals n of M, plus n of P, minus n of M intersection P.'
         write: '$n(M \cup P) = n(M) + n(P) - n(M \cap P)$'
@@ -982,21 +978,16 @@ lessons:
       - section: 'The question'
         say: 'Star is ordinary multiplication, but only on the positive integers 1, 2, 3 and so on. Four properties, and one of them fails. We check each one in turn.'
         write: '$a * b = ab$ on $\{1, 2, 3, \ldots\}$. Which property does NOT hold?'
-        doodle: {name: 'custom:1994_q22_a', id: list, caption: 'check each property'}
       - section: 'Closure'
         say: 'Solution. Closure means $a$ star $b$ is in the set for every $a$ and $b$ in the set. A positive integer times a positive integer is always a positive integer.'
         write: 'Closure: $a * b = ab \in \{1, 2, 3, \ldots\}$'
-      - say: 'Therefore star is closed. That is a tick on the list.'
+      - say: 'Therefore star is closed. That is one property ticked.'
         write: '$\therefore$ closure holds'
-        doodle_do:
-          - {id: list, op: stage, stage: 'custom:1994_q22_a2'}
       - section: 'Associativity'
         say: 'Associative means bracket $a$ star $b$, star $c$, equals $a$ star, bracket $b$ star $c$. Work out the left side, and $ab$, then times $c$, is $abc$.'
         write: 'Associative: $(a * b) * c = (ab)c = abc$'
       - say: 'Now the right side. $b$ star $c$ is $bc$, and $a$ times $bc$ is also $abc$. The two sides are equal, so associativity holds.'
         write: '$a * (b * c) = a(bc) = abc$ $\therefore$ holds'
-        doodle_do:
-          - {id: list, op: stage, stage: 'custom:1994_q22_a3'}
       - section: 'Identity'
         say: 'Let $e$ be the identity element. Then $a$ star $e$ equals $e$ star $a$ equals $a$, for every $a$ in the set.'
         write: 'Let $e$ be the identity: $a * e = e * a = a$'
@@ -1004,8 +995,6 @@ lessons:
         write: '$ae = a \Rightarrow e = \dfrac{a}{a} = 1$'
       - say: 'Check from the other side. 1 star $a$ is 1 times $a$, which is $a$. And 1 is a positive integer, so the identity is in the set. It holds.'
         write: '$1 * a = a$, $1 \in \{1, 2, 3, \ldots\}$ $\therefore e = 1$'
-        doodle_do:
-          - {id: list, op: stage, stage: 'custom:1994_q22_a4'}
       - section: 'Inverse'
         say: 'Now the inverse. Let $a$ inverse be the inverse of $a$. Then $a$ star $a$ inverse equals the identity, 1.'
         write: 'Let $a^{-1}$ be the inverse of $a$: $a * a^{-1} = e = 1$'
@@ -1013,8 +1002,6 @@ lessons:
         write: '$a \times a^{-1} = 1 \Rightarrow a^{-1} = \dfrac{1}{a}$'
       - say: 'Take $a$ equals 2. Its inverse would be 1 over 2. But 1 over 2 is not a positive integer, so it is not in the set.'
         write: '$2^{-1} = \dfrac{1}{2} \notin \{1, 2, 3, \ldots\}$'
-        doodle_do:
-          - {id: list, op: cross, part: c4}
       - say: 'Therefore 2 has no inverse in the set. Only 1 does, since 1 times 1 is 1. So the inverse property does not hold.'
         write: '$\therefore$ the inverse property does not hold'
       - section: 'Answer'
@@ -2361,9 +2348,8 @@ lessons:
   49:
     moments:
       - section: 'The question'
-        say: 'A class table gives the pupils by age, 10, 11 and 12 years. Picture pupils wearing age badges. What is the probability that a pupil chosen at random is at least 11 years old?'
+        say: 'A class table gives the pupils by age, 10, 11 and 12 years. What is the probability that a pupil chosen at random is at least 11 years old?'
         write: '$P(\text{at least 11 years old}) = ?$'
-        doodle: {name: 'custom:1994_q49_a', id: badges, caption: 'ages 10, 11 and 12'}
       - say: 'Solution. Let $E$ be the event that the pupil is at least 11 years old. Copy the table first.'
         write: 'Solution: let $E$ = at least 11 years old'
         diagram:
@@ -2380,15 +2366,11 @@ lessons:
       - section: 'The favourable outcomes'
         say: '"At least 11" means 11 or older. So the 11-year-olds and the 12-year-olds both count.'
         write: 'At least 11: age $11$ or $12$'
-        doodle_do:
-          - {id: badges, op: highlight, part: atleast}
         diagram_do:
           - {id: f, op: highlight, part: 'row:2'}
           - {id: f, op: highlight, part: 'row:3'}
       - say: 'n of $E$ is 27 plus 7, which is 34.'
         write: '$n(E) = 27 + 7 = 34$'
-        point:
-          - {line: 4, kind: highlight, at: '= 34', to: {doodle: badges, part: atleast}}
       - section: 'The probability'
         say: 'The probability of $E$ is n of $E$ over n of $S$, that is, the number of favourable outcomes over the total number of possible outcomes.'
         write: '$P(E) = \dfrac{n(E)}{n(S)}$'
@@ -2400,10 +2382,8 @@ lessons:
       - say: 'Divide the top and the bottom by 2. 34 divided by 2 is 17, and 40 divided by 2 is 20.'
         write: '$= \dfrac{34 \div 2}{40 \div 2} = \dfrac{17}{20}$'
       - section: 'Check'
-        say: 'Check with the complement. Only the 6 ten-year-olds, the first badge, are not at least 11, so P of $E$ complement is 6 over 40, which is 3 over 20.'
+        say: 'Check with the complement. Only the 6 ten-year-olds are not at least 11, so P of $E$ complement is 6 over 40, which is 3 over 20.'
         write: 'Check: $P(E^{\prime}) = \dfrac{6}{40} = \dfrac{3}{20}$'
-        doodle_do:
-          - {id: badges, op: cross, part: p10}
       - say: 'P of $E$ is 1 minus 3 over 20. That is 20 over 20 minus 3 over 20, which is 17 over 20. The same.'
         write: '$P(E) = 1 - \dfrac{3}{20} = \dfrac{17}{20}\ \checkmark$'
       - section: 'Answer'

@@ -55,14 +55,9 @@ lessons:
         say: 'Solution. A prime number has exactly two factors, 1 and itself. So 1 is not prime, because it has only one factor.'
         write: 'Solution: a prime has exactly two factors, $1$ and itself'
       - say: 'The numbers between 1 and 6 are 2, 3, 4 and 5. 2, 3 and 5 are prime. 4 is not, because 4 is 2 times 2.'
-        doodle: {name: 'custom:1988_q02_a', id: cards, caption: 'the numbers between 1 and 6'}
         write: 'Primes between 1 and 6: $2,\ 3,\ 5$ $\ (4 = 2 \times 2)$'
-        doodle_do:
-          - {id: cards, op: cross, part: c4}
       - say: 'Add them. 2 plus 3 is 5, and 5 plus 5 is 10.'
         write: '$\therefore x = 2 + 3 + 5 = 10$'
-        doodle_do:
-          - {id: cards, op: label, part: c3, text: 'x = 10'}
       - section: 'The H.C.F.'
         say: 'Now the H.C.F. of 6, 9 and 15. Set them side by side and divide by a prime that goes into all three. 2 does not go into 9, but 3 goes into all three.'
         write: 'H.C.F. of $6,\ 9,\ 15$'
@@ -91,7 +86,6 @@ lessons:
     moments:
       - section: 'The question'
         say: 'Tunde''s scale reads 5.1 grams for salt that is really 5.0 grams. The options are 20, 2, 0.2 and 0.02, and one formula, with careful decimals, will choose.'
-        doodle: {name: 'custom:1988_q03_a', id: scale, caption: 'salt: really 5.0 g, weighed 5.1 g'}
         write: 'Actual mass $= 5.0$ g, measured mass $= 5.1$ g. Percentage error $= ?$'
       - say: 'We write the formula first. Percentage error is the error over the actual value, times 100 percent.'
         write: 'Solution'
@@ -99,11 +93,9 @@ lessons:
         write: 'Percentage error $= \dfrac{\text{error}}{\text{actual value}} \times 100\%$'
       - section: 'Find the error'
         say: 'The scale says too much. The error is the measured value minus the actual value, so 5.1 minus 5.0, which is 0.1 gram.'
-        doodle_do: [{id: scale, op: label, part: display, text: '0.1 g over'}]
         write: 'Error $= 5.1 - 5.0 = 0.1$ g'
       - section: 'Substitute'
         say: 'Substitute, with the error, 0.1, on top, and the actual value, 5.0, underneath.'
-        doodle_do: [{id: scale, op: underline, part: truth}]
         write: 'Percentage error $= \dfrac{0.1}{5.0} \times 100\%$'
         point:
           - {line: 4, kind: move, from: {line: 3, at: '= 0.1'}, at: '5.0[[0.1]]', text: 'error'}
@@ -132,11 +124,9 @@ lessons:
       - say: 'We make the divisor a whole number first, then do long division, and round at the end.'
         write: 'Solution'
       - section: 'Clear the decimals'
-        say: 'Multiply the numerator and the denominator by 10,000. The value does not change. Picture both decimal points hopping 4 places to the right together.'
-        doodle: {name: 'custom:1988_q04_a', id: hops, caption: 'move both points together'}
+        say: 'Multiply the numerator and the denominator by 10,000. The value does not change. Both decimal points move 4 places to the right together.'
         write: '$\dfrac{0.24633}{0.0306} = \dfrac{0.24633 \times 10000}{0.0306 \times 10000}$'
       - say: 'The numerator becomes 2,463.3 and the denominator becomes 306.'
-        doodle_do: [{id: hops, op: stage, stage: 'custom:1988_q04_a2'}]
         write: '$= \dfrac{2463.3}{306}$'
       - section: 'Long division'
         say: 'Now 306 into 2,463. 306 times 8 is 2,448, which fits. Write 8 above. 2,463 minus 2,448 leaves 15.'
@@ -149,7 +139,6 @@ lessons:
         write: '$\dfrac{2463.3}{306} = 8.05$'
       - section: 'Round to 1 d.p.'
         say: 'For one decimal place, cut after the first decimal digit, so 8.0, then 5. The next digit is 5, and 5 or more means add 1. So 8.0 becomes 8.1.'
-        doodle_do: [{id: hops, op: pulse, part: hops}]
         write: '$\therefore 8.0|5 \approx 8.1$ (1 d.p.)'
       - section: 'Check'
         say: 'Check by multiplying back 0.0306 times 8.05. 0.0306 times 8 is 0.2448, and 0.0306 times 0.05 is 0.00153. Together that is 0.24633.'
@@ -479,14 +468,11 @@ lessons:
         write: '$(x + 2)(x + 2) = x^{2} + 4x + 4$'
       - say: 'Open the second. $x$ times $x$ is $x$ squared, $x$ minus 2 $x$ is negative $x$, and negative 2 times 1 is negative 2.'
         write: '$(x - 2)(x + 1) = x^{2} - x - 2$'
-      - say: 'Put both back into the numerator, the second still in its bracket. Picture the minus sign standing guard in front of that bracket.'
-        doodle: {name: 'custom:1988_q12_a', id: minus, caption: 'the minus reaches every term', size: scene}
+      - say: 'Put both back into the numerator, the second still in its bracket. The minus sign stands in front of that bracket.'
         write: 'Numerator $= (x^{2} + 4x + 4) - (x^{2} - x - 2)$'
       - say: 'Now the minus reaches inside and changes every sign, giving negative $x$ squared, plus $x$, plus 2.'
-        doodle_do: [{id: minus, op: stage, stage: 'custom:1988_q12_a2'}]
         write: '$= x^{2} + 4x + 4 - x^{2} + x + 2$'
       - say: 'Collect like terms. $x$ squared minus $x$ squared is zero. 4 $x$ plus $x$ is 5 $x$. 4 plus 2 is 6.'
-        doodle_do: [{id: minus, op: pulse, part: flipped}]
         write: '$= 5x + 6$'
       - say: 'Therefore the answer is 5 $x$ plus 6, over the L.C.M.'
         write: '$\therefore \dfrac{5x + 6}{(x + 1)(x + 2)}$'
@@ -517,11 +503,9 @@ lessons:
       - say: 'And $a$ squared minus 2 $a b$ plus $b$ squared is $a$ minus $b$, all squared.'
         write: '$a^{2} - 2ab + b^{2} = (a - b)^{2}$'
       - section: 'Find p and q'
-        say: 'So 1 over $p$ is $a$ plus $b$ squared, over $a$ minus $b$. Picture 1 over $p$ written on a card.'
-        doodle: {name: 'custom:1988_q13_a', id: card, caption: 'turn the card over', size: scene}
+        say: 'So 1 over $p$ is $a$ plus $b$ squared, over $a$ minus $b$.'
         write: '$\dfrac{1}{p} = \dfrac{(a + b)^{2}}{a - b}$'
-      - say: 'Take the reciprocal of both sides. Turn the card over, and $p$ is $a$ minus $b$, over $a$ plus $b$ squared.'
-        doodle_do: [{id: card, op: stage, stage: 'custom:1988_q13_a2'}]
+      - say: 'Take the reciprocal of both sides. Turn each fraction upside down, and $p$ is $a$ minus $b$, over $a$ plus $b$ squared.'
         write: '$\therefore p = \dfrac{a - b}{(a + b)^{2}}$'
       - say: 'In the same way, 1 over $q$ is $a$ plus $b$, over $a$ minus $b$ squared.'
         write: '$\dfrac{1}{q} = \dfrac{a + b}{(a - b)^{2}}$'
@@ -604,11 +588,9 @@ lessons:
       - section: 'The numerator'
         say: 'Substitute into the numerator, with each value in brackets.'
         write: 'Numerator $= (-3)^{3} - (2)^{3} - (4)^{\frac{1}{2}}$'
-      - say: 'By BODMAS, the powers come before the subtraction. Negative 3 cubed is negative 3, times negative 3, times negative 3. Picture three cards of negative 3.'
-        doodle: {name: 'custom:1988_q15_a', id: signs, caption: 'watch the signs'}
+      - say: 'By BODMAS, the powers come before the subtraction. Negative 3 cubed is negative 3, times negative 3, times negative 3.'
         write: '$(-3)^{3} = (-3) \times (-3) \times (-3)$'
       - say: 'Negative 3 times negative 3 is positive 9, and 9 times negative 3 is negative 27. An odd power of a negative number stays negative.'
-        doodle_do: [{id: signs, op: stage, stage: 'custom:1988_q15_a2'}]
         write: '$= 9 \times (-3) = -27$'
       - say: '2 cubed is 2 times 2 times 2, which is 8.'
         write: '$(2)^{3} = 2 \times 2 \times 2 = 8$'
@@ -2211,9 +2193,8 @@ lessons:
   50:
     moments:
       - section: 'The question'
-        say: 'Two dice are thrown together. What is the probability of a score of at least 10? "At least" is the word that catches students. Picture the two dice.'
+        say: 'Two dice are thrown together. What is the probability of a score of at least 10? "At least" is the word that catches students.'
         write: 'Two dice: $P(\text{score} \ge 10) = ?$'
-        doodle: {name: 'custom:1988_q50_a', id: dice, caption: 'Two dice: a total of at least 10?'}
       - say: 'Solution. Let $E$ be the event that the score is at least 10.'
         write: 'Solution: let $E$ = score at least 10'
       - section: 'The sample space'
@@ -2229,12 +2210,8 @@ lessons:
       - section: 'The favourable outcomes'
         say: '"At least 10" means 10 or more, so a score of 10, 11 or 12.'
         write: 'At least 10: score $= 10,\ 11$ or $12$'
-        doodle_do:
-          - {id: dice, op: label, part: total, text: '10, 11 or 12'}
-      - say: 'For score 10, we have 4 and 6, like the pair in the picture, 5 and 5, and 6 and 4. Ring them, and that is 3 outcomes.'
+      - say: 'For score 10, we have 4 and 6, 5 and 5, and 6 and 4. Ring them, and that is 3 outcomes.'
         write: 'Score 10: $(4, 6),\ (5, 5),\ (6, 4) \to 3$'
-        doodle_do:
-          - {id: dice, op: pulse}
         diagram_do:
           - {id: s, op: highlight, part: 'cell:4,7', 'on': 'Ring'}
           - {id: s, op: highlight, part: 'cell:5,6'}
@@ -2250,8 +2227,6 @@ lessons:
           - {id: s, op: highlight, part: 'cell:6,7'}
       - say: 'Add them, and n of $E$ is 3 plus 2 plus 1, which is 6.'
         write: '$n(E) = 3 + 2 + 1 = 6$'
-        doodle_do:
-          - {id: dice, op: label, part: total, text: '6 ways'}
       - section: 'The probability'
         say: 'The probability of $E$ is n of $E$ over n of $S$, which is the number of favourable outcomes over the total number of possible outcomes.'
         write: '$P(E) = \dfrac{n(E)}{n(S)}$'

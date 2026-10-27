@@ -432,14 +432,9 @@ lessons:
       - section: 'The question'
         say: 'A car starts at speed $u$ and speeds up at $a$. After time $t$ it has gone $s$. Make $t$ the subject, and note that the four options differ only in two signs.'
         write: '$s = ut + \tfrac{1}{2}at^{2}$'
-        doodle: {name: 'custom:1992_q10_a', id: car, caption: 's: how far the car goes in time t'}
-        doodle_do:
-          - {id: car, op: move, part: car, path: drive}
       - section: 'Solution'
         say: '$t$ appears squared and also on its own, so this is a quadratic in $t$. We arrange it equal to zero, then use the almighty formula.'
         write: 'Solution'
-        doodle_do:
-          - {id: car, op: circle, part: time}
       - say: 'Clear the fraction by multiplying every term by 2. $s$ becomes $2s$, $ut$ becomes $2ut$, and a half $at$ squared becomes $at$ squared.'
         write: '$2s = 2ut + at^{2}$'
       - say: 'Subtract $2s$ from both sides, and write the terms in descending powers of $t$.'
@@ -465,8 +460,6 @@ lessons:
         write: '$= \dfrac{-u \pm \sqrt{u^{2} + 2as}}{a}$'
       - say: 'Therefore $t$ is 1 over $a$, times negative $u$ plus or minus the root of $u$ squared plus $2as$.'
         write: '$\therefore t = \tfrac{1}{a}\left[-u \pm \sqrt{u^{2} + 2as}\right]$'
-        doodle_do:
-          - {id: car, op: label, part: time, text: 't = (−u ± √(u² + 2as))/a'}
       - section: 'Check'
         say: 'Check with numbers. Take $u$ equals 1, $a$ equals 2 and $t$ equals 1. Then $s$ is 1 plus a half of 2, which is 2.'
         write: '$u = 1,\ a = 2,\ t = 1$: $s = 1 + 1 = 2$'
@@ -582,16 +575,13 @@ lessons:
     moments:
       - section: 'The question'
         say: 'A man splits ₦280 between a 5 percent investment and a 4 percent one, and earns ₦12.80 a year. Splitting it half and half gives ₦12.60, so the 5 percent part must be bigger.'
-        doodle: {name: 'custom:1992_q13_a', id: jars, caption: '₦280 split: part at 5%, rest at 4%'}
         write: '₦280 partly at 5%, partly at 4%; total interest ₦12.80 p.a.'
       - say: 'When one sum is split two ways, name one part and write the other as what is left.'
         write: 'Solution'
       - section: 'Let x be'
         say: 'Let the amount invested at 5 percent be x naira.'
-        doodle_do: [{id: jars, op: label, part: jar5, text: 'x'}]
         write: 'Let the amount at 5% be ₦$x$'
       - say: 'Then the amount at 4 percent is 280 minus x.'
-        doodle_do: [{id: jars, op: label, part: jar4, text: '280 − x'}]
         write: 'Amount at 4% $= $₦$(280 - x)$'
       - section: 'The formula'
         say: 'Simple interest is P times R times T over 100. Here T is 1 year.'
@@ -602,7 +592,6 @@ lessons:
         write: '$I_{2} = \dfrac{(280 - x) \times 4 \times 1}{100} = \dfrac{4(280 - x)}{100}$'
       - section: 'Form the equation'
         say: 'The two interests together make ₦12.80.'
-        doodle_do: [{id: jars, op: circle, part: interest}]
         write: '$\dfrac{5x}{100} + \dfrac{4(280 - x)}{100} = 12.80$'
       - say: 'Multiply every term by 100 to clear the fractions. 12.80 times 100 is 1,280.'
         write: '$5x + 4(280 - x) = 1280$'
@@ -611,16 +600,11 @@ lessons:
       - say: 'Collect like terms. 5x minus 4x is x. Then subtract 1,120 from both sides, and 1,280 minus 1,120 is 160.'
         write: '$x = 1280 - 1120 = 160$'
       - say: 'Therefore ₦160 was invested at 5 percent.'
-        doodle_do: [{id: jars, op: label, part: jar5, text: '₦160'}]
         write: '$\therefore$ Amount at 5% $=$ ₦160'
-        point:
-          - {line: 11, kind: highlight, at: '₦160', to: {doodle: jars, part: jar5}}
       - section: 'Check'
         say: 'Check. 5 percent of 160 is ₦8. The rest is 280 minus 160, which is ₦120, and 4 percent of 120 is ₦4.80.'
-        doodle_do: [{id: jars, op: label, part: jar4, text: '₦120'}, {id: jars, op: stage, stage: 'custom:1992_q13_a2'}]
         write: 'Check: $\tfrac{5}{100} \times 160 = 8$; $\tfrac{4}{100} \times 120 = 4.80$'
-      - say: '8 plus 4.80 is 12.80, so the two jars earn exactly the total interest.'
-        doodle_do: [{id: jars, op: circle, part: interest}]
+      - say: '8 plus 4.80 is 12.80, so the two parts earn exactly the total interest.'
         write: '$8 + 4.80 = 12.80 \ \checkmark$'
       - section: 'Answer'
         say: 'So ₦160 was invested at 5 percent, which is option D.'
@@ -1792,9 +1776,6 @@ lessons:
       - section: 'The question'
         say: 'Ice forms at 4 minus 0.6 $t$ grams per minute. That is a rate, $\dfrac{dm}{dt}$, where $m$ is the mass of ice after $t$ minutes. At the start there are already 2 grams.'
         write: '$\dfrac{dm}{dt} = 4 - 0.6t$, $\ m = 2$ g when $t = 0$'
-        doodle: {name: 'custom:1992_q38_a', id: fridge, caption: '2 g of ice at the start'}
-        doodle_do:
-          - {id: fridge, op: fill, to: 0.14}
       - section: 'Solution'
         say: 'Solution. To get the mass from its rate, we integrate the rate with respect to $t$.'
         write: '$m = \displaystyle\int (4 - 0.6t)\,dt$'
@@ -1807,8 +1788,6 @@ lessons:
       - section: 'Find c'
         say: 'To find $c$, use the start, when $t$ is 0 and $m$ is 2. Substitute.'
         write: 'When $t = 0$, $m = 2$: $\ 2 = 4(0) - 0.3(0)^{2} + c$'
-        doodle_do:
-          - {id: fridge, op: circle, part: start}
       - say: 'Both terms with $t$ are 0, so $c$ is 2.'
         write: '$\therefore c = 2$'
       - say: 'So the mass after $t$ minutes is $4t$ minus 0.3 $t$ squared, plus 2.'
@@ -1816,15 +1795,10 @@ lessons:
       - section: 'After 5 minutes'
         say: 'Now substitute $t$ equals 5.'
         write: 'When $t = 5$: $\ m = 4(5) - 0.3(5)^{2} + 2$'
-        doodle_do:
-          - {id: fridge, op: circle, part: clock}
       - say: '4 times 5 is 20. 5 squared is 25, and 0.3 times 25 is 7.5.'
         write: '$= 20 - 7.5 + 2$'
       - say: '20 minus 7.5 is 12.5, and 12.5 plus 2 is 14.5 grams.'
         write: '$= 14.5$ g'
-        doodle_do:
-          - {id: fridge, op: fill, to: 1}
-          - {id: fridge, op: label, part: total, text: '14.5 g'}
       - section: 'Check'
         say: 'To check, the ice formed in the 5 minutes is the definite integral from 0 to 5, which is 12.5 grams. Add the 2 grams at the start, and we get 14.5 grams.'
         write: 'Check: $\left[4t - 0.3t^{2}\right]_{0}^{5} = 12.5$; $\ 2 + 12.5 = 14.5\ \checkmark$'
@@ -1901,14 +1875,11 @@ lessons:
       - section: 'The question'
         say: 'A balloon swells as a student blows it up. We are told how fast its volume grows, the rate, and we want the volume itself after 2 seconds.'
         write: 'Find the volume after 2 seconds.'
-        doodle: {name: 'custom:1992_q40_a', id: balloon, caption: 'the balloon swells for 2 seconds'}
       - say: 'Write Solution. A rate of change of volume with time is written d V by d t.'
         write: 'Solution'
       - section: 'What we know'
         say: 'List the givens. d V by d t equals pi times 20 minus t squared. At t equals 0, V is 0. We want V when t is 2.'
         write: '$\dfrac{dV}{dt} = \pi(20 - t^{2})$; $V = 0$ when $t = 0$'
-        doodle_do:
-          - {id: balloon, op: label, part: clock, text: 't = 2 s', 'on': 'when t is 2'}
       - section: 'Integrate'
         say: 'We have the rate, so to get V back we integrate with respect to t.'
         write: '$V = \displaystyle\int \pi(20 - t^{2})\,dt$'
@@ -1924,8 +1895,6 @@ lessons:
       - section: 'Substitute t = 2'
         say: 'Now put t equals 2.'
         write: 'When $t = 2$: $V = \pi\left(20(2) - \dfrac{2^{3}}{3}\right)$'
-        doodle_do:
-          - {id: balloon, op: grow, part: balloon, by: 1.3, 'on': 'Now put'}
       - say: '20 times 2 is 40, and 2 cubed is 8.'
         write: '$= \pi\left(40 - \dfrac{8}{3}\right)$'
       - say: 'To subtract, write 40 as 120 over 3. 120 over 3 minus 8 over 3 is 112 over 3.'
@@ -1934,8 +1903,6 @@ lessons:
         write: '$= 37.33\pi$'
       - say: 'Therefore the volume after 2 seconds is 37.33 pi cubic centimetres.'
         write: '$\therefore V = 37.33\pi\ \text{cm}^{3}$'
-        doodle_do:
-          - {id: balloon, op: label, part: vol, text: '37.33π cm³', 'on': 'Therefore'}
       - section: 'Check'
         say: 'Check by differentiating V back. 20 t gives 20, and t cubed over 3 gives 3 t squared over 3, which is t squared. That is the rate we were given.'
         write: 'Check: $\dfrac{d}{dt}\left[\pi\left(20t - \dfrac{t^{3}}{3}\right)\right] = \pi(20 - t^{2})$ ✓'
@@ -2148,16 +2115,13 @@ lessons:
   45:
     moments:
       - section: 'The question'
-        say: 'Three students scored 5, 6 and 7. How spread out are the scores? The standard deviation, S.D., measures that. Picture them holding up their scores.'
+        say: 'Three students scored 5, 6 and 7. How spread out are the scores? The standard deviation, S.D., measures that.'
         write: 'Scores: $5,\ 6,\ 7$; S.D. $= ?$'
-        doodle: {name: 'custom:1992_q45_a', id: kids, caption: 'three scores: 5, 6 and 7'}
       - section: 'Solution'
         say: 'Solution. The S.D. is the square root of the sum of the squared deviations over $n$. The deviations need the mean, so the mean comes first.'
         write: 'S.D. $= \sqrt{\dfrac{\sum(x - \bar{x})^{2}}{n}}$'
       - say: 'The mean, $x$ bar, is the sum of the scores over $n$. 5 plus 6 plus 7 is 18, and 18 over 3 is 6.'
         write: '$\bar{x} = \dfrac{\sum x}{n} = \dfrac{5 + 6 + 7}{3} = \dfrac{18}{3} = 6$'
-        doodle_do:
-          - {id: kids, op: circle, part: s6, text: 'x̄ = 6'}
       - section: 'The deviation table'
         say: 'Now the deviation table, with each score, its deviation from the mean, and the square of the deviation.'
         diagram:
@@ -2166,20 +2130,16 @@ lessons:
           columns: ['x', 'x − x̄', '(x − x̄)²']
           rows: [[5, '', ''], [6, '', ''], [7, '', '']]
           'on': 'table'
-      - say: '5 minus 6 is minus 1. 6 minus 6 is 0. 7 minus 6 is 1. Each student now shows how far they are from the mean.'
+      - say: '5 minus 6 is minus 1. 6 minus 6 is 0. 7 minus 6 is 1. That is how far each score is from the mean.'
         diagram_do:
           - {id: d, op: fill, part: 'cell:1,2', text: '−1'}
           - {id: d, op: fill, part: 'cell:2,2', text: '0'}
           - {id: d, op: fill, part: 'cell:3,2', text: '1'}
-        doodle_do:
-          - {id: kids, op: stage, stage: 'custom:1992_q45_a2'}
       - say: 'Square each one. Minus 1 squared is 1, 0 squared is 0, 1 squared is 1. We square because the plain deviations add to 0 and would cancel out.'
         diagram_do:
           - {id: d, op: fill, part: 'cell:1,3', text: '1'}
           - {id: d, op: fill, part: 'cell:2,3', text: '0'}
           - {id: d, op: fill, part: 'cell:3,3', text: '1'}
-        doodle_do:
-          - {id: kids, op: label, part: devs, text: 'squares: 1, 0, 1'}
       - say: 'Add the last column, and 1 plus 0 plus 1 is 2.'
         write: '$\sum(x - \bar{x})^{2} = 2$'
         diagram_do:
@@ -2219,15 +2179,10 @@ lessons:
           - {id: small, op: split, n: 1, text: '1 | 4 left'}
       - say: 'Now $n$ equal to 35, that is 35 people. 35 over 34 is about 1.03, only about 3 percent apart.'
         write: '$n = 35$: $\dfrac{35}{34} \approx 1.03$, about 3% apart'
-        doodle: {name: 'person-small', id: big, repeat: 35, layout: grid, caption: 'a sample of 35'}
-        doodle_do:
-          - {id: big, op: split, n: 1, text: '1 | 34 left'}
       - say: 'And for $n$ equal to 100, 100 over 99 is about 1.01, only 1 percent apart.'
         write: '$n = 100$: $\dfrac{100}{99} \approx 1.01$, about 1% apart'
       - say: 'So as $n$ grows, $n$ over $n$ minus 1 gets closer and closer to 1, and the two variances become practically equal.'
         write: 'As $n$ increases, $\dfrac{n}{n - 1} \to 1$'
-        doodle_do:
-          - {id: big, op: pulse}
       - section: 'Check'
         say: 'Check with the usual rule in statistics, which says a sample above about 30 to 35 is a large sample, and for a large sample dividing by $n$ is accepted.'
         write: 'Check: large sample $\Rightarrow$ divide by $n$ ✓'

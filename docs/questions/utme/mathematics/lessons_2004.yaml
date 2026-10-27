@@ -138,20 +138,15 @@ lessons:
       - section: 'The bottom'
         say: 'Now the bottom. For 1 over 2 divided by 3 over 5, multiply by the reciprocal, 5 over 3. That gives 5 over 6.'
         write: 'Bottom: $\dfrac{1}{2} \div \dfrac{3}{5} = \dfrac{1}{2} \times \dfrac{5}{3} = \dfrac{5}{6}$'
-      - say: 'Then subtract the 1 over 4. The L.C.M. of 6 and 4 is 12. Picture 12 squares.'
+      - say: 'Then subtract the 1 over 4. The L.C.M. of 6 and 4 is 12.'
         write: '$\dfrac{5}{6} - \dfrac{1}{4}$, L.C.M. $= 12$'
-        doodle: {name: 'custom:2004_q03_b', id: twelve, caption: '12 squares'}
       - say: '12 divided by 6 is 2, and 2 times 5 is 10. 12 divided by 4 is 3, and 3 times 1 is 3. 10 minus 3 is 7.'
         write: '$= \dfrac{10 - 3}{12} = \dfrac{7}{12}$'
-        doodle_do:
-          - {id: twelve, op: stage, stage: 'custom:2004_q03_b2'}
-          - {id: twelve, op: circle, part: left}
       - section: 'Top divided by bottom'
         say: 'Now the whole fraction is the top, 19 over 60, divided by the bottom, 7 over 12. Multiply by the reciprocal, 12 over 7.'
         write: '$\dfrac{19}{60} \div \dfrac{7}{12} = \dfrac{19}{60} \times \dfrac{12}{7}$'
         doodle_do:
           - {id: sixty, op: pulse}
-          - {id: twelve, op: pulse}
       - say: 'Cancel first, because 12 goes into 60 five times. So the 12 on top becomes 1 and the 60 becomes 5.'
         write: '$= \dfrac{19 \times 1}{5 \times 7}$'
       - say: '19 times 1 is 19, and 5 times 7 is 35.'
@@ -171,22 +166,17 @@ lessons:
       - section: 'The question'
         say: 'A farmer sowed 5000 grains of maize and harvested 5000 cobs, each with 500 grains. What is the ratio of grains sowed to grains harvested? The options differ only in zeros.'
         write: 'Sowed 5000 grains; harvested 5000 cobs of 500 grains each'
-        doodle: {name: 'custom:2004_q04_a', id: maize, caption: 'Count both sides in grains'}
       - section: 'Solution'
         say: 'Solution. A ratio compares two quantities of the same kind, in the same unit. So both sides must be counted in grains, not one in grains and one in cobs.'
         write: 'Both sides in grains'
       - say: 'The grains sowed are given as 5000.'
         write: 'Grains sowed $= 5000$'
-        doodle_do:
-          - {id: maize, op: circle, part: grains}
       - say: 'For the grains harvested, there are 5000 cobs, each with 500 grains, so we multiply.'
         write: 'Grains harvested $= 5000 \times 500$'
       - say: '5 times 5 is 25. Then put back the zeros, 3 from 5000 and 2 from 500, which makes five zeros. 2,500,000 grains.'
         write: '$= 2{,}500{,}000$'
-        doodle_do:
-          - {id: maize, op: label, part: cob, text: '2,500,000 grains'}
         point:
-          - {line: 4, kind: highlight, at: '2,500,000', to: {doodle: maize, part: cob}}
+          - {line: 4, kind: highlight, at: '2,500,000'}
       - section: 'The ratio'
         say: 'Write the ratio in the order asked, which is sowed to harvested.'
         write: 'Sowed : harvested $= 5000 : 2{,}500{,}000$'
@@ -199,13 +189,9 @@ lessons:
       - section: 'Check'
         say: 'To check, each grain sowed grew into one cob, and each cob has 500 grains. So 1 grain gives 500 grains. It agrees.'
         write: 'Check: 1 grain $\to$ 1 cob $\to$ 500 grains ✓'
-        doodle_do:
-          - {id: maize, op: stage, stage: 'custom:2004_q04_a2'}
       - say: 'Therefore the ratio is 1 to 500, which is option A.'
         write: '$\therefore$ sowed : harvested $= 1 : 500$ (A)'
         answer: true
-        doodle_do:
-          - {id: maize, op: circle, part: ratio}
     traps:
       B: 'You went for 1 : 5000. Check the division: 2,500,000 divided by 5000 is 500, not 5000.'
       C: 'You went for 1 : 25000. A slip with the zeros. 2,500,000 divided by 5000 is 500, so the ratio is 1 : 500.'
@@ -450,7 +436,6 @@ lessons:
       - section: 'The question'
         say: 'Forty students, and each offers at least one of Physics and Chemistry. Every number in the question is described through the students who offer both. So that is the number we name first.'
         write: 'Class 40: $P = 3 \times$ both, $C = 2 \times P$. Physics only $= ?$'
-        doodle: {name: person-small, id: cls, repeat: 40, layout: grid, caption: '40 students'}
       - section: 'Solution'
         say: 'Solution. The class is the universal set, epsilon, so n of epsilon is 40. Everyone offers at least one subject, so nobody is outside the circles.'
         write: '$n(\varepsilon) = 40,\ n(P \cup C)^{\prime} = 0$'
@@ -482,8 +467,6 @@ lessons:
         write: '$x = \dfrac{40}{8} = 5$'
         diagram_do:
           - {id: v, op: fill, part: 'P∩C', text: '5', 'on': 'is 5'}
-        doodle_do:
-          - {id: cls, op: group, n: 5, text: '5 offer both'}
       - section: 'Physics only'
         say: 'Physics only is the region 2x. Put x equals 5, and 2 times 5 is 10.'
         write: 'Physics only $= 2x = 2 \times 5 = 10$'
@@ -722,7 +705,6 @@ lessons:
       - section: 'The question'
         say: 'The length $L$ of a pendulum varies directly as the square of its period $T$. A period of 4 seconds goes with 64 cm. Find $L$ when $T$ is 9 seconds.'
         write: '$L = 64$ cm when $T = 4$ s; $\ L = ?$ when $T = 9$ s'
-        doodle: {name: 'custom:2004_q15_a', id: pendulum, caption: 'longer pendulum, slower swing'}
       - section: 'Solution'
         say: 'Solution. The variation statement says $L$ is proportional to $T$ squared.'
         write: 'Solution: $L \propto T^{2}$'
@@ -731,8 +713,6 @@ lessons:
       - section: 'Find k'
         say: 'Substitute the given pair, so $L$ is 64 when $T$ is 4.'
         write: 'When $L = 64$, $T = 4$: $\ 64 = k \times 4^{2}$'
-        doodle_do:
-          - {id: pendulum, op: circle, part: short}
       - say: '4 squared is 16. Divide both sides by 16, and 64 over 16 is 4.'
         write: '$64 = 16k \Rightarrow k = \dfrac{64}{16} = 4$'
       - section: 'The equation'
@@ -741,12 +721,8 @@ lessons:
       - section: 'Find L'
         say: 'Now substitute $T$ equals 9.'
         write: 'When $T = 9$: $\ L = 4 \times 9^{2}$'
-        doodle_do:
-          - {id: pendulum, op: circle, part: long}
       - say: '9 squared is 81, and 4 times 81 is 324.'
         write: '$= 4 \times 81 = 324$'
-        doodle_do:
-          - {id: pendulum, op: label, part: len, text: 'L = 324 cm'}
       - section: 'Check'
         say: 'Check with ratios. The period went from 4 to 9, so the length is multiplied by 9 squared over 4 squared, 81 over 16. 64 times 81 over 16 is 4 times 81, 324.'
         write: 'Check: $64 \times \dfrac{9^{2}}{4^{2}} = 64 \times \dfrac{81}{16} = 324\ \checkmark$'
@@ -1937,7 +1913,6 @@ lessons:
     moments:
       - section: 'The question'
         say: 'The mean age of a group of students is 15 years. When a 45-year-old teacher joins them, the mean becomes 18 years. We want the number of students.'
-        doodle: {name: 'custom:2004_q43_a', id: group, caption: 'A 45-year-old teacher joins'}
         write: 'Number of students $= ?$'
       - section: 'Solution'
         say: 'Solution. The number of students is unknown, so we name it. Let $n$ be the number of students.'
@@ -1946,12 +1921,8 @@ lessons:
         write: '$\bar{x} = \dfrac{\sum x}{n} \Rightarrow \sum x = n\bar{x}$'
       - say: 'The students'' mean age is 15, so their ages add up to 15 times $n$, which is $15n$.'
         write: 'Students'' total age $= 15n$'
-        doodle_do:
-          - {id: group, op: label, part: students, text: 'total 15n'}
       - say: 'The teacher adds 45 years to the total.'
         write: 'New total $= 15n + 45$'
-        doodle_do:
-          - {id: group, op: circle, part: teacher}
       - say: 'And the teacher is one more person, so the number becomes $n$ plus 1. Don''t forget this.'
         write: 'New number $= n + 1$'
       - section: 'The equation'
@@ -1967,8 +1938,6 @@ lessons:
         write: '$27 = 3n$'
       - say: 'Divide both sides by 3. 27 divided by 3 is 9.'
         write: '$\therefore n = 9$'
-        doodle_do:
-          - {id: group, op: label, part: students, text: 'n = 9'}
       - section: 'Check'
         say: 'To check, 9 students total 9 times 15, which is 135 years. Add the teacher''s 45 to get 180, over 10 people. 180 over 10 is 18.'
         write: 'Check: $\dfrac{135 + 45}{10} = \dfrac{180}{10} = 18$ ✓'
@@ -1984,9 +1953,8 @@ lessons:
   44:
     moments:
       - section: 'The question'
-        say: 'The weights of 10 pupils, in kilograms. We want the range. Picture the pupils in a line, the heavier ones taller.'
+        say: 'The weights of 10 pupils, in kilograms. We want the range.'
         write: '$15, 16, 17, 18, 16, 17, 17, 17, 18, 16$ kg'
-        doodle: {name: 'custom:2004_q44_a', id: lineup, size: scene, caption: '10 pupils, taller means heavier'}
       - section: 'Solution'
         say: 'Solution. The range is the highest value minus the lowest.'
         write: 'Range $=$ highest $-$ lowest'
@@ -1994,16 +1962,10 @@ lessons:
         write: 'In order: $15, 16, 16, 16, 17, 17, 17, 17, 18, 18$'
       - say: 'The highest weight is 18 kilograms, at the end.'
         write: 'Highest $= 18$ kg'
-        doodle_do:
-          - {id: lineup, op: circle, part: heavy}
       - say: 'The lowest is 15 kilograms, at the start. It appears only once, but once is enough.'
         write: 'Lowest $= 15$ kg'
-        doodle_do:
-          - {id: lineup, op: circle, part: light}
       - say: 'Substitute, and 18 minus 15 is 3 kilograms.'
         write: '$\therefore$ Range $= 18 - 15 = 3$ kg'
-        doodle_do:
-          - {id: lineup, op: stage, stage: 'custom:2004_q44_a2'}
       - section: 'Check'
         say: 'To check, start at the lowest, 15, and add the range, 3. That gives 18, the highest.'
         write: 'Check: $15 + 3 = 18$ ✓'
@@ -2130,7 +2092,6 @@ lessons:
     moments:
       - section: 'The question'
         say: 'A committee of 6 is chosen from 9 commissioners and 3 members of the house of assembly. It must include a member of the house of assembly. In how many ways?'
-        doodle: {id: people, repeat: [{name: person-small, n: 9}, {name: student-small, n: 3}], layout: grid, caption: '9 commissioners, 3 assembly'}
         write: '9 commissioners, 3 assembly members; committee of 6 with an assembly member'
       - section: 'Solution'
         say: 'Solution. A committee is a selection, so we use combinations, and n C r is n factorial over n minus r factorial, times r factorial.'
@@ -2170,8 +2131,6 @@ lessons:
           - {line: 8, kind: move, from: {line: 7, at: '= 84'}, at: '+ 84', text: 'case 3'}
       - section: 'Check'
         say: 'Check by complement. Take all committees of 6 from 12 people, minus those with no assembly member, which come from the 9 commissioners only.'
-        doodle_do:
-          - {id: people, op: group, n: 9, text: 'commissioners only'}
         write: 'Check: ${}^{12}C_{6} - {}^{9}C_{6} = 924 - 84 = 840\ \checkmark$'
       - section: 'Answer'
         say: 'Therefore the committee can be chosen in 840 ways, which is option B.'
@@ -2215,9 +2174,6 @@ lessons:
         write: '$w = \dfrac{84}{4} = 21$'
       - section: 'Check'
         say: 'To check, with 21 white balls the basket holds 28 plus 21, which is 49 balls. 21 over 49 is 3 over 7, dividing top and bottom by 7.'
-        doodle: {id: full, repeat: [{name: ball-white, n: 21}, {name: ball-red, n: 12}, {name: ball-black, n: 16}], layout: cluster, caption: 'with 21 white: 49 balls'}
-        doodle_do:
-          - {id: full, op: split, n: 21, text: '21 white | 28 red and black'}
         write: 'Check: $\dfrac{21}{28 + 21} = \dfrac{21}{49} = \dfrac{3}{7}\ \checkmark$'
       - section: 'Answer'
         say: 'Therefore 21 white balls were put in, which is option C.'

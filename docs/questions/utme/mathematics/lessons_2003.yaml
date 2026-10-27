@@ -168,29 +168,22 @@ lessons:
       - section: 'The question'
         say: 'A market woman buys 270 oranges for ₦1800 and sells them at 5 for ₦40. What is her profit? One option is just the money she took in.'
         write: 'C.P. of 270 oranges = ₦1800; sells at 5 for ₦40'
-        doodle: {name: 'custom:2003_q04_a', id: seller, caption: 'Bought 270 for ₦1800'}
       - section: 'Solution'
         say: 'Solution. Profit is the selling price, S.P., minus the cost price, C.P.'
         write: 'Profit $=$ S.P. $-$ C.P.'
-      - say: 'The C.P. is on her tag, which is ₦1800. So we need the S.P.'
+      - say: 'The C.P. is given, which is ₦1800. So we need the S.P.'
         write: 'C.P. = ₦1800.00'
-        doodle_do:
-          - {id: seller, op: highlight, part: cost}
       - section: 'Selling price'
         say: 'She sells in fives. 5 oranges sell for ₦40, so 270 oranges sell for 270 over 5, times 40.'
         write: 'S.P. $= \dfrac{270}{5} \times 40$'
-      - say: '270 divided by 5 is 54, so that is 54 groups of 5. Watch them go into bundles.'
+      - say: '270 divided by 5 is 54, so that is 54 groups of 5.'
         write: '$= 54 \times 40$'
-        doodle_do:
-          - {id: seller, op: stage, stage: 'custom:2003_q04_a2'}
         point:
-          - {line: 4, kind: highlight, at: '54', to: {doodle: seller, part: bundles}}
+          - {line: 4, kind: highlight, at: '54'}
       - say: '54 times 4 is 216, so 54 times 40 is 2160. She takes in ₦2160.'
         write: '$= 2160$, so S.P. = ₦2160.00'
-        doodle_do:
-          - {id: seller, op: stage, stage: 'custom:2003_q04_a3'}
         point:
-          - {line: 5, kind: highlight, at: '₦2160', to: {doodle: seller, part: takings}}
+          - {line: 5, kind: highlight, at: '₦2160'}
       - section: 'Profit'
         say: 'Substitute into the profit line, so 2160 minus 1800.'
         write: 'Profit $= 2160 - 1800$'
@@ -199,8 +192,6 @@ lessons:
           - {line: 6, kind: move, from: {line: 5, at: '= [[2160]], so'}, at: '[[2160]] −', text: 'S.P.'}
       - say: '2160 minus 1800 is 360. Her profit is ₦360.'
         write: '$= 360$, so profit = ₦360.00'
-        doodle_do:
-          - {id: seller, op: label, part: takings, text: '₦2160 − ₦1800 = ₦360'}
       - section: 'Check'
         say: 'To check, C.P. plus profit should give S.P. 1800 plus 360 is 2160. It agrees.'
         write: 'Check: $1800 + 360 = 2160$ ✓'
@@ -419,7 +410,6 @@ lessons:
       - section: 'The question'
         say: 'A class of 40 students. 32 offer Mathematics and 24 offer Physics. But 32 plus 24 is 56, more than the whole class. So some students offer both. How many?'
         write: 'Class 40: Maths 32, Physics 24, neither 4. Both $= ?$'
-        doodle: {name: student-small, id: cls, repeat: 40, layout: grid, caption: 'the class of 40'}
       - section: 'Solution'
         say: 'Solution. First, the givens. The whole class is the universal set, epsilon, so n of epsilon is 40. n of M, the Maths set, is 32. n of P, the Physics set, is 24.'
         write: '$n(\varepsilon) = 40,\ n(M) = 32,\ n(P) = 24$'
@@ -466,8 +456,6 @@ lessons:
         write: '$36 = 32 + 24 - x$'
       - say: 'So x is 56 minus 36, which is 20 again. Why the minus? A student in both is counted once with Maths and again with Physics, so that student is counted twice.'
         write: '$x = 56 - 36 = 20$'
-        doodle_do:
-          - {id: cls, op: group, n: 20, text: '20 in both: counted twice', 'on': 'counted twice'}
       - section: 'Answer'
         say: 'Therefore 20 students offer both Mathematics and Physics, which is answer choice C.'
         write: '$\therefore$ 20 students offer both subjects'
@@ -507,23 +495,18 @@ lessons:
       - say: 'By long division, 10 divided by 7 is 1.428 and so on.'
         write: '$= 10 \div 7 = 1.428\ldots$'
       - section: 'Correct to 2 d.p.'
-        say: 'Count two digits after the point, which are 4 and 2. Mark the cut after the 2. Picture the value on a line from 1.42 to 1.43.'
+        say: 'Count two digits after the point, which are 4 and 2. Mark the cut after the 2.'
         write: 'Cut after 2 d.p.: $1.42\,|\,8$'
-        doodle: {name: 'custom:2003_q10_b', id: numline, caption: '1.4285… sits between 1.42 and 1.43'}
-      - say: 'The next digit is 8. The rule says 5 or more, add 1 to the last digit kept. So the 2 becomes 3, giving 1.43. The dot is past halfway.'
+      - say: 'The next digit is 8. The rule says 5 or more, add 1 to the last digit kept. So the 2 becomes 3, giving 1.43.'
         write: 'Next digit $8$: add $1$, so $1.428\ldots = 1.43$ (2 d.p.)'
-        doodle_do:
-          - {id: numline, op: label, part: dot, text: 'past halfway: add 1'}
       - section: 'Check'
         say: 'To check, 10 over 7 times the bracket, 0.7, should give 1. 10 over 7 times 7 over 10 is 1. It agrees.'
         write: 'Check: $\dfrac{10}{7} \times 0.7 = \dfrac{10}{7} \times \dfrac{7}{10} = 1$ ✓'
       - say: 'Therefore the value is 1.43, correct to two decimal places, which is option D.'
         write: '$\therefore$ value $= 1.43$ (2 d.p.) (D)'
         answer: true
-        doodle_do:
-          - {id: numline, op: circle, part: right-end}
         point:
-          - {line: 12, kind: highlight, at: '1.43', to: {doodle: numline, part: right-end}}
+          - {line: 12, kind: highlight, at: '1.43'}
     traps:
       A: 'You went for 4.42. Work the bracket out first: 1 over 0.06 times 0.042 is 0.042 over 0.06, which is 0.7. The power of negative 1 then turns it to 10 over 7, about 1.43.'
       B: 'You went for 3.14. That is the value of pi, which has nothing to do with this question. The bracket is 0.7, and its reciprocal is 10 over 7, which is 1.43.'
@@ -956,29 +939,21 @@ lessons:
     moments:
       - section: 'The question'
         say: 'The length a person can jump is inversely proportional to his weight. A 20 kilogram person jumps 1.5 metres. We want the constant of proportionality.'
-        doodle: {name: 'custom:2003_q22_a', id: jump, caption: 'Heavier jumper, shorter jump'}
         write: 'Weight 20 kg, jump 1.5 m; $\ k = ?$'
       - say: 'Solution. Let $L$ be the length jumped, in metres, and $W$ the weight, in kilograms.'
         write: 'Solution: let $L$ = length (m), $W$ = weight (kg)'
       - say: 'Inversely proportional means $L$ is proportional to 1 over $W$. A heavier jumper makes a shorter jump.'
-        doodle_do:
-          - {id: jump, op: label, part: jump, text: 'heavier jumper: shorter jump'}
         write: '$L \propto \dfrac{1}{W}$'
       - say: 'Replace the sign with $k$, the constant of proportionality the question asks for.'
         write: '$\therefore\ L = \dfrac{k}{W}$'
       - section: 'Find k'
-        say: 'Substitute the given values. $L$ is 1.5, from the jump, and $W$ is 20, from the tag.'
-        doodle_do:
-          - {id: jump, op: highlight, part: jump}
-          - {id: jump, op: highlight, part: weight}
+        say: 'Substitute the given values. $L$ is 1.5, the jump, and $W$ is 20, the weight.'
         write: 'When $W = 20,\ L = 1.5$: $\ 1.5 = \dfrac{k}{20}$'
         point:
-          - {line: 4, kind: highlight, at: 'W = 20', to: {doodle: jump, part: weight}}
+          - {line: 4, kind: highlight, at: 'W = 20'}
       - say: 'Multiply both sides by 20.'
         write: '$k = 1.5 \times 20$'
       - say: '1 times 20 is 20, and 0.5 times 20 is 10. 20 plus 10 is 30.'
-        doodle_do:
-          - {id: jump, op: label, part: weight, text: 'k = 1.5 × 20 = 30'}
         write: '$= 20 + 10 = 30$'
       - say: 'Therefore the constant of proportionality is 30.'
         write: '$\therefore\ k = 30$'
@@ -1622,9 +1597,6 @@ lessons:
       - section: 'Check'
         say: 'Check by adding in a different order. 3 plus 5 plus 2 is 10, and 4 plus 6 is 10. 10 plus 10 is 20 people.'
         write: 'Check: $(3 + 5 + 2) + (4 + 6) = 10 + 10 = 20\ \checkmark$'
-        doodle: {name: person-small, id: victims, repeat: 20, layout: grid, caption: 'every victim counts'}
-        doodle_do:
-          - {id: victims, op: count}
       - section: 'Answer'
         say: 'Therefore 20 people were involved in the pollution, which is answer choice D.'
         write: '$\therefore$ number of people $= 20$'

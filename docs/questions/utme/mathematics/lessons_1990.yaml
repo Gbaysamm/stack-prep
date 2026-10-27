@@ -114,18 +114,15 @@ lessons:
         write: '$\begin{array}{r} 24134 \\ \times\ \ \ \ 9 \\ \hline 217206 \end{array}$'
       - say: '241.34 has 2 decimal places, so the product has 2, giving 2,172.06.'
         write: '$241.34 \times 9 = 2172.06$'
-      - say: 'So the value is 2,172.06 times 10 to the minus 6. Picture its digits in a row of boxes.'
-        doodle: {name: 'custom:1990_q03_a', id: digits, size: scene, caption: '2172.06 × 10⁻⁶: the point hops'}
+      - say: 'So the value is 2,172.06 times 10 to the minus 6.'
         write: 'Value $= 2172.06 \times 10^{-6}$'
-      - say: 'Multiplying by 10 to the minus 6 moves the point 6 places to the left. Watch it hop past 2, 7, 1 and 2, then two more places, which fill with zeros.'
-        doodle_do: [{id: digits, op: move, part: point, path: hop}, {id: digits, op: label, part: gaps, text: 'zeros fill the gaps'}]
+      - say: 'Multiplying by 10 to the minus 6 moves the point 6 places to the left. It moves past 2, 7, 1 and 2, then two more places, which fill with zeros.'
         write: '$= 0.00217206$'
       - section: 'Round to 4 s.f.'
         say: 'Significant figures start at the first digit that is not zero, the 2. Count 2, 1, 7, 2 and cut. The next digit is 0, which is less than 5, so leave it.'
-        doodle_do: [{id: digits, op: circle, part: sig}, {id: digits, op: cross, part: tail}]
         write: '$0.002172|06 \approx 0.002172$ (4 s.f.)'
         point:
-          - {line: 8, kind: highlight, at: '≈ 0.002172', to: {doodle: digits, part: sig}}
+          - {line: 8, kind: highlight, at: '≈ 0.002172'}
       - say: 'Therefore, correct to 4 significant figures, the value is 0.002172.'
         write: '$\therefore 241.34 \times (3 \times 10^{-3})^{2} \approx 0.002172$'
       - section: 'Check'
@@ -241,7 +238,6 @@ lessons:
       - section: 'Substitute'
         say: 'Substitute, and put the numbers in one fraction and the powers of 10 in another. Multiplication can be done in any order, so this is allowed.'
         write: 'Expression $= \dfrac{2.75 \times 6.4}{2.5 \times 8} \times \dfrac{10^{-3} \times 10^{-3}}{10^{-2} \times 10^{-2}}$'
-        doodle: {name: 'custom:1990_q06_a', id: trays, caption: 'numbers apart, powers of 10 apart'}
       - section: 'The numbers'
         say: 'The numbers first. Pair 2.75 with 2.5, and 6.4 with 8, because each pair divides neatly.'
         write: '$\dfrac{2.75 \times 6.4}{2.5 \times 8} = \dfrac{2.75}{2.5} \times \dfrac{6.4}{8}$'
@@ -249,8 +245,6 @@ lessons:
         write: '$= 1.1 \times 0.8$'
       - say: '11 times 8 is 88, and there are two decimal places, so 1.1 times 0.8 is 0.88.'
         write: '$= 0.88$'
-        doodle_do:
-          - {id: trays, op: label, part: nums, text: '0.88'}
       - section: 'The powers of 10'
         say: 'Now the powers of 10. Here is the law of indices for multiplying. When we multiply powers of the same base, we add the indices.'
         write: 'Law of indices: $a^{m} \times a^{n} = a^{m + n}$'
@@ -260,8 +254,6 @@ lessons:
         write: 'Law of indices: $a^{m} \div a^{n} = a^{m - n}$'
       - say: 'So the index is negative 6 minus negative 4. Minus a negative is plus, so that is negative 6 plus 4, which is negative 2.'
         write: '$= 10^{-6 - (-4)} = 10^{-2}$'
-        doodle_do:
-          - {id: trays, op: label, part: pows, text: '10⁻²'}
       - section: 'Join them'
         say: 'Now join the two results to get 0.88 times 10 to the power negative 2.'
         write: '$\therefore$ Expression $= 0.88 \times 10^{-2}$'
@@ -269,8 +261,6 @@ lessons:
         write: '$= 8.8 \times 10^{-1} \times 10^{-2}$'
       - say: 'Add the indices again, and negative 1 plus negative 2 is negative 3.'
         write: '$= 8.8 \times 10^{-1 + (-2)} = 8.8 \times 10^{-3}$'
-        doodle_do:
-          - {id: trays, op: label, part: result, text: '8.8 × 10⁻³'}
       - section: 'Check'
         say: 'To check, 8.8 times 10 to the power negative 3 is 0.0088. The bottom, 0.025 times 0.08, is 0.002. And 0.0088 times 0.002 is 0.0000176, which is exactly the top, 0.00275 times 0.0064.'
         write: 'Check: $0.0088 \times 0.002 = 0.0000176 = 0.00275 \times 0.0064\ \checkmark$'
@@ -473,9 +463,8 @@ lessons:
       - say: 'Solution. We work inside the bracket first, then deal with the power outside it.'
         write: 'Solution'
       - section: 'The law'
-        say: 'The law of indices for a negative index says $a$ to the power negative $n$ is 1 over $a$ to the power $n$. In the picture, the power negative 1 flips the card over.'
+        say: 'The law of indices for a negative index says $a$ to the power negative $n$ is 1 over $a$ to the power $n$. So the power negative 1 turns a fraction upside down.'
         write: 'Law of indices: $a^{-n} = \dfrac{1}{a^{n}}$'
-        doodle: {name: 'custom:1990_q11_a', id: card, caption: 'a negative index flips the card'}
       - section: 'Inside the bracket'
         say: 'By that law, $x$ to the power negative 1 is 1 over $x$.'
         write: '$x^{-1} = \dfrac{1}{x}$'
@@ -483,18 +472,13 @@ lessons:
         write: '$\therefore \dfrac{1}{x^{-1}} = 1 \div \dfrac{1}{x}$'
       - say: 'To divide by a fraction, turn it upside down and multiply. 1 times $x$ over 1 is $x$.'
         write: '$= 1 \times \dfrac{x}{1} = x$'
-        doodle_do:
-          - {id: card, op: label, part: flipped, text: 'x/1 = x'}
       - say: 'The second term works the same way. $y$ to the power negative 1 is 1 over $y$, and 1 divided by 1 over $y$ is $y$.'
         write: '$\dfrac{1}{y^{-1}} = 1 \div \dfrac{1}{y} = 1 \times \dfrac{y}{1} = y$'
       - section: 'The power outside'
         say: 'Put the two terms back into the bracket. The bracket becomes $x$ plus $y$, still to the power negative 1.'
         write: '$\therefore \left(\dfrac{1}{x^{-1}} + \dfrac{1}{y^{-1}}\right)^{-1} = (x + y)^{-1}$'
-      - say: 'Use the same law on the whole bracket, so $x$ plus $y$, to the power negative 1, is 1 over $x$ plus $y$. The card flips once more.'
+      - say: 'Use the same law on the whole bracket, so $x$ plus $y$, to the power negative 1, is 1 over $x$ plus $y$.'
         write: '$= \dfrac{1}{x + y}$'
-        doodle_do:
-          - {id: card, op: pulse, part: flip}
-          - {id: card, op: label, part: rule, text: '(x + y)⁻¹ = 1/(x + y)'}
       - section: 'Check'
         say: 'Check with $x$ equal to 2 and $y$ equal to 3. 1 over 2 to the power negative 1 is 2, and 1 over 3 to the power negative 1 is 3. 2 plus 3 is 5, and 5 to the power negative 1 is 1 over 5.'
         write: 'Check, $x = 2,\ y = 3$: $(2 + 3)^{-1} = \dfrac{1}{5}$'
@@ -512,7 +496,6 @@ lessons:
     moments:
       - section: 'The question'
         say: 'We are given $a$ equals 2, $b$ equals minus 2 and $c$ equals minus a half, and we must evaluate the product of two brackets. Two of the values are negative, so watch every sign.'
-        doodle: {name: 'custom:1990_q12_a', id: cards, caption: 'three values, two brackets'}
         write: '$a = 2,\ b = -2,\ c = -\tfrac{1}{2}$; $\ (ab^{2} - bc^{2})(a^{2}c - abc) = ?$'
       - section: 'Solution: first bracket'
         say: 'Solution. Substitute into the first bracket, with every negative value in brackets.'
@@ -521,8 +504,6 @@ lessons:
         write: '$= 2(4) - (-2)\left(\tfrac{1}{4}\right)$'
       - say: '2 times 4 is 8. Minus 2 times a quarter is minus a half, and taking away minus a half is adding a half.'
         write: '$= 8 - \left(-\tfrac{1}{2}\right) = 8 + \tfrac{1}{2} = 8\tfrac{1}{2}$'
-        doodle_do:
-          - {id: cards, op: label, part: br1, text: '8½'}
       - section: 'Second bracket'
         say: 'Now the second bracket. Substitute again, with the negatives in brackets.'
         write: '$a^{2}c - abc = (2)^{2}\left(-\tfrac{1}{2}\right) - (2)(-2)\left(-\tfrac{1}{2}\right)$'
@@ -530,15 +511,11 @@ lessons:
         write: '$= -2 - (2)$'
       - say: 'Minus 2 minus 2 is minus 4.'
         write: '$= -4$'
-        doodle_do:
-          - {id: cards, op: label, part: br2, text: '−4'}
       - section: 'Multiply'
         say: 'Now multiply the two brackets, that is 8 and a half times minus 4. Change 8 and a half to an improper fraction, which is 17 over 2.'
         write: '$(ab^{2} - bc^{2})(a^{2}c - abc) = \dfrac{17}{2} \times (-4)$'
       - say: 'Cancel first, so 4 divided by 2 is 2. 17 times 2 is 34, and a positive times a negative is negative.'
         write: '$= 17 \times (-2) = -34$'
-        doodle_do:
-          - {id: cards, op: label, part: prod, text: '−34'}
       - section: 'Check'
         say: 'Check the second bracket another way. Take out the common factor $a c$, giving $a c$ times, bracket, $a$ minus $b$. That is 2 times minus a half, times 2 minus minus 2, so minus 1 times 4, which is minus 4.'
         write: 'Check: $ac(a - b) = (2)\left(-\tfrac{1}{2}\right)(2 + 2) = -1 \times 4 = -4\ \checkmark$'

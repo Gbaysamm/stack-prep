@@ -166,22 +166,15 @@ lessons:
   5:
     moments:
       - section: 'The question'
-        say: 'Factory P goes down 5 percent and factory Q goes up 5 percent. Do they cancel out? No, because they are 5 percent of different amounts. Picture the two factories.'
-        doodle: {name: 'custom:1991_q05_a', id: plants, caption: '20,000 bags −5%, 15,000 bags +5%'}
+        say: 'Factory P goes down 5 percent and factory Q goes up 5 percent. Do they cancel out? No, because they are 5 percent of different amounts.'
         write: 'P: 20,000 bags a day, down 5%. Q: 15,000 bags a day, up 5%. Net loss $= ?$'
       - say: 'To find x percent of a quantity, we write x over 100 times the quantity. We work out each change in bags, then combine.'
         write: 'Solution: $x\%$ of $Q = \dfrac{x}{100} \times Q$'
       - section: 'Change in each factory'
         say: 'P loses 5 percent of 20,000. For 5 over 100 times 20,000, cancel 100 into 20,000, which gives 200, and 5 times 200 is 1,000 bags.'
-        doodle_do: [{id: plants, op: label, part: p-change, text: '−1,000 bags'}]
         write: 'Decrease in P $= \dfrac{5}{100} \times 20000 = 1000$ bags'
-        point:
-          - {line: 2, kind: highlight, at: '1000', to: {doodle: plants, part: p-change}}
       - say: 'Q gains 5 percent of 15,000. 15,000 over 100 is 150, and 5 times 150 is 750 bags.'
-        doodle_do: [{id: plants, op: label, part: q-change, text: '+750 bags'}]
         write: 'Increase in Q $= \dfrac{5}{100} \times 15000 = 750$ bags'
-        point:
-          - {line: 3, kind: highlight, at: '750', to: {doodle: plants, part: q-change}}
       - section: 'Combine'
         say: 'The decrease is bigger than the increase, so overall the two factories lose. The effective loss is 1,000 minus 750.'
         write: 'Effective loss $= 1000 - 750$'
@@ -189,13 +182,11 @@ lessons:
           - {line: 4, kind: move, from: {line: 2, at: '= 1000'}, at: '1000', text: 'P loses'}
           - {line: 4, kind: move, from: {line: 3, at: '= 750'}, at: '750', text: 'Q gains'}
       - say: '1,000 minus 750 is 250. So together they make 250 fewer bags a day.'
-        doodle_do: [{id: plants, op: label, text: 'net: 250 fewer bags a day'}]
         write: '$\therefore$ Effective loss $= 250$ bags per day'
       - section: 'Check'
         say: 'Check with totals. Before, 20,000 plus 15,000 is 35,000 bags. After, 19,000 plus 15,750 is 34,750 bags.'
         write: 'Check: before $35000$; after $19000 + 15750 = 34750$'
       - say: '35,000 minus 34,750 is 250. The same loss.'
-        doodle_do: [{id: plants, op: pulse}]
         write: '$35000 - 34750 = 250 \ \checkmark$'
       - section: 'Answer'
         say: 'So the effective loss is 250 bags a day, which is option A.'
@@ -209,9 +200,7 @@ lessons:
   6:
     moments:
       - section: 'The question'
-        say: 'Musa borrows ₦10 at 2 percent a month simple interest, and pays back ₦8 after 4 months. How much does he still owe? Picture his debt as a jar.'
-        doodle: {name: 'custom:1991_q06_a', id: jar, caption: 'borrow ₦10, repay ₦8 after 4 months'}
-        doodle_do: [{id: jar, op: fill, to: 0.9}]
+        say: 'Musa borrows ₦10 at 2 percent a month simple interest, and pays back ₦8 after 4 months. How much does he still owe?'
         write: 'Borrowed ₦10.00 at 2% per month simple interest; repays ₦8.00 after 4 months'
       - say: 'Write the givens first. P is 10 naira, R is 2 percent per month, and T is 4 months. The rate is per month, so T stays in months.'
         write: 'Solution: $P = $₦$10,\ R = 2\%$ per month, $T = 4$ months'
@@ -219,21 +208,15 @@ lessons:
         say: 'Simple interest is the principal times the rate times the time, over 100.'
         write: '$I = \dfrac{PRT}{100}$'
       - say: 'Substitute, so 10 times 2 times 4, over 100. 10 times 2 is 20, times 4 is 80. So 80 over 100, which is 80 kobo.'
-        doodle_do: [{id: jar, op: stage, stage: 'custom:1991_q06_a2'}]
         write: '$I = \dfrac{10 \times 2 \times 4}{100} = \dfrac{80}{100} = $₦$0.80$'
       - section: 'The amount owed'
         say: 'The amount owed after 4 months is the principal plus the interest, so A equals P plus I. 10 plus 0.80 is 10.80.'
-        doodle_do: [{id: jar, op: fill, to: 1}, {id: jar, op: label, part: coins, text: '+₦0.80 interest'}]
         write: '$A = P + I = 10.00 + 0.80 = $₦$10.80$'
         point:
           - {line: 4, kind: move, from: {line: 3, at: '₦0.80'}, at: '+ [[0.80]]', text: 'interest'}
-      - say: 'He then pays back ₦8.00, and the jar drops. Take it from the amount owed, and 10.80 minus 8.00 is 2.80.'
-        doodle_do: [{id: jar, op: fill, to: 0.26}, {id: jar, op: circle, part: repay}]
+      - say: 'He then pays back ₦8.00. Take it from the amount owed, and 10.80 minus 8.00 is 2.80.'
         write: 'Still owed $= 10.80 - 8.00 = $₦$2.80$'
-        point:
-          - {line: 5, kind: highlight, at: '₦2.80', to: {doodle: jar, part: owed}}
       - say: 'Therefore he still owes ₦2.80.'
-        doodle_do: [{id: jar, op: label, part: owed, text: '₦2.80'}]
         write: '$\therefore$ Musa still owes ₦2.80'
       - section: 'Check'
         say: 'To check, each month the interest is 2 percent of ₦10, which is 20 kobo. Four months make 80 kobo, the same interest.'
@@ -250,24 +233,18 @@ lessons:
   7:
     moments:
       - section: 'The question'
-        say: 'Two spirits are mixed, where one is 20 percent water and the other 15 percent. Is the mixture 17 and a half percent water? No, because there is more of one spirit. Picture the two jugs.'
-        doodle: {name: 'custom:1991_q07_a', id: spirits, caption: '3 gal at 20%, 5 gal at 15% water'}
+        say: 'Two spirits are mixed, where one is 20 percent water and the other 15 percent. Is the mixture 17 and a half percent water? No, because there is more of one spirit.'
         write: '3 gal at 20% water + 5 gal at 15% water. Water in the mixture $= ?\%$'
       - say: 'We find the actual gallons of water in each spirit, then the water as a percentage of the whole mixture. x percent of a quantity is x over 100 times the quantity.'
         write: 'Solution'
       - section: 'Water in each spirit'
         say: '20 percent of 3 gallons is 20 over 100 times 3. 20 times 3 is 60, over 100, which is 0.6 gallon of water.'
-        doodle_do: [{id: spirits, op: label, part: jug1, text: '0.6 gal water'}]
         write: 'Water in 1st $= \dfrac{20}{100} \times 3 = 0.6$ gal'
       - say: '15 percent of 5 gallons is 15 over 100 times 5. 15 times 5 is 75, over 100, so 0.75 gallon.'
-        doodle_do: [{id: spirits, op: label, part: jug2, text: '0.75 gal water'}]
         write: 'Water in 2nd $= \dfrac{15}{100} \times 5 = 0.75$ gal'
       - section: 'The mixture'
-        say: 'Pour both into the bucket. Total water is 0.6 plus 0.75, which is 1.35 gallons.'
-        doodle_do: [{id: spirits, op: fill, to: 0.17}, {id: spirits, op: label, part: mix, text: '1.35 gal water'}]
+        say: 'Pour both together. Total water is 0.6 plus 0.75, which is 1.35 gallons.'
         write: 'Total water $= 0.6 + 0.75 = 1.35$ gal'
-        point:
-          - {line: 4, kind: highlight, at: '1.35', to: {doodle: spirits, part: mix}}
       - say: 'Total mixture is 3 plus 5, which is 8 gallons.'
         write: 'Total mixture $= 3 + 5 = 8$ gal'
       - section: 'Percentage of water'
@@ -280,7 +257,6 @@ lessons:
       - say: '1.35 times 100 is 135. So it is 135 over 8 percent.'
         write: '$= \dfrac{135}{8}\%$'
       - say: '8 goes into 135 sixteen times, which is 128, remainder 7. So it is 16 and 7 over 8 percent.'
-        doodle_do: [{id: spirits, op: label, part: pct, text: '16⅞%'}]
         write: '$\therefore$ Water $= 16\tfrac{7}{8}\%$'
       - section: 'Check'
         say: 'Check. The answer must lie between 15 and 20 percent, and nearer 15, because there is more of the 15 percent spirit. 16 and 7 over 8 fits.'
@@ -615,18 +591,13 @@ lessons:
           - {figure: sketch, kind: underline, target: 'q km'}
       - say: 'The givens. The first leg is $p$ kilometres at $u$ kilometres per hour. The second leg is $q$ kilometres at $w$ kilometres per hour.'
         write: 'Leg 1: $p$ km at $u$ km/h; Leg 2: $q$ km at $w$ km/h'
-        doodle: {name: 'custom:1991_q14_a', id: dials, caption: 'two legs, two speeds'}
       - section: 'The times'
         say: 'Time is distance over speed. The first leg takes $p$ over $u$ hours.'
         write: 'Time $= \dfrac{\text{distance}}{\text{speed}}$; $\ t_{1} = \dfrac{p}{u}$'
-        doodle_do:
-          - {id: dials, op: label, part: t1, text: 'p/u hours'}
         point:
           - {figure: sketch, kind: circle, target: 'u km/h', text: 'p/u hours'}
       - say: 'The second leg takes $q$ over $w$ hours.'
         write: '$t_{2} = \dfrac{q}{w}$'
-        doodle_do:
-          - {id: dials, op: label, part: t2, text: 'q/w hours'}
         point:
           - {figure: sketch, kind: circle, target: 'w km/h', text: 'q/w hours'}
       - say: 'The total distance is $p$ plus $q$ kilometres.'
@@ -665,8 +636,7 @@ lessons:
         write: '$w = 8$ when $u = 2,\ v = 6$'
       - say: 'Solution. The variation statement says $w$ is proportional to 1 over that whole fraction.'
         write: 'Solution: $\ w \propto \dfrac{1}{\;\frac{uv}{u + v}\;}$'
-      - say: 'Replace the sign with the constant $k$. Picture a see-saw, where as one side goes up, the other comes down.'
-        doodle: {name: 'custom:1991_q15_a', id: seesaw, caption: 'one goes up, the other down'}
+      - say: 'Replace the sign with the constant $k$. As one side goes up, the other comes down.'
         write: '$\therefore\ w = \dfrac{k}{\;\frac{uv}{u + v}\;}$'
       - say: 'Dividing by a fraction is multiplying by its reciprocal. So $w$ equals $k$ times $u$ plus $v$, over $uv$.'
         write: '$w = \dfrac{k(u + v)}{uv}$'
@@ -678,10 +648,7 @@ lessons:
       - say: 'Cross multiply. 8 times 12 is 96.'
         write: '$8k = 96$'
       - say: 'Divide both sides by 8. 96 divided by 8 is 12.'
-        doodle_do: [{id: seesaw, op: label, part: k, text: 'k = 12'}]
         write: '$\therefore\ k = 12$'
-        point:
-          - {line: 7, kind: highlight, at: 'k = 12', to: {doodle: seesaw, part: k}}
       - section: 'The equation'
         say: 'Put $k$ equals 12 back into the equation.'
         write: '$w = \dfrac{12(u + v)}{uv}$'
@@ -2466,7 +2433,6 @@ lessons:
       - section: 'The question'
         say: 'A crate has 10 bottles of Coca-Cola, 8 of Fanta and 6 of Sprite. One bottle is picked at random. What is the probability that it is NOT a Coca-Cola? Watch the word "not".'
         write: 'Coca-Cola $10$, Fanta $8$, Sprite $6$'
-        doodle: {name: 'custom:1991_q50_a', id: crate, caption: '10 Coke, 8 Fanta, 6 Sprite'}
       - say: 'Solution. Let $C$ be the event that the bottle is a Coca-Cola. Not Coca-Cola is $C$ complement, written $C$ prime.'
         write: 'Solution: let $C$ = Coca-Cola; want $P(C^{\prime})$'
       - section: 'The sample space'
@@ -2493,16 +2459,11 @@ lessons:
       - section: 'Check'
         say: 'Check with the complement rule. First P of $C$, the Coca-Cola section of the crate, is 10 over 24, which is 5 over 12.'
         write: 'Check: $P(C) = \dfrac{10}{24} = \dfrac{5}{12}$'
-        doodle_do:
-          - {id: crate, op: circle, part: coke}
       - say: 'P of $C$ prime is 1 minus P of $C$. 1 is 12 over 12, and 12 minus 5 is 7. So 7 over 12 again.'
         write: '$P(C^{\prime}) = 1 - \dfrac{5}{12} = \dfrac{7}{12}\ \checkmark$'
       - section: 'Answer'
         say: 'Therefore the probability that the bottle is not a Coca-Cola, a Fanta or a Sprite, is 7 over 12, which is option D.'
         write: '$\therefore P(\text{not Coca-Cola}) = \dfrac{7}{12}$'
-        doodle_do:
-          - {id: crate, op: circle, part: fanta}
-          - {id: crate, op: circle, part: sprite}
         answer: true
     traps:
       A: 'You went for 5 over 12. That is P of C, that it IS a Coca-Cola: 10 out of 24. The question says NOT, so count the 14 Fanta and Sprite bottles: 14 over 24, which is 7 over 12.'

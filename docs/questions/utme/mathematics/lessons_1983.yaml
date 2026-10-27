@@ -61,7 +61,6 @@ lessons:
     moments:
       - section: 'The question'
         say: 'Two partners share a profit in the ratio 4 to 5, and Y gets ₦5,000 more than X. Many students stop at one share. We want the whole profit.'
-        doodle: {name: 'custom:1983_q02_a', id: sacks, caption: 'profit shared X : Y = 4 : 5'}
         write: 'X : Y $= 4 : 5$; Y gets ₦5,000 more than X. Total profit $= ?$'
       - say: 'Let''s set it out the way you would in the exam. First, give the unknown a name.'
         write: 'Solution'
@@ -69,17 +68,13 @@ lessons:
         write: 'Let the total profit be ₦$x$'
       - section: 'Sum of ratio'
         say: 'Add the parts of the ratio, so 4 plus 5 is 9. This is the sum of ratio. The profit is cut into 9 equal parts.'
-        doodle_do: [{id: sacks, op: stage, stage: 'custom:1983_q02_a2', 'on': 'sum of ratio'}]
         write: 'Sum of ratio $= 4 + 5 = 9$'
       - say: 'Each share is its part over the sum of ratio, times the total. X has 4 parts, so X gets 4 over 9 of x.'
-        doodle_do: [{id: sacks, op: label, part: x, text: '4/9 of x'}]
         write: 'X''s share $= \dfrac{4}{9} \times x = \dfrac{4x}{9}$'
       - say: 'Y has 5 parts, so Y gets 5 over 9 of x.'
-        doodle_do: [{id: sacks, op: label, part: 'y', text: '5/9 of x'}]
         write: 'Y''s share $= \dfrac{5}{9} \times x = \dfrac{5x}{9}$'
       - section: 'Form the equation'
-        say: 'Look at the extra on Y''s sack. Y received 5,000 naira more than X, so Y''s share minus X''s share is 5,000.'
-        doodle_do: [{id: sacks, op: circle, part: diff}]
+        say: 'Y received 5,000 naira more than X, so Y''s share minus X''s share is 5,000.'
         write: 'Y''s share $-$ X''s share $= 5000$'
       - say: 'Put in the two shares we wrote, so 5x over 9, minus 4x over 9, equals 5,000.'
         write: '$\dfrac{5x}{9} - \dfrac{4x}{9} = 5000$'
@@ -91,10 +86,8 @@ lessons:
         write: '$x = 45000$'
       - section: 'Check'
         say: 'Check each share. X gets 4 over 9 of 45,000. 45,000 divided by 9 is 5,000, and 5,000 times 4 is 20,000.'
-        doodle_do: [{id: sacks, op: label, part: x, text: '₦20,000'}]
         write: 'X $= \tfrac{4}{9} \times 45000 = 20000$'
       - say: 'Y gets 5 over 9 of 45,000, which is 5 times 5,000, that is 25,000.'
-        doodle_do: [{id: sacks, op: label, part: 'y', text: '₦25,000'}]
         write: 'Y $= \tfrac{5}{9} \times 45000 = 25000$'
       - say: '25,000 minus 20,000 is 5,000, exactly what the question says.'
         write: '$25000 - 20000 = 5000 \ \checkmark$'
@@ -162,22 +155,17 @@ lessons:
       - section: 'The question'
         say: 'Three expressions are all equal to each other, joined in one chain. We want $x$ and $y$. One chain like this hides two equations.'
         write: '$4x - 3 = 3x + y = 2y + 5x - 12$'
-        doodle: {name: 'custom:1983_q04_a', id: chain, caption: 'one chain, two links'}
       - section: 'Solution'
         say: 'We take the chain one link at a time. Each link gives one equation, so we get two simultaneous equations. We number them, then eliminate.'
         write: 'Solution'
       - say: 'Take the first link, which says $4x$ minus 3 equals $3x$ plus $y$.'
         write: 'First link: $4x - 3 = 3x + y$'
-        doodle_do:
-          - {id: chain, op: highlight, part: l1}
       - say: 'Collect the letters on the left and the numbers on the right. Subtract $3x$ and $y$ from both sides, and add 3 to both sides.'
         write: '$4x - 3x - y = 3$'
       - say: '$4x$ minus $3x$ is $x$. So $x$ minus $y$ equals 3. Call it equation one.'
         write: '$x - y = 3 \quad \text{......(1)}$'
       - say: 'Now the second link says $3x$ plus $y$ equals $2y$ plus $5x$ minus 12.'
         write: 'Second link: $3x + y = 2y + 5x - 12$'
-        doodle_do:
-          - {id: chain, op: highlight, part: l2}
       - say: 'Collect like terms. Subtract $5x$ and $2y$ from both sides.'
         write: '$3x - 5x + y - 2y = -12$'
       - say: '$3x$ minus $5x$ is negative $2x$. $y$ minus $2y$ is negative $y$.'
@@ -203,16 +191,10 @@ lessons:
       - section: 'Check'
         say: 'Check all three links of the chain. 4 times 5, minus 3, is 17.'
         write: '$4(5) - 3 = 17$'
-        doodle_do:
-          - {id: chain, op: label, part: e1, text: '17'}
       - say: '3 times 5, plus 2, is 17.'
         write: '$3(5) + 2 = 17$'
-        doodle_do:
-          - {id: chain, op: label, part: e2, text: '17'}
       - say: '2 times 2, plus 5 times 5, minus 12, is 4 plus 25 minus 12, which is 17. All three are equal.'
         write: '$2(2) + 5(5) - 12 = 17\ \checkmark$'
-        doodle_do:
-          - {id: chain, op: label, part: e3, text: '17'}
       - say: 'So $x$ is 5 and $y$ is 2, which is option A.'
         write: '$\therefore x = 5,\ y = 2$ (A)'
         answer: true
@@ -520,9 +502,8 @@ lessons:
   10:
     moments:
       - section: 'The question'
-        say: '$x$ plus 2 and $x$ minus 1 are both factors of this cubic. We want $l$ and $k$. Picture each factor as a key that must turn the lock to zero.'
+        say: '$x$ plus 2 and $x$ minus 1 are both factors of this cubic. We want $l$ and $k$. Think of each factor as a key that must turn the expression to zero.'
         write: '$lx^{3} + 2kx^{2} + 24$'
-        doodle: {name: 'custom:1983_q10_a', id: keys, caption: 'each factor is a key to zero'}
       - section: 'Solution'
         say: 'The factor theorem says that if $x$ minus $a$ is a factor, then $f$ of $a$ is zero. Two factors give us two equations in $l$ and $k$.'
         write: 'Solution'
@@ -530,8 +511,6 @@ lessons:
         write: 'Let $f(x) = lx^{3} + 2kx^{2} + 24$'
       - say: 'First key. Set the factor $x$ minus 1 equal to zero. Therefore $x$ equals 1.'
         write: 'Let $x - 1 = 0$, $\therefore x = 1$'
-        doodle_do:
-          - {id: keys, op: highlight, part: key1}
       - say: 'Put 1 in place of every $x$, each in brackets. By the factor theorem, the result is zero.'
         write: '$f(1) = l(1)^{3} + 2k(1)^{2} + 24 = 0$'
       - say: '1 cubed and 1 squared are both 1.'
@@ -540,8 +519,6 @@ lessons:
         write: '$l + 2k = -24 \quad \text{......(1)}$'
       - say: 'Second key. Set $x$ plus 2 equal to zero. Therefore $x$ equals negative 2, not positive 2.'
         write: 'Let $x + 2 = 0$, $\therefore x = -2$'
-        doodle_do:
-          - {id: keys, op: highlight, part: key2}
       - say: 'Put negative 2 in place of every $x$, in brackets.'
         write: '$f(-2) = l(-2)^{3} + 2k(-2)^{2} + 24 = 0$'
       - say: 'Negative 2 cubed is negative 8. Negative 2 squared is 4, and $2k$ times 4 is $8k$.'
@@ -566,14 +543,10 @@ lessons:
       - say: 'Therefore $l$ equals negative 6 and $k$ equals negative 9.'
         write: '$\therefore l = -6,\ k = -9$'
       - section: 'Check'
-        say: 'Try the first key in the lock. $f$ of 1 is negative 6, plus 2 times negative 9, plus 24. Negative 6 minus 18 plus 24 is zero.'
+        say: 'Try the first key. $f$ of 1 is negative 6, plus 2 times negative 9, plus 24. Negative 6 minus 18 plus 24 is zero.'
         write: '$f(1) = -6 - 18 + 24 = 0\ \checkmark$'
-        doodle_do:
-          - {id: keys, op: arrow, part: key1, to_part: lock}
       - say: 'And the second key. Negative 8 times negative 6 is 48, and 8 times negative 9 is negative 72. 48 minus 72 plus 24 is zero.'
         write: '$f(-2) = 48 - 72 + 24 = 0\ \checkmark$'
-        doodle_do:
-          - {id: keys, op: arrow, part: key2, to_part: lock}
       - say: 'So $l$ is negative 6 and $k$ is negative 9, which is option A.'
         write: '$\therefore l = -6,\ k = -9$ (A)'
         answer: true
@@ -587,20 +560,15 @@ lessons:
       - section: 'The question'
         say: 'Make $T$ the subject. $T$ is wrapped in layers, with a cube root outside and a fraction inside, and it appears twice. We peel one layer at a time.'
         write: '$\dfrac{av}{1 - v} = \sqrt[3]{\dfrac{2v + T}{2aT}}$'
-        doodle: {name: 'custom:1983_q11_a', id: layers, caption: 'T is wrapped in layers'}
       - section: 'Solution'
         say: 'We undo the operations in reverse order, one per line. The outer layer is the cube root, so that goes first.'
         write: 'Solution'
       - say: 'Cube both sides. Cubing undoes a cube root, so the root disappears from the right.'
         write: '$\left(\dfrac{av}{1 - v}\right)^{3} = \dfrac{2v + T}{2aT}$'
-        doodle_do:
-          - {id: layers, op: cross, part: root}
       - say: 'Cubing a fraction cubes the top and the bottom. $av$ cubed is $a$ cubed $v$ cubed, and the bottom is $1 - v$, all cubed.'
         write: '$\dfrac{a^{3}v^{3}}{(1 - v)^{3}} = \dfrac{2v + T}{2aT}$'
       - say: 'Next layer, the fractions. Cross multiply, which means the top of each side times the bottom of the other.'
         write: '$2aT \times a^{3}v^{3} = (1 - v)^{3}(2v + T)$'
-        doodle_do:
-          - {id: layers, op: cross, part: frac}
       - say: 'On the left, $2a$ times $a$ cubed is $2a$ to the power 4. So the left side is $2a^4v^3T$.'
         write: '$2a^{4}v^{3}T = (1 - v)^{3}(2v + T)$'
       - say: 'Open the bracket on the right, and we get $1 - v$ cubed times $2v$, plus $1 - v$ cubed times $T$.'
@@ -613,8 +581,6 @@ lessons:
         write: '$T[2a^{4}v^{3} - (1 - v)^{3}] = 2v(1 - v)^{3}$'
       - say: 'Divide both sides by the square bracket. Therefore $T$ equals $2v$ times $1 - v$ cubed, over $2a^4v^3$ minus $1 - v$ cubed.'
         write: '$\therefore T = \dfrac{2v(1 - v)^{3}}{2a^{4}v^{3} - (1 - v)^{3}}$'
-        doodle_do:
-          - {id: layers, op: circle, part: core}
       - section: 'Check'
         say: 'Check with easy numbers, $a$ equals 1 and $v$ equals a half. Then $1 - v$ is a half, and the left side is a half over a half, which is 1.'
         write: '$a = 1,\ v = \tfrac{1}{2}$: LHS $= \dfrac{\frac{1}{2}}{\frac{1}{2}} = 1$'
@@ -727,8 +693,7 @@ lessons:
         write: '$y = 2$ when $x = 1$; $\ y = 6$ when $x = 4$'
       - say: 'Solution. In partial variation, $y$ is the sum of two parts, and each part gets its own constant, $k$ one and $k$ two.'
         write: 'Solution'
-      - say: 'Picture $y$ as one tank filled from two taps. One part goes with $x$ squared, and the other with 1 over root $x$. So $y$ equals $k$ one $x$ squared, plus $k$ two over root $x$.'
-        doodle: {name: 'custom:1983_q14_a', id: tank, caption: 'two parts make up y'}
+      - say: '$y$ is made of two parts. One part goes with $x$ squared, and the other with 1 over root $x$. So $y$ equals $k$ one $x$ squared, plus $k$ two over root $x$.'
         write: '$y = k_{1}x^{2} + \dfrac{k_{2}}{\sqrt{x}}$'
       - section: 'Two equations'
         say: 'Now substitute the first pair, which is $x$ equals 1 and $y$ equals 2.'
@@ -736,7 +701,6 @@ lessons:
         point:
           - {line: 3, kind: move, from: {line: 0, at: 'y = [[2]]'}, at: ':[[2]] =', text: 'y'}
       - say: '1 squared is 1, and the square root of 1 is 1. So $k$ one plus $k$ two is 2. Number it equation one.'
-        doodle_do: [{id: tank, op: label, part: tank, text: 'y = 2 when x = 1'}]
         write: '$k_{1} + k_{2} = 2 \quad \ldots (1)$'
       - say: 'Now the second pair, $x$ equals 4 and $y$ equals 6.'
         write: 'When $x = 4,\ y = 6$: $\ 6 = k_{1}(4)^{2} + \dfrac{k_{2}}{\sqrt{4}}$'
@@ -754,8 +718,7 @@ lessons:
       - say: 'Substitute into equation one, and $k$ two is 2 minus 10 over 31. 2 is 62 over 31, and 62 minus 10 is 52.'
         write: 'Sub. in (1): $\ k_{2} = 2 - \dfrac{10}{31} = \dfrac{62 - 10}{31} = \dfrac{52}{31}$'
       - section: 'The equation'
-        say: 'Put both constants back into the law of variation. One constant for each part of the tank.'
-        doodle_do: [{id: tank, op: label, part: tapa, text: 'k₁ = 10/31'}, {id: tank, op: label, part: tapb, text: 'k₂ = 52/31'}]
+        say: 'Put both constants back into the law of variation. One constant for each part.'
         write: '$\therefore\ y = \dfrac{10x^{2}}{31} + \dfrac{52}{31\sqrt{x}}$'
         point:
           - {line: 12, kind: move, from: {line: 10, at: '3110'}, at: '[[31]]10x2', text: 'k₁'}
@@ -1155,19 +1118,15 @@ lessons:
       - say: 'The third term. The index 7 comes down, so we have 1 over 12, times 7, log $a$. 1 over 12 times 7 is 7 over 12.'
         write: '$\tfrac{1}{12}\log_{10}a^{7} = \tfrac{7}{12}\log_{10}a$'
       - section: 'Collect the terms'
-        say: 'Now write the expression again with the three new terms, keeping the minus sign on the last one. Picture the two plus terms on one pan and the minus term on the other.'
-        doodle: {name: 'custom:1983_q22_a', id: scale, caption: 'plus terms against the minus term'}
+        say: 'Now write the expression again with the three new terms, keeping the minus sign on the last one.'
         write: 'Expression $= \tfrac{1}{3}\log_{10}a + \tfrac{1}{4}\log_{10}a - \tfrac{7}{12}\log_{10}a$'
       - say: 'Every term has log $a$ in it, so factorise. Take log $a$ out as a common factor, and put the numbers in a bracket.'
         write: '$= \left(\tfrac{1}{3} + \tfrac{1}{4} - \tfrac{7}{12}\right)\log_{10}a$'
       - say: 'The L.C.M. of 3, 4 and 12 is 12. 12 divided by 3 is 4, and 12 divided by 4 is 3. So the bracket is 4 plus 3 minus 7, over 12.'
-        doodle_do: [{id: scale, op: label, part: left, text: '4/12 + 3/12'}]
         write: '$= \left(\dfrac{4 + 3 - 7}{12}\right)\log_{10}a$'
-      - say: 'On top, 4 plus 3 is 7, and 7 minus 7 is 0. The two pans balance exactly.'
-        doodle_do: [{id: scale, op: highlight, part: beam}]
+      - say: 'On top, 4 plus 3 is 7, and 7 minus 7 is 0. The plus terms and the minus term cancel exactly.'
         write: '$= \dfrac{0}{12}\log_{10}a$'
       - say: '0 over 12 is 0, and 0 times log $a$ is 0, whatever $a$ is.'
-        doodle_do: [{id: scale, op: label, part: beam, text: 'balanced: 0'}]
         write: '$= 0$'
       - section: 'Check'
         say: 'Check another way. Keep the indices, and use the laws of indices. 1 over 3, plus 1 over 4, minus 7 over 12, is 0. So everything is log of $a$ to the power 0, which is log 1, and log 1 is 0.'
@@ -1543,7 +1502,6 @@ lessons:
     moments:
       - section: 'The question'
         say: 'Four options differ only in the last digit, 4.46, 4.47, 4.48 and 4.49. So every rounding must be done exactly as the question says, in the right order.'
-        doodle: {name: 'custom:1983_q30_a', id: figs, caption: 'keep three figures'}
         write: 'Correct $59.81789$ and $0.0746829$ to 3 s.f., multiply, give 3 s.f.'
       - say: 'The rule for significant figures is to start counting at the first digit that is not zero. Mark a cut after the figures you keep, and look at the next digit.'
         write: 'Solution'
@@ -1551,10 +1509,8 @@ lessons:
         write: 'Next digit $\ge 5$: add 1. Next digit $< 5$: leave it.'
       - section: 'Round each number'
         say: 'In 59.81789, the first three significant figures are 5, 9 and 8. Cut after the 8. The next digit is 1, less than 5, so the 8 stays.'
-        doodle_do: [{id: figs, op: label, part: cut1, text: 'next is 1: leave it'}]
         write: '$59.8|1789 \approx 59.8$ (3 s.f.)'
       - say: 'In 0.0746829, the zeros in front do not count. The first three significant figures are 7, 4 and 6. The next digit is 8, so add 1, and the 6 becomes 7.'
-        doodle_do: [{id: figs, op: label, part: cut2, text: 'next is 8: add 1'}]
         write: '$0.0746|829 \approx 0.0747$ (3 s.f.)'
       - section: 'Multiply'
         say: 'Now multiply the two rounded numbers.'
@@ -1585,7 +1541,6 @@ lessons:
     moments:
       - section: 'The question'
         say: 'A rod that is really 250 cm long is measured as 255 cm. Is the error 5 percent? Many students think so. Let''s see what the percentage error really is.'
-        doodle: {name: 'custom:1983_q31_a', id: rod, caption: 'really 250 cm, measured as 255 cm'}
         write: 'Actual length $= 250$ cm, measured length $= 255$ cm'
       - say: 'We write the formula first. Percentage error is the error divided by the actual value, times 100 percent.'
         write: 'Solution'
@@ -1593,11 +1548,9 @@ lessons:
         write: 'Percentage error $= \dfrac{\text{error}}{\text{actual value}} \times 100\%$'
       - section: 'Find the error'
         say: 'The error is the difference between the measured value and the actual value, so 255 minus 250, which is 5 cm.'
-        doodle_do: [{id: rod, op: label, part: tape, text: '5 cm too long'}]
         write: 'Error $= 255 - 250 = 5$ cm'
       - section: 'Substitute'
         say: 'Now substitute. The error, 5, goes on top. The actual value, 250, goes underneath.'
-        doodle_do: [{id: rod, op: circle, part: 'true'}]
         write: 'Percentage error $= \dfrac{5}{250} \times 100\%$'
         point:
           - {line: 4, kind: move, from: {line: 3, at: '= [[5]] cm'}, at: '250[[5]]', text: 'error'}
@@ -1609,8 +1562,7 @@ lessons:
       - say: 'Therefore the percentage error is 2 percent.'
         write: '$\therefore$ Percentage error $= 2\%$'
       - section: 'Check'
-        say: 'Look at the tape again. To check, 1 percent of 250 cm is 2.5 cm, and our error of 5 cm is 2 times 2.5. So the error is 2 percent.'
-        doodle_do: [{id: rod, op: pulse, part: tape}]
+        say: 'To check, 1 percent of 250 cm is 2.5 cm, and our error of 5 cm is 2 times 2.5. So the error is 2 percent.'
         write: 'Check: $1\%$ of $250 = 2.5$, and $5 = 2 \times 2.5 \ \checkmark$'
       - section: 'Answer'
         say: 'So the percentage error is 2, which is option E.'
@@ -2190,7 +2142,6 @@ lessons:
       - section: 'The question'
         say: 'Here are four crops from a farm in Ondo, beans 14.5 kg, okro 14.5 kg, rice 56.5 kg and yams 184.5 kg. We want the angle of the okro sector.'
         write: 'Okro sector $= ?$'
-        doodle: {name: 'custom:1983_q43_a', id: crops, caption: 'Farm yields in kg, Ondo'}
         point:
           - {figure: 0, kind: circle, target: Okro}
       - section: 'Solution'
@@ -2201,13 +2152,9 @@ lessons:
         write: 'Total $= 14.5 + 14.5 + 56.5 + 184.5 = 270$ kg'
         diagram_do:
           - {id: t, op: total, part: 'col:2', 'on': '270'}
-        doodle_do:
-          - {id: crops, op: pulse}
       - section: 'The okro sector'
         say: 'Okro is 14.5 kilograms out of 270. Substitute into the formula.'
         write: 'Okro $= \dfrac{14.5}{270} \times 360^{\circ}$'
-        doodle_do:
-          - {id: crops, op: circle, part: okro}
       - say: 'Simplify 360 over 270. Divide both by 90, and it is 4 over 3.'
         write: '$= 14.5 \times \dfrac{4}{3}$'
       - say: '14.5 times 4 is 58. So it is 58 over 3.'
@@ -2216,8 +2163,6 @@ lessons:
         write: '$= 19\tfrac{1}{3}^{\circ}$'
         diagram_do:
           - {id: t, op: fill, part: 'cell:2,3', text: '19⅓°', 'on': 'degrees'}
-        doodle_do:
-          - {id: crops, op: label, part: okro, text: '19⅓°'}
         point:
           - {figure: 0, kind: label, target: Okro, text: '19⅓°'}
       - section: 'Check'

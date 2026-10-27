@@ -119,7 +119,6 @@ lessons:
       - section: 'Convert units'
         say: 'The answer is wanted in metres, so change the area to square metres. 1 metre is 1.1 yards. A metre stick is a little longer than a yard stick.'
         write: '$1$ m $= 1.1$ yd'
-        doodle: {name: 'custom:1987_q03_a', id: sticks, caption: 'a metre is a bit more than a yard'}
       - say: 'A square metre is 1 metre by 1 metre, so it is 1.1 times 1.1, which is 1.21 square yards.'
         write: '$1\ \text{m}^{2} = 1.1 \times 1.1 = 1.21\ \text{yd}^{2}$'
       - say: 'So to change square yards to square metres, divide by 1.21.'
@@ -142,8 +141,6 @@ lessons:
       - section: 'Check'
         say: 'Check in yards. 50 metres is 50 times 1.1, which is 55 yards, and 30 metres is 33 yards. 55 times 33 is 1,815. It works.'
         write: 'Check: $55 \times 33 = 1815\ \text{yd}^{2}$ ✓'
-        doodle_do:
-          - {id: sticks, op: stage, stage: 'custom:1987_q03_a2', 'on': '55 yards'}
         point:
           - {figure: sketch, kind: circle, target: '50 m = 55 yd', 'on': '55 yards'}
       - section: 'Answer'
@@ -158,7 +155,6 @@ lessons:
     moments:
       - section: 'The question'
         say: 'Round first, then work it out. If you work it out first and round at the end, you can land on a different option. Let''s follow the order the question gives.'
-        doodle: {name: 'custom:1987_q04_a', id: figs, caption: 'keep two figures'}
         write: 'Reduce each number to 2 s.f., then evaluate $\dfrac{0.02174 \times 1.2047}{0.023789}$'
       - say: 'Here is the rule for significant figures. Start counting at the first digit that is not zero, mark a cut after the figures you keep, and look at the next digit.'
         write: 'Solution'
@@ -166,13 +162,10 @@ lessons:
         write: 'Next digit $\ge 5$: add 1. Next digit $< 5$: leave it.'
       - section: 'Round each number'
         say: 'In 0.02174, the zeros in front do not count. The first two significant figures are 2 and 1. Cut after the 1. The next digit is 7, so add 1, giving 0.022.'
-        doodle_do: [{id: figs, op: label, part: cut1, text: 'next is 7: add 1'}]
         write: '$0.021|74 \approx 0.022$'
       - say: 'In 1.2047, the first two significant figures are 1 and 2. The next digit is 0, so leave it, giving 1.2.'
-        doodle_do: [{id: figs, op: label, part: cut2, text: 'next is 0: leave it'}]
         write: '$1.2|047 \approx 1.2$'
       - say: 'In 0.023789, the significant figures are 2 and 3. The next digit is 7, so add 1, giving 0.024.'
-        doodle_do: [{id: figs, op: label, part: cut3, text: 'next is 7: add 1'}]
         write: '$0.023|789 \approx 0.024$'
       - section: 'Evaluate'
         say: 'Put the rounded numbers into the expression.'
@@ -198,7 +191,6 @@ lessons:
     moments:
       - section: 'The question'
         say: 'A train goes from P to Q at 90 kilometres per hour and comes straight back at 45 kilometres per hour. We want the average speed for the entire journey.'
-        doodle: {name: 'custom:1987_q05_a', id: trip, caption: 'out fast, back slow', size: scene}
         write: 'Average speed for the entire journey $= ?$'
       - section: 'Solution'
         say: 'Solution. Let me draw the route, P to Q and back, with the two speeds on it.'
@@ -214,12 +206,10 @@ lessons:
       - say: 'The givens are speed out, 90 kilometres per hour, and speed back, 45 kilometres per hour.'
         write: 'Speed out $= 90$ km/h, speed back $= 45$ km/h'
       - section: 'The times'
-        say: 'Time is distance over speed. Watch the train go out, where $d$ kilometres at 90 takes $d$ over 90 hours.'
+        say: 'Time is distance over speed. Going out, $d$ kilometres at 90 takes $d$ over 90 hours.'
         write: 'Time $= \dfrac{\text{distance}}{\text{speed}}$; $\ t_{1} = \dfrac{d}{90}$ h'
-        doodle_do: [{id: trip, op: move, part: train, path: out}]
       - say: 'Now it crawls back, and $d$ kilometres at 45 takes $d$ over 45 hours.'
         write: '$t_{2} = \dfrac{d}{45}$ h'
-        doodle_do: [{id: trip, op: move, part: train, path: back}]
       - say: 'The total distance is $d$ out plus $d$ back, which is $2d$.'
         write: 'Total distance $= d + d = 2d$ km'
       - say: 'The total time is $d$ over 90 plus $d$ over 45. The L.C.M. of 90 and 45 is 90.'
@@ -241,7 +231,6 @@ lessons:
         write: '$\therefore$ Average speed $= 60$ km/h'
       - section: 'Check'
         say: 'Check with a real distance, 90 kilometres. Out takes 1 hour and back takes 2 hours, so 180 kilometres in 3 hours, which is 60.'
-        doodle_do: [{id: trip, op: label, part: fast, text: '90 km in 1 h'}, {id: trip, op: label, part: slow, text: '90 km in 2 h'}]
         write: 'Check: $\dfrac{90 + 90}{1 + 2} = \dfrac{180}{3} = 60$ ✓'
       - section: 'Answer'
         say: 'So the average speed is 60 kilometres per hour, which is option B.'
@@ -355,9 +344,8 @@ lessons:
   8:
     moments:
       - section: 'The question'
-        say: 'Peter earns ₦20 a week for 20 weeks, then ₦36 a week for 24 weeks. His average for the whole year is ₦30. We want his average for the last 8 weeks. Picture his year as three wage envelopes.'
+        say: 'Peter earns ₦20 a week for 20 weeks, then ₦36 a week for 24 weeks. His average for the whole year is ₦30. We want his average for the last 8 weeks.'
         write: '20 weeks at ₦20, 24 weeks at ₦36, year average ₦30'
-        doodle: {name: 'custom:1987_q08_a', id: pay, caption: 'his year: 20 + 24 + 8 weeks', 'on': 'envelopes'}
       - section: 'Solution'
         say: 'Solution. Averages cannot be added, but totals can. The total is the average times the number of weeks.'
         write: 'Solution. Total $=$ average $\times$ number of weeks'
@@ -367,19 +355,14 @@ lessons:
         write: 'Let the average for the last 8 weeks $=$ ₦$x$'
       - say: 'The year total is 52 times 30, which is 1560 naira.'
         write: 'Year total $= 52 \times 30 = 1560$'
-      - say: 'The three envelopes together make the year total, so 20 times 20, plus 24 times 36, plus 8 times $x$.'
+      - say: 'The three spells of pay together make the year total, so 20 times 20, plus 24 times 36, plus 8 times $x$.'
         write: '$20 \times 20 + 24 \times 36 + 8x = 1560$'
-      - say: '20 times 20 is 400, in the first envelope. 24 times 36 is 864, in the second.'
+      - say: '20 times 20 is 400, for the first 20 weeks. 24 times 36 is 864, for the next 24.'
         write: '$400 + 864 + 8x = 1560$'
-        doodle_do:
-          - {id: pay, op: label, part: env1, text: '₦400', 'on': 'first'}
-          - {id: pay, op: label, part: env2, text: '₦864', 'on': 'second'}
       - say: '400 plus 864 is 1264.'
         write: '$1264 + 8x = 1560$'
-      - say: 'Subtract 1264 from both sides, and 1560 minus 1264 is 296. That is the last envelope.'
+      - say: 'Subtract 1264 from both sides, and 1560 minus 1264 is 296. That is his pay for the last 8 weeks.'
         write: '$8x = 1560 - 1264 = 296$'
-        doodle_do:
-          - {id: pay, op: label, part: env3, text: '₦296', 'on': 'envelope'}
       - say: 'Divide both sides by 8, and 296 over 8 is 37.'
         write: '$x = \dfrac{296}{8} = 37$'
       - section: 'Check'
@@ -397,7 +380,6 @@ lessons:
     moments:
       - section: 'The question'
         say: 'Money is invested at 4 percent simple interest, and after 3 years it amounts to ₦7,000. What was invested? The ₦7,000 already includes the interest, so we work backwards.'
-        doodle: {name: 'custom:1987_q09_a', id: pig, caption: 'after 3 years at 4%: ₦7,000', size: scene}
         write: 'Simple interest at 4% p.a.; amount after 3 years ₦7,000. $P = ?$'
       - say: 'Write the givens first. A is 7,000 naira, R is 4 percent, T is 3 years, and P is what we want.'
         write: 'Solution: $A = $₦$7000,\ R = 4\%,\ T = 3$ years, $P = ?$'
@@ -407,25 +389,21 @@ lessons:
       - say: 'Simple interest is the principal times the rate times the time, over 100.'
         write: '$I = \dfrac{PRT}{100}$'
       - section: 'Substitute'
-        say: 'Substitute R equals 4 and T equals 3. P times 4 times 3 is 12P, over 100, which is three coins of 4 percent. Divide top and bottom by 4 to get 3P over 25.'
-        doodle_do: [{id: pig, op: stage, stage: 'custom:1987_q09_a2'}]
+        say: 'Substitute R equals 4 and T equals 3. P times 4 times 3 is 12P, over 100. Divide top and bottom by 4 to get 3P over 25.'
         write: '$I = \dfrac{P \times 4 \times 3}{100} = \dfrac{12P}{100} = \dfrac{3P}{25}$'
       - say: 'Now put I into A equals P plus I, with A equal to 7,000.'
-        doodle_do: [{id: pig, op: circle, part: amount}]
         write: '$\therefore P + \dfrac{3P}{25} = 7000$'
         point:
-          - {line: 5, kind: highlight, at: '7000', to: {doodle: pig, part: amount}}
+          - {line: 5, kind: highlight, at: '7000'}
       - section: 'Solve for P'
         say: 'The L.C.M. is 25. P is 25P over 25, and 25P plus 3P is 28P.'
         write: '$\dfrac{28P}{25} = 7000$ (L.C.M. $= 25$)'
       - say: 'Multiply both sides by 25 over 28.'
         write: '$P = 7000 \times \dfrac{25}{28}$'
-      - say: 'Cancel first, and 28 goes into 7,000 two hundred and fifty times. Then 250 times 25 is 6,250. That is the coin that went in.'
-        doodle_do: [{id: pig, op: label, part: coin, text: 'P = ₦6,250'}]
+      - say: 'Cancel first, and 28 goes into 7,000 two hundred and fifty times. Then 250 times 25 is 6,250. That is the sum invested.'
         write: '$P = 250 \times 25 = 6250$'
       - section: 'Check'
         say: 'Check with the formula. I is 6,250 times 4 times 3, over 100. That is 75,000 over 100, which is 750 naira.'
-        doodle_do: [{id: pig, op: label, part: coins, text: '₦750'}]
         write: 'Check: $I = \dfrac{6250 \times 4 \times 3}{100} = $₦$750$'
       - say: 'And A is 6,250 plus 750, which is 7,000 naira, the amount in the question.'
         write: '$A = 6250 + 750 = $₦$7000 \ \checkmark$'
@@ -441,7 +419,6 @@ lessons:
     moments:
       - section: 'The question'
         say: 'A trader sells 20 oranges for ₦1.35 and gains 8 percent. At ₦1.10, is it a gain or a loss, and how much? First we need what the oranges cost him.'
-        doodle: {name: 'custom:1987_q10_a', id: oranges, caption: '20 oranges: ₦1.35, then ₦1.10'}
         write: 'S.P. ₦1.35 gives 8% profit. New S.P. ₦1.10: gain or loss $\%$?'
       - say: 'C.P. is the cost price and S.P. the selling price. Profit or loss percent is always measured against the C.P.'
         write: 'Solution'
@@ -449,18 +426,15 @@ lessons:
         say: 'For a gain, the C.P. is 100 over 100 plus the gain percent, times the S.P.'
         write: 'C.P. $= \dfrac{100}{100 + \text{gain}\%} \times$ S.P.'
       - say: 'Substitute. The gain is 8 percent and the S.P. is 1.35. 100 plus 8 is 108.'
-        doodle_do: [{id: oranges, op: highlight, part: tag1}]
         write: 'C.P. $= \dfrac{100}{108} \times 1.35$'
       - say: '100 times 1.35 is 135. So the C.P. is 135 over 108.'
         write: '$= \dfrac{100 \times 1.35}{108} = \dfrac{135}{108}$'
       - say: 'Cancel, because 135 is 5 times 27, and 108 is 4 times 27. That leaves 5 over 4, which is 1.25. So the oranges cost him ₦1.25.'
-        doodle_do: [{id: oranges, op: label, part: tray, text: 'C.P. ₦1.25'}]
         write: 'C.P. $= \dfrac{5}{4} = $₦$1.25$'
         point:
-          - {line: 5, kind: highlight, at: '₦1.25', to: {doodle: oranges, part: tray}}
+          - {line: 5, kind: highlight, at: '₦1.25'}
       - section: 'The new sale'
         say: 'Now the new S.P. is ₦1.10. That is less than the C.P. of ₦1.25, so this time it is a loss.'
-        doodle_do: [{id: oranges, op: circle, part: tag2}]
         write: 'S.P. $= $₦$1.10 <$ C.P., so a loss'
       - say: 'Loss is C.P. minus S.P., so 1.25 minus 1.10, which is 0.15.'
         write: 'Loss $=$ C.P. $-$ S.P. $= 1.25 - 1.10 = $₦$0.15$'
@@ -475,7 +449,6 @@ lessons:
       - say: 'Clear the decimals to get 15 over 125. Cancel by 5 to get 3 over 25. Then 100 divided by 25 is 4, and 3 times 4 is 12.'
         write: '$= \dfrac{15}{125} \times 100\% = \dfrac{3}{25} \times 100\% = 12\%$'
       - say: 'Therefore he makes a loss of 12 percent.'
-        doodle_do: [{id: oranges, op: label, part: tag2, text: '12% loss'}]
         write: '$\therefore$ Loss $= 12\%$'
       - section: 'Check'
         say: 'To check, 12 percent of ₦1.25 is 0.15, and 1.25 minus 0.15 is 1.10, the new selling price.'
@@ -492,16 +465,13 @@ lessons:
     moments:
       - section: 'The question'
         say: 'Four boys and eight girls cut a field in 5 hours, and a boy works at a quarter of a girl''s rate. How many boys alone cut it in 3 hours?'
-        doodle: {name: 'custom:1987_q11_a', id: team, caption: '4 boys + 8 girls cut it in 5 hours'}
         write: '4 boys + 8 girls take 5 hours. Boy''s rate $= \tfrac{1}{4}$ girl''s rate.'
       - say: 'Boys and girls work at different rates, so we first change everyone into boys. Then we use proportion.'
         write: 'Solution'
       - section: 'Change girls to boys'
         say: 'A boy does a quarter of a girl''s work. So one girl does the work of 4 boys.'
-        doodle_do: [{id: team, op: label, part: girls, text: 'each = 4 boys'}]
         write: '1 girl $= 4$ boys'
       - say: 'So 8 girls do the work of 8 times 4, which is 32 boys.'
-        doodle_do: [{id: team, op: stage, stage: 'custom:1987_q11_a2'}]
         write: '8 girls $= 8 \times 4 = 32$ boys'
       - say: 'Add the 4 real boys, and 4 plus 32 is 36. The whole team works like 36 boys.'
         doodle: {name: 'person-small', id: crew, caption: 'the team, counted as boys', repeat: 36, layout: grid}
@@ -591,30 +561,25 @@ lessons:
         write: '$50 \div 6 = 8$ remainder $2$'
       - say: 'Bring down another zero. 6 into 20 goes 3 times, since 6 times 3 is 18, remainder 2 again. So the 3 repeats for ever.'
         write: '$20 \div 6 = 3$ remainder $2$'
-      - say: 'So 35 over 6 is 5.8333, with the 3 repeating. Picture the digits, with the 3s going on for ever.'
-        doodle: {name: 'custom:1987_q13_a', id: digits, caption: 'two ways to cut 5.8333...'}
+      - say: 'So 35 over 6 is 5.8333, with the 3 repeating. The 3s go on for ever.'
         write: '$\therefore \dfrac{35}{6} = 5.8333\ldots$'
       - section: 'The two roundings'
         say: 'To 3 significant figures we keep 5, 8 and 3. The next digit is 3, which is less than 5, so we do not round up.'
         write: '3 s.f.: $5.83$'
-        doodle_do: [{id: digits, op: highlight, part: sf}]
       - say: 'To 3 decimal places we keep three digits after the point, which are 8, 3 and 3. The next digit is 3 again, so no rounding up.'
-        doodle_do: [{id: digits, op: highlight, part: dp}]
         write: '3 d.p.: $5.833$'
       - section: 'The error'
         say: 'His error is what he wrote, 5.833, minus what he should have written, 5.83.'
         write: 'Error $= 5.833 - 5.83$'
       - say: 'Write 5.83 as 5.830 so the places line up. 5.833 minus 5.830 is 0.003.'
-        doodle_do: [{id: digits, op: circle, part: gap}]
         write: '$= 5.833 - 5.830 = 0.003$'
       - section: 'Standard form'
         say: 'Standard form is $A$ times 10 to the power $n$, where $A$ is at least 1 and less than 10, and $n$ is a whole number.'
         write: 'Standard form: $A \times 10^{n}$, where $1 \le A < 10$'
       - say: 'To turn 0.003 into 3, the decimal point moves 3 places to the right. Moving it to the right makes the index negative, so $n$ is negative 3.'
-        doodle_do: [{id: digits, op: stage, stage: 'custom:1987_q13_a2'}]
         write: '$0.003 = 3.0 \times 10^{-3}$'
         point:
-          - {line: 11, kind: highlight, at: '10−3', to: {doodle: digits, part: hops}}
+          - {line: 11, kind: highlight, at: '10−3'}
       - section: 'Check'
         say: 'To check, 10 to the negative 3 is 1 over 1000, by the negative index law. 3 divided by 1000 is 0.003.'
         write: 'Check: $3.0 \times 10^{-3} = \dfrac{3.0}{1000} = 0.003\ \checkmark$'
@@ -737,11 +702,9 @@ lessons:
         write: 'Solution'
       - say: '$p$ is 1, $r$ is the square root of 1 over 3, and $n$ is what we want.'
         write: '$p = 1,\ r = \sqrt{\tfrac{1}{3}},\ n = ?$'
-      - say: 'First, $r$ squared. Squaring a square root undoes it, so $r$ squared is 1 over 3. Picture 1 as a bar of three thirds, and $r$ squared is one of them.'
-        doodle: {name: 'custom:1987_q16_a', id: bar, caption: '1 as three thirds'}
+      - say: 'First, $r$ squared. Squaring a square root undoes it, so $r$ squared is 1 over 3.'
         write: '$r^{2} = \left(\sqrt{\tfrac{1}{3}}\right)^{2} = \tfrac{1}{3}$'
-      - say: 'Take that third off the bar. 1 minus 1 over 3 leaves 2 over 3.'
-        doodle_do: [{id: bar, op: cross, part: r2}, {id: bar, op: label, part: left, text: '⅔ left'}]
+      - say: 'Take that third away from 1. 1 minus 1 over 3 leaves 2 over 3.'
         write: '$1 - r^{2} = 1 - \tfrac{1}{3} = \tfrac{2}{3}$'
       - section: 'Substitute'
         say: 'Now substitute. $p$ is 1, and 1 minus $r$ squared is 2 over 3.'
@@ -820,11 +783,9 @@ lessons:
       - section: 'The question'
         say: 'The cost in naira of feeding $n$ people for a week is $Q$ equals 15 plus 0.5 $n$. We want the extra cost, in kobo, of feeding one more person.'
         write: '$Q = 15 + 0.5n$ (naira); extra cost for $1$ more, in kobo'
-        doodle: {name: 'custom:1987_q18_a', id: food, caption: 'Feeding one more person for a week'}
       - section: 'Solution'
         say: 'Solution. Let $Q_1$ be the cost for $n$ people. That is the formula just as it is.'
         write: 'Solution: Let $Q_{1} = 15 + 0.5n$ ($n$ people)'
-        doodle_do: [{id: food, op: label, part: pot, text: '₦15 however many'}, {id: food, op: label, part: plates, text: '0.5 each'}]
       - say: 'Let $Q_2$ be the cost for one more person, $n$ plus 1 people. Substitute $n$ plus 1 for $n$, in a bracket.'
         write: 'Let $Q_{2} = 15 + 0.5(n + 1)$ ($n + 1$ people)'
       - say: 'Open the bracket. 0.5 times $n$ is 0.5 $n$, and 0.5 times 1 is 0.5.'
@@ -835,17 +796,15 @@ lessons:
         write: '$= (15 + 0.5n + 0.5) - (15 + 0.5n)$'
       - say: 'Open the second bracket to get minus 15 and minus 0.5 $n$. The 15s cancel and the 0.5 $n$ terms cancel, leaving 0.5 naira.'
         write: '$= 15 + 0.5n + 0.5 - 15 - 0.5n = 0.50$ naira'
-        doodle_do: [{id: food, op: circle, part: extra}]
       - section: 'Naira to kobo'
         say: 'The question wants kobo. 1 naira is 100 kobo, so multiply the naira by 100.'
         write: '₦$1 = 100$k'
       - say: '0.5 times 100 is 50. So the extra cost is 50 kobo.'
         write: '₦$0.50 = 0.50 \times 100 = 50$k'
-        doodle_do: [{id: food, op: label, part: extra, text: '50 kobo'}]
       - say: 'Therefore the extra cost of feeding one more person is 50 kobo.'
         write: '$\therefore$ Extra cost $= 50$k'
         point:
-          - {line: 9, kind: highlight, at: '50', to: {doodle: food, part: extra}}
+          - {line: 9, kind: highlight, at: '50'}
       - section: 'Check'
         say: 'Check with numbers. 10 people cost 15 plus 5, which is 20 naira. 11 people cost 15 plus 5.5, which is 20.50 naira. The difference is 0.50 naira, 50 kobo.'
         write: 'Check: $Q(11) - Q(10) = 20.50 - 20 = 0.50$ naira $= 50$k $\checkmark$'
@@ -985,9 +944,7 @@ lessons:
       - say: 'Therefore $m$ is negative 2 or $m$ is 1.'
         write: '$\therefore m = -2$ or $m = 1$'
       - section: 'Check'
-        say: 'Check $m$ equals 1. Then $b$ is 2 times 2, which is 4, and $c$ is 4. We get $x$ squared plus 4 $x$ plus 4, and the tiles fit into one square of side $x$ plus 2.'
-        doodle: {name: 'custom:1987_q21_b', id: tiles, caption: 'x² + 4x + 4 as tiles'}
-        doodle_do: [{id: tiles, op: highlight, part: units}]
+        say: 'Check $m$ equals 1. Then $b$ is 2 times 2, which is 4, and $c$ is 4. We get $x$ squared plus 4 $x$ plus 4, which is $x$ plus 2, all squared.'
         write: '$m = 1$: $x^{2} + 4x + 4 = (x + 2)^{2}\ \checkmark$'
       - say: 'Check $m$ equals negative 2. $b$ is 2 times negative 1, which is negative 2, and $c$ is 1. That is $x$ minus 1, all squared.'
         write: '$m = -2$: $x^{2} - 2x + 1 = (x - 1)^{2}\ \checkmark$'
@@ -2275,19 +2232,14 @@ lessons:
       - section: 'The question'
         say: 'Daylight lasts from 5.30 a.m. to 7.00 p.m. On a pie chart of one day, we want the angles for daylight and for darkness.'
         write: 'Daylight: 5.30 a.m. to 7.00 p.m. Find the two sectoral angles.'
-        doodle: {name: 'custom:1987_q46_a', id: sky, caption: 'Daylight: 5.30 a.m. to 7.00 p.m.'}
       - section: 'Solution'
         say: 'Solution. The whole day is 24 hours, and the whole circle is 360 degrees. So each sectoral angle is the hours over 24, times 360 degrees.'
         write: 'Sectoral angle $= \dfrac{\text{hours}}{24} \times 360^{\circ}$'
       - section: 'The hours'
-        say: 'Count the daylight hours, splitting at noon. Watch the sun climb. From 5.30 a.m. to 12 noon is 6 and a half hours.'
+        say: 'Count the daylight hours, splitting at noon. From 5.30 a.m. to 12 noon is 6 and a half hours.'
         write: '5.30 a.m. to noon $= 6\tfrac{1}{2}$ h'
-        doodle_do:
-          - {id: sky, op: move, part: sun, path: 'rise-to-noon'}
       - say: 'Then down to sunset. From noon to 7 p.m. is 7 hours. 6 and a half plus 7 is 13 and a half hours of daylight.'
         write: 'Daylight $= 6\tfrac{1}{2} + 7 = 13\tfrac{1}{2}$ h'
-        doodle_do:
-          - {id: sky, op: move, part: sun, path: 'noon-to-set'}
       - say: 'Darkness is the rest of the 24 hours. 24 minus 13 and a half is 10 and a half hours.'
         write: 'Darkness $= 24 - 13\tfrac{1}{2} = 10\tfrac{1}{2}$ h'
         diagram: {id: t, kind: table, columns: [Period, 'Hours', 'Sectoral angle'], rows: [[Daylight, 13.5, ''], [Darkness, 10.5, '']]}
@@ -2323,7 +2275,6 @@ lessons:
       - section: 'The question'
         say: 'A table shows how many goals 40 teams scored. We want the total number of goals scored by all the teams.'
         write: 'Total number of goals $= ?$'
-        doodle: {name: 'custom:1987_q47_a', id: board, caption: 'Goals scored by 40 teams'}
       - section: 'Solution'
         say: 'Solution. Draw the frequency table with goals x, frequency f, and a column f x. 15 teams scored 2 goals each, so together they scored 2 times 15 goals.'
         write: 'Total goals $= \Sigma fx$'
@@ -2349,8 +2300,6 @@ lessons:
         write: '$\Sigma fx = 0 + 3 + 30 + 48 + 4 + 0 + 6 = 91$'
         diagram_do:
           - {id: t, op: total, part: 'col:3', 'on': '91'}
-        doodle_do:
-          - {id: board, op: label, part: board, text: '91 goals in all'}
       - section: 'Check'
         say: 'Check the f column. 4 plus 3 plus 15 plus 16 plus 1 plus 0 plus 1 is 40, the number of teams in the question.'
         write: '$\Sigma f = 4 + 3 + 15 + 16 + 1 + 0 + 1 = 40\ \checkmark$'

@@ -60,19 +60,14 @@ lessons:
         say: 'Write 3.1415926 correct to 5 decimal places. One of the options rounds up when it should not. Let''s see which.'
         write: '$3.1415926$ to 5 d.p.'
       - section: 'Solution'
-        say: 'Solution. For decimal places, we count from the decimal point. 5 decimal places means 5 digits after the point. Picture the digits as the carriages of a train.'
+        say: 'Solution. For decimal places, we count from the decimal point. 5 decimal places means 5 digits after the point.'
         write: 'Count 5 digits after the decimal point'
-        doodle: {name: 'custom:1995_q02_a', id: train, caption: '3.1415926 as carriages', size: scene}
       - say: 'Count after the point, 1, 4, 1, 5, 9. That is five. Mark the cut after the 9.'
         write: 'Cut after 5 d.p.: $3.14159\,|\,26$'
-        doodle_do:
-          - {id: train, op: circle, part: keep, text: 'keep these 5'}
       - say: 'Now look at the next digit after the cut. It is 2.'
         write: 'Next digit $= 2$'
         point:
-          - {line: 3, kind: highlight, at: '= 2', to: {doodle: train, part: d2}}
-        doodle_do:
-          - {id: train, op: highlight, part: d2, text: 'decides'}
+          - {line: 3, kind: highlight, at: '= 2'}
       - say: 'Here is the rule. If the next digit is 5 or more, add 1 to the last digit kept. If it is less than 5, leave the last digit as it is.'
         write: 'Rule: $5$ or more, add $1$; less than $5$, leave it'
       - say: '2 is less than 5, so we leave the 9 as it is.'
@@ -83,9 +78,6 @@ lessons:
         write: '$3.1415926 = 3.14159$ (5 d.p.)'
         point:
           - {line: 2, kind: strike, at: '26', text: 'dropped'}
-        doodle_do:
-          - {id: train, op: cross, part: d2}
-          - {id: train, op: cross, part: d6}
       - section: 'Check'
         say: 'To check, count the digits after the point in the answer, 1, 4, 1, 5, 9. Five, as asked.'
         write: 'Check: $1,\ 4,\ 1,\ 5,\ 9$: five decimal places ✓'
@@ -308,11 +300,8 @@ lessons:
         say: 'Let log base 2 of 32 be $z$. In index form, 2 to the power $z$ equals 32.'
         write: 'Let $\log_{2}32 = z \Rightarrow 2^{z} = 32$'
       - say: 'Write 32 as a power of 2, so 2, 4, 8, 16, 32. Five 2s multiplied, so 32 is 2 to the power 5.'
-        doodle: {name: 'custom:1995_q07_b', id: twos, caption: '2 × 2 × 2 × 2 × 2 = 32'}
         write: '$2^{z} = 2^{5}$'
       - say: 'Equate the indices. $z$ is 5.'
-        doodle_do:
-          - {id: twos, op: circle, part: count, text: 'five 2s'}
         write: '$\therefore z = 5$'
       - section: 'Add them'
         say: 'Now put the three values back into the expression, and we get 64, plus minus 4, plus 5.'
@@ -377,14 +366,11 @@ lessons:
       - section: 'The question'
         say: 'Four boys play in both the school''s first eleven cricket team and its first fourteen rugby team. How many boys play for at least one of the two teams? The team sizes are hiding in the names.'
         write: 'Cricket: first eleven; rugby: first fourteen; both: 4'
-        doodle: {name: 'custom:1995_q09_a', id: teams, caption: 'cricket 11, rugby 14, 4 in both'}
       - section: 'Solution'
         say: 'Solution. A first eleven has 11 players and a first fourteen has 14. So n of C, cricket, is 11, and n of R, rugby, is 14.'
         write: '$n(C) = 11,\ n(R) = 14$'
       - say: 'The 4 boys in both teams are C intersection R. Intersection means in both sets.'
         write: '$n(C \cap R) = 4$'
-        doodle_do:
-          - {id: teams, op: circle, part: both}
       - say: 'At least one team means cricket, or rugby, or both. That is C union R. We want n of C union R.'
         write: 'At least one team: $n(C \cup R) = ?$'
       - section: 'The Venn diagram'
@@ -397,9 +383,6 @@ lessons:
         diagram_do:
           - {id: v, op: fill, part: 'C only', text: '7', 'on': 'is 7'}
           - {id: v, op: fill, part: 'R only', text: '10', 'on': 'is 10'}
-        doodle_do:
-          - {id: teams, op: label, part: cricket, text: '7 cricket only'}
-          - {id: teams, op: label, part: rugby, text: '10 rugby only'}
       - say: 'C union R is all three regions inside the circles, so 7 plus 4 plus 10.'
         write: '$n(C \cup R) = 7 + 4 + 10 = 21$'
         diagram_do:
@@ -843,7 +826,6 @@ lessons:
       - section: 'Solution'
         say: 'Solution. The bottom has two different linear factors, so each gets its own fraction with a constant on top. Let the constants be $A$ and $B$.'
         write: 'Let $\dfrac{5x - 12}{(x - 2)(x - 3)} \equiv \dfrac{A}{x - 2} + \dfrac{B}{x - 3}$'
-        doodle: {name: 'custom:1995_q19_a', id: snap, caption: 'one fraction snaps into two'}
       - say: 'Multiply through by $x - 2$ times $x - 3$, the LCM of the denominators. $A$ loses its $x - 2$, and $B$ loses its $x - 3$.'
         write: '$5x - 12 \equiv A(x - 3) + B(x - 2)$'
       - section: 'Find B'
@@ -853,8 +835,6 @@ lessons:
         write: '$15 - 12 = A(0) + B(1)$'
       - say: '15 minus 12 is 3, and $A$ times 0 is 0. So $B$ is 3.'
         write: '$\therefore B = 3$'
-        doodle_do:
-          - {id: snap, op: label, part: pb, text: 'B = 3'}
       - section: 'Find A'
         say: 'Now put $x = 2$, because it makes the bracket $x - 2$ zero, and the $B$ term disappears.'
         write: 'Put $x = 2$: $\ 5(2) - 12 = A(2 - 3) + B(2 - 2)$'
@@ -864,8 +844,6 @@ lessons:
         write: '$-2 = -A$'
       - say: 'Multiply both sides by minus 1. So $A$ is 2.'
         write: '$\therefore A = 2$'
-        doodle_do:
-          - {id: snap, op: label, part: pa, text: 'A = 2'}
       - section: 'Check'
         say: 'Check by adding them back over the LCM. The new top is 2 times $x - 3$, plus 3 times $x - 2$.'
         write: 'Check: $2(x - 3) + 3(x - 2)$'

@@ -15,6 +15,24 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-27
 
+### Lesson doodles cut to the pictures that teach
+- **Why:** the founder found the board doodles in Use of English and Mathematics lessons too many
+  and often beside the point (a teacher with a book on a mean-age sum, Amina beside a plane on
+  an emphatic-stress item).
+- **The rule (founder's choice):** keep a doodle only where the picture carries the idea; at most
+  one per lesson. English keeps pictures only on word-meaning items (synonyms, antonyms,
+  idioms, a word's meaning in a passage) and only where the picture shows the meaning; every
+  stress, grammar, concord, cloze and comprehension item lost its picture. Mathematics keeps
+  models the working uses (bar and area models, tiles, number lines, factor cards, balances,
+  sketches, probability trees) and lost story pictures (people, calendars, places, objects).
+- **Numbers:** English 660 lessons with doodles (677 doodles) to 273; Mathematics 617 (637) to
+  493; 713 drawing files that nothing uses any more deleted. Every cut doodle's actions, board
+  links and timing cues went with it, and spoken lines that pointed at a removed picture were
+  reworded; nothing taught and no answer changed.
+- **Checked:** both subjects' lessons read cleanly as their loaders read them; loaded locally
+  (142 Mathematics and 388 English lessons updated, nothing pending); all API tests pass.
+- **Status:** committed, not pushed.
+
 ### The 15 "unrecoverable" Use of English questions rebuilt
 - **Why:** the English loader left 15 items marked `unrecoverable` exactly as they were in the
   bank, and some were live and broken: 2013 Q67's stem stopped mid-sentence with two identical

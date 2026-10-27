@@ -1585,16 +1585,13 @@ lessons:
           - {line: 6, kind: move, from: {line: 5, at: '= 225'}, at: '225', text: 'k'}
       - section: 'Find T for 25 men'
         say: 'Now keep only 25 men. Substitute $M$ equals 25.'
-        doodle: {name: 'custom:2002_q33_a', id: cal, caption: 'Fewer men take more days'}
         doodle_do:
           - {id: men, op: split, n: 25, text: '25 men | 20 sent home'}
         write: 'When $M = 25$: $\ T = \dfrac{225}{25}$'
-      - say: '225 divided by 25 is 9, because 25 times 9 is 225. The second calendar reads 9 days.'
-        doodle_do:
-          - {id: cal, op: label, part: cal2, text: '9 days'}
+      - say: '225 divided by 25 is 9, because 25 times 9 is 225. So 25 men take 9 days.'
         write: '$\therefore\ T = 9$ days'
         point:
-          - {line: 8, kind: highlight, at: '9', to: {doodle: cal, part: cal2}}
+          - {line: 8, kind: highlight, at: '9'}
       - section: 'Check'
         say: 'To check, fewer men should take more days, and 9 is more than 5. And 25 men times 9 days gives back the 225 man-days.'
         doodle_do:
@@ -2131,14 +2128,8 @@ lessons:
       - section: 'Check'
         say: 'To check, remember integration is the reverse of differentiation. Differentiate the answer. Cos $3x$ gives minus sin $3x$, times 3 by the chain rule.'
         write: 'Check: $\dfrac{d}{dx}\left(-\dfrac{1}{3}\cos 3x + c\right) = -\dfrac{1}{3}(-3\sin 3x) + 0$'
-        doodle: {name: 'custom:2002_q46_a', id: box, caption: 'differentiate it back'}
-        doodle_do:
-          - {id: box, op: highlight, part: unknown}
       - say: 'Minus 1 over 3 times minus 3 is plus 1. We get back sin $3x$.'
         write: '$= \sin 3x\ \checkmark$'
-        doodle_do:
-          - {id: box, op: stage, stage: 'custom:2002_q46_a2'}
-          - {id: box, op: label, part: unknown, text: '−⅓ cos 3x + c'}
       - section: 'Answer'
         say: 'Therefore the integral of sin $3x$ is minus 1 over 3 cos $3x$, plus $c$, which is answer choice B.'
         write: '$\therefore \displaystyle\int \sin 3x\,dx = -\dfrac{1}{3}\cos 3x + c$'

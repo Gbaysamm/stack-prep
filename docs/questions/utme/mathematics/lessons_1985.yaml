@@ -390,7 +390,6 @@ lessons:
     moments:
       - section: 'The question'
         say: 'John gives a third of his money to Janet, who already has ₦105. After that, John has only a quarter of what Janet has. How much did John have at first?'
-        doodle: {name: 'custom:1985_q09_a', id: gift, caption: 'John gives Janet ⅓ of his money', size: scene}
         write: 'John gives $\tfrac{1}{3}$ of his money to Janet (₦105). Then John $= \tfrac{1}{4}$ of Janet.'
       - say: 'We turn each sentence into algebra. First, name what we do not know.'
         write: 'Solution'
@@ -398,10 +397,8 @@ lessons:
         write: 'Let John''s money at first be ₦$x$'
       - section: 'After the gift'
         say: 'Watch a third go across to Janet. John gives away x over 3, so he keeps x minus x over 3, which is 2x over 3.'
-        doodle_do: [{id: gift, op: move, part: third, path: give}, {id: gift, op: label, part: john, text: 'keeps 2x/3'}]
         write: 'John keeps $x - \dfrac{x}{3} = \dfrac{2x}{3}$'
       - say: 'Janet had 105 naira, and she receives x over 3. So she now has 105 plus x over 3.'
-        doodle_do: [{id: gift, op: label, part: janet, text: '105 + x/3'}]
         write: 'Janet now has $105 + \dfrac{x}{3}$'
       - section: 'Form the equation'
         say: 'Now the key sentence, which says what John keeps is one quarter of what Janet now has.'
@@ -418,10 +415,8 @@ lessons:
         write: '$x = \dfrac{315}{7} = 45$'
       - section: 'Check'
         say: 'Check. A third of 45 is 15, so John keeps 45 minus 15, which is 30.'
-        doodle_do: [{id: gift, op: label, part: john, text: '₦45, keeps ₦30'}]
         write: 'Check: $\tfrac{1}{3} \times 45 = 15$; John keeps $45 - 15 = 30$'
       - say: 'Janet now has 105 plus 15, which is 120, and a quarter of 120 is 30, exactly what John kept.'
-        doodle_do: [{id: gift, op: label, part: janet, text: '₦120'}]
         write: 'Janet $= 105 + 15 = 120$; $\tfrac{1}{4} \times 120 = 30 \ \checkmark$'
       - section: 'Answer'
         say: 'Therefore John had ₦45.00 at first, which is option A.'
@@ -474,7 +469,6 @@ lessons:
     moments:
       - section: 'The question'
         say: 'Make $h$ the subject. The trouble is that $h$ hides in two places, on the top and on the bottom. We must bring both together.'
-        doodle: {name: 'custom:1985_q11_a', id: hs, caption: 'h hides in two places', size: scene}
         write: '$a = \dfrac{b(1 - ch)}{1 - dh}$'
       - section: 'Solution'
         say: 'Here is our plan. Clear the fraction, open the brackets, collect the terms in $h$ on one side, then factorise out $h$.'
@@ -488,15 +482,12 @@ lessons:
       - say: 'Collect the terms in $h$ on the right. Add $adh$ to both sides.'
         write: '$a = b - bch + adh$'
       - say: 'Now subtract $b$ from both sides, so the terms without $h$ are on the left. Both $h$ terms are now together.'
-        doodle_do: [{id: hs, op: stage, stage: 'custom:1985_q11_a2'}]
         write: '$a - b = adh - bch$'
       - say: 'Factorise out $h$ from the right-hand side, so $adh$ minus $bch$ is $h$ times $ad$ minus $bc$.'
-        doodle_do: [{id: hs, op: stage, stage: 'custom:1985_q11_a3'}]
         write: '$a - b = h(ad - bc)$'
         point:
           - {line: 6, kind: circle, at: 'h(', text: 'one h now'}
       - say: 'Divide both sides by $ad$ minus $bc$. Therefore $h$ equals $a$ minus $b$, over $ad$ minus $bc$.'
-        doodle_do: [{id: hs, op: circle, part: out}]
         write: '$\therefore h = \dfrac{a - b}{ad - bc}$'
       - section: 'Check'
         say: 'Check with numbers. Take $b$ as 1, $c$ as 0, $d$ as 1 and $h$ as a half. The formula gives $a$ as 1 over a half, which is 2.'
@@ -585,12 +576,10 @@ lessons:
         write: '$\therefore p = 0$ or $p = 12$'
       - section: 'Check'
         say: 'Check $p$ equals 12. $p$ minus 2 is 10 and $2p$ plus 1 is 25, so the equation is $x$ squared minus $10x$ plus 25, which is $x$ minus 5, squared.'
-        doodle: {name: 'custom:1985_q13_b', id: rest, caption: 'each curve touches once', size: scene}
         write: '$p = 12$: $x^{2} - 10x + 25 = (x - 5)^{2}$'
         point:
-          - {line: 11, kind: highlight, at: '(x - 5)2', to: {doodle: rest, part: p12}}
+          - {line: 11, kind: highlight, at: '(x - 5)2'}
       - say: 'Check $p$ equals 0. The equation is $x$ squared plus $2x$ plus 1, which is $x$ plus 1, squared. Equal roots again.'
-        doodle_do: [{id: rest, op: stage, stage: 'custom:1985_q13_b2'}]
         write: '$p = 0$: $x^{2} + 2x + 1 = (x + 1)^{2}\ \checkmark$'
       - say: 'So $p$ is 0 or 12, which is option A.'
         write: '$\therefore p = 0, 12$ (A)'
@@ -694,35 +683,31 @@ lessons:
   16:
     moments:
       - section: 'The question'
-        say: 'Feeding 100 people costs 30 kobo a head, but feeding 40 costs 60 kobo a head. Fewer people, dearer plate. What about 50 people? Picture the restaurant''s price board.'
-        doodle: {name: 'custom:1985_q16_a', id: meal, caption: 'cost per head at a restaurant', size: scene}
+        say: 'Feeding 100 people costs 30 kobo a head, but feeding 40 costs 60 kobo a head. Fewer people, dearer plate. What about 50 people?'
         write: '100 people: 30k each; 40 people: 60k each'
       - say: 'Solution. Let $C$ be the cost per head in kobo, and $n$ the number of people.'
         write: 'Solution: let $C$ = cost per head, $n$ = number of people'
       - say: 'Partly constant gives a constant, $k$ one. Partly inversely proportional to $n$ gives $k$ two over $n$. Two parts, two constants.'
-        doodle_do: [{id: meal, op: highlight, part: fixed}, {id: meal, op: highlight, part: share}]
         write: '$C = k_{1} + \dfrac{k_{2}}{n}$'
       - section: 'Two equations'
         say: 'When $n$ is 100, $C$ is 30. That is equation one.'
         write: '$30 = k_{1} + \dfrac{k_{2}}{100} \quad \ldots (1)$'
         point:
-          - {line: 3, kind: highlight, at: '30 =', to: {doodle: meal, part: r1}}
+          - {line: 3, kind: highlight, at: '30 ='}
       - say: 'When $n$ is 40, $C$ is 60. That is equation two.'
         write: '$60 = k_{1} + \dfrac{k_{2}}{40} \quad \ldots (2)$'
         point:
-          - {line: 4, kind: highlight, at: '60 =', to: {doodle: meal, part: r2}}
+          - {line: 4, kind: highlight, at: '60 ='}
       - section: 'Solve for the constants'
         say: 'Equation two minus equation one makes the $k$ ones cancel. 60 minus 30 is 30.'
         write: '$(2) - (1)$: $\ 30 = \dfrac{k_{2}}{40} - \dfrac{k_{2}}{100}$'
       - say: 'Multiply through by the L.C.M. of 40 and 100, which is 200. 200 over 40 is 5, and 200 over 100 is 2.'
         write: '$\times 200$: $\ 6000 = 5k_{2} - 2k_{2}$'
       - say: '5 $k$ two minus 2 $k$ two is 3 $k$ two. Divide 6000 by 3, and $k$ two is 2000.'
-        doodle_do: [{id: meal, op: label, part: share, text: 'k₂ = 2000'}]
         write: '$3k_{2} = 6000$ $\ \therefore\ k_{2} = 2000$'
       - say: 'Substitute $k$ two equals 2000 in equation one. 2000 over 100 is 20.'
         write: 'Sub. in (1): $\ 30 = k_{1} + \dfrac{2000}{100} = k_{1} + 20$'
       - say: '30 minus 20 is 10, so $k$ one is 10.'
-        doodle_do: [{id: meal, op: label, part: fixed, text: 'k₁ = 10'}]
         write: '$\therefore\ k_{1} = 30 - 20 = 10$'
       - section: 'The equation'
         say: 'The law of variation is cost per head equals 10, plus 2000 over $n$.'
@@ -731,7 +716,6 @@ lessons:
         say: 'Now substitute $n$ equals 50.'
         write: 'When $n = 50$: $\ C = 10 + \dfrac{2000}{50}$'
       - say: '2000 divided by 50 is 40, and 10 plus 40 is 50.'
-        doodle_do: [{id: meal, op: label, part: r3, text: '50k'}]
         write: '$= 10 + 40 = 50$'
       - section: 'Check'
         say: 'Check equation two. 10 plus 2000 over 40 is 10 plus 50, which is 60. Correct. And 50k sits between 30k and 60k, as it should.'
@@ -996,16 +980,13 @@ lessons:
     moments:
       - section: 'The question'
         say: 'Three fractions with three different denominators. One move clears them all, and then it is just a quadratic.'
-        doodle: {name: 'custom:1985_q22_a', id: fracs, caption: 'three bottoms to clear', size: scene}
         write: '$\dfrac{2}{2r - 1} - \dfrac{5}{3} = \dfrac{1}{r + 2}$'
       - section: 'Solution'
         say: 'To clear the fractions, we multiply every term by the L.C.M. of the denominators. The denominators are $2r$ minus 1, 3, and $r$ plus 2.'
         write: 'Solution'
       - say: 'They share no common factor, so the L.C.M. is all three multiplied together.'
-        doodle_do: [{id: fracs, op: stage, stage: 'custom:1985_q22_a2'}]
         write: 'L.C.M. $= 3(2r - 1)(r + 2)$'
       - say: 'Multiply every term by it. In the first term $2r$ minus 1 cancels, leaving 6 times $r$ plus 2. In the second, the 3 cancels. In the last, $r$ plus 2 cancels.'
-        doodle_do: [{id: fracs, op: cross, part: b1}, {id: fracs, op: cross, part: b2}, {id: fracs, op: cross, part: b3}]
         write: '$6(r + 2) - 5(2r - 1)(r + 2) = 3(2r - 1)$'
       - say: 'Open the double bracket. $2r$ times $r$ is $2r$ squared, $2r$ times 2 is $4r$, negative 1 times $r$ is negative $r$, negative 1 times 2 is negative 2.'
         write: '$(2r - 1)(r + 2) = 2r^{2} + 3r - 2$'
@@ -1512,13 +1493,11 @@ lessons:
           - {figure: sketch, kind: circle, target: B, text: 'bird'}
       - say: 'N 72 degrees E means we stand at the hunter, face North, and turn 72 degrees towards East. That is the line the hunter looks along to see the bird.'
         write: '$\angle NHB = 72^{\circ}$ (given, N$72^{\circ}$E)'
-        doodle: {name: 'custom:1985_q32_a', id: hunt, caption: 'the hunter looks up at the bird', size: scene}
         point:
           - {figure: sketch, kind: circle, target: '72°', text: 'N72°E'}
       - section: 'The angle at B'
         say: 'Now stand at the bird. The South line at $B$ is parallel to the North line at $H$, and $HB$ cuts both. So the angle between South at $B$ and $BH$ is also 72 degrees, because they are alternate angles.'
         write: '$\angle SBH = 72^{\circ}$ (alt. $\angle$s, N lines $\parallel$)'
-        doodle_do: [{id: hunt, op: stage, stage: 'custom:1985_q32_a2'}]
         point:
           - {figure: sketch, kind: arc, target: SBH, text: '72°'}
       - say: 'From the bird, $H$ lies on the West side of the South line. So we face South and turn 72 degrees towards West.'
@@ -1527,7 +1506,6 @@ lessons:
           - {figure: sketch, kind: circle, target: '?', text: 'towards W'}
       - say: 'Therefore the bearing of the hunter from the bird is S 72 degrees W.'
         write: '$\therefore$ Hunter from bird $=$ S$72^{\circ}$W'
-        doodle_do: [{id: hunt, op: label, part: back, text: 'S72°W'}]
         point:
           - {figure: sketch, kind: label, target: '?', text: 'S72°W'}
       - section: 'Check'
@@ -2313,12 +2291,9 @@ lessons:
       - section: 'The question'
         say: 'In a class of 120 students, 18 scored an A grade. On a pie chart, the A-grade sector has angle Z degrees. We want Z.'
         write: 'A grade: 18 of 120 students. $Z = ?$'
-        doodle: {name: 'custom:1985_q48_a', id: scripts, caption: '18 A grades in a class of 120'}
       - section: 'Solution'
         say: 'Solution. The frequency for A is given as 18, and the total frequency, sigma f, is the whole class, which is 120.'
         write: '$f = 18,\quad \Sigma f = 120$'
-        doodle_do:
-          - {id: scripts, op: circle, part: count}
       - say: 'The whole circle, 360 degrees, stands for the whole class. So the sectoral angle is the frequency over the total, times 360 degrees.'
         write: 'Sectoral angle $= \dfrac{f}{\Sigma f} \times 360^{\circ}$'
       - say: 'Substitute 18 and 120.'
@@ -2332,8 +2307,6 @@ lessons:
         diagram: {id: p, kind: pie, show: none, sectors: [{label: 'A grade', value: 18, colour: green}, {label: Others, value: 102, colour: grey}]}
         diagram_do:
           - {id: p, op: angle, part: 'sector:A grade', text: 'Z = 54°', 'on': '54'}
-        doodle_do:
-          - {id: scripts, op: label, part: a, text: '54°'}
       - section: 'Check'
         say: 'To check, 54 degrees out of 360 is the same share as 18 students out of 120. 54 over 360 is 3 over 20, and 18 over 120 is also 3 over 20.'
         write: '$\dfrac{54}{360} = \dfrac{3}{20} = \dfrac{18}{120}\ \checkmark$'
