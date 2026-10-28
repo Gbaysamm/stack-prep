@@ -63,7 +63,7 @@ const NAV = [
 /** Places a student goes less often than every day: under the main list, and in the phone menu. */
 const MORE = [
   { to: "/bookmarks", label: "Bookmarks", icon: IconBookmark },
-  { to: "/plans", label: "Premium", icon: IconSparkles },
+  { to: "/plans", label: "Plans", icon: IconSparkles },
   { to: "/exams", label: "Exams & subjects", icon: IconBook },
   { to: "/help", label: "Help & guides", icon: IconHelp },
 ] as const;
@@ -298,7 +298,7 @@ function ProfileMenu({
           </Link>
           <Link to="/plans" role="menuitem" className="sj-account-item">
             <IconSparkles size={18} />
-            Premium
+            Plans
           </Link>
           <Link to="/exams" role="menuitem" className="sj-account-item">
             <IconBook size={18} />

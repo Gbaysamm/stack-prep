@@ -281,7 +281,7 @@ export function PracticeRoom() {
   const [canHear, setCanHear] = useState(false);
   // The voice and the coach are Premium once the free limits are on (premium.tsx); the
   // board's written working is for everyone.
-  const { voice: premiumVoice } = usePremium();
+  const { voice: premiumVoice, coach: premiumCoach } = usePremium();
   const voiceOpen = canHear && premiumVoice;
   const micOpen = canSpeak && premiumVoice;
   const askedAt = useRef<number>(Date.now());
@@ -752,7 +752,7 @@ export function PracticeRoom() {
               : undefined
           }
           answerLine={`The answer is ${state.correct_option_key}.`}
-          askLocked={premiumVoice ? undefined : <VoiceLocked />}
+          askLocked={premiumCoach ? undefined : <VoiceLocked />}
           onListen={
             micOpen
               ? (recording) =>
@@ -1412,7 +1412,7 @@ function ReviewBoard({
   const question = outcome.question;
   const version = question.question_version_id;
   const [lesson, setLesson] = useState<NarratedLesson | "none" | null>(null);
-  const { voice: premiumVoice } = usePremium();
+  const { coach: premiumCoach } = usePremium();
   useEffect(() => {
     let cancelled = false;
     api
@@ -1449,7 +1449,7 @@ function ReviewBoard({
           canHear && loaded ? () => Promise.resolve(loaded) : undefined
         }
         answerLine={`The answer is ${outcome.chose}.`}
-        askLocked={premiumVoice ? undefined : <VoiceLocked />}
+        askLocked={premiumCoach ? undefined : <VoiceLocked />}
         onListen={
           canSpeak
             ? (recording) => api.practiceListen(sessionId, version, recording)

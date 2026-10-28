@@ -15,6 +15,36 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-28
 
+### Plans by benefit, set by the admin, with discounts (follow-up part A)
+- **Why:** after seeing the plans locally the founder asked for plans by benefit rather than by
+  month: the length a separate choice, a higher plan giving more, the admin deciding what each
+  plan includes and creating plans freely, and plans given to a student at a discount, at 100%
+  off or for a set time. He also disliked the half-empty row of plan cards and the separate
+  "everything is open" card (docs/plans/2026-10-28-plans-admin-and-public-site.md).
+- **What:** every plan, Free included, is a row the admin edits in **Pricing & plans**:
+  practice questions a day, mock exams a day/week/month/in total, lessons explained aloud,
+  coach questions a day, choosing topics and years, revising bookmarks, and selling points
+  shown on the card. Each is enforced by the API (a 402 with a sentence opens the student's
+  "Choose a plan" prompt). Lengths (1 month, 3 months, exam season by default) are their own
+  list; each plan has a price per length. A plan's order is its rank: with two running, the
+  higher one applies; more time on the same plan follows on. **Discounts:** promo codes
+  (percent off, optionally one plan or length, a usage cap, an end date; once per student)
+  and offers to one student, made from their page in Students, applied by themselves and shown
+  on their plans page; 100% off gives the plan at once with no payment page. Admins can still
+  give a plan for N days. `/plans` now says where the student stands in the hero, has a length
+  switch, and shows the plans side by side across the page (Free first, features ticked or
+  crossed, the featured plan marked, an offer's price on its card); checking out shows the
+  price, any discount and a promo-code box. The limits switch stays off by default.
+- **Where:** `database/migrations/035_premium_and_payments.sql` (rewritten: it was never
+  pushed), `apps/api/src/app/premium.py`, `routers/billing.py`, `routers/admin_billing.py`,
+  `routers/practice.py` (custom/bookmark runs, the coach's daily allowance);
+  `apps/web/src/prep/pages/Plans.tsx`, `billingApi.ts`, `premium.tsx`,
+  `apps/web/src/admin/PremiumPage.tsx`, `StudentPage.tsx`; tests in `tests/test_billing.py`.
+- **Checked:** all 545 API tests against the local database, the web tests and build;
+  screenshots at 1440 and 390 of /plans (free with an offer, on a plan), checkout with an
+  offer, and the admin's plans, plan editor, discounts and a student's offer form.
+- **Status:** committed, not pushed (deploys wait on GitHub billing).
+
 ### The reviewer dashboard redesigned (plan phase 8), and one hero on the Premium page
 - **Why:** the founder asked for the reviewer dashboard in the same design as the rest of the
   app. The old screen was unstyled, could not narrow to a subject (the bank now holds twelve),

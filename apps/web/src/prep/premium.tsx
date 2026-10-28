@@ -19,18 +19,20 @@ import { Button, Dialog } from './ui.js';
 interface Premium {
   /** Null until loaded, and for nobody signed in. */
   standing: Standing | null;
-  /** The lesson's voice and the coach. True until known otherwise, so nothing flickers off. */
+  /** The lesson's voice. True until known otherwise, so nothing flickers off. */
   voice: boolean;
+  /** Asking the coach. */
+  coach: boolean;
   reload: () => void;
 }
 
-const PremiumContext = createContext<Premium>({ standing: null, voice: true, reload: () => undefined });
+const PremiumContext = createContext<Premium>({ standing: null, voice: true, coach: true, reload: () => undefined });
 
 export const usePremium = () => useContext(PremiumContext);
 
 /** Free and limited: the limits are on and this student has no Premium. */
 export const isLimited = (standing: Standing | null) =>
-  Boolean(standing && standing.free.limits_on && !standing.premium);
+  Boolean(standing && standing.limits_on && !standing.premium);
 
 export function PremiumProvider({ children }: { children: ReactNode }) {
   const { identity } = useIdentity();
@@ -64,7 +66,14 @@ export function PremiumProvider({ children }: { children: ReactNode }) {
   }, [reload]);
 
   return (
-    <PremiumContext.Provider value={{ standing, voice: !isLimited(standing), reload }}>
+    <PremiumContext.Provider
+      value={{
+        standing,
+        voice: standing ? standing.allowance.voice : true,
+        coach: standing ? standing.allowance.coach_per_day !== 0 : true,
+        reload,
+      }}
+    >
       {children}
       <UpgradeDialog message={needed} onClose={() => setNeeded(null)} />
     </PremiumContext.Provider>
@@ -75,9 +84,9 @@ export function PremiumProvider({ children }: { children: ReactNode }) {
 export function VoiceLocked() {
   return (
     <>
-      <span>Hear this explained aloud and ask the coach about any step with Premium.</span>
+      <span>Ask the coach about any step you don't follow with a plan.</span>
       <Button size="sm" to="/plans" icon={<IconSparkles size={16} />}>
-        See Premium
+        See the plans
       </Button>
     </>
   );
@@ -90,7 +99,7 @@ function UpgradeDialog({ message, onClose }: { message: string | null; onClose: 
       open={message !== null}
       onClose={onClose}
       icon={<IconSparkles size={24} />}
-      title="Go Premium"
+      title="Choose a plan"
       actions={
         <>
           <Button tone="ghost" onClick={onClose}>
@@ -110,8 +119,8 @@ function UpgradeDialog({ message, onClose }: { message: string | null; onClose: 
     >
       <p style={{ margin: 0 }}>{message}</p>
       <p style={{ margin: '10px 0 0' }}>
-        Premium gives you unlimited practice and mocks, and every lesson explained aloud with a coach to
-        ask.
+        A plan gives you more practice and mocks, lessons explained aloud, and a coach to ask. The higher the
+        plan, the more you get.
       </p>
     </Dialog>
   );

@@ -1,90 +1,76 @@
-/* /plans — Premium: where the student stands, the plans, and receipts. */
+/* /plans — the plans side by side across the page, an offer, and receipts. */
 
-.sj .pl-now {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 20px 24px;
-}
-.sj .pl-now p {
-  margin: 6px 0 0;
-  color: var(--gray-600);
-  line-height: 1.5;
-}
-.sj .pl-now-icon {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: var(--purple-050);
-  color: var(--purple-600);
-}
-.sj .pl-free {
-  display: flex;
-  flex-direction: column;
+.sj .pl-lengths {
+  display: inline-flex;
+  flex-wrap: wrap;
   gap: 4px;
-  margin: 8px 0 0;
-  padding-left: 18px;
+  padding: 4px;
+  border-radius: 14px;
+  background: var(--white);
+  box-shadow: inset 0 0 0 1.5px var(--gray-200);
+}
+.sj .pl-lengths button {
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--gray-600);
-  line-height: 1.5;
+  cursor: pointer;
 }
-.sj .pl-free b {
-  color: var(--ink-900);
+.sj .pl-lengths button.on {
+  background: var(--purple-600);
+  color: #fff;
 }
-.sj .pl-gives {
+
+/* As many columns as there are plans (up to four), so the row always fills the page. */
+.sj .pl-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px 20px;
-  margin: 0 0 18px;
-  padding: 0;
-  list-style: none;
-  font-size: 14.5px;
-  color: var(--ink-900);
-}
-.sj .pl-gives li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.sj .pl-gives svg {
-  flex: none;
-  color: var(--green-600);
-}
-.sj .pl-plans {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(var(--plans, 3), minmax(0, 1fr));
+  gap: 16px;
   margin: 0;
   padding: 0;
   list-style: none;
+  align-items: stretch;
 }
 .sj .pl-plan {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 20px;
+  padding: 24px 22px 22px;
 }
-.sj .pl-plan .sj-btn {
-  margin-top: auto;
+.sj .pl-plan.featured {
+  box-shadow: inset 0 0 0 2px var(--purple-600), var(--st-purple, 0 10px 30px rgba(107, 11, 255, 0.12));
 }
-.sj .pl-plan-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
+.sj .pl-plan.current {
+  box-shadow: inset 0 0 0 2px var(--green-400);
 }
-.sj .pl-length {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--purple-700);
-  white-space: nowrap;
+.sj .pl-badge {
+  position: absolute;
+  top: -12px;
+  left: 22px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--purple-600);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+.sj .pl-blurb {
+  margin: -4px 0 0;
+  min-height: 2.9em;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--gray-600);
 }
 .sj .pl-price {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-height: 62px;
   margin: 0;
 }
 .sj .pl-price .sj-display {
@@ -97,21 +83,113 @@
   font-size: 13px;
   color: var(--gray-600);
 }
-.sj .pl-quiet {
-  margin: 0 0 12px;
-}
-.sj .pl-blurb {
-  margin: 0;
+.sj .pl-features {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 9px;
+  margin: 6px 0 4px;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--gray-100);
+  list-style: none;
   font-size: 14px;
-  line-height: 1.5;
-  color: var(--gray-600);
+  line-height: 1.4;
+  color: var(--ink-900);
+}
+.sj .pl-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.sj .pl-features svg {
+  flex: none;
+  margin-top: 1px;
+  color: var(--green-600);
+}
+.sj .pl-features li.off {
+  color: var(--gray-400, #9b97a8);
+}
+.sj .pl-features li.off svg {
+  color: var(--gray-400, #9b97a8);
+}
+.sj .pl-plan-foot {
+  margin-top: auto;
+  padding-top: 8px;
+}
+.sj .pl-closed {
+  margin: 0 0 14px;
+}
+
+.sj .pl-offer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  box-shadow: inset 0 0 0 1.5px var(--green-400);
+}
+.sj .pl-offer > div {
+  display: grid;
+  gap: 2px;
+  font-size: 15px;
+  color: var(--ink-900);
+}
+.sj .pl-offer-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--green-100);
+  color: var(--green-600);
+}
+
+.sj .pl-checkout {
+  display: grid;
+  gap: 14px;
+}
+.sj .pl-sum {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--purple-050);
+}
+.sj .pl-sum div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14.5px;
+  color: var(--ink-900);
+}
+.sj .pl-sum dd {
+  margin: 0;
+  font-weight: 600;
+}
+.sj .pl-sum .off {
+  color: var(--green-600);
+}
+.sj .pl-sum .total {
+  padding-top: 6px;
+  border-top: 1px solid var(--purple-100);
+  font-weight: 700;
+}
+.sj .pl-code {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+.sj .pl-code > .sj-field {
+  flex: 1;
 }
 .sj .pl-error {
-  margin: 0 0 12px;
+  margin: 0;
   font-size: 13.5px;
   font-weight: 600;
   color: var(--danger);
 }
+
 .sj .pl-receipts {
   margin: 0;
   padding: 4px 20px;
@@ -133,27 +211,42 @@
   flex-direction: column;
   gap: 2px;
 }
-.sj .pl-receipts .pl-quiet {
-  margin: 0;
-}
 .sj .pl-receipt-right {
   align-items: flex-end;
   text-align: right;
 }
 
-@media (max-width: 620px) {
-  .sj .pl-gives {
-    grid-template-columns: 1fr;
+@media (max-width: 1100px) {
+  .sj .pl-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-@media (max-width: 520px) {
-  .sj .pl-now {
-    padding: 16px;
+@media (max-width: 620px) {
+  .sj .pl-grid {
+    grid-template-columns: 1fr;
+    gap: 22px;
   }
-  .sj .pl-plan {
-    padding: 16px;
+  .sj .pl-blurb,
+  .sj .pl-price {
+    min-height: 0;
   }
   .sj .pl-receipts {
     padding: 4px 16px;
   }
+}
+.sj .pl-was {
+  margin-left: 10px;
+  font-family: var(--f-body);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--gray-500);
+}
+.sj .pl-offer-tag {
+  align-self: flex-start;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--green-100);
+  color: var(--green-600);
+  font-size: 12px;
+  font-weight: 700;
 }

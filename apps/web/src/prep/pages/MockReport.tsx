@@ -104,7 +104,7 @@ function QuestionModal({
   const next = here < flat.length - 1 ? flat[here + 1] : null;
   const [lesson, setLesson] = useState<NarratedLesson | 'loading' | 'none' | null>(null);
   const [canHear, setCanHear] = useState(false);
-  const { voice: premiumVoice } = usePremium();
+  const { voice: premiumVoice, coach: premiumCoach } = usePremium();
 
   useEffect(() => {
     setLesson(null);
@@ -155,7 +155,7 @@ function QuestionModal({
             answerText={correct?.body ?? null}
             steps={lesson.beats.flatMap((beat) => beat.write)}
             loadLesson={canHear && premiumVoice ? () => Promise.resolve(lesson) : undefined}
-            askLocked={premiumVoice ? undefined : <VoiceLocked />}
+            askLocked={premiumCoach ? undefined : <VoiceLocked />}
             answerLine={`The answer is ${item.correct_option_key ?? ''}.`}
             onAsk={(asked, stepIndex, handlers) =>
               api.practiceAskStreaming(subject.session_id, item.question_version_id, asked, stepIndex, handlers)

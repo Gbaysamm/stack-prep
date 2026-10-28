@@ -6,10 +6,11 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { friendly, request } from '../lib/friendlyError.js';
-import { naira, planLength, type Standing } from '../prep/billingApi.js';
+import { naira, type Standing } from '../prep/billingApi.js';
 import { useStaff } from '../staff/StaffGate.js';
 import { StaffPageHead } from '../staff/StaffShell.js';
 import { ColumnChart } from './charts.js';
+import { DiscountForm, discountWords, type Billing, type Discount } from './PremiumPage.js';
 import { CLASS_NAMES, ago } from './StudentsPage.js';
 
 type Role = 'student' | 'reviewer' | 'admin';
@@ -97,6 +98,10 @@ export function StudentPage() {
   const [password, setPassword] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [giftDays, setGiftDays] = useState('30');
+  const [giftPlan, setGiftPlan] = useState('');
+  const [catalogue, setCatalogue] = useState<Billing | null>(null);
+  const [offers, setOffers] = useState<Discount[]>([]);
+  const [offering, setOffering] = useState(false);
 
   const load = useCallback(() => {
     request<StudentDetail>(`/v1/admin/students/${studentId}`)
@@ -107,6 +112,20 @@ export function StudentPage() {
       .catch((error) => setProblem(friendly(error)));
   }, [studentId]);
   useEffect(load, [load]);
+  const loadOffers = useCallback(() => {
+    request<Discount[]>(`/v1/admin/billing/discounts?student_id=${studentId}`)
+      .then(setOffers)
+      .catch(() => undefined);
+  }, [studentId]);
+  useEffect(() => {
+    request<Billing>('/v1/admin/billing')
+      .then((next) => {
+        setCatalogue(next);
+        setGiftPlan((current) => current || next.plans.find((plan) => plan.kind === 'paid')?.id || '');
+      })
+      .catch(() => undefined);
+    loadOffers();
+  }, [loadOffers]);
 
   const act = async (key: string, run: () => Promise<string>) => {
     setBusy(key);
@@ -172,12 +191,16 @@ export function StudentPage() {
       setNotice({ ok: false, text: 'Enter a number of days from 1 to 730.' });
       return;
     }
+    if (!giftPlan) {
+      setNotice({ ok: false, text: 'Add a paid plan in Pricing & plans first.' });
+      return;
+    }
     void act('gift', async () => {
-      const done = await request<{ premium_until: string | null }>(
+      const done = await request<{ plan_name: string; plan_until: string | null }>(
         `/v1/admin/billing/students/${account.student_id}/gift`,
-        { method: 'POST', body: JSON.stringify({ days }) },
+        { method: 'POST', body: JSON.stringify({ plan_id: giftPlan, days }) },
       );
-      return `Premium given${done.premium_until ? ` until ${date(done.premium_until)}` : ''}.`;
+      return `${done.plan_name} given${done.plan_until ? `, until ${date(done.plan_until)}` : ''}.`;
     });
   };
 
@@ -191,7 +214,7 @@ export function StudentPage() {
         sub={[account.email, account.phone].filter(Boolean).join(' · ') || 'No email or phone'}
         actions={
           <span className="st-tags">
-            {premium.premium && <span className="st-pill good">Premium</span>}
+            {premium.plan_name && <span className="st-pill good">{premium.plan_name}</span>}
             {account.role !== 'student' && <span className={`st-pill ${account.role}`}>{account.role === 'admin' ? 'Admin' : 'Reviewer'}</span>}
             <span className={`st-pill ${account.status === 'active' ? 'good' : 'bad'}`}>
               {account.status === 'active' ? 'Active' : account.status === 'suspended' ? 'Suspended' : account.status}
@@ -252,18 +275,59 @@ export function StudentPage() {
             </div>
             <form className="st-action" onSubmit={gift}>
               <div>
-                <strong>Give Premium</strong>
+                <strong>Give a plan</strong>
                 <span className="st-muted">
-                  {premium.premium && premium.premium_until ? `Has it until ${date(premium.premium_until)}; days are added after.` : 'Days of Premium, free.'}
+                  {premium.plan_name && premium.plan_until
+                    ? `On ${premium.plan_name} until ${date(premium.plan_until)}. More of the same plan follows on.`
+                    : 'Free, for the days you choose.'}
                 </span>
               </div>
               <span className="st-row">
+                <select aria-label="Plan" value={giftPlan} onChange={(event) => setGiftPlan(event.target.value)}>
+                  {catalogue?.plans
+                    .filter((plan) => plan.kind === 'paid')
+                    .map((plan) => (
+                      <option key={plan.id} value={plan.id}>
+                        {plan.name}
+                      </option>
+                    ))}
+                </select>
                 <input className="st-days" inputMode="numeric" aria-label="Days" value={giftDays} onChange={(event) => setGiftDays(event.target.value)} />
                 <button type="submit" className="sj-btn ghost sm" disabled={busy !== null}>
                   {busy === 'gift' ? 'Giving…' : 'Give'}
                 </button>
               </span>
             </form>
+            <div className="st-action">
+              <div>
+                <strong>Make an offer</strong>
+                <span className="st-muted">
+                  {offers.filter((offer) => offer.active).length
+                    ? offers
+                        .filter((offer) => offer.active)
+                        .map((offer) => `${discountWords(offer)} (${offer.used ? 'used' : 'waiting'})`)
+                        .join('; ')
+                    : 'A discount for this student only, up to 100% off. They see it on their plans page.'}
+                </span>
+              </div>
+              <button type="button" className="sj-btn ghost sm" disabled={busy !== null || offering} onClick={() => setOffering(true)}>
+                Make one
+              </button>
+            </div>
+            {offering && catalogue && (
+              <DiscountForm
+                plans={catalogue.plans}
+                lengths={catalogue.lengths}
+                studentId={account.student_id}
+                onDone={(made) => {
+                  setOffering(false);
+                  if (made) {
+                    setNotice({ ok: true, text: `Offer made: ${discountWords(made)}.` });
+                    loadOffers();
+                  }
+                }}
+              />
+            )}
             <div className="st-action">
               <div>
                 <strong>Role</strong>
@@ -431,15 +495,19 @@ export function StudentPage() {
         </section>
 
         <section className="st-panel">
-          <h2>Premium</h2>
+          <h2>Plan and payments</h2>
           <p className="st-muted" style={{ marginTop: 0 }}>
-            {premium.premium
-              ? premium.premium_until
-                ? `On Premium until ${date(premium.premium_until)}.`
-                : 'Has everything (an admin account).'
-              : premium.free.limits_on
-                ? `Free plan: ${premium.practice_used_today} of ${premium.free.practice_per_day} practice questions used today, ${premium.mocks_used} of ${premium.free.mocks} free mocks.`
-                : 'Free plan. The limits are off, so nothing is held back.'}
+            {premium.plan_name
+              ? `On ${premium.plan_name}${premium.plan_until ? ` until ${date(premium.plan_until)}` : ''}.`
+              : premium.premium
+                ? 'Has everything (an admin account).'
+                : premium.limits_on
+                  ? `Free plan: ${premium.practice_used_today}${
+                      premium.allowance.practice_per_day !== null ? ` of ${premium.allowance.practice_per_day}` : ''
+                    } practice questions today, ${premium.mocks_used} mocks${
+                      premium.allowance.mocks !== null ? ` of ${premium.allowance.mocks}` : ''
+                    }.`
+                  : 'Free plan. The limits are off, so nothing is held back.'}
           </p>
           {premium.receipts.length === 0 ? (
             <p className="st-empty">No payments.</p>
@@ -450,11 +518,12 @@ export function StudentPage() {
                   <span className="st-cell">
                     <strong>{receipt.plan_name}</strong>
                     <span className="st-muted">
-                      {date(receipt.paid_at ?? receipt.created_at)} · {planLength(receipt.days)}
+                      {date(receipt.paid_at ?? receipt.created_at)} · {receipt.length_label}
+                      {receipt.discount_label ? ` · ${receipt.discount_label}` : ''}
                     </span>
                   </span>
                   <span className="st-cell st-end">
-                    <strong>{naira(receipt.amount_kobo)}</strong>
+                    <strong>{receipt.amount_kobo === 0 ? 'Free' : naira(receipt.amount_kobo)}</strong>
                     <span className={`st-pill ${receipt.status === 'paid' ? 'good' : receipt.status === 'pending' ? 'warn' : 'bad'}`}>
                       {receipt.status === 'paid' ? 'Paid' : receipt.status === 'pending' ? 'Not finished' : receipt.status === 'abandoned' ? 'Cancelled' : 'Failed'}
                     </span>

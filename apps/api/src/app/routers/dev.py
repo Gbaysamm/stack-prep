@@ -118,6 +118,9 @@ released_premium_gifts AS (
 released_billing_settings AS (
     UPDATE billing_settings SET updated_by = NULL WHERE updated_by IN (SELECT id FROM doomed)
 ),
+released_discounts AS (
+    UPDATE discounts SET created_by = NULL WHERE created_by IN (SELECT id FROM doomed)
+),
 unlinked_reviewers AS (
     -- A reviewer row keeps the decisions it made; only its link to the account goes.
     UPDATE academic_reviewers SET student_id = NULL WHERE student_id IN (SELECT id FROM doomed)

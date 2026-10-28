@@ -1,141 +1,335 @@
 /**
- * /plans — Premium: what the student has now, what is free, the plans on sale, and their
- * receipts. Paying goes to Paystack's own page; /plans/paid is where Paystack sends them back.
+ * /plans — the plans side by side, Free first, each with what it gives; a switch for how long
+ * (1 month, 3 months, ...); any offer made for this student; and their receipts. Where the
+ * student stands is said in the hero. Paying goes to Paystack's own page; /plans/paid is where
+ * Paystack sends them back. 100% off gives the plan at once.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { friendly } from '../../lib/friendlyError.js';
-import { billingApi, naira, planLength, type Confirmed, type Plan, type Standing } from '../billingApi.js';
-import { IconArrowRight, IconCheck, IconClock, IconSparkles } from '../icons.js';
-import { useLoad, usePageTitle, useStudent } from '../store.js';
-import { Button, Dialog, PageHero, Skeleton } from '../ui.js';
 import { AboutField } from '../AboutFields.js';
+import {
+  PREMIUM_CHANGED,
+  billingApi,
+  featureLines,
+  naira,
+  type Catalogue,
+  type Confirmed,
+  type Length,
+  type Plan,
+  type Quote,
+  type Standing,
+} from '../billingApi.js';
+import { IconArrowRight, IconCheck, IconClock, IconClose, IconSparkles } from '../icons.js';
+import { useLoad, usePageTitle, useStudent } from '../store.js';
+import { Button, Dialog, PageHero, Skeleton, useToast } from '../ui.js';
 import { Note, Section } from './Home.js';
 import './Plans.css';
 
 const longDate = (iso: string) =>
   new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
-const PREMIUM_GIVES = [
-  'Unlimited practice questions, every day',
-  'As many full mock exams as you want',
-  'Every lesson explained aloud on the board',
-  'Ask the coach about any step you don’t follow',
-];
+const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
-function Allowance({ standing }: { standing: Standing }) {
-  // Premium is said in the page's hero (Plans), not in a second dark card under it.
-  if (standing.premium) return null;
-  if (!standing.free.limits_on) {
-    return (
-      <div className="sj-card pl-now">
-        <span className="pl-now-icon" aria-hidden="true">
-          <IconCheck size={22} />
-        </span>
-        <div>
-          <h2 className="sj-display sj-h3">Everything is open for now</h2>
-          <p>There are no limits on your account at the moment. Premium keeps it that way when they start.</p>
-        </div>
-      </div>
+/** What the hero says: the plan they're on, or what's left of the free allowance. */
+function heroWords(standing: Standing | null): { title: string; sub: string } {
+  if (standing?.premium && standing.plan_name) {
+    return {
+      title: `You're on ${standing.plan_name}`,
+      sub: standing.plan_until
+        ? `It runs until ${longDate(standing.plan_until)}. More time on ${standing.plan_name} follows on from that; a higher plan starts at once.`
+        : 'Everything in your plan is open to you.',
+    };
+  }
+  const intro = 'Pay once for the time you want. Nothing renews by itself; pay by card, bank transfer or USSD.';
+  if (!standing || !standing.limits_on || standing.premium) return { title: 'Choose your plan', sub: intro };
+  const allowance = standing.allowance;
+  const parts: string[] = [];
+  if (allowance.practice_per_day !== null) {
+    parts.push(
+      `${Math.max(0, allowance.practice_per_day - standing.practice_used_today)} of ${allowance.practice_per_day} practice questions left today`,
     );
   }
-  const left = Math.max(0, standing.free.practice_per_day - standing.practice_used_today);
-  const mocksLeft = Math.max(0, standing.free.mocks - standing.mocks_used);
-  return (
-    <div className="sj-card pl-now">
-      <span className="pl-now-icon" aria-hidden="true">
-        <IconClock size={22} />
-      </span>
-      <div>
-        <h2 className="sj-display sj-h3">You're on the free plan</h2>
-        <ul className="pl-free">
-          <li>
-            <b>{left}</b> of {standing.free.practice_per_day} practice questions left today
-          </li>
-          <li>
-            <b>{mocksLeft}</b> of {standing.free.mocks} free {standing.free.mocks === 1 ? 'mock' : 'mocks'} left
-          </li>
-          <li>Check-ups and the written working on the board are always free</li>
-        </ul>
-      </div>
-    </div>
-  );
+  if (allowance.mocks !== null && allowance.mocks > 0) {
+    parts.push(`${Math.max(0, allowance.mocks - standing.mocks_used)} of ${allowance.mocks} free ${allowance.mocks === 1 ? 'mock' : 'mocks'} left`);
+  }
+  return {
+    title: 'Choose your plan',
+    sub: parts.length ? `You're on the free plan: ${parts.join(', ')}. ${intro}` : intro,
+  };
 }
 
 function PlanCard({
   plan,
+  length,
+  current,
   open,
-  onBuy,
-  busy,
+  offer,
+  onChoose,
 }: {
   plan: Plan;
+  length: Length | null;
+  current: boolean;
   open: boolean;
-  onBuy: (plan: Plan) => void;
-  busy: boolean;
+  /** Percent off this student's offer gives this plan at this length. */
+  offer: number;
+  onChoose: (plan: Plan) => void;
 }) {
-  // Rounded to the naira: it is a rough guide, not a price.
-  const perMonth = plan.days >= 60 ? Math.round((plan.price_kobo * 30) / plan.days / 100) * 100 : null;
+  const listed = length ? plan.prices[length.id] : undefined;
+  const price = listed !== undefined && offer ? (offer === 100 ? 0 : Math.max(10000, Math.floor((listed * (100 - offer)) / 100))) : listed;
+  const perMonth = price !== undefined && length && length.days >= 60 ? Math.round((price * 30) / length.days / 100) * 100 : null;
   return (
-    <li className="sj-card pl-plan">
-      <div className="pl-plan-head">
-        <h3 className="sj-display sj-h3">{plan.name}</h3>
-        <span className="pl-length">{planLength(plan.days)}</span>
-      </div>
-      <p className="pl-price">
-        <span className="sj-display">{naira(plan.price_kobo)}</span>
-        {perMonth ? <span className="pl-per">about {naira(perMonth)} a month</span> : null}
-      </p>
+    <li className={`sj-card pl-plan ${plan.featured ? 'featured' : ''} ${current ? 'current' : ''}`}>
+      {plan.featured ? <span className="pl-badge">Most popular</span> : null}
+      <h3 className="sj-display sj-h3">{plan.name}</h3>
       {plan.blurb ? <p className="pl-blurb">{plan.blurb}</p> : null}
-      <Button block busy={busy} disabled={!open} onClick={() => onBuy(plan)} trailing={<IconArrowRight size={18} />}>
-        Pay {naira(plan.price_kobo)}
-      </Button>
+      <p className="pl-price">
+        {plan.kind === 'free' ? (
+          <>
+            <span className="sj-display">₦0</span>
+            <span className="pl-per">Always free</span>
+          </>
+        ) : price !== undefined ? (
+          <>
+            <span className="sj-display">
+              {price === 0 ? 'Free' : naira(price)}
+              {offer && listed !== undefined ? <s className="pl-was">{naira(listed)}</s> : null}
+            </span>
+            {offer ? <span className="pl-offer-tag">Your offer: {offer === 100 ? 'free' : `${offer}% off`}</span> : null}
+            <span className="pl-per">
+              for {length ? length.label.toLowerCase() : ''}
+              {perMonth ? ` · about ${naira(perMonth)} a month` : ''}
+            </span>
+          </>
+        ) : (
+          <span className="pl-per">Not sold for {length?.label.toLowerCase() ?? 'this length'}</span>
+        )}
+      </p>
+      <ul className="pl-features">
+        {featureLines(plan.features).map((line) => (
+          <li key={line.text} className={line.on ? undefined : 'off'}>
+            {line.on ? <IconCheck size={16} /> : <IconClose size={16} />}
+            <span>{line.text}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="pl-plan-foot">
+        {current ? (
+          <Button block tone="soft" disabled>
+            Your plan
+          </Button>
+        ) : plan.kind === 'free' ? (
+          <Button block tone="ghost" disabled>
+            Included for everyone
+          </Button>
+        ) : (
+          <Button
+            block
+            tone={plan.featured ? 'primary' : 'soft'}
+            disabled={!open || price === undefined}
+            onClick={() => onChoose(plan)}
+            trailing={<IconArrowRight size={18} />}
+          >
+            Choose {plan.name}
+          </Button>
+        )}
+      </div>
     </li>
   );
 }
 
-export function Plans() {
-  usePageTitle('Premium');
+function CheckoutDialog({
+  plan,
+  length,
+  standing,
+  onClose,
+}: {
+  plan: Plan | null;
+  length: Length | null;
+  standing: Standing | null;
+  onClose: () => void;
+}) {
   const student = useStudent();
-  const catalogue = useLoad(() => billingApi.plans(), []);
-  const standing = useLoad(() => billingApi.standing(student.studentId), [student.studentId]);
-  const [buying, setBuying] = useState<Plan | null>(null);
-  const [asking, setAsking] = useState<Plan | null>(null);
+  const toast = useToast();
+  const navigate = useNavigate();
+  const [code, setCode] = useState('');
+  const [applied, setApplied] = useState('');
+  const [quote, setQuote] = useState<Quote | null>(null);
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  const pay = async (plan: Plan, withEmail?: string) => {
-    if (!standing.data?.email && !withEmail) {
-      setAsking(plan);
+  useEffect(() => {
+    setCode('');
+    setApplied('');
+    setError(null);
+    setBusy(false);
+  }, [plan?.id, length?.id]);
+
+  useEffect(() => {
+    if (!plan || !length) return;
+    let live = true;
+    setQuote(null);
+    billingApi
+      .quote(student.studentId, plan.id, length.id, applied || undefined)
+      .then((next) => live && setQuote(next))
+      .catch((failure) => {
+        if (!live) return;
+        setError(friendly(failure));
+        if (applied) setApplied('');
+      });
+    return () => {
+      live = false;
+    };
+  }, [plan, length, applied, student.studentId]);
+
+  if (!plan || !length) return null;
+  const needsEmail = !standing?.email && (quote?.amount_kobo ?? 1) > 0;
+  const pay = async () => {
+    if (!quote || busy) return;
+    if (needsEmail && !EMAIL.test(email.trim())) {
+      setError('Enter an email address for your receipt.');
       return;
     }
-    setBuying(plan);
+    setBusy(true);
     setError(null);
     try {
-      const started = await billingApi.checkout(student.studentId, plan.id, withEmail);
+      const started = await billingApi.checkout(student.studentId, plan.id, length.id, applied || undefined, email.trim());
+      if (started.granted || !started.authorization_url) {
+        window.dispatchEvent(new Event(PREMIUM_CHANGED));
+        toast(`${plan.name} is yours`);
+        onClose();
+        navigate(`/plans/paid?reference=${started.reference}`);
+        return;
+      }
       window.location.assign(started.authorization_url);
     } catch (failure) {
       setError(friendly(failure));
-      setBuying(null);
+      setBusy(false);
     }
   };
 
+  const free = quote?.amount_kobo === 0;
+  return (
+    <Dialog
+      open
+      onClose={onClose}
+      icon={<IconSparkles size={24} />}
+      title={`${plan.name}, ${length.label.toLowerCase()}`}
+      actions={
+        <>
+          <Button tone="ghost" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button busy={busy} disabled={!quote} onClick={() => void pay()}>
+            {!quote ? 'Working out the price…' : free ? 'Get it free' : `Pay ${naira(quote.amount_kobo)}`}
+          </Button>
+        </>
+      }
+    >
+      <div className="pl-checkout">
+        {quote ? (
+          <dl className="pl-sum">
+            <div>
+              <dt>Price</dt>
+              <dd>{naira(quote.list_price_kobo)}</dd>
+            </div>
+            {quote.discount_label ? (
+              <div className="off">
+                <dt>{quote.discount_label}</dt>
+                <dd>−{naira(quote.list_price_kobo - quote.amount_kobo)}</dd>
+              </div>
+            ) : null}
+            <div className="total">
+              <dt>To pay</dt>
+              <dd>{free ? 'Nothing' : naira(quote.amount_kobo)}</dd>
+            </div>
+          </dl>
+        ) : (
+          <Skeleton height={90} radius={12} />
+        )}
+        <form
+          className="pl-code"
+          onSubmit={(event) => {
+            event.preventDefault();
+            setError(null);
+            setApplied(code.trim());
+          }}
+        >
+          <AboutField label="Promo code">
+            {(id) => (
+              <input
+                id={id}
+                className="sj-input"
+                value={code}
+                autoCapitalize="characters"
+                placeholder="If you have one"
+                onChange={(event) => setCode(event.target.value)}
+              />
+            )}
+          </AboutField>
+          <Button type="submit" tone="soft" disabled={!code.trim() || code.trim() === applied}>
+            Apply
+          </Button>
+        </form>
+        {needsEmail ? (
+          <AboutField label="Email for the receipt">
+            {(id) => (
+              <input
+                id={id}
+                className="sj-input"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+              />
+            )}
+          </AboutField>
+        ) : null}
+        {error ? (
+          <p className="pl-error" role="alert">
+            {error}
+          </p>
+        ) : null}
+        <p className="pl-quiet">
+          {free
+            ? `${plan.name} is added to your account straight away.`
+            : `You'll pay on Paystack's page by card, bank transfer or USSD, then come back here. ${plan.name} starts as soon as the payment is confirmed.`}
+        </p>
+      </div>
+    </Dialog>
+  );
+}
+
+export function Plans() {
+  usePageTitle('Plans');
+  const student = useStudent();
+  const catalogue = useLoad<Catalogue>(() => billingApi.plans(), []);
+  const standing = useLoad(() => billingApi.standing(student.studentId), [student.studentId]);
+  const [lengthId, setLengthId] = useState<string | null>(null);
+  const [choosing, setChoosing] = useState<Plan | null>(null);
+
+  useEffect(() => {
+    const reload = () => standing.reload();
+    window.addEventListener(PREMIUM_CHANGED, reload);
+    return () => window.removeEventListener(PREMIUM_CHANGED, reload);
+  }, [standing]);
+
+  const lengths = catalogue.data?.lengths ?? [];
+  const length = useMemo(
+    () => lengths.find((item) => item.id === lengthId) ?? lengths[0] ?? null,
+    [lengths, lengthId],
+  );
+  const hero = heroWords(standing.data ?? null);
   const loading = !catalogue.data || !standing.data;
   const failed = catalogue.error || standing.error;
+  const plans = catalogue.data?.plans ?? [];
+  const offers = standing.data?.offers ?? [];
 
   return (
     <div className="sj-page pro-page pl-page">
-      <PageHero
-        eyebrow="Premium"
-        title={standing.data?.premium ? 'You have Premium' : 'Practise without limits'}
-        sub={
-          standing.data?.premium
-            ? standing.data.premium_until
-              ? `It runs until ${longDate(standing.data.premium_until)}. Buying another plan adds its time after that.`
-              : 'Everything in Stack Prep is open to you.'
-            : 'Pay once for the time you want. Nothing renews by itself, and you can pay by card, bank transfer or USSD.'
-        }
-      />
+      <PageHero eyebrow="Plans" title={hero.title} sub={hero.sub} />
 
       {failed && loading ? (
         <Note
@@ -158,47 +352,81 @@ export function Plans() {
           {friendly(failed)}
         </Note>
       ) : loading ? (
-        <>
-          <Skeleton height={120} radius={16} />
-          <Skeleton height={240} radius={16} />
-        </>
+        <div className="pl-grid" style={{ ['--plans' as string]: 3 }}>
+          {[0, 1, 2].map((key) => (
+            <Skeleton key={key} height={420} radius={18} />
+          ))}
+        </div>
       ) : (
         <>
-          <Allowance standing={standing.data!} />
+          {offers.length > 0 ? (
+            <div className="sj-card pl-offer">
+              <span className="pl-offer-icon" aria-hidden="true">
+                <IconSparkles size={20} />
+              </span>
+              <div>
+                <strong>
+                  An offer for you: {offers[0]!.percent_off === 100 ? 'free' : `${offers[0]!.percent_off}% off`}{' '}
+                  {offers[0]!.plan_name ?? 'any plan'}
+                  {offers[0]!.length_label ? `, ${offers[0]!.length_label.toLowerCase()}` : ''}
+                </strong>
+                <span className="pl-quiet">
+                  {offers[0]!.note ? `${offers[0]!.note}. ` : ''}It's applied when you choose the plan
+                  {offers[0]!.expires_at ? `, until ${longDate(offers[0]!.expires_at)}` : ''}.
+                </span>
+              </div>
+            </div>
+          ) : null}
 
-          <Section eyebrow="Plans" title={standing.data!.premium ? 'Add more time' : 'Choose a plan'} id="pl-plans">
-            <ul className="pl-gives">
-              {PREMIUM_GIVES.map((line) => (
-                <li key={line}>
-                  <IconCheck size={16} /> {line}
-                </li>
+          <Section
+            eyebrow="Plans"
+            title="What each plan gives"
+            id="pl-plans"
+            action={
+              lengths.length > 1 ? (
+                <div className="pl-lengths" role="tablist" aria-label="How long">
+                  {lengths.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={item.id === length?.id}
+                      className={item.id === length?.id ? 'on' : undefined}
+                      onClick={() => setLengthId(item.id)}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              ) : null
+            }
+          >
+            {!catalogue.data!.checkout_open ? (
+              <p className="pl-quiet pl-closed">Payments aren't open yet. Check back soon.</p>
+            ) : null}
+            <ul className="pl-grid" style={{ ['--plans' as string]: Math.min(plans.length, 4) }}>
+              {plans.map((plan) => (
+                <PlanCard
+                  key={plan.id}
+                  plan={plan}
+                  length={length}
+                  current={
+                    plan.kind === 'free'
+                      ? Boolean(standing.data!.limits_on && !standing.data!.premium)
+                      : plan.id === standing.data!.plan_id
+                  }
+                  open={catalogue.data!.checkout_open || offers.some((offer) => offer.percent_off === 100)}
+                  offer={
+                    offers.find(
+                      (offer) =>
+                        (offer.plan_id === null || offer.plan_id === plan.id) &&
+                        (offer.length_id === null || offer.length_id === length?.id),
+                    )?.percent_off ?? 0
+                  }
+                  onChoose={setChoosing}
+                />
               ))}
             </ul>
-            {error ? (
-              <p className="pl-error" role="alert">
-                {error}
-              </p>
-            ) : null}
-            {!catalogue.data!.checkout_open ? (
-              <p className="pl-quiet">Payments aren't open yet. Check back soon.</p>
-            ) : null}
-            {catalogue.data!.plans.length === 0 ? (
-              <Note card icon={<IconClock size={18} />} tone="yellow" title="No plans on sale yet">
-                Premium plans will appear here soon.
-              </Note>
-            ) : (
-              <ul className="pl-plans">
-                {catalogue.data!.plans.map((plan) => (
-                  <PlanCard
-                    key={plan.id}
-                    plan={plan}
-                    open={catalogue.data!.checkout_open && buying === null}
-                    busy={buying?.id === plan.id}
-                    onBuy={(chosen) => void pay(chosen)}
-                  />
-                ))}
-              </ul>
-            )}
           </Section>
 
           {standing.data!.receipts.length > 0 ? (
@@ -207,14 +435,17 @@ export function Plans() {
                 {standing.data!.receipts.map((receipt) => (
                   <li key={receipt.reference}>
                     <div>
-                      <b>{receipt.plan_name}</b>
+                      <b>
+                        {receipt.plan_name}, {receipt.length_label.toLowerCase()}
+                      </b>
                       <span className="pl-quiet">
-                        {longDate(receipt.paid_at ?? receipt.created_at)} · {planLength(receipt.days)}
-                        {receipt.channel ? ` · ${receipt.channel.replace('_', ' ')}` : ''}
+                        {longDate(receipt.paid_at ?? receipt.created_at)}
+                        {receipt.discount_label ? ` · ${receipt.discount_label}` : ''}
+                        {receipt.channel && receipt.channel !== 'free' ? ` · ${receipt.channel.replace('_', ' ')}` : ''}
                       </span>
                     </div>
                     <div className="pl-receipt-right">
-                      <b>{naira(receipt.amount_kobo)}</b>
+                      <b>{receipt.amount_kobo === 0 ? 'Free' : naira(receipt.amount_kobo)}</b>
                       <span className={`sj-badge ${receipt.status === 'paid' ? 'green' : receipt.status === 'pending' ? 'yellow' : 'pink'}`}>
                         {receipt.status === 'paid'
                           ? 'Paid'
@@ -233,51 +464,14 @@ export function Plans() {
         </>
       )}
 
-      <Dialog
-        open={asking !== null}
-        onClose={() => setAsking(null)}
-        icon={<IconSparkles size={24} />}
-        title="Where should the receipt go?"
-        actions={
-          <>
-            <Button tone="ghost" onClick={() => setAsking(null)}>
-              Cancel
-            </Button>
-            <Button
-              disabled={!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())}
-              onClick={() => {
-                const plan = asking;
-                setAsking(null);
-                if (plan) void pay(plan, email.trim());
-              }}
-            >
-              Continue to pay
-            </Button>
-          </>
-        }
-      >
-        <p style={{ margin: '0 0 14px' }}>
-          Paystack sends a receipt by email. Your account has no email, so enter one here. To sign in with
-          it too, add it in Account settings.
-        </p>
-        <AboutField label="Email for the receipt">
-          {(id) => (
-            <input
-              id={id}
-              className="sj-input"
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-            />
-          )}
-        </AboutField>
-      </Dialog>
+      {choosing ? (
+        <CheckoutDialog plan={choosing} length={length} standing={standing.data ?? null} onClose={() => setChoosing(null)} />
+      ) : null}
     </div>
   );
 }
 
-/** /plans/paid?reference=… — back from Paystack: check the payment and say how it went. */
+/** /plans/paid?reference=… — back from Paystack (or a free plan): say how it went. */
 export function PlanPaid() {
   usePageTitle('Payment');
   const student = useStudent();
@@ -314,7 +508,7 @@ export function PlanPaid() {
   const paid = result?.status === 'paid';
   return (
     <div className="sj-page pro-page pl-page">
-      <PageHero eyebrow="Premium" title={paid ? 'Payment received' : 'Your payment'} />
+      <PageHero eyebrow="Plans" title={paid ? `${result.plan_name} is yours` : 'Your payment'} />
       {error ? (
         <Note
           card
@@ -333,7 +527,7 @@ export function PlanPaid() {
             )
           }
         >
-          {error} If money left your account, it is safe: we'll add your Premium as soon as Paystack confirms it.
+          {error} If money left your account, it is safe: we'll add your plan as soon as Paystack confirms it.
         </Note>
       ) : !result ? (
         <Skeleton height={140} radius={16} />
@@ -342,21 +536,20 @@ export function PlanPaid() {
           card
           icon={<IconSparkles size={18} />}
           tone="lime"
-          title={`${result.plan_name}: you have Premium`}
+          title={`You're on ${result.standing.plan_name ?? result.plan_name}`}
           action={
             <Button onClick={() => navigate('/practice')} trailing={<IconArrowRight size={18} />}>
               Start practising
             </Button>
           }
         >
-          {result.standing.premium_until
-            ? `It runs until ${longDate(result.standing.premium_until)}. A receipt is on its way to your email.`
-            : 'A receipt is on its way to your email.'}
+          {result.standing.plan_until ? `It runs until ${longDate(result.standing.plan_until)}.` : ''}
+          {result.standing.receipts[0]?.amount_kobo ? ' A receipt is on its way to your email.' : ''}
         </Note>
       ) : result.status === 'pending' ? (
         <Note card icon={<IconClock size={18} />} tone="yellow" title="Waiting for Paystack">
           Your payment hasn't been confirmed yet. Bank transfers can take a few minutes. This page checks again by
-          itself; you can also come back to Premium later.
+          itself; you can also come back to Plans later.
         </Note>
       ) : (
         <Note
@@ -378,3 +571,4 @@ export function PlanPaid() {
     </div>
   );
 }
+

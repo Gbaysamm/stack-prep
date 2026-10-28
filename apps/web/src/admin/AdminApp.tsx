@@ -32,7 +32,7 @@ function AdminShell() {
     { to: '/overview', label: 'Overview', icon: <IconChart /> },
     { to: '/students', label: 'Students', icon: <IconUser /> },
     { to: '/reports', label: 'Reports', icon: <IconFlag />, count: openReports },
-    { to: '/premium', label: 'Premium', icon: <IconSparkles /> },
+    { to: '/premium', label: 'Pricing & plans', icon: <IconSparkles /> },
     { to: '/staff', label: 'Staff', icon: <IconLock /> },
   ];
   return (

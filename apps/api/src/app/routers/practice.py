@@ -912,9 +912,14 @@ async def start(
     locked = await checkup_lock(conn, body.student_id, body.subject_id)
     if locked is not None:
         raise HTTPException(status_code=423, detail=locked)
-    await premium.check_practice_start(conn, body.student_id)
     length = body.length
     filters = body.filters()
+    await premium.check_practice_start(
+        conn,
+        body.student_id,
+        custom=filters is not None and not filters.bookmarked,
+        bookmarked=filters is not None and filters.bookmarked,
+    )
     if filters is not None and filters.bookmarked:
         available = await _bookmarks_available(conn, body.subject_id, body.student_id)
         if available == 0:
@@ -1642,7 +1647,7 @@ async def ask(
     reviewer reading a complaint needs the lesson that happened, not the one in the bank.
     """
     await require_session_owner(request, conn, session_id)
-    await premium.check_voice(conn, session_id)
+    await premium.check_coach(conn, session_id)
     session = await _session(conn, session_id)
     await _must_be_at_the_board(conn, session_id, question.question_version_id)
 
@@ -1656,7 +1661,9 @@ async def ask(
     )
 
     used = await _asks_used_today(conn, session["student_id"])
-    allowance = settings.ai_daily_calls_per_student
+    allowance = await premium.coach_allowance(
+        conn, session["student_id"], settings.ai_daily_calls_per_student
+    )
     if used >= allowance:
         # Spent for today. They still get the reviewed step rather than a locked box, and the
         # turn is still stored — a budget nobody can see being hit is a budget nobody can size.
@@ -1705,7 +1712,7 @@ async def ask_streaming(
     deployment with `ai_speak` off is a quieter lesson and never a missing one.
     """
     await require_session_owner(request, conn, session_id)
-    await premium.check_voice(conn, session_id)
+    await premium.check_coach(conn, session_id)
     session = await _session(conn, session_id)
     await _must_be_at_the_board(conn, session_id, question.question_version_id)
 
@@ -1719,7 +1726,9 @@ async def ask_streaming(
     )
 
     used = await _asks_used_today(conn, session["student_id"])
-    allowance = settings.ai_daily_calls_per_student
+    allowance = await premium.coach_allowance(
+        conn, session["student_id"], settings.ai_daily_calls_per_student
+    )
     asks_left = max(0, allowance - (used + 1))
 
     async def events() -> AsyncIterator[str]:
@@ -1868,7 +1877,7 @@ async def listen(
     nor answered it cannot use this to spend the deployment's transcription budget.
     """
     await require_session_owner(request, conn, session_id)
-    await premium.check_voice(conn, session_id)
+    await premium.check_coach(conn, session_id)
     if not settings.ai_listen:
         raise HTTPException(status_code=404, detail="not found")
 
