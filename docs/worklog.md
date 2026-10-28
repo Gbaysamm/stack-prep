@@ -15,6 +15,41 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-28
 
+### Premium with Paystack: free basics, paid plans, set by the admin (plan phase 6)
+- **Why:** the founder chose Paystack, with free basics and paid Premium, limits and prices set
+  by an admin rather than in code.
+- **What:** a payment buys a plan once: card, bank transfer or USSD on Paystack's own page,
+  with no saved card and no renewal. Its days start when any current Premium ends. The free
+  allowance is a number of practice questions a day (Nigerian time; a question counts once
+  however many tries), a number of mocks, check-ups, and the board's full written working.
+  Premium adds unlimited practice and mocks, the lesson's voice and the coach. **The limits
+  stay off until an admin turns them on**, so deploying this holds nobody back. A limit
+  reached anywhere opens a "Go Premium" prompt with the reason. On the board, a free student
+  gets the whole written working, and a Premium note where the ask box would be. New student
+  pages: `/plans` (where they stand, the plans, their receipts; an account with no email is
+  asked for one for the receipt) and `/plans/paid` (back from Paystack: checks the payment
+  and says how it went). New admin page `/admin/premium`: totals, the free limits, plans (add,
+  change, take off sale; never deleted, so receipts keep what was bought) and payments.
+  Payments are only ever trusted after the server asks Paystack itself: on the return page
+  and through the signed webhook, whichever comes first, and only once.
+- **Server setup needed:** `PAYSTACK_SECRET_KEY` (Paystack dashboard, Settings > API Keys &
+  Webhooks; `sk_test_` first) and `PUBLIC_URL` (the site's address). In the same Paystack
+  page set the webhook URL to `https://<domain>/v1/billing/webhook`. Paystack's webhook
+  can't get past Caddy's basic_auth, so take that off (or exempt `/v1/billing/webhook`)
+  before relying on webhooks; the return page still confirms payments without it. Then add
+  plans in `/admin/premium` and turn the limits on.
+- **Where:** `database/migrations/035_premium_and_payments.sql`, `apps/api/src/app/paystack.py`,
+  `app/premium.py`, `routers/billing.py`, `routers/admin_billing.py`, gates in
+  `routers/practice.py`, `routers/mock.py`, `routers/mouth.py`; `apps/web/src/prep/premium.tsx`,
+  `billingApi.ts`, `pages/Plans.tsx`, `apps/web/src/admin/PremiumPage.tsx`, the board's
+  `askLocked` (`student/Board.tsx`), and a 402 event in `lib/friendlyError.ts`; tests in
+  `tests/test_billing.py` (Paystack stubbed; nothing is called).
+- **Checked:** all 535 API tests against the local database, the web tests and build;
+  screenshots at 1440 and 390 of Plans (free, Premium, checkout open), the receipt-email
+  dialog, the return page, the Go Premium prompt, the board for a free student, and the
+  admin Premium page with its plan form.
+- **Status:** committed, not pushed (deploys wait on GitHub billing).
+
 ### Report a question, bookmarks, and an admin Reports page (plan phase 5)
 - **Why:** the founder asked that students can report a question, above all during an exam,
   and that reports reach the admin side; and that bookmarked questions can be revised as a

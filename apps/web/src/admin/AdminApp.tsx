@@ -5,9 +5,10 @@
  * the gate in front only keeps the screen honest about it.
  */
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { IconFlag, IconUser } from '../prep/icons.js';
+import { IconFlag, IconSparkles, IconUser } from '../prep/icons.js';
 import { StaffGate } from '../staff/StaffGate.js';
 import { StaffShell, type NavItem } from '../staff/StaffShell.js';
+import { PremiumPage } from './PremiumPage.js';
 import { ReportsPage, useOpenReports } from './ReportsPage.js';
 import { StaffPage } from './StaffPage.js';
 
@@ -26,6 +27,7 @@ function AdminShell() {
   const openReports = useOpenReports();
   const nav: NavItem[] = [
     { to: '/reports', label: 'Reports', icon: <IconFlag />, count: openReports },
+    { to: '/premium', label: 'Premium', icon: <IconSparkles /> },
     { to: '/staff', label: 'Staff', icon: <IconUser /> },
   ];
   return (
@@ -33,6 +35,7 @@ function AdminShell() {
       <Routes>
         <Route path="/" element={<Navigate to="/reports" replace />} />
         <Route path="/reports" element={<ReportsPage />} />
+        <Route path="/premium" element={<PremiumPage />} />
         <Route path="/staff" element={<StaffPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

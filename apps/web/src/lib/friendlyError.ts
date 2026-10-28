@@ -10,6 +10,17 @@
 /** Raised when a session has ended: every app listens for it and sends the person to sign in. */
 export const SESSION_ENDED = 'stackprep:session-ended';
 
+/**
+ * Raised on any 402: a free limit was reached. The student app listens and offers Premium,
+ * with the server's sentence (the event's `detail`) saying which limit it was.
+ */
+export const PREMIUM_NEEDED = 'stackprep:premium-needed';
+
+function announce(status: number, message: string) {
+  if (status === 401) window.dispatchEvent(new Event(SESSION_ENDED));
+  if (status === 402) window.dispatchEvent(new CustomEvent(PREMIUM_NEEDED, { detail: message }));
+}
+
 export class FriendlyError extends Error {
   /** The HTTP status, or 0 when the request never got an answer. */
   status: number;
@@ -86,8 +97,9 @@ export async function request<T>(url: string, init: RequestInit = {}, quiet401 =
   } catch {
     body = await response.text().catch(() => null);
   }
-  if (response.status === 401 && !quiet401) window.dispatchEvent(new Event(SESSION_ENDED));
-  throw new FriendlyError(messageFor(response.status, body), response.status);
+  const message = messageFor(response.status, body);
+  if (response.status !== 401 || !quiet401) announce(response.status, message);
+  throw new FriendlyError(message, response.status);
 }
 
 /** fetch, but a dropped connection becomes a FriendlyError instead of "Failed to fetch". */
@@ -111,6 +123,7 @@ export async function failure(response: Response, quiet401 = false): Promise<Fri
   } catch {
     body = raw;
   }
-  if (response.status === 401 && !quiet401) window.dispatchEvent(new Event(SESSION_ENDED));
-  return new FriendlyError(messageFor(response.status, body), response.status);
+  const message = messageFor(response.status, body);
+  if (response.status !== 401 || !quiet401) announce(response.status, message);
+  return new FriendlyError(message, response.status);
 }

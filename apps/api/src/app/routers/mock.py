@@ -37,6 +37,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
+from app import premium
 from app.auth import require_student
 from app.db import connection, fetch_all
 from app.figures import DISPLAYABLE, OptionFigure, QuestionFigure, option_figure
@@ -1036,6 +1037,7 @@ async def start(
     chosen = [choice.subject_id for choice in body.subjects]
     if len(set(chosen)) != len(chosen):
         raise HTTPException(status_code=422, detail="Each subject can be chosen once.")
+    await premium.check_mock_start(conn, body.student_id)
 
     await _settle_expired(conn, body.student_id)
     running = (

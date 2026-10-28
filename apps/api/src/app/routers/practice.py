@@ -68,7 +68,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import kokoro_voice, scoring, tutor, voice_store
+from app import kokoro_voice, premium, scoring, tutor, voice_store
 from app.auth import require_session_owner, require_student
 from app.config import Settings, get_settings
 from app.db import connection, fetch_all
@@ -912,6 +912,7 @@ async def start(
     locked = await checkup_lock(conn, body.student_id, body.subject_id)
     if locked is not None:
         raise HTTPException(status_code=423, detail=locked)
+    await premium.check_practice_start(conn, body.student_id)
     length = body.length
     filters = body.filters()
     if filters is not None and filters.bookmarked:
@@ -1120,6 +1121,9 @@ async def answer(
     """
     await require_session_owner(request, conn, session_id)
     session = await _session(conn, session_id)
+    await premium.check_practice_answer(
+        conn, session["student_id"], session_id, submission.question_version_id
+    )
     already = await _hints_used(conn, session_id, submission.question_version_id)
 
     key = (
@@ -1638,6 +1642,7 @@ async def ask(
     reviewer reading a complaint needs the lesson that happened, not the one in the bank.
     """
     await require_session_owner(request, conn, session_id)
+    await premium.check_voice(conn, session_id)
     session = await _session(conn, session_id)
     await _must_be_at_the_board(conn, session_id, question.question_version_id)
 
@@ -1700,6 +1705,7 @@ async def ask_streaming(
     deployment with `ai_speak` off is a quieter lesson and never a missing one.
     """
     await require_session_owner(request, conn, session_id)
+    await premium.check_voice(conn, session_id)
     session = await _session(conn, session_id)
     await _must_be_at_the_board(conn, session_id, question.question_version_id)
 
@@ -1862,6 +1868,7 @@ async def listen(
     nor answered it cannot use this to spend the deployment's transcription budget.
     """
     await require_session_owner(request, conn, session_id)
+    await premium.check_voice(conn, session_id)
     if not settings.ai_listen:
         raise HTTPException(status_code=404, detail="not found")
 
@@ -2613,6 +2620,7 @@ async def lesson_voice(
     """`engine=kokoro` asks for the free voice made on this server; where it is not offered,
     the studio voice answers instead, and `X-Voice-Engine` says which one was heard."""
     await require_session_owner(request, conn, session_id)
+    await premium.check_voice(conn, session_id)
     await _lesson_is_open(conn, session_id, question_version_id, whole=False)
     beats, _ = await _lesson_beats(conn, session_id, question_version_id, settings)
     if not 0 <= beat < len(beats):
@@ -2651,6 +2659,7 @@ async def lesson_voice_words(
     no clip at all, is a 404 and the board reveals by its own clock instead.
     """
     await require_session_owner(request, conn, session_id)
+    await premium.check_voice(conn, session_id)
     await _lesson_is_open(conn, session_id, question_version_id, whole=False)
     beats, _ = await _lesson_beats(conn, session_id, question_version_id, settings)
     if not 0 <= beat < len(beats):
@@ -2685,6 +2694,8 @@ async def warm_lesson(
     A question without a written lesson has its narration written here too.
     """
     await require_session_owner(request, conn, session_id)
+    if not await premium.voice_allowed(conn, session_id):
+        return {"beats": 0}  # the written board needs nothing made
     await _lesson_is_open(conn, session_id, question_version_id, whole=False)
     beats, _ = await _lesson_beats(conn, session_id, question_version_id, settings)
     lines = [beat.say for beat in beats]

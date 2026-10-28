@@ -111,6 +111,13 @@ released_role_grants AS (
     -- Roles a sandbox student granted (none in practice) keep standing; who granted them goes.
     UPDATE account_roles SET granted_by = NULL WHERE granted_by IN (SELECT id FROM doomed)
 ),
+released_premium_gifts AS (
+    -- Premium given by the account stays given; who gave it goes. Their own goes with them.
+    UPDATE premium_periods SET granted_by = NULL WHERE granted_by IN (SELECT id FROM doomed)
+),
+released_billing_settings AS (
+    UPDATE billing_settings SET updated_by = NULL WHERE updated_by IN (SELECT id FROM doomed)
+),
 unlinked_reviewers AS (
     -- A reviewer row keeps the decisions it made; only its link to the account goes.
     UPDATE academic_reviewers SET student_id = NULL WHERE student_id IN (SELECT id FROM doomed)

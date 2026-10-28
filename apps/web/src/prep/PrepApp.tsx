@@ -27,6 +27,7 @@ import { NotFound } from './pages/NotFound.js';
 import { Onboarding } from './pages/Onboarding.js';
 import { PracticeHub } from './pages/PracticeHub.js';
 import { PracticeRoom } from './pages/PracticeRoom.js';
+import { PlanPaid, Plans } from './pages/Plans.js';
 import { Profile } from './pages/Profile.js';
 import { Settings } from './pages/Settings.js';
 import { Bookmarks } from './pages/Bookmarks.js';
@@ -36,6 +37,7 @@ import { RunReport } from './pages/RunReport.js';
 import { RunSummary } from './pages/RunSummary.js';
 import { SubjectHub } from './pages/SubjectHub.js';
 import { Welcome } from './pages/Welcome.js';
+import { PremiumProvider } from './premium.js';
 import { AppShell } from './shell.js';
 import { IdentityProvider, RequireStudent, useIdentity } from './store.js';
 import { ToastProvider } from './ui.js';
@@ -51,72 +53,76 @@ export function PrepApp() {
       <IdentityProvider>
         <div className="sj">
           <ToastProvider>
-            <Routes>
-              <Route path="/" element={<Start />} />
-              <Route
-                element={
-                  <RequireStudent>
-                    <AppShell />
-                  </RequireStudent>
-                }
-              >
-                <Route path="/home" element={<Home />} />
-                <Route path="/exams" element={<Exams />} />
-                <Route path="/exams/:examId" element={<ExamSubjects />} />
-                <Route path="/subjects/:subjectId" element={<SubjectHub />} />
-                <Route path="/subjects/:subjectId/goal" element={<Goal />} />
-                <Route path="/practice" element={<PracticeHub />} />
-                <Route path="/practice/new" element={<RunBuilder />} />
-                <Route path="/practice/:sessionId/summary" element={<RunSummary />} />
-                <Route path="/practice/:sessionId/report" element={<RunReport />} />
-                <Route path="/checkup" element={<CheckupHub />} />
-                <Route path="/checkup/:sessionId/report" element={<CheckupReport />} />
-                <Route path="/mock" element={<MockHub />} />
-                <Route path="/mock/new" element={<MockSetup />} />
-                <Route path="/mock/:mockId/report" element={<MockReport />} />
-                <Route path="/progress" element={<Progress />} />
-                <Route path="/progress/check-ins" element={<CheckIns />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/bookmarks" element={<Bookmarks />} />
-                <Route path="/help" element={<Help />} />
-                <Route path="/help/numbers" element={<HelpNumbers />} />
-                <Route path="/how-its-worked-out" element={<HowItsWorkedOutRedirect />} />
-                <Route path="*" element={<NotFound />} />
-              </Route>
-              <Route
-                path="/practice/:sessionId/*"
-                element={
-                  <RequireStudent>
-                    <PracticeRoom />
-                  </RequireStudent>
-                }
-              />
-              <Route
-                path="/onboarding"
-                element={
-                  <RequireStudent>
-                    <Onboarding />
-                  </RequireStudent>
-                }
-              />
-              <Route
-                path="/mock/:mockId"
-                element={
-                  <RequireStudent>
-                    <MockRoom />
-                  </RequireStudent>
-                }
-              />
-              <Route
-                path="/checkup/:sessionId"
-                element={
-                  <RequireStudent>
-                    <CheckupRoom />
-                  </RequireStudent>
-                }
-              />
-            </Routes>
+            <PremiumProvider>
+              <Routes>
+                <Route path="/" element={<Start />} />
+                <Route
+                  element={
+                    <RequireStudent>
+                      <AppShell />
+                    </RequireStudent>
+                  }
+                >
+                  <Route path="/home" element={<Home />} />
+                  <Route path="/exams" element={<Exams />} />
+                  <Route path="/exams/:examId" element={<ExamSubjects />} />
+                  <Route path="/subjects/:subjectId" element={<SubjectHub />} />
+                  <Route path="/subjects/:subjectId/goal" element={<Goal />} />
+                  <Route path="/practice" element={<PracticeHub />} />
+                  <Route path="/practice/new" element={<RunBuilder />} />
+                  <Route path="/practice/:sessionId/summary" element={<RunSummary />} />
+                  <Route path="/practice/:sessionId/report" element={<RunReport />} />
+                  <Route path="/checkup" element={<CheckupHub />} />
+                  <Route path="/checkup/:sessionId/report" element={<CheckupReport />} />
+                  <Route path="/mock" element={<MockHub />} />
+                  <Route path="/mock/new" element={<MockSetup />} />
+                  <Route path="/mock/:mockId/report" element={<MockReport />} />
+                  <Route path="/progress" element={<Progress />} />
+                  <Route path="/progress/check-ins" element={<CheckIns />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/bookmarks" element={<Bookmarks />} />
+                  <Route path="/plans" element={<Plans />} />
+                  <Route path="/plans/paid" element={<PlanPaid />} />
+                  <Route path="/help" element={<Help />} />
+                  <Route path="/help/numbers" element={<HelpNumbers />} />
+                  <Route path="/how-its-worked-out" element={<HowItsWorkedOutRedirect />} />
+                  <Route path="*" element={<NotFound />} />
+                </Route>
+                <Route
+                  path="/practice/:sessionId/*"
+                  element={
+                    <RequireStudent>
+                      <PracticeRoom />
+                    </RequireStudent>
+                  }
+                />
+                <Route
+                  path="/onboarding"
+                  element={
+                    <RequireStudent>
+                      <Onboarding />
+                    </RequireStudent>
+                  }
+                />
+                <Route
+                  path="/mock/:mockId"
+                  element={
+                    <RequireStudent>
+                      <MockRoom />
+                    </RequireStudent>
+                  }
+                />
+                <Route
+                  path="/checkup/:sessionId"
+                  element={
+                    <RequireStudent>
+                      <CheckupRoom />
+                    </RequireStudent>
+                  }
+                />
+              </Routes>
+            </PremiumProvider>
           </ToastProvider>
         </div>
       </IdentityProvider>

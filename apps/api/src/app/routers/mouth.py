@@ -16,7 +16,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import mouth_voice, voice_store
+from app import mouth_voice, premium, voice_store
 from app.auth import require_session_owner
 from app.config import Settings, get_settings
 from app.db import connection
@@ -63,6 +63,7 @@ async def lesson_voice_phones(
     and the board asks again once it is playing.
     """
     await require_session_owner(request, conn, session_id)
+    await premium.check_voice(conn, session_id)
     await _lesson_is_open(conn, session_id, question_version_id, whole=False)
     beats, _ = await _lesson_beats(conn, session_id, question_version_id, settings)
     if not 0 <= beat < len(beats):
@@ -94,6 +95,7 @@ async def mouth_say(
     without a voice. Words already made are kept and free; new ones are limited per sitting.
     """
     await require_session_owner(request, conn, session_id)
+    await premium.check_voice(conn, session_id)
     cleaned = mouth_voice.clean_word(word)
     if cleaned is None:
         raise HTTPException(

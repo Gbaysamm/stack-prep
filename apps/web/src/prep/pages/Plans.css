@@ -1,0 +1,173 @@
+/* /plans — Premium: where the student stands, the plans, and receipts. */
+
+.sj .pl-now {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px 24px;
+}
+.sj .pl-now p {
+  margin: 6px 0 0;
+  color: var(--gray-600);
+  line-height: 1.5;
+}
+.sj .pl-now-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--purple-050);
+  color: var(--purple-600);
+}
+.sj .pl-now.premium {
+  background: var(--ink-900);
+  color: #fff;
+}
+.sj .pl-now.premium h2 {
+  color: #fff;
+}
+.sj .pl-now.premium p {
+  color: rgba(255, 255, 255, 0.8);
+}
+.sj .pl-now.premium .pl-now-icon {
+  background: var(--green-400);
+  color: var(--ink-900);
+}
+.sj .pl-free {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: var(--gray-600);
+  line-height: 1.5;
+}
+.sj .pl-free b {
+  color: var(--ink-900);
+}
+.sj .pl-gives {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 20px;
+  margin: 0 0 18px;
+  padding: 0;
+  list-style: none;
+  font-size: 14.5px;
+  color: var(--ink-900);
+}
+.sj .pl-gives li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sj .pl-gives svg {
+  flex: none;
+  color: var(--green-600);
+}
+.sj .pl-plans {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .pl-plan {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+}
+.sj .pl-plan .sj-btn {
+  margin-top: auto;
+}
+.sj .pl-plan-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.sj .pl-length {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--purple-700);
+  white-space: nowrap;
+}
+.sj .pl-price {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+}
+.sj .pl-price .sj-display {
+  font-size: 32px;
+  line-height: 1.1;
+  color: var(--ink-900);
+}
+.sj .pl-per,
+.sj .pl-quiet {
+  font-size: 13px;
+  color: var(--gray-600);
+}
+.sj .pl-quiet {
+  margin: 0 0 12px;
+}
+.sj .pl-blurb {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--gray-600);
+}
+.sj .pl-error {
+  margin: 0 0 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--danger);
+}
+.sj .pl-receipts {
+  margin: 0;
+  padding: 4px 20px;
+  list-style: none;
+}
+.sj .pl-receipts li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--gray-100);
+}
+.sj .pl-receipts li:last-child {
+  border-bottom: 0;
+}
+.sj .pl-receipts li > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sj .pl-receipts .pl-quiet {
+  margin: 0;
+}
+.sj .pl-receipt-right {
+  align-items: flex-end;
+  text-align: right;
+}
+
+@media (max-width: 620px) {
+  .sj .pl-gives {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 520px) {
+  .sj .pl-now {
+    padding: 16px;
+  }
+  .sj .pl-plan {
+    padding: 16px;
+  }
+  .sj .pl-receipts {
+    padding: 4px 16px;
+  }
+}

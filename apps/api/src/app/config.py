@@ -93,6 +93,13 @@ class Settings(BaseSettings):
     smtp_ssl: bool = False
     mail_from: str = "Stack Prep <no-reply@stackjunior.com>"
 
+    #: Paystack, for Premium (app/paystack.py). The secret key signs every call and every
+    #: webhook; empty means checkout is off and says so. Test keys (sk_test_...) take no money.
+    paystack_secret_key: str = ""
+    #: Where Paystack sends the student back after paying, without the path; empty takes the
+    #: address the request came from, which is right behind the usual proxy.
+    public_url: str = ""
+
     @field_validator("database_schema")
     @classmethod
     def _schema_is_a_bare_identifier(cls, value: str) -> str:

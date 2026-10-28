@@ -73,6 +73,7 @@ import "./CheckIns.css";
 import "./PracticeRoom.css";
 import { friendly } from '../../lib/friendlyError.js';
 import { QuestionTools } from "../QuestionTools.js";
+import { VoiceLocked, usePremium } from "../premium.js";
 
 type Confidence = "sure" | "unsure" | "guessed";
 
@@ -278,6 +279,11 @@ export function PracticeRoom() {
   // Both assumed off until the server says otherwise, so a refused microphone is never drawn.
   const [canSpeak, setCanSpeak] = useState(false);
   const [canHear, setCanHear] = useState(false);
+  // The voice and the coach are Premium once the free limits are on (premium.tsx); the
+  // board's written working is for everyone.
+  const { voice: premiumVoice } = usePremium();
+  const voiceOpen = canHear && premiumVoice;
+  const micOpen = canSpeak && premiumVoice;
   const askedAt = useRef<number>(Date.now());
   /** Set by the tap on "Start the lesson": the board only opens after that gesture. */
   const tapped = useRef(false);
@@ -339,20 +345,20 @@ export function PracticeRoom() {
   const hintedVersion =
     state?.stage === "hint" ? state.question?.question_version_id : undefined;
   useEffect(() => {
-    if (!canHear || !hintedVersion || warmed.current === hintedVersion) return;
+    if (!voiceOpen || !hintedVersion || warmed.current === hintedVersion) return;
     warmed.current = hintedVersion;
     api.practiceWarm(sessionId, hintedVersion, readBoardPrefs().voice).catch(() => undefined);
-  }, [canHear, hintedVersion, sessionId]);
+  }, [voiceOpen, hintedVersion, sessionId]);
   // On a doubted right answer too, where the working is the recommended next step. A sure answer's
   // lesson is optional, so its voice is made only if the student opens it: warming every right
   // answer would pay for voice that is mostly never heard.
   const doubted = outcome?.confidence === "guessed" || outcome?.confidence === "unsure";
   const rightVersion = doubted ? outcome?.question.question_version_id : undefined;
   useEffect(() => {
-    if (!canHear || !rightVersion || warmed.current === rightVersion) return;
+    if (!voiceOpen || !rightVersion || warmed.current === rightVersion) return;
     warmed.current = rightVersion;
     api.practiceWarm(sessionId, rightVersion, readBoardPrefs().voice).catch(() => undefined);
-  }, [canHear, rightVersion, sessionId]);
+  }, [voiceOpen, rightVersion, sessionId]);
 
   // Dev only: `?demo=confidence|correct|hinted|guessed|unsure|twice|saved` jumps straight to that moment on
   // the current question, so each screen can be looked at without playing a run to it.
@@ -714,8 +720,8 @@ export function PracticeRoom() {
         sessionId={sessionId}
         outcome={outcome}
         subjectName={subjectName}
-        canHear={canHear}
-        canSpeak={canSpeak}
+        canHear={voiceOpen}
+        canSpeak={micOpen}
         onDone={() =>
           leaveBoard(reviewContext(outcome), outcome.question.question_version_id)
         }
@@ -740,14 +746,15 @@ export function PracticeRoom() {
           }
           steps={state.solution_steps ?? []}
           loadLesson={
-            canHear
+            voiceOpen
               ? () =>
                   api.practiceLesson(sessionId, question.question_version_id)
               : undefined
           }
           answerLine={`The answer is ${state.correct_option_key}.`}
+          askLocked={premiumVoice ? undefined : <VoiceLocked />}
           onListen={
-            canSpeak
+            micOpen
               ? (recording) =>
                   api.practiceListen(
                     sessionId,
@@ -798,8 +805,8 @@ export function PracticeRoom() {
         question={question}
         number={position.number}
         correctKey={state.correct_option_key}
-        canHear={canHear}
-        canSpeak={canSpeak}
+        canHear={voiceOpen}
+        canSpeak={micOpen}
         onStart={openBoard}
         busy={busy}
       />
@@ -1405,6 +1412,7 @@ function ReviewBoard({
   const question = outcome.question;
   const version = question.question_version_id;
   const [lesson, setLesson] = useState<NarratedLesson | "none" | null>(null);
+  const { voice: premiumVoice } = usePremium();
   useEffect(() => {
     let cancelled = false;
     api
@@ -1441,6 +1449,7 @@ function ReviewBoard({
           canHear && loaded ? () => Promise.resolve(loaded) : undefined
         }
         answerLine={`The answer is ${outcome.chose}.`}
+        askLocked={premiumVoice ? undefined : <VoiceLocked />}
         onListen={
           canSpeak
             ? (recording) => api.practiceListen(sessionId, version, recording)

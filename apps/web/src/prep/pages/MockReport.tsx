@@ -25,6 +25,7 @@ import './Mock.css';
 import './MockInsights.css';
 import { friendly } from '../../lib/friendlyError.js';
 import { QuestionTools } from '../QuestionTools.js';
+import { VoiceLocked, usePremium } from '../premium.js';
 
 const EVENT_WORDS: Record<EventKind, string> = {
   fullscreen_enter: 'Entered full screen',
@@ -103,6 +104,7 @@ function QuestionModal({
   const next = here < flat.length - 1 ? flat[here + 1] : null;
   const [lesson, setLesson] = useState<NarratedLesson | 'loading' | 'none' | null>(null);
   const [canHear, setCanHear] = useState(false);
+  const { voice: premiumVoice } = usePremium();
 
   useEffect(() => {
     setLesson(null);
@@ -152,7 +154,8 @@ function QuestionModal({
             passage={item.passage_body ? { title: item.passage_title, body: item.passage_body } : null}
             answerText={correct?.body ?? null}
             steps={lesson.beats.flatMap((beat) => beat.write)}
-            loadLesson={canHear ? () => Promise.resolve(lesson) : undefined}
+            loadLesson={canHear && premiumVoice ? () => Promise.resolve(lesson) : undefined}
+            askLocked={premiumVoice ? undefined : <VoiceLocked />}
             answerLine={`The answer is ${item.correct_option_key ?? ''}.`}
             onAsk={(asked, stepIndex, handlers) =>
               api.practiceAskStreaming(subject.session_id, item.question_version_id, asked, stepIndex, handlers)

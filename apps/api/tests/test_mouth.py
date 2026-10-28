@@ -24,7 +24,7 @@ from typing import Any
 import httpx
 import pytest
 
-from app import kokoro_voice, mouth_voice, phonemes_rp, tutor, voice_store
+from app import kokoro_voice, mouth_voice, phonemes_rp, premium, tutor, voice_store
 from app.config import Settings, get_settings
 from app.db import connection
 from app.lesson_doodles import doodle_actions
@@ -482,6 +482,7 @@ async def client(monkeypatch: pytest.MonkeyPatch) -> AsyncIterator[httpx.AsyncCl
 
     monkeypatch.setattr(mouth_router, "require_session_owner", owner)
     monkeypatch.setattr(mouth_router, "_lesson_is_open", owner)
+    monkeypatch.setattr(premium, "check_voice", owner)  # Premium is tested in test_billing
     monkeypatch.setattr(mouth_router, "_lesson_beats", beats)
     app.dependency_overrides[connection] = no_db
     app.dependency_overrides[get_settings] = lambda: _settings()

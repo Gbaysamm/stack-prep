@@ -338,6 +338,7 @@ export function Board({
   onDone,
   onAsk,
   onListen,
+  askLocked,
 }: {
   /**
    * Fetch the lesson: the reviewed working as a teacher teaches it, with what to write and
@@ -385,6 +386,11 @@ export function Board({
    * mic is off here and no button is drawn — a client never offers what the server refuses.
    */
   onListen?: (recording: Blob) => Promise<string>;
+  /**
+   * Shown instead of the ask box where asking the coach is not open to this student
+   * (a free account once the limits are on): the board still writes the whole working.
+   */
+  askLocked?: ReactNode;
   /**
    * `stepIndex` is null once the board has finished writing and the whole working is up.
    * `onWrite` is handed each piece as it arrives and `onReplace` the settled text, so the
@@ -2391,6 +2397,9 @@ export function Board({
             {whiteboard ? <BoardTuningControls {...tuning} /> : null}
           </div>
 
+          {askLocked ? (
+            <div className="pb-ask pb-ask-locked">{askLocked}</div>
+          ) : (
           <form className="pb-ask" onSubmit={send}>
             <div className={`pb-askbox ${recording ? "recording" : ""}`}>
               <input
@@ -2466,6 +2475,7 @@ export function Board({
                         : "Lost a step? Ask about it — the coach answers from this working."}
             </span>
           </form>
+          )}
         </div>
       </footer>
     </div>

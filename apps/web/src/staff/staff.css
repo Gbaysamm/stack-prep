@@ -598,3 +598,87 @@
     font-size: 15px;
   }
 }
+
+/* Premium (admin): totals, the limits form, and the plan form. */
+.sj .st-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.sj .st-stats .st-panel + .st-panel {
+  margin-top: 0;
+}
+.sj .st-stat {
+  display: grid;
+  gap: 6px;
+}
+.sj .st-stat span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-600);
+}
+.sj .st-stat strong {
+  font-family: var(--f-display);
+  font-size: 26px;
+  color: var(--ink-900);
+}
+.sj .st-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.sj .st-panel-head h2 {
+  margin: 0;
+}
+.sj .st-inline-form.st-limits-form {
+  grid-template-columns: 200px 1fr 1fr auto;
+}
+.sj .st-plan-form {
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  align-items: end;
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--gray-100);
+}
+.sj .st-span {
+  grid-column: 1 / -1;
+}
+.sj .st-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-900);
+}
+.sj .st-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--purple-600);
+}
+@media (max-width: 900px) {
+  .sj .st-stats {
+    grid-template-columns: 1fr;
+  }
+  .sj .st-inline-form.st-limits-form,
+  .sj .st-plan-form {
+    grid-template-columns: 1fr;
+  }
+}
+/* A cell of two lines (a name over a detail), kept together when a table stacks on a phone. */
+.sj .st-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sj .st-limits-form {
+  margin-top: 14px;
+}
+@media (max-width: 900px) {
+  .sj .st-table.st-stack .st-cell {
+    align-items: flex-end;
+  }
+}
