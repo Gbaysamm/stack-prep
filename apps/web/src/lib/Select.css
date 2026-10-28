@@ -1,0 +1,151 @@
+/* Select.tsx: our own dropdown, matching the app's inputs in the student app and staff pages. */
+
+.sj .sx {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+.sj .sx-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  height: 46px;
+  padding: 0 12px 0 14px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 12px;
+  background: var(--white);
+  color: var(--ink-900);
+  font: inherit;
+  font-size: 15px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.sj .sx-sm .sx-button {
+  height: 36px;
+  padding: 0 10px 0 12px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+.sj .sx-button:hover:not(:disabled) {
+  border-color: var(--purple-300);
+}
+.sj .sx-button:focus-visible,
+.sj .sx.open .sx-button {
+  outline: none;
+  border-color: var(--purple-600);
+  box-shadow: 0 0 0 3px var(--purple-100);
+}
+.sj .sx-button:disabled {
+  background: var(--gray-100);
+  color: var(--gray-500);
+  cursor: not-allowed;
+}
+.sj .sx-icon {
+  display: inline-flex;
+  flex: none;
+  color: var(--gray-500);
+}
+.sj .sx-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sj .sx-value.empty {
+  color: var(--gray-500);
+}
+.sj .sx-chev {
+  flex: none;
+  color: var(--gray-500);
+  transition: transform 0.15s;
+}
+.sj .sx.open .sx-chev {
+  transform: rotate(180deg);
+}
+
+.sj .sx-pop {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  min-width: 100%;
+  max-width: min(420px, 92vw);
+  max-height: 300px;
+  overflow: hidden;
+  border: 1px solid var(--gray-200);
+  border-radius: 14px;
+  background: var(--white);
+  box-shadow: 0 14px 34px rgba(31, 0, 80, 0.16);
+}
+.sj .sx-pop.up {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+.sj .sx-search {
+  margin: 8px 8px 0;
+  padding: 9px 12px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 10px;
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+}
+.sj .sx-search:focus {
+  border-color: var(--purple-600);
+}
+.sj .sx-list {
+  flex: 1;
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  list-style: none;
+  outline: none;
+}
+.sj .sx-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 9px;
+  color: var(--ink-900);
+  font-size: 14.5px;
+  line-height: 1.35;
+  cursor: pointer;
+}
+.sj .sx-option.active {
+  background: var(--purple-050);
+}
+.sj .sx-option.on {
+  font-weight: 600;
+  color: var(--purple-700);
+}
+.sj .sx-option.off {
+  color: var(--gray-400, #9b97a8);
+  cursor: default;
+}
+.sj .sx-option-text {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+.sj .sx-option-text small {
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--gray-600);
+}
+.sj .sx-tick {
+  flex: none;
+  color: var(--purple-600);
+}
+.sj .sx-none {
+  padding: 10px;
+  font-size: 14px;
+  color: var(--gray-600);
+}

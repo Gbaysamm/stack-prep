@@ -82,7 +82,6 @@
   color: var(--gray-700);
 }
 .sj .st-field input,
-.sj .st-field select,
 .sj .st-field textarea {
   font: inherit;
   font-weight: 400;
@@ -93,7 +92,6 @@
   color: var(--gray-900);
 }
 .sj .st-field input:focus,
-.sj .st-field select:focus,
 .sj .st-field textarea:focus {
   outline: 2px solid var(--purple-300);
   border-color: var(--purple-500);
@@ -836,7 +834,6 @@
 .sj .st-action > div .st-muted {
   font-size: 12.5px;
 }
-.sj .st-action select,
 .sj .st-days {
   height: 36px;
   padding: 0 10px;
@@ -907,7 +904,6 @@
     align-items: flex-start;
   }
 }
-.sj .st-filters select,
 .sj .st-filters input:not([type="checkbox"]) {
   width: 100%;
   min-width: 0;
@@ -1039,8 +1035,40 @@
   border-radius: 12px;
   background: var(--purple-050);
 }
-.sj .st-actions .st-plan-form input,
-.sj .st-actions .st-plan-form select {
+.sj .st-actions .st-plan-form input {
   width: 100%;
   min-width: 0;
+}
+/* A student's page: cards keep their own height; the left column stacks two. */
+.sj .st-grid.st-top {
+  align-items: start;
+}
+.sj .st-col {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+.sj .st-col .st-panel + .st-panel {
+  margin-top: 0;
+}
+
+/* A small dropdown in a row of actions. */
+.sj .st-pick {
+  width: 150px;
+}
+/* An action with several controls: the words, then the controls on their own line. */
+.sj .st-action.st-action-wide {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+.sj .st-action.st-action-wide .st-row {
+  flex-wrap: nowrap;
+}
+.sj .st-action.st-action-wide .st-pick {
+  flex: 1;
+  width: auto;
+}
+.sj .st-action.st-action-wide > div {
+  flex: none;
 }

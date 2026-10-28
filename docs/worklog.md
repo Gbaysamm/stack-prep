@@ -15,6 +15,23 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-28
 
+### Our own dropdown everywhere, and a tighter student page in the admin
+- **Why:** the founder asked (again) that the browser's own dropdown never be used: its button
+  and list look different on every device and don't line up with our inputs. He also pointed
+  at the empty space under "About them" on a student's admin page.
+- **What:** a `Select` component (`apps/web/src/lib/Select.tsx`) replaces every `<select>`:
+  in account settings and onboarding (class, state), the admin's students filters, plan
+  editor, discounts, staff roles and a student's actions, and the reviewer's queue, subject,
+  paper and skill pickers. It matches the inputs, opens a styled list (upwards near the bottom
+  of the screen), works with the keyboard (arrows, Home/End, Enter, Escape, type-ahead), and
+  adds a search box to long lists (states, skills, subjects). On a student's admin page the
+  cards no longer stretch to each other's height: "About them" and "Plan and payments" stack
+  on the left beside the actions.
+- **Where:** `apps/web/src/lib/Select.tsx`, `Select.css`; the pages above; `staff/staff.css`.
+- **Checked:** the web tests and build; screenshots at 1440 and 390 of the dropdowns open
+  (admin students, reviewer, account settings) and the student page.
+- **Status:** committed, not pushed (deploys wait on GitHub billing).
+
 ### Plans by benefit, set by the admin, with discounts (follow-up part A)
 - **Why:** after seeing the plans locally the founder asked for plans by benefit rather than by
   month: the length a separate choice, a higher plan giving more, the admin deciding what each

@@ -5,6 +5,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { friendly, request } from '../lib/friendlyError.js';
+import { Select } from '../lib/Select.js';
 import { StaffPageHead } from '../staff/StaffShell.js';
 
 export interface StudentRow {
@@ -112,43 +113,56 @@ export function StudentsPage() {
             onChange={(event) => setDraft(event.target.value)}
           />
         </label>
-        <label className="st-field">
+        <div className="st-field">
           <span>Class</span>
-          <select value={classLevel} onChange={(event) => set('class', event.target.value)}>
-            <option value="">Any</option>
-            {Object.entries(CLASS_NAMES).map(([value, name]) => (
-              <option key={value} value={value}>
-                {name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="st-field">
-          <span>Premium</span>
-          <select value={premium} onChange={(event) => set('premium', event.target.value)}>
-            <option value="">Anyone</option>
-            <option value="true">On Premium</option>
-            <option value="false">Free</option>
-          </select>
-        </label>
-        <label className="st-field">
+          <Select
+            aria-label="Class"
+            value={classLevel}
+            onChange={(value) => set('class', value)}
+            options={[{ value: '', label: 'Any' }, ...Object.entries(CLASS_NAMES).map(([value, name]) => ({ value, label: name }))]}
+          />
+        </div>
+        <div className="st-field">
+          <span>Plan</span>
+          <Select
+            aria-label="Plan"
+            value={premium}
+            onChange={(value) => set('premium', value)}
+            options={[
+              { value: '', label: 'Anyone' },
+              { value: 'true', label: 'On a plan' },
+              { value: 'false', label: 'Free' },
+            ]}
+          />
+        </div>
+        <div className="st-field">
           <span>Active</span>
-          <select value={active} onChange={(event) => set('active', event.target.value)}>
-            <option value="">Any time</option>
-            <option value="1">Today</option>
-            <option value="7">In the last 7 days</option>
-            <option value="30">In the last 30 days</option>
-          </select>
-        </label>
-        <label className="st-field">
+          <Select
+            aria-label="Active"
+            value={active}
+            onChange={(value) => set('active', value)}
+            options={[
+              { value: '', label: 'Any time' },
+              { value: '1', label: 'Today' },
+              { value: '7', label: 'In the last 7 days' },
+              { value: '30', label: 'In the last 30 days' },
+            ]}
+          />
+        </div>
+        <div className="st-field">
           <span>Sort by</span>
-          <select value={sort} onChange={(event) => set('sort', event.target.value)}>
-            <option value="newest">Newest</option>
-            <option value="active">Last active</option>
-            <option value="answered">Most answered</option>
-            <option value="name">Name</option>
-          </select>
-        </label>
+          <Select
+            aria-label="Sort by"
+            value={sort}
+            onChange={(value) => set('sort', value)}
+            options={[
+              { value: 'newest', label: 'Newest' },
+              { value: 'active', label: 'Last active' },
+              { value: 'answered', label: 'Most answered' },
+              { value: 'name', label: 'Name' },
+            ]}
+          />
+        </div>
         <label className="st-check">
           <input type="checkbox" checked={staff} onChange={(event) => set('staff', event.target.checked ? '1' : '')} />
           Include staff

@@ -6,6 +6,7 @@
 import { useId, type ReactNode } from 'react';
 
 import type { ClassLevel, StudentProfile } from '../student/api.js';
+import { Select } from '../lib/Select.js';
 import { CLASS_LEVELS, NIGERIAN_STATES } from './profileFields.js';
 import './AboutFields.css';
 
@@ -86,40 +87,29 @@ export function AboutFields({
       {withName ? text('display_name', 'Your name', 60, undefined, 'name') : null}
       <AboutField label="Class">
         {(id) => (
-          <select
+          <Select
             id={id}
-            className="sj-input about-select"
             value={draft.class_level}
-            onChange={(event) => onChange('class_level', event.target.value)}
-          >
-            <option value="">Choose…</option>
-            {CLASS_LEVELS.map((level) => (
-              <option key={level.value} value={level.value}>
-                {level.label}
-              </option>
-            ))}
-          </select>
+            onChange={(value) => onChange('class_level', value)}
+            placeholder="Choose…"
+            options={[{ value: '', label: 'Not saying' }, ...CLASS_LEVELS.map((level) => ({ value: level.value, label: level.label }))]}
+          />
         )}
       </AboutField>
       {text('school_name', 'Your school', 160, 'e.g. Kings College, Lagos')}
       <AboutField label="State">
         {(id) => (
-          <select
+          <Select
             id={id}
-            className="sj-input about-select"
             value={draft.state}
-            onChange={(event) => onChange('state', event.target.value)}
-          >
-            <option value="">Choose…</option>
-            {draft.state && !NIGERIAN_STATES.includes(draft.state) ? (
-              <option value={draft.state}>{draft.state}</option>
-            ) : null}
-            {NIGERIAN_STATES.map((state) => (
-              <option key={state} value={state}>
-                {state}
-              </option>
-            ))}
-          </select>
+            onChange={(value) => onChange('state', value)}
+            placeholder="Choose…"
+            options={[
+              { value: '', label: 'Not saying' },
+              ...(draft.state && !NIGERIAN_STATES.includes(draft.state) ? [{ value: draft.state, label: draft.state }] : []),
+              ...NIGERIAN_STATES.map((state) => ({ value: state, label: state })),
+            ]}
+          />
         )}
       </AboutField>
       {text('target_institution', 'University you’re aiming for', 160, 'e.g. University of Lagos')}

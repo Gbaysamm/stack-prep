@@ -6,6 +6,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { friendly, request } from '../lib/friendlyError.js';
+import { Select } from '../lib/Select.js';
 import { naira, type Standing } from '../prep/billingApi.js';
 import { useStaff } from '../staff/StaffGate.js';
 import { StaffPageHead } from '../staff/StaffShell.js';
@@ -244,7 +245,8 @@ export function StudentPage() {
         </section>
       )}
 
-      <div className="st-grid two">
+      <div className="st-grid two st-top">
+        <div className="st-col">
         <section className="st-panel">
           <h2>About them</h2>
           <dl className="st-details">
@@ -260,6 +262,46 @@ export function StudentPage() {
             <Detail label="Joined">{date(account.created_at)}</Detail>
           </dl>
         </section>
+        <section className="st-panel">
+          <h2>Plan and payments</h2>
+          <p className="st-muted" style={{ marginTop: 0 }}>
+            {premium.plan_name
+              ? `On ${premium.plan_name}${premium.plan_until ? ` until ${date(premium.plan_until)}` : ''}.`
+              : premium.premium
+                ? 'Has everything (an admin account).'
+                : premium.limits_on
+                  ? `Free plan: ${premium.practice_used_today}${
+                      premium.allowance.practice_per_day !== null ? ` of ${premium.allowance.practice_per_day}` : ''
+                    } practice questions today, ${premium.mocks_used} mocks${
+                      premium.allowance.mocks !== null ? ` of ${premium.allowance.mocks}` : ''
+                    }.`
+                  : 'Free plan. The limits are off, so nothing is held back.'}
+          </p>
+          {premium.receipts.length === 0 ? (
+            <p className="st-empty">No payments.</p>
+          ) : (
+            <ul className="st-list">
+              {premium.receipts.map((receipt) => (
+                <li key={receipt.reference}>
+                  <span className="st-cell">
+                    <strong>{receipt.plan_name}</strong>
+                    <span className="st-muted">
+                      {date(receipt.paid_at ?? receipt.created_at)} · {receipt.length_label}
+                      {receipt.discount_label ? ` · ${receipt.discount_label}` : ''}
+                    </span>
+                  </span>
+                  <span className="st-cell st-end">
+                    <strong>{receipt.amount_kobo === 0 ? 'Free' : naira(receipt.amount_kobo)}</strong>
+                    <span className={`st-pill ${receipt.status === 'paid' ? 'good' : receipt.status === 'pending' ? 'warn' : 'bad'}`}>
+                      {receipt.status === 'paid' ? 'Paid' : receipt.status === 'pending' ? 'Not finished' : receipt.status === 'abandoned' ? 'Cancelled' : 'Failed'}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+        </div>
 
         <section className="st-panel">
           <h2>Actions</h2>
@@ -273,7 +315,7 @@ export function StudentPage() {
                 {busy === 'password' ? 'Setting…' : 'Set one'}
               </button>
             </div>
-            <form className="st-action" onSubmit={gift}>
+            <form className="st-action st-action-wide" onSubmit={gift}>
               <div>
                 <strong>Give a plan</strong>
                 <span className="st-muted">
@@ -283,15 +325,17 @@ export function StudentPage() {
                 </span>
               </div>
               <span className="st-row">
-                <select aria-label="Plan" value={giftPlan} onChange={(event) => setGiftPlan(event.target.value)}>
-                  {catalogue?.plans
+                <Select
+                  size="sm"
+                  className="st-pick"
+                  aria-label="Plan"
+                  value={giftPlan}
+                  onChange={setGiftPlan}
+                  placeholder="No plans yet"
+                  options={(catalogue?.plans ?? [])
                     .filter((plan) => plan.kind === 'paid')
-                    .map((plan) => (
-                      <option key={plan.id} value={plan.id}>
-                        {plan.name}
-                      </option>
-                    ))}
-                </select>
+                    .map((plan) => ({ value: plan.id, label: plan.name }))}
+                />
                 <input className="st-days" inputMode="numeric" aria-label="Days" value={giftDays} onChange={(event) => setGiftDays(event.target.value)} />
                 <button type="submit" className="sj-btn ghost sm" disabled={busy !== null}>
                   {busy === 'gift' ? 'Giving…' : 'Give'}
@@ -333,16 +377,19 @@ export function StudentPage() {
                 <strong>Role</strong>
                 <span className="st-muted">Reviewers check questions; admins run this dashboard.</span>
               </div>
-              <select
+              <Select<Role>
+                size="sm"
+                className="st-pick"
                 aria-label="Role"
                 value={account.role}
                 disabled={busy !== null || me}
-                onChange={(event) => void changeRole(event.target.value as Role)}
-              >
-                <option value="student">Student</option>
-                <option value="reviewer">Reviewer</option>
-                <option value="admin">Admin</option>
-              </select>
+                onChange={(value) => void changeRole(value)}
+                options={[
+                  { value: 'student', label: 'Student' },
+                  { value: 'reviewer', label: 'Reviewer' },
+                  { value: 'admin', label: 'Admin' },
+                ]}
+              />
             </div>
             <div className="st-action">
               <div>
@@ -461,7 +508,6 @@ export function StudentPage() {
         )}
       </section>
 
-      <div className="st-grid two">
         <section className="st-panel">
           <h2>Mocks</h2>
           {mocks.length === 0 ? (
@@ -493,47 +539,6 @@ export function StudentPage() {
             </ul>
           )}
         </section>
-
-        <section className="st-panel">
-          <h2>Plan and payments</h2>
-          <p className="st-muted" style={{ marginTop: 0 }}>
-            {premium.plan_name
-              ? `On ${premium.plan_name}${premium.plan_until ? ` until ${date(premium.plan_until)}` : ''}.`
-              : premium.premium
-                ? 'Has everything (an admin account).'
-                : premium.limits_on
-                  ? `Free plan: ${premium.practice_used_today}${
-                      premium.allowance.practice_per_day !== null ? ` of ${premium.allowance.practice_per_day}` : ''
-                    } practice questions today, ${premium.mocks_used} mocks${
-                      premium.allowance.mocks !== null ? ` of ${premium.allowance.mocks}` : ''
-                    }.`
-                  : 'Free plan. The limits are off, so nothing is held back.'}
-          </p>
-          {premium.receipts.length === 0 ? (
-            <p className="st-empty">No payments.</p>
-          ) : (
-            <ul className="st-list">
-              {premium.receipts.map((receipt) => (
-                <li key={receipt.reference}>
-                  <span className="st-cell">
-                    <strong>{receipt.plan_name}</strong>
-                    <span className="st-muted">
-                      {date(receipt.paid_at ?? receipt.created_at)} · {receipt.length_label}
-                      {receipt.discount_label ? ` · ${receipt.discount_label}` : ''}
-                    </span>
-                  </span>
-                  <span className="st-cell st-end">
-                    <strong>{receipt.amount_kobo === 0 ? 'Free' : naira(receipt.amount_kobo)}</strong>
-                    <span className={`st-pill ${receipt.status === 'paid' ? 'good' : receipt.status === 'pending' ? 'warn' : 'bad'}`}>
-                      {receipt.status === 'paid' ? 'Paid' : receipt.status === 'pending' ? 'Not finished' : receipt.status === 'abandoned' ? 'Cancelled' : 'Failed'}
-                    </span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      </div>
     </>
   );
 }

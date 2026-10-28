@@ -9,6 +9,7 @@
  */
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { friendly, request } from '../lib/friendlyError.js';
+import { Select } from '../lib/Select.js';
 import { featureLines, naira, type MocksPer, type Plan } from '../prep/billingApi.js';
 import { StaffPageHead } from '../staff/StaffShell.js';
 
@@ -356,15 +357,20 @@ function PlansPanel({ plans, lengths, onSaved }: { plans: AdminPlan[]; lengths: 
               <span>Mock exams</span>
               <input inputMode="numeric" value={draft.mocks} placeholder="Unlimited" onChange={(e) => set('mocks', e.target.value)} />
             </label>
-            <label className="st-field">
+            <div className="st-field">
               <span>Mocks counted</span>
-              <select value={draft.mocks_per} onChange={(e) => set('mocks_per', e.target.value as MocksPer)}>
-                <option value="day">A day</option>
-                <option value="week">A week</option>
-                <option value="month">A month</option>
-                <option value="total">In total</option>
-              </select>
-            </label>
+              <Select<MocksPer>
+                aria-label="Mocks counted"
+                value={draft.mocks_per}
+                onChange={(value) => set('mocks_per', value)}
+                options={[
+                  { value: 'day', label: 'A day' },
+                  { value: 'week', label: 'A week' },
+                  { value: 'month', label: 'A month' },
+                  { value: 'total', label: 'In total' },
+                ]}
+              />
+            </div>
             <label className="st-field">
               <span>Coach questions a day</span>
               <input inputMode="numeric" value={draft.coach} onChange={(e) => set('coach', e.target.value)} />
@@ -775,30 +781,27 @@ export function DiscountForm({
           <input value={code} maxLength={30} placeholder="BACKTOSCHOOL" onChange={(e) => setCode(e.target.value.toUpperCase())} />
         </label>
       )}
-      <label className="st-field">
+      <div className="st-field">
         <span>Plan</span>
-        <select value={planId} onChange={(e) => setPlanId(e.target.value)}>
-          <option value="">Any plan</option>
-          {plans
-            .filter((plan) => plan.kind === 'paid')
-            .map((plan) => (
-              <option key={plan.id} value={plan.id}>
-                {plan.name}
-              </option>
-            ))}
-        </select>
-      </label>
-      <label className="st-field">
+        <Select
+          aria-label="Plan"
+          value={planId}
+          onChange={setPlanId}
+          options={[
+            { value: '', label: 'Any plan' },
+            ...plans.filter((plan) => plan.kind === 'paid').map((plan) => ({ value: plan.id, label: plan.name })),
+          ]}
+        />
+      </div>
+      <div className="st-field">
         <span>Length</span>
-        <select value={lengthId} onChange={(e) => setLengthId(e.target.value)}>
-          <option value="">Any length</option>
-          {lengths.map((length) => (
-            <option key={length.id} value={length.id}>
-              {length.label}
-            </option>
-          ))}
-        </select>
-      </label>
+        <Select
+          aria-label="Length"
+          value={lengthId}
+          onChange={setLengthId}
+          options={[{ value: '', label: 'Any length' }, ...lengths.map((length) => ({ value: length.id, label: length.label }))]}
+        />
+      </div>
       <label className="st-field">
         <span>Percent off (100 is free)</span>
         <input inputMode="numeric" value={percent} onChange={(e) => setPercent(e.target.value)} />

@@ -16,6 +16,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Maths } from '../Maths.js';
 import { OptionBody, hasOptionPictures } from '../OptionBody.js';
 import { friendly } from '../lib/friendlyError.js';
+import { Select } from '../lib/Select.js';
 import { StaffPageHead } from '../staff/StaffShell.js';
 import {
   REVIEW_CHANGED,
@@ -241,39 +242,43 @@ export function ReviewPage() {
       )}
 
       <section className="st-panel rv-filters">
-        <label className="st-field">
+        <div className="st-field">
           <span>Queue</span>
-          <select value={queueState} onChange={(event) => set('queue', event.target.value)}>
-            {QUEUES.map((queue) => (
-              <option key={queue.value} value={queue.value}>
-                {queue.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="st-field">
+          <Select
+            aria-label="Queue"
+            value={queueState}
+            onChange={(value) => set('queue', value)}
+            options={QUEUES.map((queue) => ({ value: queue.value, label: queue.label }))}
+          />
+        </div>
+        <div className="st-field">
           <span>Subject</span>
-          <select value={subjectId ?? ''} onChange={(event) => set('subject', event.target.value || null)}>
-            <option value="">All subjects</option>
-            {subjects.map((subject) => (
-              <option key={subject.subject_id} value={subject.subject_id}>
-                {subject.name}
-                {subject.flagged ? ` (${subject.flagged} flagged)` : ''}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="st-field">
+          <Select
+            aria-label="Subject"
+            value={subjectId ?? ''}
+            onChange={(value) => set('subject', value || null)}
+            options={[
+              { value: '', label: 'All subjects' },
+              ...subjects.map((subject) => ({
+                value: subject.subject_id,
+                label: subject.name,
+                hint: `${subject.questions} questions${subject.flagged ? ` · ${subject.flagged} flagged` : ''}`,
+              })),
+            ]}
+          />
+        </div>
+        <div className="st-field">
           <span>Paper</span>
-          <select value={examYear ?? ''} onChange={(event) => set('year', event.target.value || null)}>
-            <option value="">All years</option>
-            {years.map((year) => (
-              <option key={year.exam_year} value={year.exam_year}>
-                {year.exam_year} ({year.questions})
-              </option>
-            ))}
-          </select>
-        </label>
+          <Select
+            aria-label="Paper"
+            value={examYear === null ? '' : String(examYear)}
+            onChange={(value) => set('year', value || null)}
+            options={[
+              { value: '', label: 'All years' },
+              ...years.map((year) => ({ value: String(year.exam_year), label: String(year.exam_year), hint: `${year.questions} questions` })),
+            ]}
+          />
+        </div>
       </section>
 
       {error && (
@@ -486,20 +491,19 @@ function QuestionPanel({ detail, subjectName, skills, busy, onAct, onReportClose
       <div className="rv-block">
         <h3>Skill</h3>
         <div className="rv-skill">
-          <select
+          <Select
+            className="rv-skill-pick"
             aria-label="Skill"
             value={detail.primary_skill_id ?? ''}
             disabled={approved || busy}
-            onChange={(event) => void onAct(() => api.decideSkill(detail.question_id, event.target.value))}
-          >
-            {!detail.primary_skill_id && <option value="">Choose a skill</option>}
-            {skills.map((skill) => (
-              <option key={skill.id} value={skill.id}>
-                {skill.code} — {skill.name}
-                {skill.topic ? ` (${skill.topic})` : ''}
-              </option>
-            ))}
-          </select>
+            placeholder="Choose a skill"
+            onChange={(value) => void onAct(() => api.decideSkill(detail.question_id, value))}
+            options={skills.map((skill) => ({
+              value: skill.id,
+              label: `${skill.code} — ${skill.name}`,
+              hint: skill.topic ?? undefined,
+            }))}
+          />
           <button
             type="button"
             className="sj-btn ghost sm"

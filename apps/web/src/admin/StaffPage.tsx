@@ -6,6 +6,7 @@
  */
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { friendly, request } from '../lib/friendlyError.js';
+import { Select } from '../lib/Select.js';
 import { useStaff } from '../staff/StaffGate.js';
 import { StaffPageHead } from '../staff/StaffShell.js';
 
@@ -84,13 +85,18 @@ export function StaffPage() {
             <span>Their email or phone number</span>
             <input value={login} onChange={(event) => setLogin(event.target.value)} placeholder="ada@example.com" />
           </label>
-          <label className="st-field">
+          <div className="st-field">
             <span>Role</span>
-            <select value={role} onChange={(event) => setRole(event.target.value as 'reviewer' | 'admin')}>
-              <option value="reviewer">Reviewer</option>
-              <option value="admin">Admin</option>
-            </select>
-          </label>
+            <Select<'reviewer' | 'admin'>
+              aria-label="Role"
+              value={role}
+              onChange={setRole}
+              options={[
+                { value: 'reviewer', label: 'Reviewer' },
+                { value: 'admin', label: 'Admin' },
+              ]}
+            />
+          </div>
           <button type="submit" className="sj-btn" disabled={busy || !login.trim()}>
             {busy ? 'Saving…' : 'Give role'}
           </button>
