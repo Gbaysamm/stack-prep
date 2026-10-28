@@ -24,6 +24,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
+from app import audit
 from app.auth import Staff, admin_session, hash_password
 from app.db import connection, fetch_all
 from app.routers.billing import Standing, _standing
@@ -492,6 +493,11 @@ async def temporary_password(
         {"s": student_id, "hash": hashed},
     )
     await conn.execute(text("DELETE FROM auth_sessions WHERE student_id = :s"), {"s": student_id})
+    await audit.record(
+        conn, staff, "student.password",
+        f"Set a temporary password for {account.display_name}",
+        target_kind="student", target_id=student_id,
+    )
     await conn.commit()
     return TemporaryPassword(password=password)
 
@@ -519,6 +525,12 @@ async def change_status(
         await conn.execute(
             text("DELETE FROM auth_sessions WHERE student_id = :s"), {"s": student_id}
         )
+    await audit.record(
+        conn, staff, f"student.{'suspend' if body.status == 'suspended' else 'restore'}",
+        f"{'Suspended' if body.status == 'suspended' else 'Restored'} "
+        f"{await audit.name_of(conn, student_id)}",
+        target_kind="student", target_id=student_id,
+    )
     await conn.commit()
     return await _account(conn, student_id)
 
@@ -555,5 +567,10 @@ async def change_role(
             ),
             {"s": student_id, "role": body.role, "by": staff.student_id},
         )
+    await audit.record(
+        conn, staff, "student.role",
+        f"Made {await audit.name_of(conn, student_id)} a {body.role}",
+        target_kind="student", target_id=student_id,
+    )
     await conn.commit()
     return await _account(conn, student_id)

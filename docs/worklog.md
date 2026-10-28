@@ -15,6 +15,29 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-28
 
+### Admin dashboard, part B1: settings, system health, the audit log, grouped menu
+- **Why:** the founder found the admin dashboard far too thin (five pages) and shared a
+  reference dashboard for its functions. This first part lays the ground the rest stands on
+  (docs/plans/2026-10-28-plans-admin-and-public-site.md, B).
+- **What:** the admin menu is grouped (Main, People, Content, Money, System). **Settings**:
+  switches and details changed without a release: new sign-ups open or closed (enforced at
+  sign-up), the coach on or off for everyone (enforced when a student asks), a notice for every
+  student, the support email and WhatsApp number, and the coach's token prices for the AI cost
+  estimate. **System health**: database, migrations, email, Paystack (test or live), the coach,
+  lesson voice and sign-ups, each working / needs a look / not working, with totals and server
+  details. **Audit log**: every change staff make from the dashboard is written with the
+  change itself, as a sentence ("Gave Basic to Tolu Premium for 14 days"), searchable and
+  filtered by kind; plans, lengths, discounts, gifts, limits, temporary passwords, suspensions,
+  roles, staff, report closing and settings are all recorded. Migration 036 also adds the
+  tables for support messages and announcements, which come in B4.
+- **Where:** `database/migrations/036_admin_tools.sql`, `apps/api/src/app/audit.py`,
+  `app_settings.py`, `routers/admin_system.py`, audit calls in `routers/admin.py`,
+  `admin_billing.py`, `admin_students.py`; `apps/web/src/admin/SystemPages.tsx`,
+  `staff/StaffShell.tsx` (menu sections); tests in `tests/test_admin_system.py`.
+- **Checked:** all 549 API tests against the local database, the web tests and build;
+  screenshots at 1440 and 390 of Settings, System health and the Audit log.
+- **Status:** committed, not pushed (deploys wait on GitHub billing).
+
 ### Our own dropdown everywhere, and a tighter student page in the admin
 - **Why:** the founder asked (again) that the browser's own dropdown never be used: its button
   and list look different on every device and don't line up with our inputs. He also pointed

@@ -19,6 +19,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
+from app import audit
 from app.auth import Staff, admin_session
 from app.db import connection, fetch_all
 from app.routers.accounts import normalise_login
@@ -93,6 +94,12 @@ async def grant(
         ),
         {"id": student_id, "role": body.role, "by": me.student_id},
     )
+    await audit.record(
+        conn, me, "staff.grant",
+        f"Made {await audit.name_of(conn, student_id)} "
+        f"{'an admin' if body.role == 'admin' else 'a reviewer'}",
+        target_kind="student", target_id=student_id,
+    )
     await conn.commit()
     rows = await fetch_all(conn, STAFF_SQL + " WHERE r.student_id = :id", id=student_id)
     return StaffMember(**rows[0])
@@ -107,6 +114,11 @@ async def revoke(
     if student_id == me.student_id:
         raise HTTPException(status_code=409, detail="You can't remove your own admin role.")
     await conn.execute(text("DELETE FROM account_roles WHERE student_id = :id"), {"id": student_id})
+    await audit.record(
+        conn, me, "staff.revoke",
+        f"Took away {await audit.name_of(conn, student_id)}'s staff role",
+        target_kind="student", target_id=student_id,
+    )
     await conn.commit()
 
 
@@ -212,6 +224,13 @@ async def close_report(
         ),
         {"id": report_id, "outcome": body.outcome, "reviewer": me.reviewer_id, "note": note},
     )
+    if result.rowcount:
+        await audit.record(
+            conn, me, "report.close",
+            f"Closed a question report as "
+            f"{'fixed' if body.outcome == 'fixed' else 'not a problem'}: {note}",
+            target_kind="report", target_id=report_id,
+        )
     await conn.commit()
     if result.rowcount == 0:
         raise HTTPException(status_code=404, detail="That report is already closed.")

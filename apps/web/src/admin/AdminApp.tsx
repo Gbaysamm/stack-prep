@@ -5,7 +5,7 @@
  * the gate in front only keeps the screen honest about it.
  */
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { IconChart, IconFlag, IconLock, IconSparkles, IconUser } from '../prep/icons.js';
+import { IconBolt, IconBook, IconChart, IconFlag, IconLock, IconSettings, IconSparkles, IconUser } from '../prep/icons.js';
 import { StaffGate } from '../staff/StaffGate.js';
 import { StaffShell, type NavItem } from '../staff/StaffShell.js';
 import { OverviewPage } from './OverviewPage.js';
@@ -14,6 +14,7 @@ import { ReportsPage, useOpenReports } from './ReportsPage.js';
 import { StaffPage } from './StaffPage.js';
 import { StudentPage } from './StudentPage.js';
 import { StudentsPage } from './StudentsPage.js';
+import { AuditPageView, HealthPage, SettingsPage } from './SystemPages.js';
 
 export function AdminApp() {
   return (
@@ -29,11 +30,14 @@ export function AdminApp() {
 function AdminShell() {
   const openReports = useOpenReports();
   const nav: NavItem[] = [
-    { to: '/overview', label: 'Overview', icon: <IconChart /> },
-    { to: '/students', label: 'Students', icon: <IconUser /> },
-    { to: '/reports', label: 'Reports', icon: <IconFlag />, count: openReports },
-    { to: '/premium', label: 'Pricing & plans', icon: <IconSparkles /> },
+    { to: '/overview', label: 'Overview', icon: <IconChart />, section: 'Main' },
+    { to: '/students', label: 'Students', icon: <IconUser />, section: 'People' },
     { to: '/staff', label: 'Staff', icon: <IconLock /> },
+    { to: '/reports', label: 'Question reports', icon: <IconFlag />, count: openReports, section: 'Content' },
+    { to: '/premium', label: 'Pricing & plans', icon: <IconSparkles />, section: 'Money' },
+    { to: '/settings', label: 'Settings', icon: <IconSettings />, section: 'System' },
+    { to: '/health', label: 'System health', icon: <IconBolt /> },
+    { to: '/audit', label: 'Audit log', icon: <IconBook /> },
   ];
   return (
     <StaffShell title="Admin" nav={nav}>
@@ -45,6 +49,9 @@ function AdminShell() {
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/premium" element={<PremiumPage />} />
         <Route path="/staff" element={<StaffPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/health" element={<HealthPage />} />
+        <Route path="/audit" element={<AuditPageView />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </StaffShell>

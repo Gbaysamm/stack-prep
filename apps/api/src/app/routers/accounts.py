@@ -28,6 +28,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncConnection
 
+from app import app_settings
 from app.auth import (
     SESSION_COOKIE,
     SESSION_LIFETIME,
@@ -135,6 +136,11 @@ async def signup(
     response: Response,
     conn: Annotated[AsyncConnection, Depends(connection)],
 ) -> Account:
+    if not await app_settings.get(conn, "signups_open"):
+        raise HTTPException(
+            status_code=403,
+            detail="New sign-ups are closed for now. Please try again soon.",
+        )
     name = body.display_name.strip()
     if not name:
         raise _invalid("Enter your name.")

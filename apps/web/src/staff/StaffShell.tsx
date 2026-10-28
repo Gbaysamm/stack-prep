@@ -5,7 +5,7 @@
  * An admin also sees links across to the other dashboard and the student app; a reviewer sees
  * none, because they may open nothing else.
  */
-import { useEffect, useState, type ReactNode } from 'react';
+import { Fragment, useEffect, useState, type ReactNode } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useStaff } from './StaffGate.js';
 
@@ -16,6 +16,8 @@ export interface NavItem {
   /** A small count beside the label (open reports, say); hidden at zero. */
   count?: number;
   end?: boolean;
+  /** A heading over this item and the ones after it, until the next section. */
+  section?: string;
 }
 
 export function StaffShell({
@@ -42,13 +44,16 @@ export function StaffShell({
       </div>
       <nav className="st-nav" aria-label={title}>
         {nav.map((item) => (
-          <NavLink key={item.to} to={item.to} end={item.end} className={({ isActive }) => (isActive ? 'on' : '')}>
-            <span className="st-nav-icon" aria-hidden="true">
-              {item.icon}
-            </span>
-            <span className="st-nav-label">{item.label}</span>
-            {item.count ? <span className="st-nav-count">{item.count}</span> : null}
-          </NavLink>
+          <Fragment key={item.to}>
+            {item.section ? <span className="st-nav-section">{item.section}</span> : null}
+            <NavLink to={item.to} end={item.end} className={({ isActive }) => (isActive ? 'on' : '')}>
+              <span className="st-nav-icon" aria-hidden="true">
+                {item.icon}
+              </span>
+              <span className="st-nav-label">{item.label}</span>
+              {item.count ? <span className="st-nav-count">{item.count}</span> : null}
+            </NavLink>
+          </Fragment>
         ))}
       </nav>
       {user.role === 'admin' && (

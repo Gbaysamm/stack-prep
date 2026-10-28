@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import premium
+from app import audit, premium
 from app.auth import Staff, admin_session
 from app.db import connection, fetch_all
 from app.routers.billing import MocksPer, Plan, add_plan_time, plan_rows
@@ -225,13 +225,19 @@ async def set_limits(
         ),
         {"on": body.limits_on, "by": staff.student_id},
     )
+    await audit.record(
+        conn, staff, "plans.limits",
+        f"Switched the plan limits {'on' if body.limits_on else 'off'}",
+    )
     await conn.commit()
     return body
 
 
 @router.post("/lengths", response_model=AdminLength, status_code=201, summary="Add a length")
 async def add_length(
-    body: LengthIn, conn: Annotated[AsyncConnection, Depends(connection)]
+    body: LengthIn,
+    conn: Annotated[AsyncConnection, Depends(connection)],
+    staff: Annotated[Staff, Depends(admin_session)],
 ) -> AdminLength:
     length_id = (
         await conn.execute(
@@ -244,13 +250,20 @@ async def add_length(
             body.model_dump(),
         )
     ).scalar_one()
+    await audit.record(
+        conn, staff, "length.add", f"Added the length {body.label} ({body.days} days)",
+        target_kind="length", target_id=length_id,
+    )
     await conn.commit()
     return AdminLength(id=length_id, **body.model_dump())
 
 
 @router.put("/lengths/{length_id}", response_model=AdminLength, summary="Change a length")
 async def change_length(
-    length_id: UUID, body: LengthIn, conn: Annotated[AsyncConnection, Depends(connection)]
+    length_id: UUID,
+    body: LengthIn,
+    conn: Annotated[AsyncConnection, Depends(connection)],
+    staff: Annotated[Staff, Depends(admin_session)],
 ) -> AdminLength:
     result = await conn.execute(
         text(
@@ -262,6 +275,13 @@ async def change_length(
         ),
         {**body.model_dump(), "id": length_id},
     )
+    if result.rowcount:
+        await audit.record(
+            conn, staff, "length.change",
+            f"Changed the length {body.label} ({body.days} days"
+            f"{'' if body.on_sale else ', off sale'})",
+            target_kind="length", target_id=length_id,
+        )
     await conn.commit()
     if result.rowcount == 0:
         raise HTTPException(status_code=404, detail="We couldn't find that length.")
@@ -306,7 +326,9 @@ async def _save_prices(conn: AsyncConnection, plan_id: UUID, body: PlanIn) -> Ad
 
 @router.post("/plans", response_model=AdminPlan, status_code=201, summary="Add a plan")
 async def add_plan(
-    body: PlanIn, conn: Annotated[AsyncConnection, Depends(connection)]
+    body: PlanIn,
+    conn: Annotated[AsyncConnection, Depends(connection)],
+    staff: Annotated[Staff, Depends(admin_session)],
 ) -> AdminPlan:
     plan_id = (
         await conn.execute(
@@ -320,12 +342,19 @@ async def add_plan(
             body.model_dump(include=set(_PLAN_FIELDS)),
         )
     ).scalar_one()
+    await audit.record(
+        conn, staff, "plan.add", f"Added the plan {body.name}",
+        target_kind="plan", target_id=plan_id, detail=body.model_dump(mode="json"),
+    )
     return await _save_prices(conn, plan_id, body)
 
 
 @router.put("/plans/{plan_id}", response_model=AdminPlan, summary="Change a plan")
 async def change_plan(
-    plan_id: UUID, body: PlanIn, conn: Annotated[AsyncConnection, Depends(connection)]
+    plan_id: UUID,
+    body: PlanIn,
+    conn: Annotated[AsyncConnection, Depends(connection)],
+    staff: Annotated[Staff, Depends(admin_session)],
 ) -> AdminPlan:
     kind: str | None = (
         await conn.execute(text("SELECT kind FROM premium_plans WHERE id = :p"), {"p": plan_id})
@@ -345,6 +374,10 @@ async def change_plan(
             """
         ),
         {**values, "id": plan_id},
+    )
+    await audit.record(
+        conn, staff, "plan.change", f"Changed the plan {body.name}",
+        target_kind="plan", target_id=plan_id, detail=body.model_dump(mode="json"),
     )
     if kind == "free":
         body = body.model_copy(update={"featured": False, "prices": []})
@@ -426,6 +459,16 @@ async def add_discount(
             },
         )
     ).scalar_one()
+    await audit.record(
+        conn, staff, "discount.add",
+        (
+            f"Added the promo code {code}"
+            if code or body.student_id is None
+            else f"Made an offer to {await audit.name_of(conn, body.student_id)}"
+        )
+        + f": {body.percent_off}% off",
+        target_kind="discount", target_id=discount_id,
+    )
     await conn.commit()
     rows = await fetch_all(conn, DISCOUNT_SQL + " WHERE d.id = :id", id=discount_id)
     return Discount(**rows[0])
@@ -440,11 +483,18 @@ async def switch_discount(
     discount_id: UUID,
     body: DiscountSwitch,
     conn: Annotated[AsyncConnection, Depends(connection)],
+    staff: Annotated[Staff, Depends(admin_session)],
 ) -> Discount:
     result = await conn.execute(
         text("UPDATE discounts SET active = :a WHERE id = :id"),
         {"a": body.active, "id": discount_id},
     )
+    if result.rowcount:
+        await audit.record(
+            conn, staff, "discount.switch",
+            f"Switched a discount {'on' if body.active else 'off'}",
+            target_kind="discount", target_id=discount_id,
+        )
     await conn.commit()
     if result.rowcount == 0:
         raise HTTPException(status_code=404, detail="We couldn't find that discount.")
@@ -501,6 +551,12 @@ async def gift(
         raise HTTPException(status_code=404, detail="We couldn't find that plan.")
     await add_plan_time(
         conn, student_id, body.plan_id, body.days, granted_by=staff.student_id, note=body.note
+    )
+    await audit.record(
+        conn, staff, "plan.give",
+        f"Gave {name} to {await audit.name_of(conn, student_id)} for {body.days} days"
+        + (f" ({body.note})" if body.note else ""),
+        target_kind="student", target_id=student_id,
     )
     await conn.commit()
     return GiftResult(

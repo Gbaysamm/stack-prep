@@ -121,6 +121,19 @@ released_billing_settings AS (
 released_discounts AS (
     UPDATE discounts SET created_by = NULL WHERE created_by IN (SELECT id FROM doomed)
 ),
+released_audit AS (
+    -- The log keeps what they did, under the name they had.
+    UPDATE audit_log SET actor_id = NULL WHERE actor_id IN (SELECT id FROM doomed)
+),
+released_settings AS (
+    UPDATE app_settings SET updated_by = NULL WHERE updated_by IN (SELECT id FROM doomed)
+),
+released_support_messages AS (
+    UPDATE support_messages SET author_id = NULL WHERE author_id IN (SELECT id FROM doomed)
+),
+released_announcements AS (
+    UPDATE announcements SET created_by = NULL WHERE created_by IN (SELECT id FROM doomed)
+),
 unlinked_reviewers AS (
     -- A reviewer row keeps the decisions it made; only its link to the account goes.
     UPDATE academic_reviewers SET student_id = NULL WHERE student_id IN (SELECT id FROM doomed)

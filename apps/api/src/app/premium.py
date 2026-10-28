@@ -24,6 +24,7 @@ from fastapi import HTTPException
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
+from app import app_settings
 from app.auth import role_of
 
 PREMIUM_FOR_VOICE = "Lessons explained aloud come with a plan."
@@ -319,6 +320,11 @@ async def check_voice(conn: AsyncConnection, session_id: UUID) -> None:
 
 async def check_coach(conn: AsyncConnection, session_id: UUID) -> None:
     """Asking the coach: a plan with coach questions, once the limits are on."""
+    if not await app_settings.get(conn, "coach_enabled"):
+        raise HTTPException(
+            status_code=503,
+            detail="The coach is resting for now. The working on the board has every step.",
+        )
     student_id = await _session_student(conn, session_id)
     if student_id is None:
         return
