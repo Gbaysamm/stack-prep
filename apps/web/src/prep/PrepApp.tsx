@@ -6,46 +6,54 @@
  * board and the mock exam room are focus pages that have none.
  */
 
+import { lazy, Suspense, type ComponentType } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useSearchParams } from 'react-router-dom';
 
 import './prep.css';
-import { CheckIns } from './pages/CheckIns.js';
-import { CheckupHub } from './pages/CheckupHub.js';
-import { CheckupReport } from './pages/CheckupReport.js';
-import { CheckupRoom } from './pages/CheckupRoom.js';
-import { Exams } from './pages/Exams.js';
-import { ExamSubjects } from './pages/ExamSubjects.js';
-import { Goal } from './pages/Goal.js';
-import { Home } from './pages/Home.js';
-import { Help } from './pages/Help.js';
-import { MockHub } from './pages/MockHub.js';
-import { MockReport } from './pages/MockReport.js';
-import { MockRoom } from './pages/MockRoom.js';
-import { MockSetup } from './pages/MockSetup.js';
-import { HelpNumbers, HowItsWorkedOutRedirect } from './pages/HelpNumbers.js';
-import { SupportThread } from './pages/Support.js';
 import { FaqPage } from '../site/Faq.js';
 import { Landing } from '../site/Landing.js';
 import { PrivacyPage, TermsPage } from '../site/Legal.js';
 import { AboutPage, ContactPage, HowItWorksPage, PricingPage } from '../site/Pages.js';
 import { NotFound } from './pages/NotFound.js';
-import { Onboarding } from './pages/Onboarding.js';
-import { PracticeHub } from './pages/PracticeHub.js';
-import { PracticeRoom } from './pages/PracticeRoom.js';
-import { PlanPaid, Plans } from './pages/Plans.js';
-import { Profile } from './pages/Profile.js';
-import { Settings } from './pages/Settings.js';
-import { Bookmarks } from './pages/Bookmarks.js';
-import { Progress } from './pages/Progress.js';
-import { RunBuilder } from './pages/RunBuilder.js';
-import { RunReport } from './pages/RunReport.js';
-import { RunSummary } from './pages/RunSummary.js';
-import { SubjectHub } from './pages/SubjectHub.js';
 import { Welcome } from './pages/Welcome.js';
 import { PremiumProvider } from './premium.js';
 import { AppShell } from './shell.js';
 import { IdentityProvider, RequireStudent, useIdentity } from './store.js';
 import { ToastProvider } from './ui.js';
+
+/** Pages behind sign-in, each loaded the first time it is opened (shell.tsx shows a spinner). */
+function later<T extends string>(load: () => Promise<Record<T, ComponentType>>, name: T) {
+  return lazy(() => load().then((module) => ({ default: module[name] })));
+}
+const CheckIns = later(() => import('./pages/CheckIns.js'), 'CheckIns');
+const CheckupHub = later(() => import('./pages/CheckupHub.js'), 'CheckupHub');
+const CheckupReport = later(() => import('./pages/CheckupReport.js'), 'CheckupReport');
+const CheckupRoom = later(() => import('./pages/CheckupRoom.js'), 'CheckupRoom');
+const Exams = later(() => import('./pages/Exams.js'), 'Exams');
+const ExamSubjects = later(() => import('./pages/ExamSubjects.js'), 'ExamSubjects');
+const Goal = later(() => import('./pages/Goal.js'), 'Goal');
+const Home = later(() => import('./pages/Home.js'), 'Home');
+const Help = later(() => import('./pages/Help.js'), 'Help');
+const MockHub = later(() => import('./pages/MockHub.js'), 'MockHub');
+const MockReport = later(() => import('./pages/MockReport.js'), 'MockReport');
+const MockRoom = later(() => import('./pages/MockRoom.js'), 'MockRoom');
+const MockSetup = later(() => import('./pages/MockSetup.js'), 'MockSetup');
+const SupportThread = later(() => import('./pages/Support.js'), 'SupportThread');
+const Onboarding = later(() => import('./pages/Onboarding.js'), 'Onboarding');
+const PracticeHub = later(() => import('./pages/PracticeHub.js'), 'PracticeHub');
+const PracticeRoom = later(() => import('./pages/PracticeRoom.js'), 'PracticeRoom');
+const Profile = later(() => import('./pages/Profile.js'), 'Profile');
+const Settings = later(() => import('./pages/Settings.js'), 'Settings');
+const Bookmarks = later(() => import('./pages/Bookmarks.js'), 'Bookmarks');
+const Progress = later(() => import('./pages/Progress.js'), 'Progress');
+const RunBuilder = later(() => import('./pages/RunBuilder.js'), 'RunBuilder');
+const RunReport = later(() => import('./pages/RunReport.js'), 'RunReport');
+const RunSummary = later(() => import('./pages/RunSummary.js'), 'RunSummary');
+const SubjectHub = later(() => import('./pages/SubjectHub.js'), 'SubjectHub');
+const HelpNumbers = later(() => import('./pages/HelpNumbers.js'), 'HelpNumbers');
+const HowItsWorkedOutRedirect = later(() => import('./pages/HelpNumbers.js'), 'HowItsWorkedOutRedirect');
+const Plans = later(() => import('./pages/Plans.js'), 'Plans');
+const PlanPaid = later(() => import('./pages/Plans.js'), 'PlanPaid');
 
 /** The bare address: a student's home, or for anyone else the sign-up and log-in forms when
  *  asked for (?mode=signup or ?mode=login), and otherwise the public home page. */
@@ -63,6 +71,7 @@ export function PrepApp() {
         <div className="sj">
           <ToastProvider>
             <PremiumProvider>
+              <Suspense fallback={null}>
               <Routes>
                 <Route path="/" element={<Start />} />
                 <Route path="/how-it-works" element={<HowItWorksPage />} />
@@ -139,6 +148,7 @@ export function PrepApp() {
                   }
                 />
               </Routes>
+              </Suspense>
             </PremiumProvider>
           </ToastProvider>
         </div>

@@ -1,248 +1,320 @@
 /**
- * The front page for anyone not signed in (a signed-in student goes straight to /home): what
- * Stack Prep does, how it works, the subjects, the plans, the questions people ask, and the
- * way in. Every number is counted live (siteData.ts), and every claim is what the app does.
+ * The front page for anyone not signed in (a signed-in student goes straight to /home).
+ *
+ * It leads with what makes Stack Prep different: a real lesson, playing on the coach's board
+ * in the hero. Then a tour of the app, each part beside a picture of its own screen
+ * (Mockups.tsx), everything else it does, the subjects, the plans, questions, and the way in.
+ * Every claim is what the app does; the only number about the bank is the rounded total.
  */
 import { Link } from 'react-router-dom';
 
-import { IconArrowRight, IconBolt, IconBook, IconBrain, IconCheck, IconClock, IconFlag, IconTarget, IconVolume } from '../prep/icons.js';
+import {
+  IconArrowRight,
+  IconBolt,
+  IconBook,
+  IconBookmark,
+  IconCalendar,
+  IconChart,
+  IconCheck,
+  IconClock,
+  IconFlag,
+  IconHelp,
+  IconLayers,
+  IconMic,
+  IconTarget,
+  IconVolume,
+} from '../prep/icons.js';
 import { FaqList, SITE_FAQ } from './Faq.js';
+import { LessonPlayer } from './LessonPlayer.js';
+import { CheckupMock, CoachMock, MockExamMock, PracticeMock, ProgressMock, TickList } from './Mockups.js';
 import { PlanGrid } from './PlanGrid.js';
 import { SIGN_UP, SiteShell, useSiteTitle } from './SiteShell.js';
-import { roughly, useCatalogue, useSite, yearsOf } from './siteData.js';
+import { questionsWord, useCatalogue, useSite, yearsOf } from './siteData.js';
 
-const STEPS = [
+export const TOUR = [
   {
+    id: 'checkup',
     icon: IconTarget,
     tint: 'lime',
-    title: 'Take a check-up',
-    body: 'A short mixed test with no help, like the real thing. It gives you a score for every topic, and a predicted score for the exam.',
+    eyebrow: 'Check-up',
+    title: 'Know exactly where you stand',
+    body: 'About 15 questions with no help and no time limit. They get harder or easier to match you, so you quickly get a score for every topic, and a predicted score for the exam.',
+    ticks: ['A score for every topic on the syllabus', 'Your predicted score, out of 400 or as a percentage', 'A new check-up every 7 days shows how far you’ve come'],
+    mock: <CheckupMock />,
   },
   {
+    id: 'practice',
     icon: IconBolt,
     tint: 'pink',
-    title: 'Practise your weakest topics',
-    body: 'Questions come from the topics pulling your score down. Get one wrong and it comes back later, until you get it right.',
+    eyebrow: 'Practice',
+    title: 'Practise what pulls your score down',
+    body: 'Questions come from your weakest topics first. Say how sure you are, take a hint if you need one, and a question you get wrong comes back until you get it right.',
+    ticks: ['Real past questions, each with its year', 'Only answers you got right on your own count', 'Choose your own topics and years, or revise your bookmarks'],
+    mock: <PracticeMock />,
   },
   {
-    icon: IconVolume,
+    id: 'coach',
+    icon: IconMic,
     tint: 'yellow',
-    title: 'Learn the step you missed',
-    body: 'Miss a question twice and the coach works it through on the board, out loud, step by step. Ask it anything about the step.',
+    eyebrow: 'Ask the coach',
+    title: 'Stuck on a step? Just ask',
+    body: 'During any lesson, ask about the step you don’t follow, by typing or by speaking. The coach answers from the checked working, writes on the board, and explains it another way.',
+    ticks: ['Type or speak your question', 'Answers from the checked working, never made up', 'Every spoken word is also written on screen'],
+    mock: <CoachMock />,
   },
   {
+    id: 'mock',
     icon: IconClock,
     tint: 'blue',
-    title: 'Sit a full mock',
-    body: 'The real UTME: Use of English and three subjects, 180 questions, two hours, on a screen like the exam.',
+    eyebrow: 'Mock exams',
+    title: 'Sit the real thing before the real thing',
+    body: 'A JAMB-style computer-based test: Use of English and three subjects, 180 questions in two hours, full screen, with a question palette and a calculator when you need one.',
+    ticks: ['The Real UTME layout and pace, or a shorter mock you set up', 'Your score in each subject, as a percentage or out of 400', 'Every question afterwards, with the right answer and why'],
+    mock: <MockExamMock />,
+  },
+  {
+    id: 'progress',
+    icon: IconChart,
+    tint: 'purple',
+    eyebrow: 'Progress',
+    title: 'Watch your score climb',
+    body: 'Every run, check-up and mock adds up: your score in each subject and topic, how far you are from your target, a countdown to the exam and a streak to keep you going.',
+    ticks: ['Topic by topic: Needs work, Getting there, Strong', 'A countdown to your exam date', 'Every number explained in Help & guides'],
+    mock: <ProgressMock />,
   },
 ] as const;
 
-const REASONS = [
-  {
-    icon: IconBook,
-    title: 'Real past questions',
-    body: 'Questions from real UTME papers, each with its year, sorted into the topics on the syllabus.',
-  },
-  {
-    icon: IconCheck,
-    title: 'Every answer checked',
-    body: 'Every question has a full worked solution that people have checked, so you’re always taught the right answer.',
-  },
-  {
-    icon: IconBrain,
-    title: 'A score you can trust',
-    body: 'Your score is the share you get right in each topic, with no help. A guess that happens to be right doesn’t count.',
-  },
-  {
-    icon: IconFlag,
-    title: 'Something off? Tell us',
-    body: 'Flag any question from inside the app. A person looks at every report and fixes the question for everyone.',
-  },
+const MORE = [
+  { icon: IconBookmark, title: 'Bookmarks', body: 'Keep any question, then revise them all as one run.' },
+  { icon: IconFlag, title: 'Report a question', body: 'Something looks wrong? Flag it. A person checks every report.' },
+  { icon: IconCheck, title: 'Lesson check-ins', body: 'Say how each lesson landed; the ones to see again are kept for you.' },
+  { icon: IconLayers, title: 'Your own runs', body: 'Pick the topics and the years, and how many questions.' },
+  { icon: IconCalendar, title: 'Exam countdown', body: 'Set your exam date and target, and see the days count down.' },
+  { icon: IconHelp, title: 'Every number explained', body: 'How each score is worked out, with a worked example.' },
+  { icon: IconVolume, title: 'Lessons out loud', body: 'The coach talks you through it, with captions on screen.' },
+  { icon: IconBook, title: 'Works on any phone', body: 'Nothing to install. Sign in and pick up on any device.' },
 ];
+
+export function TourRows() {
+  return (
+    <div className="ld-tour">
+      {TOUR.map(({ id, icon: Icon, tint, eyebrow, title, body, ticks, mock }, index) => (
+        <article key={id} id={id} className={`ld-row ${index % 2 ? 'flip' : ''}`}>
+          <div className="ld-row-text">
+            <span className={`ld-badge ${tint}`}>
+              <Icon size={18} /> {eyebrow}
+            </span>
+            <h3 className="sj-display">{title}</h3>
+            <p>{body}</p>
+            <TickList items={[...ticks]} />
+          </div>
+          <div className={`ld-row-art ${tint}`}>{mock}</div>
+        </article>
+      ))}
+    </div>
+  );
+}
 
 export function Landing() {
   useSiteTitle('');
   const site = useSite();
   const { catalogue } = useCatalogue();
   const subjects = site?.subjects ?? [];
+  const total = questionsWord(site);
 
   return (
-    <SiteShell>
-      <section className="ps-hero">
-        <div className="ps-hero-glow" aria-hidden="true" />
-        <div className="ps-hero-text">
-          <span className="ps-kicker">UTME preparation · Nigeria</span>
-          <h1 className="sj-display">
-            Know your UTME score.
-            <br />
-            <em>Then raise it.</em>
-          </h1>
-          <p className="ps-lede">
-            A short check-up shows where you stand in every topic. Then you practise what’s holding you back, and a coach
-            teaches you the exact step you missed.
-          </p>
-          <div className="ps-hero-actions">
-            <Link to={SIGN_UP} className="sj-btn ps-cta big">
-              Start free <IconArrowRight size={18} />
-            </Link>
-            <Link to="/how-it-works" className="ps-textlink light">
-              See how it works
-            </Link>
-          </div>
-          <dl className="ps-hero-stats">
-            <div>
-              <dt>Past questions</dt>
-              <dd>{site ? roughly(site.questions) : '…'}</dd>
-            </div>
-            <div>
-              <dt>UTME subjects</dt>
-              <dd>{site ? subjects.length : '…'}</dd>
-            </div>
-            <div>
-              <dt>With worked solutions</dt>
-              <dd>{site ? `${site.worked_percent}%` : '…'}</dd>
-            </div>
-          </dl>
+    <SiteShell bare>
+      <section className="ld-hero">
+        <div className="ld-hero-sky" aria-hidden="true">
+          <span className="a" />
+          <span className="b" />
         </div>
-        <div className="ps-hero-art" aria-hidden="true">
-          <div className="ps-art-card score">
-            <span className="ps-art-label">Predicted score</span>
-            <strong>
-              268<small>/400</small>
-            </strong>
-            <span className="ps-art-bar">
-              <i style={{ width: '67%' }} />
+        <div className="ld-hero-in">
+          <div className="ld-hero-text">
+            <span className="ld-kicker">
+              <i /> UTME preparation
             </span>
-            <span className="ps-art-sub">Target 280 · 12 to go</span>
+            <h1 className="sj-display">
+              A teacher for every question. <em>On your phone.</em>
+            </h1>
+            <p className="ld-lede">
+              Real past questions, a score you can trust, and a coach who works every question through with you on the
+              board, out loud.
+            </p>
+            <div className="ld-hero-actions">
+              <Link to={SIGN_UP} className="sj-btn ld-cta">
+                Start free <IconArrowRight size={18} />
+              </Link>
+              <a href="#watch" className="ld-ghost">
+                Watch a lesson
+              </a>
+            </div>
           </div>
-          <div className="ps-art-card topics">
-            <span className="ps-art-label">Topics to work on</span>
-            {[
-              ['Quadratic equations', 38, 'warn'],
-              ['Concord', 52, 'mid'],
-              ['Organic chemistry', 61, 'ok'],
-            ].map(([name, pct, tone]) => (
-              <span key={name} className="ps-art-topic">
-                <span>{name}</span>
-                <span className={`ps-art-pct ${tone}`}>{pct}%</span>
-              </span>
+          <figure className="ld-hero-board">
+            <div className="ld-board-frame">
+              <div className="lp-bar" aria-hidden="true">
+                <i />
+                <i />
+                <i />
+              </div>
+              <img
+                src="/showcase/m84_12.jpg"
+                decoding="async"
+                alt="A lesson on the board: the coach works a number bases question through, step by step, with a drawing of the oranges and price tags."
+                width={1440}
+                height={900}
+              />
+            </div>
+          </figure>
+        </div>
+      </section>
+
+      <div className="ld-wrap">
+        <section className="ld-strip" aria-label="What you get">
+          {[
+            { icon: IconBook, text: `${total} real past questions` },
+            { icon: IconVolume, text: 'A lesson, out loud, for every question' },
+            { icon: IconMic, text: 'Ask the coach by typing or speaking' },
+            { icon: IconTarget, text: 'A predicted score you can trust' },
+          ].map(({ icon: Icon, text }) => (
+            <span key={text}>
+              <Icon size={18} />
+              {text}
+            </span>
+          ))}
+        </section>
+
+        <section className="ld-section ld-watch" id="watch" aria-labelledby="ld-watch">
+          <div className="ld-head center">
+            <span className="ps-eyebrow">Watch a lesson</span>
+            <h2 id="ld-watch" className="sj-display">
+              Every question comes with a lesson like this
+            </h2>
+            <p className="ld-head-sub">
+              Miss a question twice and the coach works it through on the board: written by hand, said out loud, with
+              drawings that make it click. Press play, with your sound on.
+            </p>
+          </div>
+          <LessonPlayer />
+        </section>
+
+        <section className="ld-section" aria-labelledby="ld-how">
+          <div className="ld-head center">
+            <span className="ps-eyebrow">How it works</span>
+            <h2 id="ld-how" className="sj-display">
+              Everything a good teacher does, for every question you meet
+            </h2>
+          </div>
+          <TourRows />
+        </section>
+
+        <section className="ld-section ld-more" aria-labelledby="ld-more">
+          <div className="ld-head">
+            <span className="ps-eyebrow">And more</span>
+            <h2 id="ld-more" className="sj-display">
+              The small things that add up
+            </h2>
+          </div>
+          <div className="ld-more-grid">
+            {MORE.map(({ icon: Icon, title, body }, index) => (
+              <article key={title}>
+                <span className={`ps-letter t${index % 6}`} aria-hidden="true">
+                  <Icon size={20} />
+                </span>
+                <h3>{title}</h3>
+                <p>{body}</p>
+              </article>
             ))}
           </div>
-          <div className="ps-art-card coach">
-            <span className="ps-art-coach-icon">
-              <IconVolume size={16} />
-            </span>
-            <span>“Factorise first: what two numbers multiply to 6 and add to 5?”</span>
+        </section>
+
+        <section className="ld-section ld-subjects" aria-labelledby="ld-subjects">
+          <div className="ld-subjects-text">
+            <span className="ps-eyebrow">Subjects</span>
+            <h2 id="ld-subjects" className="sj-display">
+              {total} questions across {subjects.length || 10} subjects
+            </h2>
+            <p>
+              Real UTME papers, sorted into the topics on the syllabus, each with a checked worked solution. Pick Use of
+              English and your three subjects when you sign up; add more whenever you like.
+            </p>
+            <Link to={SIGN_UP} className="sj-btn ld-cta small">
+              Choose your subjects <IconArrowRight size={16} />
+            </Link>
           </div>
-        </div>
-      </section>
-
-      <section className="ps-section" aria-labelledby="ps-how">
-        <div className="ps-head">
-          <span className="ps-eyebrow">How it works</span>
-          <h2 id="ps-how" className="sj-display">Four steps, one goal: a higher score</h2>
-        </div>
-        <ol className="ps-steps">
-          {STEPS.map(({ icon: Icon, tint, title, body }, index) => (
-            <li key={title} className="ps-step">
-              <span className={`ps-step-icon ${tint}`} aria-hidden="true">
-                <Icon size={22} />
-              </span>
-              <span className="ps-step-n">{String(index + 1).padStart(2, '0')}</span>
-              <h3>{title}</h3>
-              <p>{body}</p>
-            </li>
-          ))}
-        </ol>
-        <Link to="/how-it-works" className="ps-textlink">
-          The whole picture, and how your score is worked out <IconArrowRight size={16} />
-        </Link>
-      </section>
-
-      <section className="ps-section ps-band" aria-labelledby="ps-why">
-        <div className="ps-head">
-          <span className="ps-eyebrow">Why Stack Prep</span>
-          <h2 id="ps-why" className="sj-display">Built so you learn the right answer, every time</h2>
-        </div>
-        <div className="ps-reasons">
-          {REASONS.map(({ icon: Icon, title, body }) => (
-            <article key={title} className="ps-reason">
-              <span className="ps-reason-icon" aria-hidden="true">
-                <Icon size={20} />
-              </span>
-              <h3>{title}</h3>
-              <p>{body}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      {subjects.length > 0 ? (
-        <section className="ps-section" aria-labelledby="ps-subjects">
-          <div className="ps-head row">
-            <div>
-              <span className="ps-eyebrow">Subjects</span>
-              <h2 id="ps-subjects" className="sj-display">
-                {subjects.length} UTME subjects, {roughly(site!.questions)} questions
-              </h2>
-            </div>
-            <p className="ps-head-note">Pick Use of English and your three subjects when you sign up. You can add more later.</p>
-          </div>
-          <ul className="ps-subjects">
+          <ul className="ld-subject-grid">
             {subjects.map((subject, index) => (
               <li key={subject.name}>
                 <span className={`ps-letter t${index % 6}`} aria-hidden="true">
                   {subject.name.slice(0, 1)}
                 </span>
-                <span className="ps-subject-text">
+                <span>
                   <strong>{subject.name}</strong>
-                  <span>
-                    {subject.questions.toLocaleString('en-NG')} questions
-                    {yearsOf(subject) ? ` · ${yearsOf(subject)}` : ''}
-                  </span>
+                  {yearsOf(subject) ? <small>Papers {yearsOf(subject)}</small> : null}
                 </span>
               </li>
             ))}
           </ul>
         </section>
-      ) : null}
 
-      {catalogue && catalogue.plans.length > 0 ? (
-        <section className="ps-section ps-band" aria-labelledby="ps-pricing">
-          <div className="ps-head row">
-            <div>
-              <span className="ps-eyebrow">Pricing</span>
-              <h2 id="ps-pricing" className="sj-display">Start free. Pay when you want more.</h2>
+        {catalogue && catalogue.plans.length > 0 ? (
+          <section className="ld-section" aria-labelledby="ld-pricing">
+            <div className="ld-head row">
+              <div>
+                <span className="ps-eyebrow">Pricing</span>
+                <h2 id="ld-pricing" className="sj-display">
+                  Start free. Pay when you want more.
+                </h2>
+              </div>
+              <Link to="/pricing" className="ps-textlink">
+                Compare every plan <IconArrowRight size={16} />
+              </Link>
             </div>
-            <Link to="/pricing" className="ps-textlink">
-              Compare every plan <IconArrowRight size={16} />
+            <PlanGrid catalogue={catalogue} compact />
+          </section>
+        ) : null}
+
+        <section className="ld-section ps-faq-teaser" aria-labelledby="ld-faq">
+          <div className="ld-head">
+            <span className="ps-eyebrow">Questions</span>
+            <h2 id="ld-faq" className="sj-display">
+              What people ask first
+            </h2>
+            <p className="ld-head-sub">Straight answers, written from how Stack Prep works.</p>
+            <Link to="/faq" className="ps-textlink">
+              Every question <IconArrowRight size={16} />
             </Link>
           </div>
-          <PlanGrid catalogue={catalogue} compact />
+          <FaqList items={SITE_FAQ.flatMap((group) => group.items).slice(0, 6)} />
         </section>
-      ) : null}
+      </div>
 
-      <section className="ps-section ps-faq-teaser" aria-labelledby="ps-faq">
-        <div className="ps-head">
-          <span className="ps-eyebrow">Questions</span>
-          <h2 id="ps-faq" className="sj-display">What people ask first</h2>
-          <Link to="/faq" className="ps-textlink">
-            Every question <IconArrowRight size={16} />
-          </Link>
-        </div>
-        <FaqList items={SITE_FAQ.flatMap((group) => group.items).slice(0, 5)} />
-      </section>
+      <FinalCall />
+    </SiteShell>
+  );
+}
 
-      <section className="ps-final">
+export function FinalCall({
+  title = 'Find out where you stand today.',
+  sub = 'Your first check-up is about 15 questions, with no time limit. Then the lessons begin.',
+}: {
+  title?: string;
+  sub?: string;
+}) {
+  return (
+    <section className="ld-final">
+      <div className="ld-final-in">
         <div>
-          <h2 className="sj-display">Find out where you stand today</h2>
-          <p>Your first check-up is about 15 questions, with no time limit. It’s free.</p>
+          <span className="ld-kicker">
+            <i /> Free to start
+          </span>
+          <h2 className="sj-display">{title}</h2>
+          <p>{sub}</p>
         </div>
-        <Link to={SIGN_UP} className="sj-btn ps-cta big">
+        <Link to={SIGN_UP} className="sj-btn ld-cta">
           Start free <IconArrowRight size={18} />
         </Link>
-      </section>
-    </SiteShell>
+      </div>
+    </section>
   );
 }

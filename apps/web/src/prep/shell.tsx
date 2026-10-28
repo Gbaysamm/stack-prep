@@ -6,7 +6,7 @@
  * a practice run and the board — no navigation at all, one slim bar with the way out.
  */
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Link,
   NavLink,
@@ -50,7 +50,7 @@ import {
 import { progressApi, type Overview } from "./progressApi.js";
 import { StreakChip } from "./Streak.js";
 import { TitleProvider, useIdentity, useLoad, useStudent } from "./store.js";
-import { Dialog, Button, IconButton, initials } from "./ui.js";
+import { Dialog, Button, IconButton, Spinner, initials } from "./ui.js";
 
 const NAV = [
   { to: "/home", label: "Home", icon: IconHome },
@@ -467,7 +467,16 @@ export function AppShell() {
           {sandbox ? <SandboxBanner onCreate={() => setClaiming(true)} /> : null}
           <Notices />
           <main id="main">
-            <Outlet />
+            {/* A page opened for the first time loads here, inside the frame. */}
+            <Suspense
+              fallback={
+                <div className="sj-page-loading" aria-label="Loading">
+                  <Spinner size={26} />
+                </div>
+              }
+            >
+              <Outlet />
+            </Suspense>
           </main>
         </div>
 

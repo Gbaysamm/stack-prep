@@ -15,6 +15,39 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-28
 
+### The public site, redesigned: a real lesson to watch, a tour of the app, and fast loading
+- **Why:** the founder found the home page weak and the other pages blank, wanted the lesson
+  "video" shown, the app's own design used, no per-subject question counts, a calmer hero
+  with a picture of the board, the lessons in the handwritten whiteboard style, nothing
+  playing in the background, and the lesson to load fast and not lag.
+- **What:** the home page now opens on a calm hero (headline, one line, two buttons, a picture
+  of the board), then **Watch a lesson**: three real lessons (number bases, trigonometry,
+  English comprehension) that play on the coach's board in the whiteboard style with the free
+  Kokoro voice, only when the visitor presses Play. Then a tour of the app, each part beside a
+  picture of its own screen (check-up, practice, asking the coach, the mock exam, progress),
+  the smaller features, the subjects, plans and questions. Every other page opens with the
+  app's dark hero band and has fuller content (How it works carries the lesson too; About
+  explains how every answer is checked; Pricing says what every plan includes). The public
+  endpoint and pages give only a rounded total ("5,000+"), never a subject's count.
+- **Speed:** the app is split so a visitor downloads only what the page needs (the home page
+  no longer carries the dashboards or the board: about 100 KB of code instead of 480 KB); the
+  lesson page is its own small app with no sign-in check, shows its poster at once and loads
+  the board and every voice clip behind it, so Play starts at once and steps never wait on the
+  network; the lesson frame loads only as it nears the screen; fonts no longer hold the page
+  up; the hero picture is fetched first; a first-time visitor sees a public page without
+  waiting for the session check; the question count is kept for ten minutes on the server;
+  sections below the first screen are laid out only as they come near.
+- **Fixed on the way:** the lesson window grew wider than a phone (its height and shape rule
+  set its width), and the off-screen layout hint widened the tour rows on phones.
+- **Where:** `apps/web/src/site/` (Landing, LessonPlayer, Watch, WatchApp, Mockups, showcase,
+  Pages, Faq, Legal, site.css), `apps/web/public/showcase/` (lessons, voice, posters, made by
+  `scripts/showcase_lessons.py`), `apps/web/src/App.tsx`, `prep/PrepApp.tsx`, `prep/store.tsx`,
+  `student/boardPrefs.ts`, `index.html`; `apps/api/src/app/routers/site.py`.
+- **Checked:** the web tests and build, the API tests for the site and support; screenshots
+  at 1440 and 390; load timings of the production build (this machine was heavily loaded by
+  another project's video render, so absolute times were several times slower than normal).
+- **Status:** committed, not pushed.
+
 ### Part C: the public site
 - **Why:** a visitor who wasn't signed in only saw the sign-up form; the founder asked for a
   home page, About, Pricing, FAQ, Contact, Terms and Privacy (plan C).

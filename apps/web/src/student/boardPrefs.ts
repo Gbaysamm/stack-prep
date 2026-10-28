@@ -26,7 +26,15 @@ const KEY = 'sp.board.prefs';
 const EVENT = 'sp:board-prefs';
 export const DEFAULT_PREFS: BoardPrefs = { style: 'classic', voice: 'studio' };
 
+/** Set by a page that shows the board its own way (the public lesson showcase): read in place
+ *  of the student's saved choice, and changed in place of it, so their choice is never touched. */
+let forced: BoardPrefs | null = null;
+export function forceBoardPrefs(prefs: BoardPrefs): void {
+  forced = prefs;
+}
+
 export function readBoardPrefs(): BoardPrefs {
+  if (forced) return forced;
   try {
     const raw = JSON.parse(localStorage.getItem(KEY) ?? '{}') as Partial<BoardPrefs>;
     return {
@@ -40,6 +48,11 @@ export function readBoardPrefs(): BoardPrefs {
 
 export function writeBoardPrefs(change: Partial<BoardPrefs>): BoardPrefs {
   const next = { ...readBoardPrefs(), ...change };
+  if (forced) {
+    forced = next;
+    window.dispatchEvent(new CustomEvent<BoardPrefs>(EVENT, { detail: next }));
+    return next;
+  }
   try {
     localStorage.setItem(KEY, JSON.stringify(next));
   } catch {

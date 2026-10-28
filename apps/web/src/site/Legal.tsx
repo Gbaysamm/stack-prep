@@ -7,7 +7,7 @@
  */
 import { Link } from 'react-router-dom';
 
-import { SiteShell, useSiteSettings, useSiteTitle } from './SiteShell.js';
+import { SiteHero, SiteShell, useSiteSettings, useSiteTitle } from './SiteShell.js';
 
 const UPDATED = '28 October 2026';
 
@@ -19,13 +19,8 @@ interface Part {
 
 function LegalPage({ title, intro, parts }: { title: string; intro: React.ReactNode; parts: Part[] }) {
   return (
-    <SiteShell>
-      <section className="ps-page-head">
-        <span className="ps-eyebrow">The small print</span>
-        <h1 className="sj-display">{title}</h1>
-        <p>Last updated {UPDATED}</p>
-      </section>
-      <div className="ps-legal">
+    <SiteShell hero={<SiteHero eyebrow="The small print" title={title} sub={`Last updated ${UPDATED}. In plain words, written from what the app does.`} />}>
+      <div className="ps-legal first">
         <nav className="ps-faq-index" aria-label="On this page">
           {parts.map((part) => (
             <a key={part.id} href={`#${part.id}`}>

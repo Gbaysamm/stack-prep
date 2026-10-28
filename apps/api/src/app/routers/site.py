@@ -1,10 +1,13 @@
 """What the public site says about the question bank, counted live so it never goes stale.
 
 Only UTME subjects are listed: the sandbox and test subjects live under other examinations.
+How many questions each subject has is not said, and the total is rounded down to the
+thousand ("5,000+"): the founder's call, so the bank's exact size stays ours.
 """
 
 from __future__ import annotations
 
+import time
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
@@ -18,20 +21,28 @@ router = APIRouter(prefix="/v1/app", tags=["app"])
 
 class SiteSubject(BaseModel):
     name: str
-    questions: int
     first_year: int | None
     last_year: int | None
 
 
 class Site(BaseModel):
     subjects: list[SiteSubject]
-    questions: int
+    #: The number of questions, rounded down to the thousand (to the hundred below 1,000).
+    questions_at_least: int
     #: Questions with a worked solution, as a whole percentage.
     worked_percent: int
 
 
+#: The counts barely move, and every visitor to the home page asks: kept this long.
+KEEP_SECONDS = 600
+_kept: tuple[float, Site] | None = None
+
+
 @router.get("/site", response_model=Site, summary="The question bank, for the public site")
 async def site(conn: Annotated[AsyncConnection, Depends(connection)]) -> Site:
+    global _kept
+    if _kept and time.monotonic() - _kept[0] < KEEP_SECONDS:
+        return _kept[1]
     rows = await fetch_all(
         conn,
         """
@@ -50,8 +61,14 @@ async def site(conn: Annotated[AsyncConnection, Depends(connection)]) -> Site:
     )
     total = sum(row["questions"] for row in rows)
     worked = sum(row["worked"] for row in rows)
-    return Site(
-        subjects=[SiteSubject(**{k: v for k, v in row.items() if k != "worked"}) for row in rows],
-        questions=total,
+    step = 1000 if total >= 1000 else 100
+    counted = Site(
+        subjects=[
+            SiteSubject(**{k: v for k, v in row.items() if k not in ("worked", "questions")})
+            for row in rows
+        ],
+        questions_at_least=total // step * step,
         worked_percent=round(100 * worked / total) if total else 0,
     )
+    _kept = (time.monotonic(), counted)
+    return counted

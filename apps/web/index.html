@@ -10,14 +10,41 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+    <!-- The fonts load without holding the page up: it draws at once in the fallback fonts,
+         and they swap in as they arrive (display=swap). -->
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Manrope:wght@400;700;800&family=Space+Mono:wght@400;700&family=Caveat:wght@600;700&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
     <link
       href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Manrope:wght@400;700;800&family=Space+Mono:wght@400;700&family=Caveat:wght@600;700&display=swap"
+        rel="stylesheet"
+      />
+      <link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&display=swap" rel="stylesheet" />
+    </noscript>
+    <script>
+      // The biggest picture on the home page, and on a lesson's page its poster: start each
+      // before the app itself, so it is there the moment the page draws.
+      (function () {
+        var lesson = location.pathname.match(/^\/watch\/([a-z0-9_]+)$/);
+        var picture = location.pathname === '/' && !location.search ? 'm84_12' : lesson && lesson[1];
+        if (!picture) return;
+        var link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'image';
+        link.href = '/showcase/' + picture + '.jpg';
+        document.head.appendChild(link);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

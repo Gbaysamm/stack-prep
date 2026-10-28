@@ -116,14 +116,24 @@ const IdentityContext = createContext<IdentityContextValue>({
 
 type Status = { state: 'checking' } | { state: 'ready'; identity: Identity | null };
 
+/** The public site's pages: shown to a first-time visitor without waiting on the session check. */
+const PUBLIC_PAGES = new Set(['/', '/how-it-works', '/pricing', '/about', '/faq', '/contact', '/terms', '/privacy']);
+
 export function IdentityProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<Status>(() => {
     const dev = devIdentity();
-    return dev ? { state: 'ready', identity: dev } : { state: 'checking' };
+    if (dev) return { state: 'ready', identity: dev };
+    // Nobody has signed in on this device (no hint, no device-only student) and this is a public
+    // page: show it now, and let the check below run behind it. If a session turns up after all,
+    // the identity arrives and the page moves on as usual.
+    if (!sessionHint() && !readSandbox() && PUBLIC_PAGES.has(window.location.pathname)) {
+      return { state: 'ready', identity: null };
+    }
+    return { state: 'checking' };
   });
 
   useEffect(() => {
-    if (status.state !== 'checking') return;
+    if (devIdentity()) return;
     let live = true;
     authApi
       .me()

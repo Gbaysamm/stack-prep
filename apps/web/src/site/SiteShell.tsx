@@ -11,8 +11,8 @@ import { useIdentity } from '../prep/store.js';
 import { supportApi, type PublicSettings } from '../prep/supportApi.js';
 import './site.css';
 
-export const SIGN_UP = '/?mode=signup';
-export const LOG_IN = '/?mode=login';
+export { LOG_IN, SIGN_UP } from './showcase.js';
+import { LOG_IN, SIGN_UP } from './showcase.js';
 
 const PAGES = [
   { to: '/how-it-works', label: 'How it works' },
@@ -68,7 +68,47 @@ function WayIn({ onPick }: { onPick?: () => void }) {
   );
 }
 
-export function SiteShell({ children }: { children: ReactNode }) {
+/**
+ * A page's opening band, in the app's own look (its dark page heroes): an eyebrow, the title,
+ * a line under it, and something to look at on the right. Full width; the page goes on below
+ * it on the light paper, so no dark card ever sits straight under it.
+ */
+export function SiteHero({
+  eyebrow,
+  title,
+  sub,
+  art,
+  children,
+}: {
+  eyebrow: string;
+  title: ReactNode;
+  sub: ReactNode;
+  art?: ReactNode;
+  children?: ReactNode;
+}) {
+  return (
+    <section className={`ps-hero-band ${art ? 'with-art' : ''}`}>
+      <div className="ld-hero-sky" aria-hidden="true">
+        <span className="a" />
+        <span className="b" />
+      </div>
+      <div className="ps-hero-band-in">
+        <div className="ps-hero-band-text">
+          <span className="ld-kicker">
+            <i /> {eyebrow}
+          </span>
+          <h1 className="sj-display">{title}</h1>
+          <p>{sub}</p>
+          {children}
+        </div>
+        {art ? <div className="ps-hero-band-art">{art}</div> : null}
+      </div>
+    </section>
+  );
+}
+
+/** `hero` runs the full width above the page; `bare` hands the whole width to the page. */
+export function SiteShell({ children, hero, bare = false }: { children: ReactNode; hero?: ReactNode; bare?: boolean }) {
   const [menu, setMenu] = useState(false);
   const location = useLocation();
   const settings = useSiteSettings();
@@ -112,8 +152,9 @@ export function SiteShell({ children }: { children: ReactNode }) {
         ) : null}
       </header>
 
-      <main id="main" className="ps-main">
-        {children}
+      <main id="main" className={bare ? 'ps-bare' : 'ps-page'}>
+        {hero}
+        {bare ? children : <div className="ps-main">{children}</div>}
       </main>
 
       <footer className="ps-footer">

@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import { IconArrowRight } from '../prep/icons.js';
 import { Disclosure } from '../prep/pages/Disclosure.js';
 import '../prep/pages/Help.css';
-import { SiteShell, useSiteTitle } from './SiteShell.js';
+import { SiteHero, SiteShell, useSiteTitle } from './SiteShell.js';
 
 export interface FaqItem {
   id: string;
@@ -227,19 +227,43 @@ export function FaqList({ items }: { items: FaqItem[] }) {
 export function FaqPage() {
   useSiteTitle('FAQ');
   return (
-    <SiteShell>
-      <section className="ps-page-head">
-        <span className="ps-eyebrow">FAQ</span>
-        <h1 className="sj-display">Questions people ask</h1>
-        <p>Straight answers, written from how Stack Prep works.</p>
-      </section>
-      <div className="ps-faq-page">
+    <SiteShell
+      hero={
+        <SiteHero
+          eyebrow="FAQ"
+          title={
+            <>
+              Questions <em>people ask.</em>
+            </>
+          }
+          sub="Straight answers about Stack Prep, the lessons, plans and paying, and your account, written from how it works."
+          art={
+            <div className="ps-promises">
+              {SITE_FAQ.map((group) => (
+                <a key={group.id} href={`#${group.id}`}>
+                  <IconArrowRight size={18} /> {group.title}
+                  <small>{group.items.length}</small>
+                </a>
+              ))}
+            </div>
+          }
+        />
+      }
+    >
+      <div className="ps-faq-page first">
         <nav className="ps-faq-index" aria-label="Topics">
           {SITE_FAQ.map((group) => (
             <a key={group.id} href={`#${group.id}`}>
               {group.title}
             </a>
           ))}
+          <div className="ps-faq-help">
+            <strong>Still stuck?</strong>
+            <span>A person reads every message.</span>
+            <Link to="/contact" className="ps-textlink">
+              Contact us <IconArrowRight size={16} />
+            </Link>
+          </div>
         </nav>
         <div className="ps-faq-groups">
           {SITE_FAQ.map((group) => (
@@ -250,14 +274,6 @@ export function FaqPage() {
               <FaqList items={group.items} />
             </section>
           ))}
-          <div className="ps-still">
-            <p>
-              <strong>Didn’t find your answer?</strong> A person reads every message.
-            </p>
-            <Link to="/contact" className="ps-textlink">
-              Contact us <IconArrowRight size={16} />
-            </Link>
-          </div>
         </div>
       </div>
     </SiteShell>

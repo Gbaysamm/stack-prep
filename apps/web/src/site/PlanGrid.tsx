@@ -10,7 +10,7 @@ import { Select } from '../lib/Select.js';
 import { featureLines, naira, type Catalogue } from '../prep/billingApi.js';
 import { IconCheck, IconClose } from '../prep/icons.js';
 import { useIdentity } from '../prep/store.js';
-import { SIGN_UP } from './SiteShell.js';
+import { SIGN_UP } from './showcase.js';
 
 export function PlanGrid({ catalogue, compact = false }: { catalogue: Catalogue; compact?: boolean }) {
   const { identity } = useIdentity();

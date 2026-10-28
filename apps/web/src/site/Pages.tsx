@@ -1,177 +1,215 @@
 /**
- * The public site's other pages: How it works, Pricing, About and Contact. Each says only what
- * the app does; the numbers are counted live (siteData.ts) and the plans are the admin's.
+ * The public site's other pages: How it works, Pricing, About and Contact. Each opens with the
+ * hero band (SiteShell.tsx) and says only what the app does; the plans are the admin's, and
+ * the only number about the question bank is the rounded total (siteData.ts).
  */
-import { useId, useState, type FormEvent } from 'react';
+import { useId, useState, type FormEvent, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
 import { friendly } from '../lib/friendlyError.js';
 import { Select } from '../lib/Select.js';
 import {
   IconArrowRight,
-  IconBolt,
   IconBook,
-  IconChart,
   IconCheck,
-  IconClock,
+  IconFlag,
+  IconLock,
   IconMail,
+  IconPause,
+  IconReplay,
   IconSend,
+  IconSparkles,
   IconTarget,
+  IconUser,
   IconVolume,
 } from '../prep/icons.js';
 import { useIdentity } from '../prep/store.js';
 import { SUPPORT_TOPICS, supportApi, type SupportTopic } from '../prep/supportApi.js';
 import { FaqList, SITE_FAQ } from './Faq.js';
+import { FinalCall, TourRows } from './Landing.js';
+import { LessonPlayer } from './LessonPlayer.js';
 import { PlanGrid } from './PlanGrid.js';
-import { SIGN_UP, SiteShell, useSiteSettings, useSiteTitle } from './SiteShell.js';
-import { roughly, useCatalogue, useSite, yearsOf } from './siteData.js';
+import { SiteHero, SiteShell, useSiteSettings, useSiteTitle } from './SiteShell.js';
+import { questionsWord, useCatalogue, useSite } from './siteData.js';
 
-function PageHead({ eyebrow, title, sub }: { eyebrow: string; title: string; sub: string }) {
+/** Figures on a hero's right: big words with a line each, on glass. */
+function Facts({ items }: { items: { big: string; small: string }[] }) {
   return (
-    <section className="ps-page-head">
-      <span className="ps-eyebrow">{eyebrow}</span>
-      <h1 className="sj-display">{title}</h1>
-      <p>{sub}</p>
-    </section>
+    <div className="ps-facts">
+      {items.map((item) => (
+        <div key={item.small}>
+          <strong>{item.big}</strong>
+          <span>{item.small}</span>
+        </div>
+      ))}
+    </div>
   );
 }
 
-function Final({ title, sub }: { title: string; sub: string }) {
-  const { identity } = useIdentity();
+function Head({ eyebrow, title, sub, center = false }: { eyebrow: string; title: ReactNode; sub?: ReactNode; center?: boolean }) {
   return (
-    <section className="ps-final">
-      <div>
-        <h2 className="sj-display">{title}</h2>
-        <p>{sub}</p>
-      </div>
-      <Link to={identity ? '/home' : SIGN_UP} className="sj-btn ps-cta big">
-        {identity ? 'Open the app' : 'Start free'} <IconArrowRight size={18} />
-      </Link>
-    </section>
+    <div className={`ld-head ${center ? 'center' : ''}`}>
+      <span className="ps-eyebrow">{eyebrow}</span>
+      <h2 className="sj-display">{title}</h2>
+      {sub ? <p className="ld-head-sub">{sub}</p> : null}
+    </div>
   );
 }
 
 /* ------------------------------------------------------------------ how it works */
 
-const PARTS = [
-  {
-    icon: IconTarget,
-    tint: 'lime',
-    title: 'The check-up: where you stand',
-    lines: [
-      'About 15 questions from across the subject, with no help and no time limit.',
-      'They get harder or easier to match you, so it doesn’t take long to find your level.',
-      'You get a score for every topic, and a predicted score for the exam.',
-      'A new check-up is due every 7 days. It’s how your predicted score moves.',
-    ],
-  },
-  {
-    icon: IconBolt,
-    tint: 'pink',
-    title: 'Practice: work on what holds you back',
-    lines: [
-      'Questions come from your weakest topics first.',
-      'Not sure? Take a hint, or say you’re guessing. Only answers you got right on your own count toward your score.',
-      'A question you got wrong comes back in a later run, until you get it right.',
-      'Choose your own topics and years, or revise the questions you bookmarked.',
-    ],
-  },
-  {
-    icon: IconVolume,
-    tint: 'yellow',
-    title: 'The board: learn the step you missed',
-    lines: [
-      'Miss a question twice and the coach takes you to the board.',
-      'It works the question through step by step, out loud, with every word written on screen.',
-      'The working is the checked solution, not something made up on the spot.',
-      'Ask about any step, by typing or speaking, and it explains that step again another way.',
-    ],
-  },
-  {
-    icon: IconClock,
-    tint: 'blue',
-    title: 'Mock exams: the real thing, before the real thing',
-    lines: [
-      'The UTME: Use of English and three subjects, 180 questions in two hours.',
-      'One question at a time, a question palette and a timer, like the exam.',
-      'Leaving the test is noted, so your result is a fair one.',
-      'Afterwards, every question with your answer, the right answer and the working.',
-    ],
-  },
-  {
-    icon: IconChart,
-    tint: 'purple',
-    title: 'Progress: see it move',
-    lines: [
-      'Your score in each subject and topic, and how far you are from your target.',
-      'A countdown to your exam date, and a day streak to keep you going.',
-      'Every number in the app explained, with a worked example, in Help & guides.',
-    ],
-  },
-] as const;
+const LESSON_POINTS = [
+  { icon: IconSparkles, title: 'Written by hand, as it’s said', body: 'Each step appears on the board as the coach says it, in handwriting, with highlights and arrows.' },
+  { icon: IconVolume, title: 'Out loud, with captions', body: 'The coach explains every step aloud; every word is also on screen, so it works with the sound off too.' },
+  { icon: IconBook, title: 'Drawings that make it click', body: 'Sketches, diagrams and marks on the passage show the idea, not just the sums.' },
+  { icon: IconReplay, title: 'At your pace', body: 'Pause, replay a step, move on when you’re ready, or change the speed.' },
+];
 
 export function HowItWorksPage() {
   useSiteTitle('How it works');
   return (
-    <SiteShell>
-      <PageHead
-        eyebrow="How it works"
-        title="From “where am I?” to a higher score"
-        sub="Five parts that work together. Here is what each one does, and why."
-      />
-      <div className="ps-parts">
-        {PARTS.map(({ icon: Icon, tint, title, lines }, index) => (
-          <section key={title} className="ps-part">
-            <span className={`ps-step-icon ${tint}`} aria-hidden="true">
-              <Icon size={22} />
-            </span>
-            <div>
-              <span className="ps-step-n">{String(index + 1).padStart(2, '0')}</span>
-              <h2 className="sj-display">{title}</h2>
-              <ul>
-                {lines.map((line) => (
-                  <li key={line}>
-                    <IconCheck size={16} />
-                    {line}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
-        ))}
-      </div>
-      <Final title="See your own score" sub="Your first check-up is about 15 questions, with no time limit. It’s free." />
+    <SiteShell
+      hero={
+        <SiteHero
+          eyebrow="How it works"
+          title={
+            <>
+              From “where am I?” to <em>a higher score</em>
+            </>
+          }
+          sub="A check-up shows where you stand. Practice works on what holds you back. When you miss a question, the coach teaches it to you on the board. Mocks get you ready for the day."
+          art={
+            <Facts
+              items={[
+                { big: '~15', small: 'questions in a check-up, no time limit' },
+                { big: '7 days', small: 'between check-ups, to see your score move' },
+                { big: '2 misses', small: 'and the coach takes you to the board' },
+                { big: '180 · 2h', small: 'questions and hours in a Real UTME mock' },
+              ]}
+            />
+          }
+        />
+      }
+    >
+      <section className="ld-section first" aria-labelledby="hw-lesson">
+        <Head
+          eyebrow="The lesson"
+          title="Every question comes with a lesson"
+          sub="Miss a question twice, or get one right by guessing, and the coach works it through with you on the board. This is a real one."
+        />
+        <div className="hw-lesson">
+          <LessonPlayer />
+          <div className="hw-points">
+            {LESSON_POINTS.map(({ icon: Icon, title, body }) => (
+              <article key={title}>
+                <span className="ld-badge yellow" aria-hidden="true">
+                  <Icon size={18} />
+                </span>
+                <div>
+                  <h3>{title}</h3>
+                  <p>{body}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+      <section className="ld-section" aria-label="The parts of Stack Prep">
+        <Head eyebrow="Step by step" title="Five parts that work together" center />
+        <TourRows />
+      </section>
+      <FinalCall title="See your own score." />
     </SiteShell>
   );
 }
 
 /* ------------------------------------------------------------------ pricing */
 
+const EVERY_PLAN = [
+  'Every subject and every past question',
+  'Check-ups and your predicted score',
+  'The full checked working for every question',
+  'Progress, bookmarks and Help & guides',
+];
+
 export function PricingPage() {
   useSiteTitle('Pricing');
   const { catalogue, failed } = useCatalogue();
   const paying = SITE_FAQ.find((group) => group.id === 'paying')!.items;
   return (
-    <SiteShell>
-      <PageHead
-        eyebrow="Pricing"
-        title="Start free. Pay when you want more."
-        sub="Every plan has the same questions, check-ups and checked working. Paid plans give you more each day."
-      />
-      {catalogue ? (
-        <PlanGrid catalogue={catalogue} />
-      ) : (
-        <p className="ps-muted">{failed ? 'We couldn’t load the plans just now. Please try again in a moment.' : 'Loading the plans…'}</p>
-      )}
-      <section className="ps-section ps-split" aria-labelledby="ps-pay-faq">
+    <SiteShell
+      hero={
+        <SiteHero
+          eyebrow="Pricing"
+          title={
+            <>
+              Start free. <em>Pay when you want more.</em>
+            </>
+          }
+          sub="Every plan has the same questions, check-ups and checked working. Paid plans give you more each day: more practice, more mocks, lessons out loud and the coach."
+          art={
+            <div className="ps-promises">
+              {[
+                { icon: IconCheck, text: 'Pay once for a set length' },
+                { icon: IconReplay, text: 'Nothing renews by itself' },
+                { icon: IconLock, text: 'Paystack handles your card' },
+              ].map(({ icon: Icon, text }) => (
+                <span key={text}>
+                  <Icon size={18} /> {text}
+                </span>
+              ))}
+            </div>
+          }
+        />
+      }
+    >
+      <section className="ld-section first" aria-label="The plans">
+        {catalogue ? (
+          <PlanGrid catalogue={catalogue} />
+        ) : (
+          <p className="ps-muted">{failed ? 'We couldn’t load the plans just now. Please try again in a moment.' : 'Loading the plans…'}</p>
+        )}
+      </section>
+      <section className="ld-section pr-every" aria-labelledby="pr-every">
+        <div>
+          <span className="ps-eyebrow">In every plan, free included</span>
+          <h2 id="pr-every" className="sj-display">
+            The things that matter most are never locked
+          </h2>
+        </div>
+        <ul>
+          {EVERY_PLAN.map((item) => (
+            <li key={item}>
+              <IconCheck size={18} />
+              {item}
+            </li>
+          ))}
+        </ul>
+      </section>
+      <section className="ld-section ps-split" aria-labelledby="ps-pay-faq">
         <div>
           <span className="ps-eyebrow">Paying</span>
           <h2 id="ps-pay-faq" className="sj-display">
-            Simple, one-off payments
+            Questions about paying
           </h2>
-          <p className="ps-muted">You pay once for a set length. Nothing renews by itself, and Paystack handles your card.</p>
+          <p className="ps-muted">Can’t find your answer? A person reads every message.</p>
+          <Link to="/contact" className="ps-textlink">
+            Contact us <IconArrowRight size={16} />
+          </Link>
         </div>
         <FaqList items={paying} />
+      </section>
+      <section className="ld-section pr-schools">
+        <span className="ps-letter t2" aria-hidden="true">
+          <IconUser size={22} />
+        </span>
+        <div>
+          <h2 className="sj-display">For schools and lesson centres</h2>
+          <p>Preparing a class for the UTME? Tell us about your students and we’ll talk about what would work for you.</p>
+        </div>
+        <Link to="/contact" className="sj-btn ghost">
+          Talk to us
+        </Link>
       </section>
     </SiteShell>
   );
@@ -202,25 +240,63 @@ const BELIEFS = [
   },
 ];
 
+const CHECKED = [
+  { icon: IconBook, title: 'From the real paper', body: 'Each question comes from a UTME paper and keeps its year. A broken one is rebuilt on the same idea.' },
+  { icon: IconSparkles, title: 'Worked through', body: 'Every question gets a full worked solution and a lesson, step by step.' },
+  { icon: IconCheck, title: 'Checked by people', body: 'Reviewers check the answer and the working before the question goes live.' },
+  { icon: IconFlag, title: 'Fixed for everyone', body: 'Any student can report a question. A person looks at every report and fixes it.' },
+];
+
 export function AboutPage() {
   useSiteTitle('About');
   const site = useSite();
   return (
-    <SiteShell>
-      <PageHead
-        eyebrow="About"
-        title="Every candidate deserves a good teacher"
-        sub="Stack Prep is made by StackJunior to give every UTME candidate what the best-prepared ones have: a clear picture of where they stand, and someone to explain what they got wrong."
-      />
-      <section className="ps-section ps-band" aria-labelledby="ps-believe">
-        <div className="ps-head">
-          <span className="ps-eyebrow">What we believe</span>
-          <h2 id="ps-believe" className="sj-display">Four things we won’t compromise on</h2>
+    <SiteShell
+      hero={
+        <SiteHero
+          eyebrow="About Stack Prep"
+          title={
+            <>
+              Every candidate deserves <em>a good teacher.</em>
+            </>
+          }
+          sub="Stack Prep is made by StackJunior to give every UTME candidate what the best-prepared ones have: a clear picture of where they stand, and someone to explain what they got wrong."
+          art={
+            <Facts
+              items={[
+                { big: questionsWord(site), small: 'real UTME past questions' },
+                { big: String(site?.subjects.length || 10), small: 'UTME subjects' },
+                { big: `${site?.worked_percent ?? 100}%`, small: 'with checked worked solutions' },
+                { big: '1', small: 'lesson for every question' },
+              ]}
+            />
+          }
+        />
+      }
+    >
+      <section className="ld-section first ab-why">
+        <div>
+          <span className="ps-eyebrow">Why we built it</span>
+          <h2 className="sj-display">A mark tells you that you’re wrong. A teacher tells you why.</h2>
         </div>
-        <div className="ps-reasons">
-          {BELIEFS.map(({ icon: Icon, title, body }) => (
-            <article key={title} className="ps-reason">
-              <span className="ps-reason-icon" aria-hidden="true">
+        <div className="ab-why-text">
+          <p>
+            Most candidates prepare with past questions and an answer key. When they get one wrong, they see the right letter
+            and move on, often still not knowing why. In a big class there isn’t time to go through every question with every
+            student.
+          </p>
+          <p>
+            Stack Prep gives every question its own lesson, and a coach who answers when you’re stuck. It finds the topics
+            pulling your score down and keeps you on them until they come right.
+          </p>
+        </div>
+      </section>
+      <section className="ld-section ld-more" aria-labelledby="ab-believe">
+        <Head eyebrow="What we believe" title="Four things we won’t compromise on" />
+        <div className="ld-more-grid four">
+          {BELIEFS.map(({ icon: Icon, title, body }, index) => (
+            <article key={title}>
+              <span className={`ps-letter t${index}`} aria-hidden="true">
                 <Icon size={20} />
               </span>
               <h3>{title}</h3>
@@ -229,26 +305,37 @@ export function AboutPage() {
           ))}
         </div>
       </section>
+      <section className="ld-section" aria-labelledby="ab-checked">
+        <Head eyebrow="The question bank" title="How every answer is checked" center />
+        <ol className="ab-steps">
+          {CHECKED.map(({ icon: Icon, title, body }, index) => (
+            <li key={title}>
+              <span className="ab-step-n">{String(index + 1).padStart(2, '0')}</span>
+              <span className={`ps-letter t${index}`} aria-hidden="true">
+                <Icon size={20} />
+              </span>
+              <h3>{title}</h3>
+              <p>{body}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
       {site && site.subjects.length > 0 ? (
-        <section className="ps-section" aria-labelledby="ps-bank">
-          <div className="ps-head">
-            <span className="ps-eyebrow">The question bank</span>
-            <h2 id="ps-bank" className="sj-display">
-              {roughly(site.questions)} real UTME questions, {site.worked_percent}% with worked solutions
-            </h2>
-          </div>
-          <div className="ps-bank">
-            {site.subjects.map((subject) => (
-              <div key={subject.name} className="ps-bank-row">
-                <strong>{subject.name}</strong>
-                <span>{subject.questions.toLocaleString('en-NG')} questions</span>
-                <span className="ps-muted">{yearsOf(subject)}</span>
-              </div>
+        <section className="ld-section ab-subjects" aria-labelledby="ab-subjects">
+          <Head eyebrow="Subjects" title={`${site.subjects.length} UTME subjects`} />
+          <ul>
+            {site.subjects.map((subject, index) => (
+              <li key={subject.name}>
+                <span className={`ps-letter t${index % 6}`} aria-hidden="true">
+                  {subject.name.slice(0, 1)}
+                </span>
+                {subject.name}
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
       ) : null}
-      <Final title="Try it for yourself" sub="Start free, and see where you stand in about 15 questions." />
+      <FinalCall title="Try it for yourself." sub="Start free, and see where you stand in about 15 questions." />
     </SiteShell>
   );
 }
@@ -291,17 +378,43 @@ export function ContactPage() {
       .finally(() => setBusy(false));
   };
 
+  const ways = (
+    <div className="ps-promises">
+      {settings?.support_email ? (
+        <a href={`mailto:${settings.support_email}`}>
+          <IconMail size={18} /> {settings.support_email}
+        </a>
+      ) : null}
+      {settings?.support_whatsapp ? (
+        <a href={`https://wa.me/${settings.support_whatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer">
+          <IconSend size={18} /> WhatsApp {settings.support_whatsapp}
+        </a>
+      ) : null}
+      <span>
+        <IconPause size={18} /> Usually a reply within a day
+      </span>
+    </div>
+  );
+
   return (
-    <SiteShell>
-      <PageHead
-        eyebrow="Contact"
-        title="Talk to a person"
-        sub="A question before you sign up, a school or a partnership, or something not working: write to us and a person replies, usually within a day."
-      />
-      <div className="ps-contact">
+    <SiteShell
+      hero={
+        <SiteHero
+          eyebrow="Contact"
+          title={
+            <>
+              Talk to <em>a person.</em>
+            </>
+          }
+          sub="A question before you sign up, a school or a partnership, or something not working: write to us and a person replies."
+          art={ways}
+        />
+      }
+    >
+      <div className="ps-contact first">
         {sent ? (
           <div className="ps-card ps-sent" role="status">
-            <span className="ps-reason-icon" aria-hidden="true">
+            <span className="ps-letter t1" aria-hidden="true">
               <IconCheck size={22} />
             </span>
             <h2 className="sj-display">Thank you, {form.name.trim().split(' ')[0]}</h2>
@@ -309,6 +422,10 @@ export function ContactPage() {
           </div>
         ) : (
           <form className="ps-card ps-form" onSubmit={send} noValidate>
+            <div>
+              <h2 className="sj-display ps-form-title">Send us a message</h2>
+              <p className="ps-muted">All fields are needed so we can reply.</p>
+            </div>
             <div className="ps-form-two">
               <div className="sj-field">
                 <label htmlFor={`${ids}-name`}>Your name</label>
@@ -327,29 +444,31 @@ export function ContactPage() {
                 />
               </div>
             </div>
-            <div className="sj-field">
-              <label htmlFor={`${ids}-topic`}>What is it about?</label>
-              <Select
-                id={`${ids}-topic`}
-                value={topic}
-                placeholder="Choose one"
-                onChange={(value) => {
-                  setTopic(value as SupportTopic);
-                  setProblem(null);
-                }}
-                options={SUPPORT_TOPICS}
-              />
-            </div>
-            <div className="sj-field">
-              <label htmlFor={`${ids}-subject`}>Title</label>
-              <input id={`${ids}-subject`} className="sj-input" maxLength={120} value={form.subject} onChange={(e) => set('subject', e.target.value)} />
+            <div className="ps-form-two">
+              <div className="sj-field">
+                <label htmlFor={`${ids}-topic`}>What is it about?</label>
+                <Select
+                  id={`${ids}-topic`}
+                  value={topic}
+                  placeholder="Choose one"
+                  onChange={(value) => {
+                    setTopic(value as SupportTopic);
+                    setProblem(null);
+                  }}
+                  options={SUPPORT_TOPICS}
+                />
+              </div>
+              <div className="sj-field">
+                <label htmlFor={`${ids}-subject`}>Title</label>
+                <input id={`${ids}-subject`} className="sj-input" maxLength={120} value={form.subject} onChange={(e) => set('subject', e.target.value)} />
+              </div>
             </div>
             <div className="sj-field">
               <label htmlFor={`${ids}-body`}>Your message</label>
               <textarea
                 id={`${ids}-body`}
                 className="sj-input ps-textarea"
-                rows={6}
+                rows={7}
                 maxLength={4000}
                 value={form.body}
                 onChange={(e) => set('body', e.target.value)}
@@ -386,35 +505,18 @@ export function ContactPage() {
             </div>
           ) : null}
           <div className="ps-card ps-side-card">
-            <h3>Other ways to reach us</h3>
-            {settings?.support_email || settings?.support_whatsapp ? (
-              <ul className="ps-ways">
-                {settings.support_email ? (
-                  <li>
-                    <IconMail size={18} />
-                    <a href={`mailto:${settings.support_email}`}>{settings.support_email}</a>
-                  </li>
-                ) : null}
-                {settings.support_whatsapp ? (
-                  <li>
-                    <IconSend size={18} />
-                    <a href={`https://wa.me/${settings.support_whatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer">
-                      WhatsApp {settings.support_whatsapp}
-                    </a>
-                  </li>
-                ) : null}
-              </ul>
-            ) : (
-              <p>This form reaches the whole team.</p>
-            )}
-          </div>
-          <div className="ps-card ps-side-card">
+            <span className="ps-letter t2" aria-hidden="true">
+              <IconUser size={20} />
+            </span>
             <h3>Schools and lesson centres</h3>
             <p>Preparing a class for the UTME? Tell us about your students and how many there are, and we’ll talk about what would work for you.</p>
           </div>
           <div className="ps-card ps-side-card">
+            <span className="ps-letter t3" aria-hidden="true">
+              <IconSparkles size={20} />
+            </span>
             <h3>Quick answers</h3>
-            <p>Plans, payments, accounts and how the score works are in the FAQ.</p>
+            <p>Plans, payments, accounts and how the score works are all in the FAQ.</p>
             <Link to="/faq" className="ps-textlink">
               Read the FAQ <IconArrowRight size={16} />
             </Link>
