@@ -100,6 +100,8 @@ export interface PracticeFocus {
   subtopicIds?: string[];
   topicIds?: string[];
   examYears?: number[];
+  /** A revision run of the bookmarked questions. */
+  bookmarked?: boolean;
   length?: number;
   /** What the student would call the choice ("Indices"), for when it has nothing fresh left. */
   label?: string;
@@ -114,7 +116,7 @@ export interface NothingFresh {
 }
 
 const isNarrowed = (focus: PracticeFocus) =>
-  Boolean(focus.subtopicIds?.length || focus.topicIds?.length || focus.examYears?.length);
+  Boolean(focus.bookmarked || focus.subtopicIds?.length || focus.topicIds?.length || focus.examYears?.length);
 
 /**
  * Starts a practice run and takes the student into it. `key` only marks which button spins;
@@ -143,8 +145,9 @@ export function useStartPractice() {
         subtopic_ids: focus.subtopicIds?.length ? focus.subtopicIds : undefined,
         topic_ids: focus.topicIds?.length ? focus.topicIds : undefined,
         exam_years: focus.examYears?.length ? focus.examYears : undefined,
+        bookmarked: focus.bookmarked || undefined,
       });
-      toast('New run started');
+      toast(focus.bookmarked ? 'Revising your bookmarks' : 'New run started');
       navigate(`/practice/${run.session_id}`);
     } catch (failure) {
       setBusy(null);

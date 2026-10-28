@@ -1515,3 +1515,40 @@ async def test_practice_is_locked_until_the_first_check_up(
 
     await checkup_done(fixture["student"], fixture["subject_id"])
     assert (await client.post("/v1/practice/start", json=body)).status_code == 200
+
+
+async def test_a_bookmark_run_revises_the_kept_questions_oldest_first(
+    client: httpx.AsyncClient, fixture: dict[str, str]
+) -> None:
+    body = {"student_id": fixture["student"], "subject_id": fixture["subject_id"], "length": 10}
+    nothing = await client.post("/v1/practice/start", json={**body, "bookmarked": True})
+    assert nothing.status_code == 422
+
+    async with get_engine().connect() as conn:
+        versions = [
+            str(v)
+            for v in (
+                await conn.execute(
+                    text(
+                        "SELECT current_version_id FROM questions "
+                        "WHERE subject_id = CAST(:s AS uuid) ORDER BY id"
+                    ),
+                    {"s": fixture["subject_id"]},
+                )
+            ).scalars()
+        ]
+    kept = versions[:2]
+    for version in kept:
+        put = await client.put(f"/v1/student/{fixture['student']}/bookmarks/{version}")
+        assert put.status_code == 200, put.text
+
+    started = await client.post("/v1/practice/start", json={**body, "bookmarked": True})
+    assert started.status_code == 200, started.text
+    state = started.json()
+    assert state["length"] == 2
+    assert state["filters"]["bookmarked"] is True
+    assert state["question"]["question_version_id"] == kept[0]
+    state = await answer(client, state["session_id"], state, "A")
+    assert state["question"]["question_version_id"] == kept[1]
+    state = await answer(client, state["session_id"], state, "A")
+    assert state["stage"] == "finished"

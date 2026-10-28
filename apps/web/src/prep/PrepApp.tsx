@@ -29,6 +29,7 @@ import { PracticeHub } from './pages/PracticeHub.js';
 import { PracticeRoom } from './pages/PracticeRoom.js';
 import { Profile } from './pages/Profile.js';
 import { Settings } from './pages/Settings.js';
+import { Bookmarks } from './pages/Bookmarks.js';
 import { Progress } from './pages/Progress.js';
 import { RunBuilder } from './pages/RunBuilder.js';
 import { RunReport } from './pages/RunReport.js';
@@ -77,6 +78,7 @@ export function PrepApp() {
                 <Route path="/progress/check-ins" element={<CheckIns />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/bookmarks" element={<Bookmarks />} />
                 <Route path="/help" element={<Help />} />
                 <Route path="/help/numbers" element={<HelpNumbers />} />
                 <Route path="/how-its-worked-out" element={<HowItsWorkedOutRedirect />} />

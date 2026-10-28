@@ -33,6 +33,8 @@ export interface RunFilters {
   topic_ids: string[];
   subtopic_ids: string[];
   exam_years: number[];
+  /** A revision run of the student's bookmarked questions. */
+  bookmarked?: boolean;
 }
 
 export interface StartRunIn {
@@ -42,6 +44,8 @@ export interface StartRunIn {
   topic_ids?: string[];
   subtopic_ids?: string[];
   exam_years?: number[];
+  /** Revise the bookmarked questions in this subject; the other choices are then ignored. */
+  bookmarked?: boolean;
 }
 
 export type Confidence = 'sure' | 'unsure' | 'guessed';

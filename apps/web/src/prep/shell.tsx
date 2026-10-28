@@ -20,6 +20,7 @@ import {
   IconArrowLeft,
   IconBolt,
   IconBook,
+  IconBookmark,
   IconChart,
   IconCheck,
   IconCalendar,
@@ -60,6 +61,7 @@ const NAV = [
 
 /** Places a student goes less often than every day: under the main list, and in the phone menu. */
 const MORE = [
+  { to: "/bookmarks", label: "Bookmarks", icon: IconBookmark },
   { to: "/exams", label: "Exams & subjects", icon: IconBook },
   { to: "/help", label: "Help & guides", icon: IconHelp },
 ] as const;
@@ -287,6 +289,10 @@ function ProfileMenu({
           <Link to="/settings" role="menuitem" className="sj-account-item">
             <IconSettings size={18} />
             Account settings
+          </Link>
+          <Link to="/bookmarks" role="menuitem" className="sj-account-item">
+            <IconBookmark size={18} />
+            Bookmarks
           </Link>
           <Link to="/exams" role="menuitem" className="sj-account-item">
             <IconBook size={18} />

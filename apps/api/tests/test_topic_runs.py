@@ -40,6 +40,7 @@ async def test_a_subtopic_run_only_ever_serves_that_subtopic(
         "topic_ids": [],
         "subtopic_ids": [bank["Algebra"]["subtopic"]],
         "exam_years": [],
+        "bookmarked": False,
     }
     # Algebra has three questions, so a run of ten is three.
     assert state["length"] == 3

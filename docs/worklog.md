@@ -13,6 +13,35 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ---
 
+## 2026-10-28
+
+### Report a question, bookmarks, and an admin Reports page (plan phase 5)
+- **Why:** the founder asked that students can report a question, above all during an exam,
+  and that reports reach the admin side; and that bookmarked questions can be revised as a
+  practice run.
+- **What:** every question now carries **Bookmark** and **Report** buttons: in practice, in
+  check-ups, in the mock room while the clock runs, and when looking back over an answer (the
+  mock report's question view and a run's report). On a phone they shrink to icons. Report
+  opens a short form (what is wrong, plus an optional note); during a mock it says the timer
+  keeps running. A student can send at most 30 reports a day, and a second report on the same
+  question is acknowledged without a duplicate. New page `/bookmarks` (sidebar "More" and the
+  account menu) lists kept questions by subject, newest first, with "Revise N in a run",
+  which starts a practice run of up to 20 of them, oldest first. Questions pulled for checking
+  stay listed but are left out of runs. Admins get a **Reports** page at `/admin` with an
+  open count in the nav; each report shows the question, the student, where they were and
+  their note, and is closed as fixed or not a problem with a note. Keyboard answer shortcuts
+  in the practice and mock rooms now pause while any dialog is open, so typing in the report
+  form cannot answer the question behind it.
+- **Where:** `database/migrations/034_bookmarks_and_student_reports.sql`,
+  `apps/api/src/app/routers/saved.py`, `routers/admin.py` (reports), `routers/practice.py`
+  (bookmark runs); `apps/web/src/prep/QuestionTools.tsx`, `savedApi.ts`,
+  `pages/Bookmarks.tsx`, `apps/web/src/admin/ReportsPage.tsx`; tests in `tests/test_saved.py`
+  and `tests/test_practice.py`.
+- **Checked:** all 525 API tests against the local database, the web tests and build;
+  screenshots at 1440 and 390 of Bookmarks, the tools in a practice run, the report form in
+  practice and during a mock, the mock report's question view, and the admin Reports page.
+- **Status:** committed, not pushed (deploys wait on GitHub billing).
+
 ## 2026-10-27
 
 ### Forgot password, account settings, school and aim in onboarding (plan phase 4)

@@ -24,6 +24,7 @@ import { NextSteps, Section, SummaryHero, TimeInsights, TopicBreakdown, Trend, W
 import './Mock.css';
 import './MockInsights.css';
 import { friendly } from '../../lib/friendlyError.js';
+import { QuestionTools } from '../QuestionTools.js';
 
 const EVENT_WORDS: Record<EventKind, string> = {
   fullscreen_enter: 'Entered full screen',
@@ -189,9 +190,12 @@ function QuestionModal({
               {OUTCOME_WORD[item.outcome]}
             </span>
             {item.flagged ? <span className="mk-review-flag">Flagged</span> : null}
-            <button type="button" className="mk-modal-close" onClick={onClose} aria-label="Close">
-              <IconClose size={18} />
-            </button>
+            <span className="mk-modal-tools">
+              <QuestionTools versionId={item.question_version_id} where="review" />
+              <button type="button" className="mk-modal-close" onClick={onClose} aria-label="Close">
+                <IconClose size={18} />
+              </button>
+            </span>
           </header>
 
           <div className="mk-modal-body">

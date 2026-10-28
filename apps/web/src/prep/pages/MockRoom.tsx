@@ -32,6 +32,7 @@ import { usePageTitle, useStudent } from '../store.js';
 import { Button, Dialog, Spinner, cx } from '../ui.js';
 import './MockRoom.css';
 import { friendly } from '../../lib/friendlyError.js';
+import { QuestionTools } from '../QuestionTools.js';
 
 interface Mark {
   choice: string | null;
@@ -427,6 +428,8 @@ function Exam({ paper }: { paper: MockPaper }) {
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (blocked || event.ctrlKey || event.metaKey || event.altKey) return;
+      // A report dialog is open: its keys are its own, not answers.
+      if (document.querySelector('.sj-dialog')) return;
       const target = event.target as HTMLElement | null;
       if (target?.closest('.mx-calc') || target?.closest('input, textarea')) return;
       const key = event.key.toLowerCase();
@@ -558,6 +561,7 @@ function Exam({ paper }: { paper: MockPaper }) {
       <div className="mx-body">
         <main className="mx-main">
           <QuestionCard
+            mockId={mockId}
             question={question}
             number={questionIndex + 1}
             total={subject.questions.length}
@@ -732,6 +736,7 @@ function Exam({ paper }: { paper: MockPaper }) {
 /* ------------------------------------------------------------------ question */
 
 function QuestionCard({
+  mockId,
   question,
   number,
   total,
@@ -741,6 +746,7 @@ function QuestionCard({
   onChoose,
   onClear,
 }: {
+  mockId: string;
   question: PaperQuestion;
   number: number;
   total: number;
@@ -758,11 +764,14 @@ function QuestionCard({
           Question {number}
           <span> of {total}</span>
         </span>
-        {flagged ? (
-          <span className="mx-flagtag">
-            <FlagIcon size={14} /> Flagged
-          </span>
-        ) : null}
+        <span className="qt-group">
+          {flagged ? (
+            <span className="mx-flagtag">
+              <FlagIcon size={14} /> Flagged
+            </span>
+          ) : null}
+          <QuestionTools versionId={question.question_version_id} where="mock" sessionId={mockId} />
+        </span>
       </header>
 
       {question.passage_body ? (

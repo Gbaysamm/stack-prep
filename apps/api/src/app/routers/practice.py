@@ -155,18 +155,23 @@ class RunFilters(BaseModel):
     A question qualifies when its subtopic is one of `subtopic_ids` or sits under one of
     `topic_ids` (both empty means no narrowing by subject matter), and, when `exam_years` is
     given, it was set in one of those years.
+
+    `bookmarked` is a revision run instead: the student's bookmarked questions in the subject,
+    the oldest bookmark first, met before or not (migration 034).
     """
 
     topic_ids: list[UUID] = Field(default_factory=list)
     subtopic_ids: list[UUID] = Field(default_factory=list)
     exam_years: list[int] = Field(default_factory=list)
+    bookmarked: bool = False
 
     def is_empty(self) -> bool:
-        return not (self.topic_ids or self.subtopic_ids or self.exam_years)
+        return not (self.topic_ids or self.subtopic_ids or self.exam_years or self.bookmarked)
 
 
 #: Said when a student's choice leaves nothing to ask.
 NOTHING_MATCHES = "No questions match that choice yet. Try more topics or years."
+NO_BOOKMARKS = "You have no bookmarked questions to revise in this subject yet."
 
 
 class StartPractice(BaseModel):
@@ -179,8 +184,12 @@ class StartPractice(BaseModel):
     exam_years: list[Annotated[int, Field(ge=1900, le=2200)]] | None = Field(
         default=None, max_length=100
     )
+    #: Revise the bookmarked questions; the other filters are then ignored.
+    bookmarked: bool = False
 
     def filters(self) -> RunFilters | None:
+        if self.bookmarked:
+            return RunFilters(bookmarked=True)
         chosen = RunFilters(
             topic_ids=list(dict.fromkeys(self.topic_ids or [])),
             subtopic_ids=list(dict.fromkeys(self.subtopic_ids or [])),
@@ -410,6 +419,55 @@ async def _available(
         )
     ).scalar()
     return int(value or 0)
+
+
+#: A bookmarked question that can be practised: deliverable in the subject, not held out.
+_BOOKMARKED = """
+    SELECT dq.question_version_id, v.stem, v.instructions,
+           pg.title AS passage_title, pg.body AS passage_body,
+           sub.name AS subtopic_name, topic.name AS topic_name
+    FROM question_bookmarks b
+    JOIN deliverable_questions dq ON dq.question_id = b.question_id AND dq.subject_id = :subject
+    JOIN questions q ON q.id = dq.question_id AND q.usage_pool <> :pool
+    JOIN question_versions v ON v.id = dq.question_version_id
+    LEFT JOIN passages pg ON pg.id = v.passage_id
+    JOIN curriculum_items skill ON skill.id = dq.primary_skill_id
+    JOIN curriculum_items sub ON sub.id = skill.parent_id
+    JOIN curriculum_items topic ON topic.id = sub.parent_id
+    WHERE b.student_id = :student
+"""
+
+
+async def _bookmarks_available(conn: AsyncConnection, subject_id: UUID, student_id: UUID) -> int:
+    value = (
+        await conn.execute(
+            text(f"SELECT count(*) FROM ({_BOOKMARKED}) AS kept"),
+            {"subject": subject_id, "pool": EXCLUDED_POOL, "student": student_id},
+        )
+    ).scalar()
+    return int(value or 0)
+
+
+async def _next_bookmark(conn: AsyncConnection, session: dict[str, Any]) -> dict[str, Any] | None:
+    """The oldest bookmark not yet asked in this run."""
+    rows = await fetch_all(
+        conn,
+        _BOOKMARKED
+        + """
+          AND NOT EXISTS (
+              SELECT 1 FROM attempts a
+              JOIN question_versions av ON av.id = a.question_version_id
+              WHERE a.session_id = :session AND av.question_id = b.question_id
+          )
+        ORDER BY b.created_at, b.question_id
+        LIMIT 1
+        """,
+        subject=session["subject_id"],
+        pool=EXCLUDED_POOL,
+        student=session["student_id"],
+        session=session["id"],
+    )
+    return rows[0] if rows else None
 
 
 async def _standings_from_history(
@@ -716,6 +774,15 @@ async def _state(
                 hints_used=await _hints_used(conn, session["id"], repeat_version_id),
                 figures=await figures_for(conn, repeat_version_id),
             )
+    elif stage == "asking" and seen < length and filters is not None and filters.bookmarked:
+        kept = await _next_bookmark(conn, session)
+        if kept is not None:
+            question = PracticeQuestion(
+                **dict(kept),
+                options=await _options(conn, kept["question_version_id"]),
+                hints_used=0,
+                figures=await figures_for(conn, kept["question_version_id"]),
+            )
     elif stage == "asking" and seen < length:
         plan = await _plan(conn, session["student_id"], session["subject_id"], filters)
         years = filters.exam_years if filters is not None else None
@@ -847,7 +914,12 @@ async def start(
         raise HTTPException(status_code=423, detail=locked)
     length = body.length
     filters = body.filters()
-    if filters is not None:
+    if filters is not None and filters.bookmarked:
+        available = await _bookmarks_available(conn, body.subject_id, body.student_id)
+        if available == 0:
+            raise HTTPException(status_code=422, detail=NO_BOOKMARKS)
+        length = min(length, available)
+    elif filters is not None:
         # A custom run is shortened to what its choice can actually serve, and refused
         # outright when that is nothing, rather than started and finished on the spot.
         units, _ = await _subtopics(conn, body.subject_id)

@@ -72,6 +72,7 @@ import {
 import "./CheckIns.css";
 import "./PracticeRoom.css";
 import { friendly } from '../../lib/friendlyError.js';
+import { QuestionTools } from "../QuestionTools.js";
 
 type Confidence = "sure" | "unsure" | "guessed";
 
@@ -534,6 +535,8 @@ export function PracticeRoom() {
     const options = state.question.options;
     const onKey = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
+      // A report dialog is open: its keys are its own, not answers.
+      if (document.querySelector(".sj-dialog")) return;
       const target = event.target as HTMLElement | null;
       if (
         target?.closest('input, textarea, select, [contenteditable="true"], a')
@@ -1013,6 +1016,7 @@ function Asking({
                 </Badge>
               </span>
             ) : null}
+            <QuestionTools versionId={question.question_version_id} where="practice" sessionId={state.session_id} />
           </div>
         </header>
 
@@ -1237,6 +1241,7 @@ function Result({
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "Enter" || event.metaKey || event.ctrlKey || event.altKey)
         return;
+      if (document.querySelector(".sj-dialog")) return;
       const target = event.target as HTMLElement | null;
       if (target?.closest("button, a, input, textarea, select")) return;
       event.preventDefault();

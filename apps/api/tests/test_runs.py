@@ -279,7 +279,12 @@ async def test_a_year_narrows_the_run_and_shortens_it(
     response = await start(client, fixture, length=10, exam_years=[2016])
     assert response.status_code == 200, response.text
     state = response.json()
-    assert state["filters"] == {"topic_ids": [], "subtopic_ids": [], "exam_years": [2016]}
+    assert state["filters"] == {
+        "topic_ids": [],
+        "subtopic_ids": [],
+        "exam_years": [2016],
+        "bookmarked": False,
+    }
     # Three questions were set in 2016, so a run of ten is three.
     assert state["length"] == 3
 

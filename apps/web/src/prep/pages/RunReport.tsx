@@ -19,6 +19,7 @@ import { useLoad, usePageTitle } from '../store.js';
 import { Button, Dialog, PageHero, Ring, Skeleton, cx, useToast } from '../ui.js';
 import './RunReport.css';
 import { friendly } from '../../lib/friendlyError.js';
+import { QuestionTools } from '../QuestionTools.js';
 
 /* ------------------------------------------------------------------ icons only these pages use */
 
@@ -265,7 +266,9 @@ function ScopeLine({ data }: { data: RunReview }) {
   const years = yearsLabel(data.filters?.exam_years ?? []);
   // JAMB's topics (the DB subtopics), not its sections.
   const topicCount = new Set(data.items.map((item) => item.subtopic_name ?? item.topic_name).filter(Boolean)).size;
-  if (data.filters && (data.filters.topic_ids.length > 0 || data.filters.subtopic_ids.length > 0)) {
+  if (data.filters?.bookmarked) {
+    bits.push('your bookmarks');
+  } else if (data.filters && (data.filters.topic_ids.length > 0 || data.filters.subtopic_ids.length > 0)) {
     bits.push('your choice of topics');
   } else if (topicCount > 0) {
     bits.push(`${topicCount} ${topicCount === 1 ? 'topic' : 'topics'}`);
@@ -562,6 +565,11 @@ function QuestionCard({
 
       <div className="rr-qbody" id={bodyId} role="region" aria-label={`Question ${item.position}`}>
         <div className="rr-qbody-in">
+          {open ? (
+            <div className="rr-qtools">
+              <QuestionTools versionId={item.question_version_id} where="review" />
+            </div>
+          ) : null}
           {item.passage_body ? <Passage title={item.passage_title} body={item.passage_body} /> : null}
           {item.instructions ? (
             <p className="rr-instructions">

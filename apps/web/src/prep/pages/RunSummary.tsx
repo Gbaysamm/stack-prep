@@ -167,7 +167,7 @@ export function RunSummary() {
   // not by whatever the plan would pick. Only a general run gets a general run.
   const chosen = (state.data as (PracticeState & { filters?: RunFilters | null }) | null)?.filters ?? null;
   const narrowed = Boolean(
-    chosen && (chosen.subtopic_ids.length || chosen.topic_ids.length || chosen.exam_years.length),
+    chosen && (chosen.bookmarked || chosen.subtopic_ids.length || chosen.topic_ids.length || chosen.exam_years.length),
   );
   const again = () => {
     if (!run) return;
@@ -178,7 +178,8 @@ export function RunSummary() {
         subtopicIds: chosen?.subtopic_ids,
         topicIds: chosen?.topic_ids,
         examYears: chosen?.exam_years,
-        label: "the topics this run was on",
+        bookmarked: chosen?.bookmarked,
+        label: chosen?.bookmarked ? "your bookmarks" : "the topics this run was on",
       },
       "again",
     );

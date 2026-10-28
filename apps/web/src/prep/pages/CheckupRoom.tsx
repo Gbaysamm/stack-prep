@@ -24,6 +24,7 @@ import { usePageTitle, useStudent } from '../store.js';
 import { Badge, Button, Ring, Skeleton, Spinner, cx } from '../ui.js';
 import './CheckupRoom.css';
 import { friendly } from '../../lib/friendlyError.js';
+import { QuestionTools } from '../QuestionTools.js';
 
 const clockOf = (seconds: number) =>
   `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
@@ -308,10 +309,13 @@ export function CheckupRoom() {
                   QUESTION {pad2(question.position)}
                   <span className="of"> / {pad2(total)}</span>
                 </span>
-                {/* JAMB's topic when the server names it; older servers only send the section. */}
-                <Badge className="cr-topic">
-                  {question.subtopic_name ?? question.topic_name}
-                </Badge>
+                <span className="qt-group">
+                  {/* JAMB's topic when the server names it; older servers only send the section. */}
+                  <Badge className="cr-topic">
+                    {question.subtopic_name ?? question.topic_name}
+                  </Badge>
+                  <QuestionTools versionId={question.question_version_id} where="checkup" sessionId={sessionId} />
+                </span>
               </header>
 
               {question.passage_body ? (

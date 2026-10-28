@@ -30,6 +30,7 @@ from app.routers import (
     publishing,
     review,
     runs,
+    saved,
     student,
 )
 
@@ -69,6 +70,7 @@ def create_app() -> FastAPI:
     app.include_router(mouth.router)
     app.include_router(figures.router)
     app.include_router(student.router)
+    app.include_router(saved.router)
     app.include_router(progress.router)
     app.include_router(runs.router)
     app.include_router(mock.router)
