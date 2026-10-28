@@ -15,6 +15,53 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-28
 
+### Admin dashboard, part B3: subjects, the question bank, question quality, mocks, check-ups
+- **Why:** the admin could see students and money but not the content itself, or which
+  questions were teaching the wrong thing (plan B, content pages).
+- **What:** a **Content** menu with **Subjects & topics** (each subject's questions, topics,
+  papers, worked solutions, students, how often answered right and open reports; open one for
+  its topics), the **Question bank** (search every live question by words or number, filter
+  by subject, sort by paper, most answered, least accurate or most reported; open one to see
+  how many chose each option with the key marked, the worked solution, lesson check-ins and
+  reports), and **Question quality**, the list to look at first: **Check the key** (more
+  students chose one wrong option than the key, the usual sign of a wrong key, so every
+  student is taught the right answer), most reported, lessons not landing, and most missed.
+  An **Activity** menu lists every **mock** sat (score, subjects, whether they left the test)
+  and every **check-up**. The dashboard's front page was redesigned after the founder said it
+  wasn't good enough: coloured icon tiles that link to their pages, a "waiting for someone"
+  list, quick-action tiles, subject badges, avatars for the newest students and payments.
+- **Fixed on the way:** the quality page failed when nobody had picked a question's key yet
+  (the key was looked up only among chosen options); the pages kept an old error after a
+  later load worked; "1 answers".
+- **Where:** `apps/api/src/app/routers/admin_content.py`; `apps/web/src/admin/ContentPages.tsx`,
+  `HomePage.tsx`, `AdminApp.tsx`, `staff/staff.css`; tests in `tests/test_admin_content.py`.
+- **Checked:** the API tests against the local database, the web tests and build;
+  screenshots at 1440 and 390 of each page.
+- **Status:** committed, not pushed (deploys wait on GitHub billing).
+
+### Admin dashboard, part B2: a front page, Engagement, Feature usage, AI usage, Revenue
+- **Why:** the founder couldn't find statistics in the admin dashboard
+  (docs/plans/2026-10-28-plans-admin-and-public-site.md, B).
+- **What:** `/admin` now opens on a **Dashboard**: ten figures (students and today's sign-ups,
+  active this week and today, questions live and topics covered, questions answered, mocks,
+  check-ups, money this month and today, students on a plan, open reports, support waiting),
+  each linking to its page; anything not set up (from System health); what's waiting for
+  someone (support and question reports); quick actions; questions per subject; the newest
+  students and the latest payments. The Phase 7 overview is now **Analytics**. New reports:
+  **Engagement** (active today, 7 and 30 days; how often students come back; minutes a day;
+  active students a day; weekly cohorts of new students and the share active each week after;
+  days active in the last 30), **Feature usage** (eleven features, each with its total, the
+  change on the period before and how many students used it, and a day-by-day chart of the
+  one chosen), **AI usage** (questions to the coach, answered by the model or not, tokens,
+  answer times, an estimated cost from the prices in Settings, by model, and who asks most),
+  and **Revenue** (taken all time, paying students and their share, per payer, discounts
+  given, money each month, and by plan, length and how they paid).
+- **Where:** `apps/api/src/app/routers/admin_reports.py`; `apps/web/src/admin/HomePage.tsx`,
+  `ReportPages.tsx`, `AdminApp.tsx`; tests in `tests/test_admin_reports.py`.
+- **Checked:** the API tests against the local database, the web tests and build;
+  screenshots at 1440 and 390 of each page.
+- **Status:** committed, not pushed (deploys wait on GitHub billing).
+
 ### Pricing & plans redesigned as a comparison table
 - **Why:** the founder didn't like the admin's Pricing & plans page: tall, mostly empty number
   cards, plan cards that left the right side of the page blank, prices run together in one
