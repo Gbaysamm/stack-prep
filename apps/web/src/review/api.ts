@@ -39,6 +39,11 @@ export interface Report {
   reason: string;
   detail: string | null;
   status: string;
+  /** student, reviewer or system. */
+  reporter_kind: string | null;
+  /** Where a student was when they flagged it: practice, mock, ... */
+  where: string | null;
+  created_at: string | null;
 }
 
 export interface QuestionDetail {
@@ -94,6 +99,17 @@ export interface PaperYear {
   questions: number;
 }
 
+export interface ReviewSubject {
+  subject_id: string;
+  name: string;
+  questions: number;
+  /** Questions with an open report. */
+  flagged: number;
+}
+
+/** Sent after any decision, so the flagged count in the menu can catch up. */
+export const REVIEW_CHANGED = 'stackprep:review-changed';
+
 export type QueueState =
   | 'needs_review'
   | 'needs_answer'
@@ -106,16 +122,24 @@ export type QueueState =
 const request = <T,>(path: string, init?: RequestInit) => send<T>(`/v1/review${path}`, init);
 
 export const api = {
-  queue: (state: QueueState, examYear: number | null) => {
+  queue: (state: QueueState, examYear: number | null, subjectId: string | null) => {
     const params = new URLSearchParams({ state, limit: '200' });
     if (examYear !== null) params.set('exam_year', String(examYear));
+    if (subjectId) params.set('subject_id', subjectId);
     return request<QueueItem[]>(`/queue?${params.toString()}`);
   },
 
-  years: () => request<PaperYear[]>('/years'),
+  subjects: () => request<ReviewSubject[]>('/subjects'),
 
-  progress: (examYear: number | null) =>
-    request<Progress>(`/progress${examYear !== null ? `?exam_year=${examYear}` : ''}`),
+  years: (subjectId: string | null) =>
+    request<PaperYear[]>(`/years${subjectId ? `?subject_id=${subjectId}` : ''}`),
+
+  progress: (examYear: number | null, subjectId: string | null) => {
+    const params = new URLSearchParams();
+    if (examYear !== null) params.set('exam_year', String(examYear));
+    if (subjectId) params.set('subject_id', subjectId);
+    return request<Progress>(`/progress?${params.toString()}`);
+  },
 
   question: (id: string) => request<QuestionDetail>(`/questions/${id}`),
 
@@ -158,9 +182,9 @@ export const api = {
       body: JSON.stringify({}),
     }),
 
-  resolveReport: (reportId: string, note: string) =>
+  resolveReport: (reportId: string, note: string, outcome: 'fixed' | 'rejected') =>
     request<{ status: string }>(`/reports/${reportId}/resolve`, {
       method: 'POST',
-      body: JSON.stringify({ note }),
+      body: JSON.stringify({ note, outcome }),
     }),
 };

@@ -25,23 +25,8 @@ const PREMIUM_GIVES = [
 ];
 
 function Allowance({ standing }: { standing: Standing }) {
-  if (standing.premium) {
-    return (
-      <div className="sj-card pl-now premium">
-        <span className="pl-now-icon" aria-hidden="true">
-          <IconSparkles size={22} />
-        </span>
-        <div>
-          <h2 className="sj-display sj-h3">You have Premium</h2>
-          <p>
-            {standing.premium_until
-              ? `It runs until ${longDate(standing.premium_until)}. Buying another plan adds its time after that.`
-              : 'Everything in Stack Prep is open to you.'}
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // Premium is said in the page's hero (Plans), not in a second dark card under it.
+  if (standing.premium) return null;
   if (!standing.free.limits_on) {
     return (
       <div className="sj-card pl-now">
@@ -142,8 +127,14 @@ export function Plans() {
     <div className="sj-page pro-page pl-page">
       <PageHero
         eyebrow="Premium"
-        title="Practise without limits"
-        sub="Pay once for the time you want. Nothing renews by itself, and you can pay by card, bank transfer or USSD."
+        title={standing.data?.premium ? 'You have Premium' : 'Practise without limits'}
+        sub={
+          standing.data?.premium
+            ? standing.data.premium_until
+              ? `It runs until ${longDate(standing.data.premium_until)}. Buying another plan adds its time after that.`
+              : 'Everything in Stack Prep is open to you.'
+            : 'Pay once for the time you want. Nothing renews by itself, and you can pay by card, bank transfer or USSD.'
+        }
       />
 
       {failed && loading ? (

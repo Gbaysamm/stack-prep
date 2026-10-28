@@ -12,8 +12,7 @@
 import { AdminApp } from './admin/AdminApp.js';
 import { CheckupPage } from './checkup/CheckupPage.js';
 import { PrepApp } from './prep/PrepApp.js';
-import { ReviewPage } from './review/ReviewPage.js';
-import { StaffGate } from './staff/StaffGate.js';
+import { ReviewApp } from './review/ReviewApp.js';
 
 const under = (path: string, base: string) => path === base || path.startsWith(`${base}/`);
 
@@ -24,13 +23,7 @@ export function App() {
     return null;
   }
   if (under(pathname, '/admin')) return <AdminApp />;
-  if (under(pathname, '/review')) {
-    return (
-      <StaffGate allow={['reviewer', 'admin']} title="Reviewer dashboard">
-        <ReviewPage />
-      </StaffGate>
-    );
-  }
+  if (under(pathname, '/review')) return <ReviewApp />;
   if (under(pathname, '/dev/checkup')) return <CheckupPage />;
   return <PrepApp />;
 }

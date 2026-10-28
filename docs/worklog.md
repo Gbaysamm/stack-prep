@@ -15,6 +15,34 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-28
 
+### The reviewer dashboard redesigned (plan phase 8), and one hero on the Premium page
+- **Why:** the founder asked for the reviewer dashboard in the same design as the rest of the
+  app. The old screen was unstyled, could not narrow to a subject (the bank now holds twelve),
+  and opened on an empty queue while flagged questions waited. Separately, the founder didn't
+  like two dark cards stacked at the top of `/plans` for a Premium student.
+- **What:** `/review` now uses the staff frame (sidebar on a laptop, menu on a phone), with
+  the flagged count beside Questions. The page shows progress meters (answers, levels and
+  skills checked, approved) and a Flagged tile that opens that queue; filters for queue,
+  **subject** and paper year; the queue beside the question on a laptop, and on a phone the
+  queue first with the question opening over it and a way back. The question panel: who
+  flagged it, where and why, closed in place as **fixed** or **not a problem** with a note;
+  the passage, stem and options with the key marked; level buttons; the skill and its
+  approval; the worked solution and hints; and an approve bar that says what is still
+  needed. The keyboard works as before (A–F, 1–5, S, Enter, J/K) and is ignored while typing.
+  An empty queue points to the flagged one. API: `subject_id` on `/v1/review/queue`,
+  `/years` and `/progress`; new `/v1/review/subjects` with flagged counts; reports in the
+  question detail say who and where; closing a report takes an outcome. On `/plans`, a
+  Premium student's hero now says "You have Premium" and when it ends, instead of a second
+  dark card under it.
+- **Where:** `apps/api/src/app/routers/review.py`; `apps/web/src/review/ReviewApp.tsx`,
+  `ReviewPage.tsx`, `review.css`, `api.ts`; the old reviewer rules removed from
+  `apps/web/src/styles.css`; `apps/web/src/prep/pages/Plans.tsx`; a test in
+  `tests/test_review.py`.
+- **Checked:** all 542 API tests against the local database, the web tests and build;
+  screenshots at 1440 and 390 of the empty queue, the flagged queue, a question open, closing
+  a report, and the Premium page for a Premium student.
+- **Status:** committed, not pushed (deploys wait on GitHub billing).
+
 ### The admin dashboard: overview with charts, students, and a full student profile (plan phase 7)
 - **Why:** the founder asked for a very comprehensive admin dashboard with charts and full
   student profiles, and the actions to look after accounts.

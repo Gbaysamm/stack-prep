@@ -12,6 +12,7 @@ so it must stay on a trusted network until ADR-0013 lands.
 from __future__ import annotations
 
 import json
+from datetime import datetime
 from typing import Annotated, Literal
 from uuid import UUID
 
@@ -69,6 +70,11 @@ class Report(BaseModel):
     reason: str
     detail: str | None
     status: str
+    #: Who flagged it: a student, a reviewer, or an automatic check.
+    reporter_kind: str | None = None
+    #: Where a student was when they flagged it (practice, mock, ...).
+    where: str | None = None
+    created_at: datetime | None = None
 
 
 class QuestionDetail(BaseModel):
@@ -117,6 +123,13 @@ class PaperYear(BaseModel):
     questions: int
 
 
+class ReviewSubject(BaseModel):
+    subject_id: UUID
+    name: str
+    questions: int
+    flagged: int
+
+
 class Skill(BaseModel):
     id: UUID
     code: str
@@ -159,6 +172,8 @@ class ReportDecision(BaseModel):
     #: Ignored: the decision is recorded under the signed-in reviewer.
     reviewer_id: UUID | None = None
     note: str
+    #: Fixed (the question was corrected) or rejected (it was right as it stood).
+    outcome: Literal["fixed", "rejected"] = "fixed"
 
 
 class PaperSection(BaseModel):
@@ -219,6 +234,7 @@ async def queue(
     conn: Annotated[AsyncConnection, Depends(connection)],
     state: QueueFilter = "needs_review",
     exam_year: int | None = None,
+    subject_id: UUID | None = None,
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> list[QueueItem]:
@@ -234,6 +250,8 @@ async def queue(
         "approved": "r.review_status = 'approved'",
     }
     year_filter = "AND r.exam_year = :exam_year" if exam_year is not None else ""
+    if subject_id is not None:
+        year_filter += " AND r.subject_id = :subject_id"
     rows = await fetch_all(
         conn,
         f"""
@@ -255,19 +273,42 @@ async def queue(
         limit=limit,
         offset=offset,
         **({"exam_year": exam_year} if exam_year is not None else {}),
+        **({"subject_id": subject_id} if subject_id is not None else {}),
     )
     return [QueueItem(**row) for row in rows]
 
 
-@router.get("/years", response_model=list[PaperYear], summary="The paper years in the bank")
-async def years(conn: Annotated[AsyncConnection, Depends(connection)]) -> list[PaperYear]:
-    """Read from the bank, so a newly loaded paper appears in the filter without a release."""
+@router.get("/subjects", response_model=list[ReviewSubject], summary="Subjects in the bank")
+async def subjects(conn: Annotated[AsyncConnection, Depends(connection)]) -> list[ReviewSubject]:
+    """Each subject with questions, and how many of them carry an open report."""
     rows = await fetch_all(
         conn,
         """
-        SELECT exam_year, count(*) AS questions FROM question_readiness
-        WHERE exam_year IS NOT NULL GROUP BY exam_year ORDER BY exam_year
+        SELECT s.id AS subject_id, s.name, count(*) AS questions,
+               count(*) FILTER (WHERE EXISTS (
+                 SELECT 1 FROM question_reports rep
+                 WHERE rep.question_version_id = r.question_version_id
+                   AND rep.status IN ('open', 'triaged'))) AS flagged
+        FROM question_readiness r JOIN subjects s ON s.id = r.subject_id
+        GROUP BY s.id, s.name ORDER BY s.name
         """,
+    )
+    return [ReviewSubject(**row) for row in rows]
+
+
+@router.get("/years", response_model=list[PaperYear], summary="The paper years in the bank")
+async def years(
+    conn: Annotated[AsyncConnection, Depends(connection)], subject_id: UUID | None = None
+) -> list[PaperYear]:
+    """Read from the bank, so a newly loaded paper appears in the filter without a release."""
+    rows = await fetch_all(
+        conn,
+        f"""
+        SELECT exam_year, count(*) AS questions FROM question_readiness
+        WHERE exam_year IS NOT NULL {"AND subject_id = :subject_id" if subject_id else ""}
+        GROUP BY exam_year ORDER BY exam_year
+        """,
+        **({"subject_id": subject_id} if subject_id is not None else {}),
     )
     return [PaperYear(**row) for row in rows]
 
@@ -276,7 +317,12 @@ async def years(conn: Annotated[AsyncConnection, Depends(connection)]) -> list[P
 async def progress(
     conn: Annotated[AsyncConnection, Depends(connection)],
     exam_year: int | None = None,
+    subject_id: UUID | None = None,
 ) -> Progress:
+    where = [
+        *(["exam_year = :exam_year"] if exam_year is not None else []),
+        *(["subject_id = :subject_id"] if subject_id is not None else []),
+    ]
     rows = await fetch_all(
         conn,
         f"""
@@ -292,9 +338,10 @@ async def progress(
                  WHERE rep.question_version_id = question_readiness.question_version_id
                    AND rep.status IN ('open', 'triaged'))) AS flagged
         FROM question_readiness
-        {"WHERE exam_year = :exam_year" if exam_year is not None else ""}
+        {"WHERE " + " AND ".join(where) if where else ""}
         """,
         **({"exam_year": exam_year} if exam_year is not None else {}),
+        **({"subject_id": subject_id} if subject_id is not None else {}),
     )
     return Progress(**rows[0])
 
@@ -365,7 +412,9 @@ async def question_detail(
     reports = await fetch_all(
         conn,
         """
-        SELECT id, reason, detail, status FROM question_reports
+        SELECT id, reason, detail, status, reporter_kind,
+               attempt_context ->> 'where' AS "where", created_at
+        FROM question_reports
         WHERE question_version_id = :version AND status IN ('open', 'triaged')
         ORDER BY created_at
         """,
@@ -624,12 +673,17 @@ async def resolve_report(
         text(
             """
             UPDATE question_reports
-            SET status = 'fixed', resolved_by = :reviewer, resolved_at = now(),
+            SET status = :outcome, resolved_by = :reviewer, resolved_at = now(),
                 resolution_note = :note
             WHERE id = :id AND status IN ('open', 'triaged')
             """
         ),
-        {"id": report_id, "reviewer": decision.reviewer_id, "note": decision.note},
+        {
+            "id": report_id,
+            "reviewer": decision.reviewer_id,
+            "note": decision.note,
+            "outcome": decision.outcome,
+        },
     )
     await conn.commit()
     if result.rowcount == 0:

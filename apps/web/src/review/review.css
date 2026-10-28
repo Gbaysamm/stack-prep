@@ -1,0 +1,469 @@
+/* The reviewer dashboard (ReviewPage.tsx), in the staff frame. */
+
+.sj .rv-progress {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.sj .rv-meter {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--gray-200);
+  border-radius: 16px;
+  background: var(--white);
+  font: inherit;
+  text-align: left;
+}
+.sj .rv-meter > span:first-child {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--gray-600);
+}
+.sj .rv-meter strong {
+  font-family: var(--f-display);
+  font-size: 22px;
+  color: var(--ink-900);
+}
+.sj .rv-meter strong small {
+  font-family: var(--f-body, inherit);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-500);
+}
+.sj .rv-meter-track {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--purple-100);
+  overflow: hidden;
+}
+.sj .rv-meter-track span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--purple-600);
+}
+.sj .rv-flag {
+  cursor: pointer;
+}
+.sj .rv-flag.on {
+  border-color: var(--danger);
+  background: var(--danger-100);
+}
+.sj .rv-flag.on strong {
+  color: var(--danger);
+}
+.sj .rv-flag-note {
+  font-size: 12.5px;
+  color: var(--gray-600);
+}
+.sj .rv-flag:hover {
+  border-color: var(--purple-300);
+}
+
+.sj .rv-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.sj .rv-filters select {
+  width: 100%;
+  min-width: 0;
+}
+.sj .rv-error {
+  margin: 0 0 14px;
+}
+
+.sj .rv-body {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+.sj .rv-body .st-panel + .st-panel {
+  margin-top: 0;
+}
+.sj .rv-queue {
+  position: sticky;
+  top: 16px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  padding: 12px;
+}
+.sj .rv-queue-count {
+  margin: 4px 8px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-600);
+}
+.sj .rv-queue ol {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .rv-queue li button {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.sj .rv-queue li button:hover {
+  background: var(--purple-050);
+}
+.sj .rv-queue li button.on {
+  border-color: var(--purple-300);
+  background: var(--purple-050);
+}
+.sj .rv-q-id {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--purple-700);
+}
+.sj .rv-q-stem {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ink-900);
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.sj .rv-q-flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.sj .rv-chip {
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-style: normal;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.sj .rv-chip.good {
+  background: var(--green-100);
+  color: var(--green-600);
+}
+.sj .rv-chip.todo {
+  background: var(--gray-100);
+  color: var(--gray-600);
+}
+.sj .rv-chip.bad {
+  background: var(--danger-100);
+  color: var(--danger);
+}
+.sj .rv-empty {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  margin: 8px;
+  color: var(--gray-600);
+}
+.sj .rv-empty p {
+  margin: 0;
+}
+
+.sj .rv-detail {
+  display: grid;
+  /* One column the width of the panel: long working must wrap, never widen the page. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  min-width: 0;
+}
+.sj .rv-none {
+  min-height: 200px;
+  place-items: center;
+}
+.sj .rv-back {
+  display: none;
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--purple-700);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.sj .rv-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.sj .rv-detail-head h2 {
+  margin: 2px 0 0;
+}
+.sj .rv-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--purple-700);
+}
+.sj .rv-reports {
+  display: grid;
+  gap: 10px;
+}
+.sj .rv-report {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--danger-100);
+  border-left: 4px solid var(--danger);
+  border-radius: 12px;
+  background: #fff8f8;
+}
+.sj .rv-report header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  font-size: 13px;
+}
+.sj .rv-report blockquote {
+  margin: 0;
+  color: var(--ink-900);
+  font-size: 14.5px;
+}
+.sj .rv-report-close {
+  display: grid;
+  gap: 10px;
+}
+.sj .rv-passage {
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--purple-050);
+}
+.sj .rv-passage summary {
+  font-weight: 700;
+  color: var(--ink-900);
+  cursor: pointer;
+}
+.sj .rv-passage > div {
+  margin-top: 10px;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+.sj .rv-question {
+  display: grid;
+  gap: 8px;
+}
+.sj .rv-instruction {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--gray-600);
+}
+.sj .rv-stem {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--ink-900);
+}
+.sj .rv-block {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--gray-100);
+}
+.sj .rv-block h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gray-600);
+}
+.sj .rv-options {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .rv-options button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 14px 8px 8px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 12px;
+  background: var(--white);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.sj .rv-options button:hover:not(:disabled) {
+  border-color: var(--purple-300);
+}
+.sj .rv-options button.on {
+  border-color: var(--green-500);
+  background: var(--green-100);
+}
+.sj .rv-options button:disabled {
+  cursor: default;
+}
+.sj .rv-key {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 8px;
+  background: var(--white);
+  font-family: var(--f-mono, ui-monospace, monospace);
+  font-size: 13px;
+  font-weight: 700;
+}
+.sj .rv-options button.on .rv-key {
+  border-color: var(--green-500);
+  background: var(--green-500);
+  color: #fff;
+}
+.sj .rv-option-body {
+  flex: 1;
+  min-width: 0;
+}
+.sj .rv-source {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--gray-600);
+}
+.sj .rv-levels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.sj .rv-levels button {
+  min-width: 52px;
+  height: 38px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 10px;
+  background: var(--white);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.sj .rv-levels button.on {
+  border-color: var(--purple-600);
+  background: var(--purple-600);
+  color: #fff;
+}
+.sj .rv-levels button:disabled {
+  cursor: default;
+}
+.sj .rv-skill {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.sj .rv-skill select {
+  flex: 1 1 260px;
+  width: 100%;
+  min-width: 0;
+  text-overflow: ellipsis;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--gray-200);
+  border-radius: 10px;
+  background: var(--white);
+  font: inherit;
+  font-size: 14px;
+}
+.sj .rv-content textarea {
+  width: 100%;
+  resize: vertical;
+}
+.sj .rv-approve {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 0 -20px -20px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--gray-200);
+  border-radius: 0 0 18px 18px;
+  background: var(--white);
+  font-size: 13.5px;
+}
+.sj .rv-keys {
+  margin: 18px 0 0;
+  font-size: 12.5px;
+  color: var(--gray-500);
+}
+.sj .rv-keys kbd {
+  padding: 1px 6px;
+  border: 1px solid var(--gray-200);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: var(--white);
+  font-family: var(--f-mono, ui-monospace, monospace);
+  font-size: 11.5px;
+  color: var(--ink-900);
+}
+
+@media (max-width: 1100px) {
+  .sj .rv-progress {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+/* A phone or narrow window: the queue, then a question over it with a way back. */
+@media (max-width: 900px) {
+  .sj .rv-progress {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sj .rv-flag {
+    grid-column: 1 / -1;
+  }
+  .sj .rv-filters {
+    grid-template-columns: 1fr;
+  }
+  .sj .rv-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sj .rv-queue {
+    position: static;
+    max-height: none;
+  }
+  .sj .rv .rv-detail {
+    display: none;
+  }
+  .sj .rv.rv-open .rv-detail {
+    display: grid;
+  }
+  .sj .rv.rv-open .rv-queue,
+  .sj .rv.rv-open .rv-progress,
+  .sj .rv.rv-open .rv-filters,
+  .sj .rv.rv-open .st-pagehead,
+  .sj .rv.rv-open .rv-keys {
+    display: none;
+  }
+  .sj .rv-back {
+    display: block;
+  }
+  .sj .rv-approve {
+    margin: 0 -16px -16px;
+    padding: 12px 16px;
+  }
+}

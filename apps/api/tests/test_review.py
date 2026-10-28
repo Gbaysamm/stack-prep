@@ -431,3 +431,52 @@ async def test_only_a_signed_in_reviewer_or_admin_may_review(
             await remove([student])
         async with staff_login(other, "admin"):
             assert (await other.get("/v1/review/queue")).status_code == 200
+
+
+async def test_the_queue_narrows_to_a_subject_and_a_report_can_be_rejected(
+    client: httpx.AsyncClient, fixture_question: dict[str, str]
+) -> None:
+    question, subject = fixture_question["question"], fixture_question["subject"]
+    version = (await client.get(f"/v1/review/questions/{question}")).json()["question_version_id"]
+    async with get_engine().begin() as conn:
+        report = str(
+            (
+                await conn.execute(
+                    text(
+                        "INSERT INTO question_reports (question_version_id, reporter_kind, reason,"
+                        " detail) VALUES (:v, 'system', 'typo', 'Check the units.') RETURNING id"
+                    ),
+                    {"v": version},
+                )
+            ).scalar_one()
+        )
+    try:
+        subjects = (await client.get("/v1/review/subjects")).json()
+        mine = next(s for s in subjects if s["subject_id"] == subject)
+        assert mine["questions"] >= 1 and mine["flagged"] == 1
+
+        flagged = (await client.get(f"/v1/review/queue?state=flagged&subject_id={subject}")).json()
+        assert [item["question_id"] for item in flagged] == [question]
+        counts = (await client.get(f"/v1/review/progress?subject_id={subject}")).json()
+        assert counts["flagged"] == 1 and counts["total"] == mine["questions"]
+        years = (await client.get(f"/v1/review/years?subject_id={subject}")).json()
+        assert sum(year["questions"] for year in years) <= mine["questions"]
+
+        detail = (await client.get(f"/v1/review/questions/{question}")).json()
+        assert detail["reports"][0]["reporter_kind"] == "system"
+        closed = await client.post(
+            f"/v1/review/reports/{report}/resolve",
+            json={"note": "The units are right as printed.", "outcome": "rejected"},
+        )
+        assert closed.status_code == 200, closed.text
+        async with get_engine().connect() as conn:
+            status = (
+                await conn.execute(
+                    text("SELECT status FROM question_reports WHERE id = :r"), {"r": report}
+                )
+            ).scalar_one()
+        assert status == "rejected"
+        assert (await client.get(f"/v1/review/questions/{question}")).json()["reports"] == []
+    finally:
+        async with get_engine().begin() as conn:
+            await conn.execute(text("DELETE FROM question_reports WHERE id = :r"), {"r": report})
