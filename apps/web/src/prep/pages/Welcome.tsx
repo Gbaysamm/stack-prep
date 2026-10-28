@@ -1,7 +1,8 @@
 /**
  * The front door, for anyone not signed in: a split screen. On the left, the ink brand panel
  * (what Stack Prep does); on the right, a light surface with one form in a 400px column. The
- * form is "Create your account" at `/` and "Welcome back" at `/?mode=login`, so the back button
+ * form is "Create your account" at `/?mode=signup` and "Welcome back" at `/?mode=login` (the bare
+ * `/` is the public home page, site/Landing.tsx), so the back button
  * and a shared link land on the right one. On a phone the ink band shrinks to the brand and the
  * headline, and the form comes up over it as a white sheet.
  */
@@ -68,7 +69,7 @@ export function Welcome() {
     headings.current[mode]?.focus({ preventScroll: true });
   }, [mode, carry.key]);
 
-  const hrefFor = (next: Mode) => ({ pathname: "/", search: next === "login" ? "?mode=login" : "" });
+  const hrefFor = (next: Mode) => ({ pathname: "/", search: `?mode=${next}` });
 
   const signedUp = (identity: Identity) => {
     signIn(identity);
@@ -92,10 +93,10 @@ export function Welcome() {
           <span className="wel-blob b" />
         </div>
         <div className="wel-brandside-in">
-          <div className="wel-brand sj-rise">
+          <Link to="/" className="wel-brand sj-rise" aria-label="Stack Prep home">
             <img src="/brand/mark-96.png" alt="" width={36} height={36} />
             <span>Stack Prep</span>
-          </div>
+          </Link>
           <div className="wel-pitch">
             <h1 className="sj-display wel-title sj-rise d1">
               Know your score.

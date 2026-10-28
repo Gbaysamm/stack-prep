@@ -15,6 +15,28 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-28
 
+### Part C: the public site
+- **Why:** a visitor who wasn't signed in only saw the sign-up form; the founder asked for a
+  home page, About, Pricing, FAQ, Contact, Terms and Privacy (plan C).
+- **What:** the bare address now shows a **home page** to anyone not signed in (a student still
+  goes straight to their home): what Stack Prep does, four steps, why it's different, the
+  subjects with live question counts, the plans on sale, the first FAQ answers and a way in.
+  New pages: **How it works** (check-up, practice, the board, mocks, progress), **Pricing**
+  (the admin's plans, by length, with the paying questions), **About**, **FAQ** (in four
+  groups), **Contact** (a form into the Support inbox, plus the support email and WhatsApp
+  from Settings), **Terms of use** and **Privacy**. The sign-up form moved to `/?mode=signup`
+  (log in stays at `/?mode=login`), and its logo goes back to the home page. A new public
+  endpoint, `GET /v1/app/site`, counts the UTME subjects and questions live, so the site never
+  states a number that has gone stale. Every claim on the pages was checked against the code
+  (the check-up length, the mock format, the score rule, what the coach is and isn't told).
+- **Needs the founder:** Terms and Privacy are plain-language drafts written from what the app
+  does; a lawyer should read both before launch.
+- **Where:** `apps/web/src/site/` (SiteShell, Landing, Pages, Faq, Legal, PlanGrid, site.css);
+  `apps/web/src/prep/PrepApp.tsx`, `pages/Welcome.tsx`; `apps/api/src/app/routers/site.py`;
+  tests in `tests/test_site.py`.
+- **Checked:** the API and web tests and build; screenshots at 1440 and 390 of every page.
+- **Status:** committed, not pushed.
+
 ### Admin dashboard, part B4: Support and Announcements
 - **Why:** the admin had no way to hear from students or tell them anything in the app
   (plan B, support and announcements).

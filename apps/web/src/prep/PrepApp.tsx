@@ -6,7 +6,7 @@
  * board and the mock exam room are focus pages that have none.
  */
 
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useSearchParams } from 'react-router-dom';
 
 import './prep.css';
 import { CheckIns } from './pages/CheckIns.js';
@@ -24,6 +24,10 @@ import { MockRoom } from './pages/MockRoom.js';
 import { MockSetup } from './pages/MockSetup.js';
 import { HelpNumbers, HowItsWorkedOutRedirect } from './pages/HelpNumbers.js';
 import { SupportThread } from './pages/Support.js';
+import { FaqPage } from '../site/Faq.js';
+import { Landing } from '../site/Landing.js';
+import { PrivacyPage, TermsPage } from '../site/Legal.js';
+import { AboutPage, ContactPage, HowItWorksPage, PricingPage } from '../site/Pages.js';
 import { NotFound } from './pages/NotFound.js';
 import { Onboarding } from './pages/Onboarding.js';
 import { PracticeHub } from './pages/PracticeHub.js';
@@ -43,9 +47,13 @@ import { AppShell } from './shell.js';
 import { IdentityProvider, RequireStudent, useIdentity } from './store.js';
 import { ToastProvider } from './ui.js';
 
+/** The bare address: a student's home, or for anyone else the sign-up and log-in forms when
+ *  asked for (?mode=signup or ?mode=login), and otherwise the public home page. */
 function Start() {
   const { identity } = useIdentity();
-  return identity ? <Navigate to="/home" replace /> : <Welcome />;
+  const [params] = useSearchParams();
+  if (identity) return <Navigate to="/home" replace />;
+  return params.get('mode') ? <Welcome /> : <Landing />;
 }
 
 export function PrepApp() {
@@ -57,6 +65,13 @@ export function PrepApp() {
             <PremiumProvider>
               <Routes>
                 <Route path="/" element={<Start />} />
+                <Route path="/how-it-works" element={<HowItWorksPage />} />
+                <Route path="/pricing" element={<PricingPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/faq" element={<FaqPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/terms" element={<TermsPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
                 <Route
                   element={
                     <RequireStudent>

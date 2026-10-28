@@ -38,6 +38,7 @@ from app.routers import (
     review,
     runs,
     saved,
+    site,
     student,
     support,
 )
@@ -75,6 +76,7 @@ def create_app() -> FastAPI:
     app.include_router(admin_students.router)
     app.include_router(admin_system.router)
     app.include_router(admin_system.public)
+    app.include_router(site.router)
     app.include_router(billing.router)
     app.include_router(curriculum.router)
     app.include_router(review.router)
