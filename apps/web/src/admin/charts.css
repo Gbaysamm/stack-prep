@@ -1,0 +1,102 @@
+/* The admin dashboard's charts (charts.tsx). One measure each, in the brand purple. */
+
+.sj .ch-box {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+.sj .ch-box svg {
+  display: block;
+  overflow: visible;
+}
+.sj .ch-grid {
+  stroke: var(--gray-200);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+.sj .ch-tick {
+  fill: var(--gray-500);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.sj .ch-bar {
+  fill: var(--purple-600);
+}
+.sj .ch-bar.on {
+  fill: var(--ink-800);
+}
+.sj .ch-hit {
+  fill: transparent;
+  cursor: default;
+  outline: none;
+}
+.sj .ch-hit:focus-visible {
+  stroke: var(--purple-300);
+  stroke-width: 2;
+}
+.sj .ch-tip {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  gap: 2px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: var(--ink-900);
+  color: #fff;
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateX(-50%);
+  box-shadow: 0 6px 18px rgba(31, 0, 80, 0.18);
+}
+.sj .ch-tip span {
+  color: rgba(255, 255, 255, 0.75);
+}
+.sj .ch-tip strong {
+  font-size: 14px;
+}
+.sj .ch-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.sj .ch-bars {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .ch-bars li {
+  display: grid;
+  grid-template-columns: minmax(90px, 160px) 1fr auto;
+  align-items: center;
+  gap: 12px;
+  font-size: 13.5px;
+}
+.sj .ch-bars-label {
+  overflow: hidden;
+  color: var(--ink-900);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sj .ch-bars-track {
+  height: 12px;
+}
+.sj .ch-bars-fill {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: 0 4px 4px 0;
+  background: var(--purple-600);
+}
+.sj .ch-bars-value {
+  min-width: 32px;
+  color: var(--gray-600);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}

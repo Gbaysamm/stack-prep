@@ -682,3 +682,233 @@
     align-items: flex-end;
   }
 }
+
+/* Admin overview and students (Phase 7). */
+.sj .st-stats.four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.sj .st-stats.five {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.sj .st-stats-flat {
+  margin-bottom: 18px;
+}
+.sj .st-stats-flat .st-stat {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--gray-50, #f7f6fb);
+}
+.sj .st-stat small {
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+.sj .st-stat strong.st-stat-text {
+  font-size: 18px;
+}
+.sj .st-grid {
+  display: grid;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.sj .st-grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.sj .st-grid .st-panel + .st-panel {
+  margin-top: 0;
+}
+.sj .st-grid + .st-panel,
+.sj .st-panel + .st-grid {
+  margin-top: 18px;
+}
+.sj .st-chart-note {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+}
+.sj .st-stale {
+  opacity: 0.55;
+  transition: opacity 0.2s;
+}
+.sj .st-filters {
+  display: grid;
+  grid-template-columns: minmax(220px, 2fr) repeat(4, minmax(120px, 1fr)) auto;
+  align-items: end;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.sj .st-filters .st-check {
+  padding-bottom: 12px;
+}
+.sj .st-count {
+  margin: 0 0 8px;
+}
+.sj .st-tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.sj .st-cell .st-tags:empty {
+  display: none;
+}
+.sj .st-link {
+  font-weight: 700;
+  color: var(--ink-900);
+  text-decoration: none;
+}
+.sj .st-link:hover {
+  color: var(--purple-600);
+  text-decoration: underline;
+}
+.sj .st-pager {
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  margin-top: 14px;
+}
+.sj .st-back {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+.sj .st-back a {
+  color: var(--purple-700);
+  font-weight: 600;
+  text-decoration: none;
+}
+.sj .st-notice {
+  margin: 0 0 18px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--green-100);
+  color: var(--green-600);
+  font-weight: 600;
+  font-size: 14px;
+}
+.sj .st-password {
+  margin-bottom: 18px;
+  border-color: var(--purple-300);
+}
+.sj .st-password code {
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: var(--purple-050);
+  color: var(--ink-900);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.sj .st-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 20px;
+  margin: 0;
+}
+.sj .st-details dt {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+}
+.sj .st-details dd {
+  margin: 4px 0 0;
+  color: var(--ink-900);
+  font-size: 14.5px;
+}
+.sj .st-actions {
+  display: grid;
+}
+.sj .st-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 0;
+  border-top: 1px solid var(--gray-100);
+}
+.sj .st-action:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.sj .st-action > div {
+  display: grid;
+  gap: 2px;
+  font-size: 14px;
+}
+.sj .st-action > div .st-muted {
+  font-size: 12.5px;
+}
+.sj .st-action select,
+.sj .st-days {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--gray-200);
+  border-radius: 10px;
+  background: var(--white);
+  font: inherit;
+  font-size: 14px;
+}
+.sj .st-days {
+  width: 64px;
+}
+.sj .st-subhead {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-600);
+}
+.sj .st-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .st-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--gray-100);
+  font-size: 14px;
+}
+.sj .st-list li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.sj .st-end {
+  align-items: flex-end;
+  text-align: right;
+}
+@media (max-width: 1100px) {
+  .sj .st-stats.four,
+  .sj .st-stats.five {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sj .st-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sj .st-filters .st-search {
+    grid-column: 1 / -1;
+  }
+  .sj .st-grid.two {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 520px) {
+  .sj .st-table.st-compact th,
+  .sj .st-table.st-compact td {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  .sj .st-details {
+    grid-template-columns: 1fr;
+  }
+  .sj .st-action {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+.sj .st-filters select,
+.sj .st-filters input:not([type="checkbox"]) {
+  width: 100%;
+  min-width: 0;
+}

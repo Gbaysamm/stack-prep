@@ -15,6 +15,33 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-28
 
+### The admin dashboard: overview with charts, students, and a full student profile (plan phase 7)
+- **Why:** the founder asked for a very comprehensive admin dashboard with charts and full
+  student profiles, and the actions to look after accounts.
+- **What:** `/admin` now opens on **Overview**: for the last 7, 30 or 90 days, totals
+  (students and new ones, active students and today's, questions answered, money taken, and
+  how many are on Premium) and a day-by-day chart of each of sign-ups, active students,
+  questions answered, mocks submitted and money; how students' latest mocks scored, in bands
+  of ten; which subjects students aim at; and the question bank with open reports by
+  subject. Hover or focus a column for its value; each chart also has a hidden table for
+  screen readers. **Students** lists everyone (staff left out unless asked for) with search
+  by name, email, phone or school, filters for class, Premium and recent activity, sorting,
+  and pages of 50. A student's page shows who they are and what they're aiming for, their
+  activity with a 30-day chart, each subject's score, last check-up, target and exam date
+  (the same numbers the student sees), their mocks, their Premium and payments. Actions there:
+  a temporary password (shown once, readable aloud, signs out every device) for a student who
+  can't reset by email, give Premium days, change role, and suspend or restore (an admin can't
+  do any of these to themselves). Days are Nigerian days.
+- **Where:** `apps/api/src/app/routers/admin_students.py`; the student overview and mock
+  history are now plain functions (`build_overview` in `routers/progress.py`, `mock_history`
+  in `routers/mock.py`) that the admin profile calls; `apps/web/src/admin/OverviewPage.tsx`,
+  `StudentsPage.tsx`, `StudentPage.tsx`, `charts.tsx`; tests in
+  `tests/test_admin_students.py`.
+- **Checked:** all 541 API tests against the local database, the web tests and build;
+  screenshots at 1440 and 390 of the overview, the students list, a student's page, and the
+  temporary password.
+- **Status:** committed, not pushed (deploys wait on GitHub billing).
+
 ### Premium with Paystack: free basics, paid plans, set by the admin (plan phase 6)
 - **Why:** the founder chose Paystack, with free basics and paid Premium, limits and prices set
   by an admin rather than in code.

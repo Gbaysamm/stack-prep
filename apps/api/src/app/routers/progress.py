@@ -381,6 +381,11 @@ async def overview(
     the days studied, and one report per subject for its latest finished check-up.
     """
     await require_student(request, conn, student_id)
+    return await build_overview(conn, student_id)
+
+
+async def build_overview(conn: AsyncConnection, student_id: UUID) -> Overview:
+    """The home page's overview, with no check on who asks: the admin dashboard uses it too."""
     student = await _student(conn, student_id)
     today: date = student["today"]
 

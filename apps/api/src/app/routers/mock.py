@@ -1363,6 +1363,11 @@ async def history(
 ) -> list[MockSummary]:
     """Newest first, without the deleted ones."""
     await require_student(request, conn, student_id)
+    return await mock_history(conn, student_id)
+
+
+async def mock_history(conn: AsyncConnection, student_id: UUID) -> list[MockSummary]:
+    """Every mock the student can see, with no check on who asks: the admin dashboard uses it."""
     await _settle_expired(conn, student_id)
     mocks = await fetch_all(
         conn,

@@ -5,12 +5,15 @@
  * the gate in front only keeps the screen honest about it.
  */
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { IconFlag, IconSparkles, IconUser } from '../prep/icons.js';
+import { IconChart, IconFlag, IconLock, IconSparkles, IconUser } from '../prep/icons.js';
 import { StaffGate } from '../staff/StaffGate.js';
 import { StaffShell, type NavItem } from '../staff/StaffShell.js';
+import { OverviewPage } from './OverviewPage.js';
 import { PremiumPage } from './PremiumPage.js';
 import { ReportsPage, useOpenReports } from './ReportsPage.js';
 import { StaffPage } from './StaffPage.js';
+import { StudentPage } from './StudentPage.js';
+import { StudentsPage } from './StudentsPage.js';
 
 export function AdminApp() {
   return (
@@ -26,14 +29,19 @@ export function AdminApp() {
 function AdminShell() {
   const openReports = useOpenReports();
   const nav: NavItem[] = [
+    { to: '/overview', label: 'Overview', icon: <IconChart /> },
+    { to: '/students', label: 'Students', icon: <IconUser /> },
     { to: '/reports', label: 'Reports', icon: <IconFlag />, count: openReports },
     { to: '/premium', label: 'Premium', icon: <IconSparkles /> },
-    { to: '/staff', label: 'Staff', icon: <IconUser /> },
+    { to: '/staff', label: 'Staff', icon: <IconLock /> },
   ];
   return (
     <StaffShell title="Admin" nav={nav}>
       <Routes>
-        <Route path="/" element={<Navigate to="/reports" replace />} />
+        <Route path="/" element={<Navigate to="/overview" replace />} />
+        <Route path="/overview" element={<OverviewPage />} />
+        <Route path="/students" element={<StudentsPage />} />
+        <Route path="/students/:studentId" element={<StudentPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/premium" element={<PremiumPage />} />
         <Route path="/staff" element={<StaffPage />} />
