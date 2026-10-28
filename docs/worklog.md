@@ -15,6 +15,21 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-28
 
+### Pricing & plans redesigned as a comparison table
+- **Why:** the founder didn't like the admin's Pricing & plans page: tall, mostly empty number
+  cards, plan cards that left the right side of the page blank, prices run together in one
+  line, and rough tick marks.
+- **What:** the figures (on a plan now, taken in 30 days and all time) and the limits switch
+  sit in one slim bar. The plans are a table across the whole width: a column per plan (name,
+  badges, how many are on it and sold, Edit) and a row per price and per feature, with ticks,
+  dashes and amounts lined up for comparing; on a phone the table scrolls sideways with the
+  feature names held in place. Editing a plan opens a panel from the right instead of pushing
+  the page down.
+- **Where:** `apps/web/src/admin/PremiumPage.tsx`, `apps/web/src/staff/staff.css`.
+- **Checked:** the web tests and build; screenshots at 1440 and 390 of the page and the edit
+  panel.
+- **Status:** committed, not pushed (deploys wait on GitHub billing).
+
 ### Admin dashboard, part B1: settings, system health, the audit log, grouped menu
 - **Why:** the founder found the admin dashboard far too thin (five pages) and shared a
   reference dashboard for its functions. This first part lays the ground the rest stands on

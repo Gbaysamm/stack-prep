@@ -7,10 +7,11 @@
  * be set up first. Prices are entered in naira and stored in kobo, as Paystack takes them.
  * Nothing is deleted, only taken off sale or switched off, so receipts keep what was bought.
  */
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { friendly, request } from '../lib/friendlyError.js';
 import { Select } from '../lib/Select.js';
-import { featureLines, naira, type MocksPer, type Plan } from '../prep/billingApi.js';
+import { naira, type MocksPer, type Plan } from '../prep/billingApi.js';
+import { IconCheck } from '../prep/icons.js';
 import { StaffPageHead } from '../staff/StaffShell.js';
 
 export interface Length {
@@ -132,21 +133,21 @@ export function PremiumPage() {
       {!billing && !problem && <p className="st-muted">Loading…</p>}
       {billing && (
         <>
-          <div className="st-stats four">
-            <div className="st-panel st-stat">
-              <span>Students on a plan now</span>
+          <section className="st-panel pp-summary">
+            <div className="pp-figure">
+              <span>On a plan now</span>
               <strong>{billing.premium_now.toLocaleString('en-NG')}</strong>
             </div>
-            <div className="st-panel st-stat">
+            <div className="pp-figure">
               <span>Taken, last 30 days</span>
               <strong>{naira(billing.paid_kobo_30_days)}</strong>
             </div>
-            <div className="st-panel st-stat">
+            <div className="pp-figure">
               <span>Taken, all time</span>
               <strong>{naira(billing.paid_kobo_all_time)}</strong>
             </div>
             <LimitsSwitch on={billing.limits_on} onSaved={load} />
-          </div>
+          </section>
           {tab === 'plans' && <PlansPanel plans={billing.plans} lengths={billing.lengths} onSaved={load} />}
           {tab === 'lengths' && <LengthsPanel lengths={billing.lengths} onSaved={load} />}
           {tab === 'discounts' && <DiscountsPanel plans={billing.plans} lengths={billing.lengths} />}
@@ -173,14 +174,24 @@ function LimitsSwitch({ on, onSaved }: { on: boolean; onSaved: () => void }) {
     }
   };
   return (
-    <div className={`st-panel st-stat st-switchtile ${on ? 'on' : ''}`}>
-      <span>Plan limits</span>
-      <strong>{on ? 'On' : 'Off'}</strong>
-      <small className="st-muted">{on ? 'Each student gets their plan’s allowance.' : 'Every student has everything.'}</small>
-      <button type="button" className={`sj-btn sm ${on ? 'ghost' : ''}`} disabled={busy} onClick={() => void flip()}>
-        {on ? 'Switch off' : 'Switch on'}
+    <div className="pp-limits">
+      <div>
+        <strong>Plan limits {on ? 'on' : 'off'}</strong>
+        <span className="st-muted">
+          {error ?? (on ? 'Each student gets their plan’s allowance.' : 'Off: every student has everything.')}
+        </span>
+      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        aria-label="Plan limits"
+        className={`st-toggle ${on ? 'on' : ''}`}
+        disabled={busy}
+        onClick={() => void flip()}
+      >
+        <span />
       </button>
-      {error && <small className="st-error">{error}</small>}
     </div>
   );
 }
@@ -312,173 +323,266 @@ function PlansPanel({ plans, lengths, onSaved }: { plans: AdminPlan[]; lengths: 
   const set = <K extends keyof PlanDraft>(key: K, value: PlanDraft[K]) =>
     setDraft((current) => (current ? { ...current, [key]: value } : current));
 
+  const editing = draft;
+  const cell = (on: boolean) =>
+    on ? (
+      <span className="pp-yes" aria-label="Included">
+        <IconCheck size={14} />
+      </span>
+    ) : (
+      <span className="pp-no" aria-label="Not included">
+        —
+      </span>
+    );
+  const amountOf = (value: number | null, unit: string, none = 'None') =>
+    value === null ? <span className="pp-amount">Unlimited</span> : value === 0 ? <span className="pp-no">{none}</span> : (
+      <span className="pp-amount">
+        {value.toLocaleString('en-NG')} <small>{unit}</small>
+      </span>
+    );
+  const PER: Record<MocksPer, string> = { day: 'a day', week: 'a week', month: 'a month', total: 'in total' };
+  const rows: { label: string; hint?: string; cell: (plan: AdminPlan) => ReactNode }[] = [
+    { label: 'Practice questions', hint: 'a day', cell: (plan) => amountOf(plan.features.practice_per_day, 'a day') },
+    {
+      label: 'Mock exams',
+      cell: (plan) => amountOf(plan.features.mocks_allowed, PER[plan.features.mocks_per]),
+    },
+    { label: 'Check-ups and written working', cell: () => cell(true) },
+    { label: 'Lessons explained aloud', cell: (plan) => cell(plan.features.voice) },
+    {
+      label: 'Questions to the coach',
+      hint: 'a day',
+      cell: (plan) => amountOf(plan.features.coach_per_day || 0, 'a day'),
+    },
+    { label: 'Choose topics and years', cell: (plan) => cell(plan.features.custom_runs) },
+    { label: 'Revise bookmarks as a run', cell: (plan) => cell(plan.features.bookmark_runs) },
+    {
+      label: 'Selling points',
+      hint: 'shown, not enforced',
+      cell: (plan) =>
+        plan.features.extras.length ? (
+          <ul className="pp-extras">
+            {plan.features.extras.map((extra) => (
+              <li key={extra}>{extra}</li>
+            ))}
+          </ul>
+        ) : (
+          <span className="pp-no">—</span>
+        ),
+    },
+  ];
+
   return (
-    <section className="st-panel">
-      <div className="st-panel-head">
-        <h2>Plans</h2>
-        {!draft && (
+    <>
+      <section className="st-panel pp-plans">
+        <div className="pp-plans-head">
+          <div>
+            <h2>Plans</h2>
+            <p className="st-muted">
+              Each column is a plan. Its order is its rank: a student with two plans running gets the higher one.
+            </p>
+          </div>
           <button type="button" className="sj-btn sm" onClick={() => setDraft(blank(lengths))}>
             Add a plan
           </button>
-        )}
-      </div>
-      <p className="st-muted" style={{ marginTop: 0 }}>
-        A plan's order is also its rank: a student with two plans running gets the higher one. Free is what every student
-        has without a plan.
-      </p>
-
-      {draft && (
-        <form className="st-plan-editor" onSubmit={save}>
-          <h3>{draft.id ? `Change ${draft.name || 'the plan'}` : 'A new plan'}</h3>
-          <div className="st-form st-plan-form">
-            <label className="st-field">
-              <span>Name</span>
-              <input value={draft.name} maxLength={40} placeholder="Standard" onChange={(e) => set('name', e.target.value)} />
-            </label>
-            <label className="st-field st-span2">
-              <span>One line about it</span>
-              <input value={draft.blurb} maxLength={200} placeholder="For steady practice every day." onChange={(e) => set('blurb', e.target.value)} />
-            </label>
-            {draft.kind === 'paid' && (
-              <label className="st-field">
-                <span>Order (rank)</span>
-                <input inputMode="numeric" value={draft.order} onChange={(e) => set('order', e.target.value)} />
-              </label>
-            )}
-          </div>
-
-          <h4>What it gives</h4>
-          <div className="st-form st-plan-form">
-            <label className="st-field">
-              <span>Practice questions a day</span>
-              <input inputMode="numeric" value={draft.practice} placeholder="Unlimited" onChange={(e) => set('practice', e.target.value)} />
-            </label>
-            <label className="st-field">
-              <span>Mock exams</span>
-              <input inputMode="numeric" value={draft.mocks} placeholder="Unlimited" onChange={(e) => set('mocks', e.target.value)} />
-            </label>
-            <div className="st-field">
-              <span>Mocks counted</span>
-              <Select<MocksPer>
-                aria-label="Mocks counted"
-                value={draft.mocks_per}
-                onChange={(value) => set('mocks_per', value)}
-                options={[
-                  { value: 'day', label: 'A day' },
-                  { value: 'week', label: 'A week' },
-                  { value: 'month', label: 'A month' },
-                  { value: 'total', label: 'In total' },
-                ]}
-              />
-            </div>
-            <label className="st-field">
-              <span>Coach questions a day</span>
-              <input inputMode="numeric" value={draft.coach} onChange={(e) => set('coach', e.target.value)} />
-            </label>
-          </div>
-          <div className="st-toggles">
-            <label className="st-check">
-              <input type="checkbox" checked={draft.voice} onChange={(e) => set('voice', e.target.checked)} />
-              Lessons explained aloud
-            </label>
-            <label className="st-check">
-              <input type="checkbox" checked={draft.custom_runs} onChange={(e) => set('custom_runs', e.target.checked)} />
-              Choose own topics and years
-            </label>
-            <label className="st-check">
-              <input type="checkbox" checked={draft.bookmark_runs} onChange={(e) => set('bookmark_runs', e.target.checked)} />
-              Revise bookmarks as a run
-            </label>
-            {draft.kind === 'paid' && (
-              <>
-                <label className="st-check">
-                  <input type="checkbox" checked={draft.featured} onChange={(e) => set('featured', e.target.checked)} />
-                  Most popular
-                </label>
-                <label className="st-check">
-                  <input type="checkbox" checked={draft.on_sale} onChange={(e) => set('on_sale', e.target.checked)} />
-                  On sale
-                </label>
-              </>
-            )}
-          </div>
-          <label className="st-field">
-            <span>Selling points, one a line (shown on the card, not enforced)</span>
-            <textarea rows={3} value={draft.extras} placeholder={'WhatsApp study group\nPriority support'} onChange={(e) => set('extras', e.target.value)} />
-          </label>
-
-          {draft.kind === 'paid' && (
-            <>
-              <h4>Price for each length (₦; leave empty if not sold for it)</h4>
-              <div className="st-form st-plan-form">
-                {lengths.map((length) => (
-                  <label key={length.id} className="st-field">
-                    <span>
-                      {length.label} ({length.days} days){length.on_sale ? '' : ', off sale'}
-                    </span>
-                    <input
-                      inputMode="decimal"
-                      value={draft.prices[length.id] ?? ''}
-                      placeholder="Not sold"
-                      onChange={(e) => set('prices', { ...draft.prices, [length.id]: e.target.value })}
-                    />
-                  </label>
+        </div>
+        <div className="pp-matrix-wrap">
+          <table className="pp-matrix">
+            <thead>
+              <tr>
+                <th scope="col" className="pp-corner">
+                  <span className="pp-corner-label">Plan</span>
+                </th>
+                {plans.map((plan) => (
+                  <th key={plan.id} scope="col" className={`pp-col ${plan.featured ? 'featured' : ''} ${plan.on_sale || plan.kind === 'free' ? '' : 'off'}`}>
+                    <div className="pp-plan-head">
+                      <span className="pp-plan-name">{plan.name}</span>
+                      <span className="pp-badges">
+                        {plan.kind === 'free' && <span className="st-pill reviewer">Everyone</span>}
+                        {plan.featured && <span className="st-pill admin">Most popular</span>}
+                        {plan.kind === 'paid' && !plan.on_sale && <span className="st-pill bad">Off sale</span>}
+                      </span>
+                      <span className="pp-plan-meta">
+                        {plan.kind === 'free' ? 'Without a plan' : `${plan.active} on it · ${plan.sold} sold`}
+                      </span>
+                      <button type="button" className="pp-edit" onClick={() => setDraft(draftOf(plan, lengths))}>
+                        Edit
+                      </button>
+                    </div>
+                  </th>
                 ))}
-              </div>
-            </>
-          )}
-          {error && <p className="st-error">{error}</p>}
-          <div className="st-row">
-            <button type="button" className="sj-btn ghost sm" onClick={() => setDraft(null)} disabled={busy}>
-              Cancel
-            </button>
-            <button type="submit" className="sj-btn sm" disabled={busy}>
-              {busy ? 'Saving…' : draft.id ? 'Save the plan' : 'Add the plan'}
-            </button>
-          </div>
-        </form>
-      )}
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="pp-group">
+                <th scope="rowgroup" colSpan={plans.length + 1}>
+                  Price
+                </th>
+              </tr>
+              {lengths.map((length) => (
+                <tr key={length.id}>
+                  <th scope="row">
+                    {length.label}
+                    <small>
+                      {length.days} days{length.on_sale ? '' : ' · off sale'}
+                    </small>
+                  </th>
+                  {plans.map((plan) => (
+                    <td key={plan.id}>
+                      {plan.kind === 'free' ? (
+                        <span className="pp-amount">₦0</span>
+                      ) : plan.prices[length.id] !== undefined ? (
+                        <span className="pp-price">{naira(plan.prices[length.id]!)}</span>
+                      ) : (
+                        <span className="pp-no">Not sold</span>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+              <tr className="pp-group">
+                <th scope="rowgroup" colSpan={plans.length + 1}>
+                  What it gives
+                </th>
+              </tr>
+              {rows.map((row) => (
+                <tr key={row.label}>
+                  <th scope="row">
+                    {row.label}
+                    {row.hint ? <small>{row.hint}</small> : null}
+                  </th>
+                  {plans.map((plan) => (
+                    <td key={plan.id}>{row.cell(plan)}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-      <div className="st-plan-cards">
-        {plans.map((plan) => (
-          <article key={plan.id} className={`st-plan-card ${plan.on_sale || plan.kind === 'free' ? '' : 'off'}`}>
-            <header>
-              <div>
-                <strong>{plan.name}</strong>
-                <span className="st-tags">
-                  {plan.kind === 'free' && <span className="st-pill reviewer">Free</span>}
-                  {plan.featured && <span className="st-pill admin">Most popular</span>}
-                  {plan.kind === 'paid' && !plan.on_sale && <span className="st-pill bad">Off sale</span>}
-                </span>
-              </div>
-              <button type="button" className="sj-btn ghost sm" onClick={() => setDraft(draftOf(plan, lengths))}>
-                Change
+      {editing && (
+        <div className="pp-drawer" role="dialog" aria-modal="true" aria-label={editing.id ? `Edit ${editing.name}` : 'A new plan'}>
+          <button type="button" className="pp-drawer-scrim" aria-label="Close" onClick={() => !busy && setDraft(null)} />
+          <aside className="pp-drawer-panel">
+            <header className="pp-drawer-head">
+              <h3>{editing.id ? `Edit ${editing.name || 'the plan'}` : 'A new plan'}</h3>
+              <button type="button" className="pp-drawer-close" aria-label="Close" onClick={() => setDraft(null)} disabled={busy}>
+                ×
               </button>
             </header>
-            {plan.kind === 'paid' && (
-              <p className="st-plan-prices">
-                {lengths
-                  .filter((length) => plan.prices[length.id] !== undefined)
-                  .map((length) => `${length.label}: ${naira(plan.prices[length.id]!)}`)
-                  .join(' · ') || 'No prices yet: not on sale for any length.'}
-              </p>
-            )}
-            <ul className="st-plan-features">
-              {featureLines(plan.features).map((line) => (
-                <li key={line.text} className={line.on ? undefined : 'off'}>
-                  {line.on ? '✓' : '✕'} {line.text}
-                </li>
-              ))}
-            </ul>
-            {plan.kind === 'paid' && (
-              <p className="st-muted st-plan-counts">
-                {plan.active} on it now · {plan.sold} sold · rank {plan.display_order}
-              </p>
-            )}
-          </article>
-        ))}
-      </div>
-    </section>
+            <form className="st-plan-editor" onSubmit={save}>
+              <div className="st-form st-plan-form">
+                <label className="st-field">
+                  <span>Name</span>
+                  <input value={draft.name} maxLength={40} placeholder="Standard" onChange={(e) => set('name', e.target.value)} />
+                </label>
+                <label className="st-field st-span2">
+                  <span>One line about it</span>
+                  <input value={draft.blurb} maxLength={200} placeholder="For steady practice every day." onChange={(e) => set('blurb', e.target.value)} />
+                </label>
+                {draft.kind === 'paid' && (
+                  <label className="st-field">
+                    <span>Order (rank)</span>
+                    <input inputMode="numeric" value={draft.order} onChange={(e) => set('order', e.target.value)} />
+                  </label>
+                )}
+              </div>
+
+              <h4>What it gives</h4>
+              <div className="st-form st-plan-form">
+                <label className="st-field">
+                  <span>Practice questions a day</span>
+                  <input inputMode="numeric" value={draft.practice} placeholder="Unlimited" onChange={(e) => set('practice', e.target.value)} />
+                </label>
+                <label className="st-field">
+                  <span>Mock exams</span>
+                  <input inputMode="numeric" value={draft.mocks} placeholder="Unlimited" onChange={(e) => set('mocks', e.target.value)} />
+                </label>
+                <div className="st-field">
+                  <span>Mocks counted</span>
+                  <Select<MocksPer>
+                    aria-label="Mocks counted"
+                    value={draft.mocks_per}
+                    onChange={(value) => set('mocks_per', value)}
+                    options={[
+                      { value: 'day', label: 'A day' },
+                      { value: 'week', label: 'A week' },
+                      { value: 'month', label: 'A month' },
+                      { value: 'total', label: 'In total' },
+                    ]}
+                  />
+                </div>
+                <label className="st-field">
+                  <span>Coach questions a day</span>
+                  <input inputMode="numeric" value={draft.coach} onChange={(e) => set('coach', e.target.value)} />
+                </label>
+              </div>
+              <div className="st-toggles">
+                <label className="st-check">
+                  <input type="checkbox" checked={draft.voice} onChange={(e) => set('voice', e.target.checked)} />
+                  Lessons explained aloud
+                </label>
+                <label className="st-check">
+                  <input type="checkbox" checked={draft.custom_runs} onChange={(e) => set('custom_runs', e.target.checked)} />
+                  Choose own topics and years
+                </label>
+                <label className="st-check">
+                  <input type="checkbox" checked={draft.bookmark_runs} onChange={(e) => set('bookmark_runs', e.target.checked)} />
+                  Revise bookmarks as a run
+                </label>
+                {draft.kind === 'paid' && (
+                  <>
+                    <label className="st-check">
+                      <input type="checkbox" checked={draft.featured} onChange={(e) => set('featured', e.target.checked)} />
+                      Most popular
+                    </label>
+                    <label className="st-check">
+                      <input type="checkbox" checked={draft.on_sale} onChange={(e) => set('on_sale', e.target.checked)} />
+                      On sale
+                    </label>
+                  </>
+                )}
+              </div>
+              <label className="st-field">
+                <span>Selling points, one a line (shown on the card, not enforced)</span>
+                <textarea rows={3} value={draft.extras} placeholder={'WhatsApp study group\nPriority support'} onChange={(e) => set('extras', e.target.value)} />
+              </label>
+
+              {draft.kind === 'paid' && (
+                <>
+                  <h4>Price for each length (₦; leave empty if not sold for it)</h4>
+                  <div className="st-form st-plan-form">
+                    {lengths.map((length) => (
+                      <label key={length.id} className="st-field">
+                        <span>
+                          {length.label} ({length.days} days){length.on_sale ? '' : ', off sale'}
+                        </span>
+                        <input
+                          inputMode="decimal"
+                          value={draft.prices[length.id] ?? ''}
+                          placeholder="Not sold"
+                          onChange={(e) => set('prices', { ...draft.prices, [length.id]: e.target.value })}
+                        />
+                      </label>
+                    ))}
+                  </div>
+                </>
+              )}
+              {error && <p className="st-error">{error}</p>}
+              <div className="st-row">
+                <button type="button" className="sj-btn ghost sm" onClick={() => setDraft(null)} disabled={busy}>
+                  Cancel
+                </button>
+                <button type="submit" className="sj-btn sm" disabled={busy}>
+                  {busy ? 'Saving…' : draft.id ? 'Save the plan' : 'Add the plan'}
+                </button>
+              </div>
+            </form>
+          </aside>
+        </div>
+      )}
+    </>
   );
 }
 
