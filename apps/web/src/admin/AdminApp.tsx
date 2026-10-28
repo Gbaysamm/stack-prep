@@ -18,6 +18,8 @@ import {
   IconHome,
   IconLayers,
   IconLock,
+  IconMail,
+  IconMegaphone,
   IconSettings,
   IconSparkles,
   IconTarget,
@@ -43,6 +45,7 @@ import { ReportsPage, useOpenReports } from './ReportsPage.js';
 import { StaffPage } from './StaffPage.js';
 import { StudentPage } from './StudentPage.js';
 import { StudentsPage } from './StudentsPage.js';
+import { AnnouncementsPage, SupportPage, useWaitingSupport } from './SupportPages.js';
 import { AuditPageView, HealthPage, SettingsPage } from './SystemPages.js';
 
 export function AdminApp() {
@@ -58,11 +61,14 @@ export function AdminApp() {
 /** Inside the gate, so the open-report count is only asked for by a signed-in admin. */
 function AdminShell() {
   const openReports = useOpenReports();
+  const waitingSupport = useWaitingSupport();
   const nav: NavItem[] = [
     { to: '/dashboard', label: 'Dashboard', icon: <IconHome />, section: 'Main' },
     { to: '/overview', label: 'Analytics', icon: <IconChart /> },
     { to: '/students', label: 'Students', icon: <IconUser />, section: 'People' },
     { to: '/staff', label: 'Staff', icon: <IconLock /> },
+    { to: '/support', label: 'Support', icon: <IconMail />, count: waitingSupport },
+    { to: '/announcements', label: 'Announcements', icon: <IconMegaphone /> },
     { to: '/content', label: 'Subjects & topics', icon: <IconBook />, section: 'Content' },
     { to: '/questions', label: 'Question bank', icon: <IconLayers /> },
     { to: '/quality', label: 'Question quality', icon: <IconTarget /> },
@@ -98,6 +104,9 @@ function AdminShell() {
         <Route path="/students" element={<StudentsPage />} />
         <Route path="/students/:studentId" element={<StudentPage />} />
         <Route path="/reports" element={<ReportsPage />} />
+        <Route path="/support" element={<SupportPage />} />
+        <Route path="/support/:threadId" element={<SupportPage />} />
+        <Route path="/announcements" element={<AnnouncementsPage />} />
         <Route path="/premium" element={<PremiumPage />} />
         <Route path="/staff" element={<StaffPage />} />
         <Route path="/settings" element={<SettingsPage />} />

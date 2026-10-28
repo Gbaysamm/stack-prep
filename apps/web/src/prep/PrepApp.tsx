@@ -23,6 +23,7 @@ import { MockReport } from './pages/MockReport.js';
 import { MockRoom } from './pages/MockRoom.js';
 import { MockSetup } from './pages/MockSetup.js';
 import { HelpNumbers, HowItsWorkedOutRedirect } from './pages/HelpNumbers.js';
+import { SupportThread } from './pages/Support.js';
 import { NotFound } from './pages/NotFound.js';
 import { Onboarding } from './pages/Onboarding.js';
 import { PracticeHub } from './pages/PracticeHub.js';
@@ -86,6 +87,7 @@ export function PrepApp() {
                   <Route path="/plans/paid" element={<PlanPaid />} />
                   <Route path="/help" element={<Help />} />
                   <Route path="/help/numbers" element={<HelpNumbers />} />
+                  <Route path="/help/messages/:threadId" element={<SupportThread />} />
                   <Route path="/how-its-worked-out" element={<HowItsWorkedOutRedirect />} />
                   <Route path="*" element={<NotFound />} />
                 </Route>

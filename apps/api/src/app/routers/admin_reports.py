@@ -137,7 +137,7 @@ async def home(conn: Annotated[AsyncConnection, Depends(connection)]) -> Home:
         Tile(key="on_plan", label="On a plan now", value=t["on_plan"], link="/premium"),
         Tile(key="reports", label="Open question reports", value=t["reports_open"],
              link="/reports"),
-        Tile(key="support", label="Support waiting", value=t["support_open"], link=None),
+        Tile(key="support", label="Support waiting", value=t["support_open"], link="/support"),
     ]
     subjects = await fetch_all(
         conn,

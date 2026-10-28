@@ -210,3 +210,15 @@ export const IconSearch = make(
     <path d="m16 16 4.5 4.5" />
   </>,
 );
+export const IconMail = make(
+  <>
+    <rect x="3" y="5" width="18" height="14" rx="2.5" />
+    <path d="m4 7 8 6 8-6" />
+  </>,
+);
+export const IconMegaphone = make(
+  <>
+    <path d="M4 10v4a1 1 0 0 0 1 1h3l8 4V5L8 9H5a1 1 0 0 0-1 1Z" />
+    <path d="M8 15v3.5a1.5 1.5 0 0 0 3 0V16M19.5 9.5a3.5 3.5 0 0 1 0 5" />
+  </>,
+);

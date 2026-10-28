@@ -12,10 +12,10 @@ import {
   IconBolt,
   IconBook,
   IconCalendar,
-  IconChart,
   IconClock,
   IconFlag,
   IconHelp,
+  IconMail,
   IconSettings,
   IconSparkles,
   IconTarget,
@@ -61,10 +61,10 @@ const SHOWN: { key: string; icon: ReactNode; tint: Tint }[] = [
   { key: 'active', icon: <IconBolt size={20} />, tint: 'green' },
   { key: 'answers', icon: <IconTarget size={20} />, tint: 'blue' },
   { key: 'mocks', icon: <IconClock size={20} />, tint: 'orange' },
-  { key: 'checkups', icon: <IconChart size={20} />, tint: 'yellow' },
   { key: 'revenue', icon: <IconTrophy size={20} />, tint: 'green' },
   { key: 'on_plan', icon: <IconSparkles size={20} />, tint: 'purple' },
   { key: 'reports', icon: <IconFlag size={20} />, tint: 'pink' },
+  { key: 'support', icon: <IconMail size={20} />, tint: 'yellow' },
 ];
 
 const QUICK: { to: string; label: string; icon: ReactNode; tint: Tint }[] = [

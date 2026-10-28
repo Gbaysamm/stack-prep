@@ -23,7 +23,7 @@
  *   deleting a run              PracticeHub run list bin, RunReport Delete; routers/runs.py
  *                               (hides, still counts toward your score)
  *   past questions              docs/questions/utme, README "Content review"
- * No support address exists in the repo, so none is shown.
+ * Writing to us: Support.tsx, routers/support.py (the admin replies in the support inbox).
  */
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
@@ -44,6 +44,7 @@ import {
 import { usePageTitle } from '../store.js';
 import { Button, PageHero } from '../ui.js';
 import { Disclosure } from './Disclosure.js';
+import { SupportBox } from './Support.js';
 import { HOW_PATH, METRIC_GROUPS, METRICS } from './HowItsWorkedOut.js';
 import './Help.css';
 
@@ -481,15 +482,7 @@ export function Help() {
         </section>
       ) : null}
 
-      <footer className="hp-foot">
-        <span className="hp-foot-icon" aria-hidden="true">
-          <IconHelp size={20} />
-        </span>
-        <p>
-          <strong>Still stuck?</strong> On the board you can ask the coach about any step, by typing or, where it’s
-          switched on, by speaking.
-        </p>
-      </footer>
+      <SupportBox />
     </div>
   );
 }

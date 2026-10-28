@@ -15,6 +15,31 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-10-28
 
+### Admin dashboard, part B4: Support and Announcements
+- **Why:** the admin had no way to hear from students or tell them anything in the app
+  (plan B, support and announcements).
+- **What:** students now **write to us** from the foot of Help & guides (what it's about, a
+  title, the message) and read replies in a conversation at `/help/messages/…`; an unread reply
+  shows as a green note at the top of every page until they open it. People without an account
+  write through `POST /v1/contact` (for the public Contact page): a hidden field turns robots
+  away, and there is a cap of 3 a day per address and 60 an hour in all. The admin gets a
+  **Support** inbox (count in the menu and on the dashboard): waiting, replied and closed,
+  search, the conversation beside the list, reply, close or reopen. A reply shows in the
+  student's app and is also emailed when there is an address and email is set up (it says
+  which, before sending). **Announcements**: the admin writes a banner (along the top until
+  closed) or a pop-up (once), picks who sees it (everyone, with or without a plan, a class),
+  a colour, a button, and when it starts and ends; each shows as it looks in the app, with how
+  many it reaches and how many closed it. The `notice` setting now shows to students as a
+  yellow bar. Every reply, close and announcement change goes in the audit log.
+- **Where:** `apps/api/src/app/routers/support.py`, `announcements.py` (tables from migration
+  036); `apps/web/src/prep/Notices.tsx`, `supportApi.ts`, `pages/Support.tsx`;
+  `apps/web/src/admin/SupportPages.tsx`; tests in `tests/test_support.py`.
+- **Checked:** the API tests against the local database, the web tests and build;
+  screenshots at 1440 and 390 of the inbox, a conversation, announcements and the editor, the
+  student's banners and pop-up, Help & guides and a conversation.
+- **Status:** committed, not pushed (deploys wait on GitHub billing). Replies by email need
+  the SMTP settings on the server.
+
 ### Admin dashboard, part B3: subjects, the question bank, question quality, mocks, check-ups
 - **Why:** the admin could see students and money but not the content itself, or which
   questions were teaching the wrong thing (plan B, content pages).

@@ -23,6 +23,7 @@ from app.routers import (
     admin_reports,
     admin_students,
     admin_system,
+    announcements,
     billing,
     checkup,
     curriculum,
@@ -38,6 +39,7 @@ from app.routers import (
     runs,
     saved,
     student,
+    support,
 )
 
 API_VERSION = "0.1.0"
@@ -84,6 +86,11 @@ def create_app() -> FastAPI:
     app.include_router(figures.router)
     app.include_router(student.router)
     app.include_router(saved.router)
+    app.include_router(support.student_router)
+    app.include_router(support.public_router)
+    app.include_router(support.admin_router)
+    app.include_router(announcements.student_router)
+    app.include_router(announcements.admin_router)
     app.include_router(progress.router)
     app.include_router(runs.router)
     app.include_router(mock.router)

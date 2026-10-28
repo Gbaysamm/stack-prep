@@ -1,0 +1,123 @@
+/* Notices.tsx: the admin's notice, announcement banners, and a reply from support. */
+.nt-wrap {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 18px 32px 0;
+}
+.nt-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 10px 10px 12px;
+  border-radius: var(--r-lg);
+  background: var(--purple-050);
+  box-shadow: inset 0 0 0 1px var(--purple-200);
+  color: var(--ink-900);
+  animation: sj-view-in 360ms var(--ease) both;
+}
+.nt-bar.good {
+  background: var(--green-100);
+  box-shadow: inset 0 0 0 1px rgba(0, 170, 15, 0.35);
+}
+.nt-bar.warning {
+  background: var(--yellow-100);
+  box-shadow: inset 0 0 0 1px rgba(255, 199, 0, 0.55);
+}
+.nt-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-md);
+  background: var(--white);
+  color: var(--purple-700);
+  box-shadow: inset 0 0 0 1px rgba(31, 0, 80, 0.08);
+}
+.nt-bar.good .nt-icon {
+  color: var(--green-600);
+}
+.nt-bar.warning .nt-icon {
+  background: var(--yellow-300);
+  color: var(--ink-900);
+}
+.sj .nt-text {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--gray-700);
+}
+.nt-text strong {
+  font-weight: 600;
+  color: var(--ink-900);
+}
+.sj .nt-go {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: var(--white);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--purple-700);
+  text-decoration: none;
+  box-shadow: inset 0 0 0 1px rgba(31, 0, 80, 0.1);
+}
+.sj .nt-go:hover {
+  background: var(--purple-600);
+  color: #fff;
+}
+.sj .nt-close {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--gray-600);
+  cursor: pointer;
+}
+.sj .nt-close:hover {
+  background: rgba(31, 0, 80, 0.07);
+  color: var(--ink-900);
+}
+.sj .nt-popup-body {
+  margin: 0;
+  line-height: 1.55;
+  white-space: pre-line;
+}
+
+@media (max-width: 860px) {
+  .nt-wrap {
+    gap: 8px;
+    padding: 12px 16px 0;
+  }
+  .nt-bar {
+    gap: 10px;
+    padding: 8px 6px 8px 10px;
+  }
+  .nt-icon {
+    width: 30px;
+    height: 30px;
+  }
+  .sj .nt-text {
+    font-size: 13px;
+    line-height: 18px;
+  }
+  .nt-text .nt-more {
+    display: none;
+  }
+  .sj .nt-go {
+    padding: 6px 10px;
+  }
+}

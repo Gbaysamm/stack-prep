@@ -15,6 +15,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 
+import { Notices } from "./Notices.js";
 import { ClaimDialog } from "./AuthForms.js";
 import {
   IconArrowLeft,
@@ -464,6 +465,7 @@ export function AppShell() {
             </div>
           </header>
           {sandbox ? <SandboxBanner onCreate={() => setClaiming(true)} /> : null}
+          <Notices />
           <main id="main">
             <Outlet />
           </main>
