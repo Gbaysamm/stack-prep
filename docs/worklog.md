@@ -15,6 +15,13 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-10
 
+### Deploy fix: httpx is a runtime dependency
+- **Why:** the Binaax deploy built, then the API would not start: `app/paystack.py` imports
+  `httpx`, which was only installed for tests, so the server image lacked it and the site
+  answered 502 (sign-up said "something went wrong on our side").
+- **What:** `httpx` is now in the API's dependencies (`apps/api/pyproject.toml`, `uv.lock`).
+- **Status:** committed and pushed.
+
 ### CI: System health copes with a database that has no migration ledger
 - **Why:** the deploy of 7527343 stopped in CI: CI builds its database by applying the
   migration files directly, so `public.schema_migrations` doesn't exist there, and the health
