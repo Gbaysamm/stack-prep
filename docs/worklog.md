@@ -15,6 +15,21 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-10
 
+### Topic weights from JAMB's past papers
+- **Why:** the founder asked whether planning uses how often topics come up in past papers.
+  It did not: weights came only from an approved printed paper structure, which no subject
+  has, so every subtopic was weighted equally everywhere (check-up, practice, roadmap).
+- **What:** migration 042 adds `subtopic_past_paper_frequency` (questions per subtopic on
+  dated past papers; our own sets never count). Where no printed structure is approved, a
+  subtopic's share of the paper is its share of past-paper questions, smoothed by one (spec
+  §9.2 `historical_share`), once a subject has at least 100 such questions; topic shares are
+  the sum of theirs. Labelled "estimated from N past papers". In Biology (9 papers, 421
+  questions) Animalia carries 5.3% and Animal nutrition 3.8% against 1.4% each before, and
+  the roadmap now starts with the topics JAMB sets most. Maths has a subtopic at about 24%.
+- **Where:** `database/migrations/042_past_paper_frequency.sql`,
+  `apps/api/src/app/routers/checkup.py` (`_subtopics`, `_topics`).
+- **Status:** done locally; deploy needs a push.
+
 ### The roadmap picks the runs
 - **Why:** the founder: a student shouldn't build their own runs at first; the plan says what
   to do.

@@ -254,30 +254,51 @@ async def _topics(conn: AsyncConnection, subject_id: UUID) -> tuple[list[TopicWe
         )
 
     weighted = any(row["share"] is not None for row in rows)
+    if weighted:
+        topics = [
+            TopicWeight(
+                topic_id=row["topic_id"],
+                share=float(row["share"]) if row["share"] is not None else 1.0,
+                name=row["name"],
+            )
+            for row in rows
+        ]
+        return topics, "exam_structure"
+    # No printed structure: a topic weighs what its subtopics weigh, from the past papers when
+    # there are enough of them (`_subtopics`), equally when not.
+    units, source = await _subtopics(conn, subject_id)
+    by_topic: dict[str, float] = {}
+    for unit in units:
+        by_topic[unit.topic_id] = by_topic.get(unit.topic_id, 0.0) + unit.share
     topics = [
         TopicWeight(
             topic_id=row["topic_id"],
-            share=float(row["share"]) if weighted and row["share"] is not None else 1.0,
+            share=by_topic.get(row["topic_id"], 0.0) or 1e-6,
             name=row["name"],
         )
         for row in rows
     ]
-    source = "exam_structure" if weighted else "equal (no approved exam structure yet)"
     return topics, source
+
+
+#: Below this many past-paper questions in a subject, frequencies say too little and the
+#: subtopics are weighted equally instead.
+MIN_PAST_QUESTIONS = 100
 
 
 async def _subtopics(conn: AsyncConnection, subject_id: UUID) -> tuple[list[UnitWeight], str]:
     """Every examinable subtopic, with the share of the paper it carries.
 
-    Read from `subtopic_exam_weight`, which is built from the printed sections of the paper.
-    Where the document attributes a section to a subtopic the share is that section's; where
-    it names only a topic, the view shares those questions out. Either way the number comes
-    from the examination, never from how many questions our own bank happens to hold — that
-    would make our sampling the examiner's, and every plan built on it circular.
+    In order of what we trust most:
 
-    A subject whose paper structure has not been approved has no shares at all, and then the
-    subtopics are weighted equally and the caller is told so rather than being handed a guess
-    dressed as a fact.
+    1. The exam's printed section structure (`subtopic_exam_weight`), once approved.
+    2. How often the subtopic came up in the real JAMB papers we hold
+       (`subtopic_past_paper_frequency`, spec §9.2 `historical_share`), smoothed by one so a
+       subtopic seen once in nine years is rare, not impossible. Only questions on dated past
+       papers count, never a set of our own.
+    3. Equal shares, when a subject has too few past-paper questions to say anything.
+
+    The second string says which, so a caller can label the weights honestly.
     """
     version_id = await _current_syllabus(conn, subject_id)
     rows = await fetch_all(
@@ -286,43 +307,64 @@ async def _subtopics(conn: AsyncConnection, subject_id: UUID) -> tuple[list[Unit
         SELECT sub.id::text AS unit_id, sub.name, topic.id::text AS topic_id,
                topic.name AS topic_name, w.share,
                w.expected_questions,
+               coalesce(f.past_questions, 0) AS past_questions,
+               coalesce(f.years_seen, 0) AS years_seen,
                count(*) OVER (PARTITION BY topic.id) AS siblings
         FROM curriculum_items sub
         JOIN curriculum_items topic ON topic.id = sub.parent_id
         LEFT JOIN subtopic_exam_weight w
           ON w.subtopic_id = sub.id AND w.syllabus_version_id = sub.syllabus_version_id
+        LEFT JOIN subtopic_past_paper_frequency f ON f.subtopic_id = sub.id
         WHERE sub.syllabus_version_id = :version AND sub.item_type = 'subtopic'
           AND sub.review_status = 'approved' AND sub.pilot_support_status = 'supported'
         ORDER BY topic.display_order, sub.display_order, sub.code
         """,
         version=version_id,
     )
-    weighted = any(row["share"] is not None for row in rows)
-    units = [
-        UnitWeight(
-            unit_id=row["unit_id"],
-            name=row["name"],
-            topic_id=row["topic_id"],
-            topic_name=row["topic_name"],
-            share=(
-                float(row["share"])
-                if weighted and row["share"] is not None
-                # No printed share, so every subtopic of the subject is treated as equally
-                # important. An equal share of the SUBJECT, not of its topic: dividing within
-                # the topic would make a subtopic of a five-part topic look four times as
-                # heavy as one of a twenty-part topic, which is a weighting nobody chose and
-                # which the report then prints as a percentage of the paper.
-                else 1.0 / len(rows)
-            ),
+    if any(row["share"] is not None for row in rows):
+        units = [
+            UnitWeight(
+                row["unit_id"],
+                row["name"],
+                row["topic_id"],
+                row["topic_name"],
+                float(row["share"]) if row["share"] is not None else 0.0,
+            )
+            for row in rows
+        ]
+        return units, "the exam's printed section structure"
+
+    past = sum(int(row["past_questions"]) for row in rows)
+    if rows and past >= MIN_PAST_QUESTIONS:
+        years = await fetch_all(
+            conn,
+            """
+            SELECT count(DISTINCT exam_year) AS n FROM exam_papers
+            WHERE subject_id = :subject AND exam_year IS NOT NULL AND NOT own
+            """,
+            subject=subject_id,
         )
+        spread = past + len(rows)
+        units = [
+            UnitWeight(
+                row["unit_id"],
+                row["name"],
+                row["topic_id"],
+                row["topic_name"],
+                (int(row["past_questions"]) + 1) / spread,
+            )
+            for row in rows
+        ]
+        return units, f"estimated from {years[0]['n']} past papers ({past} questions)"
+
+    # No evidence: every subtopic counts the same. An equal share of the SUBJECT, not of its
+    # topic: dividing within the topic would make a subtopic of a five-part topic look four
+    # times as heavy as one of a twenty-part topic, a weighting nobody chose.
+    units = [
+        UnitWeight(row["unit_id"], row["name"], row["topic_id"], row["topic_name"], 1.0 / len(rows))
         for row in rows
     ]
-    source = (
-        "the exam's printed section structure"
-        if weighted
-        else "equal (no approved exam structure yet)"
-    )
-    return units, source
+    return units, "equal (no exam structure or past papers yet)"
 
 
 async def _answers_so_far(conn: AsyncConnection, session_id: UUID) -> list[dict[str, Any]]:
