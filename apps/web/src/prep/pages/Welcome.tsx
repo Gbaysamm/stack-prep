@@ -119,7 +119,7 @@ export function Welcome() {
               ))}
             </ul>
           </div>
-          <p className="wel-foot wel-foot-dark">Stack Prep by Stackjunior · Made for UTME candidates in Nigeria</p>
+          <p className="wel-foot wel-foot-dark">© {new Date().getFullYear()} Stack Prep by StackJunior</p>
         </div>
       </section>
 
@@ -185,7 +185,7 @@ export function Welcome() {
             })}
           </div>
         </div>
-        <p className="wel-foot wel-foot-light">Stack Prep by Stackjunior · Made for UTME candidates in Nigeria</p>
+        <p className="wel-foot wel-foot-light">© {new Date().getFullYear()} Stack Prep by StackJunior</p>
       </main>
     </div>
   );

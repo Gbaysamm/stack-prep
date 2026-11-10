@@ -1,8 +1,8 @@
 """What the public site says about the question bank, counted live so it never goes stale.
 
 Only UTME subjects are listed: the sandbox and test subjects live under other examinations.
-How many questions each subject has is not said, and the total is rounded down to the
-thousand ("5,000+"): the founder's call, so the bank's exact size stays ours.
+No count of questions and no years are given, for the bank or any subject: the founder's call,
+so the bank's size stays ours. The site says "thousands of questions" and names the subjects.
 """
 
 from __future__ import annotations
@@ -21,14 +21,10 @@ router = APIRouter(prefix="/v1/app", tags=["app"])
 
 class SiteSubject(BaseModel):
     name: str
-    first_year: int | None
-    last_year: int | None
 
 
 class Site(BaseModel):
     subjects: list[SiteSubject]
-    #: The number of questions, rounded down to the thousand (to the hundred below 1,000).
-    questions_at_least: int
     #: Questions with a worked solution, as a whole percentage.
     worked_percent: int
 
@@ -47,7 +43,6 @@ async def site(conn: Annotated[AsyncConnection, Depends(connection)]) -> Site:
         conn,
         """
         SELECT sub.name, count(DISTINCT d.question_version_id) AS questions,
-               min(q.exam_year) AS first_year, max(q.exam_year) AS last_year,
                count(DISTINCT d.question_version_id) FILTER (
                  WHERE jsonb_array_length(coalesce(v.solution_steps, '[]'::jsonb)) > 0) AS worked
         FROM subjects sub
@@ -61,13 +56,8 @@ async def site(conn: Annotated[AsyncConnection, Depends(connection)]) -> Site:
     )
     total = sum(row["questions"] for row in rows)
     worked = sum(row["worked"] for row in rows)
-    step = 1000 if total >= 1000 else 100
     counted = Site(
-        subjects=[
-            SiteSubject(**{k: v for k, v in row.items() if k not in ("worked", "questions")})
-            for row in rows
-        ],
-        questions_at_least=total // step * step,
+        subjects=[SiteSubject(name=row["name"]) for row in rows],
         worked_percent=round(100 * worked / total) if total else 0,
     )
     _kept = (time.monotonic(), counted)

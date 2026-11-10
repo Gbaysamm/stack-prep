@@ -4,7 +4,7 @@
  * It leads with what makes Stack Prep different: a real lesson, playing on the coach's board
  * in the hero. Then a tour of the app, each part beside a picture of its own screen
  * (Mockups.tsx), everything else it does, the subjects, the plans, questions, and the way in.
- * Every claim is what the app does; the only number about the bank is the rounded total.
+ * Every claim is what the app does; the bank is "thousands of questions", never a count.
  */
 import { Link } from 'react-router-dom';
 
@@ -26,10 +26,10 @@ import {
 } from '../prep/icons.js';
 import { FaqList, SITE_FAQ } from './Faq.js';
 import { LessonPlayer } from './LessonPlayer.js';
-import { CheckupMock, CoachMock, MockExamMock, PracticeMock, ProgressMock, TickList } from './Mockups.js';
+import { AppShot, CheckupMock, CoachMock, PracticeMock, ProgressMock, TickList } from './Mockups.js';
 import { PlanGrid } from './PlanGrid.js';
 import { SIGN_UP, SiteShell, useSiteTitle } from './SiteShell.js';
-import { questionsWord, useCatalogue, useSite, yearsOf } from './siteData.js';
+import { useCatalogue, useSite } from './siteData.js';
 
 export const TOUR = [
   {
@@ -66,11 +66,19 @@ export const TOUR = [
     id: 'mock',
     icon: IconClock,
     tint: 'blue',
+    wide: true,
     eyebrow: 'Mock exams',
     title: 'Sit the real thing before the real thing',
     body: 'A JAMB-style computer-based test: Use of English and three subjects, 180 questions in two hours, full screen, with a question palette and a calculator when you need one.',
     ticks: ['The Real UTME layout and pace, or a shorter mock you set up', 'Your score in each subject, as a percentage or out of 400', 'Every question afterwards, with the right answer and why'],
-    mock: <MockExamMock />,
+    mock: (
+      <AppShot
+        src="/showcase/mock-room.jpg"
+        phoneSrc="/showcase/mock-room-phone.jpg"
+        label="Mock exam · the real screen"
+        alt="The mock exam screen: the timer, a subject tab for each paper, the question with its options, and the question palette showing which are answered and flagged."
+      />
+    ),
   },
   {
     id: 'progress',
@@ -98,8 +106,12 @@ const MORE = [
 export function TourRows() {
   return (
     <div className="ld-tour">
-      {TOUR.map(({ id, icon: Icon, tint, eyebrow, title, body, ticks, mock }, index) => (
-        <article key={id} id={id} className={`ld-row ${index % 2 ? 'flip' : ''}`}>
+      {TOUR.map(({ id, icon: Icon, tint, eyebrow, title, body, ticks, mock, ...rest }, index) => (
+        <article
+          key={id}
+          id={id}
+          className={`ld-row ${'wide' in rest && rest.wide ? 'wide' : index % 2 ? 'flip' : ''}`}
+        >
           <div className="ld-row-text">
             <span className={`ld-badge ${tint}`}>
               <Icon size={18} /> {eyebrow}
@@ -120,7 +132,6 @@ export function Landing() {
   const site = useSite();
   const { catalogue } = useCatalogue();
   const subjects = site?.subjects ?? [];
-  const total = questionsWord(site);
 
   return (
     <SiteShell bare>
@@ -172,7 +183,7 @@ export function Landing() {
       <div className="ld-wrap">
         <section className="ld-strip" aria-label="What you get">
           {[
-            { icon: IconBook, text: `${total} real past questions` },
+            { icon: IconBook, text: 'Thousands of real past questions' },
             { icon: IconVolume, text: 'A lesson, out loud, for every question' },
             { icon: IconMic, text: 'Ask the coach by typing or speaking' },
             { icon: IconTarget, text: 'A predicted score you can trust' },
@@ -232,7 +243,7 @@ export function Landing() {
           <div className="ld-subjects-text">
             <span className="ps-eyebrow">Subjects</span>
             <h2 id="ld-subjects" className="sj-display">
-              {total} questions across {subjects.length || 10} subjects
+              Thousands of questions across {subjects.length || 10} subjects
             </h2>
             <p>
               Real UTME papers, sorted into the topics on the syllabus, each with a checked worked solution. Pick Use of
@@ -248,10 +259,7 @@ export function Landing() {
                 <span className={`ps-letter t${index % 6}`} aria-hidden="true">
                   {subject.name.slice(0, 1)}
                 </span>
-                <span>
-                  <strong>{subject.name}</strong>
-                  {yearsOf(subject) ? <small>Papers {yearsOf(subject)}</small> : null}
-                </span>
+                <strong>{subject.name}</strong>
               </li>
             ))}
           </ul>

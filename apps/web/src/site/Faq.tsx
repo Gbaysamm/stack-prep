@@ -6,9 +6,10 @@
 import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
-import { IconArrowRight } from '../prep/icons.js';
+import { IconArrowRight, IconBolt, IconLock, IconSparkles, IconUser } from '../prep/icons.js';
 import { Disclosure } from '../prep/pages/Disclosure.js';
 import '../prep/pages/Help.css';
+import { QuestionStackArt } from './Art.js';
 import { SiteHero, SiteShell, useSiteTitle } from './SiteShell.js';
 
 export interface FaqItem {
@@ -224,6 +225,13 @@ export function FaqList({ items }: { items: FaqItem[] }) {
   );
 }
 
+const GROUP_LOOK: Record<string, { icon: (props: { size?: number }) => ReactNode; tint: number; blurb: string }> = {
+  about: { icon: IconSparkles, tint: 0, blurb: 'What it is, the questions, and who it’s for' },
+  using: { icon: IconBolt, tint: 1, blurb: 'Devices, the score, the coach and mocks' },
+  paying: { icon: IconLock, tint: 3, blurb: 'Free and paid plans, and paying' },
+  account: { icon: IconUser, tint: 2, blurb: 'Your data, password and account' },
+};
+
 export function FaqPage() {
   useSiteTitle('FAQ');
   return (
@@ -237,44 +245,60 @@ export function FaqPage() {
             </>
           }
           sub="Straight answers about Stack Prep, the lessons, plans and paying, and your account, written from how it works."
-          art={
-            <div className="ps-promises">
-              {SITE_FAQ.map((group) => (
-                <a key={group.id} href={`#${group.id}`}>
-                  <IconArrowRight size={18} /> {group.title}
-                  <small>{group.items.length}</small>
-                </a>
-              ))}
-            </div>
-          }
+          art={<QuestionStackArt />}
         />
       }
     >
-      <div className="ps-faq-page first">
-        <nav className="ps-faq-index" aria-label="Topics">
-          {SITE_FAQ.map((group) => (
-            <a key={group.id} href={`#${group.id}`}>
-              {group.title}
+      <nav className="topic-cards first" aria-label="Topics">
+        {SITE_FAQ.map((group) => {
+          const look = GROUP_LOOK[group.id]!;
+          const Icon = look.icon;
+          return (
+            <a key={group.id} href={`#${group.id}`} className={`topic-card t${look.tint}`}>
+              <span className="tile-icon" aria-hidden="true">
+                <Icon size={22} />
+              </span>
+              <strong>{group.title}</strong>
+              <small>{look.blurb}</small>
+              <span className="topic-count">
+                {group.items.length} questions <IconArrowRight size={14} />
+              </span>
             </a>
-          ))}
-          <div className="ps-faq-help">
-            <strong>Still stuck?</strong>
-            <span>A person reads every message.</span>
-            <Link to="/contact" className="ps-textlink">
+          );
+        })}
+      </nav>
+      <div className="faq-layout">
+        <div className="faq-groups">
+          {SITE_FAQ.map((group) => {
+            const look = GROUP_LOOK[group.id]!;
+            const Icon = look.icon;
+            return (
+              <section key={group.id} id={group.id} className="faq-group" aria-labelledby={`${group.id}-h`}>
+                <header>
+                  <span className={`tile-icon t${look.tint}`} aria-hidden="true">
+                    <Icon size={20} />
+                  </span>
+                  <h2 id={`${group.id}-h`} className="sj-display">
+                    {group.title}
+                  </h2>
+                </header>
+                <FaqList items={group.items} />
+              </section>
+            );
+          })}
+        </div>
+        <aside className="faq-help">
+          <div className="faq-help-card">
+            <span className="faq-help-face" aria-hidden="true">
+              <img src="/brand/mark-96.png" alt="" width={40} height={40} />
+            </span>
+            <h3 className="sj-display">Still stuck?</h3>
+            <p>A person reads every message and replies, usually within a day.</p>
+            <Link to="/contact" className="sj-btn ld-cta small">
               Contact us <IconArrowRight size={16} />
             </Link>
           </div>
-        </nav>
-        <div className="ps-faq-groups">
-          {SITE_FAQ.map((group) => (
-            <section key={group.id} id={group.id} aria-labelledby={`${group.id}-h`}>
-              <h2 id={`${group.id}-h`} className="sj-display">
-                {group.title}
-              </h2>
-              <FaqList items={group.items} />
-            </section>
-          ))}
-        </div>
+        </aside>
       </div>
     </SiteShell>
   );

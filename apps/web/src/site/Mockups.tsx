@@ -4,7 +4,7 @@
  * They show the app as it is (its words, its labels, its colours) with made-up numbers; they
  * are pictures, so nothing in them can be clicked.
  */
-import { IconCheck, IconClock, IconMic, IconSend, IconSparkles } from '../prep/icons.js';
+import { IconCheck, IconMic, IconSend, IconSparkles } from '../prep/icons.js';
 import { Ring, Track } from '../prep/ui.js';
 
 function Frame({ label, children, tone = '' }: { label: string; children: React.ReactNode; tone?: string }) {
@@ -125,44 +125,24 @@ export function CoachMock() {
   );
 }
 
-export function MockExamMock() {
-  const answered = new Set([1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 15, 16, 17, 18, 19, 21, 22]);
-  const flagged = new Set([5, 14]);
+/**
+ * A screenshot of the app itself, in the same window frame as the pictures above. On a phone
+ * `phoneSrc` (the same screen, taken on a phone) is shown instead, so it stays readable.
+ */
+export function AppShot({ src, phoneSrc, label, alt }: { src: string; phoneSrc?: string; label: string; alt: string }) {
   return (
-    <Frame label="Mock exam · Real UTME" tone="dark">
-      <div className="mk-cbt-top">
-        <div className="mk-cbt-tabs">
-          <span className="on">English</span>
-          <span>Maths</span>
-          <span>Physics</span>
-          <span>Chemistry</span>
-        </div>
-        <span className="mk-timer">
-          <IconClock size={15} /> 1:42:18
-        </span>
+    <div className="mk shot">
+      <div className="mk-bar" aria-hidden="true">
+        <i />
+        <i />
+        <i />
+        <span>{label}</span>
       </div>
-      <div className="mk-cbt">
-        <div className="mk-cbt-q">
-          <span className="mk-eyebrow light">Question 23 of 60</span>
-          <p>Choose the option nearest in meaning to the word in italics: the man was <em>adamant</em> about his decision.</p>
-          <ol className="mk-options dark">
-            {['firm', 'confused', 'happy', 'careless'].map((text, index) => (
-              <li key={text} className={index === 0 ? 'picked' : undefined}>
-                <b>{'ABCD'[index]}</b>
-                {text}
-              </li>
-            ))}
-          </ol>
-        </div>
-        <div className="mk-palette">
-          {Array.from({ length: 30 }, (_, i) => i + 1).map((n) => (
-            <span key={n} className={n === 23 ? 'now' : flagged.has(n) ? 'flag' : answered.has(n) ? 'done' : undefined}>
-              {n}
-            </span>
-          ))}
-        </div>
-      </div>
-    </Frame>
+      <picture>
+        {phoneSrc ? <source media="(max-width: 640px)" srcSet={phoneSrc} /> : null}
+        <img src={src} alt={alt} loading="lazy" decoding="async" />
+      </picture>
+    </div>
   );
 }
 

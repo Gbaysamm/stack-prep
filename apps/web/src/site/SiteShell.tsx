@@ -6,10 +6,11 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 
-import { IconClose, IconMenu } from '../prep/icons.js';
+import { IconArrowUp, IconClose, IconMenu } from '../prep/icons.js';
 import { useIdentity } from '../prep/store.js';
 import { supportApi, type PublicSettings } from '../prep/supportApi.js';
 import './site.css';
+import './depth.css';
 
 export { LOG_IN, SIGN_UP } from './showcase.js';
 import { LOG_IN, SIGN_UP } from './showcase.js';
@@ -79,7 +80,10 @@ export function SiteHero({
   sub,
   art,
   children,
+  tall = false,
 }: {
+  /** More room at the bottom, for a card that overlaps the band's edge (Contact). */
+  tall?: boolean;
   eyebrow: string;
   title: ReactNode;
   sub: ReactNode;
@@ -87,7 +91,7 @@ export function SiteHero({
   children?: ReactNode;
 }) {
   return (
-    <section className={`ps-hero-band ${art ? 'with-art' : ''}`}>
+    <section className={`ps-hero-band ${art ? 'with-art' : ''} ${tall ? 'tall' : ''}`}>
       <div className="ld-hero-sky" aria-hidden="true">
         <span className="a" />
         <span className="b" />
@@ -110,7 +114,14 @@ export function SiteHero({
 /** `hero` runs the full width above the page; `bare` hands the whole width to the page. */
 export function SiteShell({ children, hero, bare = false }: { children: ReactNode; hero?: ReactNode; bare?: boolean }) {
   const [menu, setMenu] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
   const settings = useSiteSettings();
   useEffect(() => {
     setMenu(false);
@@ -119,7 +130,9 @@ export function SiteShell({ children, hero, bare = false }: { children: ReactNod
 
   return (
     <div className="ps">
-      <header className="ps-header">
+      {/* A floating bar of dark glass over the top of each page's hero (every public page opens
+          on one). It goes a little more solid once the page has scrolled. */}
+      <header className={`ps-header ${scrolled ? 'scrolled' : ''} ${menu ? 'open' : ''}`}>
         <div className="ps-header-in">
           <Brand />
           <nav className="ps-nav" aria-label="Main">
@@ -133,14 +146,14 @@ export function SiteShell({ children, hero, bare = false }: { children: ReactNod
             <WayIn />
           </div>
           <button type="button" className="ps-menubtn" aria-label="Menu" aria-expanded={menu} onClick={() => setMenu(!menu)}>
-            {menu ? <IconClose size={22} /> : <IconMenu size={22} />}
+            {menu ? <IconClose size={20} /> : <IconMenu size={20} />}
           </button>
         </div>
         {menu ? (
           <div className="ps-sheet">
             <nav aria-label="Pages">
               {PAGES.map((page) => (
-                <NavLink key={page.to} to={page.to}>
+                <NavLink key={page.to} to={page.to} className={({ isActive }) => (isActive ? 'on' : undefined)}>
                   {page.label}
                 </NavLink>
               ))}
@@ -159,31 +172,44 @@ export function SiteShell({ children, hero, bare = false }: { children: ReactNod
 
       <footer className="ps-footer">
         <div className="ps-footer-in">
-          <div className="ps-footer-brand">
-            <Brand />
-            <p>Real UTME past questions, a score you can trust, and a coach that teaches the step you missed.</p>
+          <div className="ps-footer-top">
+            <div className="ps-footer-brand">
+              <Brand />
+              <p>Real UTME past questions, a score you can trust, and a coach that teaches the step you missed.</p>
+              <div className="ps-footer-wayin">
+                <WayIn />
+              </div>
+            </div>
+            <nav className="ps-footer-cols" aria-label="Footer">
+              <div>
+                <h3>Stack Prep</h3>
+                <Link to="/how-it-works">How it works</Link>
+                <Link to="/pricing">Pricing</Link>
+                <Link to="/about">About</Link>
+              </div>
+              <div>
+                <h3>Help</h3>
+                <Link to="/faq">FAQ</Link>
+                <Link to="/contact">Contact us</Link>
+                {settings?.support_email ? <a href={`mailto:${settings.support_email}`}>{settings.support_email}</a> : null}
+              </div>
+              <div>
+                <h3>The small print</h3>
+                <Link to="/terms">Terms of use</Link>
+                <Link to="/privacy">Privacy</Link>
+              </div>
+            </nav>
           </div>
-          <div className="ps-footer-cols">
-            <div>
-              <h3>Stack Prep</h3>
-              <Link to="/how-it-works">How it works</Link>
-              <Link to="/pricing">Pricing</Link>
-              <Link to="/about">About</Link>
-            </div>
-            <div>
-              <h3>Help</h3>
-              <Link to="/faq">FAQ</Link>
-              <Link to="/contact">Contact us</Link>
-              {settings?.support_email ? <a href={`mailto:${settings.support_email}`}>{settings.support_email}</a> : null}
-            </div>
-            <div>
-              <h3>The small print</h3>
-              <Link to="/terms">Terms of use</Link>
-              <Link to="/privacy">Privacy</Link>
-            </div>
+          <div className="ps-footer-base">
+            <span>© {new Date().getFullYear()} Stack Prep by StackJunior</span>
+            <button type="button" className="ps-totop" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+              Back to top <IconArrowUp size={14} />
+            </button>
           </div>
         </div>
-        <p className="ps-footer-base">© {new Date().getFullYear()} Stack Prep by StackJunior · Made for UTME candidates in Nigeria</p>
+        <div className="ps-footer-mark" aria-hidden="true">
+          Stack Prep
+        </div>
       </footer>
     </div>
   );

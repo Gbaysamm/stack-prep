@@ -1,11 +1,10 @@
 /* The public site (SiteShell.tsx and its pages), in the app's own design: the ink heroes with
-   their purple and pink glow (prep.css .sj-hero), lime calls to action, mono eyebrows, white
+   their purple glow (as prep.css .sj-hero, without the pink), lime calls to action, mono eyebrows, white
    rounded cards on the paper, and pastel icon tiles. */
 .sj .ps {
   --ps-max: 1200px;
   --ps-hero-bg:
     radial-gradient(60% 80% at 100% 0%, rgba(107, 11, 255, 0.6), transparent 65%),
-    radial-gradient(45% 70% at 75% 120%, rgba(254, 118, 152, 0.32), transparent 70%),
     radial-gradient(40% 60% at 0% 100%, rgba(133, 222, 76, 0.12), transparent 70%),
     var(--ink-900);
   display: flex;
@@ -22,94 +21,156 @@
 }
 
 /* ------------------------------------------------------------------ header */
+/* A slim bar of dark glass floating over the top of each page's hero: rounded, see-through with
+   a blur behind it, a fine light edge and a highlight along its top, like liquid glass. Once the
+   page scrolls it goes a little more solid, so it reads over the light sections too. */
 .sj .ps-header {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  border-bottom: 1px solid rgba(31, 0, 80, 0.06);
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(14px);
+  position: fixed;
+  top: 14px;
+  right: 0;
+  left: 0;
+  z-index: 60;
+  padding: 0 24px;
+  pointer-events: none;
 }
 .sj .ps-header-in {
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 24px;
   max-width: var(--ps-max);
-  height: 68px;
+  height: 60px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 10px 0 18px;
+  border-radius: 999px;
+  background: rgba(26, 4, 60, 0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 12px 32px rgba(10, 0, 30, 0.28);
+  backdrop-filter: blur(18px) saturate(1.5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  pointer-events: auto;
+  transition: background 0.2s;
+}
+.sj .ps-header.scrolled .ps-header-in,
+.sj .ps-header.open .ps-header-in {
+  background: rgba(22, 2, 52, 0.86);
 }
 .sj .ps-brand {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   font-family: var(--f-display);
-  font-size: 19px;
+  font-size: 18px;
+  color: #fff !important;
   text-decoration: none;
+}
+.sj .ps-brand img {
+  width: 30px;
+  height: 30px;
 }
 .sj .ps-nav {
   display: flex;
-  gap: 4px;
+  gap: 2px;
   margin-right: auto;
 }
 .sj .ps-nav a {
-  padding: 8px 12px;
+  padding: 8px 14px;
   border-radius: 999px;
   font-size: 14.5px;
-  font-weight: 600;
-  color: var(--gray-700);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.72) !important;
   text-decoration: none;
+  transition: color 0.15s, background 0.15s;
 }
-.sj .ps-nav a:hover,
+.sj .ps-nav a:hover {
+  color: #fff !important;
+}
 .sj .ps-nav a.on {
-  background: var(--purple-050);
-  color: var(--purple-700);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff !important;
 }
 .sj .ps-wayin {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 6px;
 }
 .sj .ps-login {
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
   font-size: 14.5px;
   font-weight: 600;
+  color: rgba(255, 255, 255, 0.85) !important;
   text-decoration: none;
 }
 .sj .ps-login:hover {
-  color: var(--purple-700);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff !important;
 }
+/* The call to action: a small pill, its words centred on both axes. */
 .sj .ps a.ps-cta {
-  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  min-height: 0;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--green-400);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 6px 16px rgba(133, 222, 76, 0.25);
+  font-size: 14.5px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ink-900) !important;
   text-decoration: none;
+}
+.sj .ps a.ps-cta:hover {
+  filter: brightness(1.05);
 }
 .sj .ps-menubtn {
   display: none;
   place-items: center;
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   margin-left: auto;
   border: 0;
-  border-radius: 12px;
-  background: var(--purple-050);
-  color: var(--ink-900);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
   cursor: pointer;
 }
+/* The phone menu: a panel of the same glass under the bar. */
 .sj .ps-sheet {
   display: grid;
-  gap: 16px;
-  padding: 8px 16px 20px;
-  border-top: 1px solid var(--gray-100);
-  background: var(--white);
+  gap: 14px;
+  max-width: var(--ps-max);
+  margin: 8px auto 0;
+  padding: 10px 14px 16px;
+  border-radius: 24px;
+  background: rgba(22, 2, 52, 0.92);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 20px 40px rgba(10, 0, 30, 0.35);
+  backdrop-filter: blur(18px) saturate(1.5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  pointer-events: auto;
 }
 .sj .ps-sheet nav {
   display: grid;
 }
 .sj .ps-sheet nav a {
-  padding: 12px 4px;
-  border-bottom: 1px solid var(--gray-100);
+  padding: 13px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   font-size: 16px;
   font-weight: 600;
+  color: rgba(255, 255, 255, 0.85) !important;
   text-decoration: none;
+}
+.sj .ps-sheet nav a.on {
+  color: var(--green-400) !important;
 }
 .sj .ps-sheet-wayin {
   display: flex;
@@ -119,7 +180,6 @@
 }
 .sj .ps-sheet-wayin .ps-cta {
   flex: 1;
-  justify-content: center;
 }
 
 /* ------------------------------------------------------------------ page frame */
@@ -277,6 +337,7 @@
   background: #7a1fff;
 }
 .sj .ld-hero-sky .b {
+  display: none; /* the pink glow: the founder's call, the heroes keep only the purple */
   bottom: -160px;
   left: 30%;
   width: 380px;
@@ -303,10 +364,10 @@
 .sj .ld-hero-in {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-  gap: 64px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 56px;
   align-items: center;
-  max-width: 1280px;
+  max-width: var(--ps-max);
   margin: 0 auto;
   padding: 80px 24px 112px;
 }
@@ -326,7 +387,7 @@
 }
 .sj .ld-hero h1 {
   margin: 20px 0 20px;
-  font-size: clamp(40px, 4.6vw, 64px);
+  font-size: clamp(38px, 4.2vw, 56px);
   line-height: 1.03;
   letter-spacing: -0.02em;
   color: #fff;
@@ -805,26 +866,39 @@
   color: rgba(255, 255, 255, 0.6);
 }
 
-/* The closing call: dark, after a light page. */
+/* The closing call: a bright card on the light page, in the page column, with clear paper
+   before the footer, so it never runs into the footer's dark. */
 .sj .ld-final {
   position: relative;
-  overflow: hidden;
-  margin-top: 96px;
-  background: var(--ps-hero-bg);
-  color: #fff;
+  max-width: var(--ps-max);
+  margin: 96px auto 88px;
+  padding: 0 24px;
 }
 .sj .ps-main > .ld-final {
-  border-radius: 32px;
+  margin-bottom: 16px;
+  padding: 0;
 }
 .sj .ld-final-in {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 24px 40px;
-  max-width: var(--ps-max);
-  margin: 0 auto;
-  padding: 56px 48px;
+  overflow: hidden;
+  padding: 52px 56px;
+  border-radius: 32px;
+  background:
+    radial-gradient(50% 120% at 100% 0%, rgba(255, 255, 255, 0.18), transparent 60%),
+    linear-gradient(120deg, #5a00d6 0%, #6b0bff 45%, #9147ff 100%);
+  box-shadow: 0 30px 60px rgba(107, 11, 255, 0.28);
+  color: #fff;
+}
+.sj .ld-final .ld-kicker {
+  color: #fff;
+}
+.sj .ld-final .ld-kicker i {
+  background: var(--green-400);
 }
 .sj .ld-final h2 {
   margin: 12px 0 8px;
@@ -834,7 +908,7 @@
 .sj .ld-final p {
   margin: 0;
   font-size: 17px;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 /* ------------------------------------------------------------------ the mock screens */
@@ -1449,31 +1523,6 @@
   flex: none;
   color: var(--green-600);
 }
-.sj .pr-schools {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 20px;
-  padding: 28px 32px;
-  border-radius: 28px;
-  background: var(--white);
-  box-shadow: inset 0 0 0 1px var(--gray-200);
-}
-.sj .pr-schools > div {
-  flex: 1;
-  min-width: 240px;
-}
-.sj .pr-schools h2 {
-  margin: 0 0 6px;
-  font-size: 22px;
-}
-.sj .pr-schools p {
-  margin: 0;
-  color: var(--gray-600);
-}
-.sj .pr-schools .sj-btn {
-  text-decoration: none;
-}
 
 /* About */
 .sj .ab-why {
@@ -1557,12 +1606,16 @@
 }
 
 /* ------------------------------------------------------------------ plans */
+/* PlanGrid.tsx. Each step up has its own colour (tier0 free … tier3 the top plan, which is the
+   dark card), an icon, its price in a tinted panel with the length on the same line, and only
+   what it adds to the plan below it. */
 .sj .ps-plans-bar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 12px;
-  margin-bottom: 18px;
+  margin-bottom: 28px;
   font-size: 14.5px;
   font-weight: 600;
   color: var(--gray-600);
@@ -1570,19 +1623,19 @@
 .sj .ps-seg {
   display: inline-flex;
   gap: 4px;
-  padding: 4px;
-  border-radius: 14px;
+  padding: 5px;
+  border-radius: 999px;
   background: var(--white);
-  box-shadow: inset 0 0 0 1px var(--gray-200);
+  box-shadow: 0 8px 20px rgba(31, 0, 80, 0.08), inset 0 0 0 1px var(--gray-200);
 }
 .sj .ps-seg button {
-  padding: 8px 16px;
+  padding: 9px 20px;
   border: 0;
-  border-radius: 10px;
+  border-radius: 999px;
   background: transparent;
   font: inherit;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--gray-700);
   cursor: pointer;
 }
@@ -1592,122 +1645,174 @@
 }
 .sj .ps-plan-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 18px;
   align-items: stretch;
 }
 .sj .ps-plan {
+  --tier: var(--purple-600);
+  --tier-soft: var(--purple-050);
+  --tier-ink: var(--purple-700);
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 26px;
-  border-radius: 24px;
+  gap: 14px;
+  padding: 24px;
+  border-radius: 26px;
   background: var(--white);
-  box-shadow: inset 0 0 0 1px var(--gray-200);
+  box-shadow: 0 18px 40px rgba(31, 0, 80, 0.08), inset 0 0 0 1px var(--gray-200);
 }
-.sj .ps-plan.featured {
-  background: var(--ink-900);
-  box-shadow: 0 24px 50px rgba(31, 0, 80, 0.25);
+.sj .ps-plan.tier0 { --tier: #9a93b0; --tier-soft: #f1eff6; --tier-ink: #4b4563; }
+.sj .ps-plan.tier1 { --tier: var(--blue-500); --tier-soft: #e1f3fc; --tier-ink: #006a9e; }
+.sj .ps-plan.tier2 { --tier: var(--purple-600); --tier-soft: var(--purple-050); --tier-ink: var(--purple-700); }
+.sj .ps-plan.tier3 { --tier: var(--green-400); --tier-soft: rgba(133, 222, 76, 0.14); --tier-ink: var(--green-400); }
+.sj .ps-plan.top {
+  background:
+    radial-gradient(80% 60% at 100% 0%, rgba(107, 11, 255, 0.45), transparent 70%),
+    var(--ink-900);
+  box-shadow: 0 30px 60px rgba(31, 0, 80, 0.3);
   color: #fff;
 }
 .sj .ps-plan-flag {
   position: absolute;
-  top: -12px;
-  left: 24px;
-  padding: 4px 12px;
+  top: -14px;
+  right: 22px;
+  padding: 5px 12px;
   border-radius: 999px;
-  background: var(--green-400);
+  background: var(--yellow-300);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--ink-900);
+}
+.sj .ps-plan-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sj .ps-plan-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  background: var(--tier-soft);
+  color: var(--tier-ink);
 }
 .sj .ps-plan h3 {
   margin: 0;
   font-family: var(--f-display);
   font-size: 22px;
 }
+.sj .ps-plan.top h3 {
+  color: #fff;
+}
 .sj .ps-plan-blurb {
   margin: 0;
+  min-height: 42px; /* two lines: the space is kept even with no blurb */
   font-size: 14px;
   line-height: 1.5;
   color: var(--gray-600);
 }
-.sj .ps-plan.featured .ps-plan-blurb,
-.sj .ps-plan.featured .ps-plan-price {
-  color: rgba(255, 255, 255, 0.7);
+.sj .ps-plan.top .ps-plan-blurb {
+  color: rgba(255, 255, 255, 0.72);
 }
 .sj .ps-plan-price {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 8px;
-  margin: 4px 0 6px;
-  font-size: 14px;
-  color: var(--gray-600);
+  display: grid;
+  gap: 2px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: var(--tier-soft);
 }
-.sj .ps-plan-price strong {
+.sj .ps-plan.top .ps-plan-price {
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+.sj .ps-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  white-space: nowrap;
+}
+.sj .ps-price-row strong {
   font-family: var(--f-display);
-  font-size: 36px;
+  font-size: 26px;
+  line-height: 1.1;
   color: var(--ink-900);
 }
-.sj .ps-plan.featured .ps-plan-price strong {
+.sj .ps-plan.top .ps-price-row strong {
   color: var(--green-400);
 }
-.sj .ps-plan-price small {
-  flex-basis: 100%;
+.sj .ps-price-row span {
   font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-600);
+}
+.sj .ps-plan-price small {
+  font-size: 12.5px;
+  color: var(--gray-600);
+}
+.sj .ps-plan.top .ps-price-row span,
+.sj .ps-plan.top .ps-plan-price small {
+  color: rgba(255, 255, 255, 0.7);
+}
+.sj .ps-plan-plus {
+  margin: 2px 0 -4px;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--tier-ink);
 }
 .sj .ps-plan ul {
   display: grid;
-  gap: 9px;
-  margin: 0 0 8px;
-  padding: 14px 0 0;
-  border-top: 1px solid var(--gray-100);
+  gap: 10px;
+  margin: 0 0 6px;
+  padding: 0;
   list-style: none;
-}
-.sj .ps-plan.featured ul {
-  border-color: rgba(255, 255, 255, 0.12);
 }
 .sj .ps-plan li {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 10px;
   font-size: 14px;
+  font-weight: 500;
   line-height: 1.4;
 }
 .sj .ps-plan li svg {
   flex: none;
+  box-sizing: content-box;
   margin-top: 1px;
+  padding: 3px;
+  border-radius: 50%;
+  background: var(--tier-soft);
+  color: var(--tier-ink);
 }
-.sj .ps-plan li.on svg {
-  color: var(--green-600);
+.sj .ps-plan.top li svg {
+  background: rgba(133, 222, 76, 0.18);
 }
-.sj .ps-plan.featured li.on svg {
-  color: var(--green-400);
-}
-.sj .ps-plan li.off {
-  color: var(--gray-400, #a8a3b8);
-}
-.sj .ps-plan.featured li.off {
-  color: rgba(255, 255, 255, 0.35);
-}
-.sj .ps-plan-go {
+.sj .ps a.ps-plan-go {
   justify-content: center;
   margin-top: auto;
+  background: var(--tier);
+  box-shadow: none;
+  color: #fff;
   text-decoration: none;
 }
-.sj .ps-plan .sj-btn.ghost.ps-plan-go {
-  color: var(--ink-900);
+.sj .ps a.ps-plan-go:hover {
+  filter: brightness(1.06);
 }
-.sj .ps-plan.featured .ps-plan-go {
+.sj .ps-plan.tier0 a.ps-plan-go {
+  background: var(--ink-900);
+}
+.sj .ps-plan.top a.ps-plan-go {
   background: var(--green-400);
   box-shadow: 0 4px 0 #4d9a1f;
-  color: var(--ink-900) !important;
+  color: var(--ink-900);
 }
 .sj .ps-plans-note {
-  margin: 16px 0 0;
+  margin: 20px 0 0;
   font-size: 14px;
+  text-align: center;
   color: var(--gray-600);
 }
 
@@ -1917,26 +2022,42 @@
 }
 
 /* ------------------------------------------------------------------ footer */
+/* Rounded at the top so it reads as its own piece after the light page, a purple glow in one
+   corner, the brand with the way in, the links, and the name written large and faint along the
+   bottom. */
 .sj .ps-footer {
-  background: #12002e;
-  color: rgba(255, 255, 255, 0.78);
+  position: relative;
+  overflow: hidden;
+  border-radius: 40px 40px 0 0;
+  background:
+    radial-gradient(50% 70% at 100% 0%, rgba(107, 11, 255, 0.35), transparent 70%),
+    radial-gradient(40% 60% at 0% 100%, rgba(107, 11, 255, 0.18), transparent 70%),
+    #12002e;
+  color: rgba(255, 255, 255, 0.72);
 }
 .sj .ps-footer-in {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
-  gap: 40px;
+  position: relative;
+  z-index: 1;
   max-width: var(--ps-max);
   margin: 0 auto;
-  padding: 52px 24px 32px;
+  padding: 64px 24px 0;
 }
-.sj .ps-footer .ps-brand {
-  color: #fff;
+.sj .ps-footer-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+  gap: 48px;
+  padding-bottom: 48px;
 }
 .sj .ps-footer-brand p {
-  max-width: 340px;
-  margin: 14px 0 0;
-  font-size: 14.5px;
-  line-height: 1.55;
+  max-width: 360px;
+  margin: 16px 0 24px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.sj .ps-footer-wayin {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .sj .ps-footer-cols {
   display: grid;
@@ -1945,34 +2066,53 @@
 }
 .sj .ps-footer-cols div {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   align-content: start;
 }
 .sj .ps-footer-cols h3 {
-  margin: 0 0 4px;
+  margin: 0 0 6px;
   font-family: var(--f-mono);
   font-size: 12px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--green-400);
+  color: rgba(255, 255, 255, 0.45);
 }
 .sj .ps-footer-cols a {
-  font-size: 14.5px;
-  color: rgba(255, 255, 255, 0.85);
+  justify-self: start;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.85) !important;
   text-decoration: none;
   overflow-wrap: anywhere;
+  transition: color 0.15s;
 }
 .sj .ps-footer-cols a:hover {
-  color: #fff;
-  text-decoration: underline;
+  color: var(--green-400) !important;
 }
 .sj .ps-footer-base {
-  max-width: var(--ps-max);
-  margin: 0 auto;
-  padding: 18px 24px 28px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+  margin: 0;
+  padding: 22px 0 28px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.55);
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.5);
+}
+.sj .ps-footer-mark {
+  margin: -10px 0 -0.22em;
+  font-family: var(--f-display);
+  font-size: clamp(64px, 15vw, 220px);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  text-align: center;
+  white-space: nowrap;
+  color: transparent;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+  -webkit-background-clip: text;
+  background-clip: text;
+  user-select: none;
 }
 
 /* ------------------------------------------------------------------ narrower screens */
@@ -2102,17 +2242,38 @@
     padding: 20px;
     border-radius: 26px;
   }
+  /* On a phone a picture of the app sits straight on the page: no card around the row and no
+     tinted frame around the picture, so it gets the whole width rather than being squeezed. */
+  .sj .ld-row {
+    gap: 20px;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .sj .ld-tour {
+    gap: 56px;
+  }
   .sj .ld-row-art {
-    padding: 16px;
-    border-radius: 20px;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+  }
+  .sj .ld-row-art .mk {
+    max-width: none;
   }
   .sj .ld-subjects,
   .sj .pr-every {
     padding: 28px 20px;
     border-radius: 26px;
   }
+  .sj .ld-final {
+    margin: 64px auto 56px;
+    padding: 0 16px;
+  }
   .sj .ld-final-in {
-    padding: 44px 16px;
+    padding: 34px 22px;
+    border-radius: 26px;
   }
   .sj .ld-final .ld-cta {
     width: 100%;
@@ -2154,12 +2315,170 @@
 
 /* Sections below the first screen are laid out and painted only as they come near, so the
    page draws its first screen sooner. The sizes are what each roughly takes up meanwhile. */
+/* Not the closing card or the footer: skipping their paint clips the card's shadow. */
 .sj .ld-row,
 .sj .ld-more,
 .sj .ld-subjects,
-.sj .ps-faq-teaser,
-.sj .ld-final,
-.sj .ps-footer {
+.sj .ps-faq-teaser {
   content-visibility: auto;
   contain-intrinsic-block-size: auto 560px;
+}
+
+/* How it works: the facts under the hero, in the home page's strip of white cards. */
+.sj .ps-main > .hw-facts {
+  margin-top: -36px;
+}
+.sj .hw-facts span {
+  display: grid;
+  gap: 2px;
+  align-content: start;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-600);
+}
+.sj .hw-facts strong {
+  font-family: var(--f-display);
+  font-size: 26px;
+  line-height: 1.1;
+  color: var(--purple-600);
+}
+
+/* A screenshot of the app in the picture frame: wider than the drawn pictures, as the real
+   screen is. */
+.sj .mk.shot {
+  max-width: 560px;
+}
+.sj .mk.shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* The mock exam row: the real screen runs the full width of the row, under its words, so it
+   is big enough to read. */
+.sj .ld-row.wide {
+  grid-template-columns: 1fr;
+  gap: 32px;
+}
+.sj .ld-row.wide .ld-row-text {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0 56px;
+  align-items: center;
+}
+.sj .ld-row.wide .ld-row-text > :not(.ps-ticks) {
+  grid-column: 1;
+}
+.sj .ld-row.wide .ld-row-text > .ld-badge {
+  justify-self: start;
+}
+.sj .ld-row.wide .ps-ticks {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+}
+.sj .ld-row.wide .mk.shot {
+  max-width: none;
+}
+@media (max-width: 860px) {
+  .sj .ld-row.wide .ld-row-text {
+    grid-template-columns: 1fr;
+  }
+  .sj .ld-row.wide .ps-ticks {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+
+/* The bar floats over the hero, so each hero starts lower, under it. */
+.sj .ld-hero-in {
+  padding-top: 150px;
+}
+.sj .ps-hero-band-in {
+  padding-top: 140px;
+}
+/* The bar and the footer on narrower screens (after the older rules, so these win). */
+@media (max-width: 1100px) {
+  .sj .ps-nav {
+    display: none;
+  }
+  .sj .ps-wayin {
+    margin-left: auto;
+  }
+  .sj .ps-menubtn {
+    display: grid;
+    margin-left: 0;
+  }
+}
+@media (max-width: 860px) {
+  .sj .ps-footer-top {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+}
+@media (max-width: 640px) {
+  .sj .ps-header {
+    top: 10px;
+    padding: 0 12px;
+  }
+  .sj .ps-header-in {
+    height: 56px;
+    padding: 0 8px 0 14px;
+  }
+  .sj .ps-wayin {
+    display: none;
+  }
+  .sj .ps-menubtn {
+    margin-left: auto;
+  }
+  .sj .ld-hero-in,
+  .sj .ps-hero-band-in {
+    padding-top: 104px;
+  }
+  .sj .ps-footer {
+    border-radius: 28px 28px 0 0;
+  }
+  .sj .ps-footer-in {
+    padding: 48px 16px 0;
+  }
+  .sj .ps-footer-cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sj .ps-footer-base {
+    padding: 20px 0 24px;
+  }
+}
+/* The support address stays whole on a phone rather than breaking mid-word. */
+@media (max-width: 640px) {
+  .sj .ps-footer-cols a {
+    font-size: 14px;
+    overflow-wrap: normal;
+    white-space: nowrap;
+  }
+}
+
+/* The footer's way back up. */
+.sj .ps-totop {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+}
+.sj .ps-totop:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+/* Headings share their words out across lines, so none ends on a single word. */
+.sj .ps h1,
+.sj .ps h2 {
+  text-wrap: balance;
 }

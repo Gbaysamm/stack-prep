@@ -1,4 +1,4 @@
-"""The public site's live counts: UTME subjects only, and only a rounded total."""
+"""The public site's subjects: UTME only, named, with no counts or years."""
 
 from __future__ import annotations
 
@@ -26,9 +26,9 @@ async def test_the_site_counts_add_up(client: httpx.AsyncClient) -> None:
     response = await client.get("/v1/app/site")  # no sign-in needed
     assert response.status_code == 200, response.text
     site = response.json()
-    # Only a rounded total: no subject says how many questions it has.
-    assert site["questions_at_least"] % 100 == 0
-    assert all("questions" not in s for s in site["subjects"])
+    # No counts and no years, for the bank or any subject: only the subjects' names.
+    assert "questions" not in site and "questions_at_least" not in site
+    assert all(set(s) == {"name"} for s in site["subjects"])
     assert 0 <= site["worked_percent"] <= 100
     names = [s["name"] for s in site["subjects"]]
     assert not any(name.startswith(("Practice subject", "Sandbox")) for name in names)
