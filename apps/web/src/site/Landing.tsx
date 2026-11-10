@@ -73,7 +73,7 @@ export const TOUR = [
     ticks: ['The Real UTME layout and pace, or a shorter mock you set up', 'Your score in each subject, as a percentage or out of 400', 'Every question afterwards, with the right answer and why'],
     mock: (
       <AppShot
-        src="/showcase/mock-room.jpg"
+        src="/showcase/mock-exam-screen.jpg"
         label="Mock exam · the real screen"
         alt="The mock exam screen: the timer, a subject tab for each paper, the question with its options, and the question palette showing which are answered and flagged."
       />
