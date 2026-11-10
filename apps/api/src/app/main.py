@@ -24,6 +24,7 @@ from app.routers import (
     admin_students,
     admin_system,
     announcements,
+    bank,
     billing,
     checkup,
     curriculum,
@@ -80,6 +81,7 @@ def create_app() -> FastAPI:
     app.include_router(billing.router)
     app.include_router(curriculum.router)
     app.include_router(review.router)
+    app.include_router(bank.router)
     app.include_router(publishing.router)
     app.include_router(checkup.router)
     app.include_router(pool.router)

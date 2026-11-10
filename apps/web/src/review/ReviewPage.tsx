@@ -377,7 +377,7 @@ interface PanelProps {
   onBack: () => void;
 }
 
-function QuestionPanel({ detail, subjectName, skills, busy, onAct, onReportClosed, onBack }: PanelProps) {
+export function QuestionPanel({ detail, subjectName, skills, busy, onAct, onReportClosed, onBack }: PanelProps) {
   const [solution, setSolution] = useState(detail.solution_steps.join('\n'));
   const [hint, setHint] = useState(detail.hints.join('\n'));
 
@@ -556,7 +556,7 @@ function QuestionPanel({ detail, subjectName, skills, busy, onAct, onReportClose
         </button>
         <span className="st-muted">
           {approved
-            ? 'Approved questions are frozen. A change needs a new version.'
+            ? 'Approved. Use Edit to change it: a change to what it asks is checked again before it is served.'
             : missing.length > 0
               ? `Still needs ${missing.join(', ')}.`
               : 'Everything is checked.'}

@@ -655,8 +655,15 @@ async def approve(
         )
         await conn.commit()
     except DBAPIError as error:
-        # The database states exactly what is still missing; pass that through unchanged.
+        # The database states exactly what is still missing; pass that through unchanged,
+        # except the one rule it can only name by its constraint: a second pair of eyes.
         await conn.rollback()
+        if "question_versions_check4" in str(error):
+            raise HTTPException(
+                status_code=409,
+                detail="You wrote or last edited this question, so another reviewer must "
+                "approve it.",
+            ) from error
         raise HTTPException(status_code=409, detail=_message(error)) from error
     return await question_detail(conn, question_id)
 

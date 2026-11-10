@@ -15,6 +15,44 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-10
 
+### Public site, second round: glass navbar, new footer, plans, no figures
+- **Why:** the founder's review of the redesigned site, point by point.
+- **What:** a floating dark-glass navbar with a smaller, centred "Start free"; a new footer
+  (rounded, the brand and the way in, the links, the name written large, "Back to top");
+  the call to action before it is a purple card on the light page; everything lines up with
+  the navbar. Pricing, About, FAQ and Contact rebuilt with layered pictures in their heroes,
+  a plan comparison table, and no mention of schools. Plan cards redone: a colour and icon
+  per plan, smaller prices, every part lined up across the cards, each paid plan listing what
+  it adds. The mock exam picture is now a real screenshot of the mock screen. On phones,
+  pictures are no longer squeezed inside two boxes. The pink glow is gone from the heroes.
+  The site shows no question counts and no year ranges ("thousands of questions"), and the
+  public endpoint no longer sends them.
+- **Where:** `apps/web/src/site/` (SiteShell, Landing, Pages, Faq, Art, PlanGrid, Mockups,
+  site.css, depth.css), `apps/web/public/showcase/mock-room*.jpg`,
+  `apps/api/src/app/routers/site.py`, `apps/web/src/prep/pages/Welcome.tsx`.
+- **Status:** committed, not pushed.
+
+### The reviewer dashboard, rebuilt as a question bank (part 1)
+- **Why:** the founder found the old dashboard (one queue with filters) poor, and wants
+  reviewers without Claude Code to grow the bank themselves
+  (docs/plans/2026-11-10-reviewer-question-bank.md).
+- **What:** /review now opens on the exams in the menu (UTME, plus "Add an exam" for WAEC,
+  Post-UTME…). An exam shows its subjects as cards (papers, questions, share approved,
+  reports), with "Add a subject", which can copy the topics of an existing subject so its
+  questions can go live. A subject shows its past papers by year and our own sets, with "Add
+  a paper". A paper lists its questions (filter: to check, ready, approved, reported); one
+  opens beside the list to check and approve (the old panel), edit, or remove. "Add a
+  question" writes one by hand. "Reported" lists every flagged question. "Add with AI" is in
+  place, switched off, for part 2.
+- **Rules kept:** an approved question's working and hints change in place; changing what it
+  asks, its options or its key makes a new version that waits for a second check; whoever
+  wrote or last edited a question can't approve it (now said in plain words); removing a
+  question retires it, so scores that point at it stay whole.
+- **Where:** migration 037 (a paper carries its year, `own` sets, who retired a question);
+  `apps/api/src/app/routers/bank.py`; `apps/web/src/review/` (ReviewApp, BankPages, bankApi,
+  bank.css); tests in `tests/test_bank.py`.
+- **Status:** committed, not pushed.
+
 ### The review server goes public: production mode, no site password
 - **Why:** the founder wants the password prompt in front of stackprep.binaax.app removed.
   It was there because the server ran as `local` with no login, so the `/v1/dev` routes
