@@ -4,6 +4,7 @@
 -- signing up are adults who agreed in the app; a staff account is an adult who made it
 -- themselves on the server. This gives each such account the same footing as a sign-up.
 
+BEGIN;
 SET LOCAL search_path = stackprep, public;
 
 UPDATE students s SET requires_guardian_consent = false
@@ -24,3 +25,5 @@ WHERE NOT EXISTS (
   WHERE c.student_id = r.student_id AND c.consent_type = 'data_processing' AND c.granted
     AND c.revoked_at IS NULL
 );
+
+COMMIT;
