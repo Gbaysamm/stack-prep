@@ -18,6 +18,7 @@ from app.db import dispose_engine
 from app.routers import (
     accounts,
     admin,
+    admin_ai,
     admin_billing,
     admin_content,
     admin_reports,
@@ -72,6 +73,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(accounts.router)
     app.include_router(admin.router)
+    app.include_router(admin_ai.router)
     app.include_router(admin_billing.router)
     app.include_router(admin_content.router)
     app.include_router(admin_reports.router)

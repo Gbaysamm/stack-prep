@@ -15,6 +15,23 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-10
 
+### Admin: AI for questions (settings for the reviewers' "Add with AI")
+- **Why:** the founder doesn't yet know whether the key will be Anthropic's or OpenAI's, and
+  asked for an optional monthly spending cap the admin can set.
+- **What:** Admin > System > AI for questions: choose Anthropic or OpenAI and the model (Claude
+  models come with their prices filled in; OpenAI models are listed from the key, prices
+  entered by the admin), paste the API key, set an optional monthly cap in US dollars. The key
+  is stored encrypted (the key that opens it is in the server's environment, never in the
+  database) and is never sent back, only its last four characters. Checking a key is free: it
+  lists the provider's models. This month's spend and runs are shown, with a bar against the
+  cap. Every change is in the audit log. Migration 040 adds the settings and a log of runs and
+  their cost, which "Add with AI" will write to and the cap counts against.
+- **Where:** `apps/api/src/app/ai_writer.py`, `secret_box.py`, `routers/admin_ai.py`,
+  `tests/test_admin_ai.py`, `database/migrations/040_ai_writer.sql`,
+  `apps/web/src/admin/AiWriterPage.tsx`. New dependencies: `anthropic`, `cryptography`.
+  Optional `SECRETS_KEY` in `.env.example`.
+- **Status:** done locally; deploy needs a push. Nothing calls a paid model yet.
+
 ### Reviewer dashboard: Reviewers, for admins
 - **Why:** the founder wanted reviewers added from the reviewer dashboard too.
 - **What:** an admin sees Reviewers in the reviewer menu: the same staff page as the admin

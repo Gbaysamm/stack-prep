@@ -39,6 +39,7 @@ import {
 } from './ContentPages.js';
 import { HomePage } from './HomePage.js';
 import { OverviewPage } from './OverviewPage.js';
+import { AiWriterPage } from './AiWriterPage.js';
 import { AiPage, EngagementPage, FeaturesPage, RevenuePage } from './ReportPages.js';
 import { PremiumPage } from './PremiumPage.js';
 import { ReportsPage, useOpenReports } from './ReportsPage.js';
@@ -81,6 +82,7 @@ function AdminShell() {
     { to: '/revenue', label: 'Revenue', icon: <IconTrophy /> },
     { to: '/premium', label: 'Pricing & plans', icon: <IconSparkles />, section: 'Money' },
     { to: '/settings', label: 'Settings', icon: <IconSettings />, section: 'System' },
+    { to: '/ai-writer', label: 'AI for questions', icon: <IconSparkles /> },
     { to: '/health', label: 'System health', icon: <IconBolt /> },
     { to: '/audit', label: 'Audit log', icon: <IconBookmark /> },
   ];
@@ -110,6 +112,7 @@ function AdminShell() {
         <Route path="/premium" element={<PremiumPage />} />
         <Route path="/staff" element={<StaffPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/ai-writer" element={<AiWriterPage />} />
         <Route path="/health" element={<HealthPage />} />
         <Route path="/audit" element={<AuditPageView />} />
         <Route path="*" element={<Navigate to="/" replace />} />

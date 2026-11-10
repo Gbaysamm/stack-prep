@@ -140,6 +140,12 @@ released_papers AS (
 released_retirements AS (
     UPDATE questions SET retired_by = NULL WHERE retired_by IN (SELECT id FROM doomed)
 ),
+released_ai_settings AS (
+    UPDATE ai_writer_settings SET updated_by = NULL WHERE updated_by IN (SELECT id FROM doomed)
+),
+released_ai_runs AS (
+    UPDATE ai_writer_runs SET created_by = NULL WHERE created_by IN (SELECT id FROM doomed)
+),
 unlinked_reviewers AS (
     -- A reviewer row keeps the decisions it made; only its link to the account goes.
     UPDATE academic_reviewers SET student_id = NULL WHERE student_id IN (SELECT id FROM doomed)

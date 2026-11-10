@@ -99,6 +99,11 @@ class Settings(BaseSettings):
     #: Where Paystack sends the student back after paying, without the path; empty takes the
     #: address the request came from, which is right behind the usual proxy.
     public_url: str = ""
+    #: Opens the secrets an admin stores in the database, such as the question writer's API
+    #: key (app/secret_box.py). Empty uses one derived from the database password, which is
+    #: never in the database itself; set this to keep stored keys working across a change of
+    #: database password.
+    secrets_key: str = ""
 
     @field_validator("database_schema")
     @classmethod
