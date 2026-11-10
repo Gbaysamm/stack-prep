@@ -1,0 +1,206 @@
+/* The journey (Journey.tsx). Class prefix: jr-. */
+
+.sj .jr {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 28px 16px 36px;
+  border-radius: var(--r-xl);
+  background:
+    radial-gradient(60% 40% at 15% 10%, rgba(133, 222, 76, 0.16), transparent 70%),
+    radial-gradient(50% 35% at 90% 85%, rgba(107, 11, 255, 0.12), transparent 70%),
+    linear-gradient(180deg, #fbf9ff, #f3effb);
+  box-shadow: inset 0 0 0 1px var(--gray-200);
+  overflow: hidden;
+}
+/* A faint dotted ground under the trail. */
+.sj .jr::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(31, 0, 80, 0.08) 1px, transparent 1.4px);
+  background-size: 22px 22px;
+  pointer-events: none;
+}
+.sj .jr-track {
+  position: relative;
+}
+.sj .jr-line {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+.sj .jr-line path {
+  fill: none;
+  stroke-width: 10;
+  stroke-linecap: round;
+}
+.sj .jr-line path.walked {
+  stroke: var(--purple-300);
+}
+.sj .jr-line path.ahead {
+  stroke: var(--gray-200);
+  stroke-dasharray: 2 18;
+}
+
+.sj .jr-stops {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .jr-stop {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+/* The circle: raised on a ledge, like the app's buttons. */
+.sj .jr-node {
+  position: absolute;
+  left: -38px;
+  top: -38px;
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  color: #fff;
+  transition: transform var(--t-fast) var(--ease);
+}
+.sj .jr-stop.done .jr-node {
+  background: linear-gradient(160deg, var(--purple-500), var(--purple-700));
+  box-shadow: 0 7px 0 #3d0399, 0 14px 22px rgba(61, 3, 153, 0.25);
+}
+.sj .jr-stop.current .jr-node {
+  background: linear-gradient(160deg, #a6ef6f, var(--green-500));
+  box-shadow: 0 7px 0 var(--green-600), 0 16px 28px rgba(80, 160, 30, 0.35);
+  color: var(--ink-900);
+}
+.sj .jr-stop.locked .jr-node {
+  background: linear-gradient(160deg, #fff, #ece8f3);
+  box-shadow: 0 7px 0 #d9d3e4, 0 10px 16px rgba(31, 0, 80, 0.06);
+  color: var(--gray-500);
+}
+.sj .jr-stop.finish .jr-node {
+  left: -46px;
+  top: -46px;
+  width: 92px;
+  height: 92px;
+  background: linear-gradient(160deg, #ffe680, var(--yellow-400));
+  box-shadow: 0 8px 0 #c99a00, 0 16px 26px rgba(201, 154, 0, 0.3);
+  color: var(--ink-900);
+}
+.sj .jr-stop.finish.locked .jr-node {
+  filter: saturate(0.55);
+}
+
+/* The current step breathes. */
+.sj .jr-pulse {
+  position: absolute;
+  left: -48px;
+  top: -48px;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(133, 222, 76, 0.55);
+  animation: jr-breathe 2.2s var(--ease) infinite;
+  pointer-events: none;
+}
+@keyframes jr-breathe {
+  0% {
+    transform: scale(0.92);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sj .jr-pulse {
+    animation: none;
+  }
+}
+
+/* Labels sit on the open side of the trail. */
+.sj .jr-label {
+  position: absolute;
+  top: 0;
+  display: grid;
+  gap: 2px;
+  width: 150px;
+  transform: translateY(-50%);
+}
+.sj .jr-stop.left .jr-label {
+  left: 56px;
+}
+.sj .jr-stop.right .jr-label {
+  right: 56px;
+  text-align: right;
+}
+.sj .jr-stop.finish.left .jr-label {
+  left: 64px;
+}
+.sj .jr-stop.finish.right .jr-label {
+  right: 64px;
+}
+.sj .jr-label b {
+  font-family: var(--f-display);
+  font-size: 16px;
+  line-height: 1.2;
+  color: var(--ink-900);
+}
+.sj .jr-label span {
+  font-size: 12.5px;
+  color: var(--gray-600);
+}
+.sj .jr-stop.locked .jr-label b {
+  color: var(--gray-600);
+}
+
+/* The current step's callout: a card with its one action. */
+.sj .jr-label.callout {
+  width: 196px;
+  gap: 4px;
+  padding: 14px 16px 16px;
+  border-radius: var(--r-lg);
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(31, 0, 80, 0.14), inset 0 0 0 1px var(--gray-200);
+  text-align: left;
+}
+.sj .jr-stop.right .jr-label.callout {
+  text-align: left;
+}
+.sj .jr-label.callout::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  box-shadow: -1px 1px 0 var(--gray-200);
+  transform: translateY(-50%) rotate(45deg);
+}
+.sj .jr-stop.left .jr-label.callout::before {
+  left: -7px;
+}
+.sj .jr-stop.right .jr-label.callout::before {
+  right: -7px;
+  transform: translateY(-50%) rotate(225deg);
+}
+.sj .jr-go {
+  margin-top: 8px;
+}
+.sj .jr-go .sj-btn {
+  width: 100%;
+}
+
+/* A phone draws the same path a size smaller, so every label stays on screen. */
+@media (max-width: 480px) {
+  .sj .jr {
+    padding: 22px 0 30px;
+  }
+  .sj .jr-track {
+    zoom: 0.8;
+  }
+}

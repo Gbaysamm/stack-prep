@@ -15,11 +15,14 @@ import { Refused, runsApi } from '../runsApi.js';
 import {
   IconArrowRight,
   IconBolt,
+  IconCalendar,
+  IconChart,
   IconCheck,
   IconChevronRight,
   IconHome,
   IconPlay,
   IconTarget,
+  IconTrophy,
 } from '../icons.js';
 import type { Overview, PracticeRun, SubjectOverview, WeakSubtopic } from '../progressApi.js';
 import {
@@ -35,9 +38,10 @@ import {
   useSubjectChoice,
   type SubjectColumn,
 } from '../SubjectSwitcher.js';
+import { Journey, type Stop } from '../Journey.js';
 import { itemLabel, roadmapApi, today as todayOf, useRoadmap, useStartItem, type Roadmap } from '../roadmapApi.js';
 import { usePageTitle, useStudent } from '../store.js';
-import { Badge, Button, CountUp, PageHero, ShowMore, Steps, Skeleton, Track, cx, greeting, useShowMore, useToast } from '../ui.js';
+import { Badge, Button, CountUp, PageHero, ShowMore, Skeleton, Track, cx, greeting, useShowMore, useToast } from '../ui.js';
 import { HOW_PATH, MetricTip, type MetricId } from './HowItsWorkedOut.js';
 import './Home.css';
 import { friendly } from '../../lib/friendlyError.js';
@@ -1014,91 +1018,29 @@ function Hero({ overview, step }: { overview: Overview; step: NextStep; focus?: 
 
 /* ------------------------------------------------------------------ brand-new student */
 
-const STEPS = [
-  { n: '01', title: 'Set your goal', body: 'Pick your exam, the score you want and the day you sit it.' },
-  { n: '02', title: 'Take a check-up', body: 'A short set of questions. The percentage you get right is where you start.' },
-  { n: '03', title: 'Practise daily', body: 'Ten-question runs on your weakest topics, with a coach when you are stuck.' },
+/** A new student: the path ahead, with its first step (set the goal) as the one action. */
+const FIRST_PATH: Stop[] = [
+  { key: 'goal', title: 'Set your goal', line: 'Your exam, target and date', icon: <IconTarget size={30} />, state: 'current' },
+  { key: 'checkup', title: 'Take a check-up', line: '15 questions', icon: <IconTarget size={28} />, state: 'locked' },
+  { key: 'plan', title: 'Your plan', line: 'Built for you', icon: <IconCalendar size={28} />, state: 'locked' },
+  { key: 'daily', title: 'Daily runs', line: 'A few a day', icon: <IconBolt size={28} />, state: 'locked' },
+  { key: 'weekly', title: 'Check-ups', line: 'Every week, your score climbs', icon: <IconChart size={28} />, state: 'locked' },
+  { key: 'exam', title: 'Exam day', line: 'Your target', icon: <IconTrophy size={36} />, state: 'locked', finish: true },
 ];
-
-/** Clearly marked example numbers for the preview of the score card. Never shown as real. */
-const SAMPLE: SubjectOverview = {
-  subject_id: 'sample',
-  subject_name: 'Sample',
-  examination_short_name: 'UTME',
-  goal: { target_score: 70, exam_date: null, days_to_exam: null, minutes_per_day: null, study_days: null, sessions_before_exam: null },
-  latest_checkup: {
-    session_id: 'sample',
-    finished_at: '2026-01-01T00:00:00Z',
-    answered: 15,
-    right: 7,
-    score: 47,
-    weakest_subtopics: [],
-  },
-  scores: {
-    subject_id: 'sample',
-    score: 58,
-    answered: 52,
-    right: 30,
-    topics_tried: 9,
-    started_score: 20,
-    change: 38,
-    predicted: 47,
-    checkups: [
-      { session_id: 'a', finished_at: '2026-01-01T00:00:00Z', answered: 15, right: 3, score: 20 },
-      { session_id: 'b', finished_at: '2026-01-08T00:00:00Z', answered: 15, right: 7, score: 47 },
-    ],
-    next_checkup_due: null,
-    checkup_due: false,
-    topics: [],
-  },
-  open_checkup_session_id: null,
-  open_practice_session_id: null,
-  practice: { runs_finished: 0, questions_answered: 0, correct_unaided: 0, taught: 0 },
-};
 
 function FirstRun({ overview }: { overview: Overview }) {
   return (
     <>
-      <PageHero
-        eyebrow={todayLabel()}
-        title={`${greeting()}, ${firstName(overview)}`}
-        sub="Three short steps to your plan."
-        actions={
-          <>
-            <Button to="/onboarding" tone="lime" size="lg" trailing={<IconArrowRight size={18} />}>
+      <PageHero eyebrow={todayLabel()} title={`${greeting()}, ${firstName(overview)}`} sub="Set your goal and we'll build your plan." />
+      <Section eyebrow="Your path" title="From here to exam day" id="home-path" className="sj-rise d1">
+        <Journey
+          stops={FIRST_PATH}
+          action={
+            <Button to="/onboarding" tone="lime" size="sm" trailing={<IconArrowRight size={16} />}>
               Set my goal
             </Button>
-            <span className="home-hero-link">
-              <Link to="/checkup">What a check-up does</Link>
-            </span>
-          </>
-        }
-      />
-
-      <Section eyebrow="Getting started" title="Your path to exam-ready" id="home-path" className="sj-rise d1">
-        <Steps
-          current={0}
-          steps={STEPS.map((step, index) => ({
-            title: step.title,
-            body: step.body,
-            action:
-              index === 0 ? (
-                <Button to="/onboarding" size="sm" trailing={<IconArrowRight size={16} />}>
-                  Set my goal
-                </Button>
-              ) : undefined,
-            note: index === 0 ? undefined : `After step ${index}`,
-          }))}
+          }
         />
-      </Section>
-
-      <Section
-        eyebrow="What you'll see here"
-        title="Your score, on one scale"
-        id="home-preview"
-        className="sj-rise d2"
-      >
-        <Standing subject={SAMPLE} sample />
       </Section>
     </>
   );

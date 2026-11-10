@@ -15,6 +15,23 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-10
 
+### The journey path, and say less in the practice room
+- **Why:** the founder: a new student's Home was either an essay (three explained steps and an
+  example score card) or, cut down, blank; it should look like a learning path, in our own
+  design, nicer than Duolingo's. And the practice room repeated itself.
+- **What:** a reusable `Journey` component: a winding trail of raised circles (done in purple,
+  current in lime with a breathing ring and a callout carrying its one action, ahead locked)
+  ending in a gold "Exam day". A new student's Home is the greeting and that path: Set your
+  goal (the action), Take a check-up, Your plan, Daily runs, Check-ups, Exam day. In the
+  practice room: praise lines are one short sentence; "Recommended…" and "Optional…" notes
+  under the buttons removed; one name for the action ("See the working"); the missed-twice
+  dialog shows the tries and the answer without a "What happens now" list; after the
+  check-in a "Saved" toast and straight on, instead of a screen explaining each answer. The
+  student is now told once, not three times, that a missed question comes back.
+- **Where:** `apps/web/src/prep/Journey.tsx`, `Journey.css`, `pages/Home.tsx`, `Home.css`,
+  `pages/PracticeRoom.tsx`.
+- **Status:** done locally. The roadmap page moves onto the path next.
+
 ### Say less: Home and Practice
 - **Why:** the founder: the app is far too wordy; each page should carry only what the student
   needs. Guided by a page-by-page audit of repeated and explanatory text.

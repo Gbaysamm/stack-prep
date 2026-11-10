@@ -1170,3 +1170,70 @@
 .sj .home-duo > :only-child {
   grid-column: 1 / -1;
 }
+
+/* A new student's three steps: a glance, one line each. */
+.sj .home-first {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .home-first li {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: var(--r-lg);
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--gray-200);
+}
+.sj .home-first li.now {
+  box-shadow: inset 0 0 0 2px var(--purple-600);
+}
+.sj .home-first .n {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--gray-100);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gray-600);
+}
+.sj .home-first li.now .n {
+  background: var(--purple-600);
+  color: #fff;
+}
+.sj .home-first .what {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.sj .home-first b {
+  font-size: 15px;
+  color: var(--ink-900);
+}
+.sj .home-first .what span {
+  font-size: 13px;
+  color: var(--gray-600);
+}
+.sj .home-first .here {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--green-600);
+}
+@media (max-width: 760px) {
+  .sj .home-first {
+    grid-template-columns: 1fr;
+  }
+}

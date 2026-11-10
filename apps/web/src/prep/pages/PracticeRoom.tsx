@@ -22,7 +22,6 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import {
-  Link,
   Navigate,
   Route,
   Routes,
@@ -56,7 +55,6 @@ import {
   type MatchedWorking,
   type Understood,
 } from "../lessonFeedbackApi.js";
-import { MATCHED_WORD, UNDERSTOOD_WORD, WHY_BOARD, type Word } from "../checkinWords.js";
 import { progressApi } from "../progressApi.js";
 import { FocusShell } from "../shell.js";
 import { useLoad, usePageTitle, useStudent } from "../store.js";
@@ -244,13 +242,13 @@ function reviewContext(outcome: Outcome): LessonContext {
 function praiseFor(confidence: Confidence | null): string {
   switch (confidence) {
     case "sure":
-      return "You knew it, and you were right. That is the kind that counts.";
+      return "You knew it.";
     case "unsure":
-      return "Right — so that thinking can be trusted. Next time, back yourself.";
+      return "Trust that thinking next time.";
     case "guessed":
-      return "Right, though you said you guessed. This idea will come back so you can prove it.";
+      return "A guess, so it comes back later.";
     default:
-      return "Nicely worked. On to the next one.";
+      return "Nicely worked.";
   }
 }
 
@@ -1273,16 +1271,12 @@ function Result({
         ? "Right answer — let’s check your thinking."
         : "Correct.";
   const praise =
-    tone === "second" && check
-      ? `That was the hint doing its job, but you said you ${
-          outcome.confidence === "guessed" ? "guessed" : "weren’t sure"
-        }. See the working so it sticks. It won’t count as known yet — this question comes back in a later run.`
-      : tone === "second"
-      ? "That was the hint doing its job. It won’t count as known yet — this question comes back in a later run."
+    tone === "second"
+      ? "The hint helped. It comes back later."
       : tone === "guessed"
-        ? "Lucky guesses don’t count as knowing it. See the working, then tell us if it matches what you did."
+        ? "A guess doesn’t count yet. Check the working."
         : tone === "unsure"
-          ? "You were right but not certain. A quick look at the working will tell you whether to trust that thinking next time."
+          ? "Check the working to be sure."
           : praiseFor(outcome.confidence);
   const nextLabel = last ? "See how you did" : "Next question";
 
@@ -1364,7 +1358,7 @@ function Result({
           onClick={check ? onWhy : onNext}
         >
           {check ? <IconBook size={18} /> : null}
-          {check ? "Show me the working" : nextLabel}
+          {check ? "See the working" : nextLabel}
           <kbd className="pr-enter sj-mono" aria-hidden="true">
             Enter ↵
           </kbd>
@@ -1375,15 +1369,8 @@ function Result({
           onClick={check ? onNext : onWhy}
         >
           {check ? null : <IconBook size={18} />}
-          {check ? nextLabel : "See how it’s worked out"}
+          {check ? nextLabel : "See the working"}
         </button>
-        <p className="pr-go-note">
-          {check
-            ? `Recommended: a short lesson on this question, then two quick taps and on to ${
-                last ? "your results" : "the next one"
-              }.`
-            : "Optional: the lesson for this question. Your score stays as it is."}
-        </p>
       </div>
     </section>
   );
@@ -1503,7 +1490,7 @@ function MissedTwiceDialog({
             Not yet
           </Button>
           <Button onClick={onStart} trailing={<IconArrowRight size={18} />}>
-            Show me the working
+            See the working
           </Button>
         </>
       }
@@ -1533,14 +1520,6 @@ function MissedTwiceDialog({
             </li>
           ) : null}
         </ul>
-        {missed?.confidence ? <p className="pr-twice-said">{MISSED_WITH[missed.confidence].second}</p> : null}
-        <div className="ci-what">
-          <span className="ci-what-label sj-mono">What happens now</span>
-          <ul>
-            <li>The coach works it through on the board, one line at a time.</li>
-            <li>{WHY_BOARD.after_misses.then}</li>
-          </ul>
-        </div>
       </div>
     </Dialog>
   );
@@ -1698,8 +1677,6 @@ function CheckIn({
   const [landed, setLanded] = useState<Understood | null>(demoSaved ? "unsure" : null);
   const [sending, setSending] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
-  /** Once saved, the answers stay on screen with what they mean until the student goes on. */
-  const [saved, setSaved] = useState(demoSaved);
   const [useful, setUseful] = useState<Useful | null>(null);
   const toast = useToast();
   const ready = !!landed && (!both || !!matched);
@@ -1793,75 +1770,14 @@ function CheckIn({
         matched_working: both ? matched : null,
       })
       .then(() => {
-        setSaved(true);
-        toast("Check-in saved");
+        toast("Saved");
+        onDone();
       })
       .catch((error: Error) =>
         setFailed(friendly(error) || "It didn’t save."),
       )
       .finally(() => setSending(false));
   };
-
-  if (saved && landed) {
-    const said: { question: string; word: Word }[] = [
-      { question: "Before the lesson", word: WHY_BOARD[checkin.context] },
-      ...(both && matched ? [{ question: "Was this how you worked it out?", word: MATCHED_WORD[matched] }] : []),
-      { question: "How was this lesson?", word: UNDERSTOOD_WORD[landed] },
-    ];
-    return (
-      <section className="pr-res checkin">
-        <div className="pr-panel checkin" role="status" aria-live="polite">
-          <div className="pr-panel-head">
-            <span className="pr-medal checkin saved" aria-hidden="true">
-              <IconCheck size={22} />
-            </span>
-            <span className="pr-panel-eyebrow sj-mono">
-              Question {pad(number)} · check-in saved
-            </span>
-          </div>
-          <h2 className="sj-display pr-panel-title">Saved. Here’s what it means.</h2>
-          <p className="pr-praise">
-            Thanks for being straight with us. Your answers decide what you should look at again, not your score.
-          </p>
-        </div>
-
-        <ul className="pr-saved">
-          {said.map((item) => (
-            <li key={item.question} className="pr-saved-row">
-              <span className="pr-saved-q sj-mono">{item.question}</span>
-              <span className={cx("ci-pill", item.word.tone)}>
-                <span className={cx("ci-dot", item.word.tone)} aria-hidden="true" />
-                {item.word.label}
-              </span>
-              <span className="pr-saved-means">{item.word.means}</span>
-              <span className="pr-saved-then">
-                <span className="sj-mono">Then</span> {item.word.then}
-              </span>
-            </li>
-          ))}
-        </ul>
-
-        <div className="pr-res-go">
-          <Button
-            size="lg"
-            block={narrow}
-            busy={busy}
-            onClick={onDone}
-            trailing={busy ? undefined : <IconArrowRight size={18} />}
-          >
-            Next question
-          </Button>
-          <p className="pr-go-note">
-            Everything you’ve said is kept in{" "}
-            <Link to="/progress/check-ins" target="_blank" rel="noreferrer">
-              Your check-ins
-            </Link>
-            , with what each answer means.
-          </p>
-        </div>
-      </section>
-    );
-  }
 
   return (
     <section className="pr-res checkin">
@@ -1875,10 +1791,6 @@ function CheckIn({
           </span>
         </div>
         <h2 className="sj-display pr-panel-title">Quick check-in.</h2>
-        <p className="pr-praise">
-          {both ? "Two taps" : "One tap"}, then on. It tells us whether this
-          idea needs another look — there are no wrong answers here.
-        </p>
       </div>
 
       <div className="pr-asks">
