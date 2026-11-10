@@ -28,6 +28,8 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
   Plans on phones: "Prices for" and the length switch start at the left like the heading,
   the switch spans the width, and the Free card has a default line ("Every question,
   check-ups and the working, free.") when the admin has given it none, so it has no gap.
+  Corners cut again (16px to 10px, 12px to 8px…), and the hero's board picture has a green
+  border.
 - **Where:** `apps/web/src/site/` (LessonPlayer, Landing, site.css, depth.css),
   `apps/web/public/showcase/mock-room.jpg`, `apps/web/src/prep/PrepApp.tsx`.
 - **Status:** committed.
