@@ -24,6 +24,7 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
   to its content, and is the desktop shot on phones too. Large corner radii across the public
   site are cut by about a third (32px to 20px, 24px to 16px, …). `/` now shows the home page
   to everyone; the sign-up and log-in forms still send a signed-in person to their home.
+  On phones the home page's subjects are compact chips that wrap, not a long list.
 - **Where:** `apps/web/src/site/` (LessonPlayer, Landing, site.css, depth.css),
   `apps/web/public/showcase/mock-room.jpg`, `apps/web/src/prep/PrepApp.tsx`.
 - **Status:** committed.
