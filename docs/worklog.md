@@ -15,6 +15,14 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-10
 
+### Reviewer dashboard: Reviewers, for admins
+- **Why:** the founder wanted reviewers added from the reviewer dashboard too.
+- **What:** an admin sees Reviewers in the reviewer menu: the same staff page as the admin
+  dashboard (give a role by email or phone, remove one). A reviewer doesn't see it; only an
+  admin can change roles (routers/admin.py).
+- **Where:** `apps/web/src/review/ReviewApp.tsx`, reusing `apps/web/src/admin/StaffPage.tsx`.
+- **Status:** done locally; deploy needs a push.
+
 ### Reviewer dashboard: a Topics page
 - **Why:** the founder asked for a page to see each subject's topics, add and remove them, see
   the questions under each, with a guardrail so removing a topic never strands its questions.

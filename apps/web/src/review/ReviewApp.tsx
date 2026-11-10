@@ -7,8 +7,9 @@
  */
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
-import { IconBook, IconBrain, IconFlag, IconLayers } from '../prep/icons.js';
-import { StaffGate } from '../staff/StaffGate.js';
+import { IconBook, IconBrain, IconFlag, IconLayers, IconUser } from '../prep/icons.js';
+import { StaffPage } from '../admin/StaffPage.js';
+import { StaffGate, useStaff } from '../staff/StaffGate.js';
 import { StaffShell, type NavItem } from '../staff/StaffShell.js';
 import { REVIEW_CHANGED, api } from './api.js';
 import {
@@ -34,6 +35,8 @@ export function ReviewApp() {
 
 /** Inside the gate, so the exams and the reported count are only asked for by signed-in staff. */
 function ReviewShell() {
+  // Only an admin can give or take away a role (routers/admin.py), so only they see Reviewers.
+  const isAdmin = useStaff().user.role === 'admin';
   const [exams, setExams] = useState<ExamLine[] | null>(null);
   const [flagged, setFlagged] = useState<number>();
   useEffect(() => {
@@ -62,6 +65,7 @@ function ReviewShell() {
     })),
     { to: '/new-exam', label: 'Add an exam', icon: <IconLayers />, section: exams?.length ? undefined : 'Exams' },
     { to: '/topics', label: 'Topics', icon: <IconBrain />, section: 'Manage' },
+    ...(isAdmin ? [{ to: '/reviewers', label: 'Reviewers', icon: <IconUser /> }] : []),
     { to: '/reported', label: 'Reported', icon: <IconFlag />, count: flagged, section: 'Needs attention' },
   ];
   return (
@@ -74,6 +78,7 @@ function ReviewShell() {
         <Route path="/question/:questionId" element={<QuestionRedirect />} />
         <Route path="/topics" element={<TopicSubjects />} />
         <Route path="/topics/:subjectId" element={<SubjectTopics />} />
+        {isAdmin ? <Route path="/reviewers" element={<StaffPage />} /> : null}
         <Route path="/reported" element={<FlaggedQuestions />} />
         <Route path="/new-exam" element={<NewExam />} />
         {/* The old queue's address. */}
