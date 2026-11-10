@@ -96,6 +96,7 @@ async def test_health_says_what_is_set_up(client: httpx.AsyncClient) -> None:
         body = health.json()
         names = {check["name"]: check for check in body["checks"]}
         assert names["Database"]["state"] in ("ok", "warning")
-        assert names["Database changes (migrations)"]["state"] == "ok"
+        # "warning" where the database was built without the ledger (CI applies files with psql).
+        assert names["Database changes (migrations)"]["state"] in ("ok", "warning")
         assert "Payments (Paystack)" in names
         assert body["counts"]["accounts"] >= 1
