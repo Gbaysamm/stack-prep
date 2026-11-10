@@ -21,7 +21,11 @@ export interface Stop {
   state: StopState;
   /** The finish: drawn larger, in gold. */
   finish?: boolean;
+  /** A subtopic's level, 0 to 5: five pips under the circle, filled to it. */
+  level?: number;
 }
+
+export const LEVEL_NAMES = ['Not started', 'Weak', 'Developing', 'Exam-ready', 'Strong', 'Mastered'];
 
 /** How far each stop sits from the centre, in turn: the trail's sway. */
 const SWAY = [-70, 10, 80, 10, -70, 10, 80, 10];
@@ -62,6 +66,13 @@ export function Journey({ stops, action }: { stops: Stop[]; action?: ReactNode }
                 {stop.state === 'done' ? <IconCheck size={30} /> : stop.state === 'locked' && !stop.finish ? <IconLock size={24} /> : stop.icon}
               </span>
               {stop.state === 'current' ? <span className="jr-pulse" aria-hidden="true" /> : null}
+              {stop.level !== undefined ? (
+                <span className="jr-pips" aria-label={`Level ${stop.level} of 5`}>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <i key={n} className={n <= stop.level! ? 'on' : undefined} />
+                  ))}
+                </span>
+              ) : null}
               <span className={cx('jr-label', stop.state === 'current' && 'callout')}>
                 <b>{stop.title}</b>
                 {stop.line ? <span>{stop.line}</span> : null}

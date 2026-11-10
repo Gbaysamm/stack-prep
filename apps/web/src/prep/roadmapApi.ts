@@ -25,6 +25,8 @@ export interface RoadmapItem {
   value: 'high' | 'medium' | 'low' | null;
   state: ItemState;
   session_id: string | null;
+  /** 0 (not levelled yet) to 5 (mastered); null for a check-up, mock or mixed run. */
+  level: number | null;
 }
 
 export interface RoadmapSubject {

@@ -15,6 +15,21 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-10
 
+### The roadmap on the path, with levels
+- **Why:** the founder wants the roadmap fun and levelled, like Duolingo's path but our own.
+- **What:** each planned subtopic has a level from the spec's mastery bands (§9.1): 1 Weak
+  (<40%), 2 Developing (40–65%), 3 Exam-ready (65–80%), 4 Strong (80–90%), 5 Mastered (≥90%);
+  0 until it has 3 answers. The roadmap API returns it per run (`level`). The Roadmap page is
+  now the path: today's finished items done, the next one glowing with its Start (or Carry
+  on) in a callout, what follows ahead with five level pips under each circle, check-ups as
+  checkpoints, and a gold Exam day with the target at the end. On a wide screen the subjects
+  sit beside the path; the hero no longer repeats the Start button.
+- **Where:** `apps/api/src/app/routers/roadmap.py` (`level_of`, `_levels`),
+  `tests/test_roadmap_api.py`, `apps/web/src/prep/Journey.tsx`, `Journey.css`,
+  `roadmapApi.ts`, `pages/Roadmap.tsx`, `pages/Roadmap.css`.
+- **Status:** done locally. Next: points, daily goal, streak freezes and a run-complete screen
+  with level-ups.
+
 ### The journey path, and say less in the practice room
 - **Why:** the founder: a new student's Home was either an essay (three explained steps and an
   example score card) or, cut down, blank; it should look like a learning path, in our own

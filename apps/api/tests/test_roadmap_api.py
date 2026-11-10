@@ -90,6 +90,7 @@ async def test_the_roadmap_follows_the_student(client: httpx.AsyncClient) -> Non
         runs = [i for i in plan["items"] if i["kind"] == "run"]
         assert runs and runs[0]["state"] == "to_do" and runs[0]["subtopic_name"]
         assert all(i["value"] in ("high", "medium", "low") for i in runs)
+        assert all(isinstance(i["level"], int) and 0 <= i["level"] <= 5 for i in runs)
 
         # The roadmap picks the runs: the student's own choice waits for the first milestone,
         # a general run for today's plan; bookmarks are always open.
@@ -171,3 +172,10 @@ async def test_the_roadmap_follows_the_student(client: httpx.AsyncClient) -> Non
                     text(statement.replace(":ids", "CAST(:ids AS uuid[])")),
                     {"ids": [student, other]},
                 )
+
+
+def test_levels_follow_the_spec_mastery_bands() -> None:
+    from app.routers.roadmap import level_of
+
+    assert level_of(None, 0) == 0 and level_of(0.9, 2) == 0  # not enough answers yet
+    assert [level_of(m, 5) for m in (0.2, 0.4, 0.65, 0.8, 0.9)] == [1, 2, 3, 4, 5]

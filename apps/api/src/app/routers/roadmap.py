@@ -53,6 +53,9 @@ class ItemOut(BaseModel):
     value: Literal["high", "medium", "low"] | None
     state: ItemState
     session_id: UUID | None
+    #: The subtopic's level, 1 (weak) to 5 (mastered), from the spec's mastery bands; 0 when
+    #: it has fewer than 3 answers; None for an item that is not a single subtopic.
+    level: int | None = None
 
 
 class Milestone(BaseModel):
@@ -361,6 +364,30 @@ ITEM_SQL = """
 """
 
 
+#: Spec §9.1's mastery bands as levels: Weak, Developing, Exam-ready, Strong, Mastered.
+LEVEL_FROM = (0.40, 0.65, 0.80, 0.90)
+#: Fewer answers than this and a subtopic is not yet levelled.
+LEVEL_AFTER = 3
+
+
+def level_of(mastery: float | None, answered: int) -> int:
+    if mastery is None or answered < LEVEL_AFTER:
+        return 0
+    return 1 + sum(1 for edge in LEVEL_FROM if mastery >= edge)
+
+
+async def _levels(
+    conn: AsyncConnection, student_id: UUID, items: list[dict[str, Any]]
+) -> dict[str, int]:
+    """Each planned subtopic's level, from the student's answers in its subject."""
+    out: dict[str, int] = {}
+    for subject_id in {row["subject_id"] for row in items if row["subtopic_id"] is not None}:
+        units, _ = await _subtopics(conn, subject_id)
+        for standing in await _standings_from_history(conn, student_id, subject_id, units):
+            out[standing.unit_id] = level_of(standing.mastery, standing.answered)
+    return out
+
+
 @router.get("/{student_id}", response_model=RoadmapOut, summary="The student's roadmap")
 async def read(
     student_id: UUID, request: Request, conn: Annotated[AsyncConnection, Depends(connection)]
@@ -398,6 +425,7 @@ async def read(
             s=student_id,
         )
     )[0]["n"]
+    levels = await _levels(conn, student_id, items)
     summary = active["summary"]
     return RoadmapOut(
         built_for=active["built_for"],
@@ -412,7 +440,7 @@ async def read(
         total_expected=summary["total_expected"],
         target_total=summary["target_total"],
         subjects=[SubjectOut(**s) for s in summary["subjects"]],
-        items=[ItemOut(**row) for row in items],
+        items=[ItemOut(**row, level=levels.get(str(row["subtopic_id"]))) for row in items],
         record=Record(
             due=history["due"],
             done=history["done"],

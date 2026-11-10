@@ -5,7 +5,8 @@
  */
 import { Link } from 'react-router-dom';
 
-import { IconArrowRight, IconCheck } from '../icons.js';
+import { IconArrowRight, IconBolt, IconClock, IconTarget, IconTrophy } from '../icons.js';
+import { Journey, LEVEL_NAMES, type Stop } from '../Journey.js';
 import {
   itemLabel,
   today,
@@ -16,13 +17,12 @@ import {
   type RoadmapSubject,
 } from '../roadmapApi.js';
 import { usePageTitle, useStudent } from '../store.js';
-import { Badge, Button, CountUp, PageHero, Skeleton, cx } from '../ui.js';
+import { Button, CountUp, PageHero, Skeleton } from '../ui.js';
 import { HeroStats, Section } from './Home.js';
 import './Roadmap.css';
 
-const DAY = new Intl.DateTimeFormat('en-NG', { weekday: 'short', day: 'numeric', month: 'short' });
-/** How many of the coming items are listed. */
-const UP_NEXT = 6;
+/** How many planned items the path shows before exam day. */
+const PATH_LENGTH = 10;
 
 function headline(roadmap: RoadmapData): string {
   const target = roadmap.target_total;
@@ -77,10 +77,7 @@ export function Roadmap() {
   }
 
   const roadmap = loaded.data;
-  const { items: todays, next } = today(roadmap);
-  // Later days in order, without their dates: the plan re-builds as results come in, so only a
-  // real deadline (a check-up, a mock) carries a date.
-  const upcoming = roadmap.items.filter((item) => item.day > roadmap.today).slice(0, UP_NEXT);
+  const { next } = today(roadmap);
   const stats: Parameters<typeof HeroStats>[0]['stats'] = [];
   if (roadmap.total_expected !== null) {
     stats.push({
@@ -98,31 +95,15 @@ export function Roadmap() {
         eyebrow="Your roadmap"
         title={headline(roadmap)}
         sub={subline(roadmap) || undefined}
-        actions={
-          next ? (
-            <Button
-              tone="lime"
-              size="lg"
-              busy={starter.busy === next.id}
-              onClick={() => void starter.start(next)}
-              trailing={<IconArrowRight size={18} />}
-            >
-              {next.state === 'in_progress' ? 'Carry on' : "Start today's plan"}
-            </Button>
-          ) : roadmap.status === 'no_target' ? (
-            <Button to="/profile" tone="lime" size="lg">
-              Set my target
-            </Button>
-          ) : null
-        }
         aside={stats.length ? <HeroStats stats={stats} /> : undefined}
       />
       {starter.error ? <p className="rm-error">{starter.error}</p> : null}
 
+      <div className="rm-layout">
       <Section
-        eyebrow="Today"
-        title={next ? "Today's plan" : 'Done for today'}
-        id="rm-today"
+        eyebrow={next ? 'Today, then next' : 'Done for today'}
+        title="Your path"
+        id="rm-path"
         action={
           roadmap.record.last_7_days_due > 0 ? (
             <span className="rm-record">
@@ -131,17 +112,26 @@ export function Roadmap() {
           ) : undefined
         }
       >
-        <Items items={todays} next={next} starter={starter} today={roadmap.today} />
+        <Journey
+          stops={pathStops(roadmap, next)}
+          action={
+            next ? (
+              <Button
+                tone="lime"
+                size="sm"
+                busy={starter.busy === next.id}
+                onClick={() => void starter.start(next)}
+                trailing={<IconArrowRight size={16} />}
+              >
+                {next.state === 'in_progress' ? 'Carry on' : 'Start'}
+              </Button>
+            ) : undefined
+          }
+        />
       </Section>
 
-      {upcoming.length ? (
-        <Section eyebrow="Up next" title="After today" id="rm-next">
-          <Items items={upcoming} next={null} starter={starter} today={roadmap.today} />
-        </Section>
-      ) : null}
-
       {roadmap.subjects.length ? (
-        <Section eyebrow="By exam day" title="Your subjects" id="rm-subjects">
+        <Section eyebrow="By exam day" title="Your subjects" id="rm-subjects" className="rm-aside">
           <ul className="rm-subjects">
             {roadmap.subjects.map((subject) => (
               <SubjectLine key={subject.subject_id} subject={subject} />
@@ -149,55 +139,45 @@ export function Roadmap() {
           </ul>
         </Section>
       ) : null}
+      </div>
     </div>
   );
 }
 
-function Items({
-  items,
-  next,
-  starter,
-  today: todayIso,
-}: {
-  items: RoadmapItem[];
-  next: RoadmapItem | null;
-  starter: ReturnType<typeof useStartItem>;
-  today: string;
-}) {
-  if (items.length === 0) return <p className="rm-empty">Nothing more planned today.</p>;
-  return (
-    <ul className="rm-items">
-      {items.map((item) => {
-        const deadline = (item.kind === 'checkup' || item.kind === 'mock') && item.day !== todayIso;
-        return (
-          <li key={item.id} className={cx('rm-item', item.state)}>
-            <span className="rm-mark" aria-hidden="true">
-              {item.state === 'done' ? <IconCheck size={14} /> : null}
-            </span>
-            <span className="rm-what">
-              <b>{itemLabel(item)}</b>
-              <span>
-                {[
-                  item.kind === 'mock' ? null : item.subject_name,
-                  item.length ? `${item.length} questions` : null,
-                  deadline ? `Due ${DAY.format(new Date(`${item.day}T00:00:00`))}` : null,
-                  item.state === 'in_progress' ? 'Started' : null,
-                ]
-                  .filter(Boolean)
-                  .join(' · ')}
-              </span>
-            </span>
-            {item.value === 'high' && item.state !== 'done' ? <Badge tone="green">High value</Badge> : null}
-            {next && item.id === next.id ? (
-              <Button size="sm" busy={starter.busy === item.id} onClick={() => void starter.start(item)}>
-                {item.state === 'in_progress' ? 'Carry on' : 'Start'}
-              </Button>
-            ) : null}
-          </li>
-        );
-      })}
-    </ul>
-  );
+/** The path: today's items (finished ones done), what comes after, and exam day at the end. */
+function pathStops(roadmap: RoadmapData, next: RoadmapItem | null): Stop[] {
+  const ahead = roadmap.items.filter((item) => item.day >= roadmap.today && item.state !== 'missed').slice(0, PATH_LENGTH);
+  const stops: Stop[] = ahead.map((item) => {
+    const state: Stop['state'] = item.state === 'done' ? 'done' : next && item.id === next.id ? 'current' : 'locked';
+    const level = item.level ?? undefined;
+    return {
+      key: item.id,
+      title: item.kind === 'checkup' ? `${item.subject_name} check-up` : itemLabel(item),
+      line:
+        item.kind === 'run'
+          ? level
+            ? `${item.subject_name} · ${LEVEL_NAMES[level]}`
+            : (item.subject_name ?? undefined)
+          : item.kind === 'checkup'
+            ? 'Checkpoint'
+            : item.kind === 'mock'
+              ? 'The whole paper'
+              : (item.subject_name ?? undefined),
+      icon:
+        item.kind === 'checkup' ? <IconTarget size={30} /> : item.kind === 'mock' ? <IconClock size={30} /> : <IconBolt size={30} />,
+      state,
+      level: item.kind === 'run' ? level : undefined,
+    };
+  });
+  stops.push({
+    key: 'exam',
+    title: 'Exam day',
+    line: roadmap.target_total !== null ? `Target ${Math.round(roadmap.target_total)}` : 'Your target',
+    icon: <IconTrophy size={36} />,
+    state: 'locked',
+    finish: true,
+  });
+  return stops;
 }
 
 function SubjectLine({ subject }: { subject: RoadmapSubject }) {
