@@ -15,6 +15,15 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-10
 
+### CI: System health copes with a database that has no migration ledger
+- **Why:** the deploy of 7527343 stopped in CI: CI builds its database by applying the
+  migration files directly, so `public.schema_migrations` doesn't exist there, and the health
+  check (and the dashboard front page, which uses it) failed on it. 635 of 637 tests passed.
+- **What:** the check looks for the ledger first; without one it says which changes are
+  applied is unknown, as a warning, instead of failing.
+- **Where:** `apps/api/src/app/routers/admin_system.py`.
+- **Status:** committed and pushed.
+
 ### Public site, second round: glass navbar, new footer, plans, no figures
 - **Why:** the founder's review of the redesigned site, point by point.
 - **What:** a floating dark-glass navbar with a smaller, centred "Start free"; a new footer

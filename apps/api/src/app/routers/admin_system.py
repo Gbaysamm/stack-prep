@@ -134,17 +134,30 @@ async def health(conn: Annotated[AsyncConnection, Depends(connection)]) -> Healt
         detail=f"Answering in {took:.0f} ms.",
     ))
 
-    applied = {
-        row[0] for row in (
-            await conn.execute(text("SELECT version FROM public.schema_migrations"))
-        ).all()
-    }
-    pending = [m.version for m in migrations.discover() if m.version not in applied]
-    checks.append(Check(
-        name="Database changes (migrations)",
-        state="ok" if not pending else "problem",
-        detail="All applied." if not pending else f"Not applied yet: {', '.join(pending)}.",
-    ))
+    # The ledger exists once app.migrations has run; a database built another way (CI applies
+    # the files with psql) has none, and then this check can only say it doesn't know.
+    ledger = (
+        await conn.execute(text("SELECT to_regclass('public.schema_migrations')"))
+    ).scalar_one_or_none()
+    if ledger is None:
+        checks.append(Check(
+            name="Database changes (migrations)",
+            state="warning",
+            detail="No migration ledger in this database, so which changes are applied is unknown.",
+        ))
+    else:
+        applied = {
+            row[0] for row in (
+                await conn.execute(text("SELECT version FROM public.schema_migrations"))
+            ).all()
+        }
+        pending = [m.version for m in migrations.discover() if m.version not in applied]
+        checks.append(Check(
+            name="Database changes (migrations)",
+            state="ok" if not pending else "problem",
+            detail="All applied." if not pending
+            else f"Not applied yet: {', '.join(pending)}.",
+        ))
     checks.append(Check(
         name="Email (password resets)",
         state="ok" if settings.smtp_host else "problem",
