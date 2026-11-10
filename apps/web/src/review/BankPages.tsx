@@ -23,10 +23,10 @@ import {
 import { QuestionPanel } from './ReviewPage.js';
 import './bank.css';
 
-const TINTS = ['purple', 'green', 'blue', 'orange', 'pink', 'yellow'] as const;
-const plural = (n: number, one: string, many = `${one}s`) => `${n.toLocaleString('en-NG')} ${n === 1 ? one : many}`;
+export const TINTS = ['purple', 'green', 'blue', 'orange', 'pink', 'yellow'] as const;
+export const plural = (n: number, one: string, many = `${one}s`) => `${n.toLocaleString('en-NG')} ${n === 1 ? one : many}`;
 
-function useLoad<T>(load: () => Promise<T>, key: unknown[]) {
+export function useLoad<T>(load: () => Promise<T>, key: unknown[]) {
   const [data, setData] = useState<T | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
@@ -59,7 +59,7 @@ function Progress({ approved, total }: { approved: number; total: number }) {
   );
 }
 
-function Crumbs({ items }: { items: { to?: string; label: string }[] }) {
+export function Crumbs({ items }: { items: { to?: string; label: string }[] }) {
   return (
     <nav className="bk-crumbs" aria-label="Where you are">
       {items.map((item, index) => (
@@ -73,7 +73,7 @@ function Crumbs({ items }: { items: { to?: string; label: string }[] }) {
 }
 
 /** A side panel with a form: adding an exam, a subject, a paper or a question. */
-function Drawer({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
+export function Drawer({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   useEffect(() => {
     const key = (event: KeyboardEvent) => event.key === 'Escape' && onClose();
     window.addEventListener('keydown', key);
@@ -319,9 +319,14 @@ export function SubjectPapers() {
         title={data ? data.subject.name : 'Papers'}
         sub={data ? `${plural(data.subject.questions, 'question')} in ${plural(data.subject.papers, 'paper')} · ${data.subject.approved.toLocaleString('en-NG')} approved` : undefined}
         actions={
-          <button type="button" className="sj-btn" onClick={() => setAdding(true)}>
-            Add a paper
-          </button>
+          <>
+            <Link to={`/topics/${subjectId}`} className="sj-btn ghost">
+              Topics
+            </Link>
+            <button type="button" className="sj-btn" onClick={() => setAdding(true)}>
+              Add a paper
+            </button>
+          </>
         }
       />
       {problem && <p className="st-error">{problem}</p>}

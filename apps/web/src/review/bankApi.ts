@@ -78,6 +78,36 @@ export interface QuestionIn {
   skill_id?: string | null;
 }
 
+export type TopicKind = 'topic' | 'subtopic' | 'skill';
+
+export interface TopicNode {
+  id: string;
+  kind: TopicKind;
+  code: string;
+  name: string;
+  parent_id: string | null;
+  /** Questions filed under it: its own for a skill, its skills' together otherwise. */
+  questions: number;
+}
+
+export interface TopicTree {
+  subject_id: string;
+  subject_name: string;
+  exam_id: string;
+  exam_short_name: string;
+  syllabus_version_id: string | null;
+  items: TopicNode[];
+}
+
+export interface FiledQuestion {
+  question_id: string;
+  question_number: string | null;
+  stem: string;
+  paper_id: string | null;
+  paper_title: string | null;
+  state: string;
+}
+
 /** Sent after anything in the bank changes, so the menu's counts catch up. */
 export const BANK_CHANGED = 'stackprep:bank-changed';
 const changed = <T,>(value: T): T => {
@@ -105,5 +135,12 @@ export const bank = {
   editQuestion: (id: string, body: QuestionIn) => post<{ question_id: string }>(`/questions/${id}`, body, 'PUT'),
   paperOf: (questionId: string) =>
     request<{ paper_id: string }>(`/questions/${questionId}/paper`).then((found) => found.paper_id),
+  topics: (subjectId: string) => request<TopicTree>(`/subjects/${subjectId}/topics`),
+  addTopic: (subjectId: string, body: { name: string; parent_id?: string | null }) =>
+    post<TopicNode>(`/subjects/${subjectId}/topics`, body),
+  renameTopic: (id: string, name: string) => post<TopicNode>(`/topics/${id}`, { name }, 'PUT'),
+  removeTopic: (id: string, moveTo: string | null) =>
+    post<{ moved: number }>(`/topics/${id}/remove`, { move_to_skill_id: moveTo }),
+  topicQuestions: (id: string) => request<FiledQuestion[]>(`/topics/${id}/questions`),
   removeQuestion: (id: string, reason: string) => post<void>(`/questions/${id}/remove`, { reason }),
 };

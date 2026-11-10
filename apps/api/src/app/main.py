@@ -42,6 +42,7 @@ from app.routers import (
     site,
     student,
     support,
+    topics,
 )
 
 API_VERSION = "0.1.0"
@@ -82,6 +83,7 @@ def create_app() -> FastAPI:
     app.include_router(curriculum.router)
     app.include_router(review.router)
     app.include_router(bank.router)
+    app.include_router(topics.router)
     app.include_router(publishing.router)
     app.include_router(checkup.router)
     app.include_router(pool.router)

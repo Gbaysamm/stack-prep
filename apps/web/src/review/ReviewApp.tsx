@@ -1,12 +1,13 @@
 /**
  * The reviewer dashboard, at /review: the question bank (BankPages.tsx). The menu lists the
  * exams (UTME, and any added: WAEC, Post-UTME…); an exam shows its subjects, a subject its
- * papers by year, a paper its questions to check, edit, add or remove. Reviewers and admins
+ * papers by year, a paper its questions to check, edit, add or remove. Topics (TopicsPages.tsx)
+ * holds each subject's topic list. Reviewers and admins
  * only (apps/api routers/bank.py and review.py check it too).
  */
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
-import { IconBook, IconFlag, IconLayers } from '../prep/icons.js';
+import { IconBook, IconBrain, IconFlag, IconLayers } from '../prep/icons.js';
 import { StaffGate } from '../staff/StaffGate.js';
 import { StaffShell, type NavItem } from '../staff/StaffShell.js';
 import { REVIEW_CHANGED, api } from './api.js';
@@ -18,6 +19,7 @@ import {
   QuestionRedirect,
   SubjectPapers,
 } from './BankPages.js';
+import { SubjectTopics, TopicSubjects } from './TopicsPages.js';
 import { BANK_CHANGED, bank, type ExamLine } from './bankApi.js';
 
 export function ReviewApp() {
@@ -59,6 +61,7 @@ function ReviewShell() {
       section: index === 0 ? 'Exams' : undefined,
     })),
     { to: '/new-exam', label: 'Add an exam', icon: <IconLayers />, section: exams?.length ? undefined : 'Exams' },
+    { to: '/topics', label: 'Topics', icon: <IconBrain />, section: 'Manage' },
     { to: '/reported', label: 'Reported', icon: <IconFlag />, count: flagged, section: 'Needs attention' },
   ];
   return (
@@ -69,6 +72,8 @@ function ReviewShell() {
         <Route path="/subjects/:subjectId" element={<SubjectPapers />} />
         <Route path="/papers/:paperId" element={<PaperQuestions />} />
         <Route path="/question/:questionId" element={<QuestionRedirect />} />
+        <Route path="/topics" element={<TopicSubjects />} />
+        <Route path="/topics/:subjectId" element={<SubjectTopics />} />
         <Route path="/reported" element={<FlaggedQuestions />} />
         <Route path="/new-exam" element={<NewExam />} />
         {/* The old queue's address. */}

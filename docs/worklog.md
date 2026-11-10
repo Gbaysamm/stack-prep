@@ -15,6 +15,21 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-10
 
+### Reviewer dashboard: a Topics page
+- **Why:** the founder asked for a page to see each subject's topics, add and remove them, see
+  the questions under each, with a guardrail so removing a topic never strands its questions.
+- **What:** Topics in the reviewer menu lists every subject; a subject shows its topics on the
+  left and the chosen topic's subtopics and skills on the right, each with how many questions
+  are filed under it (a click lists them). A "⋯" menu adds, renames or removes. A part with
+  questions under it can only be removed once a skill outside it is chosen; the questions
+  move there and stay approved, then the part and all under it are withdrawn (never deleted).
+  A subject with no topics gets its syllabus the first time one is added. Migration 038 lets an
+  approved topic's name change; its code, place and scope stay frozen. On a phone the list and
+  the topic show one at a time.
+- **Where:** `apps/api/src/app/routers/topics.py`, `apps/api/tests/test_topics.py`,
+  `database/migrations/038_rename_topics.sql`, `apps/web/src/review/TopicsPages.tsx`.
+- **Status:** done locally; deploy needs a push.
+
 ### Check-up stuck at question 1 for the founder's account
 - **Why:** on the live site a check-up refused every answer with "Some of what was entered is
   not quite right". The account had been made on the server with `database/create_admin.py`,
