@@ -280,10 +280,12 @@ function FormAlert({ children }: { children: ReactNode }) {
 }
 
 const BAD_LOGIN = 'Enter an email address, or a Nigerian phone number like 0803 123 4567.';
+const BAD_EMAIL = 'Enter a valid email address, like you@example.com.';
+const BAD_PHONE = 'Enter a Nigerian phone number, like 0803 123 4567.';
 
 /* ------------------------------------------------------------------ create account */
 
-type SignupErrors = Partial<Record<'name' | 'login' | 'password' | 'confirm', string>>;
+type SignupErrors = Partial<Record<'name' | 'email' | 'phone' | 'password' | 'confirm', string>>;
 
 export function SignupForm({
   claimStudentId,
@@ -306,21 +308,26 @@ export function SignupForm({
 }) {
   const ids = useId();
   const nameId = `${ids}-name`;
-  const loginId = `${ids}-login`;
+  const emailId = `${ids}-email`;
+  const phoneId = `${ids}-phone`;
   const pwId = `${ids}-pw`;
   const confirmId = `${ids}-confirm`;
   const refs = {
     name: useRef<HTMLInputElement>(null),
-    login: useRef<HTMLInputElement>(null),
+    email: useRef<HTMLInputElement>(null),
+    phone: useRef<HTMLInputElement>(null),
     password: useRef<HTMLInputElement>(null),
     confirm: useRef<HTMLInputElement>(null),
   };
   const [name, setName] = useState(defaultName);
-  const [login, setLogin] = useState(defaultLogin);
+  // What they typed as their login elsewhere ("Create an account" from the log-in form) goes
+  // to the field it belongs in.
+  const [email, setEmail] = useState(defaultLogin && !looksLikePhone(defaultLogin) ? defaultLogin : '');
+  const [phone, setPhone] = useState(defaultLogin && looksLikePhone(defaultLogin) ? defaultLogin : '');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [errors, setErrors] = useState<SignupErrors>({});
-  const [taken, setTaken] = useState(false);
+  const [taken, setTaken] = useState<'email' | 'phone' | null>(null);
   const [alert, setAlert] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [tried, setTried] = useState(false);
@@ -328,19 +335,19 @@ export function SignupForm({
   useEffect(() => {
     // After the frame, so a dialog opening around the form has taken focus first.
     if (!autoFocus) return;
-    const frame = window.requestAnimationFrame(() => (defaultName ? refs.login : refs.name).current?.focus());
+    const frame = window.requestAnimationFrame(() => (defaultName ? refs.email : refs.name).current?.focus());
     return () => window.cancelAnimationFrame(frame);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const clear = (key: keyof SignupErrors) => {
     if (errors[key]) setErrors((current) => ({ ...current, [key]: undefined }));
-    if (key === 'login') setTaken(false);
+    if (key === taken) setTaken(null);
     if (alert) setAlert(null);
   };
 
   const focusFirst = (found: SignupErrors) => {
-    const order = ['name', 'login', 'password', 'confirm'] as const;
+    const order = ['name', 'email', 'phone', 'password', 'confirm'] as const;
     const first = order.find((key) => found[key]);
     if (first) window.requestAnimationFrame(() => refs[first].current?.focus());
   };
@@ -351,13 +358,15 @@ export function SignupForm({
     setTried(true);
     const found: SignupErrors = {};
     if (!name.trim()) found.name = claimStudentId ? 'Tell us your name.' : 'Tell us your first name.';
-    if (!login.trim()) found.login = 'Enter your email or phone number.';
-    else if (!validLogin(login)) found.login = BAD_LOGIN;
+    if (!email.trim()) found.email = 'Enter your email address.';
+    else if (!validLogin(email) || looksLikePhone(email)) found.email = BAD_EMAIL;
+    if (!phone.trim()) found.phone = 'Enter your phone number.';
+    else if (!looksLikePhone(phone) || !validLogin(phone)) found.phone = BAD_PHONE;
     if (password.length < 8) found.password = password ? 'Use at least 8 characters.' : 'Choose a password of at least 8 characters.';
     if (!confirm) found.confirm = 'Type your password again.';
     else if (confirm !== password) found.confirm = "These don't match. Check both passwords.";
     setErrors(found);
-    setTaken(false);
+    setTaken(null);
     setAlert(null);
     if (Object.keys(found).length) {
       focusFirst(found);
@@ -367,7 +376,8 @@ export function SignupForm({
     try {
       const user = await authApi.signup({
         display_name: name.trim(),
-        login: cleanLogin(login),
+        email: email.trim(),
+        phone: cleanLogin(phone),
         password,
         ...(claimStudentId ? { claim_student_id: claimStudentId } : {}),
       });
@@ -376,10 +386,11 @@ export function SignupForm({
       setBusy(false);
       const error = failure instanceof AuthError ? failure : new AuthError('Something went wrong. Try again.', 0);
       if (error.status === 409) {
-        setErrors({ login: error.message });
-        setTaken(true);
-        focusFirst({ login: error.message });
-      } else if (error.status === 422 && error.field) {
+        const which = error.field === 'phone' ? 'phone' : 'email';
+        setErrors({ [which]: error.message });
+        setTaken(which);
+        focusFirst({ [which]: error.message });
+      } else if (error.status === 422 && error.field && error.field !== 'login') {
         const key = error.field === 'display_name' ? 'name' : error.field;
         setErrors({ [key]: error.message });
         focusFirst({ [key]: error.message });
@@ -418,17 +429,17 @@ export function SignupForm({
       </Field>
 
       <Field
-        id={loginId}
-        label="Email or phone number"
-        message="We'll use this to log you in on any device."
+        id={emailId}
+        label="Email"
+        message="For your password reset codes and receipts."
         error={
-          errors.login ? (
+          errors.email ? (
             <>
-              {errors.login}
-              {taken && onSwitchToLogin ? (
+              {errors.email}
+              {taken === 'email' && onSwitchToLogin ? (
                 <>
                   {' '}
-                  <button type="button" className="auth-inline" onClick={() => onSwitchToLogin(login)}>
+                  <button type="button" className="auth-inline" onClick={() => onSwitchToLogin(email)}>
                     Log in instead
                   </button>
                 </>
@@ -437,19 +448,73 @@ export function SignupForm({
           ) : undefined
         }
       >
-        <LoginInput
-          id={loginId}
-          inputRef={refs.login}
-          value={login}
-          onChange={(value) => {
-            setLogin(value);
-            clear('login');
+        <input
+          id={emailId}
+          ref={refs.email}
+          type="email"
+          className="sj-input auth-input"
+          value={email}
+          onChange={(event) => {
+            setEmail(event.target.value);
+            clear('email');
           }}
           onBlur={() => {
-            if (login.trim() && !validLogin(login)) setErrors((current) => ({ ...current, login: BAD_LOGIN }));
+            if (email.trim() && (!validLogin(email) || looksLikePhone(email)))
+              setErrors((current) => ({ ...current, email: BAD_EMAIL }));
           }}
-          invalid={Boolean(errors.login)}
-          describedBy={`${loginId}-msg`}
+          placeholder="you@example.com"
+          inputMode="email"
+          autoComplete="email"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          maxLength={254}
+          aria-invalid={errors.email ? true : undefined}
+          aria-describedby={`${emailId}-msg`}
+          disabled={busy}
+        />
+      </Field>
+
+      <Field
+        id={phoneId}
+        label="Phone number"
+        message="You can log in with your email or this number."
+        error={
+          errors.phone ? (
+            <>
+              {errors.phone}
+              {taken === 'phone' && onSwitchToLogin ? (
+                <>
+                  {' '}
+                  <button type="button" className="auth-inline" onClick={() => onSwitchToLogin(phone)}>
+                    Log in instead
+                  </button>
+                </>
+              ) : null}
+            </>
+          ) : undefined
+        }
+      >
+        <input
+          id={phoneId}
+          ref={refs.phone}
+          type="tel"
+          className="sj-input auth-input"
+          value={phone}
+          onChange={(event) => {
+            setPhone(event.target.value);
+            clear('phone');
+          }}
+          onBlur={() => {
+            if (phone.trim() && (!looksLikePhone(phone) || !validLogin(phone)))
+              setErrors((current) => ({ ...current, phone: BAD_PHONE }));
+          }}
+          placeholder="0803 123 4567"
+          inputMode="tel"
+          autoComplete="tel"
+          maxLength={20}
+          aria-invalid={errors.phone ? true : undefined}
+          aria-describedby={`${phoneId}-msg`}
           disabled={busy}
         />
       </Field>

@@ -22,14 +22,16 @@ export interface AuthUser {
 
 export interface SignupBody {
   display_name: string;
-  login: string;
+  /** Both required at sign-up; either one signs in afterwards. */
+  email: string;
+  phone: string;
   password: string;
   /** A sandbox student to turn into this account, so their progress comes with them. */
   claim_student_id?: string;
 }
 
 /** Which form field a server error is about, when that is clear from the response. */
-export type AuthField = 'display_name' | 'login' | 'password';
+export type AuthField = 'display_name' | 'login' | 'email' | 'phone' | 'password';
 
 export class AuthError extends Error {
   status: number;
@@ -45,7 +47,12 @@ const OFFLINE = "We couldn't reach Stack Prep. Check your connection and try aga
 
 function fieldFrom(text: string): AuthField | undefined {
   if (/password/i.test(text)) return 'password';
-  if (/\b(e-?mail|phone|login|number)\b/i.test(text)) return 'login';
+  const email = /\be-?mail\b/i.test(text);
+  const phone = /\b(phone|number)\b/i.test(text);
+  // One named alone is about that field (sign-up asks for both); either, or a login, the login.
+  if (email && !phone) return 'email';
+  if (phone && !email) return 'phone';
+  if (email || phone || /\blogin\b/i.test(text)) return 'login';
   if (/\bname\b/i.test(text)) return 'display_name';
   return undefined;
 }
@@ -63,7 +70,7 @@ async function failure(response: Response): Promise<AuthError> {
     } else if (Array.isArray(detail) && detail.length) {
       const first = detail[0] as { msg?: string; loc?: unknown[] };
       const where = String(first.loc?.[first.loc.length - 1] ?? '');
-      field = (['display_name', 'login', 'password'] as const).find((name) => name === where);
+      field = (['display_name', 'login', 'email', 'phone', 'password'] as const).find((name) => name === where);
       message = (first.msg ?? '').replace(/^Value error, /, '');
     }
   } catch {

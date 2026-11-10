@@ -54,7 +54,8 @@ export function LessonPlayer() {
   const narrow = width > 0 && width < 640;
   const native = width >= DESKTOP.width;
   const scale = narrow || native ? 1 : width / DESKTOP.width;
-  const height = narrow ? 600 : native ? Math.round(width * (DESKTOP.height / DESKTOP.width)) : DESKTOP.height * scale;
+  // On a phone the board is drawn at the phone's own size, a little taller than wide.
+  const height = narrow ? Math.round(width * 1.15) : native ? Math.round(width * (DESKTOP.height / DESKTOP.width)) : DESKTOP.height * scale;
   const frameStyle = narrow || native
     ? { width: '100%', height }
     : { width: DESKTOP.width, height: DESKTOP.height, transform: `scale(${scale})`, transformOrigin: '0 0' };

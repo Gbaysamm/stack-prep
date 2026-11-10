@@ -366,3 +366,47 @@ async def test_a_sandbox_student_can_be_claimed(
     # And the sandbox cleanup no longer treats the claimed student as disposable. (Running
     # it here would clear every other sandbox student too, so its selection is checked.)
     assert "student_credentials" in str(CLEAR_STUDENTS_SQL)
+
+
+async def test_signup_with_both_an_email_and_a_phone(
+    client: httpx.AsyncClient, tracker: Tracker
+) -> None:
+    email = tracker.email()
+    typed, stored = tracker.phone()
+    body = {"display_name": "Ada", "email": email, "phone": typed, "password": PASSWORD}
+    made = await client.post("/v1/auth/signup", json=body)
+    assert made.status_code == 201, made.text
+    tracker.students.add(made.json()["student_id"])
+    assert made.json()["login"] == email
+
+    # Either one signs in.
+    for login in (email, typed):
+        client.cookies.clear()
+        signed = await client.post("/v1/auth/login", json={"login": login, "password": PASSWORD})
+        assert signed.status_code == 200, (login, signed.text)
+
+    # Taken, each named on its own.
+    again = await client.post("/v1/auth/signup", json={**body, "phone": tracker.phone()[0]})
+    assert again.status_code == 409 and "email" in again.json()["detail"]
+    other = await client.post("/v1/auth/signup", json={**body, "email": tracker.email()})
+    assert other.status_code == 409 and "phone" in other.json()["detail"]
+    async with get_engine().connect() as conn:
+        phone = (await conn.execute(
+            text("SELECT phone FROM students WHERE email = :e"), {"e": email}
+        )).scalar_one()
+    assert phone == stored
+
+
+async def test_signup_needs_both_and_each_in_its_place(
+    client: httpx.AsyncClient, tracker: Tracker
+) -> None:
+    base = {"display_name": "Ada", "password": PASSWORD}
+    cases = [
+        {"email": tracker.email()},  # no phone
+        {"phone": tracker.phone()[0]},  # no email
+        {"email": tracker.phone()[0], "phone": tracker.phone()[0]},  # a phone as the email
+        {"email": tracker.email(), "phone": tracker.email()},  # an email as the phone
+    ]
+    for extra in cases:
+        response = await client.post("/v1/auth/signup", json={**base, **extra})
+        assert response.status_code == 422, (extra, response.text)

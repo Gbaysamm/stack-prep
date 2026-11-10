@@ -52,6 +52,10 @@ router = APIRouter(prefix="/v1/auth", tags=["auth"])
 
 TAKEN = "An account with that email or phone number already exists."
 BAD_LOGIN = "Enter a valid email address or Nigerian phone number."
+BAD_EMAIL = "Enter a valid email address."
+BAD_PHONE = "Enter a valid Nigerian phone number, like 0803 123 4567."
+EMAIL_TAKEN = "An account already uses that email."
+PHONE_TAKEN = "An account already uses that phone number."
 NO_MATCH = "That email/phone and password don't match."
 LOCKED = "Too many attempts. Wait a few minutes and try again."
 NOT_SIGNED_IN = "Not signed in."
@@ -71,7 +75,12 @@ _NIGERIAN = re.compile(r"^(?:\+?234|0)([0-9]{10})$")
 
 class SignUp(BaseModel):
     display_name: str
-    login: str
+    #: The sign-up form sends both, and both are required there: an email for reset codes and
+    #: receipts, a phone number to reach the student. Either one then signs in.
+    email: str | None = None
+    phone: str | None = None
+    #: The older shape, one login (email or phone), still accepted from clients not yet updated.
+    login: str | None = None
     password: str
     claim_student_id: UUID | None = None
 
@@ -147,27 +156,52 @@ async def signup(
     if len(name) > MAX_NAME:
         raise _invalid(f"Keep your name to {MAX_NAME} characters or fewer.")
 
-    login = normalise_login(body.login)
-    if login is None:
-        raise _invalid(BAD_LOGIN)
-    kind, value = login
+    email: str | None
+    phone: str | None
+    if body.email is not None or body.phone is not None:
+        given_email = normalise_login(body.email or "")
+        if given_email is None or given_email[0] != "email":
+            raise _invalid(BAD_EMAIL)
+        given_phone = normalise_login(body.phone or "")
+        if given_phone is None or given_phone[0] != "phone":
+            raise _invalid(BAD_PHONE)
+        email, phone = given_email[1], given_phone[1]
+        value = email
+        typed: tuple[str | None, ...] = (body.email, body.phone, email, phone)
+    else:
+        login = normalise_login(body.login or "")
+        if login is None:
+            raise _invalid(BAD_LOGIN)
+        kind, value = login
+        email = value if kind == "email" else None
+        phone = value if kind == "phone" else None
+        typed = (body.login, value)
 
     password = body.password
-    _check_password(password, body.login, value)
+    _check_password(password, *typed)
 
     password_hash = await hash_password(password)
-    email = value if kind == "email" else None
-    phone = value if kind == "phone" else None
 
     try:
         taken = (
             await conn.execute(
-                text("SELECT 1 FROM students WHERE email = :email OR phone = :phone"),
+                text(
+                    """
+                    SELECT bool_or(email = :email) AS email_taken,
+                           bool_or(phone = :phone) AS phone_taken
+                    FROM students WHERE email = :email OR phone = :phone
+                    """
+                ),
                 {"email": email, "phone": phone},
             )
         ).first()
-        if taken:
-            raise HTTPException(status_code=409, detail=TAKEN)
+        if taken and (taken.email_taken or taken.phone_taken):
+            detail = (
+                TAKEN if body.email is None and body.phone is None
+                else EMAIL_TAKEN if taken.email_taken
+                else PHONE_TAKEN
+            )
+            raise HTTPException(status_code=409, detail=detail)
 
         student_id = await _claim(conn, body.claim_student_id, name, email, phone)
         if student_id is None:

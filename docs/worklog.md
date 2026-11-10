@@ -15,6 +15,19 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-10
 
+### Sign-up asks for both an email and a phone number
+- **Why:** the founder wants both on every account: email for reset codes and receipts, a
+  phone number to reach the student.
+- **What:** "Create your account" has an Email field and a Phone number field, both required,
+  each checked as what it is (an email can't go in the phone box). Either signs in afterwards.
+  A taken one is named on its own ("An account already uses that phone number") with "Log in
+  instead". The API still accepts the old single-login shape from clients not yet updated.
+  Also: the home page's lesson window on a phone is sized to the phone (about 15% taller than
+  wide) instead of a fixed 600 px.
+- **Where:** `apps/api/src/app/routers/accounts.py`, `apps/web/src/prep/AuthForms.tsx`,
+  `authApi.ts`, `apps/web/src/site/LessonPlayer.tsx`; tests in `tests/test_auth.py`.
+- **Status:** committed.
+
 ### Deploy fix: httpx is a runtime dependency
 - **Why:** the Binaax deploy built, then the API would not start: `app/paystack.py` imports
   `httpx`, which was only installed for tests, so the server image lacked it and the site
