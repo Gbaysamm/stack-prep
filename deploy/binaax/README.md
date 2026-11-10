@@ -13,7 +13,7 @@ from a system Caddy, so everything here is additive and nothing touches that.
   certs/        fullchain.pem + privkey.pem, owned deploy:caddy, dir 2750
   acme/         ACME http-01 webroot
   .acme.sh/     acme.sh, with its own cron for renewal
-  .env.local    POSTGRES_PASSWORD, ANTHROPIC_API_KEY, APP_ENV=local
+  .env.local    POSTGRES_PASSWORD, ANTHROPIC_API_KEY, APP_ENV=production
   compose.yml   copied from the checkout on each release
   .deployed     the commit CI last released, and when
 ```
@@ -27,13 +27,14 @@ GHCR), applies migrations, brings up the compose stack, builds the client into
 start — the latter because this deployment once served a perfect page whose Start
 button failed.
 
-## APP_ENV must be `local`
+## APP_ENV is `production`, and there is no site password
 
-There is no login yet (ADR-0013 is Proposed), so `/v1/dev/students` is the only way
-a student record is created, and that router refuses unless `APP_ENV` is `local` or
-`ci`. A review instance therefore runs as `local`. That is safe **only** because
-Caddy requires basic auth in front of it — anyone with the password can create and
-delete sandbox students.
+This instance used to run as `local` behind a Caddy password, because there was no login
+and `/v1/dev/students` (which only answers under `local` or `ci`) was the only way to make
+a student. Students now sign up with an account, staff sign in with roles, and the site is
+public, so it runs as `production`: the `/v1/dev` routes answer 404, and Caddy has no
+`basic_auth`. Never set it back to `local` on a public site: the dev routes can create and
+delete students.
 
 ## TLS is acme.sh's, not Caddy's
 
@@ -50,14 +51,6 @@ different user, so without it the site would break silently at the first renewal
 
 Caddy's config is `/etc/caddy/Caddyfile`, root-owned, and shared with `binaax.app`
 and the sandbox subdomains. A deploy never writes it. Back it up before editing.
-
-## Changing the password
-
-```
-HASH="$(caddy hash-password)"          # prompts twice, never echoes
-```
-
-then replace the hash on the `review` line in the Caddyfile and reload.
 
 ## When it goes wrong
 

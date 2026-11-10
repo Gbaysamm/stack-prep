@@ -13,6 +13,23 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ---
 
+## 2026-11-10
+
+### The review server goes public: production mode, no site password
+- **Why:** the founder wants the password prompt in front of stackprep.binaax.app removed.
+  It was there because the server ran as `local` with no login, so the `/v1/dev` routes
+  (which create and delete students) and the reviewer tool were open to anyone who got past
+  it. With accounts, staff roles and admin sign-in in the app, the password can go, but only
+  once that version is deployed and the server runs as `production`.
+- **What:** the binaax release check no longer asks `/v1/dev/subjects` (refused in
+  production); it checks `/v1/curriculum/subjects` returns subjects. The binaax README now
+  says the instance runs as `production` with no `basic_auth`, and never `local` again.
+- **Server steps (the founder runs them):** deploy the current code first; set
+  `APP_ENV=production`; create the admin; then remove the `basic_auth` block from the
+  `stackprep.binaax.app` site in `/etc/caddy/Caddyfile` and reload Caddy.
+- **Where:** `deploy/binaax/release.sh`, `deploy/binaax/README.md`.
+- **Status:** committed, not pushed.
+
 ## 2026-10-28
 
 ### The public site, redesigned: a real lesson to watch, a tour of the app, and fast loading

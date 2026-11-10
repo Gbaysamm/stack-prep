@@ -163,14 +163,14 @@ done
 
 echo "==> Checking a student can actually start"
 # The page rendering proves nothing: this deployment once served a perfect form
-# whose Start button failed, because /v1/dev/students is gated on APP_ENV and the
-# box was staging. Assert the endpoint the student journey depends on.
-if ! curl -fsS --max-time 8 http://127.0.0.1:8010/v1/dev/subjects > /dev/null; then
-  echo "/v1/dev/subjects refused. APP_ENV must be local or ci for the demo to work;" >&2
-  echo "check APP_ENV in $ROOT/.env.local." >&2
+# whose Start button failed. Students now sign up with an account (routers/accounts.py),
+# so assert what that journey needs: the database answering with subjects to choose.
+# (The /v1/dev routes are off here: APP_ENV is production now that the site is public.)
+if ! curl -fsS --max-time 8 http://127.0.0.1:8010/v1/curriculum/subjects | grep -q '"name"'; then
+  echo "/v1/curriculum/subjects returned no subjects; a student could not choose any." >&2
   exit 1
 fi
-echo "    student endpoints answering"
+echo "    subjects answering"
 
 echo "==> Checking the client is served"
 if ! curl -fsS --max-time 8 http://127.0.0.1:8010/health > /dev/null || ! grep -q '/assets/' "$ROOT/web/index.html"; then
