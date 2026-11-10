@@ -1340,3 +1340,41 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* Build your own: one line and one button (the roadmap leads; this is the way out of it). */
+.sj .ph-build.ph-build-short {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+}
+.sj .ph-build-short .ph-build-text {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+}
+.sj .ph-build-short .ph-build-title,
+.sj .ph-build-short .ph-build-body {
+  margin: 0;
+  text-align: left;
+}
+@media (max-width: 640px) {
+  .sj .ph-build.ph-build-short {
+    flex-wrap: wrap;
+  }
+  .sj .ph-build-short .sj-btn {
+    width: 100%;
+  }
+}
+.sj .ph-build-short .ph-build-text {
+  justify-items: start;
+}
+.sj .ph-build-short .ph-build-body {
+  max-width: none;
+}
+.sj .ph-build-short .ph-build-body,
+.sj .ph-build-short .ph-build-title {
+  grid-area: auto;
+}

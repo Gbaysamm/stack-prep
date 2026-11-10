@@ -9,18 +9,16 @@
  * subject is in the URL (`?subject=`), so it survives a refresh and the trip back from a run.
  */
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useRoadmap } from "../roadmapApi.js";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import {
   IconArrowRight,
-  IconBulb,
   IconChevronRight,
   IconLayers,
   IconReplay,
   IconSpark,
-  IconTarget,
-  IconTrophy,
 } from "../icons.js";
 import {
   progressApi,
@@ -40,7 +38,6 @@ import {
   SubjectSwitcher,
   isDemoSubject,
   practiceLock,
-  scoreNote,
   subjectStatus,
   useOverview,
   useSubjectChoice,
@@ -59,7 +56,7 @@ import {
   useShowMore,
   useToast,
 } from "../ui.js";
-import { plural, useStartCheckup, useStartPractice } from "./Home.js";
+import { plural, useStartPractice } from "./Home.js";
 import { DeleteRunDialog, IconTrash } from "./RunReport.js";
 import "./PracticeHub.css";
 import { friendly } from '../../lib/friendlyError.js';
@@ -165,8 +162,7 @@ export function PracticeHub() {
     ? everyRun
     : everyRun.filter((run) => run.subject_id === subject.subject_id);
   const anyOpen = subjects.some((s) => s.open_practice_session_id);
-  const sub =
-    "Short sets of questions aimed at your weakest topics. Miss one and you get a hint; miss it again and the coach works it through with you.";
+  const sub = undefined;
 
   if (overview.error && !overview.data) {
     return (
@@ -308,7 +304,7 @@ export function PracticeHub() {
               <p className="sj-muted">
                 {next && !scopeAll
                   ? "Older runs may have some. Load more to look further back."
-                  : "Your first one will show up here, with how each question went."}
+                  : null}
               </p>
               {next && !scopeAll ? (
                 <div>
@@ -354,7 +350,6 @@ export function PracticeHub() {
         </section>
       ) : null}
 
-      {loading ? null : <HowItWorks />}
     </div>
   );
 }
@@ -385,10 +380,8 @@ function HeroStat({ subjects }: { subjects: SubjectOverview[] }) {
       </span>
       <span className="ph-stat-note">
         {answered === 0
-          ? "Nothing answered yet. Your first run starts the count."
-          : finished === 0
-            ? `Answered with no hint and no help so far${across}. Finish a run to see it counted by run.`
-            : `Answered with no hint and no help, across ${finished} finished ${finished === 1 ? "run" : "runs"}${across}.`}
+          ? "No answers yet"
+          : `${finished} ${finished === 1 ? "run" : "runs"} finished${across}`}
       </span>
     </div>
   );
@@ -528,243 +521,11 @@ function SubjectPanel({
         ) : null}
       </div>
 
-      <SubjectStanding subject={subject} />
     </article>
   );
 }
 
-/** The lowest-scoring topics the student has tried, lowest first: what runs aim at. */
-function lowestTopics(subject: SubjectOverview, count: number): { id: string; name: string; score: number; status: TopicStatus }[] {
-  const topics = subject.scores?.topics ?? [];
-  if (topics.length > 0) {
-    return topics
-      .filter((t): t is TopicScore & { score: number } => t.score !== null)
-      .sort((x, y) => x.score - y.score || y.share - x.share)
-      .slice(0, count)
-      .map((t) => ({ id: t.subtopic_id, name: t.name, score: t.score, status: t.status }));
-  }
-  // Older overviews: the latest check-up's weakest list, as plain percentages.
-  return (subject.latest_checkup?.weakest_subtopics ?? []).slice(0, count).map((w) => {
-    const score = Math.round(w.mastery * 100);
-    const status: TopicStatus = score >= 80 ? "strong" : score >= 50 ? "getting_there" : "needs_work";
-    return { id: w.subtopic_id, name: w.name, score, status };
-  });
-}
-
-/**
- * The panel's foot: where the subject stands, as one band across the full width. Checked, it is
- * your score, the predicted score (the last check-up) and the target, what runs aim at, and the
- * report (or the check-up, when one is due); otherwise the one step that comes next.
- */
-function SubjectStanding({ subject }: { subject: SubjectOverview }) {
-  const checkup = useStartCheckup();
-  const status = subjectStatus(subject);
-  const latest = subject.latest_checkup;
-  const weak = lowestTopics(subject, 3);
-
-  let body;
-  if (status.kind === "checkup-open") {
-    body = (
-      <Callout
-        icon={<IconReplay size={18} />}
-        title="Finish your check-up"
-        action={
-          <Button to={`/checkup/${subject.open_checkup_session_id}`} size="sm" tone="dark" trailing={<IconArrowRight size={16} />}>
-            Resume check-up
-          </Button>
-        }
-      >
-        Your answers so far are saved. Once it is done, it gives your predicted score and runs aim at what it finds.
-      </Callout>
-    );
-  } else if (status.kind === "no-goal") {
-    body = (
-      <Callout
-        icon={<IconTrophy size={18} />}
-        title={`No ${subject.subject_name} goal yet`}
-        action={
-          <Button to={`/subjects/${subject.subject_id}/goal`} size="sm" tone="dark" trailing={<IconArrowRight size={16} />}>
-            Set my goal
-          </Button>
-        }
-      >
-        A target gives your score something to aim at, and the date starts your countdown. Then take your first check-up:
-        practice opens after it.
-      </Callout>
-    );
-  } else if (status.kind === "no-checkup") {
-    body = (
-      <Callout
-        icon={<IconBulb size={18} />}
-        title={`No ${subject.subject_name} check-up yet`}
-        action={
-          <Button
-            size="sm"
-            tone="dark"
-            busy={checkup.busy}
-            disabled={isDemoSubject(subject.subject_id)}
-            onClick={() => checkup.start(subject.subject_id)}
-            trailing={checkup.busy ? undefined : <IconArrowRight size={16} />}
-          >
-            Take the check-up
-          </Button>
-        }
-      >
-        {status.score !== null
-          ? `Your score so far is ${status.score}%. A check-up gives you a predicted score, and practice opens after it.`
-          : "A short mixed test with no help, like the exam. It sets where you start and which topics your runs aim at. Practice opens after it."}
-      </Callout>
-    );
-  } else {
-    const gap = status.gap;
-    body = (
-      <div className="ph-stand">
-        <dl className="ph-figs">
-          <div className="ph-fig lead">
-            <dt>Your score</dt>
-            <dd className="ph-score-num">
-              <span className="sj-num">{status.score ?? "—"}</span>
-              {status.score !== null ? <span className="sj-mono">%</span> : null}
-            </dd>
-            <span>{scoreNote(subject)}</span>
-          </div>
-          <div className="ph-fig">
-            <dt>Predicted</dt>
-            <dd className="sj-num">{status.predicted === null ? "—" : `${status.predicted}%`}</dd>
-            <span>{status.due ? "Check-up due" : "Last check-up"}</span>
-          </div>
-          <div className="ph-fig">
-            <dt>Target</dt>
-            <dd className="sj-num">{status.target === null ? "—" : `${status.target}%`}</dd>
-            {status.target === null ? (
-              <Link className="sj-link" to={`/subjects/${subject.subject_id}/goal`}>
-                Set a target
-              </Link>
-            ) : (
-              <span className={cx(gap !== null && gap > 0 ? "short" : "ok")}>
-                {gap === null ? "Your goal" : gap > 0 ? `${gap} short` : "On track"}
-              </span>
-            )}
-          </div>
-        </dl>
-        <div className="ph-aims">
-          <span className="ph-aims-label">
-            <IconTarget size={16} />
-            {weak.length > 0 ? "Runs aim at these first" : "Runs aim at your lowest topics first"}
-          </span>
-          {weak.length > 0 ? (
-            <div className="ph-aims-chips">
-              {weak.map((item) => (
-                <span key={item.id} className="ph-chip">
-                  {item.name}
-                  <b className={cx("sj-mono", item.status)}>{item.score}%</b>
-                </span>
-              ))}
-            </div>
-          ) : null}
-          <span className="ph-aims-note">
-            <IconReplay size={14} />
-            Questions you missed come back in your runs until you get them right.
-          </span>
-        </div>
-        {status.due ? (
-          <Button
-            size="sm"
-            tone="dark"
-            className="ph-report"
-            busy={checkup.busy}
-            disabled={isDemoSubject(subject.subject_id)}
-            onClick={() => checkup.start(subject.subject_id)}
-            trailing={checkup.busy ? undefined : <IconArrowRight size={16} />}
-          >
-            Check-up due
-          </Button>
-        ) : latest ? (
-          <Link className="sj-link ph-report" to={`/checkup/${latest.session_id}/report`}>
-            Check-up report <IconArrowRight size={14} />
-          </Link>
-        ) : null}
-      </div>
-    );
-  }
-
-  return (
-    <footer className="ph-standing" aria-label={`Where ${subject.subject_name} stands`}>
-      {body}
-      {checkup.error ? (
-        <p className="ph-alert" role="alert">
-          {checkup.error}
-        </p>
-      ) : null}
-    </footer>
-  );
-}
-
-/** The next step for an unchecked subject: icon, words and the one button, on one line. */
-function Callout({
-  icon,
-  title,
-  children,
-  action,
-}: {
-  icon: ReactNode;
-  title: string;
-  children: ReactNode;
-  action: ReactNode;
-}) {
-  return (
-    <div className="ph-callout">
-      <span className="ph-tile yellow" aria-hidden="true">
-        {icon}
-      </span>
-      <span className="ph-callout-text">
-        <b>{title}</b>
-        <span>{children}</span>
-      </span>
-      <span className="ph-callout-go">{action}</span>
-    </div>
-  );
-}
-
 /* ------------------------------------------------------------------ what a run is */
-
-function HowItWorks() {
-  return (
-    <section
-      className="ph-section ph-how sj-rise d4"
-      aria-labelledby="ph-how-title"
-    >
-      <span className="sj-eyebrow">What a run is</span>
-      <h2 id="ph-how-title" className="sj-display sj-h2">
-        Help, not just marks
-      </h2>
-      <p className="ph-lead">
-        No timer, and nothing is lost by missing. A miss just means help. The
-        lines above each step use the same colours as your runs.
-      </p>
-      <Steps
-        steps={[
-          {
-            title: "Say how sure you are",
-            body: "After you answer and before you find out, so a lucky guess isn’t mistaken for knowing.",
-          },
-          {
-            title: "Right first time counts",
-            body: "A right first try, with no hint and no guess, is what counts in your score.",
-          },
-          {
-            title: "Miss once: a hint",
-            body: "Then the same question again. Your first try already counted, so relax.",
-          },
-          {
-            title: "Miss twice: the board",
-            body: "The coach works it through step by step. The question comes back in a later run for you to get right.",
-          },
-        ]}
-      />
-    </section>
-  );
-}
 
 /* ------------------------------------------------------------------ history */
 
@@ -983,9 +744,6 @@ function AllSubjects({
 
 /* ------------------------------------------------------------------ build your own */
 
-/** The builder's own lengths, so the preview offers what the builder does. */
-const BUILD_LENGTHS = [5, 10, 20, 40];
-
 type Options = NonNullable<Awaited<ReturnType<typeof runsApi.options>>>;
 
 /** The builder's range for a subject, remembered per subject so switching back is instant. */
@@ -1066,18 +824,6 @@ function TopicKey() {
   );
 }
 
-/** Questions per exam year, oldest on the left. */
-function YearBars({ years }: { years: Options["years"] }) {
-  const max = Math.max(1, ...years.map((y) => y.questions));
-  return (
-    <span className="ph-ybars" aria-hidden="true">
-      {years.map((y) => (
-        <i key={y.exam_year} style={{ height: `${Math.max(12, (y.questions / max) * 100)}%` }} title={`${y.exam_year}: ${y.questions} questions`} />
-      ))}
-    </span>
-  );
-}
-
 /**
  * The way into a run the student shapes, in the chosen subject, drawn as the builder's three
  * choices with the subject's real range: every topic as a slice (width = its questions, colour =
@@ -1086,110 +832,47 @@ function YearBars({ years }: { years: Options["years"] }) {
  * choice is, so the card is never half-empty.
  */
 function BuildOwn({ subject }: { subject: SubjectOverview }) {
-  const options = useOptions(subject.subject_id);
+  const student = useStudent();
+  const plan = useRoadmap(student.studentId);
   const to = `/practice/new?subject=${subject.subject_id}`;
-  const o = options.data;
-  const facts = o ? optionFacts(o) : null;
-  const loading = options.loading && options.data === undefined;
-  const scores = topicScores(subject);
   const lock = practiceLock(subject);
-  const tried = (subject.scores?.topics ?? []).some((t) => t.answered > 0);
-
-  const steps = [
-    {
-      n: "01",
-      label: "Topics",
-      value: facts && o ? `${plural(facts.subtopics, "topic")} · ${plural(o.topics.length, "section")}` : "Any of its topics",
-      viz: o && o.topics.length > 0 ? <TopicBar topics={o.topics} scores={scores} /> : null,
-      note: facts && o
-        ? tried
-          ? "Width is the questions in each; colour is your score there."
-          : "Width is the questions in each topic."
-        : "Whole sections, or single topics.",
-    },
-    {
-      n: "02",
-      label: "Exam years",
-      value: facts && facts.years.length > 0 ? `${facts.span} · ${plural(facts.years.length, "paper")}` : "Any past paper",
-      viz: facts && facts.years.length > 0 ? <YearBars years={facts.years} /> : null,
-      note: facts ? `${facts.questions.toLocaleString()} questions to draw from.` : "One year, a few, or all of them.",
-    },
-    {
-      n: "03",
-      label: "Length",
-      value: `${BUILD_LENGTHS[0]} to ${BUILD_LENGTHS[BUILD_LENGTHS.length - 1]} questions`,
-      viz: (
-        <span className="ph-lchips" aria-hidden="true">
-          {BUILD_LENGTHS.map((n) => (
-            <i key={n} className={cx(n === 40 && "full")}>
-              {n}
-            </i>
-          ))}
-        </span>
-      ),
-      note: "Up to a whole paper. Misses still get a hint, then the board.",
-    },
-  ];
+  const waiting = plan.data?.record.own_runs_in ?? 0;
 
   return (
-    <section className="ph-build sj-rise d2" aria-labelledby="ph-build-title">
-      <div className="ph-build-head">
-        <span className="ph-row">
-          <span className="ph-tile ink" aria-hidden="true">
-            <IconLayers size={18} />
-          </span>
-          <h2 id="ph-build-title" className="sj-display sj-h3 ph-build-title">
-            Build your own {subject.subject_name} run
-          </h2>
-        </span>
+    <section className="ph-build ph-build-short sj-rise d2" aria-labelledby="ph-build-title">
+      <span className="ph-tile ink" aria-hidden="true">
+        <IconLayers size={18} />
+      </span>
+      <div className="ph-build-text">
+        <h2 id="ph-build-title" className="sj-display sj-h3 ph-build-title">
+          Build your own run
+        </h2>
         <p className="ph-build-body">
-          Choose the topics, the exam years and how long. Good for going over one topic, or sitting a
-          whole year’s paper.
+          {waiting > 0
+            ? `Opens after ${waiting} more planned ${waiting === 1 ? "run" : "runs"}.`
+            : lock
+              ? PRACTICE_LOCK_WORDS[lock]
+              : "Choose the topics, years and length."}
         </p>
-        {lock ? (
-          <Button
-            to={subject.open_checkup_session_id ? `/checkup/${subject.open_checkup_session_id}` : `/checkup?subject=${subject.subject_id}`}
-            tone="dark"
-            size="sm"
-            className="ph-build-go"
-            trailing={<IconArrowRight size={16} />}
-          >
-            {lock === "checkup-due" ? "Take your check-up" : "Take the check-up"}
-          </Button>
-        ) : (
-          <Button to={to} tone="dark" size="sm" className="ph-build-go" trailing={<IconArrowRight size={16} />}>
-            Build a run
-          </Button>
-        )}
-        {lock ? <p className="ph-locked">{PRACTICE_LOCK_WORDS[lock]}</p> : null}
       </div>
-      <ol className="ph-bsteps">
-        {steps.map((step) => (
-          <li key={step.n}>
-            <Link to={to} className="ph-bstep" aria-label={`${step.label}: ${step.value}. Open the run builder`}>
-              <span className="ph-bstep-top">
-                <span className="ph-bstep-n sj-mono">
-                  {step.n} · {step.label}
-                </span>
-                <IconChevronRight size={16} className="ph-bstep-go" />
-              </span>
-              {loading ? (
-                <>
-                  <Skeleton width="70%" height={18} radius={6} />
-                  <Skeleton height={28} radius={6} />
-                  <Skeleton width="85%" height={12} radius={6} />
-                </>
-              ) : (
-                <>
-                  <b className="ph-bstep-value">{step.value}</b>
-                  {step.viz ?? <span className="ph-bstep-blank" aria-hidden="true" />}
-                  <small className="ph-bstep-note">{step.note}</small>
-                </>
-              )}
-            </Link>
-          </li>
-        ))}
-      </ol>
+      {waiting > 0 ? (
+        <Button to="/roadmap" tone="dark" size="sm" trailing={<IconArrowRight size={16} />}>
+          Your roadmap
+        </Button>
+      ) : lock ? (
+        <Button
+          to={subject.open_checkup_session_id ? `/checkup/${subject.open_checkup_session_id}` : `/checkup?subject=${subject.subject_id}`}
+          tone="dark"
+          size="sm"
+          trailing={<IconArrowRight size={16} />}
+        >
+          Take the check-up
+        </Button>
+      ) : (
+        <Button to={to} tone="dark" size="sm" trailing={<IconArrowRight size={16} />}>
+          Build a run
+        </Button>
+      )}
     </section>
   );
 }

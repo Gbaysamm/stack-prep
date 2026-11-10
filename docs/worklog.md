@@ -15,6 +15,20 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-10
 
+### Say less: Home and Practice
+- **Why:** the founder: the app is far too wordy; each page should carry only what the student
+  needs. Guided by a page-by-page audit of repeated and explanatory text.
+- **What:** Home: "Your weakest topics" removed (the roadmap now chooses what comes next, so
+  it was a second, competing suggestion); section subtitles that defined terms removed; the
+  score card's notes cut to their titles; the hero says what to do, not why. Practice: the
+  hero's long sentence and the "What a run is" section removed; the duplicate score block
+  removed from the subject panel (Home has it); "Build your own" is one line and one button
+  (with the roadmap's "Opens after N more planned runs" and a link to it); captions cut to a
+  few words.
+- **Where:** `apps/web/src/prep/pages/Home.tsx`, `Home.css`, `PracticeHub.tsx`,
+  `PracticeHub.css`.
+- **Status:** done locally; the run screens, check-ups and the rest follow.
+
 ### Topic weights from JAMB's past papers
 - **Why:** the founder asked whether planning uses how often topics come up in past papers.
   It did not: weights came only from an approved printed paper structure, which no subject

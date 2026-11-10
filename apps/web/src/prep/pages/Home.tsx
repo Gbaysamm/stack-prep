@@ -489,7 +489,6 @@ export function Standing({ subject, className, sample }: { subject: SubjectOverv
           </Button>
         }
       >
-        Your answers so far are saved. When you finish, its result becomes your predicted score.
       </Note>
     );
   } else if (latest && scores) {
@@ -506,9 +505,7 @@ export function Standing({ subject, className, sample }: { subject: SubjectOverv
             </>
           )}
           {scores.checkup_due ? (
-            <>
-              <b>A new check-up is due</b>. It updates your predicted score.
-            </>
+            <b>A new check-up is due.</b>
           ) : (
             <>Next check-up {dueIn(scores.next_checkup_due)}.</>
           )}{' '}
@@ -525,17 +522,11 @@ export function Standing({ subject, className, sample }: { subject: SubjectOverv
     );
   } else if (score !== null) {
     footer = (
-      <Note icon={<IconTarget size={18} />} title="Take a check-up for your predicted score" action={takeCheckup}>
-        Your score counts your practice. A check-up is a short mixed test with no help, like the exam, and its result is
-        your predicted score.
-      </Note>
+      <Note icon={<IconTarget size={18} />} title="Take a check-up for your predicted score" action={takeCheckup} />
     );
   } else {
     footer = (
-      <Note icon={<IconTarget size={18} />} title="Your first check-up fills this in" action={takeCheckup}>
-        A short set of {subject.subject_name} questions. The percentage you get right is where you start, and every
-        question you practise after that moves it.
-      </Note>
+      <Note icon={<IconTarget size={18} />} title="Your first check-up fills this in" action={takeCheckup} />
     );
   }
 
@@ -876,7 +867,7 @@ function Hero({ overview, step }: { overview: Overview; step: NextStep; focus?: 
     }
     case 'resume-checkup':
       lead = `Finish your ${name} check-up.`;
-      body = "Your answers so far are saved. Finish it and you'll see your predicted score.";
+      body = null;
       action = (
         <Button to={`/checkup/${step.sessionId}`} tone="lime" size="lg" trailing={<IconArrowRight size={18} />}>
           Resume check-up
@@ -888,9 +879,7 @@ function Hero({ overview, step }: { overview: Overview; step: NextStep; focus?: 
       lead = overview.subjects.some((s) => s.latest_checkup)
         ? `Take your ${name} check-up.`
         : `See where you stand in ${name}.`;
-      body = overview.subjects.some((s) => s.latest_checkup)
-        ? `${name} has no check-up yet, so it has no predicted score and no plan. About 15 questions fixes that.`
-        : "A short check-up finds what you know and what's holding your score down, then gives you your starting score.";
+      body = 'About 15 questions. Your plan starts from it.';
       action = (
         <Button
           tone="lime"
@@ -913,7 +902,7 @@ function Hero({ overview, step }: { overview: Overview; step: NextStep; focus?: 
       break;
     case 'set-goal':
       lead = 'Set the score you are aiming for.';
-      body = 'Your predicted score, your countdown and your study plan all hang off it.';
+      body = null;
       action = (
         <Button
           to={overview.subjects.some((s) => s.goal) && step.subject ? `/subjects/${step.subject.subject_id}/goal` : '/onboarding'}
@@ -1073,7 +1062,7 @@ function FirstRun({ overview }: { overview: Overview }) {
       <PageHero
         eyebrow={todayLabel()}
         title={`${greeting()}, ${firstName(overview)}`}
-        sub="Welcome to Stack Prep. Three short steps and you'll know your predicted score, and exactly what to practise each day to raise it."
+        sub="Three short steps to your plan."
         actions={
           <>
             <Button to="/onboarding" tone="lime" size="lg" trailing={<IconArrowRight size={18} />}>
@@ -1108,7 +1097,6 @@ function FirstRun({ overview }: { overview: Overview }) {
         title="Your score, on one scale"
         id="home-preview"
         className="sj-rise d2"
-        sub="Your score, your predicted score from your last check-up, and your target, side by side."
       >
         <Standing subject={SAMPLE} sample />
       </Section>
@@ -1271,7 +1259,6 @@ export function Home() {
   const student = useStudent();
   const overview = useOverview(student.studentId);
   const roadmap = useRoadmap(student.studentId);
-  const starter = useStartPractice();
 
   if (!overview.data) {
     return (
@@ -1313,11 +1300,8 @@ export function Home() {
   const focus = focusSubject(subjects);
   const many = subjects.length > 1;
   const step = decideNext(data, focus, roadmap.data);
-  const weak = focus?.latest_checkup?.weakest_subtopics ?? [];
 
-  return (
-    <HomeBody data={data} focus={focus} many={many} step={step} weak={weak} starter={starter} />
-  );
+  return <HomeBody data={data} focus={focus} many={many} step={step} />;
 }
 
 function HomeBody({
@@ -1325,14 +1309,11 @@ function HomeBody({
   focus,
   many,
   step,
-  starter,
 }: {
   data: Overview;
   focus: SubjectOverview | undefined;
   many: boolean;
   step: NextStep;
-  weak: WeakSubtopic[];
-  starter: ReturnType<typeof useStartPractice>;
 }) {
   const subjects = data.subjects;
   const recent = useShowMore(data.recent_runs, 4);
@@ -1340,7 +1321,6 @@ function HomeBody({
   // most urgent.
   const [chosenId, choose] = useSubjectChoice(subjects);
   const chosen = subjects.find((s) => s.subject_id === chosenId) ?? focus;
-  const weak = chosen?.latest_checkup?.weakest_subtopics ?? [];
   return (
     <div className="sj-page home">
       <Hero overview={data} step={step} focus={focus} />
@@ -1366,44 +1346,10 @@ function HomeBody({
 
       <div className="home-duo">
         <Section
-          eyebrow={many && chosen ? `Work on next · ${chosen.subject_name}` : 'Work on next'}
-          title="Your weakest topics"
-          id="home-weak"
-          className="sj-rise d3"
-          tip={<MetricTip id="weakest" />}
-          sub={
-            <>
-              Your score in each topic: the share of its questions you got right, counting your latest try at each.{' '}
-              <MetricTip id="score" />
-            </>
-          }
-        >
-          <div className="sj-card home-panel">
-            {weak.length > 0 && chosen ? (
-              <>
-                <WeakList subject={chosen} weak={weak} starter={starter} />
-                <p className="home-note">Practise gives you a run on that one topic, so every question is about it.</p>
-                {starter.error ? <Alert>{starter.error}</Alert> : null}
-              </>
-            ) : (
-              <Note
-                icon={<IconTarget size={18} />}
-                title={chosen?.latest_checkup ? 'Nothing weak to single out' : `No ${chosen?.subject_name ?? ''} check-up yet`}
-              >
-                {chosen?.latest_checkup
-                  ? 'Your check-up found nothing weak enough to single out. Keep practising to hold it.'
-                  : `Take a ${chosen?.subject_name ?? ''} check-up and the topics holding that score down show up here, weakest first.`}
-              </Note>
-            )}
-          </div>
-        </Section>
-
-        <Section
           eyebrow={many ? 'Recent practice · every subject' : 'Recent practice'}
           title="Your practice so far"
           id="home-runs"
           className="sj-rise d4"
-          sub="Right first time means no hint needed. Taught means the coach worked it through with you."
         >
           <div className="sj-card home-panel">
             <PracticeSplit subjects={subjects} />
