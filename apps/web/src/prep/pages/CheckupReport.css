@@ -5,13 +5,19 @@
   flex-direction: column;
 }
 
+/* A word that must not break at its hyphen ("check-" / "up"). */
+.sj .cp-nowrap {
+  white-space: nowrap;
+}
+
 /* ---------------------------------------------------------------- hero aside */
 .sj .cp-stat {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  min-width: 260px;
-  padding: 18px 20px;
+  width: 320px;
+  max-width: 100%;
+  padding: 20px 22px;
   border-radius: var(--r-lg);
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(215, 189, 255, 0.18);
@@ -29,7 +35,7 @@
 .sj .cp-stat-num {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 4px;
 }
 .sj .cp-stat-num .sj-num {
   font-size: 84px;
@@ -37,12 +43,14 @@
   color: #fff;
 }
 .sj .cp-stat-num .unit {
-  font-size: 13px;
+  font-family: var(--f-display);
+  font-size: 34px;
   font-weight: 700;
+  line-height: 1;
   color: var(--purple-200);
 }
 .sj .cp-stat-note {
-  max-width: 26ch;
+  max-width: none;
   font-size: 13px;
   line-height: 1.45;
   color: rgba(255, 255, 255, 0.72);
@@ -586,22 +594,78 @@
   font-size: 14px;
 }
 
-/* What next: the weakest topics with their scores, and when the next check-up is due. */
+/* What next: on a wide screen the words and buttons on the left, the weakest topics on the
+   right; on a phone, one column in reading order. */
+@media (min-width: 900px) {
+  .sj .cp-cta:has(.cp-next-wrap) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 420px);
+    grid-template-areas:
+      'eyebrow list'
+      'title list'
+      'text list'
+      'due list'
+      'actions list';
+    grid-template-rows: auto auto auto auto 1fr;
+    column-gap: 40px;
+    row-gap: 10px;
+    align-items: start;
+    padding: 32px;
+  }
+  .sj .cp-cta:has(.cp-next-wrap) > .sj-eyebrow {
+    grid-area: eyebrow;
+  }
+  .sj .cp-cta:has(.cp-next-wrap) > h2 {
+    grid-area: title;
+  }
+  .sj .cp-cta:has(.cp-next-wrap) > p {
+    grid-area: text;
+  }
+  .sj .cp-cta:has(.cp-next-wrap) > .cp-due {
+    grid-area: due;
+    justify-self: start;
+  }
+  .sj .cp-cta:has(.cp-next-wrap) > .cp-cta-actions {
+    grid-area: actions;
+    align-self: end;
+  }
+  .sj .cp-cta:has(.cp-next-wrap) > .cp-next-wrap {
+    grid-area: list;
+    margin: 0;
+  }
+}
+.sj .cp-next-wrap {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  margin: 10px 0 6px;
+  padding: 16px;
+  border-radius: var(--r-lg);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(215, 189, 255, 0.16);
+}
+.sj .cp-next-label {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--purple-200);
+}
 .sj .cp-next {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  width: 100%;
-  max-width: 520px;
-  margin: 6px 0 4px;
+  gap: 8px;
+  margin: 0;
   padding: 0;
   list-style: none;
   counter-reset: cp-next;
 }
 .sj .cp-next li {
   display: flex;
-  align-items: baseline;
-  gap: 12px;
+  align-items: center;
+  gap: 14px;
+  min-height: 48px;
   padding: 10px 14px;
   border-radius: var(--r-md);
   background: rgba(255, 255, 255, 0.08);
@@ -609,6 +673,13 @@
 }
 .sj .cp-next li::before {
   content: counter(cp-next);
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  background: rgba(133, 222, 76, 0.16);
   font-family: var(--f-mono);
   font-size: 12px;
   font-weight: 700;
@@ -617,11 +688,14 @@
 .sj .cp-next .name {
   flex: 1;
   min-width: 0;
+  font-size: 14.5px;
   font-weight: 600;
+  line-height: 1.35;
   color: #fff;
 }
 .sj .cp-next b {
   flex: none;
+  font-size: 13px;
   color: var(--purple-200);
 }
 .sj .cp-due {

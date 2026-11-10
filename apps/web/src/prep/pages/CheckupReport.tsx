@@ -192,7 +192,11 @@ export function CheckupReport() {
         eyebrow={`Check-up report${exam || subjectName ? ` · ${[exam, subjectName].filter(Boolean).join(' ')}` : ''}`}
         title={
           data.answered > 0 && score !== null
-            ? `Your check-up result: ${score}%`
+            ? (
+              <>
+                Your <span className="cp-nowrap">check-up</span> result is {score}%
+              </>
+            )
             : 'No answers in this check-up yet'
         }
         sub={
@@ -295,14 +299,17 @@ export function CheckupReport() {
               : 'Start practising'}
         </h2>
         {weakest.length > 0 ? (
-          <ol className="cp-next">
-            {weakest.map((t) => (
-              <li key={t.subtopic_id}>
-                <span className="name">{t.name}</span>
-                <b className="sj-mono">{t.score !== null ? `${t.score}%` : '—'}</b>
-              </li>
-            ))}
-          </ol>
+          <div className="cp-next-wrap">
+            <span className="cp-next-label">Start with these</span>
+            <ol className="cp-next">
+              {weakest.map((t) => (
+                <li key={t.subtopic_id}>
+                  <span className="name">{t.name}</span>
+                  <b className="sj-mono">{t.score !== null ? `${t.score}%` : '—'}</b>
+                </li>
+              ))}
+            </ol>
+          </div>
         ) : null}
         <p>
           Questions you got wrong or guessed come back in practice until you get them. Get a hint or a worked lesson

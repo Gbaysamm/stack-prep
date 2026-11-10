@@ -15,6 +15,18 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-10
 
+### Check-up report: hero and What next tidied
+- **Why:** the founder found the report's hero and What next card broken-looking: the colon
+  in "result: 13%" ran into the number, the score card's note wrapped into four short lines
+  with a tiny "%", and What next filled only the left half with cramped rows.
+- **What:** the title reads "Your check-up result is 20%" ("check-up" never splits at its
+  hyphen); the score card is wider, its note two calm lines, the "%" sized beside the number.
+  What next is two columns on a wide screen (words and buttons left, a "Start with these"
+  panel of the weakest topics right, with roomier numbered rows); on a phone it stacks in
+  reading order.
+- **Where:** `apps/web/src/prep/pages/CheckupReport.tsx`, `CheckupReport.css`.
+- **Status:** done locally; deploy needs a push.
+
 ### Check-up: the next question shows at once
 - **Why:** the founder saw "Saving…" on every Next. On the live site each save is a round trip
   of about a second.
