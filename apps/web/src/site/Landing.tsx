@@ -264,20 +264,18 @@ export function Landing() {
           </ul>
         </section>
 
-        {catalogue && catalogue.plans.length > 0 ? (
+        {catalogue && hasPaidPlans(catalogue) ? (
           <section className="ld-section" aria-labelledby="ld-pricing">
             <div className="ld-head row">
               <div>
                 <span className="ps-eyebrow">Pricing</span>
                 <h2 id="ld-pricing" className="sj-display">
-                  {hasPaidPlans(catalogue) ? 'Start free. Pay when you want more.' : 'Free to start, today.'}
+                  Start free. Pay when you want more.
                 </h2>
               </div>
-              {hasPaidPlans(catalogue) ? (
-                <Link to="/pricing" className="ps-textlink">
-                  Compare every plan <IconArrowRight size={16} />
-                </Link>
-              ) : null}
+              <Link to="/pricing" className="ps-textlink">
+                Compare every plan <IconArrowRight size={16} />
+              </Link>
             </div>
             <PlanGrid catalogue={catalogue} compact />
           </section>

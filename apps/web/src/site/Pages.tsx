@@ -167,19 +167,22 @@ export function PricingPage() {
         </SiteHero>
       }
     >
-      <section className="band tint first" aria-labelledby="pr-plans">
-        <div className="ld-head center">
-          <span className="ps-eyebrow">The plans</span>
-          <h2 id="pr-plans" className="sj-display">
-            {catalogue && !hasPaidPlans(catalogue) ? 'Start today, free' : 'Choose how long, then choose your plan'}
-          </h2>
-        </div>
-        {catalogue ? (
-          <PlanGrid catalogue={catalogue} />
-        ) : (
-          <p className="ps-muted">{failed ? 'We couldn’t load the plans just now. Please try again in a moment.' : 'Loading the plans…'}</p>
-        )}
-      </section>
+      {/* While only Free is on sale there is nothing to choose between, so no plans band. */}
+      {catalogue && !hasPaidPlans(catalogue) ? null : (
+        <section className="band tint first" aria-labelledby="pr-plans">
+          <div className="ld-head center">
+            <span className="ps-eyebrow">The plans</span>
+            <h2 id="pr-plans" className="sj-display">
+              Choose how long, then choose your plan
+            </h2>
+          </div>
+          {catalogue ? (
+            <PlanGrid catalogue={catalogue} />
+          ) : (
+            <p className="ps-muted">{failed ? 'We couldn’t load the plans just now. Please try again in a moment.' : 'Loading the plans…'}</p>
+          )}
+        </section>
+      )}
 
       <section className="ld-section" aria-labelledby="pr-every">
         <div className="ld-head center">

@@ -15,7 +15,7 @@ import { SIGN_UP } from './showcase.js';
 /** An icon for each step up: free, then each paid plan in order. */
 const TIER_ICONS = [IconBook, IconBolt, IconSparkles, IconTrophy];
 
-/** Whether any paid plan is on sale with a price. Until one is, the site shows one free card. */
+/** Whether any paid plan is on sale with a price. Until one is, the site leaves plans out. */
 export function hasPaidPlans(catalogue: Catalogue | null): boolean {
   return Boolean(catalogue?.plans.some((plan) => plan.kind === 'paid' && Object.keys(plan.prices).length));
 }
@@ -26,29 +26,8 @@ export function PlanGrid({ catalogue, compact = false }: { catalogue: Catalogue;
   const length = catalogue.lengths.find((l) => l.id === lengthId);
   const go = identity ? '/plans' : SIGN_UP;
 
-  if (!hasPaidPlans(catalogue)) {
-    // Nothing to compare yet: no length switch, and no daily limits listed while none apply.
-    return (
-      <div className="ps-plans">
-        <article className="ps-launch">
-          <span className="ps-launch-icon" aria-hidden="true">
-            <IconBook size={22} />
-          </span>
-          <div>
-            <h3>Free while we launch</h3>
-            <p>
-              {catalogue.limits_on
-                ? 'Practice, check-ups and the full written working, free. No card needed.'
-                : 'Every question, check-ups, mock exams and the full written working are open to every student right now. No card needed.'}
-            </p>
-          </div>
-          <Link to={go} className="sj-btn ld-cta small">
-            {identity ? 'Open the app' : 'Start free'}
-          </Link>
-        </article>
-      </div>
-    );
-  }
+  // Nothing to compare while only Free is on sale: the pages leave the plans out.
+  if (!hasPaidPlans(catalogue)) return null;
 
   return (
     <div className="ps-plans">
