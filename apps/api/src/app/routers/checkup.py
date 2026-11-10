@@ -107,6 +107,10 @@ class CheckupState(BaseModel):
     finished: bool
     weights_source: str
     question: QuestionOut | None = None
+    #: The question after this one, when this answer cannot change it (it is in another
+    #: topic), so the app can show it the moment Next is pressed and save in the background.
+    #: None when the next question depends on this answer, or this is the last.
+    upcoming: QuestionOut | None = None
 
 
 class TopicReport(BaseModel):
@@ -478,26 +482,54 @@ async def _next_state(
             weights_source=weights_source,
         )
 
+    upcoming = None
+    if position + 1 < len(blueprint) and blueprint[position + 1].topic_id != slot.topic_id:
+        # The next slot is another topic, so how this one is answered cannot change its level;
+        # and with this question counted as seen, the pick is the same one the server makes
+        # once the answer is in. Sent now, it can be shown without waiting.
+        after = blueprint[position + 1]
+        after_outcomes = [
+            bool(row["is_correct"]) for row in answers if row["topic_id"] == after.topic_id
+        ]
+        following = await _pick_question(
+            conn,
+            subject_id,
+            after,
+            next_level(after_outcomes, after.start_level),
+            session_id,
+            [*seen, question["question_version_id"]],
+            student_id,
+        )
+        if following is not None:
+            upcoming = await _question_out(conn, following, position + 2, len(blueprint))
+
     return CheckupState(
         session_id=session_id,
         answered=position,
         length=len(blueprint),
         finished=False,
         weights_source=weights_source,
-        question=QuestionOut(
-            position=position + 1,
-            of=len(blueprint),
-            topic_name=str(question["topic_name"]),
-            section_name=str(question["topic_name"]),
-            subtopic_name=str(question["subtopic_name"]),
-            question_version_id=question["question_version_id"],
-            stem=str(question["stem"]),
-            instructions=question["instructions"],
-            passage_title=question["passage_title"],
-            passage_body=question["passage_body"],
-            options=await _options(conn, question["question_version_id"]),
-            figures=await figures_for(conn, question["question_version_id"]),
-        ),
+        question=await _question_out(conn, question, position + 1, len(blueprint)),
+        upcoming=upcoming,
+    )
+
+
+async def _question_out(
+    conn: AsyncConnection, question: Any, position: int, of: int
+) -> QuestionOut:
+    return QuestionOut(
+        position=position,
+        of=of,
+        topic_name=str(question["topic_name"]),
+        section_name=str(question["topic_name"]),
+        subtopic_name=str(question["subtopic_name"]),
+        question_version_id=question["question_version_id"],
+        stem=str(question["stem"]),
+        instructions=question["instructions"],
+        passage_title=question["passage_title"],
+        passage_body=question["passage_body"],
+        options=await _options(conn, question["question_version_id"]),
+        figures=await figures_for(conn, question["question_version_id"]),
     )
 
 

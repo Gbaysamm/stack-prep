@@ -48,6 +48,10 @@ export function CheckupRoom() {
 
   const selectedRef = useRef<string | null>(null);
   const sendingRef = useRef(false);
+  // Answers saving in the background, in order: each waits for the one before it.
+  const savingRef = useRef<Promise<void>>(Promise.resolve());
+  // An answer that would not save after a few tries. Nothing goes further until it does.
+  const failedRef = useRef<(() => Promise<CheckupState>) | null>(null);
   const askedAt = useRef(Date.now());
   const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -113,15 +117,72 @@ export function CheckupRoom() {
     return () => window.clearInterval(timer);
   }, [scoring]);
 
+  /** Up to three tries, a moment apart: a phone on a weak signal often gets through on the next. */
+  const persist = useCallback(async (send: () => Promise<CheckupState>) => {
+    let lastError: unknown;
+    for (const wait of [0, 700, 1800]) {
+      if (wait) await new Promise((resolve) => window.setTimeout(resolve, wait));
+      try {
+        return await send();
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw lastError;
+  }, []);
+
   const submit = useCallback(async () => {
     const question = state?.question;
     const pick = selectedRef.current;
-    if (!question || !pick || sendingRef.current) return;
+    if (!question || sendingRef.current) return;
     sendingRef.current = true;
     setSending(true);
     setSendIssue(null);
     try {
-      const next = await api.answer(sessionId, question.question_version_id, pick, Date.now() - askedAt.current);
+      // An earlier answer that would not save goes first, so none is skipped.
+      if (failedRef.current) {
+        await persist(failedRef.current);
+        failedRef.current = null;
+      }
+      if (!pick) return;
+      const attemptId = crypto.randomUUID();
+      const responseMs = Date.now() - askedAt.current;
+      const send = () => api.answer(sessionId, question.question_version_id, pick, responseMs, attemptId);
+      const ahead = state?.upcoming ?? null;
+
+      if (ahead) {
+        // This answer can't change the next question, so show it now and save behind it.
+        selectedRef.current = null;
+        setSelected(null);
+        askedAt.current = Date.now();
+        setState((current) => (current ? { ...current, answered: current.answered + 1, question: ahead, upcoming: null } : current));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        savingRef.current = savingRef.current.then(() =>
+          persist(send).then(
+            (next) =>
+              // The one after, if this answer's reply knows it and the student is still here.
+              setState((current) =>
+                current?.question?.question_version_id === ahead.question_version_id &&
+                next.question?.question_version_id === ahead.question_version_id
+                  ? { ...current, upcoming: next.upcoming ?? null }
+                  : current,
+              ),
+            () => {
+              failedRef.current = send;
+              setSendIssue('Your last answer didn’t save. Check your connection.');
+            },
+          ),
+        );
+        return;
+      }
+
+      // The next question depends on this answer: wait for it (after any still saving).
+      await savingRef.current;
+      if (failedRef.current) {
+        await persist(failedRef.current);
+        failedRef.current = null;
+      }
+      const next = await persist(send);
       selectedRef.current = null;
       setSelected(null);
       askedAt.current = Date.now();
@@ -138,7 +199,7 @@ export function CheckupRoom() {
       sendingRef.current = false;
       setSending(false);
     }
-  }, [sessionId, state]);
+  }, [sessionId, state, persist]);
 
   // A–F choose, Enter confirms. Ignored while a dialog is open or a modifier is held.
   useEffect(() => {
@@ -377,7 +438,7 @@ export function CheckupRoom() {
               <div className="cr-actionbar-inner">
                 {sendIssue ? (
                   <p className="cr-senderr" role="alert">
-                    {sendIssue} Your choice is kept; try again.
+                    {sendIssue} {selected ? 'Your choice is kept; try again.' : 'Press Try again.'}
                   </p>
                 ) : (
                   <p className="cr-hint">
@@ -389,7 +450,7 @@ export function CheckupRoom() {
                   className="cr-next"
                   size="lg"
                   onClick={() => void submit()}
-                  disabled={!selected}
+                  disabled={!selected && !sendIssue}
                   busy={sending}
                   trailing={sending ? undefined : isLast ? <IconCheck size={18} /> : <IconArrowRight size={18} />}
                 >

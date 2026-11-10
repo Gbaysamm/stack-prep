@@ -98,6 +98,9 @@ export interface CheckupState {
   finished: boolean;
   weights_source: string;
   question: CheckupQuestion | null;
+  /** The question after this one, sent ahead when this answer can't change it: shown at once
+   *  on Next while the answer saves in the background. Null when the next one must wait. */
+  upcoming?: CheckupQuestion | null;
 }
 
 /** One JAMB topic (the DB subtopic). `topic_name` is its JAMB section; so is `section_name`. */
@@ -893,12 +896,18 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ student_id: studentId, subject_id: subjectId }),
     }),
-  answer: (sessionId: string, questionVersionId: string, optionKey: string, responseMs: number) =>
+  answer: (
+    sessionId: string,
+    questionVersionId: string,
+    optionKey: string,
+    responseMs: number,
+    // The same id on every retry of one answer, so it is stored once, not twice.
+    attemptId: string = crypto.randomUUID(),
+  ) =>
     call<CheckupState>(`/checkup/${sessionId}/answer`, {
       method: 'POST',
       body: JSON.stringify({
-        // Generated here so a retried submission is stored once, not twice.
-        attempt_id: crypto.randomUUID(),
+        attempt_id: attemptId,
         question_version_id: questionVersionId,
         selected_option_key: optionKey,
         response_ms: responseMs,

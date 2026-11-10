@@ -15,6 +15,21 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-10
 
+### Check-up: the next question shows at once
+- **Why:** the founder saw "Saving…" on every Next. On the live site each save is a round trip
+  of about a second.
+- **What:** the check-up adapts within a topic, and the answer key never leaves the server, so
+  a next question in the same topic still has to wait for the answer. But topics change on
+  almost every question, and then this answer can't change what comes next. In that case the
+  server now sends the next question ahead (`upcoming`); Next shows it at once and the answer
+  saves behind it, in order, with the same attempt id on every retry (three tries). If it
+  still won't save, the student is told and Try again saves it before anything else goes. In
+  a Biology check-up locally, 12 of 14 Nexts took under 30 ms; the two same-topic ones about
+  0.4 s. A test checks that whatever is sent ahead is exactly what comes next, right or wrong.
+- **Where:** `apps/api/src/app/routers/checkup.py`, `tests/test_checkup_upcoming.py`,
+  `apps/web/src/prep/pages/CheckupRoom.tsx`, `apps/web/src/student/api.ts`.
+- **Status:** done locally; deploy needs a push.
+
 ### Public pricing when only Free is on sale
 - **Why:** the live site has no paid plans on sale yet, so the home page showed a lone Free
   card under a "1 month / 3 months / Exam season" switch that changed nothing, listing daily
