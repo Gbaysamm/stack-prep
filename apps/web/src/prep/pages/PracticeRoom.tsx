@@ -47,7 +47,6 @@ import {
   IconHelp,
   IconReplay,
   IconSpark,
-  IconVolume,
 } from "../icons.js";
 import {
   lessonFeedbackApi,
@@ -125,26 +124,6 @@ const CONFIDENCE: {
     said: "You said you guessed",
   },
 ];
-
-/**
- * A wrong answer, read against how sure the student said they were: each tells a different
- * story, and the student should hear which one theirs is.
- */
-const MISSED_WITH: Record<Confidence, { first: string; second: string }> = {
-  sure: {
-    first: "You said you knew it, so something in the working went a different way. The hint points at where.",
-    second:
-      "You were sure both times, so this is a real gap, not a slip. Watch for the step where the coach’s working differs from yours.",
-  },
-  unsure: {
-    first: "You weren’t sure, and that was a fair read. Use the hint to pin it down.",
-    second: "You weren’t sure, and now you’ll see exactly which step was shaky.",
-  },
-  guessed: {
-    first: "You said you guessed. Read the hint and try to work it out this time, rather than guess again.",
-    second: "You said you guessed, which was honest. This is new ground for you, and the lesson is the right next step.",
-  },
-};
 
 /** Two misses, held on screen before the page that opens the board. */
 interface MissedTwice {
@@ -855,10 +834,6 @@ export function PracticeRoom() {
               onClose={() => setConfirming(false)}
               title="How sure are you?"
             >
-              <p className="pr-conf-why">
-                Asked before we mark it: a lucky guess should not count as
-                knowing it.
-              </p>
               {picked ? (
                 <div className="pr-conf-echo">
                   <span className="pr-conf-echo-label sj-mono">
@@ -893,7 +868,6 @@ export function PracticeRoom() {
                         {index + 1}
                       </kbd>
                     </span>
-                    <small>{choice.meaning}</small>
                   </button>
                 ))}
               </div>
@@ -933,7 +907,6 @@ function Asking({
   total,
   selected,
   wrong,
-  missConfidence,
   busy,
   onSelect,
   onCheck,
@@ -978,9 +951,6 @@ function Asking({
             <span className="pr-panel-tag sj-mono">Hint</span>
           </div>
           <h2 className="sj-display pr-panel-title">Not quite.</h2>
-          {missConfidence ? (
-            <p className="pr-said">{MISSED_WITH[missConfidence].first}</p>
-          ) : null}
           {state.hint ? (
             <p className="pr-hint">
               <Maths text={state.hint} />
@@ -1000,7 +970,6 @@ function Asking({
             number={number}
             tone="miss"
             right={state.correct_unaided}
-            note="This one won’t count now. Try again below."
           />
         </section>
       ) : null}
@@ -1645,7 +1614,6 @@ function ChoiceRow<T extends string>({
                 <IconCheck size={14} />
               </span>
             </span>
-            <small>{choice.meaning}</small>
           </button>
         ))}
       </div>
@@ -1868,7 +1836,6 @@ function BeforeBoard({
   number,
   correctKey,
   canHear,
-  canSpeak,
   onStart,
   busy,
 }: {
@@ -1905,51 +1872,7 @@ function BeforeBoard({
         <h2 className="sj-display sj-h2 pr-explain-title">
           Let’s work through it together.
         </h2>
-        <p className="pr-explain-lead">
-          This one is worth slowing down for. The coach will write the working
-          out step by step
-          {canHear
-            ? " and talk you through it as it goes."
-            : ", one line at a time."}
-        </p>
-        <ul className="pr-points">
-          <li>
-            <span className="pr-point-row">
-              <span className="pr-point-icon" aria-hidden="true">
-                <IconBook size={18} />
-              </span>
-              <b>Step by step</b>
-            </span>
-            <span className="pr-point-text">
-              Written out one line at a time, from the question to the answer.
-            </span>
-          </li>
-          {canHear ? (
-            <li>
-              <span className="pr-point-row">
-                <span className="pr-point-icon sound" aria-hidden="true">
-                  <IconVolume size={18} />
-                </span>
-                <b>Sound on</b>
-              </span>
-              <span className="pr-point-text">
-                The coach speaks each step, so turn your volume up.
-              </span>
-            </li>
-          ) : null}
-          <li>
-            <span className="pr-point-row">
-              <span className="pr-point-icon" aria-hidden="true">
-                <IconHelp size={18} />
-              </span>
-              <b>Ask any time</b>
-            </span>
-            <span className="pr-point-text">
-              Stuck on a step? Ask the coach
-              {canSpeak ? ", typed or out loud." : " in your own words."}
-            </span>
-          </li>
-        </ul>
+        {canHear ? <p className="pr-explain-lead">Sound on: the coach talks you through it.</p> : null}
         {answer ? (
           <div className="pr-answer">
             <span className="pr-answer-label sj-mono">The answer</span>
@@ -1971,10 +1894,6 @@ function BeforeBoard({
         >
           Start the lesson
         </Button>
-        <p className="pr-explain-note">
-          Counted as taught, not known. This question comes back in a later run, so you can get it
-          right yourself.
-        </p>
       </div>
     </section>
   );

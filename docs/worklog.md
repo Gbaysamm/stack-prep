@@ -27,7 +27,10 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
   under the buttons removed; one name for the action ("See the working"); the missed-twice
   dialog shows the tries and the answer without a "What happens now" list; after the
   check-in a "Saved" toast and straight on, instead of a screen explaining each answer. The
-  student is now told once, not three times, that a missed question comes back.
+  student is now told once, not three times, that a missed question comes back. Also cut: the
+  "How sure are you?" dialog's explanation and the sentence under each choice; the hint
+  panel's "You said you knew it…" and "This one won't count now…" lines; the screen before
+  the board is now the question, one line (sound on), the answer and "Start the lesson".
 - **Where:** `apps/web/src/prep/Journey.tsx`, `Journey.css`, `pages/Home.tsx`, `Home.css`,
   `pages/PracticeRoom.tsx`.
 - **Status:** done locally. The roadmap page moves onto the path next.
