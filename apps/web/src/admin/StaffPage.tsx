@@ -84,6 +84,7 @@ export function StaffPage() {
           <label className="st-field">
             <span>Their email or phone number</span>
             <input value={login} onChange={(event) => setLogin(event.target.value)} placeholder="ada@example.com" />
+            <small className="st-muted">They must have signed up first. They sign in with the same details.</small>
           </label>
           <div className="st-field">
             <span>Role</span>
@@ -97,13 +98,10 @@ export function StaffPage() {
               ]}
             />
           </div>
-          <button type="submit" className="sj-btn" disabled={busy || !login.trim()}>
+          <button type="submit" className="sj-btn st-give" disabled={busy || !login.trim()}>
             {busy ? 'Saving…' : 'Give role'}
           </button>
         </form>
-        <p className="st-muted" style={{ marginBottom: 0 }}>
-          They must have signed up first. They sign in with the same details and land on their dashboard.
-        </p>
         {notice && (
           <p className={notice.ok ? 'st-pill good' : 'st-error'} role="status" style={{ marginTop: 12 }}>
             {notice.text}
@@ -117,8 +115,35 @@ export function StaffPage() {
         {!members && !problem && <p className="st-muted">Loading…</p>}
         {members && members.length === 0 && <p className="st-empty">No staff yet.</p>}
         {members && members.length > 0 && (
-          <div className="st-table-wrap">
-            <table className="st-table st-stack">
+          <>
+          {/* On a phone, one card per person; the table is for wider screens. */}
+          <ul className="st-people">
+            {members.map((member) => (
+              <li key={member.student_id} className="st-person">
+                <div className="st-person-top">
+                  <strong>
+                    {member.display_name}
+                    {member.student_id === user.student_id && <span className="st-muted"> (you)</span>}
+                  </strong>
+                  <span className={`st-pill ${member.role}`}>{member.role === 'admin' ? 'Admin' : 'Reviewer'}</span>
+                </div>
+                <span className="st-person-login">{member.login ?? '—'}</span>
+                <div className="st-person-foot">
+                  <span className="st-muted">
+                    Since {when(member.granted_at)}
+                    {member.granted_by_name ? ` · by ${member.granted_by_name}` : ''}
+                  </span>
+                  {member.student_id !== user.student_id && (
+                    <button type="button" className="sj-btn ghost sm" onClick={() => void revoke(member)}>
+                      Remove
+                    </button>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="st-table-wrap st-people-table">
+            <table className="st-table">
               <thead>
                 <tr>
                   <th>Name</th>
@@ -155,6 +180,7 @@ export function StaffPage() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </section>
     </>

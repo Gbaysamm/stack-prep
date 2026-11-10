@@ -21,6 +21,8 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
   dashboard (give a role by email or phone, remove one). A reviewer doesn't see it; only an
   admin can change roles (routers/admin.py).
 - **Where:** `apps/web/src/review/ReviewApp.tsx`, reusing `apps/web/src/admin/StaffPage.tsx`.
+  On a phone each person is now their own card (name and "(you)" together), the hint sits
+  under the email field and the button is a normal size (`staff/staff.css`).
 - **Status:** done locally; deploy needs a push.
 
 ### Reviewer dashboard: a Topics page

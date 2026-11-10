@@ -2730,3 +2730,81 @@
     margin-left: 0;
   }
 }
+
+/* Staff: the people with a role. A table on a wide screen; on a phone, one card each. */
+.sj .st-people {
+  display: none;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .st-person {
+  display: grid;
+  gap: 4px;
+  padding: 14px 14px 12px;
+  border-radius: 12px;
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--gray-200);
+}
+.sj .st-person-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.sj .st-person-top strong {
+  font-size: 15px;
+  color: var(--ink-900);
+}
+.sj .st-person-top strong .st-muted {
+  font-weight: 500;
+}
+.sj .st-person-login {
+  font-size: 13.5px;
+  color: var(--gray-600);
+  overflow-wrap: anywhere;
+}
+.sj .st-person-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 32px;
+  margin-top: 4px;
+  font-size: 12.5px;
+}
+.sj .st-inline-form .st-field small {
+  margin-top: 2px;
+}
+@media (max-width: 640px) {
+  .sj .st-people {
+    display: grid;
+  }
+  .sj .st-people-table {
+    display: none;
+  }
+  .sj .sj-btn.st-give {
+    justify-self: start;
+    min-width: 140px;
+  }
+}
+@media (min-width: 641px) {
+  /* The button lines up with the inputs, not with the hint under the first. */
+  .sj .st-inline-form:has(.st-give) {
+    align-items: start;
+  }
+  .sj .st-inline-form .sj-btn.st-give {
+    margin-top: 26px;
+  }
+}
+.sj .sj-btn.st-give {
+  min-height: 44px;
+  padding: 0 20px;
+  font-size: 14.5px;
+}
+@media (min-width: 641px) {
+  .sj .st-inline-form .sj-btn.st-give {
+    margin-top: 27px;
+  }
+}
