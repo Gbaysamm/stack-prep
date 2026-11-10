@@ -909,30 +909,48 @@ async def start(
     ).first()
     if student is None:
         raise HTTPException(status_code=404, detail="unknown student")
-    locked = await checkup_lock(conn, body.student_id, body.subject_id)
+    session_id = await begin_run(
+        conn, body.student_id, body.subject_id, body.length, body.filters()
+    )
+    return await _state(conn, await _session(conn, session_id))
+
+
+async def begin_run(
+    conn: AsyncConnection,
+    student_id: UUID,
+    subject_id: UUID,
+    length: int,
+    filters: RunFilters | None,
+    *,
+    planned: bool = False,
+) -> UUID:
+    """Open a practice run and return its id: the student's own, or one their roadmap planned.
+
+    A roadmap run (``planned``) is the product's own plan, so it never counts as a custom run
+    against the student's plan limits, though it narrows to a subtopic like one.
+    """
+    locked = await checkup_lock(conn, student_id, subject_id)
     if locked is not None:
         raise HTTPException(status_code=423, detail=locked)
-    length = body.length
-    filters = body.filters()
     await premium.check_practice_start(
         conn,
-        body.student_id,
-        custom=filters is not None and not filters.bookmarked,
+        student_id,
+        custom=filters is not None and not filters.bookmarked and not planned,
         bookmarked=filters is not None and filters.bookmarked,
     )
     if filters is not None and filters.bookmarked:
-        available = await _bookmarks_available(conn, body.subject_id, body.student_id)
+        available = await _bookmarks_available(conn, subject_id, student_id)
         if available == 0:
             raise HTTPException(status_code=422, detail=NO_BOOKMARKS)
         length = min(length, available)
     elif filters is not None:
         # A custom run is shortened to what its choice can actually serve, and refused
         # outright when that is nothing, rather than started and finished on the spot.
-        units, _ = await _subtopics(conn, body.subject_id)
+        units, _ = await _subtopics(conn, subject_id)
         available = await _available(
             conn,
-            body.subject_id,
-            body.student_id,
+            subject_id,
+            student_id,
             [unit.unit_id for unit in allowed_units(units, filters)],
             filters.exam_years,
         )
@@ -951,8 +969,8 @@ async def start(
                 """
             ),
             {
-                "student": body.student_id,
-                "subject": body.subject_id,
+                "student": student_id,
+                "subject": subject_id,
                 "length": length,
                 "engine": ENGINE_VERSION,
                 "filters": filters.model_dump_json() if filters is not None else None,
@@ -960,7 +978,7 @@ async def start(
         )
     ).scalar_one()
     await conn.commit()
-    return await _state(conn, await _session(conn, session_id))
+    return UUID(str(session_id))
 
 
 async def _hint_state(

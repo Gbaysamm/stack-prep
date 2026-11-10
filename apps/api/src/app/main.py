@@ -38,6 +38,7 @@ from app.routers import (
     progress,
     publishing,
     review,
+    roadmap,
     runs,
     saved,
     site,
@@ -100,6 +101,7 @@ def create_app() -> FastAPI:
     app.include_router(announcements.student_router)
     app.include_router(announcements.admin_router)
     app.include_router(progress.router)
+    app.include_router(roadmap.router)
     app.include_router(runs.router)
     app.include_router(mock.router)
     # Student creation without a login, for building the student side. The router refuses to

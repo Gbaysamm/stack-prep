@@ -1,0 +1,186 @@
+/* Roadmap: /roadmap. Class prefix: rm-. */
+
+.sj .rm-page {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sj .rm-error {
+  margin: 10px 0 0;
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  background: var(--pink-100);
+  font-size: 14px;
+}
+.sj .rm-record {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--gray-600);
+}
+.sj .rm-empty {
+  margin: 0;
+  color: var(--gray-600);
+}
+
+/* A list of planned items, as rows in one card. */
+.sj .rm-items {
+  display: grid;
+  margin: 0;
+  padding: 6px 16px;
+  border-radius: var(--r-lg);
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--gray-200);
+  list-style: none;
+}
+.sj #rm-today .rm-items {
+  box-shadow: inset 0 0 0 2px var(--purple-600);
+}
+.sj .rm-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 0;
+}
+.sj .rm-item + .rm-item {
+  border-top: 1px solid var(--gray-100);
+}
+.sj .rm-mark {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px var(--gray-300);
+  color: #fff;
+}
+.sj .rm-item.done .rm-mark {
+  background: var(--green-500);
+  box-shadow: none;
+}
+.sj .rm-item.in_progress .rm-mark {
+  box-shadow: inset 0 0 0 2px var(--purple-600), inset 0 0 0 6px var(--purple-100);
+}
+.sj .rm-what {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 1px;
+}
+.sj .rm-what b {
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink-900);
+}
+.sj .rm-what span {
+  font-size: 12.5px;
+  color: var(--gray-600);
+}
+.sj .rm-item.done .rm-what b,
+.sj .rm-item.missed .rm-what b {
+  color: var(--gray-600);
+}
+.sj .rm-item.missed .rm-mark {
+  box-shadow: inset 0 0 0 2px var(--gray-200);
+}
+
+/* Each subject: now, the gain the plan expects, and the target as a mark. */
+.sj .rm-subjects {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 6px 16px;
+  border-radius: var(--r-lg);
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--gray-200);
+  list-style: none;
+}
+.sj .rm-subject {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr) 170px;
+  gap: 14px;
+  align-items: center;
+  min-height: 54px;
+}
+.sj .rm-subject + .rm-subject {
+  border-top: 1px solid var(--gray-100);
+}
+.sj .rm-subject-name {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--ink-900);
+}
+.sj .rm-subject-note {
+  grid-column: 2 / -1;
+  font-size: 13.5px;
+  color: var(--gray-600);
+}
+.sj .rm-bar {
+  position: relative;
+  height: 10px;
+  border-radius: var(--r-pill);
+  background: var(--gray-100);
+}
+.sj .rm-bar i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: var(--r-pill);
+}
+.sj .rm-bar i.now {
+  background: var(--purple-600);
+}
+.sj .rm-bar i.gain {
+  background: var(--purple-200);
+  border-radius: 0 var(--r-pill) var(--r-pill) 0;
+}
+.sj .rm-bar b {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 3px;
+  margin-left: -1px;
+  border-radius: 2px;
+  background: var(--ink-900);
+}
+.sj .rm-subject-nums {
+  font-size: 13.5px;
+  color: var(--gray-600);
+  text-align: right;
+}
+.sj .rm-subject-nums strong {
+  color: var(--ink-900);
+}
+
+@media (max-width: 640px) {
+  .sj .rm-items {
+    padding: 4px 14px;
+  }
+  .sj .rm-item .sj-badge {
+    display: none;
+  }
+  .sj .rm-subjects {
+    padding: 4px 14px;
+  }
+  .sj .rm-subject {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 6px;
+    padding: 10px 0;
+  }
+  .sj .rm-bar {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .sj .rm-subject-nums {
+    grid-row: 1;
+    grid-column: 2;
+  }
+}
+
+/* Room between the page's sections. */
+.sj .rm-page > section + section {
+  margin-top: 26px;
+}

@@ -54,6 +54,7 @@ import { Dialog, Button, IconButton, Spinner, initials } from "./ui.js";
 
 const NAV = [
   { to: "/home", label: "Home", icon: IconHome },
+  { to: "/roadmap", label: "Roadmap", icon: IconCalendar },
   { to: "/practice", label: "Practice", icon: IconBolt },
   { to: "/checkup", label: "Check-up", icon: IconTarget },
   { to: "/mock", label: "Mock exam", icon: IconClock },

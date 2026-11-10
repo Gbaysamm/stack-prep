@@ -15,6 +15,38 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-10
 
+### The student roadmap, first step: Stack Prep plans, the student follows
+- **Why:** the founder's direction: drive each student to their target instead of handing them
+  a toolbox; later a money-back promise for students who follow the plan and miss their
+  target. It builds the planner the original spec designed and never built
+  (`docs/product-spec.md` §9.4, roadmap sprints S6 and S14).
+- **What:**
+  - Engine (`packages/engine/src/engine/roadmap.py`): from each subject's subtopic standings,
+    the target (out of 400, split per subject), exam date and study time, it splits the
+    sessions left between subjects (by gap to target, 30% floor for two subjects, 15% for
+    four) and subtopics (the existing marks projection), judges the target (on track, a
+    stretch, out of reach, with one plain fix), draws the expected line week by week, and
+    fixes the next seven days run by run. The spec's rules are kept: every weak topic within
+    14 days, mixed practice at least 40% in the last six weeks plus a weekly mock, no new
+    skill that needs more than 10% of the time left in the last three weeks, no backlog after
+    missed days, value bands (high, medium, low) instead of marks, and a total out of 400
+    only when all four subjects are measured. 16 golden-profile tests.
+  - Migration 041 and `routers/roadmap.py`: the roadmap is built on first read and re-built
+    when a check-up finishes, the goal changes or its week runs out; old plans are kept.
+    Each item links to the sitting that did it (done, started, missed, to do), so following
+    the plan is recorded from day one. Starting a planned run never counts as a custom run
+    against plan limits. Check-ups and mocks taken from their own pages count too.
+  - App: Home's main card is today's plan with one button; a Roadmap page (in the menu)
+    shows today, what comes after (no dates: the plan re-builds as results come in, so only
+    a check-up or mock carries one), and each subject's now, expected and target.
+- **Where:** `packages/engine/src/engine/roadmap.py`, `packages/engine/tests/test_roadmap.py`,
+  `database/migrations/041_student_roadmap.sql`, `apps/api/src/app/routers/roadmap.py`,
+  `routers/practice.py` (`begin_run`), `tests/test_roadmap_api.py`,
+  `apps/web/src/prep/roadmapApi.ts`, `pages/Roadmap.tsx`, `pages/Home.tsx`, `shell.tsx`,
+  `PrepApp.tsx`; design in `docs/plans/2026-11-10-student-roadmap.md`.
+- **Status:** done locally; deploy needs a push. Next: lock the run builder until the first
+  milestone, reminders, then parents.
+
 ### Check-up report: hero and What next tidied
 - **Why:** the founder found the report's hero and What next card broken-looking: the colon
   in "result: 13%" ran into the number, the score card's note wrapped into four short lines

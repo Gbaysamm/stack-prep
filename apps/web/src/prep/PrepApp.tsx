@@ -33,6 +33,7 @@ const Exams = later(() => import('./pages/Exams.js'), 'Exams');
 const ExamSubjects = later(() => import('./pages/ExamSubjects.js'), 'ExamSubjects');
 const Goal = later(() => import('./pages/Goal.js'), 'Goal');
 const Home = later(() => import('./pages/Home.js'), 'Home');
+const Roadmap = later(() => import('./pages/Roadmap.js'), 'Roadmap');
 const Help = later(() => import('./pages/Help.js'), 'Help');
 const MockHub = later(() => import('./pages/MockHub.js'), 'MockHub');
 const MockReport = later(() => import('./pages/MockReport.js'), 'MockReport');
@@ -90,6 +91,7 @@ export function PrepApp() {
                   }
                 >
                   <Route path="/home" element={<Home />} />
+                  <Route path="/roadmap" element={<Roadmap />} />
                   <Route path="/exams" element={<Exams />} />
                   <Route path="/exams/:examId" element={<ExamSubjects />} />
                   <Route path="/subjects/:subjectId" element={<SubjectHub />} />

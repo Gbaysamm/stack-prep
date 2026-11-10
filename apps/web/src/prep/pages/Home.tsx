@@ -35,6 +35,7 @@ import {
   useSubjectChoice,
   type SubjectColumn,
 } from '../SubjectSwitcher.js';
+import { itemLabel, today as todayOf, useRoadmap, useStartItem, type Roadmap } from '../roadmapApi.js';
 import { usePageTitle, useStudent } from '../store.js';
 import { Badge, Button, CountUp, PageHero, ShowMore, Steps, Skeleton, Track, cx, greeting, useShowMore, useToast } from '../ui.js';
 import { HOW_PATH, MetricTip, type MetricId } from './HowItsWorkedOut.js';
@@ -740,19 +741,23 @@ function focusSubject(subjects: SubjectOverview[]): SubjectOverview | undefined 
 }
 
 type NextStep =
+  | { kind: 'today'; roadmap: Roadmap; subject?: undefined }
   | { kind: 'resume-run'; subject: SubjectOverview; sessionId: string; run?: PracticeRun }
   | { kind: 'resume-checkup'; subject: SubjectOverview; sessionId: string }
   | { kind: 'first-checkup'; subject: SubjectOverview }
   | { kind: 'set-goal'; subject?: SubjectOverview }
   | { kind: 'practice'; subject: SubjectOverview };
 
-function decideNext(overview: Overview, focus: SubjectOverview | undefined): NextStep {
+function decideNext(overview: Overview, focus: SubjectOverview | undefined, roadmap?: Roadmap): NextStep {
   // Most urgent first (a half-done check-up, a subject with no check-up, an open run, the
   // widest gap), with the dashboard's focus subject winning a tie.
   const ordered = byUrgency(focus ? [focus, ...overview.subjects.filter((s) => s !== focus)] : overview.subjects);
   for (const subject of ordered) {
     if (subject.open_checkup_session_id) return { kind: 'resume-checkup', subject, sessionId: subject.open_checkup_session_id };
   }
+  // The roadmap leads once there is one with something planned today (the plan, not the
+  // student, decides what comes next).
+  if (roadmap && todayOf(roadmap).items.length > 0) return { kind: 'today', roadmap };
   for (const subject of ordered) {
     if (subject.goal && !subject.latest_checkup) return { kind: 'first-checkup', subject };
   }
@@ -787,6 +792,7 @@ function firstName(overview: Overview): string {
 function Hero({ overview, step }: { overview: Overview; step: NextStep; focus?: SubjectOverview }) {
   const practice = useStartPractice();
   const checkup = useStartCheckup();
+  const planned = useStartItem(overview.student.student_id);
   const name = step.subject?.subject_name ?? '';
 
   let lead: string;
@@ -795,6 +801,43 @@ function Hero({ overview, step }: { overview: Overview; step: NextStep; focus?: 
   let secondary: ReactNode = null;
 
   switch (step.kind) {
+    case 'today': {
+      const { items, next } = todayOf(step.roadmap);
+      const done = items.filter((item) => item.state === 'done').length;
+      lead = next ? "Today's plan" : "Today's plan is done.";
+      body = (
+        <ol className="home-today">
+          {items.map((item) => (
+            <li key={item.id} className={item.state}>
+              <span className="mark" aria-hidden="true">
+                {item.state === 'done' ? <IconCheck size={12} /> : null}
+              </span>
+              <span>
+                {itemLabel(item)}
+                {item.kind !== 'mock' && item.subject_name ? <em> · {item.subject_name}</em> : null}
+              </span>
+            </li>
+          ))}
+        </ol>
+      );
+      action = next ? (
+        <Button
+          tone="lime"
+          size="lg"
+          busy={planned.busy === next.id}
+          onClick={() => void planned.start(next)}
+          trailing={<IconArrowRight size={18} />}
+        >
+          {next.state === 'in_progress' ? 'Carry on' : done ? 'Next' : 'Start'}
+        </Button>
+      ) : (
+        <Button to="/roadmap" tone="lime" size="lg" trailing={<IconArrowRight size={18} />}>
+          See tomorrow
+        </Button>
+      );
+      secondary = <Link to="/roadmap">Your roadmap</Link>;
+      break;
+    }
     case 'resume-run': {
       const run = step.run;
       lead = `Finish your ${name} run.`;
@@ -954,7 +997,7 @@ function Hero({ overview, step }: { overview: Overview; step: NextStep; focus?: 
       }
       aside={stats.length > 0 ? <HeroStats stats={stats} /> : undefined}
     />
-    {practice.error || checkup.error ? <Alert>{practice.error ?? checkup.error}</Alert> : null}
+    {practice.error || checkup.error || planned.error ? <Alert>{practice.error ?? checkup.error ?? planned.error}</Alert> : null}
     <NothingFreshNote starter={practice} />
     </>
   );
@@ -1207,6 +1250,7 @@ export function Home() {
   usePageTitle('Home');
   const student = useStudent();
   const overview = useOverview(student.studentId);
+  const roadmap = useRoadmap(student.studentId);
   const starter = useStartPractice();
 
   if (!overview.data) {
@@ -1248,7 +1292,7 @@ export function Home() {
 
   const focus = focusSubject(subjects);
   const many = subjects.length > 1;
-  const step = decideNext(data, focus);
+  const step = decideNext(data, focus, roadmap.data);
   const weak = focus?.latest_checkup?.weakest_subtopics ?? [];
 
   return (
