@@ -15,6 +15,20 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-10
 
+### The roadmap picks the runs
+- **Why:** the founder: a student shouldn't build their own runs at first; the plan says what
+  to do.
+- **What:** with a roadmap, a run narrowed to topics the student picked is refused (428) until
+  10 planned items are done (`practice.OWN_RUNS_AFTER`, the first milestone for now), and a
+  general run until today's plan is done. Bookmark revision stays open; planned runs pass.
+  Every "Practise" button in the app that is refused this way starts the plan's next item
+  instead and says so; the run builder shows "Your roadmap picks your runs for now" with how
+  many planned runs are left. The roadmap reports that count (`record.own_runs_in`).
+- **Where:** `apps/api/src/app/routers/practice.py` (`roadmap_lock`), `routers/roadmap.py`,
+  `tests/test_roadmap_api.py`, `apps/web/src/prep/pages/Home.tsx` (`useStartPractice`),
+  `pages/RunBuilder.tsx`, `roadmapApi.ts`.
+- **Status:** done locally; deploy needs a push.
+
 ### The student roadmap, first step: Stack Prep plans, the student follows
 - **Why:** the founder's direction: drive each student to their target instead of handing them
   a toolbox; later a money-back promise for students who follow the plan and miss their

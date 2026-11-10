@@ -27,7 +27,7 @@ from app.auth import require_student
 from app.db import connection, fetch_all
 from app.routers import checkup as checkup_router
 from app.routers.checkup import _subtopics
-from app.routers.practice import RunFilters, _standings_from_history, begin_run
+from app.routers.practice import OWN_RUNS_AFTER, RunFilters, _standings_from_history, begin_run
 from engine import roadmap as engine
 from engine.version import ENGINE_VERSION
 
@@ -77,6 +77,9 @@ class Record(BaseModel):
     done: int
     last_7_days_due: int
     last_7_days_done: int
+    #: Planned items still to finish before the student may choose their own runs; 0 when
+    #: they may (practice.OWN_RUNS_AFTER).
+    own_runs_in: int
 
 
 class RoadmapOut(BaseModel):
@@ -387,6 +390,14 @@ async def read(
             week_ago=today - timedelta(days=7),
         )
     )[0]
+    finished = (
+        await fetch_all(
+            conn,
+            "SELECT count(*) AS n FROM roadmap_items i JOIN study_sessions ss"
+            " ON ss.id = i.session_id WHERE i.student_id = :s AND ss.ended_at IS NOT NULL",
+            s=student_id,
+        )
+    )[0]["n"]
     summary = active["summary"]
     return RoadmapOut(
         built_for=active["built_for"],
@@ -407,6 +418,7 @@ async def read(
             done=history["done"],
             last_7_days_due=history["due7"],
             last_7_days_done=history["done7"],
+            own_runs_in=max(0, OWN_RUNS_AFTER - int(finished)),
         ),
     )
 

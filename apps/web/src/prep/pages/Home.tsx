@@ -35,7 +35,7 @@ import {
   useSubjectChoice,
   type SubjectColumn,
 } from '../SubjectSwitcher.js';
-import { itemLabel, today as todayOf, useRoadmap, useStartItem, type Roadmap } from '../roadmapApi.js';
+import { itemLabel, roadmapApi, today as todayOf, useRoadmap, useStartItem, type Roadmap } from '../roadmapApi.js';
 import { usePageTitle, useStudent } from '../store.js';
 import { Badge, Button, CountUp, PageHero, ShowMore, Steps, Skeleton, Track, cx, greeting, useShowMore, useToast } from '../ui.js';
 import { HOW_PATH, MetricTip, type MetricId } from './HowItsWorkedOut.js';
@@ -152,6 +152,26 @@ export function useStartPractice() {
       navigate(`/practice/${run.session_id}`);
     } catch (failure) {
       setBusy(null);
+      // 428: the roadmap picks the runs for now. Do its next item instead, and say so.
+      if (failure instanceof Refused && failure.status === 428) {
+        try {
+          const plan = await roadmapApi.read(student.studentId);
+          const next =
+            todayOf(plan).next ??
+            plan.items.find((item) => item.state === 'to_do' && item.subject_id === subjectId) ??
+            plan.items.find((item) => item.state === 'to_do');
+          if (next) {
+            const started = await roadmapApi.start(student.studentId, next.id);
+            toast(`Your roadmap: ${itemLabel(next)}`);
+            navigate(started.path);
+            return;
+          }
+        } catch {
+          /* fall through to the plain message */
+        }
+        setError(friendly(failure));
+        return;
+      }
       // 423: practice is locked behind a check-up (first one, or one due). Go and take it.
       if (failure instanceof Refused && failure.status === 423) {
         toast(friendly(failure));

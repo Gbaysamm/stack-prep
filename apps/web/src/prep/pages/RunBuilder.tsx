@@ -17,6 +17,7 @@ import { IconArrowRight, IconBook, IconCalendar, IconCheck, IconChevronDown, Ico
 import type { SubjectOverview } from '../progressApi.js';
 import { SubjectSwitcher, rememberSubject, useOverview } from '../SubjectSwitcher.js';
 import { Refused, orGone, runsApi, type PracticeOptions, type StartRunIn } from '../runsApi.js';
+import { useRoadmap } from '../roadmapApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
 import { Button, CountUp, PageHero, Skeleton, cx } from '../ui.js';
 import { MasteryBar, masteryWord } from './Home.js';
@@ -39,6 +40,31 @@ const plural = (n: number, word: string) => `${n} ${n === 1 ? word : `${word}s`}
 
 export function RunBuilder() {
   usePageTitle('Build a run');
+  const student = useStudent();
+  const plan = useRoadmap(student.studentId);
+  if (plan.data && plan.data.record.own_runs_in > 0) return <OwnRunsLocked left={plan.data.record.own_runs_in} />;
+  return <BuilderPage />;
+}
+
+/** While the roadmap is new, it picks the runs (docs/plans/2026-11-10-student-roadmap.md). */
+function OwnRunsLocked({ left }: { left: number }) {
+  return (
+    <div className="sj-page">
+      <PageHero
+        eyebrow="Build a run"
+        title="Your roadmap picks your runs for now"
+        sub={`Choosing your own opens after ${left} more planned ${left === 1 ? 'run' : 'runs'}.`}
+        actions={
+          <Button to="/roadmap" tone="lime" size="lg">
+            Go to your roadmap
+          </Button>
+        }
+      />
+    </div>
+  );
+}
+
+function BuilderPage() {
   const student = useStudent();
   const [params, setParams] = useSearchParams();
   const overview = useOverview(student.studentId);

@@ -91,6 +91,28 @@ async def test_the_roadmap_follows_the_student(client: httpx.AsyncClient) -> Non
         assert runs and runs[0]["state"] == "to_do" and runs[0]["subtopic_name"]
         assert all(i["value"] in ("high", "medium", "low") for i in runs)
 
+        # The roadmap picks the runs: the student's own choice waits for the first milestone,
+        # a general run for today's plan; bookmarks are always open.
+        assert plan["record"]["own_runs_in"] == 10
+        own = await client.post(
+            "/v1/practice/start",
+            json={
+                "student_id": student,
+                "subject_id": subject,
+                "subtopic_ids": [runs[0]["subtopic_id"]],
+            },
+        )
+        assert own.status_code == 428 and "10 more planned runs" in own.json()["detail"]
+        general = await client.post(
+            "/v1/practice/start", json={"student_id": student, "subject_id": subject}
+        )
+        assert general.status_code == 428
+        marked = await client.post(
+            "/v1/practice/start",
+            json={"student_id": student, "subject_id": subject, "bookmarked": True},
+        )
+        assert marked.status_code != 428
+
         started = await client.post(f"/v1/roadmap/{student}/items/{runs[0]['id']}/start")
         assert started.status_code == 200, started.text
         assert started.json()["path"].startswith("/practice/")

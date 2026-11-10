@@ -915,6 +915,52 @@ async def start(
     return await _state(conn, await _session(conn, session_id))
 
 
+#: Planned items a student finishes before building their own runs (the roadmap's first
+#: milestone; docs/plans/2026-11-10-student-roadmap.md).
+OWN_RUNS_AFTER = 10
+
+
+async def roadmap_lock(
+    conn: AsyncConnection, student_id: UUID, filters: RunFilters | None
+) -> str | None:
+    """Why a run the student starts themselves waits for their roadmap, or nothing.
+
+    Stack Prep plans the work. With a roadmap, a run narrowed to topics the student picked opens
+    only after OWN_RUNS_AFTER planned items are done, and a general run only once today's plan
+    is. Revising bookmarks is always open.
+    """
+    if filters is not None and filters.bookmarked:
+        return None
+    rows = await fetch_all(
+        conn,
+        """
+        SELECT
+          EXISTS (SELECT 1 FROM roadmaps WHERE student_id = :s AND status = 'active') AS planned,
+          (SELECT count(*) FROM roadmap_items i JOIN study_sessions ss ON ss.id = i.session_id
+           WHERE i.student_id = :s AND ss.ended_at IS NOT NULL) AS done,
+          (SELECT count(*) FROM roadmap_items i
+           JOIN roadmaps r ON r.id = i.roadmap_id AND r.status = 'active'
+           JOIN students st ON st.id = i.student_id
+           LEFT JOIN study_sessions ss ON ss.id = i.session_id
+           WHERE i.student_id = :s AND ss.ended_at IS NULL
+             AND i.day = (now() AT TIME ZONE st.timezone)::date) AS left_today
+        """,
+        s=student_id,
+    )
+    row = rows[0]
+    if not row["planned"]:
+        return None
+    if filters is not None and row["done"] < OWN_RUNS_AFTER:
+        left = OWN_RUNS_AFTER - int(row["done"])
+        return (
+            "Your roadmap picks your runs for now. Choosing your own opens after "
+            f"{left} more planned {'run' if left == 1 else 'runs'}."
+        )
+    if filters is None and row["left_today"] > 0:
+        return "Today's plan comes first."
+    return None
+
+
 async def begin_run(
     conn: AsyncConnection,
     student_id: UUID,
@@ -932,6 +978,11 @@ async def begin_run(
     locked = await checkup_lock(conn, student_id, subject_id)
     if locked is not None:
         raise HTTPException(status_code=423, detail=locked)
+    if not planned:
+        # 428: follow the roadmap first. The app starts the plan's next item instead.
+        waiting = await roadmap_lock(conn, student_id, filters)
+        if waiting is not None:
+            raise HTTPException(status_code=428, detail=waiting)
     await premium.check_practice_start(
         conn,
         student_id,

@@ -53,7 +53,7 @@ export interface Roadmap {
   target_total: number | null;
   subjects: RoadmapSubject[];
   items: RoadmapItem[];
-  record: { due: number; done: number; last_7_days_due: number; last_7_days_done: number };
+  record: { due: number; done: number; last_7_days_due: number; last_7_days_done: number; own_runs_in: number };
 }
 
 export const roadmapApi = {
