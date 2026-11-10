@@ -1,6 +1,6 @@
 # Deploying to the Binaax box (the review instance)
 
-**https://stackprep.binaax.app** — basic auth, user `review`. This is the instance
+**https://stackprep.binaax.app** — public, no site password (see below). This is the instance
 people outside the team are shown. See [ADR-0018](../../docs/adr/0018-a-review-instance-on-the-binaax-box.md).
 
 The box is `deploy@138.199.220.0` (`aep-server`). It also serves `binaax.app` itself
