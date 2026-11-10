@@ -56,11 +56,21 @@ async def run(login: str, name: str | None) -> None:
                 password = getpass.getpass("Password for the new admin (10+ characters): ")
                 if len(password) < 10 or password != getpass.getpass("Again: "):
                     raise SystemExit("passwords must match and be at least 10 characters")
+                # Made the way signing up makes an account: an adult who agrees to data
+                # processing, so their answers can be stored (check_attempt_consent).
                 student_id = await conn.fetchval(
-                    f"INSERT INTO students (display_name, {kind}, country_code, status) "
-                    "VALUES ($1, $2, 'NG', 'active') RETURNING id",
+                    f"INSERT INTO students (display_name, {kind}, requires_guardian_consent, "
+                    "country_code, timezone, status) "
+                    "VALUES ($1, $2, false, 'NG', 'Africa/Lagos', 'active') RETURNING id",
                     name,
                     value,
+                )
+                await conn.execute(
+                    "INSERT INTO consents"
+                    " (student_id, consent_type, granted, source, evidence_note)"
+                    " VALUES ($1, 'data_processing', true, 'in_app',"
+                    " 'Staff account made on the server by its owner (create_admin).')",
+                    student_id,
                 )
                 await conn.execute(
                     "INSERT INTO student_credentials (student_id, password_hash) VALUES ($1, $2)",

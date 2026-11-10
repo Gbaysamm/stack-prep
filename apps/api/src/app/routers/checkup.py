@@ -12,6 +12,7 @@ recorded. Nothing to lose if the device drops off halfway.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import date
@@ -644,7 +645,11 @@ async def answer(
         await conn.rollback()
         original = getattr(error, "orig", None)
         message = str(original.args[0]) if original and original.args else str(error)
-        raise HTTPException(status_code=409, detail=message.split("\n")[0]) from error
+        # The driver prefixes the database's sentence with its class ("<class '...'>: "), and
+        # the app hides anything naming the driver: without this the student saw only "not
+        # quite right" and nobody could tell why.
+        message = re.sub(r"^<class '[^']*'>:\s*", "", message.split("\n")[0]).strip()
+        raise HTTPException(status_code=409, detail=message) from error
 
     state = await _next_state(conn, session_id, session["subject_id"], session["student_id"])
     if state.finished:

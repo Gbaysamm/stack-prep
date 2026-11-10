@@ -15,6 +15,20 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-10
 
+### Check-up stuck at question 1 for the founder's account
+- **Why:** on the live site a check-up refused every answer with "Some of what was entered is
+  not quite right". The account had been made on the server with `database/create_admin.py`,
+  which left `requires_guardian_consent` at its default (true) and recorded no consent, so the
+  `check_attempt_consent` trigger refused to store any answer. The trigger's own sentence was
+  hidden because the driver prefixes it with its class name, which the app never shows.
+- **What:** migration 039 gives every staff account without consent the same footing as a
+  sign-up (adult, consent recorded, with a note saying how). `create_admin.py` now makes new
+  accounts that way. The check-up strips the driver's prefix, so a refusal shows its reason.
+  Accounts made by signing up were never affected.
+- **Where:** `database/migrations/039_staff_accounts_consent.sql`, `database/create_admin.py`,
+  `apps/api/src/app/routers/checkup.py`.
+- **Status:** done locally (reproduced, then fixed: the same answer saves); deploy needs a push.
+
 ### Showcase lessons: a clearer first lesson, instant tabs
 - **Why:** the founder found the number bases lesson unclear and its doodle unhelpful, and the
   lesson tabs slow to switch.
