@@ -28,7 +28,7 @@ import { FaqList, SITE_FAQ } from './Faq.js';
 import { FinalCall, TourRows } from './Landing.js';
 import { LessonPlayer } from './LessonPlayer.js';
 import { BoardCollageArt, KeyVersusLesson, PlanStackArt, SupportArt } from './Art.js';
-import { PlanGrid, PlanTable } from './PlanGrid.js';
+import { PlanGrid, PlanTable, hasPaidPlans } from './PlanGrid.js';
 import { SiteHero, SiteShell, useSiteSettings, useSiteTitle } from './SiteShell.js';
 import { useCatalogue, useSite } from './siteData.js';
 
@@ -171,7 +171,7 @@ export function PricingPage() {
         <div className="ld-head center">
           <span className="ps-eyebrow">The plans</span>
           <h2 id="pr-plans" className="sj-display">
-            Choose how long, then choose your plan
+            {catalogue && !hasPaidPlans(catalogue) ? 'Start today, free' : 'Choose how long, then choose your plan'}
           </h2>
         </div>
         {catalogue ? (

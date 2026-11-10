@@ -27,7 +27,7 @@ import {
 import { FaqList, SITE_FAQ } from './Faq.js';
 import { LessonPlayer } from './LessonPlayer.js';
 import { AppShot, CheckupMock, CoachMock, PracticeMock, ProgressMock, TickList } from './Mockups.js';
-import { PlanGrid } from './PlanGrid.js';
+import { PlanGrid, hasPaidPlans } from './PlanGrid.js';
 import { SIGN_UP, SiteShell, useSiteTitle } from './SiteShell.js';
 import { useCatalogue, useSite } from './siteData.js';
 
@@ -270,12 +270,14 @@ export function Landing() {
               <div>
                 <span className="ps-eyebrow">Pricing</span>
                 <h2 id="ld-pricing" className="sj-display">
-                  Start free. Pay when you want more.
+                  {hasPaidPlans(catalogue) ? 'Start free. Pay when you want more.' : 'Free to start, today.'}
                 </h2>
               </div>
-              <Link to="/pricing" className="ps-textlink">
-                Compare every plan <IconArrowRight size={16} />
-              </Link>
+              {hasPaidPlans(catalogue) ? (
+                <Link to="/pricing" className="ps-textlink">
+                  Compare every plan <IconArrowRight size={16} />
+                </Link>
+              ) : null}
             </div>
             <PlanGrid catalogue={catalogue} compact />
           </section>

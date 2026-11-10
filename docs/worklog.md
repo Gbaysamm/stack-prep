@@ -15,6 +15,18 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-10
 
+### Public pricing when only Free is on sale
+- **Why:** the live site has no paid plans on sale yet, so the home page showed a lone Free
+  card under a "1 month / 3 months / Exam season" switch that changed nothing, listing daily
+  limits that don't apply while limits are off.
+- **What:** until a paid plan is on sale with a price, the home page and Pricing page show one
+  "Free while we launch" card (what is open, no card needed, Start free), with no length
+  switch and no "Compare every plan". Paid plans added in Admin > Pricing & plans bring the
+  full cards back by themselves.
+- **Where:** `apps/web/src/site/PlanGrid.tsx` (`hasPaidPlans`), `Landing.tsx`, `Pages.tsx`,
+  `site.css`.
+- **Status:** done locally; deploy needs a push.
+
 ### Admin: AI for questions (settings for the reviewers' "Add with AI")
 - **Why:** the founder doesn't yet know whether the key will be Anthropic's or OpenAI's, and
   asked for an optional monthly spending cap the admin can set.
