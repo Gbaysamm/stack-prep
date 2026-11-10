@@ -32,6 +32,9 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
   border.
   The mock exam screenshot is renamed (`mock-exam-screen.jpg`) so browsers drop the old,
   uncropped copy they had kept, and it has a border and a soft shadow.
+  The shadows under the tour's pictures were cut off at the bottom on phones: the
+  skip-painting-until-near speed rule clips anything outside a section's box, so it is now
+  only on the FAQ teaser.
 - **Where:** `apps/web/src/site/` (LessonPlayer, Landing, site.css, depth.css),
   `apps/web/public/showcase/mock-room.jpg`, `apps/web/src/prep/PrepApp.tsx`.
 - **Status:** committed.

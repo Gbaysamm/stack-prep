@@ -2315,10 +2315,9 @@
 
 /* Sections below the first screen are laid out and painted only as they come near, so the
    page draws its first screen sooner. The sizes are what each roughly takes up meanwhile. */
-/* Not the closing card or the footer: skipping their paint clips the card's shadow. */
-.sj .ld-row,
-.sj .ld-more,
-.sj .ld-subjects,
+/* Only sections whose pictures and cards cast no shadow past their own edge: skipping paint
+   clips anything drawn outside the box, which cut the shadows under the tour's pictures and
+   the closing card. */
 .sj .ps-faq-teaser {
   content-visibility: auto;
   contain-intrinsic-block-size: auto 560px;
