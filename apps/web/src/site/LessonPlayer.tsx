@@ -20,6 +20,14 @@ export function LessonPlayer() {
   const [near, setNear] = useState(false);
   // The frame stays hidden behind its poster until its own poster is drawn (Watch.tsx says so).
   const [ready, setReady] = useState<string | null>(null);
+  const frame = useRef<HTMLIFrameElement>(null);
+  // The frame loads once, on the first lesson; a tab then asks it to show another, which it
+  // does in place, with no new page load (Watch.tsx listens for this).
+  const [first] = useState<string>(SHOWCASE[0].id);
+  const show = (id: string) => {
+    setLesson(id);
+    frame.current?.contentWindow?.postMessage({ type: 'sp-watch-show', lesson: id }, window.location.origin);
+  };
   useEffect(() => {
     const heard = (event: MessageEvent) => {
       const data = event.data as { type?: string; lesson?: string } | null;
@@ -72,7 +80,7 @@ export function LessonPlayer() {
             role="tab"
             aria-selected={lesson === item.id}
             className={lesson === item.id ? 'on' : undefined}
-            onClick={() => setLesson(item.id)}
+            onClick={() => show(item.id)}
           >
             <small>{item.subject}</small>
             {item.label}
@@ -87,13 +95,22 @@ export function LessonPlayer() {
           <span>stackprep · the board</span>
         </div>
         <div className="lp-screen" ref={box} style={{ height: width ? height : undefined }}>
-          {/* Until the frame is near, the poster alone: the same picture the frame opens on. */}
-          <img src={`/showcase/${lesson}.jpg`} alt="" className="lp-poster" loading="lazy" />
+          {/* Every lesson's poster is there from the start, so a tab shows its picture at once;
+              the frame covers them once it is ready. */}
+          {SHOWCASE.map((item) => (
+            <img
+              key={item.id}
+              src={`/showcase/${item.id}.jpg`}
+              alt=""
+              className="lp-poster"
+              style={{ opacity: item.id === lesson ? 1 : 0 }}
+            />
+          ))}
           {near && width > 0 ? (
             <iframe
-              key={lesson}
+              ref={frame}
               title="A lesson on the coach's board"
-              src={`/watch/${lesson}?embed=1`}
+              src={`/watch/${first}?embed=1`}
               allow="autoplay"
               style={{ ...frameStyle, opacity: ready === lesson ? 1 : 0 }}
             />

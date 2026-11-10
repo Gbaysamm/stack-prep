@@ -64,7 +64,7 @@ export function PlanStackArt({ catalogue }: { catalogue: Catalogue | null }) {
 export function BoardCollageArt() {
   return (
     <div className="art art-collage" aria-hidden="true">
-      {['e14_7d', 'm97_35', 'm84_12'].map((id, index) => (
+      {['e14_7d', 'm97_35', '11'].map((id, index) => (
         <figure key={id} className={`art-board b${index}`}>
           <div className="art-board-bar">
             <i />

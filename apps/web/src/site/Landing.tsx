@@ -168,9 +168,9 @@ export function Landing() {
                 <i />
               </div>
               <img
-                src="/showcase/m84_12.jpg"
+                src="/showcase/11.jpg"
                 decoding="async"
-                alt="A lesson on the board: the coach works a number bases question through, step by step, with a drawing of the oranges and price tags."
+                alt="A lesson on the board: the coach works a straight-line question through, step by step, in handwriting."
                 width={1440}
                 height={900}
               />

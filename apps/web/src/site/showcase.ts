@@ -4,7 +4,7 @@
  * watch page so the pages that list them never load the board itself.
  */
 export const SHOWCASE = [
-  { id: 'm84_12', subject: 'Mathematics', label: 'Number bases' },
+  { id: '11', subject: 'Mathematics', label: 'Straight lines' },
   { id: 'm97_35', subject: 'Mathematics', label: 'Trigonometry' },
   { id: 'e14_7d', subject: 'English', label: 'Comprehension' },
 ] as const;

@@ -155,6 +155,23 @@ export function WatchPage() {
       .catch(() => setMissing(true));
   }, [lessonId]);
 
+  // The other lessons' files (a few KB each) come down now, so a tab opens one at once.
+  useEffect(() => {
+    if (embed) for (const item of SHOWCASE) void fetch(`/showcase/${item.id}.json`).catch(() => undefined);
+  }, [embed]);
+
+  // In the home page's frame, a tab asks for another lesson: shown in place, no page load.
+  useEffect(() => {
+    if (!embed) return;
+    const asked = (event: MessageEvent) => {
+      const data = event.data as { type?: string; lesson?: string } | null;
+      if (event.origin !== window.location.origin || data?.type !== 'sp-watch-show' || !data.lesson) return;
+      if (SHOWCASE.some((item) => item.id === data.lesson)) navigate(`/watch/${data.lesson}?embed=1`, { replace: true });
+    };
+    window.addEventListener('message', asked);
+    return () => window.removeEventListener('message', asked);
+  }, [embed, navigate]);
+
   // In the home page's frame: say when the poster is up, so the page shows the frame then.
   useEffect(() => {
     if (embed && lesson) window.parent.postMessage({ type: 'sp-watch-ready', lesson: lessonId }, window.location.origin);

@@ -29,7 +29,8 @@ OUT = ROOT / "apps" / "web" / "public" / "showcase"
 
 #: id in the harness file -> how the home page names it, and the keyed option.
 CHOSEN = {
-    "m84_12": {"subject": "Mathematics", "label": "Number bases", "answer": "B"},
+    "11": {"subject": "Mathematics", "label": "Straight lines", "answer": "D",
+           "title": "Coordinate geometry of straight lines"},
     "m97_35": {"subject": "Mathematics", "label": "Trigonometry", "answer": "B"},
     "e14_7d": {"subject": "English", "label": "Comprehension", "answer": "C"},
 }

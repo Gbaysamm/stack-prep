@@ -15,6 +15,18 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-10
 
+### Showcase lessons: a clearer first lesson, instant tabs
+- **Why:** the founder found the number bases lesson unclear and its doodle unhelpful, and the
+  lesson tabs slow to switch.
+- **What:** the first lesson is now UTME 2002 Q11, the midpoint of a line's intercepts (answer
+  D, (1, −2), checked against the paper): plain handwritten steps, no doodle, voiced with the
+  free Kokoro voice. It is also the home page's hero picture and on the About page. The lesson
+  frame now loads once; a tab tells it which lesson to show, and every poster is there from
+  the start, so a switch takes about 50 ms instead of a page load.
+- **Where:** `scripts/showcase_lessons.py`, `apps/web/public/showcase/11*`,
+  `apps/web/src/site/` (showcase.ts, LessonPlayer, Watch, Landing, Art), `index.html`.
+- **Status:** committed.
+
 ### Public site: the lesson keeps its shape, sharper screenshot, softer corners, home when signed in
 - **Why:** the founder's review on a phone: the lesson window was too tall, the mock
   screenshot blurry with empty space under it, corners too round, and a signed-in visitor
