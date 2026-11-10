@@ -2506,3 +2506,28 @@
     white-space: nowrap;
   }
 }
+
+/* Plans on a phone: everything starts at the left edge, like the heading above, and a card
+   keeps no empty space for a line it doesn't have (the cards stack, so nothing to line up). */
+@media (max-width: 640px) {
+  .sj .ps-plans-bar {
+    justify-content: flex-start;
+    margin-bottom: 20px;
+  }
+  .sj .ps-plans-bar > span {
+    flex-basis: 100%;
+  }
+  .sj .ps-plans-bar .ps-seg {
+    width: 100%;
+  }
+  .sj .ps-plans-bar .ps-seg button {
+    flex: 1;
+    padding: 9px 8px;
+  }
+  .sj .ps-plan-blurb {
+    min-height: 0;
+  }
+  .sj .ps-plan-blurb:empty {
+    display: none;
+  }
+}

@@ -25,6 +25,9 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
   site are cut by about a third (32px to 20px, 24px to 16px, …). `/` now shows the home page
   to everyone; the sign-up and log-in forms still send a signed-in person to their home.
   On phones the home page's subjects are compact chips that wrap, not a long list.
+  Plans on phones: "Prices for" and the length switch start at the left like the heading,
+  the switch spans the width, and the Free card has a default line ("Every question,
+  check-ups and the working, free.") when the admin has given it none, so it has no gap.
 - **Where:** `apps/web/src/site/` (LessonPlayer, Landing, site.css, depth.css),
   `apps/web/public/showcase/mock-room.jpg`, `apps/web/src/prep/PrepApp.tsx`.
 - **Status:** committed.

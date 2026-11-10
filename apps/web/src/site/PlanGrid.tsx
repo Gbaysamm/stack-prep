@@ -77,7 +77,9 @@ export function PlanGrid({ catalogue, compact = false }: { catalogue: Catalogue;
                 <h3>{plan.name}</h3>
               </header>
               {/* Always there, even empty, so every card's price and list start at the same height. */}
-              <p className="ps-plan-blurb">{plan.blurb ?? ''}</p>
+              <p className="ps-plan-blurb">
+                {plan.blurb || (plan.kind === 'free' ? 'Every question, check-ups and the working, free.' : '')}
+              </p>
               <div className="ps-plan-price">
                 {plan.kind === 'free' ? (
                   <>
