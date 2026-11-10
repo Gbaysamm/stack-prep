@@ -15,6 +15,19 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-10
 
+### Public site: the lesson keeps its shape, sharper screenshot, softer corners, home when signed in
+- **Why:** the founder's review on a phone: the lesson window was too tall, the mock
+  screenshot blurry with empty space under it, corners too round, and a signed-in visitor
+  was always sent from the home page to their dashboard.
+- **What:** the lesson window keeps the board's 16:10 shape at every size, scaled like a video
+  (no special phone height). The mock exam picture is retaken at double resolution, cropped
+  to its content, and is the desktop shot on phones too. Large corner radii across the public
+  site are cut by about a third (32px to 20px, 24px to 16px, …). `/` now shows the home page
+  to everyone; the sign-up and log-in forms still send a signed-in person to their home.
+- **Where:** `apps/web/src/site/` (LessonPlayer, Landing, site.css, depth.css),
+  `apps/web/public/showcase/mock-room.jpg`, `apps/web/src/prep/PrepApp.tsx`.
+- **Status:** committed.
+
 ### Sign-up asks for both an email and a phone number
 - **Why:** the founder wants both on every account: email for reset codes and receipts, a
   phone number to reach the student.

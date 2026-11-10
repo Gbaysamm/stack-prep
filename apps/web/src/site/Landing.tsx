@@ -74,7 +74,6 @@ export const TOUR = [
     mock: (
       <AppShot
         src="/showcase/mock-room.jpg"
-        phoneSrc="/showcase/mock-room-phone.jpg"
         label="Mock exam · the real screen"
         alt="The mock exam screen: the timer, a subject tab for each paper, the question with its options, and the question palette showing which are answered and flagged."
       />

@@ -2,15 +2,15 @@
  * A real lesson on the coach's board, inside the page: the watch page (Watch.tsx, its own small
  * app: site/WatchApp.tsx) in a frame, with a tab for each showcase lesson.
  *
- * Kept quick: the frame loads only as it nears the screen (and only one lesson at a time), it
- * shows a poster until the visitor presses Play, and where there is room the board is drawn at
- * its real size rather than a bigger board scaled down. On a phone it is the phone board.
+ * Kept quick: the frame loads only as it nears the screen (and only one lesson at a time), and
+ * it shows a poster until the visitor presses Play. It keeps the board's shape (16:10) at every
+ * size, scaled to the width, as a video would.
  */
 import { useEffect, useRef, useState } from 'react';
 
 import { SHOWCASE } from './showcase.js';
 
-/** The desktop board is drawn at this size (it needs the room) and scaled down to fit. */
+/** The board is drawn at this size and scaled to the width it has. */
 const DESKTOP = { width: 1280, height: 800 };
 
 export function LessonPlayer() {
@@ -51,14 +51,16 @@ export function LessonPlayer() {
     };
   }, []);
 
-  const narrow = width > 0 && width < 640;
-  const native = width >= DESKTOP.width;
-  const scale = narrow || native ? 1 : width / DESKTOP.width;
-  // On a phone the board is drawn at the phone's own size, a little taller than wide.
-  const height = narrow ? Math.round(width * 1.15) : native ? Math.round(width * (DESKTOP.height / DESKTOP.width)) : DESKTOP.height * scale;
-  const frameStyle = narrow || native
-    ? { width: '100%', height }
-    : { width: DESKTOP.width, height: DESKTOP.height, transform: `scale(${scale})`, transformOrigin: '0 0' };
+  // One shape at every size, like a video: the board drawn at a laptop's size and scaled to
+  // fit, so it looks the same on a phone as on a laptop, only smaller.
+  const scale = width > 0 ? width / DESKTOP.width : 1;
+  const height = Math.round(DESKTOP.height * scale);
+  const frameStyle = {
+    width: DESKTOP.width,
+    height: DESKTOP.height,
+    transform: `scale(${scale})`,
+    transformOrigin: '0 0',
+  };
 
   return (
     <div className="lp">

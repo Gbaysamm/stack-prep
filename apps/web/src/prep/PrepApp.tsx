@@ -55,13 +55,14 @@ const HowItsWorkedOutRedirect = later(() => import('./pages/HelpNumbers.js'), 'H
 const Plans = later(() => import('./pages/Plans.js'), 'Plans');
 const PlanPaid = later(() => import('./pages/Plans.js'), 'PlanPaid');
 
-/** The bare address: a student's home, or for anyone else the sign-up and log-in forms when
- *  asked for (?mode=signup or ?mode=login), and otherwise the public home page. */
+/** The bare address is the public home page for everyone, signed in or not (its menu then says
+ *  "Open the app"). The sign-up and log-in forms (?mode=signup, ?mode=login) send someone
+ *  already signed in on to their home instead. */
 function Start() {
   const { identity } = useIdentity();
   const [params] = useSearchParams();
-  if (identity) return <Navigate to="/home" replace />;
-  return params.get('mode') ? <Welcome /> : <Landing />;
+  if (params.get('mode')) return identity ? <Navigate to="/home" replace /> : <Welcome />;
+  return <Landing />;
 }
 
 export function PrepApp() {
