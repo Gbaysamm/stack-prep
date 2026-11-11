@@ -1,0 +1,262 @@
+/* DatePicker.tsx: our own date field and calendar, matching Select and the app's inputs. */
+
+.sj .dp {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+.sj .dp-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  height: 46px;
+  padding: 0 12px 0 14px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 12px;
+  background: var(--white, #fff);
+  color: var(--ink-900);
+  font: inherit;
+  font-size: 15px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.sj .dp-button:hover:not(:disabled) {
+  border-color: var(--purple-300);
+}
+.sj .dp-button:focus-visible,
+.sj .dp.open .dp-button {
+  outline: none;
+  border-color: var(--purple-600);
+  box-shadow: 0 0 0 3px var(--purple-100);
+}
+.sj .dp.invalid .dp-button {
+  border-color: var(--pink-500);
+}
+.sj .dp-button:disabled {
+  background: var(--gray-100);
+  color: var(--gray-500);
+  cursor: not-allowed;
+}
+.sj .dp-icon {
+  flex: none;
+  color: var(--purple-600);
+}
+.sj .dp-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.sj .dp-value.empty {
+  font-weight: 400;
+  color: var(--gray-500);
+}
+.sj .dp-chev {
+  flex: none;
+  color: var(--gray-500);
+  transition: transform 0.15s;
+}
+.sj .dp.open .dp-chev {
+  transform: rotate(180deg);
+}
+
+/* ---------------------------------------------------------------- the calendar */
+.sj .dp-pop {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 300;
+  width: min(320px, calc(100vw - 32px));
+  padding: 12px;
+  border: 1px solid var(--gray-200);
+  border-radius: 16px;
+  background: var(--white, #fff);
+  box-shadow: 0 14px 34px rgba(31, 0, 80, 0.16);
+}
+.sj .dp-pop.up {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+.sj .dp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.sj .dp-month {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  font-family: var(--f-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink-900);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.sj .dp-month:hover,
+.sj .dp-month[aria-expanded='true'] {
+  background: var(--purple-050);
+}
+.sj .dp-month svg {
+  color: var(--purple-600);
+  transition: transform 0.15s;
+}
+.sj .dp-month[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+.sj .dp-month span {
+  color: var(--gray-500);
+}
+.sj .dp-nav {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--purple-050);
+  color: var(--purple-600);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.sj .dp-nav:hover:not(:disabled) {
+  background: var(--purple-100);
+}
+.sj .dp-nav:disabled {
+  background: transparent;
+  color: var(--gray-300);
+  cursor: default;
+}
+.sj .dp-weekdays,
+.sj .dp-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 2px;
+}
+.sj .dp-weekdays span {
+  padding: 6px 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--gray-500);
+}
+.sj .dp-day {
+  position: relative;
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--ink-900);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.sj .dp-day:hover:not(.off):not(.on) {
+  background: var(--purple-050);
+}
+.sj .dp-day:focus-visible {
+  outline: 2px solid var(--purple-600);
+  outline-offset: -2px;
+}
+/* Today: a small dot under the number. */
+.sj .dp-day.today::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: var(--purple-600);
+}
+.sj .dp-day.on {
+  background: var(--purple-600);
+  box-shadow: 0 3px 0 var(--purple-700);
+  color: #fff;
+  font-weight: 700;
+}
+.sj .dp-day.on.today::after {
+  background: #fff;
+}
+.sj .dp-day.off {
+  color: var(--gray-300);
+  cursor: default;
+}
+
+/* ---------------------------------------------------------------- month and year */
+.sj .dp-pick {
+  display: grid;
+  gap: 12px;
+}
+.sj .dp-years {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--gray-100);
+}
+.sj .dp-months {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.sj .dp-chip {
+  height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--gray-100);
+  color: var(--ink-900);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.sj .dp-chip:hover:not(:disabled):not(.on) {
+  background: var(--purple-050);
+}
+.sj .dp-chip.on {
+  background: var(--purple-600);
+  box-shadow: 0 3px 0 var(--purple-700);
+  color: #fff;
+}
+.sj .dp-chip:disabled {
+  background: none;
+  color: var(--gray-300);
+  cursor: default;
+}
+
+.sj .dp-clear {
+  width: 100%;
+  height: 38px;
+  margin-top: 10px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--gray-100);
+  color: var(--gray-800);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.sj .dp-clear:hover {
+  background: var(--purple-050);
+  color: var(--purple-600);
+}

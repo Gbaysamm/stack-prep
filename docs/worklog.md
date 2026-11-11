@@ -15,6 +15,19 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### Our own date picker instead of the browser's
+- **What:** a new `lib/DatePicker` replaces every `<input type="date">` the app uses (onboarding's
+  exam date and paper dates, the Goal page, the admin Premium "Ends on"). The field shows the day
+  in words ("Thu 14 May 2027") and opens a calendar in the app's style: Monday first, today
+  dotted, the chosen day a purple tile, days before tomorrow greyed. Tapping the month name
+  opens a year row and the twelve months, so a date a year away is a few taps. Keyboard works
+  (arrows, Page Up/Down, Enter, Escape). Optional dates can offer a clear button (`clearLabel`).
+- **Why:** the founder: the browser's picker ("mm / dd / yyyy", grey boxes) looked wrong, and
+  the year was hard to change.
+- **Where:** `apps/web/src/lib/DatePicker.tsx` and `.css`; `prep/pages/Onboarding.tsx`,
+  `Goal.tsx`, `admin/PremiumPage.tsx`. The unused `student/StudentApp.tsx` was left alone.
+- **Status:** done locally, checked at 1440 and 390; web tests pass; not pushed.
+
 ### Onboarding cannot be skipped; the path's lit row is even
 - **What:** a new student has no "Skip for now" and the logo is not a link while setting up;
   only a student changing an existing goal gets "Back to home". The side rail goes back only

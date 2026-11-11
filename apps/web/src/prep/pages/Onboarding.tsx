@@ -39,6 +39,7 @@ import { Button, CountUp, Skeleton, cx, daysUntil, useToast } from '../ui.js';
 import { examTitle, isHiddenExam } from './Exams.js';
 import { CountdownTip } from '../countdown.js';
 import { Journey } from '../Journey.js';
+import { DatePicker } from '../../lib/DatePicker.js';
 import './Onboarding.css';
 import { friendly } from '../../lib/friendlyError.js';
 
@@ -985,14 +986,13 @@ function GoalStep({
         </p>
         {together ? (
         <div className="onb-dategrid">
-          <input
+          <DatePicker
+            className="onb-dateinput"
             id={dateId}
-            type="date"
-            className="sj-input onb-dateinput"
             value={choice.examDate}
             min={tomorrow}
-            onChange={(event) => update({ examDate: event.target.value })}
-            aria-invalid={invalidDate || undefined}
+            onChange={(iso) => update({ examDate: iso })}
+            invalid={invalidDate}
             aria-labelledby="onb-part-date"
           />
           <div className="onb-quick" role="group" aria-label="Quick picks for exam day">
@@ -1209,14 +1209,13 @@ function PaperDates({
             <label className="onb-paper-name" htmlFor={inputId}>
               {subject.name}
             </label>
-            <input
+            <DatePicker
+              className="onb-dateinput"
               id={inputId}
-              type="date"
-              className="sj-input onb-dateinput"
               value={mine}
               min={tomorrow}
-              onChange={(event) => setDate(subject.subject_id, event.target.value)}
-              aria-invalid={(invalid && (!mine || mine < tomorrow)) || undefined}
+              onChange={(iso) => setDate(subject.subject_id, iso)}
+              invalid={invalid && (!mine || mine < tomorrow)}
             />
             {sameDays.size ? (
               <div className="onb-paper-same" role="group" aria-label={`Same day as another paper, for ${subject.name}`}>

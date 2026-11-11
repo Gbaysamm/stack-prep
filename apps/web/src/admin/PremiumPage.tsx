@@ -13,6 +13,7 @@ import { Select } from '../lib/Select.js';
 import { naira, type MocksPer, type Plan } from '../prep/billingApi.js';
 import { IconCheck } from '../prep/icons.js';
 import { StaffPageHead } from '../staff/StaffShell.js';
+import { DatePicker } from '../lib/DatePicker.js';
 
 export interface Length {
   id: string;
@@ -916,10 +917,10 @@ export function DiscountForm({
           <input inputMode="numeric" value={maxUses} placeholder="No limit" onChange={(e) => setMaxUses(e.target.value)} />
         </label>
       )}
-      <label className="st-field">
-        <span>Ends on</span>
-        <input type="date" value={expires} onChange={(e) => setExpires(e.target.value)} />
-      </label>
+      <div className="st-field">
+        <span id="premium-ends-on">Ends on</span>
+        <DatePicker value={expires} onChange={setExpires} placeholder="No end date" clearLabel="No end date" aria-labelledby="premium-ends-on" />
+      </div>
       <label className="st-field st-span">
         <span>Note {studentId ? '(the student sees it)' : '(for staff)'}</span>
         <input

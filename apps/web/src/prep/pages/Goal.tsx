@@ -22,6 +22,7 @@ import {
 } from '../icons.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
 import { Button, CountUp, Dialog, PageHero, Skeleton, Steps, cx, daysUntil, useToast } from '../ui.js';
+import { DatePicker } from '../../lib/DatePicker.js';
 import './Goal.css';
 import { friendly } from '../../lib/friendlyError.js';
 
@@ -706,14 +707,13 @@ function DateStep({
           <label className="goal-label" htmlFor={inputId}>
             {label}
           </label>
-          <input
+          <DatePicker
+            className="goal-dateinput"
             id={inputId}
-            type="date"
-            className="sj-input goal-dateinput"
             value={examDate}
             min={tomorrow}
-            onChange={(event) => setExamDate(event.target.value)}
-            aria-invalid={invalid || undefined}
+            onChange={(iso) => setExamDate(iso)}
+            invalid={invalid}
           />
           <div className="goal-chips" role="group" aria-label="Quick picks">
             {quick.map(({ months, iso }) => (
