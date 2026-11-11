@@ -24,9 +24,10 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
   - Chemistry "Elements, compounds and mixtures" (30 moments; singles, couples, the party).
   - Mathematics "Indices, Logarithms and Surds" (36 moments; the Tower of Twos).
   - Biology "Cell structure and functions of cell components" (32 moments; the cell compound).
-  Each lesson opens with the student's own mistakes there (the bank's trap line for each option
-  they picked, at most two). A subtopic with no written lesson keeps the missed questions'
-  working page. Asking mid-lesson is not wired yet (the box says it is coming).
+  The lesson is the same for every student and stands on its own: it does not replay the
+  student's mistakes (the founder: the run's own board already went over each missed question;
+  an opening of trap lines with no question on the board made no sense). A subtopic with no
+  written lesson keeps the missed questions' working page. Asking mid-lesson is not wired yet (the box says it is coming).
 - **Where:** `docs/lessons/subtopics/<subject>/<slug>.yaml` and `doodles/sub_<slug>_x.svg`;
   migration `045_subtopic_lesson_bank.sql`; loader `database/load_subtopic_lessons.py`
   (`DATABASE_URL=... python database/load_subtopic_lessons.py`); `database/lesson_doodles.py`

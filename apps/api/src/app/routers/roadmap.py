@@ -898,60 +898,24 @@ async def _bank_lesson(conn: AsyncConnection, subtopic_id: UUID) -> dict[str, An
     }
 
 
-async def _opening(conn: AsyncConnection, student_id: UUID, subtopic_id: UUID) -> list[str]:
-    """The student's own way in: why each option they picked was wrong, from the bank's traps.
-
-    The questions they missed here, newest first, at most two, each with the trap written for
-    the option they chose. Nothing when none of their misses has a trap on record.
-    """
-    rows = await fetch_all(
-        conn,
-        """
-        SELECT DISTINCT ON (v.question_id) a.selected_option_key, l.traps
-        FROM attempts a
-        JOIN question_versions v ON v.id = a.question_version_id
-        JOIN questions q ON q.id = v.question_id
-        JOIN question_classifications c
-          ON c.question_id = v.question_id AND c.classification_role = 'primary'
-        JOIN curriculum_items skill ON skill.id = c.curriculum_item_id
-        JOIN question_lessons l ON l.question_version_id = q.current_version_id
-        WHERE a.student_id = :s AND skill.parent_id = :sub AND a.is_correct IS FALSE
-        ORDER BY v.question_id, a.answered_at_client DESC
-        """,
-        s=student_id,
-        sub=subtopic_id,
-    )
-    said: list[str] = []
-    for row in rows:
-        traps = row["traps"]
-        traps = json.loads(traps) if isinstance(traps, str) else (traps or {})
-        line = traps.get(str(row["selected_option_key"] or ""))
-        if line:
-            said.append(str(line))
-    return said[:2]
-
-
 async def _bank_beats(
     conn: AsyncConnection, student_id: UUID, subtopic_id: UUID
 ) -> tuple[list[Any], list[Any]] | None:
-    """The lesson's beats, opened with the student's own mistakes, and its doodles."""
+    """The lesson's beats and its doodles: the same lesson for every student (the run's own
+    board already went over each question they missed)."""
     from app.lesson_doodles import LessonDoodle
-    from app.routers.practice import _Beat, beats_from_moments
+    from app.routers.practice import beats_from_moments
 
     bank = await _bank_lesson(conn, subtopic_id)
     if bank is None:
         return None
-    opening = [
-        _Beat(board_index=None, write=[], at=[], say=line)
-        for line in await _opening(conn, student_id, subtopic_id)
-    ]
     doodles = []
     for raw in bank["doodles"]:
         try:
             doodles.append(LessonDoodle.model_validate(raw))
         except ValueError:
             continue
-    return [*opening, *beats_from_moments(bank["moments"])], doodles
+    return beats_from_moments(bank["moments"]), doodles
 
 
 @router.get(
