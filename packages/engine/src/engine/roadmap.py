@@ -57,7 +57,8 @@ from engine.projection import (
 RUN_MINUTES = 15
 RUN_LENGTH = 10
 CHECKUP_LENGTH = 15
-MAX_RUNS_PER_DAY = 6
+#: Five hours of runs a day at most (the student can pick up to 300 minutes).
+MAX_RUNS_PER_DAY = 20
 #: With no exam date, plan this far ahead.
 DEFAULT_WEEKS = 12
 #: A check-up falls due this many days after the last (scoring.CHECKUP_EVERY_DAYS).

@@ -1,0 +1,84 @@
+/* StudyMinutes.tsx: how long a study day is. Class prefix: sm-. */
+
+.sj .sm {
+  display: grid;
+  gap: 10px;
+}
+.sj .sm-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sj .sm-chips .sj-chip {
+  flex: 1 1 0;
+  min-width: 72px;
+  white-space: nowrap;
+}
+/* Custom: − 1 h 15 + in 15-minute steps, inside a soft panel. */
+.sj .sm-custom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px;
+  border-radius: var(--r-md);
+  background: var(--purple-050);
+}
+.sj .sm-step {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--purple-600);
+  box-shadow: 0 3px 0 var(--purple-200);
+  transition: transform var(--t-fast) var(--ease);
+}
+.sj .sm-step:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--purple-200);
+}
+.sj .sm-step:disabled {
+  color: var(--gray-300);
+  box-shadow: none;
+  cursor: default;
+}
+.sj .sm-value {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.sj .sm-value b {
+  font-family: var(--f-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ink-900);
+}
+.sj .sm-value span {
+  font-size: 13px;
+  color: var(--gray-600);
+}
+.sj .sm-note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--gray-600);
+}
+.sj .sm-note.short {
+  color: var(--gray-800);
+  font-weight: 500;
+}
+@media (max-width: 520px) {
+  /* Up to six choices: two even rows of three. */
+  .sj .sm-chips {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .sj .sm-chips .sj-chip {
+    min-width: 0;
+    padding-inline: 6px;
+    font-size: 13px;
+  }
+}

@@ -25,7 +25,12 @@ describe('leastTime', () => {
     expect(far.minutes).toBe(30);
     expect(mid.minutes).toBe(75);
     expect(far.minutes).toBeLessThan(mid.minutes);
-    expect(near).toMatchObject({ minutes: 90, enough: false, daysLeft: 30 });
+    // A month out, four subjects need 4.5 hours a day, inside the five-hour cap.
+    expect(near).toMatchObject({ minutes: 270, enough: true, daysLeft: 30 });
+  });
+
+  it('caps at five hours and says when even that is not enough', () => {
+    expect(leastTime(four(iso(7)), WEEKDAYS, today)).toMatchObject({ minutes: 300, enough: false });
   });
 
   it('is always a whole number of 15-minute runs, at least one', () => {
@@ -40,7 +45,7 @@ describe('leastTime', () => {
   });
 
   it('says when studying every day would be enough', () => {
-    const tight = leastTime(four(iso(60)), [1, 3, 5], today)!;
+    const tight = leastTime([{ topics: 73, date: iso(14) }], [1, 3, 5], today)!;
     expect(tight.enough).toBe(false);
     expect(tight.everyDayWouldDo).toBe(true);
   });

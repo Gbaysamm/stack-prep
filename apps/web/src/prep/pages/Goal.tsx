@@ -23,6 +23,7 @@ import {
 import { useLoad, usePageTitle, useStudent } from '../store.js';
 import { Button, CountUp, Dialog, PageHero, Skeleton, Steps, cx, daysUntil, useToast } from '../ui.js';
 import { DatePicker } from '../../lib/DatePicker.js';
+import { StudyMinutes } from '../StudyMinutes.js';
 import { leastTime, type LeastTime } from '../studyTime.js';
 import './Goal.css';
 import { friendly } from '../../lib/friendlyError.js';
@@ -35,7 +36,6 @@ const STEPS = [
 ] as const;
 
 const SCORE_CHIPS = [60, 70, 80, 90];
-const MINUTE_CHIPS = [15, 30, 45, 60, 90];
 const DAYS = [
   { n: 1, short: 'Mon', long: 'Monday' },
   { n: 2, short: 'Tue', long: 'Tuesday' },
@@ -279,9 +279,6 @@ function GoalStepper({
     ],
     days,
   );
-  useEffect(() => {
-    if (least && minutes < least.minutes) setMinutes(least.minutes);
-  }, [least?.minutes]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const problem = (index: number): string | null => {
     if (index === 0 && (!Number.isFinite(target) || target < 1 || target > 100)) return 'Pick a score between 1 and 100.';
@@ -573,10 +570,6 @@ function GoalStepper({
                 }}
                 days={days}
                 toggleDay={toggleDay}
-                setDays={(value) => {
-                  setIssue(null);
-                  setDays(value);
-                }}
               />
             ) : null}
             {step === 3 ? (
@@ -799,47 +792,21 @@ function RhythmStep({
   setMinutes,
   days,
   toggleDay,
-  setDays,
 }: {
   least: LeastTime | null;
   minutes: number;
   setMinutes: (value: number) => void;
   days: number[];
   toggleDay: (n: number) => void;
-  setDays: (value: number[]) => void;
 }) {
-  const chips = [...new Set([...MINUTE_CHIPS, minutes, ...(least ? [least.minutes] : [])])].sort((a, b) => a - b);
   const weekly = minutes * days.length;
-  const sorted = [...days].sort((a, b) => a - b).join();
   return (
     <div className="goal-rhythm">
       <div className="goal-block">
         <div className="goal-label" id="goal-minutes-label">
           On a study day, you can give
         </div>
-        <div className="goal-chips" role="group" aria-labelledby="goal-minutes-label">
-          {chips.map((value) => (
-            <button
-              key={value}
-              type="button"
-              className="sj-chip goal-minchip"
-              aria-pressed={minutes === value}
-              disabled={least != null && value < least.minutes}
-              onClick={() => setMinutes(value)}
-            >
-              {value} min
-            </button>
-          ))}
-        </div>
-        {least ? (
-          <p className={cx('sj-least', !least.enough && 'short')} aria-live="polite">
-            {least.enough
-              ? `${least.daysLeft} days to go: at least ${least.minutes} min a day to cover all your topics.`
-              : `${least.daysLeft} days to go: even ${least.minutes} min a day won't cover every topic.${
-                  least.everyDayWouldDo && days.length < 7 ? ' Add more days.' : ' Your plan will put the topics that come up most first.'
-                }`}
-          </p>
-        ) : null}
+        <StudyMinutes value={minutes} onChange={setMinutes} least={least} labelledBy="goal-minutes-label" />
       </div>
 
       <div className="goal-block">
@@ -847,14 +814,6 @@ function RhythmStep({
           <div className="goal-label" id="goal-days-label">
             On these days
           </div>
-          <span className="sj-seg" role="group" aria-label="Quick picks for study days">
-            <button type="button" className={cx(sorted === '1,2,3,4,5' && 'on')} aria-pressed={sorted === '1,2,3,4,5'} onClick={() => setDays([1, 2, 3, 4, 5])}>
-              Weekdays
-            </button>
-            <button type="button" className={cx(days.length === 7 && 'on')} aria-pressed={days.length === 7} onClick={() => setDays([1, 2, 3, 4, 5, 6, 7])}>
-              Every day
-            </button>
-          </span>
         </div>
         <div className="goal-days" role="group" aria-labelledby="goal-days-label">
           {DAYS.map((day) => {

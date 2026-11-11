@@ -15,6 +15,24 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### Study time: only workable times, up to five hours, a custom stepper; no Weekdays / Every day
+- **What:** a shared `prep/StudyMinutes` replaces the minute chips on onboarding and the Goal
+  page. It offers only times that work for the days left: the least the plan needs, then the
+  next longer ones (1 h 30, 2 h, 3 h, 4 h, 5 h), plus Custom, a − / + stepper in 15-minute steps
+  between the least and five hours. Times are shown as "1 h 15". One quiet line says why
+  ("92 days to go, so at least 1 h 15 a day"). The planner now fits up to 20 runs a day (five
+  hours) instead of 6 (`MAX_RUNS_PER_DAY`), so a month out with four subjects asks for 4 h 30
+  rather than "even 90 min won't do". The Weekdays / Every day switch is gone: students tap the
+  days. The "In 1 month" chips beside the date field are its height (42px), with no ledge.
+- **Why:** the founder: don't show times that can't work, offer longer ones and a custom time,
+  allow 4-5 hours a day; remove the switch; the quick chips were taller than the date field;
+  the number box for a custom time looked bad.
+- **Where:** `apps/web/src/prep/StudyMinutes.tsx` and `.css`, `studyTime.ts` (+ tests),
+  `pages/Onboarding.tsx`, `pages/Goal.tsx`, `prep.css`, `Onboarding.css`;
+  `packages/engine/src/engine/roadmap.py` (`MAX_RUNS_PER_DAY = 20`) and its test.
+- **Status:** done locally, checked at 1440 and 390; engine 98, web 59 and roadmap API tests pass.
+  Not pushed.
+
 ### The least study time a day follows the days left; smaller chips; a Weekdays / Every day switch
 - **What:** onboarding and the Goal page no longer let a student pick less time a day than the
   plan needs. `prep/studyTime.ts` works it out from the planner's own rules: every subtopic we

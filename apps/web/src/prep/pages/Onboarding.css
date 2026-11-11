@@ -806,9 +806,14 @@
 }
 .sj .onb-quick .sj-chip {
   min-width: 0;
-  min-height: 42px;
-  padding: 7px 6px;
+  height: 42px;
+  min-height: 0;
+  padding: 0 6px;
   white-space: nowrap;
+}
+/* Beside the date field: the same height, chosen or not, so no ledge underneath. */
+.sj .onb-quick .sj-chip[aria-pressed='true'] {
+  box-shadow: none;
 }
 .sj .onb-count {
   display: flex;
@@ -1409,7 +1414,7 @@
     padding: 20px 0;
   }
   .sj .onb-quick .sj-chip {
-    min-height: 40px;
+    height: 40px;
     font-size: 13px;
   }
   .sj .onb-target {

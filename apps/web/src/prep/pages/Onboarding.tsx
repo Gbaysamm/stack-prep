@@ -39,6 +39,7 @@ import { Button, CountUp, Skeleton, cx, daysUntil, useToast } from '../ui.js';
 import { examTitle, isHiddenExam } from './Exams.js';
 import { CountdownTip } from '../countdown.js';
 import { Journey } from '../Journey.js';
+import { StudyMinutes } from '../StudyMinutes.js';
 import { leastTime, type LeastTime } from '../studyTime.js';
 import { DatePicker } from '../../lib/DatePicker.js';
 import './Onboarding.css';
@@ -58,7 +59,6 @@ const SUBJECTS = 2;
 const GOAL = 3;
 const REVIEW = 4;
 
-const MINUTE_CHIPS = [15, 30, 45, 60, 90];
 const DAYS = [
   { n: 1, short: 'Mon', long: 'Monday' },
   { n: 2, short: 'Tue', long: 'Tuesday' },
@@ -972,13 +972,6 @@ function GoalStep({
   const good = away != null && away > 0;
   const isUtme = examName.toUpperCase() === 'UTME';
   const setDate = (id: string, value: string) => update({ dates: { ...choice.dates, [id]: value } });
-  const minuteChips = [...new Set([...MINUTE_CHIPS, choice.minutes, ...(least ? [least.minutes] : [])])].sort((a, b) => a - b);
-  // A time below the least is raised to it as soon as the date or days make it too short.
-  useEffect(() => {
-    if (least && choice.minutes < least.minutes) update({ minutes: least.minutes });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [least?.minutes]);
-  const sortedDays = [...choice.days].sort((a, b) => a - b).join();
   const setTarget = (id: string, value: number) => update({ targets: { ...choice.targets, [id]: clampScore(value) } });
   const toggleDay = (n: number) =>
     update({ days: choice.days.includes(n) ? choice.days.filter((d) => d !== n) : [...choice.days, n].sort((a, b) => a - b) });
@@ -1127,42 +1120,12 @@ function GoalStep({
           <span className="onb-label" id="onb-minutes-label">
             On a study day, you can give
           </span>
-          <div className="onb-minutes" role="group" aria-labelledby="onb-minutes-label">
-            {minuteChips.map((value) => (
-              <button
-                key={value}
-                type="button"
-                className="sj-chip"
-                aria-pressed={choice.minutes === value}
-                disabled={least != null && value < least.minutes}
-                onClick={() => update({ minutes: value })}
-              >
-                {value} min
-              </button>
-            ))}
-          </div>
-          {least ? (
-            <p className={cx('sj-least', !least.enough && 'short')} aria-live="polite">
-              {least.enough
-                ? `${least.daysLeft} days to go: at least ${least.minutes} min a day to cover all your topics.`
-                : `${least.daysLeft} days to go: even ${least.minutes} min a day won't cover every topic.${
-                    least.everyDayWouldDo && choice.days.length < 7 ? ' Add more days.' : ' Your plan will put the topics that come up most first.'
-                  }`}
-            </p>
-          ) : null}
+          <StudyMinutes value={choice.minutes} onChange={(minutes) => update({ minutes })} least={least} labelledBy="onb-minutes-label" />
         </div>
         <div className="onb-block">
           <div className="onb-blockhead">
             <span className="onb-label" id="onb-days-label">
               On these days
-            </span>
-            <span className="sj-seg" role="group" aria-label="Quick picks for study days">
-              <button type="button" className={cx(sortedDays === '1,2,3,4,5' && 'on')} aria-pressed={sortedDays === '1,2,3,4,5'} onClick={() => update({ days: [1, 2, 3, 4, 5] })}>
-                Weekdays
-              </button>
-              <button type="button" className={cx(choice.days.length === 7 && 'on')} aria-pressed={choice.days.length === 7} onClick={() => update({ days: [1, 2, 3, 4, 5, 6, 7] })}>
-                Every day
-              </button>
             </span>
           </div>
           <div className="onb-days" role="group" aria-labelledby="onb-days-label">

@@ -74,7 +74,7 @@ def runs(items):
 
 
 def test_capacity_follows_the_study_time() -> None:
-    assert runs_per_day(30) == 2 and runs_per_day(5) == 1 and runs_per_day(600) == 6
+    assert runs_per_day(30) == 2 and runs_per_day(5) == 1 and runs_per_day(120) == 8 and runs_per_day(600) == 20
     days = study_dates(TODAY, TODAY + timedelta(days=14), (1, 3, 5))
     assert all(d.isoweekday() in (1, 3, 5) for d in days) and len(days) == 6
 

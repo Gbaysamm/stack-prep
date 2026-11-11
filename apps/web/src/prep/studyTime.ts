@@ -2,7 +2,7 @@
  * The least time a day that lets the roadmap work: every subtopic the student is sitting gets at
  * least one run before its exam, around the planner's own rules (packages/engine roadmap.py):
  *
- * - a run is about RUN_MINUTES (15) minutes, and at most MAX_RUNS_PER_DAY (6) fit a day;
+ * - a run is about RUN_MINUTES (15) minutes, and at most MAX_RUNS_PER_DAY (20, five hours) fit a day;
  * - in the exam phase (the last 42 days) 40% of runs are mixed practice, so only 60% of those
  *   days' runs can go to covering topics.
  *
@@ -12,7 +12,7 @@
  */
 
 export const RUN_MINUTES = 15;
-export const MAX_RUNS_PER_DAY = 6;
+export const MAX_RUNS_PER_DAY = 20;
 const EXAM_PHASE_DAYS = 42;
 const MIXED_SHARE = 0.4;
 
