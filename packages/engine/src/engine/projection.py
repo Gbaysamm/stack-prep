@@ -100,6 +100,8 @@ class UnitStanding:
     #: False when we have no questions for it yet: it cannot be practised, so the syllabus
     #: order steps over it rather than waiting on it (roadmap.open_units).
     teachable: bool = True
+    #: Practice runs the student has had on it, for the run limit (roadmap.STUCK_AFTER_RUNS).
+    runs: int = 0
 
 
 @dataclass(frozen=True)
@@ -212,8 +214,7 @@ def project(
             spent[best.unit_id] += 1
             reasons.setdefault(
                 best.unit_id,
-                "close enough to move quickly, and it comes up often enough to be worth the "
-                "time",
+                "close enough to move quickly, and it comes up often enough to be worth the time",
             )
         else:
             break

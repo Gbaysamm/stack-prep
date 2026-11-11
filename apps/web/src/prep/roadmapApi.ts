@@ -50,6 +50,8 @@ export interface Roadmap {
   runs_per_day: number;
   status: RoadmapStatus;
   advice: string | null;
+  /** When the rest of the syllabus would not fit by exam day: the time a day that would. */
+  pace_advice: string | null;
   total_now: number | null;
   total_expected: number | null;
   target_total: number | null;

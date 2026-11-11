@@ -13,8 +13,8 @@ check-up or mock the student takes from their own pages counts for the matching 
 from __future__ import annotations
 
 import json
-from datetime import date, timedelta
 from dataclasses import replace
+from datetime import date, timedelta
 from typing import Annotated, Any, Literal
 from uuid import UUID
 
@@ -36,6 +36,7 @@ from app.routers.practice import (
     begin_run,
 )
 from engine import roadmap as engine
+from engine.projection import UnitStanding
 from engine.version import ENGINE_VERSION
 
 router = APIRouter(prefix="/v1/roadmap", tags=["roadmap"])
@@ -101,6 +102,8 @@ class RoadmapOut(BaseModel):
     runs_per_day: int
     status: str
     advice: str | None
+    #: When the rest of the syllabus would not fit by exam day: the time a day that would.
+    pace_advice: str | None = None
     total_now: float | None
     total_expected: float | None
     target_total: float | None
@@ -170,6 +173,7 @@ async def _inputs(
         minutes_per_day=minutes or DEFAULT_MINUTES,
         subjects=tuple(inputs),
         target_total=float(target_total) if target_total is not None else None,
+        run_minutes=await _run_minutes(conn, student_id),
     )
     snapshot = {
         "target_total": spec.target_total,
@@ -207,12 +211,66 @@ async def _teachable(conn: AsyncConnection, subject_id: UUID) -> set[str]:
 
 async def _standings(
     conn: AsyncConnection, student_id: UUID, subject_id: UUID
-) -> list[engine.UnitStanding]:
+) -> list[UnitStanding]:
     """Where the student stands in each subtopic, in syllabus order, marked teachable or not."""
     units, _ = await _subtopics(conn, subject_id)
     found = await _standings_from_history(conn, student_id, subject_id, units)
     taught = await _teachable(conn, subject_id)
-    return [replace(u, teachable=u.unit_id in taught) for u in found]
+    runs = await _runs_by_subtopic(conn, student_id, subject_id)
+    return [replace(u, teachable=u.unit_id in taught, runs=runs.get(u.unit_id, 0)) for u in found]
+
+
+async def _runs_by_subtopic(
+    conn: AsyncConnection, student_id: UUID, subject_id: UUID
+) -> dict[str, int]:
+    """Practice runs this student has had on each subtopic (for the planner's run limit)."""
+    rows = await fetch_all(
+        conn,
+        """
+        SELECT skill.parent_id AS sub, count(DISTINCT a.session_id) AS runs
+        FROM attempts a
+        JOIN study_sessions ss ON ss.id = a.session_id AND ss.session_type = 'guided'
+        JOIN question_versions v ON v.id = a.question_version_id
+        JOIN question_classifications c
+          ON c.question_id = v.question_id AND c.classification_role = 'primary'
+        JOIN curriculum_items skill ON skill.id = c.curriculum_item_id
+        WHERE a.student_id = :s AND ss.subject_id = :subject
+        GROUP BY skill.parent_id
+        """,
+        s=student_id,
+        subject=subject_id,
+    )
+    return {str(r["sub"]): int(r["runs"]) for r in rows}
+
+
+#: A run's minutes, measured: from this many finished runs, held between these bounds (a run
+#: left open overnight, or skimmed in a minute, says nothing about the student's pace).
+RUN_MINUTES_FROM = 3
+RUN_MINUTES_RANGE = (10, 30)
+
+
+async def _run_minutes(conn: AsyncConnection, student_id: UUID) -> int:
+    """How long a run of ten takes this student: the median of their last ten finished runs."""
+    rows = await fetch_all(
+        conn,
+        """
+        SELECT extract(epoch FROM ss.ended_at - ss.started_at) / 60.0
+               / greatest(1, (SELECT count(DISTINCT a.question_version_id) FROM attempts a
+                              WHERE a.session_id = ss.id)) * :per_run AS minutes
+        FROM study_sessions ss
+        WHERE ss.student_id = :s AND ss.session_type = 'guided' AND ss.ended_at IS NOT NULL
+        ORDER BY ss.ended_at DESC
+        LIMIT 10
+        """,
+        s=student_id,
+        per_run=engine.RUN_LENGTH,
+    )
+    if len(rows) < RUN_MINUTES_FROM:
+        return engine.RUN_MINUTES
+    found = sorted(float(r["minutes"]) for r in rows)
+    middle = found[len(found) // 2]
+    low, high = RUN_MINUTES_RANGE
+    return round(min(high, max(low, middle)))
 
 
 async def opened_subtopics(conn: AsyncConnection, student_id: UUID, subject_id: UUID) -> list[str]:
@@ -259,6 +317,7 @@ def _summary(plan: engine.Roadmap) -> dict[str, Any]:
         "runs_per_day": plan.runs_per_day,
         "status": plan.status,
         "advice": plan.advice,
+        "pace_advice": plan.pace_advice,
         "total_now": plan.total_now,
         "total_expected": plan.total_expected,
         "target_total": plan.target_total,
@@ -483,6 +542,7 @@ async def read(
         runs_per_day=summary["runs_per_day"],
         status=summary["status"],
         advice=summary["advice"],
+        pace_advice=summary.get("pace_advice"),
         total_now=summary["total_now"],
         total_expected=summary["total_expected"],
         target_total=summary["target_total"],
@@ -543,7 +603,7 @@ async def start_item(
     else:
         # A mixed run mixes only what the syllabus order has opened for this student.
         opened = await opened_subtopics(conn, student_id, item["subject_id"])
-        mixed = RunFilters(subtopic_ids=opened) if opened else None
+        mixed = RunFilters(subtopic_ids=[UUID(u) for u in opened]) if opened else None
         filters = RunFilters(subtopic_ids=[item["subtopic_id"]]) if item["kind"] == "run" else mixed
         try:
             session_id = await begin_run(

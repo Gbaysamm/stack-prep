@@ -75,7 +75,12 @@ def runs(items):
 
 
 def test_capacity_follows_the_study_time() -> None:
-    assert runs_per_day(30) == 2 and runs_per_day(5) == 1 and runs_per_day(120) == 8 and runs_per_day(600) == 20
+    assert (
+        runs_per_day(30) == 2
+        and runs_per_day(5) == 1
+        and runs_per_day(120) == 8
+        and runs_per_day(600) == 20
+    )
     days = study_dates(TODAY, TODAY + timedelta(days=14), (1, 3, 5))
     assert all(d.isoweekday() in (1, 3, 5) for d in days) and len(days) == 6
 
@@ -253,3 +258,38 @@ def test_no_total_out_of_400_from_fewer_than_four_subjects() -> None:
     assert one.status == "needs_checkups"
     four = build(spec(*FOUR))
     assert four.total_now is not None and four.total_expected is not None
+
+
+def test_a_subtopic_stops_holding_the_rest_back_after_four_runs() -> None:
+    # A slow student is not stuck: four runs without securing it, and the path moves past it.
+    from dataclasses import replace
+
+    base = units("bio", [0.2, None, None, None, None])
+    stuck = (replace(base[0], runs=4), *base[1:])
+    assert [u.unit_id for u in open_units(base)] == ["bio-u0", "bio-u1", "bio-u2"]
+    assert [u.unit_id for u in open_units(stuck)] == ["bio-u0", "bio-u1", "bio-u2", "bio-u3"]
+
+
+def test_too_little_time_opens_more_and_says_how_much_more_a_day() -> None:
+    # Sixty subtopics, three weeks, fifteen minutes a day: the open window widens so the plan
+    # still reaches the end, and the student is told the time a day that would cover it.
+    from engine.roadmap import _pace, runs_to_secure
+
+    big = subject("biology", [None] * 60, target=70)
+    tight = spec(big, exam=TODAY + timedelta(days=21), minutes=15, target_total=None)
+    plan = build(tight)
+    assert plan.pace_advice is not None and plan.pace_advice.startswith("Add ")
+    roomy = build(spec(big, exam=TODAY + timedelta(weeks=40), minutes=120, target_total=None))
+    assert roomy.pace_advice is None
+    assert runs_to_secure([big]) == 2.0
+    _ = _pace  # imported for the reader: the rule lives there
+
+
+def test_a_slower_runner_fits_fewer_runs_in_the_same_time() -> None:
+    assert runs_per_day(60) == 4
+    assert runs_per_day(60, run_minutes=20) == 3
+    slow = build(spec(*FOUR, minutes=60, today=TODAY))
+    slower = build(
+        RoadmapInput(TODAY, TODAY + timedelta(weeks=20), (1, 2, 3, 4, 5, 6), 60, FOUR, 250, 20)
+    )
+    assert slower.runs_per_day < slow.runs_per_day

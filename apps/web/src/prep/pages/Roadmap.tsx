@@ -45,6 +45,8 @@ function headline(roadmap: RoadmapData): string {
 
 function subline(roadmap: RoadmapData): string {
   if (roadmap.subjects.length === 0) return "We'll build your plan from it.";
+  // Covering the syllabus comes before any target: say that first.
+  if (roadmap.pace_advice) return roadmap.pace_advice;
   if (roadmap.advice) return roadmap.advice;
   if (roadmap.status === 'needs_checkups') return 'Your total out of 400 shows once all four subjects have a check-up.';
   if (roadmap.status === 'no_target') return 'Set a target score and the plan aims at it.';

@@ -15,6 +15,27 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### A slow student is never stuck: a run limit, a pace check, and each student's own run time
+- **What:**
+  - Run limit: a subtopic not secured after 4 runs (`STUCK_AFTER_RUNS`) stops holding the rest
+    of the syllabus back; it stays open, and its missed questions keep coming back.
+  - Pace check, each morning: per subject, the subtopics not yet moved past × the student's
+    runs-to-secure (their own average once 3 are secured, else 2) against the runs that
+    subject has before exam day (75% of them; the rest are reviews, mixed runs, check-ups).
+    When short, more subtopics open at once in proportion, and the roadmap's one line says
+    "Add 30 minutes a day to cover everything in time." (or, beyond five hours, that the
+    most-asked topics come first).
+  - Run time: a student's own minutes per run (the median of their last 10 finished runs,
+    per 10 questions, held between 10 and 30) replace the 15-minute guess once they have 3
+    runs, so runs a day = their minutes ÷ their run time.
+- **Why:** the founder: with daily re-planning and the syllabus order, a slow student could
+  stall on the first subtopics and never reach the rest; the hours per run were a guess.
+- **Where:** `packages/engine/src/engine/roadmap.py` (`moved_past`, `_pace`, `_pace_advice`,
+  `runs_to_secure`, `RoadmapInput.run_minutes`), `projection.py` (`UnitStanding.runs`), tests;
+  `apps/api/src/app/routers/roadmap.py` (`_runs_by_subtopic`, `_run_minutes`, `pace_advice`);
+  `apps/web/src/prep/pages/Roadmap.tsx`, `roadmapApi.ts`.
+- **Status:** done locally; engine 104 tests, roadmap/practice/check-up API tests pass. Not pushed.
+
 ### The roadmap follows the syllabus order, re-plans each morning; difficulty moves on two in a row
 - **What:**
   - Syllabus order is the prerequisite order (founder's rule). A subject's subtopics are taken

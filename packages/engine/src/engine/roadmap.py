@@ -22,7 +22,11 @@ Exam-ready gets an activity every      gets one in any fourteen days
 ≤ 30 minutes on one skill in a row     one run is ~15 minutes and the next run is always a
                                        different subtopic or subject
 Syllabus order (the prerequisites)    :func:`open_units`: a subject's subtopics open in the
-                                       syllabus's order, a few at a time
+                                       syllabus's order, a few at a time; after STUCK_AFTER_RUNS
+                                       runs without securing one, the path moves past it
+Pace                                   :func:`_pace`: if the open subtopics would not reach the
+                                       syllabus's end in time, more open at once, and the
+                                       student is told the time a day that would
 Exam phase (≤ 6 weeks): mixed ≥ 40%    :func:`_next_days`
 Final 3 weeks: don't start skills      :func:`_startable`
 needing > 10% of the remaining time
@@ -90,6 +94,14 @@ OPEN_AHEAD = 3
 #: Secured: at least Developing (spec §9.1), from enough answers to say so.
 SECURED = 0.40
 SECURED_AFTER = 3
+#: A subtopic not secured after this many runs no longer holds the rest back: the path moves
+#: past it (its missed questions keep coming back as comebacks). A slow student is never stuck
+#: on the first few subtopics for weeks.
+STUCK_AFTER_RUNS = 4
+#: Runs a subtopic takes to secure, until the student's own record says otherwise.
+RUNS_TO_SECURE = 2.0
+#: Share of runs that can go to new subtopics; the rest is reviews, mixed runs and check-ups.
+NEW_WORK_SHARE = 0.75
 
 Kind = Literal["run", "mixed", "mock", "checkup"]
 #: Spec §9.4's reason codes, with the check-up added (weekly, not only at onboarding).
@@ -123,6 +135,8 @@ class RoadmapInput:
     subjects: tuple[SubjectInput, ...]
     #: Out of 400; split across the subjects when they have no target of their own.
     target_total: float | None = None
+    #: How long one run takes this student, measured from their runs (RUN_MINUTES until then).
+    run_minutes: int = RUN_MINUTES
 
 
 @dataclass(frozen=True)
@@ -168,38 +182,94 @@ class Roadmap:
     advice: str | None
     subjects: tuple[SubjectPlan, ...]
     items: tuple[PlannedItem, ...] = field(default=())
+    #: When the open subtopics would not reach the syllabus's end by exam day: the time a day
+    #: that would ("Add 30 minutes a day to cover everything in time.").
+    pace_advice: str | None = None
 
 
 def secured(unit: UnitStanding) -> bool:
     return unit.answered >= SECURED_AFTER and (unit.mastery or 0.0) >= SECURED
 
 
-def open_units(units: Sequence[UnitStanding]) -> list[UnitStanding]:
+def moved_past(unit: UnitStanding) -> bool:
+    """Secured, or given STUCK_AFTER_RUNS runs already: it no longer holds the rest back."""
+    return secured(unit) or unit.runs >= STUCK_AFTER_RUNS
+
+
+def open_units(units: Sequence[UnitStanding], ahead: int = OPEN_AHEAD) -> list[UnitStanding]:
     """The subtopics a student may be given now, the syllabus's order being the prerequisites.
 
     ``units`` come in syllabus order (topic by topic, subtopic by subtopic). Every secured one
-    stays open (for review and to push it higher), and the first OPEN_AHEAD not yet secured
-    are open too; everything after them waits. So a student who has not got the basics is not
-    sent to what builds on them, and a student who already has them is placed past them as soon
-    as a check-up or a run shows it. A subtopic with no questions yet is stepped over.
+    stays open (for review and to push it higher), and the first ``ahead`` not yet secured
+    are open too; everything after them waits. One given STUCK_AFTER_RUNS runs without being
+    secured stays open but stops holding the rest back. So a student who has not got the
+    basics is not sent to what builds on them, and a student who already has them is placed
+    past them as soon as a check-up or a run shows it. A subtopic with no questions yet is
+    stepped over.
     """
     opened: list[UnitStanding] = []
     waiting = 0
     for unit in units:
         if not unit.teachable:
             continue
-        if secured(unit):
+        if moved_past(unit):
             opened.append(unit)
             continue
-        if waiting >= OPEN_AHEAD:
+        if waiting >= ahead:
             break
         opened.append(unit)
         waiting += 1
     return opened
 
 
-def runs_per_day(minutes_per_day: int) -> int:
-    return max(1, min(MAX_RUNS_PER_DAY, minutes_per_day // RUN_MINUTES))
+def runs_per_day(minutes_per_day: int, run_minutes: int = RUN_MINUTES) -> int:
+    return max(1, min(MAX_RUNS_PER_DAY, minutes_per_day // max(1, run_minutes)))
+
+
+def runs_to_secure(subjects: Sequence[SubjectInput]) -> float:
+    """This student's own pace: runs per subtopic secured so far, or RUNS_TO_SECURE."""
+    done = [u.runs for s in subjects for u in s.units if secured(u) and u.runs > 0]
+    if len(done) < 3:
+        return RUNS_TO_SECURE
+    return min(float(STUCK_AFTER_RUNS), sum(done) / len(done))
+
+
+def _pace(
+    measured: Sequence[SubjectInput],
+    allocated: dict[str, tuple[int, Projection]],
+    pace: float,
+) -> tuple[dict[str, int], int]:
+    """How many not-yet-secured subtopics each subject opens at once, and the runs still short.
+
+    A subject's remaining syllabus needs about ``pace`` runs per subtopic not yet moved past;
+    the runs it has are its share of the sessions to exam day, less the reviews, mixed runs
+    and check-ups. When that is short, more subtopics open at once in proportion, so the plan
+    still reaches the end, and the shortfall is reported for the student.
+    """
+    ahead: dict[str, int] = {}
+    short = 0.0
+    for subject in measured:
+        count = allocated[subject.subject_id][0]
+        left = [u for u in subject.units if u.teachable and not moved_past(u)]
+        need = len(left) * pace
+        have = count * NEW_WORK_SHARE
+        if need <= have or not left:
+            ahead[subject.subject_id] = OPEN_AHEAD
+            continue
+        short += need - have
+        ahead[subject.subject_id] = min(len(left), ceil(OPEN_AHEAD * need / max(have, 1.0)))
+    return ahead, ceil(short)
+
+
+def _pace_advice(spec: RoadmapInput, days: int, short_runs: int) -> str | None:
+    """The time a day that would cover the rest of the syllabus in time."""
+    if short_runs <= 0 or days <= 0:
+        return None
+    extra = ceil(short_runs / NEW_WORK_SHARE / days) * spec.run_minutes
+    if spec.minutes_per_day + extra > MAX_RUNS_PER_DAY * spec.run_minutes:
+        return "More to cover than time left: the most-asked topics come first."
+    extra = ceil(extra / 15) * 15
+    return f"Add {extra} minutes a day to cover everything in time."
 
 
 def study_dates(today: date, exam_date: date | None, study_days: Sequence[int]) -> list[date]:
@@ -267,7 +337,9 @@ def _expected_total(spec: RoadmapInput, minutes: int, study_days: Sequence[int])
         return None
     targets = _targets(spec)
     now = {s.subject_id: score_now(s.units) for s in measured}
-    sessions = len(study_dates(spec.today, spec.exam_date, study_days)) * runs_per_day(minutes)
+    sessions = len(study_dates(spec.today, spec.exam_date, study_days)) * runs_per_day(
+        minutes, spec.run_minutes
+    )
     allocated = _allocate(measured, _shares(measured, now, targets), sessions)
     return _total([p.score_projected for _, p in allocated.values()])
 
@@ -285,8 +357,9 @@ def _status(expected: float | None, target: float | None) -> Status:
 def _advice(spec: RoadmapInput, status: Status, target: float | None) -> str | None:
     if status not in ("stretch", "out_of_reach") or target is None:
         return None
-    longer = spec.minutes_per_day + RUN_MINUTES
-    if runs_per_day(longer) > runs_per_day(spec.minutes_per_day):
+    longer = spec.minutes_per_day + spec.run_minutes
+    now = runs_per_day(spec.minutes_per_day, spec.run_minutes)
+    if runs_per_day(longer, spec.run_minutes) > now:
         reached = _expected_total(spec, longer, spec.study_days)
         if reached is not None and reached >= target:
             return f"Study {longer} minutes a day instead of {spec.minutes_per_day} to reach it."
@@ -296,7 +369,7 @@ def _advice(spec: RoadmapInput, status: Status, target: float | None) -> str | N
         reached = _expected_total(spec, spec.minutes_per_day, [*days, extra])
         if reached is not None and reached >= target:
             return "Add one more study day a week to reach it."
-    best = _expected_total(spec, MAX_RUNS_PER_DAY * RUN_MINUTES, range(1, 8))
+    best = _expected_total(spec, MAX_RUNS_PER_DAY * spec.run_minutes, range(1, 8))
     if best is not None and best < target:
         return f"The time left allows about {round(best)}; aim for that, or start earlier."
     return "Give it more time each day to reach it."
@@ -398,7 +471,7 @@ def _week_ends(today: date, last: date) -> list[date]:
 def build(spec: RoadmapInput) -> Roadmap:
     """The roadmap for this student, today."""
     dates = study_dates(spec.today, spec.exam_date, spec.study_days)
-    per_day = runs_per_day(spec.minutes_per_day)
+    per_day = runs_per_day(spec.minutes_per_day, spec.run_minutes)
     sessions = len(dates) * per_day
     targets = _targets(spec)
     measured = [s for s in spec.subjects if s.last_checkup is not None]
@@ -464,7 +537,8 @@ def build(spec: RoadmapInput) -> Roadmap:
     else:
         status = _status(total_expected, target_total)
 
-    items = _next_days(spec, dates, per_day, measured, allocated, shares) if dates else []
+    ahead, short = _pace(measured, allocated, runs_to_secure(spec.subjects))
+    items = _next_days(spec, dates, per_day, measured, allocated, shares, ahead) if dates else []
     return Roadmap(
         today=spec.today,
         exam_date=spec.exam_date,
@@ -479,6 +553,7 @@ def build(spec: RoadmapInput) -> Roadmap:
         advice=_advice(spec, status, target_total) if dates and len(spec.subjects) == 4 else None,
         subjects=tuple(subject_plans),
         items=tuple(items),
+        pace_advice=_pace_advice(spec, len(dates), short) if spec.exam_date else None,
     )
 
 
@@ -489,6 +564,7 @@ def _next_days(
     measured: Sequence[SubjectInput],
     allocated: dict[str, tuple[int, Projection]],
     shares: dict[str, float],
+    ahead: dict[str, int],
 ) -> list[PlannedItem]:
     """The next seven days, slot by slot."""
     horizon = spec.today + timedelta(days=FIXED_DAYS - 1)
@@ -498,7 +574,7 @@ def _next_days(
         # The runs come from the open subtopics only (syllabus order); the scores above still
         # count every subtopic, since the exam does.
         count = allocated[subject.subject_id][0]
-        opened = open_units(subject.units)
+        opened = open_units(subject.units, ahead.get(subject.subject_id, OPEN_AHEAD))
         if not opened:
             queues[subject.subject_id] = []
             continue
