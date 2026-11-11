@@ -32,7 +32,7 @@ import {
 } from '../icons.js';
 import { progressApi, type Overview } from '../progressApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
-import { Button, CountUp, Skeleton, Steps, cx, daysUntil, useToast } from '../ui.js';
+import { Button, CountUp, Skeleton, cx, daysUntil, useToast } from '../ui.js';
 import { examTitle, isHiddenExam } from './Exams.js';
 import { CountdownTip } from '../countdown.js';
 import './Onboarding.css';
@@ -537,16 +537,6 @@ function Flow({
                     />
                   </section>
                 ) : null}
-                <div className="onb-next">
-                  <span className="sj-eyebrow">Then</span>
-                  <Steps
-                    steps={[
-                      { title: 'Your subjects', body: 'Pick the ones you are sitting.' },
-                      { title: 'Your goal', body: 'Your exam day, target score and study days.' },
-                      { title: 'Your first check-up', body: 'A short set of questions that predicts your score today.' },
-                    ]}
-                  />
-                </div>
               </>
             ) : null}
             {step === 1 && exam ? (

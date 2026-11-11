@@ -13,6 +13,16 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ---
 
+## 2026-11-11
+
+### Onboarding: the "Then 01 02 03" steps are gone
+- **What:** the first onboarding step no longer lists the steps to come (subjects, goal,
+  first check-up) under the exam card.
+- **Why:** the founder: not needed. The step strip at the side (or across the top on a phone)
+  already names them, so it said the same thing twice.
+- **Where:** `apps/web/src/prep/pages/Onboarding.tsx`, `Onboarding.css` (unused `.onb-next` rules removed).
+- **Status:** done locally, checked at 1440 and 390; not pushed.
+
 ## 2026-11-10
 
 ### The path as a ladder card, and a roadmap that is never blank
