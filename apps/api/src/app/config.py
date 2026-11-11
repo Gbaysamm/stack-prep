@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal
 
 from pydantic import Field, field_validator
@@ -11,9 +12,14 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _IDENTIFIER = re.compile(r"^[a-z_][a-z0-9_]*$")
 
+#: The checkout's own .env, found from this file, so the API reads it wherever it is started
+#: from (started from apps/api it found none, and ran with no AI key). A .env in the working
+#: directory still comes after it and wins; real environment variables win over both.
+_REPO_ENV = Path(__file__).resolve().parents[4] / ".env"
+
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=(_REPO_ENV, ".env"), extra="ignore")
 
     app_env: Literal["local", "ci", "staging", "production"] = "local"
     log_level: str = "info"

@@ -15,6 +15,19 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### The API finds the checkout's .env wherever it starts; tests never see a paid key
+- **What:** settings read the checkout's own `.env` (found from `config.py`) as well as one in
+  the working directory, so an API started from `apps/api` has its AI key. Started that way it
+  had none: every coach question fell back ("The answer is A.") and the studio voice was not
+  found. The test setup now blanks the OpenAI and Paystack keys, so running tests on a laptop
+  with a real `.env` can never spend money. The coach's fallback, when it truly cannot answer,
+  now says so on the board ("I can't answer questions right now. The working above shows why
+  the answer is A.") instead of only the letter.
+- **Why:** the founder asked the coach twice and got "The answer is A." both times.
+- **Where:** `apps/api/src/app/config.py`, `tests/conftest.py`, `app/tutor.py`, `tests/test_tutor.py`.
+- **Status:** done locally; tutor tests pass. Not pushed. Production reads its settings from its
+  own environment, unaffected.
+
 ### Kokoro makes one line at a time, the line a student waits on first
 - **What:** the free Kokoro voice is now made one line at a time on the server, and a line the
   board is waiting on goes ahead of lines being made in advance. Opening a lesson still makes

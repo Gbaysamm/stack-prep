@@ -7,7 +7,13 @@ connection from being reused on a loop that has already closed.
 
 from __future__ import annotations
 
+import os
 from collections.abc import AsyncIterator
+
+# Tests never spend money: whatever the checkout's .env holds, the paid services see no key
+# (environment variables win over .env). A test that wants a key sets one itself.
+os.environ["OPENAI_API_KEY"] = ""
+os.environ["PAYSTACK_SECRET_KEY"] = ""
 
 import pytest
 

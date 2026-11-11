@@ -917,7 +917,10 @@ def fallback_text(lesson: Lesson) -> str:
     return (
         "SAY: I cannot talk this through right now, but the whole working is still on the "
         "board.\n"
-        f"BOARD: The answer is {lesson.correct_option_key}.\n"
+        # The board line is what is read on screen: it says why there is no answer, not just
+        # the letter, which read as the coach brushing the question off.
+        "BOARD: I can't answer questions right now. The working above shows why the answer "
+        f"is {lesson.correct_option_key}.\n"
         "SAY: You can ask a person to look at this question with you."
     )
 

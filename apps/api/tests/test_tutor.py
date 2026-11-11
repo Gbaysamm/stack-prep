@@ -160,7 +160,9 @@ def test_the_fallback_after_the_board_has_finished_gives_the_answer() -> None:
         text=fallback_text(replace(LESSON, correct_option_key="A", step_index=None)),
         source="fallback",
     )
-    assert reply.board == ["The answer is A."]
+    assert reply.board == [
+        "I can't answer questions right now. The working above shows why the answer is A."
+    ]
     assert "ask a person" in reply.spoken
 
 
