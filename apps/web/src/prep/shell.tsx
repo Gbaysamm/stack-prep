@@ -571,7 +571,9 @@ export function FocusShell({
   right,
   children,
   backInstead,
+  step,
 }: {
+  /** Kept for screen readers only: the bar itself says where the student is. */
   eyebrow?: ReactNode;
   title: ReactNode;
   exitTo: string;
@@ -580,8 +582,10 @@ export function FocusShell({
   progress?: number;
   right?: ReactNode;
   children: ReactNode;
-  /** Show a back arrow on the left instead of a close button on the right. */
+  /** Show a back arrow instead of a close button. */
   backInstead?: boolean;
+  /** Where the student is, shown as "6/15" beside the progress bar. */
+  step?: { at: number; of: number };
 }) {
   const [asking, setAsking] = useState(false);
   const exitButton = (
@@ -602,23 +606,28 @@ export function FocusShell({
   );
   return (
     <div className="sj-focus">
+      {/* One line within the page width, no band: leave, the subject, a thick progress bar
+          with the count, and the page's own extra (a timer, the score). */}
       <header className="sj-focusbar">
-        {backInstead ? exitButton : null}
-        <div className="what">
-          {eyebrow ? <span className="sj-eyebrow">{eyebrow}</span> : null}
-          <strong>{title}</strong>
-        </div>
-        <div className="right">
-          {right}
-          {backInstead ? null : exitButton}
-        </div>
-        {progress !== undefined ? (
-          <div className="progress" aria-hidden="true">
-            <span
-              style={{ width: `${Math.max(0, Math.min(1, progress)) * 100}%` }}
-            />
+        <div className="in">
+          {exitButton}
+          <div className="what">
+            {eyebrow ? <span className="sr-only">{eyebrow}</span> : null}
+            <strong>{title}</strong>
           </div>
-        ) : null}
+          {progress !== undefined ? (
+            <div className="track" aria-hidden="true">
+              <span style={{ width: `${Math.max(0, Math.min(1, progress)) * 100}%` }} />
+            </div>
+          ) : null}
+          {step ? (
+            <span className="count sj-mono" aria-hidden="true">
+              {step.at}
+              <i>/{step.of}</i>
+            </span>
+          ) : null}
+          {right ? <div className="right">{right}</div> : null}
+        </div>
       </header>
       {children}
       {confirmExit ? (

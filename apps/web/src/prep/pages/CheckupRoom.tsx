@@ -29,7 +29,6 @@ import { QuestionTools } from '../QuestionTools.js';
 const clockOf = (seconds: number) =>
   `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
 
-const pad2 = (n: number) => String(n).padStart(2, '0');
 
 export function CheckupRoom() {
   const { sessionId = '' } = useParams();
@@ -350,6 +349,7 @@ export function CheckupRoom() {
       exitTo="/checkup"
       confirmExit={exit}
       progress={answered / total}
+      step={{ at: question.position, of: total }}
       right={
         <span className="sj-timer" aria-label={`Time so far ${clockOf(seconds)}`} role="timer">
           <IconClock size={16} />
@@ -366,10 +366,6 @@ export function CheckupRoom() {
               aria-labelledby="cr-stem"
             >
               <header className="cr-qhead">
-                <span className="cr-qnum sj-mono">
-                  QUESTION {pad2(question.position)}
-                  <span className="of"> / {pad2(total)}</span>
-                </span>
                 <span className="qt-group">
                   {/* JAMB's topic when the server names it; older servers only send the section. */}
                   <Badge className="cr-topic">

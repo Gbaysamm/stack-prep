@@ -603,6 +603,7 @@ export function PracticeRoom() {
         stay: "Keep going",
       }}
       progress={total ? position.done / total : 0}
+      step={total ? { at: position.number, of: total } : undefined}
       right={
         counts ? (
           <span
@@ -976,10 +977,6 @@ function Asking({
 
       <article className="pr-qcard">
         <header className="pr-qhead">
-          <span className="pr-qno sj-mono">
-            Question {pad(number)}
-            <span> / {pad(total)}</span>
-          </span>
           <div className="pr-tags">
             <Badge tone="ghost">{question.topic_name}</Badge>
             <Badge>{question.subtopic_name}</Badge>

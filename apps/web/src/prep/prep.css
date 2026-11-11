@@ -1310,58 +1310,98 @@
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: #fff;
+  /* The page's paper all the way up, so nothing white shows round the floating bar. */
+  background: var(--paper);
+}
+/* Read by screen readers, not shown. */
+.sj .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 .sj-focusbar {
   position: sticky;
   top: 0;
   z-index: 15;
+  padding: 14px 16px 0;
+  pointer-events: none;
+}
+/* A floating rounded bar, like the public site's, no wider than the content under it. */
+.sj-focusbar .in {
   display: flex;
   align-items: center;
   gap: 14px;
-  min-height: 64px;
-  padding: 10px max(16px, calc((100% - 1100px) / 2));
-  background: rgba(255, 255, 255, 0.78);
-  -webkit-backdrop-filter: blur(18px) saturate(180%);
-  backdrop-filter: blur(18px) saturate(180%);
-  border-bottom: 1px solid var(--gray-100);
+  width: 100%;
+  max-width: 1200px;
+  min-height: 60px;
+  margin: 0 auto;
+  padding: 8px 12px 8px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  backdrop-filter: blur(18px) saturate(1.5);
+  box-shadow:
+    inset 0 0 0 1px var(--gray-100),
+    0 10px 28px rgba(31, 0, 80, 0.08);
+  pointer-events: auto;
 }
 .sj-focusbar .what {
+  flex: 0 1 auto;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
 }
 .sj-focusbar .what strong {
+  display: block;
   font-family: var(--f-display);
   font-weight: 600;
-  font-size: 18px;
+  font-size: 17px;
   letter-spacing: -0.02em;
   line-height: 1.1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.sj-focusbar .right {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+/* With no progress bar, the title takes the line. */
+.sj-focusbar .what:nth-last-child(1),
+.sj-focusbar .what:has(+ .right) {
+  flex: 1;
 }
-.sj-focusbar .progress {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  height: 3px;
+/* The progress: a thick rounded bar, the done part purple with a soft highlight on top. */
+.sj-focusbar .track {
+  position: relative;
+  flex: 1;
+  min-width: 80px;
+  height: 14px;
+  border-radius: 999px;
   background: var(--gray-100);
+  overflow: hidden;
 }
-.sj-focusbar .progress > span {
+.sj-focusbar .track > span {
   display: block;
   height: 100%;
+  min-width: 14px;
+  border-radius: 999px;
   background: var(--purple-600);
-  border-radius: 0 3px 3px 0;
+  box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.22);
   transition: width 500ms var(--ease);
+}
+.sj-focusbar .count {
+  flex: none;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-900);
+}
+.sj-focusbar .count i {
+  font-style: normal;
+  color: var(--gray-500);
+}
+.sj-focusbar .right {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
 }
 .sj-timer {
   display: inline-flex;
@@ -2025,12 +2065,19 @@
     flex: 1;
   }
   .sj-focusbar {
-    padding: 8px 12px;
-    padding-top: calc(8px + env(safe-area-inset-top));
-    gap: 10px;
+    padding: calc(10px + env(safe-area-inset-top)) 16px 0;
   }
-  .sj-focusbar .what strong {
-    font-size: 16px;
+  .sj-focusbar .in {
+    gap: 10px;
+    min-height: 52px;
+    padding: 6px 12px 6px 6px;
+  }
+  /* A phone keeps the bar, the count and the extra; there is no room for the subject too. */
+  .sj-focusbar .what:has(+ .track) {
+    display: none;
+  }
+  .sj-focusbar .track {
+    height: 12px;
   }
 }
 @media (min-width: 861px) {

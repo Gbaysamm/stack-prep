@@ -1115,9 +1115,8 @@
 
 /* ---------------------------------------------------------------- family on narrower screens */
 @media (max-width: 1100px) and (min-width: 861px) {
-  .sj .sj-focus:has(.pr-main) .sj-focusbar {
-    padding-left: max(16px, calc((100% - 836px) / 2));
-    padding-right: max(16px, calc((100% - 836px) / 2));
+  .sj .sj-focus:has(.pr-main) .sj-focusbar .in {
+    max-width: 836px;
   }
 }
 @media (max-width: 860px) {
@@ -1548,16 +1547,9 @@
   animation: pr-pulse 1.2s var(--ease) infinite;
 }
 
-/* The focus bar's text lines up with the question card's content, not a wider column. */
-.sj .sj-focus:has(.pr-main) .sj-focusbar {
-  padding-left: max(16px, calc((100% - 896px) / 2));
-  padding-right: max(16px, calc((100% - 896px) / 2));
-}
-@media (max-width: 860px) {
-  .sj .sj-focus:has(.pr-main) .sj-focusbar {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
+/* The focus bar lines up with the question card, not a wider column. */
+.sj .sj-focus:has(.pr-main) .sj-focusbar .in {
+  max-width: 896px;
 }
 
 /* A keyboard ring that keeps the option's own shape. */

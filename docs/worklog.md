@@ -15,6 +15,20 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### The check-up and practice bar: a floating rounded bar the width of the content
+- **What:** the top bar of the check-up and practice rooms (`FocusShell`) is now a floating,
+  fully rounded light-glass bar, like the public site's, no wider than the content under it
+  (the check-up's two columns, the practice card). On one line: leave, the subject, a thick
+  rounded progress bar, the count ("6/15"), then the timer or score. The "QUESTION 6 OF 15"
+  label is gone (kept for screen readers), and so is the "QUESTION 06 / 15" repeated on the
+  question cards. The focus pages are on the lavender paper all the way up, so no white band
+  shows round the bar. On a phone the subject is left out to give the bar room.
+- **Why:** the founder: the old header was a full-width white band with a thin line, too long,
+  and the question number was said twice.
+- **Where:** `apps/web/src/prep/shell.tsx` (`FocusShell`, new `step`), `prep.css`
+  (`.sj-focusbar`, `.sr-only`), `pages/CheckupRoom.tsx`, `pages/PracticeRoom.tsx` and `.css`.
+- **Status:** done locally, checked at 1440 and 390; not pushed.
+
 ### A chosen chip is the height of its row
 - **What:** chosen chips and toggles no longer carry the 3-4px purple ledge underneath
   (`.sj-chip` pressed, onboarding and Goal days, the calendar's day and month chips, the run
