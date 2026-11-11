@@ -97,6 +97,9 @@ class UnitStanding:
     #: None when the check-up never reached it.
     mastery: float | None
     answered: int
+    #: False when we have no questions for it yet: it cannot be practised, so the syllabus
+    #: order steps over it rather than waiting on it (roadmap.open_units).
+    teachable: bool = True
 
 
 @dataclass(frozen=True)

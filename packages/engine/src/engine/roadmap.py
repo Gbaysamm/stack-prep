@@ -21,6 +21,8 @@ Exam-ready gets an activity every      gets one in any fourteen days
 14 days
 ≤ 30 minutes on one skill in a row     one run is ~15 minutes and the next run is always a
                                        different subtopic or subject
+Syllabus order (the prerequisites)    :func:`open_units`: a subject's subtopics open in the
+                                       syllabus's order, a few at a time
 Exam phase (≤ 6 weeks): mixed ≥ 40%    :func:`_next_days`
 Final 3 weeks: don't start skills      :func:`_startable`
 needing > 10% of the remaining time
@@ -82,6 +84,12 @@ SUBJECTS_IN_EXAM = 4
 #: Within this many marks (out of 400) of the target is a stretch, not out of reach.
 STRETCH_MARGIN = 15.0
 FIXED_DAYS = 7
+#: The syllabus order is the prerequisite order: of a subject's subtopics, taken in that order,
+#: only this many not yet secured are open at once. The next opens as one is secured.
+OPEN_AHEAD = 3
+#: Secured: at least Developing (spec §9.1), from enough answers to say so.
+SECURED = 0.40
+SECURED_AFTER = 3
 
 Kind = Literal["run", "mixed", "mock", "checkup"]
 #: Spec §9.4's reason codes, with the check-up added (weekly, not only at onboarding).
@@ -160,6 +168,34 @@ class Roadmap:
     advice: str | None
     subjects: tuple[SubjectPlan, ...]
     items: tuple[PlannedItem, ...] = field(default=())
+
+
+def secured(unit: UnitStanding) -> bool:
+    return unit.answered >= SECURED_AFTER and (unit.mastery or 0.0) >= SECURED
+
+
+def open_units(units: Sequence[UnitStanding]) -> list[UnitStanding]:
+    """The subtopics a student may be given now, the syllabus's order being the prerequisites.
+
+    ``units`` come in syllabus order (topic by topic, subtopic by subtopic). Every secured one
+    stays open (for review and to push it higher), and the first OPEN_AHEAD not yet secured
+    are open too; everything after them waits. So a student who has not got the basics is not
+    sent to what builds on them, and a student who already has them is placed past them as soon
+    as a check-up or a run shows it. A subtopic with no questions yet is stepped over.
+    """
+    opened: list[UnitStanding] = []
+    waiting = 0
+    for unit in units:
+        if not unit.teachable:
+            continue
+        if secured(unit):
+            opened.append(unit)
+            continue
+        if waiting >= OPEN_AHEAD:
+            break
+        opened.append(unit)
+        waiting += 1
+    return opened
 
 
 def runs_per_day(minutes_per_day: int) -> int:
@@ -459,7 +495,14 @@ def _next_days(
     units = {u.unit_id: u for s in measured for u in s.units}
     queues: dict[str, list[tuple[str, str, Reason, Value, PlannedUnit]]] = {}
     for subject in measured:
-        projection = allocated[subject.subject_id][1]
+        # The runs come from the open subtopics only (syllabus order); the scores above still
+        # count every subtopic, since the exam does.
+        count = allocated[subject.subject_id][0]
+        opened = open_units(subject.units)
+        if not opened:
+            queues[subject.subject_id] = []
+            continue
+        projection = project(opened, sessions_available=max(count, len(opened)))
         planned = _queue(projection)
         extra = _coverage(projection, spec.today)
         # Coverage runs go in every fourth place, so they never crowd out the high-value work.

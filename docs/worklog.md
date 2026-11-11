@@ -15,6 +15,33 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### The roadmap follows the syllabus order, re-plans each morning; difficulty moves on two in a row
+- **What:**
+  - Syllabus order is the prerequisite order (founder's rule). A subject's subtopics are taken
+    in the syllabus's order (`display_order`); every secured one (≥ 40% from 3+ answers) stays
+    open, and only the next three not yet secured are open; everything after waits. Runs and
+    mixed runs come only from open subtopics; subtopics with no questions are stepped over.
+    Scores and the expected total still count every subtopic. (`engine.roadmap.open_units`,
+    `OPEN_AHEAD = 3`; `UnitStanding.teachable`.)
+  - The plan is re-built each morning (`new_day`, migration 043) as well as after a check-up or
+    a goal change, so yesterday's runs shape today; today's stops are not re-planned mid-day
+    except by those two. The weekly record counts a stop only while its plan was the current
+    one, or when it was taken, so replaced plans leave no phantom missed stops.
+  - Practice difficulty (spec §9.5): two right in a row at the same level move up one, two
+    wrong move down one; anything else stays (was: every answer moved it).
+  - The path shows each subtopic once, with its runs ("Biology · 4 runs"), and ends with the
+    next steps: no "Exam day" stop and no "more runs" row, as on Duolingo; the target stays in
+    the hero and the subjects column.
+  - Scoring stays right ÷ answered (founder: keep it easy to follow).
+- **Why:** the founder: a student without the basics (algebra) must not be sent to what builds
+  on them (differentiation); a weak run should not wait a week to change the plan; ten stops
+  then "Exam day" read as all it takes.
+- **Where:** `packages/engine/src/engine/roadmap.py`, `projection.py`, tests;
+  `apps/api/src/app/routers/roadmap.py`, `practice.py`; `database/migrations/043_roadmap_daily.sql`;
+  `apps/web/src/prep/pages/Roadmap.tsx`, `Journey.tsx`, `Journey.css`.
+- **Status:** done locally; engine 101, API 568 and web tests pass; checked at 1440 and 390.
+  Not pushed.
+
 ### The path's Start button and level squares
 - **What:** the roadmap's Start (and Carry on) button has a play icon in front instead of an
   arrow behind, and a step's button can no longer shrink or wrap (the arrow had dropped under

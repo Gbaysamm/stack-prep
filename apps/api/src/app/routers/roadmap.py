@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 from datetime import date, timedelta
+from dataclasses import replace
 from typing import Annotated, Any, Literal
 from uuid import UUID
 
@@ -27,7 +28,13 @@ from app.auth import require_student
 from app.db import connection, fetch_all
 from app.routers import checkup as checkup_router
 from app.routers.checkup import _subtopics
-from app.routers.practice import OWN_RUNS_AFTER, RunFilters, _standings_from_history, begin_run
+from app.routers.practice import (
+    EXCLUDED_POOL,
+    OWN_RUNS_AFTER,
+    RunFilters,
+    _standings_from_history,
+    begin_run,
+)
 from engine import roadmap as engine
 from engine.version import ENGINE_VERSION
 
@@ -146,8 +153,7 @@ async def _inputs(
     days = next((r["study_days"] for r in subjects if r["study_days"]), None)
     inputs: list[engine.SubjectInput] = []
     for row in subjects:
-        units, _ = await _subtopics(conn, row["id"])
-        standings = await _standings_from_history(conn, student_id, row["id"], units)
+        standings = await _standings(conn, student_id, row["id"])
         inputs.append(
             engine.SubjectInput(
                 subject_id=str(row["id"]),
@@ -182,6 +188,38 @@ async def _inputs(
     return spec, snapshot
 
 
+async def _teachable(conn: AsyncConnection, subject_id: UUID) -> set[str]:
+    """The subject's subtopics with questions a run can serve."""
+    rows = await fetch_all(
+        conn,
+        """
+        SELECT DISTINCT skill.parent_id AS sub
+        FROM deliverable_questions dq
+        JOIN questions q ON q.id = dq.question_id AND q.usage_pool <> :pool
+        JOIN curriculum_items skill ON skill.id = dq.primary_skill_id
+        WHERE dq.subject_id = :subject
+        """,
+        subject=subject_id,
+        pool=EXCLUDED_POOL,
+    )
+    return {str(r["sub"]) for r in rows}
+
+
+async def _standings(
+    conn: AsyncConnection, student_id: UUID, subject_id: UUID
+) -> list[engine.UnitStanding]:
+    """Where the student stands in each subtopic, in syllabus order, marked teachable or not."""
+    units, _ = await _subtopics(conn, subject_id)
+    found = await _standings_from_history(conn, student_id, subject_id, units)
+    taught = await _teachable(conn, subject_id)
+    return [replace(u, teachable=u.unit_id in taught) for u in found]
+
+
+async def opened_subtopics(conn: AsyncConnection, student_id: UUID, subject_id: UUID) -> list[str]:
+    """The subtopics this student may be given now, in syllabus order (engine.open_units)."""
+    return [u.unit_id for u in engine.open_units(await _standings(conn, student_id, subject_id))]
+
+
 def _goal_part(snapshot: dict[str, Any]) -> dict[str, Any]:
     """The parts of the inputs a student changes on purpose (not their scores)."""
     return {
@@ -207,8 +245,10 @@ def _rebuild_reason(
         return "checkup"
     if _goal_part(stored) != _goal_part(snapshot):
         return "goal"
-    if today > active["built_for"] + timedelta(days=engine.FIXED_DAYS - 1):
-        return "new_week"
+    # Each morning: yesterday's results shape today. Today's stops are never re-planned under
+    # the student except by a check-up or a goal change above.
+    if today > active["built_for"]:
+        return "new_day"
     return None
 
 
@@ -410,7 +450,14 @@ async def read(
                count(*) FILTER (WHERE state = 'done') AS done,
                count(*) FILTER (WHERE state <> 'to_do' AND day > :week_ago) AS due7,
                count(*) FILTER (WHERE state = 'done' AND day > :week_ago) AS done7
-        FROM ({ITEM_SQL} WHERE i.student_id = :s AND i.day <= :today) AS everything
+        FROM ({ITEM_SQL} WHERE i.student_id = :s AND i.day <= :today
+              -- A stop counts while its plan was the current one, or when it was taken: a plan
+              -- replaced (each morning, or by a check-up) leaves no phantom missed stops.
+              AND (i.session_id IS NOT NULL OR NOT EXISTS (
+                SELECT 1 FROM roadmaps mine, roadmaps later
+                WHERE mine.id = i.roadmap_id AND later.student_id = i.student_id
+                  AND later.created_at > mine.created_at AND later.built_for <= i.day))
+             ) AS everything
         """,
             s=student_id,
             today=today,
@@ -494,17 +541,20 @@ async def start_item(
         )
         session_id = state.session_id
     else:
-        filters = RunFilters(subtopic_ids=[item["subtopic_id"]]) if item["kind"] == "run" else None
+        # A mixed run mixes only what the syllabus order has opened for this student.
+        opened = await opened_subtopics(conn, student_id, item["subject_id"])
+        mixed = RunFilters(subtopic_ids=opened) if opened else None
+        filters = RunFilters(subtopic_ids=[item["subtopic_id"]]) if item["kind"] == "run" else mixed
         try:
             session_id = await begin_run(
                 conn, student_id, item["subject_id"], item["length"] or 10, filters, planned=True
             )
         except HTTPException as error:
-            if error.status_code != 422 or filters is None:
+            if error.status_code != 422 or item["kind"] != "run":
                 raise
             # Nothing new left in that subtopic for this student: a mixed run instead.
             session_id = await begin_run(
-                conn, student_id, item["subject_id"], item["length"] or 10, None, planned=True
+                conn, student_id, item["subject_id"], item["length"] or 10, mixed, planned=True
             )
     await conn.execute(
         text(

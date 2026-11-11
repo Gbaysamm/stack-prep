@@ -14,6 +14,7 @@ from engine.roadmap import (
     RoadmapInput,
     SubjectInput,
     build,
+    open_units,
     runs_per_day,
     study_dates,
 )
@@ -120,13 +121,46 @@ def test_a_day_mixes_subjects_and_never_repeats_a_subtopic_back_to_back() -> Non
 
 def test_every_weak_topic_gets_an_activity_within_fourteen_days() -> None:
     # S6: a 14-day simulation; every in-scope topic below Exam-ready gets an activity. The
-    # plan is re-built after seven days, from the same standings.
+    # plan is re-built after seven days, from the same standings. In scope means open in the
+    # syllabus order: the secured ones (≥ 40%) and the next three not yet secured.
     many = subject("maths", [0.1, 0.2, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.62], target=70)
     first = build(spec(many, target_total=None, minutes=45))
     second = build(spec(many, target_total=None, minutes=45, today=TODAY + timedelta(days=7)))
     touched = {i.subtopic_id for i in first.items + second.items if i.subtopic_id}
-    weak = {u.unit_id for u in many.units if (u.mastery or 0) < EXAM_READY}
+    opened = {u.unit_id for u in open_units(many.units)}
+    weak = {u.unit_id for u in many.units if (u.mastery or 0) < EXAM_READY} & opened
     assert weak <= touched
+    assert touched <= opened
+
+
+def test_the_syllabus_order_comes_first() -> None:
+    # The founder's rule: no differentiation for a student who has not got algebra. Subtopics
+    # open in the syllabus's order; only three not yet secured are open at once.
+    maths = subject("maths", [0.2, None, None, None, 0.1, 0.1], target=80)
+    opened = [u.unit_id for u in open_units(maths.units)]
+    assert opened == ["maths-u0", "maths-u1", "maths-u2"]
+    plan = build(spec(maths, target_total=None, minutes=60))
+    assert {i.subtopic_id for i in runs(plan.items) if i.subtopic_id} <= set(opened)
+
+
+def test_a_secured_subtopic_opens_the_next() -> None:
+    # Secured (≥ 40% from 3+ answers) stays open for review and lets the next one in.
+    maths = subject("maths", [0.9, 0.5, 0.2, None, None, None], target=80)
+    assert [u.unit_id for u in open_units(maths.units)] == [
+        "maths-u0",
+        "maths-u1",
+        "maths-u2",
+        "maths-u3",
+        "maths-u4",
+    ]
+
+
+def test_a_subtopic_with_no_questions_is_stepped_over() -> None:
+    from dataclasses import replace
+
+    base = units("bio", [None, None, None, None])
+    with_gap = (replace(base[0], teachable=False), *base[1:])
+    assert [u.unit_id for u in open_units(with_gap)] == ["bio-u1", "bio-u2", "bio-u3"]
 
 
 def test_the_exam_phase_is_at_least_forty_percent_mixed() -> None:

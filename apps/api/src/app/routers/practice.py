@@ -499,8 +499,9 @@ async def _standings_from_history(
 async def _level_for(conn: AsyncConnection, student_id: UUID, subtopic_id: str) -> int:
     """The level this student is working at in one subtopic.
 
-    Their last few unaided answers there, walked the way the check-up walks: up when right,
-    down when wrong. A subtopic they have never met starts in the middle.
+    Spec §9.5: from the level of their latest answer there, two right in a row move up one
+    level and two wrong in a row move down one; anything else stays. One slip or one lucky
+    guess does not swing the difficulty. A subtopic they have never met starts in the middle.
     """
     rows = await fetch_all(
         conn,
@@ -522,7 +523,14 @@ async def _level_for(conn: AsyncConnection, student_id: UUID, subtopic_id: str) 
         return 3
     last = rows[0]
     level = int(last["level"] or 3)
-    return max(1, min(5, level + (1 if last["is_correct"] else -1)))
+    # Two in a row at this same level: after a move, it takes two more at the new level.
+    if (
+        len(rows) >= 2
+        and rows[1]["is_correct"] == last["is_correct"]
+        and int(rows[1]["level"] or 3) == level
+    ):
+        level += 1 if last["is_correct"] else -1
+    return max(1, min(5, level))
 
 
 async def _pick(

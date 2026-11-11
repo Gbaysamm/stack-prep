@@ -5,7 +5,7 @@
  */
 import { Link } from 'react-router-dom';
 
-import { IconArrowRight, IconBolt, IconPlay, IconClock, IconTarget, IconTrophy } from '../icons.js';
+import { IconArrowRight, IconBolt, IconPlay, IconClock, IconTarget } from '../icons.js';
 import { Journey, LEVEL_NAMES, type Stop } from '../Journey.js';
 import {
   itemLabel,
@@ -152,18 +152,41 @@ export function Roadmap() {
 
 /** The path: today's items (finished ones done), what comes after, and exam day at the end. */
 function pathStops(roadmap: RoadmapData, next: RoadmapItem | null): Stop[] {
-  const ahead = roadmap.items.filter((item) => item.day >= roadmap.today && item.state !== 'missed').slice(0, PATH_LENGTH);
-  const stops: Stop[] = ahead.map((item) => {
-    const state: Stop['state'] = item.state === 'done' ? 'done' : next && item.id === next.id ? 'current' : 'locked';
+  const upcoming = roadmap.items.filter((item) => item.day >= roadmap.today && item.state !== 'missed');
+  // One stop per subtopic: its runs this week are grouped, so the path reads as the syllabus's
+  // steps rather than the same three names over and over. Check-ups, mocks and mixed runs stand
+  // on their own.
+  type Group = { first: RoadmapItem; items: RoadmapItem[] };
+  const groups: Group[] = [];
+  const bySubtopic = new Map<string, Group>();
+  for (const item of upcoming) {
+    if (item.kind === 'run' && item.subtopic_id) {
+      const found = bySubtopic.get(item.subtopic_id);
+      if (found) {
+        found.items.push(item);
+        continue;
+      }
+      const group = { first: item, items: [item] };
+      bySubtopic.set(item.subtopic_id, group);
+      groups.push(group);
+    } else {
+      groups.push({ first: item, items: [item] });
+    }
+  }
+  const shownGroups = groups.slice(0, PATH_LENGTH);
+  const stops: Stop[] = shownGroups.map(({ first: item, items }) => {
+    const done = items.every((i) => i.state === 'done');
+    const holdsNext = next != null && items.some((i) => i.id === next.id);
+    const state: Stop['state'] = done ? 'done' : holdsNext ? 'current' : 'locked';
     const level = item.level ?? undefined;
+    const left = items.filter((i) => i.state !== 'done').length;
+    const runs = left > 1 ? `${left} runs` : null;
     return {
       key: item.id,
       title: item.kind === 'checkup' ? `${item.subject_name} check-up` : itemLabel(item),
       line:
         item.kind === 'run'
-          ? level
-            ? `${item.subject_name} · ${LEVEL_NAMES[level]}`
-            : (item.subject_name ?? undefined)
+          ? [item.subject_name, level ? LEVEL_NAMES[level] : null, runs].filter(Boolean).join(' · ')
           : item.kind === 'checkup'
             ? 'Checkpoint'
             : item.kind === 'mock'
@@ -174,14 +197,6 @@ function pathStops(roadmap: RoadmapData, next: RoadmapItem | null): Stop[] {
       state,
       level: item.kind === 'run' ? level : undefined,
     };
-  });
-  stops.push({
-    key: 'exam',
-    title: 'Exam day',
-    line: roadmap.target_total !== null ? `Target ${Math.round(roadmap.target_total)}` : 'Your target',
-    icon: <IconTrophy size={20} />,
-    state: 'locked',
-    finish: true,
   });
   return stops;
 }
