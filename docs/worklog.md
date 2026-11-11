@@ -15,6 +15,19 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### Onboarding cannot be skipped; the path's lit row is even
+- **What:** a new student has no "Skip for now" and the logo is not a link while setting up;
+  only a student changing an existing goal gets "Back to home". The side rail goes back only
+  to steps already reached, and ticks a step only when it is really complete (no more "Your
+  goal" ticked while it says "Not picked yet"). In the ladder card, rows have 3px more padding
+  below than above (the tiles' ledge), and an empty end slot is hidden, so the current row on
+  a phone no longer carries an empty line under it.
+- **Why:** the founder: these steps are important and should not be skippable; the lit row's
+  bottom padding looked wrong.
+- **Where:** `apps/web/src/prep/pages/Onboarding.tsx` (`canLeave`, rail state and disabling),
+  `apps/web/src/prep/Journey.css`.
+- **Status:** done locally, checked at 1440 and 390 (onboarding and the roadmap); not pushed.
+
 ### Onboarding: English ticked for real; a calmer top; no red outlines when the list is full
 - **What:** Use of English is now part of the saved choice everywhere (on load, on every change,
   on save), never more than the exam allows, and its card shows the tick; the "Everyone sits

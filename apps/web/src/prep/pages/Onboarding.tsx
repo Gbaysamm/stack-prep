@@ -187,6 +187,8 @@ export function Onboarding() {
     );
   }
 
+  const canLeave = finished || Boolean(load.data?.[1].some((goal) => goal.target_score != null && goal.exam_date));
+
   return (
     <div className="onb">
       <div className="onb-sky" aria-hidden="true">
@@ -195,15 +197,24 @@ export function Onboarding() {
       </div>
       <header className="onb-bar">
         <div className="onb-wrap onb-bar-in">
-          <Link to="/home" className="onb-brand" aria-label="Stack Prep home">
-            <img src="/brand/mark-96.png" alt="" width={34} height={34} />
-            <span>Stack Prep</span>
-          </Link>
-          {finished ? null : (
-            <Link to="/home" className="onb-skip">
-              Skip for now
+          {/* Setting up is not skippable: only a student changing an existing goal (or one who has
+              finished) gets a way out, by the logo or the link. */}
+          {canLeave ? (
+            <Link to="/home" className="onb-brand" aria-label="Stack Prep home">
+              <img src="/brand/mark-96.png" alt="" width={34} height={34} />
+              <span>Stack Prep</span>
             </Link>
+          ) : (
+            <span className="onb-brand">
+              <img src="/brand/mark-96.png" alt="" width={34} height={34} />
+              <span>Stack Prep</span>
+            </span>
           )}
+          {canLeave && !finished ? (
+            <Link to="/home" className="onb-skip">
+              Back to home
+            </Link>
+          ) : null}
         </div>
       </header>
       {body}
@@ -462,7 +473,8 @@ function Flow({
   };
 
   const rail: { value: ReactNode; state: 'done' | 'current' | 'todo' }[] = STEPS.map((_, index) => ({
-    state: done ? 'done' : index === step ? 'current' : index <= reached ? 'done' : 'todo',
+    // Ticked only when it is really complete, not merely visited.
+    state: done ? 'done' : index === step ? 'current' : index <= reached && !problem(index) ? 'done' : 'todo',
     value: null,
   }));
   rail[EXAM]!.value = exam ? exam.short_name : null;
@@ -715,7 +727,7 @@ function Rail({
                 type="button"
                 className={cx('onb-railbtn', state)}
                 onClick={() => onGo(index)}
-                disabled={done || (index > reached && index !== step + 1)}
+                disabled={done || index > reached}
                 aria-current={!done && index === step ? 'step' : undefined}
               >
                 <span className="onb-railrow">

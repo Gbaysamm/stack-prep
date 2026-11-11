@@ -12,7 +12,8 @@
   align-items: center;
   gap: 14px;
   min-height: 64px;
-  padding: 10px 12px;
+  /* 3px more below than above: the tiles' ledge sits under them, so tile and ledge are centred. */
+  padding: 9px 12px 12px;
   border-radius: var(--r-lg);
 }
 /* The line down the left, from each tile to the next. */
@@ -20,7 +21,7 @@
   content: '';
   position: absolute;
   left: 33px;
-  top: 52px;
+  top: 51px;
   bottom: -12px;
   width: 3px;
   border-radius: 2px;
@@ -91,6 +92,10 @@
   align-items: center;
   gap: 12px;
 }
+/* Nothing to show at the end (the current step with no button): no slot, so no empty line on a phone. */
+.sj .jr-end:empty {
+  display: none;
+}
 .sj .jr-lock {
   color: var(--gray-300);
 }
@@ -123,7 +128,7 @@
   }
   .sj .jr-step {
     gap: 12px;
-    padding: 10px;
+    padding: 9px 10px 12px;
   }
   .sj .jr-step:not(:last-child)::after {
     left: 31px;
