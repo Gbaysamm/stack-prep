@@ -1,7 +1,7 @@
-# Subtopic lesson: the structure of plant and animal cells and the function of each part, taught
-# plainly. One textbook animal cell grows on the board part by part (stages a to a10), each part
-# labelled in its own colour with an arrow and a short note of its job; then a labelled plant
-# cell (b) shows the plant-only parts.
+# Subtopic lesson: the structure of plant and animal cells and the function of each part, built
+# to docs/lessons/subtopic-lesson-guide.md. One textbook animal cell grows on the board part by
+# part (stages a to a10), each part labelled in its own colour with an arrow and a short note of
+# its job; then a labelled plant cell (b) shows the plant-only parts.
 format_version: 1
 subject: biology
 subtopic: 'Cell structure and functions of cell components'
@@ -12,24 +12,34 @@ sources:
   - https://edupadi.com/classroom/lessons/ss1/biology/the-cell/page/1
   - https://classnotes.ng/?p=70074
 moments:
-  - section: 'Cell structure'
-    say: 'Inside every cell, small parts called organelles do different jobs. JAMB asks which organelle does which job almost every year. So let us draw one cell and label it.'
-    write: 'Cell structure: which part does which job?'
+  - section: 'Welcome'
+    say: 'Welcome. Today''s lesson is cell structure and the functions of the cell components.'
+    write: 'Cell structure and functions of cell components'
     doodle: {name: 'custom:sub_bio_cell_structure_a', id: cell, size: scene, caption: 'an animal cell'}
 
-  - section: 'The cell'
+  - section: 'Introduction'
     say: 'Every living thing is made of cells. The cell is the basic unit of structure and function of life. An amoeba is one cell, and your body has trillions.'
     write: 'Cell: the basic unit of structure and function of life'
     doodle_do:
       - {id: cell, op: pulse, 'on': 'cell'}
 
+  - say: 'Inside a cell are small parts called organelles, and each one has its own job. JAMB asks about them nearly every year.'
+    write: 'Organelles: the parts of a cell, each with a job'
+
+  - say: 'JAMB names a job and asks which organelle does it, or it shows a cell diagram and asks you to name a labelled part.'
+    write: 'JAMB asks: which organelle does this job? name the labelled part'
+
+  - section: 'Objectives'
+    say: 'By the end of this lesson you will be able to name the parts of plant and animal cells, state the function of each part, and compare the two.'
+    write: '1. Name the parts   2. State their functions   3. Compare plant and animal cells'
+
   - section: 'Cell membrane'
-    say: 'The cell membrane is the thin layer round the whole cell. It is made of protein and lipid. It controls what enters and leaves the cell.'
+    say: 'We start with an animal cell. The cell membrane is the thin layer round the whole cell, made of protein and lipid. It controls what enters and leaves the cell.'
     write: 'Cell membrane: controls what enters and leaves'
     doodle_do:
       - {id: cell, op: stage, stage: 'custom:sub_bio_cell_structure_a2', 'on': 'membrane'}
 
-  - say: 'We say the membrane is selectively permeable, which means it lets some substances through and holds others back.'
+  - say: 'We say it is selectively permeable, which means it lets some substances through and holds others back. Water and oxygen, for example, pass through it easily.'
     write: 'Selectively (differentially) permeable'
     doodle_do:
       - {id: cell, op: pulse, part: membrane, 'on': 'selectively'}
@@ -109,29 +119,30 @@ moments:
     doodle_do:
       - {id: cell, op: stage, stage: 'custom:sub_bio_cell_structure_a9', 'on': 'Lysosomes'}
 
-  - section: 'Centrioles and vacuoles'
+  - section: 'Centrioles'
     say: 'Centrioles are a pair of short tubes at right angles, near the nucleus. In cell division they form the spindle that pulls the chromosomes apart. Animal cells have them.'
     write: 'Centrioles: form the spindle in cell division (animal cells)'
     doodle_do:
       - {id: cell, op: stage, stage: 'custom:sub_bio_cell_structure_a10', 'on': 'Centrioles'}
 
-  - say: 'A vacuole is a fluid-filled sac. In an animal cell the vacuoles are few, small and temporary, holding food or water for a short time.'
-    write: 'Animal cell vacuoles: small and temporary'
+  - section: 'Vacuoles'
+    say: 'A vacuole is a fluid-filled sac. In an animal cell the vacuoles are few, small and temporary, holding food or water for a short time.'
+    write: 'Vacuole: fluid-filled sac; small and temporary in animal cells'
     doodle_do:
       - {id: cell, op: circle, part: vacuole, 'on': 'vacuoles'}
 
-  - section: 'The plant cell'
+  - section: 'Plant cell'
     say: 'Now a plant cell. It has a membrane, cytoplasm, nucleus, mitochondria, ribosomes, endoplasmic reticulum and Golgi body too, plus three structures an animal cell lacks.'
     write: 'Plant cell: the same organelles, plus three more'
     doodle: {name: 'custom:sub_bio_cell_structure_b', id: plant, size: scene, caption: 'a plant cell', 'on': 'plant'}
 
   - section: 'Cell wall'
     say: 'First, the cell wall, outside the cell membrane. It is made of cellulose. It gives the cell a fixed shape, supports it, and stops it bursting when it takes in water.'
-    write: 'Cell wall: cellulose, gives shape and support'
+    write: 'Cell wall: cellulose; gives shape and support'
     doodle_do:
       - {id: plant, op: circle, part: wall, 'on': 'wall'}
 
-  - say: 'Careful. The cell wall is fully permeable, so it lets almost everything through. It is the cell membrane that is selectively permeable.'
+  - say: 'The cell wall is fully permeable, so it lets almost everything through. It is the cell membrane that is selectively permeable.'
     write: 'Wall: fully permeable.  Membrane: selectively permeable'
     doodle_do:
       - {id: plant, op: pulse, part: membrane, 'on': 'membrane'}
@@ -144,6 +155,8 @@ moments:
 
   - say: 'Not every plant cell has them. Root cells, like those of cassava, and onion skin cells do not photosynthesise, so they have no chloroplasts.'
     write: 'No chloroplasts in root or onion skin cells'
+    doodle_do:
+      - {id: plant, op: pulse, part: chloroplasts, 'on': 'Root'}
 
   - section: 'Large central vacuole'
     say: 'Third, one large central vacuole, full of cell sap. It keeps the cell firm, presses the cytoplasm into a thin layer, and pushes the nucleus to the side.'
@@ -152,29 +165,50 @@ moments:
       - {id: plant, op: circle, part: vacuole, 'on': 'vacuole'}
       - {id: plant, op: pulse, part: nucleus, 'on': 'nucleus'}
 
-  - section: 'Plant versus animal'
-    say: 'So, plant cells have a cellulose wall, chloroplasts and one large vacuole. Animal cells have none of these, but they have centrioles and small vacuoles.'
+  - section: 'Comparison'
+    say: 'Now compare them. Plant cells have a cellulose wall, chloroplasts and one large vacuole. Animal cells have none of these, but they have centrioles and small vacuoles.'
     write: 'Plant: wall, chloroplasts, large vacuole.  Animal: centrioles, small vacuoles'
 
   - say: 'Plants store food as starch, and animals store it as glycogen. Plant cells have a regular shape, and animal cells are irregular.'
     write: 'Food store: starch vs glycogen.  Shape: regular vs irregular'
 
-  - section: 'Traps'
-    say: 'Trap one. Mitochondria release energy, they do not store it. Energy is stored as starch, glycogen or fat. And plant cells have mitochondria too.'
+  - say: 'Both cells have a membrane, cytoplasm, nucleus, mitochondria, ribosomes, endoplasmic reticulum and Golgi body.'
+    write: 'In both: membrane, cytoplasm, nucleus, mitochondria, ribosomes, ER, Golgi body'
+
+  - section: 'JAMB traps'
+    say: 'Here is a JAMB question. The cell organelle responsible for aerobic respiration is the nucleus, the nucleolus, the endoplasmic reticulum, or the mitochondrion?'
+    write: 'Organelle for aerobic respiration? nucleus, nucleolus, ER, mitochondrion'
+
+  - say: 'Aerobic respiration takes place in the mitochondrion, so that is the answer.'
+    write: '∴ mitochondrion'
+    doodle_do:
+      - {id: cell, op: circle, part: mitochondrion, 'on': 'mitochondrion'}
+
+  - say: 'The traps. The nucleus controls the cell but does not respire. The nucleolus makes ribosomes. The endoplasmic reticulum transports materials.'
+    write: 'Nucleus controls, nucleolus makes ribosomes, ER transports'
+
+  - say: 'One more trap. Mitochondria release energy, they do not store it. Energy is stored as starch, glycogen or fat. And plant cells have mitochondria too.'
     write: 'Mitochondria RELEASE energy; plant cells have them too'
     doodle_do:
       - {id: plant, op: circle, part: mitochondrion, 'on': 'plant'}
 
   - section: 'Check yourself'
-    say: 'Quick check. A leaf cell in sunlight is respiring and photosynthesising at the same time. Which two organelles are at work? Think before I answer.'
+    say: 'Your turn. A leaf cell in sunlight is respiring and photosynthesising at the same time. Which two organelles are at work? Pause and think.'
     write: 'Leaf cell in sunlight: respiring and photosynthesising. Which two?'
 
-  - say: 'Mitochondria, for respiration, and chloroplasts, for photosynthesis.'
-    write: 'Mitochondria + chloroplasts'
+  - say: 'Mitochondria carry out respiration, and chloroplasts carry out photosynthesis. So the answer is mitochondria and chloroplasts.'
+    write: '∴ mitochondria and chloroplasts'
     doodle_do:
       - {id: plant, op: circle, part: mitochondrion, 'on': 'Mitochondria'}
       - {id: plant, op: circle, part: chloroplasts, 'on': 'chloroplasts'}
 
-  - section: 'Remember'
-    say: 'Remember. The nucleus controls, mitochondria release energy, ribosomes make proteins, the Golgi body packages, and lysosomes digest. Plants add a wall, chloroplasts and a large vacuole.'
-    write: 'Nucleus controls, mitochondria energy, ribosomes proteins, Golgi packages, lysosomes digest'
+  - section: 'Recap'
+    say: 'Let us recap. You can now name the parts of a cell. The nucleus controls, mitochondria release energy, ribosomes make proteins, the Golgi body packages, and lysosomes digest.'
+    write: '1, 2. Nucleus controls, mitochondria energy, ribosomes proteins, Golgi packages, lysosomes digest'
+    doodle_do:
+      - {id: cell, op: pulse, 'on': 'parts'}
+
+  - say: 'And you can compare the cells. Only plant cells have a wall, chloroplasts and a large vacuole. That is the lesson. Next, try new questions on it.'
+    write: '3. Plant only: wall, chloroplasts, large vacuole'
+    doodle_do:
+      - {id: plant, op: pulse, 'on': 'plant'}

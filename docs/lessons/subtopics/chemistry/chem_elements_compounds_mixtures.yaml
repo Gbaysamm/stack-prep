@@ -12,21 +12,39 @@ sources:            # pages consulted for the approach, for reviewers
   - https://www.vedantu.com/chemistry/difference-between-compound-and-mixture
   - https://www.pearson.com/channels/general-chemistry/asset/18025671/which-of-the-following-is-a-mixture
 moments:
-  # ---------------------------------------------------------------- hook
-  - section: 'Element, compound or mixture?'
-    say: 'Sea water, brass, table salt and carbon four sulphide. Two of them are mixtures and two are compounds. By the end you will sort them in seconds.'
-    write: 'Element, compound or mixture?'
-    doodle: {name: 'custom:sub_chem_elements_compounds_mixtures_a', id: dia, size: scene, caption: 'element, compound, mixture'}
+  # ---------------------------------------------------------------- welcome
+  - section: 'Welcome'
+    say: 'Welcome. Today''s lesson is elements, compounds and mixtures.'
+    write: 'Elements, compounds and mixtures'
+
+  # ---------------------------------------------------------------- introduction
+  - section: 'Introduction'
+    say: 'Every substance around you, the air, the water you drink, the salt in your food, is an element, a compound or a mixture.'
+    write: 'every substance is an element, a compound or a mixture'
+  - say: 'JAMB asks you to tell them apart, often as which of these is a mixture. It is also the first step before separating mixtures.'
+    write: 'JAMB asks: which is a mixture? how do they differ?'
+
+  # ---------------------------------------------------------------- objectives
+  - section: 'Objectives'
+    say: 'By the end of this lesson you will be able to do four things. One, define an element, a compound and a mixture.'
+    write: '1. Define an element, a compound and a mixture'
+  - say: 'Two, tell a compound from a mixture by its composition, its properties and how it is separated.'
+    write: '2. Tell them apart: composition, properties, separation'
+  - say: 'Three, tell homogeneous mixtures from heterogeneous ones, with everyday examples.'
+    write: '3. Homogeneous and heterogeneous mixtures'
+  - say: 'Four, spot the traps JAMB sets on this topic.'
+    write: '4. Spot the JAMB traps'
 
   # ---------------------------------------------------------------- element
   - section: 'Element'
     say: 'An element is a pure substance that cannot be split into anything simpler by chemical means. Look at the box. All its atoms are of one kind, here sodium.'
     write: 'Element: cannot be split into simpler substances by chemical means'
+    doodle: {name: 'custom:sub_chem_elements_compounds_mixtures_a', id: dia, size: scene, caption: 'element, compound, mixture', 'on': box}
     doodle_do:
       - {id: dia, op: circle, part: element-tag, 'on': element}
       - {id: dia, op: pulse, part: element-box, 'on': box}
     point:
-      - {line: 1, kind: underline, at: 'cannot be split'}
+      - {line: 7, kind: underline, at: 'cannot be split'}
   - say: 'Sodium, chlorine, iron, copper, gold and carbon are elements. So is the aluminium in a cooking pot.'
     write: 'e.g. Na, Cl, Fe, Cu, Au, C, Al'
   - say: 'Careful. Oxygen gas is O two, and nitrogen gas is N two. Each molecule has two atoms, but both are the same kind, so these gases are still elements.'
@@ -49,7 +67,7 @@ moments:
     doodle_do:
       - {id: dia, op: circle, part: compound-tag, 'on': always}
     point:
-      - {line: 6, kind: circle, at: 'fixed composition'}
+      - {line: 12, kind: circle, at: 'fixed composition'}
   - say: 'Because the composition is fixed, every compound has a chemical formula. Pure water from Kano or from Lagos is always H two O.'
     write: 'a compound has a formula, e.g. NaCl, $\ce{H2O}$, $\ce{CO2}$'
   - say: 'A compound has new properties. Sodium is a soft metal that reacts violently with water. Chlorine is a poisonous greenish yellow gas. Sodium chloride is the white salt we eat.'
@@ -92,7 +110,7 @@ moments:
     write: 'heterogeneous: parts you can see, e.g. garri and water, oil on water, blood'
 
   # ---------------------------------------------------------------- comparison
-  - section: 'Element vs compound vs mixture'
+  - section: 'Comparison'
     say: 'Now compare the three boxes. An element has one kind of atom. A compound has different atoms chemically joined. A mixture has different substances that are not joined.'
     write: 'element: one kind of atom; compound: joined; mixture: not joined'
     doodle_do:
@@ -115,16 +133,20 @@ moments:
 
   # ---------------------------------------------------------------- traps
   - section: 'JAMB traps'
-    say: 'Trap one. Carbon four sulphide is a liquid, but it has a formula, C S two, so it is a compound. Rubber latex and vulcaniser''s solution are mixtures.'
-    write: '$\ce{CS2}$ = compound; latex, vulcaniser''s solution = mixtures'
+    say: 'Here is a real JAMB question. Which of these are mixtures? Petroleum, rubber latex, vulcaniser''s solution and carbon four sulphide.'
+    write: 'Which are mixtures? petroleum, rubber latex, vulcaniser''s solution, $\ce{CS2}$'
+  - say: 'Petroleum is many hydrocarbons, rubber latex is rubber in water, and vulcaniser''s solution is rubber dissolved in a solvent. All three are mixtures.'
+    write: 'petroleum, latex, vulcaniser''s solution = mixtures ✓'
+  - say: 'The trap is carbon four sulphide. It is a liquid, but it has a formula, C S two, so it is a compound, not a mixture.'
+    write: '$\ce{CS2}$ has a formula, so it is a compound ✗'
     point:
-      - {line: 22, kind: circle, at: 'compound'}
-  - say: 'Trap two. Washing soda and table salt have formulae, so they are compounds. Clean sand is mostly silicon four oxide, S i O two, so treat it as a compound.'
+      - {line: 30, kind: circle, at: 'compound'}
+  - say: 'Another trap. Washing soda and table salt have formulae, so they are compounds. Clean sand is mostly silicon four oxide, S i O two, so treat it as a compound.'
     write: 'washing soda, salt, sand ($\ce{SiO2}$) = compounds'
-  - say: 'Trap three. A mixture is not always homogeneous, and it has no formula. A compound does not keep the properties of its elements. Cross out any option that says otherwise.'
+  - say: 'A last trap. A mixture is not always homogeneous, and it has no formula. A compound does not keep its elements'' properties. Cross out any option that says otherwise.'
     write: 'mixture: not always uniform, no formula; compound: new properties'
     point:
-      - {line: 24, kind: underline, at: 'not always uniform'}
+      - {line: 32, kind: underline, at: 'not always uniform'}
 
   # ---------------------------------------------------------------- check
   - section: 'Check yourself'
@@ -140,16 +162,19 @@ moments:
     doodle_do:
       - {id: dia, op: circle, part: mixture-tag, 'on': mixture}
     point:
-      - {line: 27, kind: circle, at: 'mixture'}
+      - {line: 35, kind: circle, at: 'mixture'}
 
-  # ---------------------------------------------------------------- remember
-  - section: 'Remember'
-    say: 'Remember. An element has one kind of atom and cannot be split by chemical means. A compound is elements chemically combined in a fixed ratio, with a formula.'
-    write: 'element: one kind of atom; compound: fixed ratio, formula, new properties'
+  # ---------------------------------------------------------------- recap
+  - section: 'Recap'
+    say: 'Let us recap. An element has one kind of atom. A compound is elements chemically combined in a fixed ratio. A mixture is substances together, not chemically combined.'
+    write: '1. element: one kind of atom; compound: combined, fixed ratio; mixture: not combined'
     doodle_do:
       - {id: dia, op: pulse, part: element-tag, 'on': element}
       - {id: dia, op: pulse, part: compound-tag, 'on': compound}
-  - say: 'A mixture is not chemically combined, has no fixed composition, keeps the properties of its parts, and is separated by physical means. Ask, does it have a formula?'
-    write: 'mixture: no formula, properties kept, physical separation'
-    doodle_do:
       - {id: dia, op: pulse, part: mixture-tag, 'on': mixture}
+  - say: 'A compound has a fixed composition, a formula and new properties, and needs chemical means to separate. A mixture keeps its properties and separates by physical means.'
+    write: '2. compound: formula, new properties, chemical means; mixture: physical means'
+  - say: 'A homogeneous mixture is the same all through, like salt water or air. A heterogeneous mixture shows its parts, like garri in water.'
+    write: '3. homogeneous: salt water, air; heterogeneous: garri and water'
+  - say: 'And for the traps, ask one question. Does it have a formula? Then it is a compound, not a mixture. That''s the lesson. Next, try new questions on it.'
+    write: '4. has a formula? then not a mixture'
