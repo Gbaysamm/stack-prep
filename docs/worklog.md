@@ -15,6 +15,15 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### Onboarding: Use of English is picked for the student
+- **What:** a compulsory subject (UTME's Use of English) is ticked from the start, cannot be
+  unticked, and sits first in the list. The yellow "UTME is four subjects…" box is gone; the
+  line under the title now reads "Use of English is in. Pick the rest."
+- **Why:** the founder: everyone sits English, so it should be selected already, and everyone
+  knows UTME is four subjects.
+- **Where:** `apps/web/src/prep/pages/Onboarding.tsx` (`withCompulsory`, `SubjectCard`), `Onboarding.css`.
+- **Status:** done locally, checked at 1440 and 390; not pushed.
+
 ### Onboarding: the State list no longer opens under the Back button
 - **What:** the step's slide-in animation now leaves no transform behind (`backwards` instead
   of `both`), so a dropdown opened in a step sits above Back and Continue.

@@ -125,6 +125,11 @@ const countWord = (n: number) => COUNT_WORDS[n] ?? String(n);
 const fullText = (exam: ExaminationOffer) =>
   `${exam.short_name} is ${countWord(exam.max_subjects ?? 0)} subjects. Remove one to add another.`;
 /** The subjects every candidate of this exam sits, in catalogue order. */
+/** The picked subjects with the exam's compulsory ones (when we teach them) always in, first. */
+function withCompulsory(exam: ExaminationOffer | undefined, picked: string[]): string[] {
+  const must = (exam?.subjects ?? []).filter((s) => s.compulsory && s.ready).map((s) => s.subject_id);
+  return [...must, ...picked.filter((id) => !must.includes(id))];
+}
 const compulsoryOf = (exam: ExaminationOffer) => exam.subjects.filter((subject) => subject.compulsory);
 
 /* ------------------------------------------------------------------ the page */
@@ -222,7 +227,7 @@ function initialChoice(exams: ExaminationOffer[], goals: GoalRow[]): Choice {
   const goalFor = new Map(goals.map((goal) => [goal.subject_id, goal]));
   const examWithGoal = exams.find((exam) => exam.subjects.some((subject) => goalFor.has(subject.subject_id)));
   const exam = exams.length === 1 ? exams[0] : examWithGoal;
-  const selected = exam ? exam.subjects.filter((s) => s.ready && goalFor.has(s.subject_id)).map((s) => s.subject_id) : [];
+  const selected = withCompulsory(exam, exam ? exam.subjects.filter((s) => s.ready && goalFor.has(s.subject_id)).map((s) => s.subject_id) : []);
   const known = selected.map((id) => goalFor.get(id)!).filter(Boolean);
   const dated = known.find((goal) => goal.exam_date);
   const paced = known.find((goal) => goal.minutes_per_day);
@@ -479,7 +484,9 @@ function Flow({
     },
     {
       title: 'Which subjects are you sitting?',
-      lede: 'Pick every one you want to prepare for. You get a check-up and a daily plan for each.',
+      lede: exam && compulsoryOf(exam).some((s) => s.ready)
+        ? `${listText(compulsoryOf(exam).filter((s) => s.ready).map((s) => s.name))} is in. Pick the rest.`
+        : 'Pick every one you are sitting.',
     },
     {
       title: 'Set your goal',
@@ -539,7 +546,7 @@ function Flow({
                   onPick={(examId) => {
                     if (examId === choice.examId) return;
                     const next = exams.find((item) => item.examination_id === examId);
-                    const keep = choice.selected.filter((id) => next?.subjects.some((s) => s.subject_id === id));
+                    const keep = withCompulsory(next, choice.selected.filter((id) => next?.subjects.some((s) => s.subject_id === id)));
                     update({ examId, selected: next?.max_subjects ? keep.slice(0, next.max_subjects) : keep });
                   }}
                 />
@@ -557,6 +564,7 @@ function Flow({
                 selected={choice.selected}
                 goalFor={goalFor}
                 onToggle={(id) => {
+                  if (subjects.some((s) => s.subject_id === id && s.compulsory && s.ready)) return;
                   const adding = !choice.selected.includes(id);
                   if (adding && exam.max_subjects != null && choice.selected.length >= exam.max_subjects) {
                     setIssue(fullText(exam));
@@ -821,30 +829,9 @@ function SubjectsStep({
 }) {
   const ready = exam.subjects.filter((subject) => subject.ready);
   const limit = exam.max_subjects;
-  const compulsory = compulsoryOf(exam);
   const allOn = ready.length > 0 && ready.every((subject) => selected.includes(subject.subject_id));
-  const rest = limit != null ? limit - compulsory.length : 0;
   return (
     <div className="onb-subjects">
-      {limit != null ? (
-        <div className="onb-info">
-          <div className="onb-info-head">
-            <span className="onb-ico yellow" aria-hidden="true">
-              <IconBook size={18} />
-            </span>
-            <strong>
-              {exam.short_name} is {countWord(limit)} subjects
-            </strong>
-          </div>
-          <p>
-            {compulsory.length
-              ? `Everyone sits ${listText(compulsory.map((subject) => subject.name))}, plus ${countWord(rest)} ${rest === 1 ? 'subject' : 'subjects'} for their course. `
-              : `Pick up to ${countWord(limit)}. `}
-            {exam.sits_together ? `All ${countWord(limit)} are sat together, on one day. ` : ''}
-            We list only the subjects we already teach, so pick each one here that you are sitting.
-          </p>
-        </div>
-      ) : null}
 
       <div className="onb-blockhead">
         <span className="onb-label" id="onb-subjects-label">
@@ -858,7 +845,9 @@ function SubjectsStep({
       </div>
 
       <div className={cx('onb-subgrid', invalid && 'invalid')} role="group" aria-labelledby="onb-subjects-label">
-        {exam.subjects.map((subject, index) => (
+        {[...exam.subjects]
+          .sort((a, b) => Number(b.compulsory && b.ready) - Number(a.compulsory && a.ready))
+          .map((subject, index) => (
           <SubjectCard
             key={subject.subject_id}
             subject={subject}
@@ -887,9 +876,18 @@ function SubjectCard({
   delay: number;
 }) {
   const disabled = !subject.ready;
+  // Everyone sits it: ticked for them, and it stays ticked.
+  const must = subject.compulsory && !disabled;
   return (
-    <label className={cx('onb-opt onb-subject', on && 'on', disabled && 'off', `sj-rise d${Math.min(delay + 1, 4)}`)}>
-      <input className="onb-sr" type="checkbox" checked={on} disabled={disabled} onChange={onToggle} />
+    <label className={cx('onb-opt onb-subject', on && 'on', must && 'must', disabled && 'off', `sj-rise d${Math.min(delay + 1, 4)}`)}>
+      <input
+        className="onb-sr"
+        type="checkbox"
+        checked={on || must}
+        disabled={disabled}
+        aria-readonly={must || undefined}
+        onChange={must ? () => undefined : onToggle}
+      />
       <span className="onb-opt-head">
         <span className={cx('onb-opt-ico', on ? 'purple' : 'soft')} aria-hidden="true">
           {disabled ? <IconLock size={18} /> : <IconBook size={18} />}
