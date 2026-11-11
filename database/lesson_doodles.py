@@ -70,6 +70,10 @@ REACTS = {"wiggle", "shake", "pop"}
 _KEYS = {"name", "caption", "near", "id", "size", "repeat", "layout"}
 _CUSTOM = re.compile(r"custom:(\d{4})_q(\d{2,3})_([a-z0-9][a-z0-9_-]*)")
 _FILE = re.compile(r"(\d{4})_q(\d{2,3})_([a-z0-9][a-z0-9_-]*)\.svg")
+#: A subtopic lesson's own doodle (docs/lessons/subtopics/<subject>/doodles/sub_<slug>_x.svg),
+#: named custom:sub_<slug>_x. Such a lesson is checked with year and number 0.
+_SUB = re.compile(r"custom:sub_[a-z0-9][a-z0-9_-]*")
+SUBTOPIC = 0
 _LIBRARY_NAME = re.compile(r"[a-z0-9][a-z0-9_-]*")
 #: A doodle's handle in its lesson, a part's name in its art, and a route's or a level's.
 _ID = re.compile(r"[a-z][a-z0-9_]*")
@@ -239,6 +243,17 @@ def read_custom_doodles(folder: Path, year: int, number: int) -> list[dict[str, 
     return found
 
 
+def read_subtopic_doodles(folder: Path, slug: str) -> list[dict[str, str]]:
+    """The doodles drawn for one subtopic lesson, checked: [{name, svg, alt_text}]."""
+    if not folder.is_dir():
+        return []
+    found: list[dict[str, str]] = []
+    for file in sorted(folder.glob(f"sub_{slug}_*.svg")):
+        checked = check_doodle(file.read_text(encoding="utf-8"), f"doodles/{file.name}")
+        found.append({"name": f"custom:{file.stem}", **checked})
+    return found
+
+
 def check_doodle_files(folder: Path, lessons: set[tuple[int, int]]) -> None:
     """Every doodle file is named YYYY_qNN_x.svg and has a written lesson to go with."""
     for file in sorted(folder.glob("*")) if folder.is_dir() else []:
@@ -256,7 +271,12 @@ def _doodle_name(
     if not isinstance(name, str) or not name.strip():
         raise SystemExit(f"{where}: a doodle needs a name")
     name = name.strip()
-    if name.startswith("custom:"):
+    if name.startswith("custom:") and year == SUBTOPIC:
+        if not _SUB.fullmatch(name):
+            raise SystemExit(f"{where}: a lesson's own doodle is named custom:sub_<lesson>_x")
+        if name not in custom:
+            raise SystemExit(f"{where}: {name}, but there is no doodles/{name[7:]}.svg")
+    elif name.startswith("custom:"):
         found = _CUSTOM.fullmatch(name)
         if not found:
             raise SystemExit(f"{where}: a custom doodle is named custom:YYYY_qNN_x ({name!r})")
@@ -681,11 +701,15 @@ class DoodleBook:
     def _stage(
         self, stage: object, held: _Held, handle: str, clean: dict[str, object], where: str
     ) -> None:
-        found = _CUSTOM.fullmatch(stage) if isinstance(stage, str) else None
-        if not isinstance(stage, str) or not found:
-            raise SystemExit(f"{where}: a stage is this question's custom:YYYY_qNN_x file")
-        if (int(found.group(1)), int(found.group(2))) != (self.year, self.number):
-            raise SystemExit(f"{where}: stage {stage} is not this question's")
+        if self.year == SUBTOPIC:
+            if not isinstance(stage, str) or not _SUB.fullmatch(stage):
+                raise SystemExit(f"{where}: a stage is this lesson's custom:sub_<lesson>_x file")
+        else:
+            found = _CUSTOM.fullmatch(stage) if isinstance(stage, str) else None
+            if not isinstance(stage, str) or not found:
+                raise SystemExit(f"{where}: a stage is this question's custom:YYYY_qNN_x file")
+            if (int(found.group(1)), int(found.group(2))) != (self.year, self.number):
+                raise SystemExit(f"{where}: stage {stage} is not this question's")
         if stage not in self.svgs:
             raise SystemExit(f"{where}: stage {stage}, but there is no doodles/{stage[7:]}.svg")
         if stage == held.name:

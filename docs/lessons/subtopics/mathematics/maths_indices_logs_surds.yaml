@@ -1,0 +1,140 @@
+# Subtopic lesson "The Tower of Twos": indices, logarithms and surds as one idea (repeated multiplication), read forwards as powers, backwards as logs, and as roots for surds; one scene grows through all three parts.
+#
+# Colours, one per idea, kept in the scene: base blocks blue, index tags purple, log box pink, root house orange.
+format_version: 1
+subject: mathematics
+subtopic: 'Indices, Logarithms and Surds'
+subtopic_id: a33da1ac-bc18-55d5-83af-029e0acd9980
+sources:
+  - https://www.headteacher.ng/lesson-note-on-indices-laws-and-exponential-equations-for-sss-1/
+  - https://www.headteacher.ng/deducing-logarithm-from-indices-and-standard-form-and-definition-of-logarithm-for-ss-1/
+  - https://lessonotes.com/v3/senior-secondary-school-1/lesson-notes-for-senior-secondary-1-3rd-term-week-2-further-mathematics-topic-is-surds.html
+  - https://edupadi.com/classroom/l/rationalizing-surds
+  - https://ancourage.academy/articles/a-maths-indices-surds-logarithms-exponentials-singapore
+moments:
+  # ---------------------------------------------------------------- Part 1: indices
+  - section: 'The Tower of Twos'
+    say: 'Welcome to the Tower of Twos, one tower for three topics. Is two to the power three, times two to the power two, two to the power six or five? Many say six. Let''s see.'
+    write: 'One tower, three topics. $2^{3} \times 2^{2} = 2^{?}$'
+    doodle: {name: 'custom:sub_maths_indices_logs_surds_a', id: tower, caption: 'the tower of twos', size: scene}
+  - section: 'What a power means'
+    say: 'Ade builds a tower, and every block is a 2, the base. The index counts the blocks. Three blocks give two to the power three, which is 8.'
+    write: '$2^{3} = 2 \times 2 \times 2 = 8$'
+    doodle_do:
+      - {id: tower, op: pulse, part: first, 'on': 'blocks'}
+      - {id: tower, op: pulse, part: count, 'on': 'index'}
+  - section: 'Law 1: multiplying, add the indices'
+    say: 'Now multiply two to the power three by two to the power two. Two to the power two is two more blocks, so watch them join the tower.'
+    write: '$2^{3} \times 2^{2} = (2 \times 2 \times 2) \times (2 \times 2)$'
+    doodle_do:
+      - {id: tower, op: stage, stage: 'custom:sub_maths_indices_logs_surds_a2', 'on': 'join'}
+  - say: 'Count the blocks. Three plus two is five, so we get two to the power five, which is 32, not six. So when we multiply the same base, we add the indices.'
+    write: '$= 2^{3+2} = 2^{5} = 32 \quad [a^{m} \times a^{n} = a^{m+n}]$'
+    point:
+      - {line: 3, kind: highlight, at: '= 32', to: {doodle: tower, part: all}}
+  - section: 'Law 2: dividing, subtract the indices'
+    say: 'Dividing does the opposite. The two twos at the bottom cancel two twos on top, so Ade takes two blocks off. Five minus two is three. So we subtract the indices.'
+    write: '$\dfrac{2^{5}}{2^{2}} = 2^{5-2} = 2^{3} \quad [a^{m} \div a^{n} = a^{m-n}]$'
+    doodle_do:
+      - {id: tower, op: circle, part: second, text: 'cancel these two', 'on': 'cancel'}
+  - section: 'Law 3: power of a power, multiply'
+    say: 'Two to the power three, all squared, is the tower of three built two times over. That makes six twos. So for a power of a power, we multiply the indices.'
+    write: '$(2^{3})^{2} = 2^{3 \times 2} = 2^{6} \quad [(a^{m})^{n} = a^{mn}]$'
+  - section: 'Zero, negative and fraction indices'
+    say: 'Two to the power three divided by itself gives index three minus three, which is nought. But 8 divided by 8 is 1. So any number to the power nought is 1.'
+    write: '$\dfrac{2^{3}}{2^{3}} = 2^{0}$ and $\dfrac{8}{8} = 1$, so $a^{0} = 1$'
+  - say: 'A negative index means one over. Two to the power minus three is one over two to the power three, which is one over 8.'
+    write: '$2^{-3} = \dfrac{1}{2^{3}} = \dfrac{1}{8} \quad [a^{-n} = \dfrac{1}{a^{n}}]$'
+  - say: 'A fraction index means a root. In two over three, the bottom 3 is the root and the top 2 is the power. The cube root of 8 is 2, our three blocks. 2 squared is 4.'
+    write: '$8^{\frac{2}{3}} = (\sqrt[3]{8})^{2} = 2^{2} = 4$'
+    doodle_do:
+      - {id: tower, op: pulse, part: first, 'on': 'blocks'}
+  - section: 'JAMB style: an equation in indices'
+    say: 'Now a typical exam question. Solve 9 to the power x plus 1 equals 27 to the power x. The key step is to write both sides with the same base.'
+    write: 'Solve $9^{x+1} = 27^{x}$'
+  - say: '9 is three squared, and 27 is three cubed. So both sides can be written in base 3.'
+    write: '$(3^{2})^{x+1} = (3^{3})^{x}$'
+  - say: 'By law 3, multiply the indices. 2 times x plus 1 is 2x plus 2, and 3 times x is 3x.'
+    write: '$3^{2x+2} = 3^{3x}$'
+  - say: 'The bases are now the same, so the indices must be equal. We equate indices.'
+    write: '$2x + 2 = 3x$'
+  - say: 'Subtract 2x from both sides. 3x minus 2x is x, so x is 2. Check it. 9 cubed is 729, and 27 squared is also 729.'
+    write: '$\therefore x = 2 \quad (9^{3} = 27^{2} = 729\ \checkmark)$'
+  - section: 'Trap: different bases'
+    say: 'Careful. The laws work only when the base is the same. Two to the power three times three to the power two is not six to the power five. It is 8 times 9, which is 72.'
+    write: '$2^{3} \times 3^{2} = 8 \times 9 = 72$, not $6^{5}$'
+  # ---------------------------------------------------------------- Part 2: logarithms
+  - section: 'Logarithms: the question how many times'
+    say: 'Ngozi asks the other way round. How many twos multiply to make 8? Count the blocks. Three. That count is the logarithm, so log base 2 of 8 is 3.'
+    write: '$2^{3} = 8$, so $\log_{2}8 = 3$'
+    doodle_do:
+      - {id: tower, op: stage, stage: 'custom:sub_maths_indices_logs_surds_a3', 'on': 'Count'}
+    point:
+      - {line: 15, kind: travel, at: 'log28 = [[3]]', from: {doodle: tower, part: log8}, text: '3 twos'}
+  - say: 'In general, log base a of N equals k means a to the power k equals N. So the log is just the index. Log base a of a is 1, and log base a of 1 is nought.'
+    write: 'Recall: $\log_{a}N = k$ means $a^{k} = N$'
+  - section: 'The laws of logarithms'
+    say: '8 times 4 is 32, which is three blocks and two more. The counts add, 3 plus 2 is 5. So the log of a product is the sum of the logs. This is the product law.'
+    write: '$\log_{2}(8 \times 4) = \log_{2}8 + \log_{2}4 = 3 + 2 = 5$'
+    doodle_do:
+      - {id: tower, op: highlight, part: log32, 'on': 'counts'}
+    point:
+      - {line: 17, kind: highlight, at: '3 + 2 = 5', to: {doodle: tower, part: log32}}
+  - say: 'In the same way, the log of a quotient is the log of the top minus the log of the bottom. And a power inside a log comes down in front.'
+    write: '$\log_{a}\dfrac{M}{N} = \log_{a}M - \log_{a}N, \quad \log_{a}M^{n} = n\log_{a}M$'
+  - section: 'JAMB style: simplify without tables'
+    say: 'A real JAMB question. Log base 2 of 6 minus log base 2 of 3, all over log base 2 of 8 minus 2 log base 2 of a half. Do the top and bottom separately.'
+    write: 'Simplify $\dfrac{\log_{2}6 - \log_{2}3}{\log_{2}8 - 2\log_{2}\frac{1}{2}}$'
+  - say: 'The top first. By the quotient law, it is log base 2 of 6 over 3, which is log base 2 of 2. One 2 makes 2, so the top is 1.'
+    write: 'Top: $\log_{2}\dfrac{6}{3} = \log_{2}2 = 1$'
+  - say: 'Now the bottom. Three twos make 8, so log base 2 of 8 is 3. A half is two to the power minus one, so log base 2 of a half is minus 1.'
+    write: '$\log_{2}8 = 3, \quad \log_{2}\tfrac{1}{2} = -1$ (since $2^{-1} = \tfrac{1}{2}$)'
+    doodle_do:
+      - {id: tower, op: pulse, part: log8, 'on': 'Three'}
+  - say: 'So the bottom is 3 minus 2 times minus 1. 2 times minus 1 is minus 2, and 3 minus minus 2 is 3 plus 2, which is 5.'
+    write: 'Bottom: $3 - 2(-1) = 3 + 2 = 5$'
+  - say: 'The top is 1 and the bottom is 5. So the answer is one over 5.'
+    write: '$\therefore \dfrac{1}{5}$'
+  - section: 'Trap: the log of a sum'
+    say: 'The product law is for a product, never a sum. Log base 2 of 8 plus 8 is log base 2 of 16, which is 4. But log base 2 of 8, twice, is 3 plus 3, which is 6.'
+    write: '$\log_{2}(8 + 8) = \log_{2}16 = 4$, not $\log_{2}8 + \log_{2}8 = 6$'
+  # ---------------------------------------------------------------- Part 3: surds
+  - section: 'Surds: numbers in the root house'
+    say: 'Beside the tower stands the root house. A number comes out only if it is a perfect square. Root 9 comes out as 3. Root 12 cannot come out whole, so it is a surd.'
+    write: '$\sqrt{9} = 3$, but $\sqrt{12} \approx 3.46$ is a surd'
+    doodle_do:
+      - {id: tower, op: stage, stage: 'custom:sub_maths_indices_logs_surds_a4', 'on': 'house'}
+  - say: 'Here is the law of surds. The root of a product is the root of each factor, multiplied.'
+    write: '$\sqrt{a \times b} = \sqrt{a} \times \sqrt{b}$'
+  - section: 'Simplify a surd'
+    say: 'To simplify root 12, find the biggest perfect square that divides 12. That is 4, since 4 times 3 is 12. So inside the house, 12 is written as 4 times 3.'
+    write: '$\sqrt{12} = \sqrt{4 \times 3}$'
+    doodle_do:
+      - {id: tower, op: stage, stage: 'custom:sub_maths_indices_logs_surds_a5', 'on': 'inside'}
+    point:
+      - {line: 27, kind: highlight, at: '4 × 3', to: {doodle: tower, part: four}}
+  - say: 'By the law of surds, that is root 4 times root 3. 4 is a perfect square, so it comes out of the house as 2. The 3 stays inside. So root 12 is 2 root 3.'
+    write: '$= \sqrt{4} \times \sqrt{3} = 2\sqrt{3}$'
+    doodle_do:
+      - {id: tower, op: stage, stage: 'custom:sub_maths_indices_logs_surds_a6', 'on': 'comes'}
+    point:
+      - {line: 28, kind: highlight, at: '= 23', to: {doodle: tower, part: result}}
+  - say: 'Surds add only when the number in the house is the same, just as 2x plus 5x is 7x. So 2 root 3 plus 5 root 3 is 7 root 3.'
+    write: '$2\sqrt{3} + 5\sqrt{3} = 7\sqrt{3}$'
+  - section: 'Trap: the root of a sum'
+    say: 'The law of surds is for a product, never a sum. Root of 9 plus 16 is root 25, which is 5. But root 9 plus root 16 is 3 plus 4, which is 7.'
+    write: '$\sqrt{9 + 16} = \sqrt{25} = 5$, not $\sqrt{9} + \sqrt{16} = 7$'
+  - section: 'Rationalising the denominator'
+    say: 'To rationalise means to clear the surd from the bottom of a fraction. The bottom is root 3 minus root 2, so we multiply by root 3 plus root 2, its conjugate.'
+    write: 'Rationalise $\dfrac{1}{\sqrt{3} - \sqrt{2}}$'
+  - say: 'Multiply the top and the bottom by the same thing, so the value of the fraction does not change. Forgetting the top is a common slip.'
+    write: '$= \dfrac{1 \times (\sqrt{3} + \sqrt{2})}{(\sqrt{3} - \sqrt{2})(\sqrt{3} + \sqrt{2})}$'
+  - say: 'The bottom is a difference of two squares. Squaring opens the root house, so root 3 squared is 3, and root 2 squared is 2. 3 minus 2 is 1.'
+    write: 'Bottom: $(\sqrt{3})^{2} - (\sqrt{2})^{2} = 3 - 2 = 1$'
+    doodle_do:
+      - {id: tower, op: pulse, part: house, 'on': 'house'}
+  - say: 'Anything over 1 is itself, so the answer is root 3 plus root 2. Check with decimals. 1 over 0.318 is about 3.15, and 1.732 plus 1.414 is about 3.15 too.'
+    write: '$\therefore \dfrac{1}{\sqrt{3} - \sqrt{2}} = \sqrt{3} + \sqrt{2} \ \checkmark$'
+  - section: 'Remember'
+    say: 'Remember the tower. Multiplying the same base adds indices. A log asks how many times, so a product becomes a sum. A root splits over a product. None works for a sum.'
+    write: '$a^{m} \times a^{n} = a^{m+n}, \quad \log_{a}MN = \log_{a}M + \log_{a}N, \quad \sqrt{ab} = \sqrt{a}\sqrt{b}$'

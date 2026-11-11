@@ -5,16 +5,21 @@
  * student missed in the subtopic: each question, its right answer, and how it is reached. When
  * they have read it, the subtopic's next run is their real attempt at it, on new questions.
  */
-import { useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import { request } from '../../lib/friendlyError.js';
 import { Maths } from '../../Maths.js';
+import { api, type NarratedLesson } from '../../student/api.js';
+import { usePremium } from '../premium.js';
 import { IconCheck } from '../icons.js';
 import { FocusShell } from '../shell.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
 import { Button, Skeleton, cx } from '../ui.js';
 import './Lesson.css';
+
+/** The board is a large module and only a lesson needs it, so it loads when first opened. */
+const Board = lazy(() => import('../../student/Board.js').then((module) => ({ default: module.Board })));
 
 interface LessonData {
   subtopic_id: string;
@@ -55,7 +60,42 @@ export function Lesson() {
     }
   };
 
+  // The written lesson from the bank, played on the board; none yet means the missed
+  // questions' working below.
+  const [board, setBoard] = useState<NarratedLesson | 'none' | null>(null);
+  const [canHear, setCanHear] = useState(false);
+  const { voice: premiumVoice } = usePremium();
+  useEffect(() => {
+    request<NarratedLesson>(`/v1/roadmap/${student.studentId}/lessons/${subtopicId}/board`)
+      .then(setBoard)
+      .catch(() => setBoard('none'));
+    api
+      .features()
+      .then((features) => setCanHear(features.coach_voice))
+      .catch(() => setCanHear(false));
+  }, [student.studentId, subtopicId]);
+
   const lesson = loaded.data;
+  if (board && board !== 'none' && lesson) {
+    return (
+      <div className="sj ls-board">
+        <Suspense fallback={null}>
+          <Board
+            title={lesson.subtopic_name}
+            subtitle={`Lesson · ${lesson.subject_name}`}
+            question={lesson.subtopic_name}
+            questionLabel="Today's lesson"
+            steps={board.beats.flatMap((beat) => beat.write)}
+            loadLesson={canHear && premiumVoice ? () => Promise.resolve(board) : undefined}
+            askLocked={<span className="sj-small sj-muted">Asking in lessons is coming next.</span>}
+            answerLine="Now try it on new questions."
+            onAsk={() => Promise.reject(new Error('Asking during a lesson is not open yet.'))}
+            onDone={() => void finish()}
+          />
+        </Suspense>
+      </div>
+    );
+  }
   return (
     <FocusShell title={lesson?.subtopic_name ?? 'Lesson'} exitTo="/roadmap">
       <main className="ls-page">

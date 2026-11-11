@@ -339,7 +339,10 @@ export function Board({
   onAsk,
   onListen,
   askLocked,
+  questionLabel = "The question",
 }: {
+  /** The label over what is written at the top: a topic lesson says so, not "The question". */
+  questionLabel?: string;
   /**
    * Fetch the lesson: the reviewed working as a teacher teaches it, with what to write and
    * what to say for each step. Undefined where the deployment has no voice, and the board
@@ -2069,8 +2072,8 @@ export function Board({
             }
           >
             {questionUp ? (
-              <section className="pb-question" aria-label="The question">
-                <span className="sj-eyebrow">The question</span>
+              <section className="pb-question" aria-label={questionLabel}>
+                <span className="sj-eyebrow">{questionLabel}</span>
                 <div
                   className="pb-question-text pb-stroke"
                   data-ink=""

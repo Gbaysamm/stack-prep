@@ -15,6 +15,28 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### Subtopic lesson bank: three pilot lessons, played on the board
+- **What:** a written lesson per subtopic, played on the whiteboard (voice, handwritten lines,
+  doodles) at the roadmap's lesson stop. Three pilots, written by parallel agents from our
+  syllabus, the subtopic's JAMB past questions and Nigerian school and tutorial explanations
+  (in our own words), in the style the founder pointed to (an AI tutor that teaches cell
+  structure "like gossip" while drawing one picture that grows):
+  - Chemistry "Elements, compounds and mixtures" (30 moments; singles, couples, the party).
+  - Mathematics "Indices, Logarithms and Surds" (36 moments; the Tower of Twos).
+  - Biology "Cell structure and functions of cell components" (32 moments; the cell compound).
+  Each lesson opens with the student's own mistakes there (the bank's trap line for each option
+  they picked, at most two). A subtopic with no written lesson keeps the missed questions'
+  working page. Asking mid-lesson is not wired yet (the box says it is coming).
+- **Where:** `docs/lessons/subtopics/<subject>/<slug>.yaml` and `doodles/sub_<slug>_x.svg`;
+  migration `045_subtopic_lesson_bank.sql`; loader `database/load_subtopic_lessons.py`
+  (`DATABASE_URL=... python database/load_subtopic_lessons.py`); `database/lesson_doodles.py`
+  (custom:sub_ names); API `routers/roadmap.py` (lesson board, voice, words),
+  `routers/practice.py` (`beats_from_moments`), `lesson_doodles.py`; web `pages/Lesson.tsx`,
+  `student/Board.tsx` (`questionLabel`).
+- **Status:** done locally; played on the board at 1440 and 390. Not pushed. Needs a teacher's
+  read for accuracy before students see them. Polish found: on the Biology board the link lines
+  from words to the drawing cross the written text, and one label is clipped at the edge.
+
 ### Lessons on the roadmap, an 80% bar, answers after a lesson count, topic tests
 - **What:**
   - The bar to pass a subtopic is 80% (was 40%). Below it after a run, the path's next stop on

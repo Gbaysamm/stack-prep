@@ -22,7 +22,9 @@ from app.lesson_cues import LessonCue, cue_of
 
 #: As the loader allows: a caption is a few words.
 MAX_CAPTION = 40
-_NAME = re.compile(r"custom:\d{4}_q\d{2,3}_[a-z0-9][a-z0-9_-]*|[a-z0-9][a-z0-9_-]*")
+_NAME = re.compile(
+    r"custom:\d{4}_q\d{2,3}_[a-z0-9][a-z0-9_-]*|custom:sub_[a-z0-9][a-z0-9_-]*|[a-z0-9][a-z0-9_-]*"
+)
 
 
 #: Doodles v2 (docs/plans/doodles-v2-contract.md), as the loader allows them.

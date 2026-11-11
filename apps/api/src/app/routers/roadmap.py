@@ -24,8 +24,9 @@ from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import scoring
+from app import premium, scoring, voice_store
 from app.auth import require_student
+from app.config import Settings, get_settings
 from app.db import connection, fetch_all
 from app.routers import checkup as checkup_router
 from app.routers.checkup import _subtopics
@@ -878,3 +879,185 @@ async def lesson_done(
             {"i": body.item_id, "s": student_id},
         )
     await conn.commit()
+
+
+async def _bank_lesson(conn: AsyncConnection, subtopic_id: UUID) -> dict[str, Any] | None:
+    """The subtopic's written lesson from the bank (migration 045), or None."""
+    rows = await fetch_all(
+        conn,
+        "SELECT moments, doodles FROM subtopic_lesson_content WHERE subtopic_id = :sub",
+        sub=subtopic_id,
+    )
+    if not rows:
+        return None
+    moments = rows[0]["moments"]
+    doodles = rows[0]["doodles"]
+    return {
+        "moments": json.loads(moments) if isinstance(moments, str) else moments,
+        "doodles": json.loads(doodles) if isinstance(doodles, str) else (doodles or []),
+    }
+
+
+async def _opening(conn: AsyncConnection, student_id: UUID, subtopic_id: UUID) -> list[str]:
+    """The student's own way in: why each option they picked was wrong, from the bank's traps.
+
+    The questions they missed here, newest first, at most two, each with the trap written for
+    the option they chose. Nothing when none of their misses has a trap on record.
+    """
+    rows = await fetch_all(
+        conn,
+        """
+        SELECT DISTINCT ON (v.question_id) a.selected_option_key, l.traps
+        FROM attempts a
+        JOIN question_versions v ON v.id = a.question_version_id
+        JOIN questions q ON q.id = v.question_id
+        JOIN question_classifications c
+          ON c.question_id = v.question_id AND c.classification_role = 'primary'
+        JOIN curriculum_items skill ON skill.id = c.curriculum_item_id
+        JOIN question_lessons l ON l.question_version_id = q.current_version_id
+        WHERE a.student_id = :s AND skill.parent_id = :sub AND a.is_correct IS FALSE
+        ORDER BY v.question_id, a.answered_at_client DESC
+        """,
+        s=student_id,
+        sub=subtopic_id,
+    )
+    said: list[str] = []
+    for row in rows:
+        traps = row["traps"]
+        traps = json.loads(traps) if isinstance(traps, str) else (traps or {})
+        line = traps.get(str(row["selected_option_key"] or ""))
+        if line:
+            said.append(str(line))
+    return said[:2]
+
+
+async def _bank_beats(
+    conn: AsyncConnection, student_id: UUID, subtopic_id: UUID
+) -> tuple[list[Any], list[Any]] | None:
+    """The lesson's beats, opened with the student's own mistakes, and its doodles."""
+    from app.lesson_doodles import LessonDoodle
+    from app.routers.practice import _Beat, beats_from_moments
+
+    bank = await _bank_lesson(conn, subtopic_id)
+    if bank is None:
+        return None
+    opening = [
+        _Beat(board_index=None, write=[], at=[], say=line)
+        for line in await _opening(conn, student_id, subtopic_id)
+    ]
+    doodles = []
+    for raw in bank["doodles"]:
+        try:
+            doodles.append(LessonDoodle.model_validate(raw))
+        except ValueError:
+            continue
+    return [*opening, *beats_from_moments(bank["moments"])], doodles
+
+
+@router.get(
+    "/{student_id}/lessons/{subtopic_id}/board",
+    summary="The subtopic's written lesson, as the board plays it",
+)
+async def lesson_board(
+    student_id: UUID,
+    subtopic_id: UUID,
+    request: Request,
+    conn: Annotated[AsyncConnection, Depends(connection)],
+) -> Any:
+    """404 when the bank has no lesson for this subtopic yet: the page shows the missed
+    questions' working instead."""
+    import hashlib
+
+    from app.routers.practice import LessonBeat, NarratedLesson
+
+    await require_student(request, conn, student_id)
+    found = await _bank_beats(conn, student_id, subtopic_id)
+    if found is None:
+        raise HTTPException(status_code=404, detail="No written lesson for this topic yet.")
+    beats, doodles = found
+    base = f"/v1/roadmap/{student_id}/lessons/{subtopic_id}/voice"
+    return NarratedLesson(
+        source="script",
+        beats=[
+            LessonBeat(
+                board_index=beat.board_index,
+                write=beat.write,
+                write_at=beat.at,
+                say=beat.say,
+                voice_url=f"{base}/{index}?v={hashlib.sha256(beat.say.encode()).hexdigest()[:12]}",
+                answer=beat.answer,
+                point=beat.point,
+                show_sketch=beat.show_sketch,
+                doodle=beat.doodle,
+                doodles=beat.doodles,
+                doodle_do=beat.doodle_do,
+                on=beat.on,
+                section=beat.section,
+                mouth=beat.mouth,
+                diagram=beat.diagram,
+                diagram_do=beat.diagram_do,
+            )
+            for index, beat in enumerate(beats)
+        ],
+        doodles=doodles,
+    )
+
+
+async def _said(conn: AsyncConnection, student_id: UUID, subtopic_id: UUID, beat: int) -> str:
+    found = await _bank_beats(conn, student_id, subtopic_id)
+    if found is None or not 0 <= beat < len(found[0]):
+        raise HTTPException(status_code=404, detail="no such beat")
+    return str(found[0][beat].say)
+
+
+@router.get("/{student_id}/lessons/{subtopic_id}/voice/{beat}", summary="One beat, spoken")
+async def lesson_voice(
+    student_id: UUID,
+    subtopic_id: UUID,
+    beat: int,
+    request: Request,
+    conn: Annotated[AsyncConnection, Depends(connection)],
+    settings: Annotated[Settings, Depends(get_settings)],
+    engine: voice_store.Engine = "studio",
+) -> Any:
+    from fastapi.responses import FileResponse
+
+    await require_student(request, conn, student_id)
+    if not (await premium.standing(conn, student_id)).allowance.voice:
+        raise HTTPException(status_code=402, detail=premium.PREMIUM_FOR_VOICE)
+    path = await voice_store.voiced(
+        await _said(conn, student_id, subtopic_id, beat), settings, engine=engine
+    )
+    if path is None:
+        raise HTTPException(status_code=404, detail="no voice for this beat")
+    return FileResponse(
+        path,
+        media_type="audio/mpeg",
+        headers={
+            "Cache-Control": "private, max-age=86400",
+            "X-Voice-Engine": voice_store.engine_for(engine, settings),
+        },
+    )
+
+
+@router.get(
+    "/{student_id}/lessons/{subtopic_id}/voice/{beat}/words",
+    summary="When each word of one beat is said",
+)
+async def lesson_voice_words(
+    student_id: UUID,
+    subtopic_id: UUID,
+    beat: int,
+    request: Request,
+    conn: Annotated[AsyncConnection, Depends(connection)],
+    settings: Annotated[Settings, Depends(get_settings)],
+    engine: voice_store.Engine = "studio",
+) -> dict[str, Any]:
+    await require_student(request, conn, student_id)
+    said = await _said(conn, student_id, subtopic_id, beat)
+    if voice_store.engine_for(engine, settings) == "kokoro":
+        await voice_store.voiced(said, settings, engine=engine)
+    found = voice_store.timings(said, settings, engine)
+    if found is None:
+        raise HTTPException(status_code=404, detail="no word timings for this beat")
+    return dict(found)

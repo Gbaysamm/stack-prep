@@ -2541,6 +2541,32 @@ async def _lesson_sketches(conn: AsyncConnection, version_id: UUID) -> list[Less
     return sketches
 
 
+def beats_from_moments(moments: list[Any]) -> list[_Beat]:
+    """A written lesson's moments as the board plays them: a question's lesson or a subtopic's
+    (roadmap.py), the same beats either way."""
+    acting = doodle_actions(moments)
+    return [
+        _Beat(
+            board_index=None,
+            write=[str(moment["write"])] if moment.get("write") else [],
+            at=[0.0] if moment.get("write") else [],
+            say=str(moment["say"]),
+            answer=bool(moment.get("answer")),
+            point=_cued_points(moment.get("point")),
+            show_sketch=_show_sketch(moment.get("show_sketch")),
+            doodle=doodle_ref(moment.get("doodle")),
+            doodles=doodle_refs(moment.get("doodles")),
+            doodle_do=acting[index],
+            on=cue_of(moment),
+            section=_words(moment.get("section")),
+            mouth=mouth_of(moment.get("mouth")),
+            diagram=diagram_of(moment.get("diagram")),
+            diagram_do=diagram_actions(moment.get("diagram_do")),
+        )
+        for index, moment in enumerate(moments)
+    ]
+
+
 async def _lesson_beats(
     conn: AsyncConnection, session_id: UUID, version_id: UUID, settings: Settings
 ) -> tuple[list[_Beat], Literal["script", "model", "steps"]]:
@@ -2582,27 +2608,7 @@ async def _lesson_beats(
         moments = json.loads(moments) if isinstance(moments, str) else moments
         traps = written["traps"]
         traps = json.loads(traps) if isinstance(traps, str) else (traps or {})
-        acting = doodle_actions(moments)
-        beats = [
-            _Beat(
-                board_index=None,
-                write=[str(moment["write"])] if moment.get("write") else [],
-                at=[0.0] if moment.get("write") else [],
-                say=str(moment["say"]),
-                answer=bool(moment.get("answer")),
-                point=_cued_points(moment.get("point")),
-                show_sketch=_show_sketch(moment.get("show_sketch")),
-                doodle=doodle_ref(moment.get("doodle")),
-                doodles=doodle_refs(moment.get("doodles")),
-                doodle_do=acting[index],
-                on=cue_of(moment),
-                section=_words(moment.get("section")),
-                mouth=mouth_of(moment.get("mouth")),
-                diagram=diagram_of(moment.get("diagram")),
-                diagram_do=diagram_actions(moment.get("diagram_do")),
-            )
-            for index, moment in enumerate(moments)
-        ]
+        beats = beats_from_moments(moments)
         chose, _ = await _mistake(conn, session_id, version_id, first=False)
         # No trap when the option they ended on was the right one: a student who got there
         # (however unsure) is not told about a mistake as if it were the one they made last.

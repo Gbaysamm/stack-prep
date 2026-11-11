@@ -1,0 +1,154 @@
+# Elements, compounds and mixtures, told as singles, a married couple and a party, on one growing scene.
+format_version: 1
+subject: chemistry
+subtopic: 'Elements, compounds and mixtures'
+subtopic_id: 4657fe1f-0818-5df4-b5ce-36b724e9b42a
+sources:            # pages consulted for the approach, for reviewers
+  - https://jambsyllabus.pages.dev/chemistry/
+  - https://edupadi.com/classroom/l/classification-of-matter
+  - https://schoolings.org/chemistry-lesson-note-for-ss1-first-term-2/
+  - https://www.headteacher.ng/first-term-chemistry-revision-for-ss-1/
+  - https://syllabus.ng/ss1-scheme-of-work/chemistry/
+  - https://www.vedantu.com/chemistry/difference-between-compound-and-mixture
+  - https://www.pearson.com/channels/general-chemistry/asset/18025671/which-of-the-following-is-a-mixture
+moments:
+  # ---------------------------------------------------------------- hook
+  - section: 'Singles, couples and the party'
+    say: 'Singles, couples and the party. Every substance in chemistry is single, married or just at a party. Learn who is who, and JAMB cannot trick you on this topic again.'
+    write: 'Singles, couples and the party'
+    doodle: {name: 'custom:sub_chem_elements_compounds_mixtures_a', id: story, size: scene, caption: 'singles, a couple, a party'}
+
+  # ---------------------------------------------------------------- element
+  - section: 'Element: the single'
+    say: 'Meet Mr Sodium and Miss Chlorine. Each is single, made of one kind of atom, and cannot be split into anything simpler by chemical means. That is an element.'
+    write: 'element: one kind of atom, cannot be split by chemical means'
+    doodle_do:
+      - {id: story, op: pulse, part: sodium, 'on': Sodium}
+      - {id: story, op: pulse, part: chlorine, 'on': Chlorine}
+      - {id: story, op: circle, part: element-tag, 'on': element}
+    point:
+      - {line: 1, kind: highlight, at: 'element', to: {doodle: story, part: element-tag}}
+      - {line: 1, kind: underline, at: 'cannot be split'}
+  - say: 'Sodium, chlorine, iron, copper, gold and carbon are elements. So is the aluminium in Mama''s cooking pot.'
+    write: 'e.g. Na, Cl, Fe, Cu, Au, C, Al'
+  - say: 'Careful. Oxygen gas is O two, two oxygen atoms holding hands like twins. Same kind of atom, so oxygen gas is still an element, not a compound.'
+    write: '$\ce{O2}$, $\ce{N2}$, $\ce{Cl2}$ are elements, not compounds'
+    doodle_do:
+      - {id: story, op: label, part: element-tag, text: 'twins like O2 are still singles', 'on': twins}
+
+  # ---------------------------------------------------------------- compound
+  - section: 'Compound: the married couple'
+    say: 'Now the wedding. Sodium and chlorine react and become chemically joined. The couple is a new household called sodium chloride, the table salt we eat.'
+    write: '$\ce{2Na + Cl2 -> 2NaCl}$'
+    doodle_do:
+      - {id: story, op: stage, stage: 'custom:sub_chem_elements_compounds_mixtures_a2', 'on': wedding}
+      - {id: story, op: circle, part: compound-tag, 'on': household}
+  - say: 'Marriage changes them. Sodium alone is a soft metal that reacts violently with water. Chlorine alone is a poisonous greenish yellow gas. Together they make harmless white salt.'
+    write: 'a compound has new properties, unlike its elements'
+    doodle_do:
+      - {id: story, op: pulse, part: couple, 'on': Together}
+  - say: 'Every couple here pays a fixed bride price. Salt is always one sodium to one chlorine. Water is always two hydrogen to one oxygen, never more, never less.'
+    write: 'fixed ratio: NaCl is 1 Na : 1 Cl, $\ce{H2O}$ is 2 H : 1 O'
+    doodle_do:
+      - {id: story, op: label, part: couple, text: 'bride price fixed: 1 Na to 1 Cl', 'on': price}
+    point:
+      - {line: 6, kind: circle, at: 'fixed ratio'}
+  - say: 'Because the ratio is fixed, every compound has a chemical formula. Pure water from Kano or from Lagos is always H two O.'
+    write: 'a compound has a formula, e.g. NaCl, $\ce{H2O}$, $\ce{CO2}$'
+  - say: 'Can this couple split up? Only by a chemical divorce. Passing electricity through melted salt, which is called electrolysis, gives back sodium and chlorine. Stirring or boiling never will.'
+    write: 'split only by chemical means, e.g. electrolysis'
+    doodle_do:
+      - {id: story, op: label, part: couple, text: 'divorce needs chemistry', 'on': divorce}
+  - say: 'So a compound is two or more elements chemically combined in a fixed ratio by mass.'
+    write: 'compound: elements chemically combined in a fixed ratio'
+    point:
+      - {line: 9, kind: highlight, at: 'compound', to: {doodle: story, part: compound-tag}}
+
+  # ---------------------------------------------------------------- mixture
+  - section: 'Mixture: the party'
+    say: 'Now Mama stirs salt into water, and it is party time. Salt guests and water guests mingle in the hall, but nobody marries anybody.'
+    write: 'salt + water = salt water, a mixture'
+    doodle_do:
+      - {id: story, op: stage, stage: 'custom:sub_chem_elements_compounds_mixtures_a3', 'on': party}
+      - {id: story, op: circle, part: mixture-tag, 'on': mingle}
+  - say: 'At a party, every guest keeps their own personality. Salt water still tastes salty, because the salt keeps its own properties.'
+    write: 'each part of a mixture keeps its own properties'
+    doodle_do:
+      - {id: story, op: pulse, part: salt-guests, 'on': salty}
+  - say: 'There is no fixed guest list either. One spoon of salt or five, it is still salt water. A mixture has no fixed ratio, so it has no formula.'
+    write: 'no fixed ratio, so no formula'
+  - say: 'Guests leave by the door, and no court is needed. Boil the salt water, and the water guests leave as steam while the salt guests stay behind.'
+    write: 'separated by physical means, e.g. evaporation'
+    doodle_do:
+      - {id: story, op: stage, stage: 'custom:sub_chem_elements_compounds_mixtures_a4', 'on': Boil}
+      - {id: story, op: cross, part: water-guests, text: 'gone as steam', 'on': steam}
+      - {id: story, op: circle, part: salt-guests, text: 'salt left', 'on': stay}
+  - say: 'So a mixture is two or more substances put together without chemical combination.'
+    write: 'mixture: substances mixed, not chemically combined'
+    point:
+      - {line: 14, kind: highlight, at: 'mixture', to: {doodle: story, part: mixture-tag}}
+  - say: 'A test for purity. A pure substance melts and boils at one sharp temperature. Pure water boils at one hundred degrees Celsius at sea level, but salt water boils higher.'
+    write: 'pure: sharp melting and boiling points; mixture: not sharp'
+
+  # ---------------------------------------------------------------- two kinds
+  - section: 'Two kinds of party'
+    say: 'Look at our party hall again. The guests are spread evenly, and you cannot see the salt at all. That is a homogeneous mixture, which means the same all through.'
+    write: 'homogeneous: the same all through, e.g. salt water, sea water, air'
+    doodle_do:
+      - {id: story, op: pulse, part: party, 'on': hall}
+  - say: 'At some parties the groups stay apart. Garri sinks in cold water, and palm oil floats on water as a layer. These are heterogeneous mixtures, which means not uniform.'
+    write: 'heterogeneous: parts you can see, e.g. garri and water, oil on water'
+  - say: 'Blood is a mixture too. Spin it in a centrifuge, and the red cells settle away from the yellow plasma.'
+    write: 'blood = cells + plasma, a mixture'
+
+  # ---------------------------------------------------------------- everyday
+  - section: 'Everyday mixtures'
+    say: 'Air is a mixture of nitrogen, oxygen, argon, carbon four oxide and water vapour. Its make-up changes from place to place, and liquid air is separated by fractional distillation.'
+    write: 'air = $\ce{N2}$ + $\ce{O2}$ + Ar + $\ce{CO2}$ + water vapour'
+  - say: 'Crude oil, or petroleum, is a mixture of many hydrocarbons. Even petrol and kerosene, the fractions we buy, are each a mixture and not a single compound.'
+    write: 'petroleum, petrol, kerosene = mixtures of hydrocarbons'
+  - say: 'Metals melted and mixed together are alloys. Brass is copper and zinc, bronze is copper and tin, and steel is iron and carbon. Every alloy is a mixture.'
+    write: 'alloys are mixtures: brass (Cu + Zn), bronze (Cu + Sn), steel (Fe + C)'
+    doodle_do:
+      - {id: story, op: label, part: party, text: 'brass: copper and zinc at a party', 'on': Brass}
+
+  # ---------------------------------------------------------------- traps
+  - section: 'How JAMB sets the trap'
+    say: 'Trap one. Carbon four sulphide is a liquid, but it has a formula, C S two, so it is a compound. Rubber latex and vulcaniser''s solution are mixtures.'
+    write: '$\ce{CS2}$ = compound; latex, vulcaniser''s solution = mixtures'
+    point:
+      - {line: 22, kind: circle, at: 'compound'}
+  - say: 'Trap two. Washing soda and table salt have formulae, so they are compounds. Clean sand is mostly silicon four oxide, S i O two, so treat it as a compound.'
+    write: 'washing soda, salt, sand ($\ce{SiO2}$) = compounds'
+  - say: 'Trap three. A mixture is not always homogeneous, and it has no formula. A compound does not keep the properties of its elements. Cross out any option that says otherwise.'
+    write: 'mixture: not always uniform, no formula; compound: new properties'
+    point:
+      - {line: 24, kind: underline, at: 'not always uniform'}
+
+  # ---------------------------------------------------------------- check
+  - section: 'Check yourself'
+    say: 'Your turn. Which of these is a mixture? Distilled water, oxygen gas, carbon four sulphide, or brass. Ask who is single, who is married, and who is at a party.'
+    write: 'Which is a mixture? distilled water, oxygen, $\ce{CS2}$, brass'
+  - say: 'Distilled water is H two O, a married couple, so it is a compound. Oxygen gas is twins of one kind, an element. Carbon four sulphide is a compound.'
+    write: 'water, $\ce{CS2}$ = compounds; oxygen = element ✗'
+    doodle_do:
+      - {id: story, op: pulse, part: couple, 'on': couple}
+      - {id: story, op: pulse, part: element-tag, 'on': element}
+  - say: 'Brass is copper and zinc at a party, with no formula and no fixed ratio. So brass is the mixture.'
+    write: 'brass = mixture ✓'
+    doodle_do:
+      - {id: story, op: circle, part: mixture-tag, text: 'brass', 'on': mixture}
+    point:
+      - {line: 27, kind: circle, at: 'mixture'}
+
+  # ---------------------------------------------------------------- remember
+  - section: 'Remember'
+    say: 'Remember. An element is a single, one kind of atom. A compound is a married couple, chemically joined in a fixed ratio, with a formula and new properties.'
+    write: 'element: one kind of atom; compound: fixed ratio, formula, new properties'
+    doodle_do:
+      - {id: story, op: pulse, part: element-tag, 'on': single}
+      - {id: story, op: pulse, part: compound-tag, 'on': couple}
+  - say: 'A mixture is a party. Nothing is chemically joined, there is no fixed ratio, each part keeps its properties, and physical means separate it. Ask, does it have a formula?'
+    write: 'mixture: no formula, properties kept, physical separation'
+    doodle_do:
+      - {id: story, op: pulse, part: mixture-tag, 'on': party}
