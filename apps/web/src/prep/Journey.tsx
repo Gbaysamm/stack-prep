@@ -28,9 +28,9 @@ export interface Stop {
 
 export const LEVEL_NAMES = ['Not started', 'Weak', 'Developing', 'Exam-ready', 'Strong', 'Mastered'];
 
-function Pips({ level }: { level: number }) {
+function Pips({ level, className }: { level: number; className?: string }) {
   return (
-    <span className="jr-pips" role="img" aria-label={`Level ${level} of 5: ${LEVEL_NAMES[level]}`} title={`Level ${level} of 5: ${LEVEL_NAMES[level]}`}>
+    <span className={cx('jr-pips', className)} role="img" aria-label={`Level ${level} of 5: ${LEVEL_NAMES[level]}`} title={`Level ${level} of 5: ${LEVEL_NAMES[level]}`}>
       {[1, 2, 3, 4, 5].map((n) => (
         <i key={n} className={n <= level ? 'on' : undefined} />
       ))}
@@ -66,11 +66,17 @@ export function Journey({ stops, action, continues }: { stops: Stop[]; action?: 
             </span>
             <span className="jr-words">
               <b>{stop.title}</b>
-              {stop.line ? <span>{stop.line}</span> : null}
+              {stop.line || stop.level ? (
+                <span className="jr-line">
+                  {stop.line}
+                  {/* On a phone the level sits on this line, so the name keeps the full width. */}
+                  {stop.level ? <Pips level={stop.level} className="on-line" /> : null}
+                </span>
+              ) : null}
             </span>
             <span className="jr-end">
               {/* A topic not started yet has no level to show: five grey squares would say nothing. */}
-              {stop.level ? <Pips level={stop.level} /> : null}
+              {stop.level ? <Pips level={stop.level} className="at-end" /> : null}
               {stop.state === 'current' && action ? (
                 action
               ) : stop.state === 'locked' && !stop.finish ? (

@@ -113,7 +113,7 @@
   align-items: center;
   gap: 3px;
 }
-.sj .jr-level {
+.sj .jr-pips .jr-level {
   margin-left: 6px;
   font-size: 12px;
   font-weight: 600;
@@ -204,5 +204,27 @@
   .sj .jr-head::before,
   .sj .jr.continues .jr-step:last-child::after {
     left: 31px;
+  }
+}
+
+/* The level: at the row's end on a wide screen, on the subject's line on a phone. */
+.sj .jr-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+.sj .jr-pips.on-line {
+  display: none;
+}
+@media (max-width: 520px) {
+  .sj .jr-pips.at-end {
+    display: none;
+  }
+  .sj .jr-pips.on-line {
+    display: flex;
+  }
+  .sj .jr-pips.on-line .jr-level {
+    margin-left: 4px;
   }
 }
