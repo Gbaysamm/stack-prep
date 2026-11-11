@@ -26,14 +26,13 @@ moments:
       - {id: dia, op: circle, part: element-tag, 'on': element}
       - {id: dia, op: pulse, part: element-box, 'on': box}
     point:
-      - {line: 1, kind: highlight, at: 'Element', to: {doodle: dia, part: element-tag}}
       - {line: 1, kind: underline, at: 'cannot be split'}
   - say: 'Sodium, chlorine, iron, copper, gold and carbon are elements. So is the aluminium in a cooking pot.'
     write: 'e.g. Na, Cl, Fe, Cu, Au, C, Al'
   - say: 'Careful. Oxygen gas is O two, and nitrogen gas is N two. Each molecule has two atoms, but both are the same kind, so these gases are still elements.'
     write: '$\ce{O2}$, $\ce{N2}$, $\ce{Cl2}$ are elements, not compounds'
     doodle_do:
-      - {id: dia, op: label, part: element-tag, text: 'O2, N2: still one kind of atom', 'on': same}
+      - {id: dia, op: pulse, part: element-box, 'on': same}
 
   # ---------------------------------------------------------------- compound
   - section: 'Compound'
@@ -41,8 +40,6 @@ moments:
     write: 'Compound: elements chemically combined in a fixed ratio'
     doodle_do:
       - {id: dia, op: stage, stage: 'custom:sub_chem_elements_compounds_mixtures_a2', 'on': compound}
-    point:
-      - {line: 4, kind: highlight, at: 'Compound', to: {doodle: dia, part: compound-tag}}
   - say: 'Look at the second box. Each particle is a sodium atom joined to a chlorine atom. Sodium burns in chlorine to form sodium chloride, which is table salt.'
     write: '$\ce{2Na + Cl2 -> 2NaCl}$'
     doodle_do:
@@ -50,7 +47,7 @@ moments:
   - say: 'The composition is fixed. Sodium chloride always has one sodium to one chlorine. Water always has two hydrogen atoms to one oxygen, which is one to eight by mass.'
     write: 'fixed composition: NaCl is 1 : 1; in $\ce{H2O}$, H : O = 1 : 8 by mass'
     doodle_do:
-      - {id: dia, op: label, part: compound-tag, text: 'NaCl: always 1 Na to 1 Cl', 'on': always}
+      - {id: dia, op: circle, part: compound-tag, 'on': always}
     point:
       - {line: 6, kind: circle, at: 'fixed composition'}
   - say: 'Because the composition is fixed, every compound has a chemical formula. Pure water from Kano or from Lagos is always H two O.'
@@ -60,7 +57,7 @@ moments:
   - say: 'A compound can be split only by chemical means. Electrolysis of molten sodium chloride gives back sodium and chlorine. Stirring, filtering or boiling never will.'
     write: 'separated only by chemical means, e.g. electrolysis'
     doodle_do:
-      - {id: dia, op: label, part: compound-box, text: 'split only by chemical means', 'on': Electrolysis}
+      - {id: dia, op: pulse, part: compound-box, 'on': Electrolysis}
 
   # ---------------------------------------------------------------- mixture
   - section: 'Mixture'
@@ -70,8 +67,6 @@ moments:
       - {id: dia, op: stage, stage: 'custom:sub_chem_elements_compounds_mixtures_a3', 'on': mixture}
       - {id: dia, op: pulse, part: salt, 'on': salt}
       - {id: dia, op: pulse, part: water, 'on': water}
-    point:
-      - {line: 10, kind: highlight, at: 'Mixture', to: {doodle: dia, part: mixture-tag}}
   - say: 'A mixture has no fixed composition. One spoon of salt or five, it is still salt water. So a mixture has no chemical formula.'
     write: 'no fixed composition, so no formula'
     doodle_do:
@@ -82,8 +77,8 @@ moments:
     write: 'separated by physical means, e.g. evaporation'
     doodle_do:
       - {id: dia, op: stage, stage: 'custom:sub_chem_elements_compounds_mixtures_a4', 'on': Boil}
-      - {id: dia, op: cross, part: water, text: 'leaves as steam', 'on': steam}
-      - {id: dia, op: circle, part: salt, text: 'salt left', 'on': left}
+      - {id: dia, op: cross, part: water, 'on': steam}
+      - {id: dia, op: circle, part: salt, 'on': left}
   - say: 'A pure substance melts and boils at one sharp temperature. Pure water boils at one hundred degrees Celsius at sea level, but salt water boils higher.'
     write: 'pure substance: sharp melting and boiling points; mixture: not sharp'
 
@@ -116,7 +111,7 @@ moments:
   - say: 'Alloys are metals melted and mixed together. Brass is copper and zinc, bronze is copper and tin, and steel is iron and carbon. Every alloy is a mixture.'
     write: 'alloys are mixtures: brass (Cu + Zn), bronze (Cu + Sn), steel (Fe + C)'
     doodle_do:
-      - {id: dia, op: label, part: mixture-tag, text: 'also air, petrol, brass, blood', 'on': alloy}
+      - {id: dia, op: pulse, part: mixture-box, 'on': alloy}
 
   # ---------------------------------------------------------------- traps
   - section: 'JAMB traps'
@@ -143,7 +138,7 @@ moments:
   - say: 'Brass is copper and zinc mixed, with no formula and no fixed composition. So brass is the mixture.'
     write: 'brass = mixture ✓'
     doodle_do:
-      - {id: dia, op: circle, part: mixture-tag, text: 'brass', 'on': mixture}
+      - {id: dia, op: circle, part: mixture-tag, 'on': mixture}
     point:
       - {line: 27, kind: circle, at: 'mixture'}
 
