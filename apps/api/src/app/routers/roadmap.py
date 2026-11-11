@@ -24,6 +24,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncConnection
 
+from app import scoring
 from app.auth import require_student
 from app.db import connection, fetch_all
 from app.routers import checkup as checkup_router
@@ -51,7 +52,7 @@ class ItemOut(BaseModel):
     id: UUID
     day: date
     position: int
-    kind: Literal["run", "mixed", "mock", "checkup"]
+    kind: Literal["run", "mixed", "mock", "checkup", "lesson", "topic_test"]
     subject_id: UUID | None
     subject_name: str | None
     subtopic_id: UUID | None
@@ -164,6 +165,7 @@ async def _inputs(
                 units=tuple(standings),
                 target=float(row["target_score"]) if row["target_score"] is not None else None,
                 last_checkup=row["last_checkup"],
+                tested_topics=frozenset(await _tested_topics(conn, student_id, row["id"])),
             )
         )
     spec = engine.RoadmapInput(
@@ -218,15 +220,62 @@ async def _standings(
     taught = await _teachable(conn, subject_id)
     runs = await _runs_by_subtopic(conn, student_id, subject_id)
     fresh = await _fresh_by_subtopic(conn, student_id, subject_id)
+    lessoned = await _taught_since_last_run(conn, student_id, subject_id)
     return [
         replace(
             u,
             teachable=u.unit_id in taught,
             runs=runs.get(u.unit_id, 0),
             fresh=fresh.get(u.unit_id, 0),
+            taught=u.unit_id in lessoned,
         )
         for u in found
     ]
+
+
+async def _taught_since_last_run(
+    conn: AsyncConnection, student_id: UUID, subject_id: UUID
+) -> set[str]:
+    """Subtopics whose lesson the student finished after their last run there."""
+    rows = await fetch_all(
+        conn,
+        """
+        SELECT l.subtopic_id AS sub
+        FROM subtopic_lessons l
+        JOIN curriculum_items sub ON sub.id = l.subtopic_id AND sub.subject_id = :subject
+        WHERE l.student_id = :s
+        GROUP BY l.subtopic_id
+        HAVING max(l.finished_at) > coalesce((
+          SELECT max(a.answered_at_client) FROM attempts a
+          JOIN study_sessions ss ON ss.id = a.session_id AND ss.session_type = 'guided'
+          JOIN question_versions v ON v.id = a.question_version_id
+          JOIN question_classifications c
+            ON c.question_id = v.question_id AND c.classification_role = 'primary'
+          JOIN curriculum_items skill ON skill.id = c.curriculum_item_id
+          WHERE a.student_id = :s AND skill.parent_id = l.subtopic_id
+        ), '-infinity'::timestamptz)
+        """,
+        s=student_id,
+        subject=subject_id,
+    )
+    return {str(r["sub"]) for r in rows}
+
+
+async def _tested_topics(conn: AsyncConnection, student_id: UUID, subject_id: UUID) -> set[str]:
+    """Topics whose topic test the student has finished (a run across that one topic)."""
+    rows = await fetch_all(
+        conn,
+        """
+        SELECT DISTINCT jsonb_array_elements_text(ss.practice_filters -> 'topic_ids') AS topic
+        FROM study_sessions ss
+        WHERE ss.student_id = :s AND ss.subject_id = :subject AND ss.session_type = 'guided'
+          AND ss.ended_at IS NOT NULL
+          AND jsonb_array_length(coalesce(ss.practice_filters -> 'topic_ids', '[]'::jsonb)) = 1
+        """,
+        s=student_id,
+        subject=subject_id,
+    )
+    return {str(r["topic"]) for r in rows}
 
 
 async def _fresh_by_subtopic(
@@ -513,7 +562,7 @@ ITEM_SQL = """
     SELECT i.id, i.day, i.position, i.kind, i.subject_id, sub.name AS subject_name,
            i.subtopic_id, ci.name AS subtopic_name, i.length, i.reason, i.value, i.session_id,
            CASE
-             WHEN ss.ended_at IS NOT NULL THEN 'done'
+             WHEN i.done_at IS NOT NULL OR ss.ended_at IS NOT NULL THEN 'done'
              WHEN ss.id IS NOT NULL THEN 'in_progress'
              WHEN i.day < :today THEN 'missed'
              ELSE 'to_do'
@@ -653,6 +702,12 @@ async def start_item(
     item = rows[0]
     if item["kind"] == "mock":
         return Started(kind="mock", session_id=None, path="/mock/new")
+    if item["kind"] == "lesson":
+        return Started(
+            kind="lesson",
+            session_id=None,
+            path=f"/lesson/{item['subtopic_id']}?item={item_id}",
+        )
     if item["session_id"] is not None and item["ended_at"] is None:
         session_id = item["session_id"]  # already open: carry on with it
     elif item["kind"] == "checkup":
@@ -666,13 +721,20 @@ async def start_item(
         # A mixed run mixes only what the syllabus order has opened for this student.
         opened = await opened_subtopics(conn, student_id, item["subject_id"])
         mixed = RunFilters(subtopic_ids=[UUID(u) for u in opened]) if opened else None
-        filters = RunFilters(subtopic_ids=[item["subtopic_id"]]) if item["kind"] == "run" else mixed
+        filters: RunFilters | None
+        if item["kind"] == "topic_test":
+            # One run across the whole topic: every subtopic under it, at mixed levels.
+            filters = RunFilters(topic_ids=[item["subtopic_id"]])
+        elif item["kind"] == "run":
+            filters = RunFilters(subtopic_ids=[item["subtopic_id"]])
+        else:
+            filters = mixed
         try:
             session_id = await begin_run(
                 conn, student_id, item["subject_id"], item["length"] or 10, filters, planned=True
             )
         except HTTPException as error:
-            if error.status_code != 422 or item["kind"] != "run":
+            if error.status_code != 422 or item["kind"] not in ("run", "topic_test"):
                 raise
             # Nothing new left in that subtopic for this student: a mixed run instead.
             session_id = await begin_run(
@@ -688,3 +750,131 @@ async def start_item(
     await conn.commit()
     path = f"/checkup/{session_id}" if item["kind"] == "checkup" else f"/practice/{session_id}"
     return Started(kind=item["kind"], session_id=session_id, path=path)
+
+
+class LessonOption(BaseModel):
+    option_key: str
+    body: str
+    correct: bool
+
+
+class LessonQuestion(BaseModel):
+    question_version_id: UUID
+    stem: str
+    options: list[LessonOption]
+    #: The reviewed working, step by step.
+    steps: list[str]
+
+
+class Lesson(BaseModel):
+    subtopic_id: UUID
+    subtopic_name: str
+    topic_name: str
+    subject_name: str
+    #: The questions the student missed here (latest answer wrong), each with its working.
+    questions: list[LessonQuestion]
+
+
+@router.get(
+    "/{student_id}/lessons/{subtopic_id}", response_model=Lesson, summary="A weak subtopic's lesson"
+)
+async def lesson(
+    student_id: UUID,
+    subtopic_id: UUID,
+    request: Request,
+    conn: Annotated[AsyncConnection, Depends(connection)],
+) -> Lesson:
+    """Until the written lesson bank exists, the lesson is the reviewed working of the questions
+    this student missed in the subtopic: the answer to each and how it is reached."""
+    await require_student(request, conn, student_id)
+    found = await fetch_all(
+        conn,
+        """
+        SELECT sub.name AS subtopic_name, topic.name AS topic_name, s.name AS subject_name,
+               sub.subject_id
+        FROM curriculum_items sub
+        JOIN curriculum_items topic ON topic.id = sub.parent_id
+        JOIN subjects s ON s.id = sub.subject_id
+        WHERE sub.id = :sub AND sub.item_type = 'subtopic'
+        """,
+        sub=subtopic_id,
+    )
+    if not found:
+        raise HTTPException(status_code=404, detail="No such topic.")
+    head = found[0]
+    answers = await scoring.answers_for(conn, student_id, head["subject_id"])
+    missed = [
+        UUID(a.question_id)
+        for a in scoring.latest(answers).values()
+        if a.unit_id == str(subtopic_id) and not a.is_correct
+    ]
+    rows = await fetch_all(
+        conn,
+        """
+        SELECT DISTINCT ON (dq.question_id) dq.question_version_id, v.stem, v.solution_steps
+        FROM deliverable_questions dq
+        JOIN question_versions v ON v.id = dq.question_version_id
+        WHERE dq.question_id = ANY(CAST(:ids AS uuid[]))
+        ORDER BY dq.question_id, v.version DESC
+        """,
+        ids=[str(m) for m in missed],
+    )
+    questions: list[LessonQuestion] = []
+    for row in rows:
+        options = await fetch_all(
+            conn,
+            """
+            SELECT o.option_key, o.body, coalesce(k.is_correct, false) AS correct
+            FROM candidate_question_options o
+            LEFT JOIN question_options k
+              ON k.question_version_id = o.question_version_id AND k.option_key = o.option_key
+            WHERE o.question_version_id = :v ORDER BY o.display_order, o.option_key
+            """,
+            v=row["question_version_id"],
+        )
+        questions.append(
+            LessonQuestion(
+                question_version_id=row["question_version_id"],
+                stem=row["stem"],
+                options=[LessonOption(**o) for o in options],
+                steps=[str(step) for step in (row["solution_steps"] or [])],
+            )
+        )
+    return Lesson(
+        subtopic_id=subtopic_id,
+        subtopic_name=head["subtopic_name"],
+        topic_name=head["topic_name"],
+        subject_name=head["subject_name"],
+        questions=questions,
+    )
+
+
+class LessonDone(BaseModel):
+    #: The roadmap stop it was taken from, ticked off with it.
+    item_id: UUID | None = None
+
+
+@router.post("/{student_id}/lessons/{subtopic_id}/done", status_code=204, summary="Finish a lesson")
+async def lesson_done(
+    student_id: UUID,
+    subtopic_id: UUID,
+    body: LessonDone,
+    request: Request,
+    conn: Annotated[AsyncConnection, Depends(connection)],
+) -> None:
+    """The lesson is taken: the subtopic's next stop is its run, and the answers from here on
+    are the student's real attempt at it (scoring.after_lessons)."""
+    await require_student(request, conn, student_id)
+    await conn.execute(
+        text("INSERT INTO subtopic_lessons (student_id, subtopic_id) VALUES (:s, :sub)"),
+        {"s": student_id, "sub": subtopic_id},
+    )
+    if body.item_id is not None:
+        await conn.execute(
+            text(
+                "UPDATE roadmap_items SET done_at = now() WHERE id = :i AND student_id = :s"
+                " AND kind = 'lesson'"
+            ),
+            {"i": body.item_id, "s": student_id},
+        )
+    await conn.commit()

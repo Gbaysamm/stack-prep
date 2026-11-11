@@ -71,7 +71,7 @@ FOUR = (
 
 
 def runs(items):
-    return [i for i in items if i.kind in ("run", "mixed")]
+    return [i for i in items if i.kind in ("run", "mixed", "topic_test")]
 
 
 def test_capacity_follows_the_study_time() -> None:
@@ -186,14 +186,14 @@ def test_a_subtopic_never_met_is_planned_not_skipped() -> None:
 
 
 def test_a_secured_subtopic_opens_the_next() -> None:
-    # Secured (≥ 40% from 3+ answers) stays open for review and lets the next one in.
+    # Passed (80% or more from 3+ answers) stays open for review and lets the next one in;
+    # 50% is not passed, so it still holds a place among the three.
     maths = subject("maths", [0.9, 0.5, 0.2, None, None, None], target=80)
     assert [u.unit_id for u in open_units(maths.units)] == [
         "maths-u0",
         "maths-u1",
         "maths-u2",
         "maths-u3",
-        "maths-u4",
     ]
 
 
@@ -351,3 +351,43 @@ def test_runs_never_outnumber_the_new_questions() -> None:
     small = (replace(base[0], fresh=3), replace(base[1], fresh=0), *base[2:])
     assert _runs_left(small[0]) == 1
     assert [u.unit_id for u in open_units(small)] == ["chem-u0", "chem-u1", "chem-u2", "chem-u3"]
+
+
+def test_a_weak_run_puts_the_lesson_before_the_next_run() -> None:
+    # Founder, 11 Nov: below 80% after a run, the subtopic's lesson comes first, then the run
+    # again; once taught, no second lesson until the student has run on it again.
+    from dataclasses import replace
+
+    from engine.roadmap import needs_lesson
+
+    base = units("chem", [0.3, None, None])
+    weak = (replace(base[0], runs=1), *base[1:])
+    plan = build(spec(subject_from(weak), target_total=None, minutes=60))
+    chem = [i for i in plan.items if i.subtopic_id == "chem-u0"]
+    assert chem[0].kind == "lesson" and chem[1].kind == "run"
+    assert needs_lesson(weak[0])
+    assert not needs_lesson(replace(weak[0], taught=True))
+    assert not needs_lesson(replace(weak[0], mastery=0.85))
+
+
+def test_a_finished_topic_gets_one_test() -> None:
+    from dataclasses import replace
+
+    from engine.projection import UnitStanding as U
+
+    both = (
+        U("s1", "first", "topicA", "Topic A", 0.25, 0.9, 5, runs=2),
+        U("s2", "second", "topicA", "Topic A", 0.25, 0.85, 5, runs=2),
+        U("s3", "third", "topicB", "Topic B", 0.5, None, 0),
+    )
+    plan = build(spec(subject_from(both), target_total=None, minutes=60))
+    tests = [i for i in plan.items if i.kind == "topic_test"]
+    assert [t.subtopic_id for t in tests] == ["topicA"]
+    done = build(
+        spec(replace(subject_from(both), tested_topics=frozenset({"topicA"})), target_total=None)
+    )
+    assert not [i for i in done.items if i.kind == "topic_test"]
+
+
+def subject_from(found: tuple[UnitStanding, ...]) -> SubjectInput:
+    return SubjectInput("chem", "Chemistry", found, 80, TODAY - timedelta(days=1))

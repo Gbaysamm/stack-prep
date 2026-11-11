@@ -637,6 +637,13 @@ async def _comeback(
         WHERE NOT mine.this_run
           AND coalesce(c.is_correct, false) = false
           AND sub.id::text = ANY(CAST(:subs AS text[]))
+          -- Taught since: a lesson on this subtopic came after it was last met, so it is not
+          -- asked again; the student's real attempt is on new questions (migration 044).
+          AND NOT EXISTS (
+            SELECT 1 FROM subtopic_lessons l
+            WHERE l.student_id = :student AND l.subtopic_id = sub.id
+              AND l.finished_at > mine.last_at
+          )
           AND (cardinality(CAST(:years AS int[])) = 0
                OR q.exam_year = ANY(CAST(:years AS int[])))
         ORDER BY array_position(CAST(:subs AS text[]), sub.id::text), mine.last_at,

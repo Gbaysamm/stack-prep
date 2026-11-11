@@ -225,9 +225,34 @@ CHECKUPS = """
 """
 
 
+#: The latest lesson the student finished on each subtopic of the subject (migration 044).
+LESSONS = """
+    SELECT l.subtopic_id::text AS unit_id, max(l.finished_at) AS at
+    FROM subtopic_lessons l
+    JOIN curriculum_items sub ON sub.id = l.subtopic_id
+    WHERE l.student_id = :student AND sub.subject_id = :subject
+    GROUP BY l.subtopic_id
+"""
+
+
+def after_lessons(answers: Sequence[Answer], lessons: dict[str, datetime]) -> list[Answer]:
+    """A subtopic's answers after its lesson are the student's real attempt at it.
+
+    Once there is at least one answer after the latest lesson on a subtopic, the answers before
+    that lesson stop counting there: the student was taught, then tried again on new questions.
+    Until then nothing changes, so a lesson alone never moves a score.
+    """
+    since = {
+        unit: at
+        for unit, at in lessons.items()
+        if any(a.unit_id == unit and a.at > at for a in answers)
+    }
+    return [a for a in answers if a.unit_id not in since or a.at > since[a.unit_id]]
+
+
 async def answers_for(conn: AsyncConnection, student_id: UUID, subject_id: UUID) -> list[Answer]:
     rows = await fetch_all(conn, ANSWERS, student=student_id, subject=subject_id)
-    return [
+    found = [
         Answer(
             question_id=row["question_id"],
             unit_id=row["unit_id"],
@@ -237,6 +262,11 @@ async def answers_for(conn: AsyncConnection, student_id: UUID, subject_id: UUID)
         )
         for row in rows
     ]
+    lessons = {
+        str(row["unit_id"]): row["at"]
+        for row in await fetch_all(conn, LESSONS, student=student_id, subject=subject_id)
+    }
+    return after_lessons(found, lessons) if lessons else found
 
 
 def checkup_result(

@@ -26,6 +26,7 @@ function later<T extends string>(load: () => Promise<Record<T, ComponentType>>, 
   return lazy(() => load().then((module) => ({ default: module[name] })));
 }
 const CheckIns = later(() => import('./pages/CheckIns.js'), 'CheckIns');
+const Lesson = later(() => import('./pages/Lesson.js'), 'Lesson');
 const CheckupHub = later(() => import('./pages/CheckupHub.js'), 'CheckupHub');
 const CheckupReport = later(() => import('./pages/CheckupReport.js'), 'CheckupReport');
 const CheckupRoom = later(() => import('./pages/CheckupRoom.js'), 'CheckupRoom');
@@ -118,6 +119,14 @@ export function PrepApp() {
                   <Route path="/how-its-worked-out" element={<HowItsWorkedOutRedirect />} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
+                <Route
+                  path="/lesson/:subtopicId"
+                  element={
+                    <RequireStudent>
+                      <Lesson />
+                    </RequireStudent>
+                  }
+                />
                 <Route
                   path="/practice/:sessionId/*"
                   element={

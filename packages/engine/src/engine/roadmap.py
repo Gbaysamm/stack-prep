@@ -91,8 +91,9 @@ FIXED_DAYS = 7
 #: The syllabus order is the prerequisite order: of a subject's subtopics, taken in that order,
 #: only this many not yet secured are open at once. The next opens as one is secured.
 OPEN_AHEAD = 3
-#: Secured: at least Developing (spec §9.1), from enough answers to say so.
-SECURED = 0.40
+#: Passed: 80% in the subtopic, from enough answers to say so (founder, 11 Nov 2026). Below
+#: it after a run, the student gets the subtopic's lesson and tries it again.
+SECURED = 0.80
 SECURED_AFTER = 3
 #: A subtopic not secured after this many runs no longer holds the rest back: the path moves
 #: past it (its missed questions keep coming back as comebacks). A slow student is never stuck
@@ -103,9 +104,18 @@ RUNS_TO_SECURE = 2.0
 #: Share of runs that can go to new subtopics; the rest is reviews, mixed runs and check-ups.
 NEW_WORK_SHARE = 0.75
 
-Kind = Literal["run", "mixed", "mock", "checkup"]
+Kind = Literal["run", "mixed", "mock", "checkup", "lesson", "topic_test"]
 #: Spec §9.4's reason codes, with the check-up added (weekly, not only at onboarding).
-Reason = Literal["high_value_gap", "coverage", "mixed_practice", "mock", "checkup", "first_checkup"]
+Reason = Literal[
+    "high_value_gap",
+    "coverage",
+    "mixed_practice",
+    "mock",
+    "checkup",
+    "first_checkup",
+    "reteach",
+    "topic_test",
+]
 Value = Literal["high", "medium", "low"]
 Status = Literal[
     "on_track", "stretch", "out_of_reach", "no_target", "needs_checkups", "exam_passed"
@@ -123,6 +133,8 @@ class SubjectInput:
     #: When its last check-up finished; None when it has had none (nothing is planned for it
     #: beyond that first check-up, because there is nothing to plan from).
     last_checkup: date | None
+    #: Topics whose test the student has taken: no second test is planned for them.
+    tested_topics: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True)
@@ -385,8 +397,32 @@ def _advice(spec: RoadmapInput, status: Status, target: float | None) -> str | N
     return "Give it more time each day to reach it."
 
 
+def needs_lesson(unit: UnitStanding) -> bool:
+    """Run on, still below the bar, and not taught since: its next stop is its lesson."""
+    return unit.runs >= 1 and not unit.taught and not moved_past(unit)
+
+
+def topics_to_test(units: Sequence[UnitStanding], tested: frozenset[str]) -> list[UnitStanding]:
+    """Topics (one subtopic standing in for each) whose every subtopic is done: each answered
+    and passed, or moved past. One test across the whole topic follows, once."""
+    by_topic: dict[str, list[UnitStanding]] = {}
+    for unit in units:
+        if unit.teachable:
+            by_topic.setdefault(unit.topic_id, []).append(unit)
+    return [
+        members[0]
+        for topic, members in by_topic.items()
+        if topic not in tested
+        and all(u.answered >= SECURED_AFTER and moved_past(u) for u in members)
+        and any(secured(u) for u in members)
+    ]
+
+
 def _syllabus_queue(
-    units: Sequence[UnitStanding], slots: int, ahead: int
+    units: Sequence[UnitStanding],
+    slots: int,
+    ahead: int,
+    tested: frozenset[str] = frozenset(),
 ) -> list[tuple[str, str, Reason, Value, PlannedUnit]]:
     """A subject's runs for the week, in the syllabus's order.
 
@@ -422,12 +458,23 @@ def _syllabus_queue(
         width += 1
 
     queue: list[tuple[str, str, Reason, Value, PlannedUnit]] = []
+    # A finished topic's test comes first: it is the check that the topic is really done.
+    for first in topics_to_test(units, tested):
+        test = entry(first, "topic_test")
+        queue.append((first.topic_id, first.topic_name, "topic_test", test[3], test[4]))
     left = {u.unit_id: _runs_left(u) for u in learning}
+    lesson_due = {u.unit_id for u in learning if needs_lesson(u)}
     for start in range(0, len(learning), max(1, ahead)):
         group = learning[start : start + max(1, ahead)]
         while any(left[u.unit_id] for u in group) and len(queue) < slots:
             for unit in group:
                 if left[unit.unit_id] and len(queue) < slots:
+                    # Below the bar after a run: its lesson first, then the run again.
+                    if unit.unit_id in lesson_due:
+                        queue.append(entry(unit, "reteach"))
+                        lesson_due.discard(unit.unit_id)
+                        if len(queue) >= slots:
+                            break
                     queue.append(entry(unit, "high_value_gap"))
                     left[unit.unit_id] -= 1
     reviews = sorted(
@@ -581,7 +628,7 @@ def _next_days(
         # week, with a day's worth to spare.
         slots = ceil(week_days * per_day * shares.get(subject.subject_id, 0.0)) + per_day
         queues[subject.subject_id] = _syllabus_queue(
-            subject.units, slots, ahead.get(subject.subject_id, OPEN_AHEAD)
+            subject.units, slots, ahead.get(subject.subject_id, OPEN_AHEAD), subject.tested_topics
         )
     used = dict.fromkeys(queues, 0)
     placed_runs = 0
@@ -685,9 +732,24 @@ def _next_days(
                     )
                 else:
                     unit_id, name, reason, value, _ = pick
+                    kind: Kind = (
+                        "lesson"
+                        if reason == "reteach"
+                        else "topic_test"
+                        if reason == "topic_test"
+                        else "run"
+                    )
                     items.append(
                         PlannedItem(
-                            day, order, "run", subject_id, unit_id, name, RUN_LENGTH, reason, value
+                            day,
+                            order,
+                            kind,
+                            subject_id,
+                            unit_id,
+                            name,
+                            0 if kind == "lesson" else RUN_LENGTH,
+                            reason,
+                            value,
                         )
                     )
             if exam_phase:

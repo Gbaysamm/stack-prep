@@ -75,6 +75,13 @@ WITH doomed AS (
 cleared_turns AS (
     DELETE FROM tutor_turns WHERE student_id IN (SELECT id FROM doomed)
 ),
+-- The roadmap's items go with it (ON DELETE CASCADE).
+cleared_roadmaps AS (
+    DELETE FROM roadmaps WHERE student_id IN (SELECT id FROM doomed)
+),
+cleared_lessons AS (
+    DELETE FROM subtopic_lessons WHERE student_id IN (SELECT id FROM doomed)
+),
 cleared_attempts AS (
     DELETE FROM attempts WHERE student_id IN (SELECT id FROM doomed)
 ),

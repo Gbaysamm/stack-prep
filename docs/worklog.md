@@ -15,6 +15,27 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### Lessons on the roadmap, an 80% bar, answers after a lesson count, topic tests
+- **What:**
+  - The bar to pass a subtopic is 80% (was 40%). Below it after a run, the path's next stop on
+    that subtopic is a **lesson**, then the run again. Until the written lesson bank exists, the
+    lesson is the reviewed working of the questions the student missed there (`/lesson/:id`).
+  - After a lesson, the student's answers in that subtopic are their real attempt: once there is
+    an answer after the lesson, earlier answers there stop counting (`scoring.after_lessons`),
+    and the questions missed before it are not served again as comebacks.
+  - When every subtopic of a topic is done (answered, at least one passed, the rest passed or
+    moved past), the path adds one **topic test**: a run across the whole topic.
+  - The 4-run limit and running out of new questions still move the path on.
+- **Why:** the founder's rule, 11 Nov: weak means taught then tried again on new questions;
+  80% to move on; a test once a topic is complete.
+- **Where:** migration `044_roadmap_lessons.sql`; `packages/engine/src/engine/roadmap.py`
+  (`needs_lesson`, `topics_to_test`, `SECURED = 0.80`), `projection.py`, tests; API
+  `routers/roadmap.py` (lesson GET and done, starts), `scoring.py`, `routers/practice.py`,
+  `routers/dev.py`, `tests/test_scoring_lessons.py`; web `pages/Lesson.tsx`, `PrepApp.tsx`,
+  `roadmapApi.ts`, `pages/Roadmap.tsx`.
+- **Status:** done locally; engine 108 and the API roadmap, practice, scoring and check-up tests
+  pass; lesson page checked at 1440 and 390. Not pushed. The lesson bank is next.
+
 ### The path's level reads as the topic's, not the subject's
 - **Then:** every stop's name is one line, cut with "…" when long (the full name on hover), so
   the words never stand taller than the tile; on a phone the level sits at the far right of the

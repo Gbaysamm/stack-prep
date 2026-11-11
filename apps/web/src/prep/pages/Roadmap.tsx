@@ -5,7 +5,7 @@
  */
 import { Link } from 'react-router-dom';
 
-import { IconArrowRight, IconBolt, IconPlay, IconClock, IconTarget } from '../icons.js';
+import { IconArrowRight, IconBolt, IconBook, IconClock, IconPlay, IconTarget, IconTrophy } from '../icons.js';
 import { Journey, type Stop } from '../Journey.js';
 import {
   itemLabel,
@@ -189,13 +189,27 @@ export function pathStops(roadmap: RoadmapData, next: RoadmapItem | null): Stop[
         line:
           item.kind === 'run'
             ? (item.subject_name ?? undefined)
-            : item.kind === 'checkup'
+            : item.kind === 'lesson'
+              ? `Lesson · ${item.subject_name ?? ''}`
+              : item.kind === 'topic_test'
+                ? `Whole topic · ${item.subject_name ?? ''}`
+                : item.kind === 'checkup'
               ? 'Checkpoint'
               : item.kind === 'mock'
                 ? 'The whole paper'
                 : 'Topics you have covered',
         icon:
-          item.kind === 'checkup' ? <IconTarget size={20} /> : item.kind === 'mock' ? <IconClock size={20} /> : <IconBolt size={20} />,
+          item.kind === 'checkup' ? (
+            <IconTarget size={20} />
+          ) : item.kind === 'mock' ? (
+            <IconClock size={20} />
+          ) : item.kind === 'lesson' ? (
+            <IconBook size={20} />
+          ) : item.kind === 'topic_test' ? (
+            <IconTrophy size={20} />
+          ) : (
+            <IconBolt size={20} />
+          ),
         state: done ? 'done' : holdsNext ? 'current' : 'locked',
         level: item.kind === 'run' ? level : undefined,
       });

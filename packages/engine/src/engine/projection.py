@@ -105,6 +105,9 @@ class UnitStanding:
     #: Questions in it this student has not met yet; None when not known. A run is ten of
     #: them, so this caps how many runs it can be given (roadmap._runs_left).
     fresh: int | None = None
+    #: The student has taken this subtopic's lesson since their last run on it, so the next
+    #: stop is a run, not another lesson (roadmap._syllabus_queue).
+    taught: bool = False
 
 
 @dataclass(frozen=True)

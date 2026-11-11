@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { friendly, request } from '../lib/friendlyError.js';
 import { useLoad } from './store.js';
 
-export type ItemKind = 'run' | 'mixed' | 'mock' | 'checkup';
+export type ItemKind = 'run' | 'mixed' | 'mock' | 'checkup' | 'lesson' | 'topic_test';
 export type ItemState = 'done' | 'in_progress' | 'missed' | 'to_do';
 
 export interface RoadmapItem {
@@ -105,7 +105,10 @@ export function today(roadmap: Roadmap) {
 export function itemLabel(item: RoadmapItem): string {
   switch (item.kind) {
     case 'run':
+    case 'lesson':
       return item.subtopic_name ?? `${item.subject_name} practice`;
+    case 'topic_test':
+      return `${item.subtopic_name ?? 'Topic'} test`;
     case 'mixed':
       // Questions from the topics already covered, to keep them fresh.
       return `${item.subject_name ?? ''} review`.trim();
