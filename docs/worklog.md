@@ -15,6 +15,14 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### Home: "Where you stand" is back
+- **What:** Home is now the hero (next stop, today's dots, Start or Carry on), "Up next" (the
+  next stops, fading on), and "Where you stand" with its subject switcher (score, predicted
+  score, target and the bar). The slim "Your subjects" rows stay on the Roadmap page only.
+- **Why:** the founder liked the score card and wanted it on Home.
+- **Where:** `apps/web/src/prep/pages/Home.tsx`.
+- **Status:** done locally, checked at 1440 and 390; not pushed.
+
 ### The path never "ends"; runs never outnumber a subtopic's new questions; a half-done run carries over
 - **What:**
   - The path is shown day by day ("Today", "Tomorrow", then the weekday), at most 14 stops,

@@ -30,10 +30,12 @@ import {
   StatusCell,
   SubjectName,
   SubjectRows,
+  SubjectSwitcher,
   byUrgency,
   isDemoSubject,
   subjectStatus,
   useOverview,
+  useSubjectChoice,
   type SubjectColumn,
 } from '../SubjectSwitcher.js';
 import { Journey, type Stop } from '../Journey.js';
@@ -41,7 +43,7 @@ import { itemLabel, roadmapApi, today as todayOf, useRoadmap, useStartItem, type
 import { usePageTitle, useStudent } from '../store.js';
 import { Badge, Button, CountUp, PageHero, ShowMore, Skeleton, Track, cx, greeting, useShowMore, useToast } from '../ui.js';
 import { HOW_PATH, MetricTip, type MetricId } from './HowItsWorkedOut.js';
-import { RoadmapSubjects, pathStops } from './Roadmap.js';
+import { pathStops } from './Roadmap.js';
 import './Home.css';
 import { friendly } from '../../lib/friendlyError.js';
 
@@ -1279,20 +1281,37 @@ function HomeBody({
   roadmap: Roadmap | null;
 }) {
   const subjects = data.subjects;
+  // The subject "Where you stand" shows: ?subject=, else the last one chosen, else the most urgent.
+  const [chosenId, choose] = useSubjectChoice(subjects);
+  const chosen = subjects.find((s) => s.subject_id === chosenId) ?? focus;
   return (
     <div className="sj-page home">
       <Hero overview={data} step={step} focus={focus} />
 
       {roadmap && roadmap.subjects.length > 0 ? (
-        <>
-          <UpNext roadmap={roadmap} heroHasNext={step.kind === 'today'} />
-          <Section eyebrow="By exam day" title="Your subjects" id="home-subjects" className="sj-rise d2">
-            <RoadmapSubjects subjects={roadmap.subjects} />
-          </Section>
-        </>
-      ) : (
-        <SubjectsGlance subjects={subjects} selected={null} />
-      )}
+        <UpNext roadmap={roadmap} heroHasNext={step.kind === 'today'} />
+      ) : subjects.length > 1 ? (
+        <SubjectsGlance subjects={subjects} selected={chosen?.subject_id ?? null} />
+      ) : null}
+
+      {chosen ? (
+        <Section
+          eyebrow={`Your score · ${chosen.examination_short_name} ${chosen.subject_name}`}
+          title="Where you stand"
+          id="home-stand"
+          className="sj-rise d2"
+          action={
+            <Link className="sj-link" to={`/subjects/${chosen.subject_id}`}>
+              {chosen.subject_name} plan <IconArrowRight size={14} />
+            </Link>
+          }
+        >
+          {subjects.length > 1 ? (
+            <SubjectSwitcher subjects={subjects} value={chosen.subject_id} onChange={choose} label="Show subject" />
+          ) : null}
+          <Standing key={chosen.subject_id} subject={chosen} />
+        </Section>
+      ) : null}
     </div>
   );
 }
