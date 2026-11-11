@@ -339,7 +339,10 @@ export function Board({
   onAsk,
   onListen,
   askLocked,
+  noAsk = false,
 }: {
+  /** No ask box and nothing in its place: the controls stand alone (the public showcase). */
+  noAsk?: boolean;
   /**
    * Fetch the lesson: the reviewed working as a teacher teaches it, with what to write and
    * what to say for each step. Undefined where the deployment has no voice, and the board
@@ -2397,7 +2400,7 @@ export function Board({
             {whiteboard ? <BoardTuningControls {...tuning} /> : null}
           </div>
 
-          {askLocked ? (
+          {noAsk ? null : askLocked ? (
             <div className="pb-ask pb-ask-locked">{askLocked}</div>
           ) : (
           <form className="pb-ask" onSubmit={send}>
