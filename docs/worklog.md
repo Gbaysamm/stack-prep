@@ -15,6 +15,22 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### Kokoro makes one line at a time, the line a student waits on first
+- **What:** the free Kokoro voice is now made one line at a time on the server, and a line the
+  board is waiting on goes ahead of lines being made in advance. Opening a lesson still makes
+  its lines in advance, but in step order, one at a time, and only while no student is
+  waiting. Before, a lesson's advance job (two at once) and the board's three prefetches ran
+  together on the same processor, each took about three times as long, the waited-on line
+  timed out (15 s, then 10 s), and after three misses the board went silent for the lesson.
+- **Why:** the founder: the board was slow and the voice sometimes did not talk (Kokoro chosen
+  in the board's settings).
+- **Measured on the dev laptop:** about 5 s per sentence alone, 5-11 s under load; a sentence
+  lasts about 4 s spoken. So on this processor Kokoro still cannot keep up live; the queue stops
+  the silent failures but some waiting remains. Making each lesson's Kokoro lines ahead of time
+  would remove it (free, but hours of processor time; not started).
+- **Where:** `apps/api/src/app/voice_store.py` (`_kokoro_turn`), `routers/practice.py` (warm).
+- **Status:** done locally; voice and lesson tests (112) pass. Not pushed.
+
 ### Home: "Where you stand" is back
 - **What:** Home is now the hero (next stop, today's dots, Start or Carry on), "Up next" (the
   next stops, fading on), and "Where you stand" with its subject switcher (score, predicted

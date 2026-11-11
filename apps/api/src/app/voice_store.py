@@ -20,6 +20,8 @@ import asyncio
 import hashlib
 import json
 import secrets
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, Literal
 
@@ -38,6 +40,37 @@ _MAKING: dict[str, asyncio.Lock] = {}
 
 def making(key: str) -> asyncio.Lock:
     return _MAKING.setdefault(key, asyncio.Lock())
+
+
+#: Kokoro runs on this server's processor: one line at a time. Several at once only shared the
+#: same cores, so each took three times as long and the line a student was waiting for timed
+#: out on the board. A line someone is waiting for goes ahead of lines made in advance.
+_KOKORO = asyncio.Lock()
+_waiting = 0
+
+
+@asynccontextmanager
+async def _kokoro_turn(patient: bool) -> AsyncIterator[None]:
+    global _waiting
+    if patient:
+        # Made in advance: only when no student is waiting on a line.
+        while True:
+            while _waiting:
+                await asyncio.sleep(0.05)
+            await _KOKORO.acquire()
+            if not _waiting:
+                break
+            _KOKORO.release()
+    else:
+        _waiting += 1
+        try:
+            await _KOKORO.acquire()
+        finally:
+            _waiting -= 1
+    try:
+        yield
+    finally:
+        _KOKORO.release()
 
 
 def folder() -> Path:
@@ -94,11 +127,14 @@ def timings(line: str, settings: Settings, engine: Engine = "studio") -> dict[st
     return kept
 
 
-async def _made_by_kokoro(line: str, settings: Settings, cached: Path) -> Path | None:
+async def _made_by_kokoro(
+    line: str, settings: Settings, cached: Path, patient: bool = False
+) -> Path | None:
     said = tutor.for_the_voice(line)
     if not said or len(said) > MAX_SPOKEN_CHARS:
         return None
-    clip = await asyncio.to_thread(kokoro_voice.synthesize, said, settings)
+    async with _kokoro_turn(patient):
+        clip = await asyncio.to_thread(kokoro_voice.synthesize, said, settings)
     if clip is None:
         return None
     # The timings first: a clip found on disk is taken as finished, words and all.
@@ -128,7 +164,7 @@ async def voiced(
         if cached.is_file():
             return cached
         if engine == "kokoro":
-            return await _made_by_kokoro(line, settings, cached)
+            return await _made_by_kokoro(line, settings, cached, patient=patient)
         audio = await tutor.speak(line, settings, max_chars=MAX_SPOKEN_CHARS, patient=patient)
         if audio is None:
             return None

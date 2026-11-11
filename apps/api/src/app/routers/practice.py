@@ -2788,7 +2788,10 @@ async def warm_lesson(
     # Kokoro is free and independent of the paid voice's switch; it is made when asked for
     # and offered here, and otherwise the studio voice is warmed as it always was.
     if voice_store.engine_for(engine, settings) == "kokoro":
-        background.add_task(voice_store.voice_all, lines, settings, engine="kokoro")
+        # In step order, one at a time, and only while no student is waiting on a line.
+        background.add_task(
+            voice_store.voice_all, lines, settings, at_once=1, patient=True, engine="kokoro"
+        )
     elif settings.ai_speak:
         background.add_task(voice_store.voice_all, lines, settings)
     return {"beats": len(lines)}
