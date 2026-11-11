@@ -20,7 +20,8 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
   arrow behind, and a step's button can no longer shrink or wrap (the arrow had dropped under
   the word in the founder's window). The five level squares show only once a topic has a level
   (three or more answers); a topic not started shows none. They carry their meaning as a
-  tooltip and for screen readers ("Level 1 of 5: Weak").
+  tooltip and for screen readers ("Level 1 of 5: Weak"). The button also keeps at least its
+  own width (`min-width: max-content`), as it was still squeezed in one window.
 - **Why:** the founder asked what the dots meant (grey squares on unstarted topics said
   nothing) and did not like the arrow under "Start".
 - **Where:** `apps/web/src/prep/Journey.tsx`, `Journey.css`, `pages/Roadmap.tsx`.
