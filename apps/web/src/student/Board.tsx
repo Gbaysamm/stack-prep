@@ -2357,7 +2357,7 @@ export function Board({
       </main>
 
       <footer className="pb-dock">
-        <div className="pb-col pb-dock-in">
+        <div className={`pb-col pb-dock-in ${noAsk ? "no-ask" : ""}`}>
           <div className="pb-ctl" role="group" aria-label="Lesson controls">
             <button
               type="button"
