@@ -125,10 +125,12 @@ const countWord = (n: number) => COUNT_WORDS[n] ?? String(n);
 const fullText = (exam: ExaminationOffer) =>
   `${exam.short_name} is ${countWord(exam.max_subjects ?? 0)} subjects. Remove one to add another.`;
 /** The subjects every candidate of this exam sits, in catalogue order. */
-/** The picked subjects with the exam's compulsory ones (when we teach them) always in, first. */
+/** The picked subjects with the exam's compulsory ones (when we teach them) always in, first,
+ *  and never more than the exam allows: a compulsory subject never waits for a free place. */
 function withCompulsory(exam: ExaminationOffer | undefined, picked: string[]): string[] {
   const must = (exam?.subjects ?? []).filter((s) => s.compulsory && s.ready).map((s) => s.subject_id);
-  return [...must, ...picked.filter((id) => !must.includes(id))];
+  const all = [...must, ...picked.filter((id) => !must.includes(id))];
+  return exam?.max_subjects != null ? all.slice(0, Math.max(exam.max_subjects, must.length)) : all;
 }
 const compulsoryOf = (exam: ExaminationOffer) => exam.subjects.filter((subject) => subject.compulsory);
 
@@ -282,7 +284,7 @@ function Flow({
     const start = initialChoice(exams, goals);
     if (hasDev && devStep >= GOAL) {
       const exam = exams.find((e) => e.examination_id === start.examId);
-      if (!start.selected.length && exam) start.selected = exam.subjects.filter((s) => s.ready).map((s) => s.subject_id);
+      if (!start.selected.length && exam) start.selected = withCompulsory(exam, exam.subjects.filter((s) => s.ready).map((s) => s.subject_id));
       if (!start.examDate) start.examDate = monthsFromToday(7);
     }
     return start;
@@ -336,7 +338,11 @@ function Flow({
   const update = (patch: Partial<Choice>) => {
     setIssue(null);
     setSaved({});
-    setChoice((current) => ({ ...current, ...patch }));
+    setChoice((current) => {
+      const next = { ...current, ...patch };
+      const forExam = exams.find((item) => item.examination_id === next.examId);
+      return { ...next, selected: withCompulsory(forExam, next.selected) };
+    });
   };
 
   const problem = (index: number): string | null => {
@@ -581,7 +587,8 @@ function Flow({
                   const ready = subjects.filter((s) => s.ready).sort((a, b) => Number(b.compulsory) - Number(a.compulsory));
                   update({ selected: ready.slice(0, exam.max_subjects ?? ready.length).map((s) => s.subject_id) });
                 }}
-                invalid={Boolean(issue)}
+                // Red only when nothing is picked; a full list is not a mistake.
+                invalid={Boolean(issue) && chosen.length === 0}
               />
             ) : null}
             {step === GOAL ? (
@@ -879,7 +886,7 @@ function SubjectCard({
   // Everyone sits it: ticked for them, and it stays ticked.
   const must = subject.compulsory && !disabled;
   return (
-    <label className={cx('onb-opt onb-subject', on && 'on', must && 'must', disabled && 'off', `sj-rise d${Math.min(delay + 1, 4)}`)}>
+    <label className={cx('onb-opt onb-subject', (on || must) && 'on', must && 'must', disabled && 'off', `sj-rise d${Math.min(delay + 1, 4)}`)}>
       <input
         className="onb-sr"
         type="checkbox"
@@ -889,23 +896,20 @@ function SubjectCard({
         onChange={must ? () => undefined : onToggle}
       />
       <span className="onb-opt-head">
-        <span className={cx('onb-opt-ico', on ? 'purple' : 'soft')} aria-hidden="true">
+        <span className={cx('onb-opt-ico', on || must ? 'purple' : 'soft')} aria-hidden="true">
           {disabled ? <IconLock size={18} /> : <IconBook size={18} />}
         </span>
         <span className="onb-opt-title">{subject.name}</span>
         <span className="onb-tick" aria-hidden="true">
-          {on ? <IconCheck size={14} /> : null}
+          {on || must ? <IconCheck size={14} /> : null}
         </span>
       </span>
       {disabled ? (
         <span className="onb-opt-meta">{subject.blocked_reason ?? 'Not ready yet. We are still building it.'}</span>
       ) : null}
-      {subject.compulsory || goal?.target_score != null ? (
+      {goal?.target_score != null ? (
         <span className="onb-opt-badges">
-          {subject.compulsory ? <span className="onb-opt-badge must sj-mono">Everyone sits this</span> : null}
-          {goal?.target_score != null ? (
-            <span className="onb-opt-badge sj-mono">Goal set · {Math.round(goal.target_score)}/100</span>
-          ) : null}
+          <span className="onb-opt-badge sj-mono">Goal set · {Math.round(goal.target_score)}/100</span>
         </span>
       ) : null}
     </label>

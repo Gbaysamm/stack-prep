@@ -15,6 +15,18 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### Onboarding: English ticked for real; a calmer top; no red outlines when the list is full
+- **What:** Use of English is now part of the saved choice everywhere (on load, on every change,
+  on save), never more than the exam allows, and its card shows the tick; the "Everyone sits
+  this" badge is gone. Trying a fifth UTME subject shows the note but no longer outlines every
+  card in red. The top bar is no longer a frosted white band with a line under it: the logo and
+  a small "Skip for now" pill sit on the page itself.
+- **Why:** the founder: English showed unticked with four others picked, the badge was not
+  wanted, and the header band looked wrong (the pink glow smudged through it).
+- **Where:** `apps/web/src/prep/pages/Onboarding.tsx` (`withCompulsory` now caps at the limit,
+  `update` applies it), `Onboarding.css` (`.onb-bar`, `.onb-skip`).
+- **Status:** done locally, checked at 1440 and 390; not pushed.
+
 ### Onboarding: Use of English is picked for the student
 - **What:** a compulsory subject (UTME's Use of English) is ticked from the start, cannot be
   unticked, and sits first in the list. The yellow "UTME is four subjects…" box is gone; the
