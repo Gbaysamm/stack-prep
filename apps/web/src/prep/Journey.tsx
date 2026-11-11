@@ -65,7 +65,7 @@ export function Journey({ stops, action, continues }: { stops: Stop[]; action?: 
               {stop.state === 'done' ? <IconCheck size={20} /> : stop.icon}
             </span>
             <span className="jr-words">
-              <b>{stop.title}</b>
+              <b title={stop.title}>{stop.title}</b>
               {stop.line || stop.level ? (
                 <span className="jr-line">
                   {stop.line}

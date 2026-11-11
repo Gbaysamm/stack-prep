@@ -16,6 +16,9 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 ## 2026-11-11
 
 ### The path's level reads as the topic's, not the subject's
+- **Then:** every stop's name is one line, cut with "…" when long (the full name on hover), so
+  the words never stand taller than the tile; on a phone the level sits at the far right of the
+  subject's line.
 - **Phone (later the same day):** on a phone the boxes and level word sit on the subject's line
   ("Chemistry ▪▫▫▫▫ Weak"), so the topic name keeps the full width instead of wrapping to three
   lines; on a wide screen they stay at the row's end.

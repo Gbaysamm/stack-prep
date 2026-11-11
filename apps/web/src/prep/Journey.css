@@ -228,3 +228,23 @@
     margin-left: 4px;
   }
 }
+
+/* Each stop's words stay beside its tile: the name on one line, cut with "…" when long (the full
+   name on hover), and the level pushed to the line's far end on a phone. */
+.sj .jr-words b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sj .jr-line {
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+@media (max-width: 520px) {
+  .sj .jr-pips.on-line {
+    margin-left: auto;
+  }
+  .sj .jr-words b {
+    font-size: 14.5px;
+  }
+}
