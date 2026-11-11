@@ -583,30 +583,6 @@
   line-height: 1.5;
   color: var(--gray-600);
 }
-.sj .onb-exam-facts {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 8px;
-  padding-top: 14px;
-  border-top: 1px solid var(--gray-200);
-}
-.sj .onb-opt.on .onb-exam-facts {
-  border-top-color: var(--purple-100);
-}
-.sj .onb-fact {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-}
-.sj .onb-fact .sj-num {
-  font-size: 30px;
-  color: var(--ink-900);
-}
-.sj .onb-fact .sj-eyebrow {
-  color: var(--gray-600);
-}
 .sj .onb-opt-badges {
   display: flex;
   flex-wrap: wrap;
@@ -635,56 +611,6 @@
 }
 .sj .onb-exams.single {
   grid-template-columns: minmax(0, 1fr);
-}
-/* One exam: a wide card, the facts beside the name instead of under it. */
-.sj .onb-exams.single .onb-exam {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 300px);
-  column-gap: 26px;
-  row-gap: 8px;
-  align-items: start;
-}
-.sj .onb-exams.single .onb-opt-head {
-  grid-column: 1 / -1;
-}
-.sj .onb-exams.single .onb-exam-name,
-.sj .onb-exams.single .onb-opt-meta {
-  grid-column: 1;
-}
-.sj .onb-exams.single .onb-exam-facts {
-  grid-column: 2;
-  grid-row: 2 / span 2;
-  align-self: stretch;
-  align-content: end;
-  margin-top: 6px;
-  padding: 0 0 0 22px;
-  border-top: 0;
-  border-left: 1px solid var(--purple-100);
-}
-.sj .onb-about {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-top: 28px;
-  padding: 22px 24px;
-  border-radius: var(--r-lg);
-  background: #fff;
-  box-shadow: inset 0 0 0 1.5px var(--gray-200);
-}
-.sj .onb-about-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 4px 12px;
-}
-.sj .onb-about-head h2 {
-  margin: 0;
-}
-@media (max-width: 520px) {
-  .sj .onb-about {
-    padding: 18px 16px;
-  }
 }
 .sj .onb-subjects {
   display: flex;
@@ -1276,8 +1202,8 @@
   }
   .sj .onb-rail-steps {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
   }
   .sj .onb-railbtn,
   .sj .onb-railbtn.current {
@@ -1335,13 +1261,16 @@
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
   }
+  /* Buttons at their own size, not stretched across the bar; Continue keeps to the right. */
   .sj .onb-actions .sj-btn {
-    flex: 1;
-    min-width: 0;
-  }
-  .sj .onb-actions .sj-btn.ghost {
     flex: 0 0 auto;
-    padding-inline: 18px;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 20px;
+    font-size: 15px;
+  }
+  .sj .onb-actions .sj-btn[type='submit'] {
+    margin-left: auto;
   }
   .sj .onb-actions > span:not(.sj-btn) {
     display: none;
@@ -1363,16 +1292,6 @@
     margin-top: -4px;
   }
 
-  .sj .onb-exams.single .onb-exam {
-    display: flex;
-    align-items: stretch;
-  }
-  .sj .onb-exams.single .onb-exam-facts {
-    margin-top: 8px;
-    padding: 14px 0 0;
-    border-left: 0;
-    border-top: 1px solid var(--purple-100);
-  }
   .sj .onb-exams,
   .sj .onb-subgrid {
     grid-template-columns: minmax(0, 1fr);

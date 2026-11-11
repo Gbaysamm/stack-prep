@@ -29,6 +29,7 @@ import {
   IconLock,
   IconReplay,
   IconTarget,
+  IconUser,
 } from '../icons.js';
 import { progressApi, type Overview } from '../progressApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
@@ -40,10 +41,17 @@ import { friendly } from '../../lib/friendlyError.js';
 
 const STEPS = [
   { key: 'exam', label: 'Exam', icon: IconTarget },
+  { key: 'about', label: 'About', icon: IconUser },
   { key: 'subjects', label: 'Subjects', icon: IconBook },
   { key: 'goal', label: 'Your goal', icon: IconCalendar },
   { key: 'review', label: 'Review', icon: IconCheck },
 ] as const;
+// Where each step sits, so the numbers below read as names.
+const EXAM = 0;
+const ABOUT = 1;
+const SUBJECTS = 2;
+const GOAL = 3;
+const REVIEW = 4;
 
 const MINUTE_CHIPS = [15, 30, 45, 60, 90];
 const DAYS = [
@@ -115,7 +123,6 @@ const fullText = (exam: ExaminationOffer) =>
   `${exam.short_name} is ${countWord(exam.max_subjects ?? 0)} subjects. Remove one to add another.`;
 /** The subjects every candidate of this exam sits, in catalogue order. */
 const compulsoryOf = (exam: ExaminationOffer) => exam.subjects.filter((subject) => subject.compulsory);
-const nf = new Intl.NumberFormat('en-GB');
 
 /* ------------------------------------------------------------------ the page */
 
@@ -232,6 +239,12 @@ function initialChoice(exams: ExaminationOffer[], goals: GoalRow[]): Choice {
   };
 }
 
+/** The rail's line for the about step: what they gave, briefly. */
+function aboutLine(about: AboutDraft): string | null {
+  const said = [about.class_level, about.school_name, about.target_course].map((v) => v.trim()).filter(Boolean);
+  return said.length ? said.slice(0, 2).join(', ') : null;
+}
+
 function Flow({
   exams,
   goals,
@@ -253,27 +266,27 @@ function Flow({
   const firstName = name.trim().split(/\s+/)[0] || 'there';
   const returning = goals.some((goal) => goal.target_score != null && goal.exam_date);
 
-  // Development only: `?step=0..3` opens on a step and `?step=4` on the finish, for screenshots.
+  // Development only: `?step=0..4` opens on a step and `?step=5` on the finish, for screenshots.
   const devStep = import.meta.env.DEV ? Number(new URLSearchParams(window.location.search).get('step') ?? NaN) : NaN;
   const hasDev = !Number.isNaN(devStep);
 
   const [choice, setChoice] = useState<Choice>(() => {
     const start = initialChoice(exams, goals);
-    if (hasDev && devStep >= 2) {
+    if (hasDev && devStep >= GOAL) {
       const exam = exams.find((e) => e.examination_id === start.examId);
       if (!start.selected.length && exam) start.selected = exam.subjects.filter((s) => s.ready).map((s) => s.subject_id);
       if (!start.examDate) start.examDate = monthsFromToday(7);
     }
     return start;
   });
-  const [step, setStep] = useState(hasDev ? Math.max(0, Math.min(3, devStep)) : 0);
-  const [reached, setReached] = useState(returning ? 3 : hasDev ? Math.min(3, Math.max(0, devStep)) : 0);
+  const [step, setStep] = useState(hasDev ? Math.max(0, Math.min(REVIEW, devStep)) : 0);
+  const [reached, setReached] = useState(returning ? REVIEW : hasDev ? Math.min(REVIEW, Math.max(0, devStep)) : 0);
   const [direction, setDirection] = useState<1 | -1>(1);
   const [issue, setIssue] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState<Record<string, GoalRow>>({});
-  const [done, setDone] = useState(hasDev && devStep >= 4);
-  // School, class and aim, asked beside the exam; all optional, saved with the goals.
+  const [done, setDone] = useState(hasDev && devStep > REVIEW);
+  // School, class and aim, asked in their own step; all optional, saved with the goals.
   const [about, setAbout] = useState<AboutDraft>(() => draftOf(profile));
   const [aboutSaved, setAboutSaved] = useState<AboutDraft>(() => draftOf(profile));
   useEffect(() => {
@@ -317,9 +330,9 @@ function Flow({
   };
 
   const problem = (index: number): string | null => {
-    if (index === 0 && !exam) return 'Pick the exam you are sitting.';
-    if (index === 1 && chosen.length === 0) return 'Pick at least one subject. You can add more later.';
-    if (index === 2) {
+    if (index === EXAM && !exam) return 'Pick the exam you are sitting.';
+    if (index === SUBJECTS && chosen.length === 0) return 'Pick at least one subject. You can add more later.';
+    if (index === GOAL) {
       if (together) {
         if (!choice.examDate) return 'Pick the day of your exam. A best guess is fine; you can change it later.';
         if (away === null || away < 1) return 'Pick an exam day after today.';
@@ -353,7 +366,7 @@ function Flow({
   };
 
   const save = async () => {
-    for (let index = 0; index < 3; index += 1) {
+    for (let index = 0; index < REVIEW; index += 1) {
       const found = problem(index);
       if (found) {
         go(index);
@@ -428,7 +441,7 @@ function Flow({
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
-    if (step < 3) go(step + 1);
+    if (step < REVIEW) go(step + 1);
     else void save();
   };
 
@@ -436,9 +449,10 @@ function Flow({
     state: done ? 'done' : index === step ? 'current' : index <= reached ? 'done' : 'todo',
     value: null,
   }));
-  rail[0]!.value = exam ? exam.short_name : null;
-  rail[1]!.value = chosen.length ? chosen.map((subject) => subject.name).join(', ') : null;
-  rail[2]!.value =
+  rail[EXAM]!.value = exam ? exam.short_name : null;
+  rail[ABOUT]!.value = aboutLine(about);
+  rail[SUBJECTS]!.value = chosen.length ? chosen.map((subject) => subject.name).join(', ') : null;
+  rail[GOAL]!.value =
     nearest && away != null && away > 0 ? (
       <>
         {together ? shortDate(nearest) : `Next paper ${shortDate(nearest)}`}
@@ -446,17 +460,20 @@ function Flow({
         {choice.minutes} min, {daysText(choice.days)}
       </>
     ) : null;
-  rail[3]!.value = done ? 'Saved' : null;
+  rail[REVIEW]!.value = done ? 'Saved' : null;
 
   const StepIcon = STEPS[step]!.icon;
   const pieces: { title: string; lede: ReactNode }[] = [
     {
       title: !returning ? `Welcome, ${firstName}` : exams.length === 1 ? 'Your exam' : 'Which exam are you sitting?',
       lede:
-        (!returning ? 'Four quick steps and your plan is ready. ' : '') +
-        (exams.length === 1
-          ? `${exams[0]!.short_name} is the exam we prepare you for right now, so we have picked it for you.`
-          : 'First, pick the exam you are preparing for. Its subjects come next.'),
+        exams.length === 1
+          ? `${exams[0]!.short_name} is picked for you.`
+          : 'Pick the exam you are preparing for.',
+    },
+    {
+      title: 'A little about you',
+      lede: 'Optional. Fill in what you know.',
     },
     {
       title: 'Which subjects are you sitting?',
@@ -511,9 +528,8 @@ function Flow({
           </div>
 
           <div key={step} className={cx('onb-body', direction > 0 ? 'fwd' : 'bwd')}>
-            {step === 0 ? (
-              <>
-                <ExamStep
+            {step === EXAM ? (
+              <ExamStep
                   exams={exams}
                   examId={choice.examId}
                   onPick={(examId) => {
@@ -523,23 +539,15 @@ function Flow({
                     update({ examId, selected: next?.max_subjects ? keep.slice(0, next.max_subjects) : keep });
                   }}
                 />
-                {profile ? (
-                  <section className="onb-about" aria-labelledby="onb-about-title">
-                    <div className="onb-about-head">
-                      <h2 className="sj-display sj-h3" id="onb-about-title">
-                        A little about you
-                      </h2>
-                      <span className="sj-small sj-muted">Optional. Fill in what you know.</span>
-                    </div>
-                    <AboutFields
-                      draft={about}
-                      onChange={(key, value) => setAbout((current) => ({ ...current, [key]: value }))}
-                    />
-                  </section>
-                ) : null}
-              </>
             ) : null}
-            {step === 1 && exam ? (
+            {step === ABOUT ? (
+              profile ? (
+                <AboutFields draft={about} onChange={(key, value) => setAbout((current) => ({ ...current, [key]: value }))} />
+              ) : (
+                <p className="sj-muted">We could not load this just now. You can fill it in later on your profile.</p>
+              )
+            ) : null}
+            {step === SUBJECTS && exam ? (
               <SubjectsStep
                 exam={exam}
                 selected={choice.selected}
@@ -564,7 +572,7 @@ function Flow({
                 invalid={Boolean(issue)}
               />
             ) : null}
-            {step === 2 ? (
+            {step === GOAL ? (
               <GoalStep
                 examName={exam?.short_name ?? 'your exam'}
                 together={together}
@@ -577,7 +585,7 @@ function Flow({
                 invalidDate={Boolean(issue) && (!nearest || away === null || away < 1)}
               />
             ) : null}
-            {step === 3 && exam ? (
+            {step === REVIEW && exam ? (
               <ReviewStep
                 exam={exam}
                 chosen={chosen}
@@ -605,7 +613,7 @@ function Flow({
             ) : (
               <span className="onb-actions-note sj-small sj-muted">About a minute. You can change it all later.</span>
             )}
-            {step < 3 ? (
+            {step < REVIEW ? (
               <Button type="submit" trailing={<IconArrowRight size={18} />}>
                 Continue
               </Button>
@@ -672,7 +680,7 @@ function Rail({
                     {item.label}
                   </span>
                 </span>
-                <span className="onb-railvalue">{value ?? (state === 'todo' ? 'Not yet' : index === 3 ? 'Ready when you are' : 'Not picked yet')}</span>
+                <span className="onb-railvalue">{value ?? (state === 'todo' ? 'Not yet' : index === REVIEW ? 'Ready when you are' : index === ABOUT ? 'Optional' : 'Not picked yet')}</span>
               </button>
             </li>
           );
@@ -697,7 +705,6 @@ function ExamStep({ exams, examId, onPick }: { exams: ExaminationOffer[]; examId
   return (
     <div className={cx('onb-exams', exams.length === 1 && 'single')} role="radiogroup" aria-label="Exam">
       {exams.map((exam, index) => {
-        const ready = exam.subjects.filter((subject) => subject.ready).length;
         const on = exam.examination_id === examId;
         return (
           <label key={exam.examination_id} className={cx('onb-opt onb-exam', on && 'on', `sj-rise d${Math.min(index + 1, 4)}`)}>
@@ -720,16 +727,6 @@ function ExamStep({ exams, examId, onPick }: { exams: ExaminationOffer[]; examId
             </span>
             <span className="onb-exam-name">{examTitle(exam)}</span>
             <span className="onb-opt-meta">Set by {exam.exam_body}</span>
-            <span className="onb-exam-facts">
-              <span className="onb-fact">
-                <span className="sj-num">{ready}</span>
-                <span className="sj-eyebrow">{ready === 1 ? 'Subject ready' : 'Subjects ready'}</span>
-              </span>
-              <span className="onb-fact">
-                <span className="sj-num">{nf.format(exam.subjects.reduce((sum, s) => sum + (s.ready ? s.deliverable_questions : 0), 0))}</span>
-                <span className="sj-eyebrow">Past questions</span>
-              </span>
-            </span>
           </label>
         );
       })}
@@ -836,11 +833,7 @@ function SubjectCard({
       </span>
       {disabled ? (
         <span className="onb-opt-meta">{subject.blocked_reason ?? 'Not ready yet. We are still building it.'}</span>
-      ) : (
-        <span className="onb-opt-meta">
-          {nf.format(subject.deliverable_questions)} past questions · {subject.teachable_topics ?? 0} topics we teach
-        </span>
-      )}
+      ) : null}
       {subject.compulsory || goal?.target_score != null ? (
         <span className="onb-opt-badges">
           {subject.compulsory ? <span className="onb-opt-badge must sj-mono">Everyone sits this</span> : null}
@@ -1182,7 +1175,7 @@ function ReviewStep({
 }) {
   const rows: { step: number; tone: string; icon: typeof IconTarget; label: string; body: ReactNode }[] = [
     {
-      step: 0,
+      step: EXAM,
       tone: 'ink',
       icon: IconTarget,
       label: 'Exam',
@@ -1194,7 +1187,7 @@ function ReviewStep({
       ),
     },
     {
-      step: 1,
+      step: SUBJECTS,
       tone: 'purple',
       icon: IconBook,
       label: chosen.length === 1 ? 'Subject and target' : 'Subjects and targets',
@@ -1216,7 +1209,7 @@ function ReviewStep({
       ),
     },
     {
-      step: 2,
+      step: GOAL,
       tone: 'yellow',
       icon: IconCalendar,
       label: exam.sits_together ? `${exam.short_name} date` : 'Paper dates',
@@ -1244,7 +1237,7 @@ function ReviewStep({
       ),
     },
     {
-      step: 2,
+      step: GOAL,
       tone: 'lime',
       icon: IconClock,
       label: 'Study rhythm',

@@ -15,6 +15,18 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### Onboarding: no counts, "About you" on its own step, smaller phone buttons
+- **What:** the exam card no longer shows how many subjects and past questions we have, and the
+  subject cards no longer show question and topic counts. "A little about you" moved off the
+  exam step into its own optional step: Exam, About, Subjects, Your goal, Review. The first
+  step's line is now just "UTME is picked for you." On a phone, Back and Continue keep their
+  own width (Continue on the right) instead of stretching across the bar.
+- **Why:** the founder: students do not need our numbers; exam and "about you" are separate
+  things; the phone button was too big.
+- **Where:** `apps/web/src/prep/pages/Onboarding.tsx` (named step constants EXAM to REVIEW
+  replace the bare 0 to 3), `Onboarding.css` (unused facts and about-box rules removed).
+- **Status:** done locally, checked at 1440 and 390; not pushed.
+
 ### Onboarding: the "Then 01 02 03" steps are gone
 - **What:** the first onboarding step no longer lists the steps to come (subjects, goal,
   first check-up) under the exam card.
