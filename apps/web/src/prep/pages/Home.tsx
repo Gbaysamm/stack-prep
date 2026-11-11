@@ -559,7 +559,7 @@ export function Standing({ subject, className, sample }: { subject: SubjectOverv
       <div className="home-scale" aria-hidden="true">
         <div className="rail">
           {started !== null && score !== null && score > started ? (
-            <span className="band gain" style={{ left: at(started), width: at(score - started) }} />
+            <span className="home-band gain" style={{ left: at(started), width: at(score - started) }} />
           ) : null}
           {score !== null ? <span className="now" style={{ width: at(score) }} /> : null}
           {started !== null && score !== null && started !== score ? <span className="start" style={{ left: at(started) }} /> : null}

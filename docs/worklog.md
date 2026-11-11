@@ -15,6 +15,16 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### Home's score bar no longer catches the public site's band style; no "Done" word on the path
+- **What:** the gain stretch on Home's score bar was class `band`, which the public site also
+  styles (64px padding, for its edge-to-edge sections). After visiting the site in the same
+  tab, that stretch became a tall green strip hanging out of the card. It is `home-band` now.
+  The path's finished stops show only the purple tick, not the word "Done" (read as "topic
+  mastered" when it means "today's run finished").
+- **Why:** the founder asked what the strip and "Done" meant.
+- **Where:** `apps/web/src/prep/pages/Home.tsx`, `Home.css`, `Journey.tsx`, `Journey.css`.
+- **Status:** done locally, checked at 1440 after loading a site page first; not pushed.
+
 ### The API finds the checkout's .env wherever it starts; tests never see a paid key
 - **What:** settings read the checkout's own `.env` (found from `config.py`) as well as one in
   the working directory, so an API started from `apps/api` has its AI key. Started that way it

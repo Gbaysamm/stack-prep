@@ -71,8 +71,6 @@ export function Journey({ stops, action, continues }: { stops: Stop[]; action?: 
               {stop.level ? <Pips level={stop.level} /> : null}
               {stop.state === 'current' && action ? (
                 action
-              ) : stop.state === 'done' ? (
-                <span className="jr-done sj-mono">Done</span>
               ) : stop.state === 'locked' && !stop.finish ? (
                 <IconLock size={16} className="jr-lock" />
               ) : null}
