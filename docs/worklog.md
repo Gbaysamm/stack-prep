@@ -15,6 +15,16 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### A chosen chip is the height of its row
+- **What:** chosen chips and toggles no longer carry the 3-4px purple ledge underneath
+  (`.sj-chip` pressed, onboarding and Goal days, the calendar's day and month chips, the run
+  builder's year and length, the run report's filters), so a chosen one lines up with the rest.
+  The study-time line is hidden when the least is 15 minutes, as it then rules nothing out.
+- **Why:** the founder: the heights were still not aligned when one item was selected.
+- **Where:** `prep.css`, `lib/DatePicker.css`, `Onboarding.css`, `Goal.css`, `RunBuilder.css`,
+  `RunReport.css`, `prep/StudyMinutes.tsx`.
+- **Status:** done locally, checked at 1440; not pushed.
+
 ### Study time: only workable times, up to five hours, a custom stepper; no Weekdays / Every day
 - **What:** a shared `prep/StudyMinutes` replaces the minute chips on onboarding and the Goal
   page. It offers only times that work for the days left: the least the plan needs, then the

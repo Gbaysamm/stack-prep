@@ -95,7 +95,8 @@ export function StudyMinutes({
           </button>
         </div>
       ) : null}
-      {least ? (
+      {/* Only when it rules something out: "at least 15 min" says nothing. */}
+      {least && least.minutes > RUN_MINUTES ? (
         <p className={cx('sm-note', !least.enough && 'short')} aria-live="polite">
           {least.enough
             ? `${least.daysLeft} days to go, so at least ${length(least.minutes)} a day.`
