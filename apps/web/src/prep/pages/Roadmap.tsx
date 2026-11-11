@@ -18,13 +18,14 @@ import {
 } from '../roadmapApi.js';
 import { usePageTitle, useStudent } from '../store.js';
 import { Button, CountUp, PageHero, Skeleton } from '../ui.js';
-import { HeroStats, Section } from './Home.js';
+import { FIRST_PATH, HeroStats, Section } from './Home.js';
 import './Roadmap.css';
 
 /** How many planned items the path shows before exam day. */
 const PATH_LENGTH = 10;
 
 function headline(roadmap: RoadmapData): string {
+  if (roadmap.subjects.length === 0) return 'Start with your goal';
   const target = roadmap.target_total;
   switch (roadmap.status) {
     case 'on_track':
@@ -43,6 +44,7 @@ function headline(roadmap: RoadmapData): string {
 }
 
 function subline(roadmap: RoadmapData): string {
+  if (roadmap.subjects.length === 0) return "We'll build your plan from it.";
   if (roadmap.advice) return roadmap.advice;
   if (roadmap.status === 'needs_checkups') return 'Your total out of 400 shows once all four subjects have a check-up.';
   if (roadmap.status === 'no_target') return 'Set a target score and the plan aims at it.';
@@ -101,7 +103,7 @@ export function Roadmap() {
 
       <div className="rm-layout">
       <Section
-        eyebrow={next ? 'Today, then next' : 'Done for today'}
+        eyebrow={roadmap.subjects.length === 0 ? 'Getting started' : next ? 'Today, then next' : 'Done for today'}
         title="Your path"
         id="rm-path"
         action={
@@ -113,9 +115,13 @@ export function Roadmap() {
         }
       >
         <Journey
-          stops={pathStops(roadmap, next)}
+          stops={roadmap.subjects.length === 0 ? FIRST_PATH : pathStops(roadmap, next)}
           action={
-            next ? (
+            roadmap.subjects.length === 0 ? (
+              <Button to="/onboarding" tone="lime" size="sm" trailing={<IconArrowRight size={16} />}>
+                Set my goal
+              </Button>
+            ) : next ? (
               <Button
                 tone="lime"
                 size="sm"
@@ -164,7 +170,7 @@ function pathStops(roadmap: RoadmapData, next: RoadmapItem | null): Stop[] {
               ? 'The whole paper'
               : (item.subject_name ?? undefined),
       icon:
-        item.kind === 'checkup' ? <IconTarget size={30} /> : item.kind === 'mock' ? <IconClock size={30} /> : <IconBolt size={30} />,
+        item.kind === 'checkup' ? <IconTarget size={20} /> : item.kind === 'mock' ? <IconClock size={20} /> : <IconBolt size={20} />,
       state,
       level: item.kind === 'run' ? level : undefined,
     };
@@ -173,7 +179,7 @@ function pathStops(roadmap: RoadmapData, next: RoadmapItem | null): Stop[] {
     key: 'exam',
     title: 'Exam day',
     line: roadmap.target_total !== null ? `Target ${Math.round(roadmap.target_total)}` : 'Your target',
-    icon: <IconTrophy size={36} />,
+    icon: <IconTrophy size={20} />,
     state: 'locked',
     finish: true,
   });

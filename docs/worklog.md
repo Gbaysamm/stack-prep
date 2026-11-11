@@ -15,6 +15,20 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-10
 
+### The path as a ladder card, and a roadmap that is never blank
+- **Why:** the founder: the winding, dotted path did not fit the app's look; a student with no
+  goal yet saw an almost empty roadmap.
+- **What:** the founder chose the "ladder card" style. `Journey` is now one white card with
+  the app's purple offset shadow: square icon tiles on a line down the left (purple when
+  done, lime for the current step, grey ahead, gold for exam day), the words in one column,
+  level pips and a lock on the right, and the current step as a lit row with its button
+  (full width under the words on a phone). A student with no subjects sees the starting path
+  on the Roadmap too (Set your goal, check-up, plan, daily runs, check-ups, exam day), headed
+  "Start with your goal"; the path then takes the full row.
+- **Where:** `apps/web/src/prep/Journey.tsx`, `Journey.css`, `pages/Home.tsx`,
+  `pages/Roadmap.tsx`, `pages/Roadmap.css`.
+- **Status:** done locally.
+
 ### The roadmap on the path, with levels
 - **Why:** the founder wants the roadmap fun and levelled, like Duolingo's path but our own.
 - **What:** each planned subtopic has a level from the spec's mastery bands (§9.1): 1 Weak

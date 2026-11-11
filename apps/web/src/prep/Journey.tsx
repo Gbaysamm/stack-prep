@@ -1,8 +1,7 @@
 /**
- * The journey: a student's path drawn as a winding trail of raised circles, done, current and
- * ahead (locked). Our own take on a learning path: the current circle glows and carries its
- * one action in a callout; the trail ends at exam day. Used for a new student's Home and for
- * the roadmap.
+ * The journey: a student's path as a ladder in one card, done, current and ahead. Square
+ * tiles on a line down the left, the words in one column, and the current step as a lit row
+ * carrying its one action. Used for a new student's Home and for the roadmap.
  */
 import type { ReactNode } from 'react';
 
@@ -19,69 +18,54 @@ export interface Stop {
   line?: string;
   icon: ReactNode;
   state: StopState;
-  /** The finish: drawn larger, in gold. */
+  /** The finish: a gold tile. */
   finish?: boolean;
-  /** A subtopic's level, 0 to 5: five pips under the circle, filled to it. */
+  /** A subtopic's level, 0 to 5: five pips, filled to it. */
   level?: number;
 }
 
 export const LEVEL_NAMES = ['Not started', 'Weak', 'Developing', 'Exam-ready', 'Strong', 'Mastered'];
 
-/** How far each stop sits from the centre, in turn: the trail's sway. */
-const SWAY = [-70, 10, 80, 10, -70, 10, 80, 10];
-const ROW = 118;
-const WIDTH = 420;
+function Pips({ level }: { level: number }) {
+  return (
+    <span className="jr-pips" aria-label={`Level ${level} of 5`}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <i key={n} className={n <= level ? 'on' : undefined} />
+      ))}
+    </span>
+  );
+}
 
 export function Journey({ stops, action }: { stops: Stop[]; action?: ReactNode }) {
-  const points = stops.map((_, index) => ({
-    x: WIDTH / 2 + SWAY[index % SWAY.length]!,
-    y: ROW / 2 + index * ROW,
-  }));
-  const height = stops.length * ROW;
-  const segment = (from: { x: number; y: number }, to: { x: number; y: number }) => {
-    const mid = (from.y + to.y) / 2;
-    return `M ${from.x} ${from.y} C ${from.x} ${mid}, ${to.x} ${mid}, ${to.x} ${to.y}`;
-  };
   return (
-    <div className="jr">
-      <div className="jr-track" style={{ width: WIDTH, height }}>
-        <svg className="jr-line" width={WIDTH} height={height} aria-hidden="true">
-          {points.slice(1).map((point, index) => (
-            <path
-              key={index}
-              d={segment(points[index]!, point)}
-              className={stops[index + 1]!.state === 'locked' ? 'ahead' : 'walked'}
-            />
-          ))}
-        </svg>
-        <ol className="jr-stops">
-          {stops.map((stop, index) => (
-            <li
-              key={stop.key}
-              // The label goes on the side with room: right of a stop left of centre, else left.
-              className={cx('jr-stop', stop.state, stop.finish && 'finish', points[index]!.x > WIDTH / 2 ? 'right' : 'left')}
-              style={{ left: points[index]!.x, top: points[index]!.y }}
-            >
-              <span className="jr-node" aria-hidden="true">
-                {stop.state === 'done' ? <IconCheck size={30} /> : stop.state === 'locked' && !stop.finish ? <IconLock size={24} /> : stop.icon}
-              </span>
-              {stop.state === 'current' ? <span className="jr-pulse" aria-hidden="true" /> : null}
-              {stop.level !== undefined ? (
-                <span className="jr-pips" aria-label={`Level ${stop.level} of 5`}>
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <i key={n} className={n <= stop.level! ? 'on' : undefined} />
-                  ))}
-                </span>
+    <ol className="sj-card sticker jr">
+      {stops.map((stop, index) => {
+        const next = stops[index + 1];
+        return (
+          <li
+            key={stop.key}
+            className={cx('jr-step', stop.state, stop.finish && 'finish', next && next.state !== 'locked' && 'walked')}
+          >
+            <span className="jr-tile" aria-hidden="true">
+              {stop.state === 'done' ? <IconCheck size={20} /> : stop.icon}
+            </span>
+            <span className="jr-words">
+              <b>{stop.title}</b>
+              {stop.line ? <span>{stop.line}</span> : null}
+            </span>
+            <span className="jr-end">
+              {stop.level !== undefined ? <Pips level={stop.level} /> : null}
+              {stop.state === 'current' && action ? (
+                action
+              ) : stop.state === 'done' ? (
+                <span className="jr-done sj-mono">Done</span>
+              ) : stop.state === 'locked' && !stop.finish ? (
+                <IconLock size={16} className="jr-lock" />
               ) : null}
-              <span className={cx('jr-label', stop.state === 'current' && 'callout')}>
-                <b>{stop.title}</b>
-                {stop.line ? <span>{stop.line}</span> : null}
-                {stop.state === 'current' && action ? <span className="jr-go">{action}</span> : null}
-              </span>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </div>
+            </span>
+          </li>
+        );
+      })}
+    </ol>
   );
 }

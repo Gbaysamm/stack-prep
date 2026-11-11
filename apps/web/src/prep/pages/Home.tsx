@@ -1019,13 +1019,13 @@ function Hero({ overview, step }: { overview: Overview; step: NextStep; focus?: 
 /* ------------------------------------------------------------------ brand-new student */
 
 /** A new student: the path ahead, with its first step (set the goal) as the one action. */
-const FIRST_PATH: Stop[] = [
-  { key: 'goal', title: 'Set your goal', line: 'Your exam, target and date', icon: <IconTarget size={30} />, state: 'current' },
-  { key: 'checkup', title: 'Take a check-up', line: '15 questions', icon: <IconTarget size={28} />, state: 'locked' },
-  { key: 'plan', title: 'Your plan', line: 'Built for you', icon: <IconCalendar size={28} />, state: 'locked' },
-  { key: 'daily', title: 'Daily runs', line: 'A few a day', icon: <IconBolt size={28} />, state: 'locked' },
-  { key: 'weekly', title: 'Check-ups', line: 'Every week, your score climbs', icon: <IconChart size={28} />, state: 'locked' },
-  { key: 'exam', title: 'Exam day', line: 'Your target', icon: <IconTrophy size={36} />, state: 'locked', finish: true },
+export const FIRST_PATH: Stop[] = [
+  { key: 'goal', title: 'Set your goal', line: 'Your exam, target and date', icon: <IconTarget size={20} />, state: 'current' },
+  { key: 'checkup', title: 'Take a check-up', line: '15 questions', icon: <IconTarget size={20} />, state: 'locked' },
+  { key: 'plan', title: 'Your plan', line: 'Built for you', icon: <IconCalendar size={20} />, state: 'locked' },
+  { key: 'daily', title: 'Daily runs', line: 'A few a day', icon: <IconBolt size={20} />, state: 'locked' },
+  { key: 'weekly', title: 'Check-ups', line: 'Every week, your score climbs', icon: <IconChart size={20} />, state: 'locked' },
+  { key: 'exam', title: 'Exam day', line: 'Your target', icon: <IconTrophy size={20} />, state: 'locked', finish: true },
 ];
 
 function FirstRun({ overview }: { overview: Overview }) {
