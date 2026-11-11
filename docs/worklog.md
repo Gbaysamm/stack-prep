@@ -15,6 +15,14 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### Onboarding: the State list no longer opens under the Back button
+- **What:** the step's slide-in animation now leaves no transform behind (`backwards` instead
+  of `both`), so a dropdown opened in a step sits above Back and Continue.
+- **Why:** the founder: the Back button covered the State list. The kept transform put the step
+  in its own layer below the buttons, whatever the list's z-index.
+- **Where:** `apps/web/src/prep/pages/Onboarding.css` (`.onb-body`).
+- **Status:** done locally, checked at 1440 and 390; not pushed.
+
 ### Onboarding: a welcome page of its own, "Your exam" with what the exam is like, shorter buttons
 - **What:** a new student first sees a welcome page ("Hi Ada, let's set up your plan", one
   line, Let's start, and the setup path drawn as the ladder card). The first step is now

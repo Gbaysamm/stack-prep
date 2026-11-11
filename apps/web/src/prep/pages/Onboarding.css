@@ -333,7 +333,8 @@
 .onb-body {
   flex: 1;
   min-width: 0;
-  animation: onb-in-fwd 320ms var(--ease) both;
+  /* backwards, not both: once in, no transform is left to trap a dropdown under the buttons. */
+  animation: onb-in-fwd 320ms var(--ease) backwards;
 }
 .onb-body.bwd {
   animation-name: onb-in-bwd;
