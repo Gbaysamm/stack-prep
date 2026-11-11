@@ -39,6 +39,7 @@ import { Button, CountUp, Skeleton, cx, daysUntil, useToast } from '../ui.js';
 import { examTitle, isHiddenExam } from './Exams.js';
 import { CountdownTip } from '../countdown.js';
 import { Journey } from '../Journey.js';
+import { leastTime, type LeastTime } from '../studyTime.js';
 import { DatePicker } from '../../lib/DatePicker.js';
 import './Onboarding.css';
 import { friendly } from '../../lib/friendlyError.js';
@@ -346,6 +347,11 @@ function Flow({
   const away = daysUntil(nearest);
   const nearestNames = chosen.filter((subject) => dateOf(subject.subject_id) === nearest).map((subject) => subject.name);
   const goalFor = new Map(goals.map((goal) => [goal.subject_id, goal]));
+  // The least time a day that reaches every topic before the exam (studyTime.ts).
+  const least = leastTime(
+    chosen.map((subject) => ({ topics: subject.teachable_topics ?? 0, date: dateOf(subject.subject_id) })),
+    choice.days,
+  );
 
   const update = (patch: Partial<Choice>) => {
     setIssue(null);
@@ -371,6 +377,7 @@ function Flow({
         if (past.length) return `Pick a day after today for ${listText(past.map((subject) => subject.name))}.`;
       }
       if (choice.days.length === 0) return 'Pick at least one day you can study.';
+      if (least && choice.minutes < least.minutes) return `Pick at least ${least.minutes} minutes a day.`;
     }
     return null;
   };
@@ -614,6 +621,7 @@ function Flow({
                 nearestNames={nearestNames}
                 targetOf={targetOf}
                 update={update}
+                least={least}
                 invalidDate={Boolean(issue) && (!nearest || away === null || away < 1)}
               />
             ) : null}
@@ -940,6 +948,7 @@ function GoalStep({
   nearestNames,
   targetOf,
   update,
+  least,
   invalidDate,
 }: {
   examName: string;
@@ -950,6 +959,7 @@ function GoalStep({
   nearestNames: string[];
   targetOf: (id: string) => number;
   update: (patch: Partial<Choice>) => void;
+  least: LeastTime | null;
   invalidDate: boolean;
 }) {
   const dateId = useId();
@@ -962,7 +972,12 @@ function GoalStep({
   const good = away != null && away > 0;
   const isUtme = examName.toUpperCase() === 'UTME';
   const setDate = (id: string, value: string) => update({ dates: { ...choice.dates, [id]: value } });
-  const minuteChips = MINUTE_CHIPS.includes(choice.minutes) ? MINUTE_CHIPS : [...MINUTE_CHIPS, choice.minutes].sort((a, b) => a - b);
+  const minuteChips = [...new Set([...MINUTE_CHIPS, choice.minutes, ...(least ? [least.minutes] : [])])].sort((a, b) => a - b);
+  // A time below the least is raised to it as soon as the date or days make it too short.
+  useEffect(() => {
+    if (least && choice.minutes < least.minutes) update({ minutes: least.minutes });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [least?.minutes]);
   const sortedDays = [...choice.days].sort((a, b) => a - b).join();
   const setTarget = (id: string, value: number) => update({ targets: { ...choice.targets, [id]: clampScore(value) } });
   const toggleDay = (n: number) =>
@@ -1119,27 +1134,33 @@ function GoalStep({
                 type="button"
                 className="sj-chip"
                 aria-pressed={choice.minutes === value}
+                disabled={least != null && value < least.minutes}
                 onClick={() => update({ minutes: value })}
               >
                 {value} min
               </button>
             ))}
           </div>
+          {least ? (
+            <p className={cx('sj-least', !least.enough && 'short')} aria-live="polite">
+              {least.enough
+                ? `${least.daysLeft} days to go: at least ${least.minutes} min a day to cover all your topics.`
+                : `${least.daysLeft} days to go: even ${least.minutes} min a day won't cover every topic.${
+                    least.everyDayWouldDo && choice.days.length < 7 ? ' Add more days.' : ' Your plan will put the topics that come up most first.'
+                  }`}
+            </p>
+          ) : null}
         </div>
         <div className="onb-block">
           <div className="onb-blockhead">
             <span className="onb-label" id="onb-days-label">
               On these days
             </span>
-            <span className="onb-quickdays">
-              <button type="button" className={cx('onb-textbtn', sortedDays === '1,2,3,4,5' && 'on')} onClick={() => update({ days: [1, 2, 3, 4, 5] })}>
+            <span className="sj-seg" role="group" aria-label="Quick picks for study days">
+              <button type="button" className={cx(sortedDays === '1,2,3,4,5' && 'on')} aria-pressed={sortedDays === '1,2,3,4,5'} onClick={() => update({ days: [1, 2, 3, 4, 5] })}>
                 Weekdays
               </button>
-              <button
-                type="button"
-                className={cx('onb-textbtn', choice.days.length === 7 && 'on')}
-                onClick={() => update({ days: [1, 2, 3, 4, 5, 6, 7] })}
-              >
+              <button type="button" className={cx(choice.days.length === 7 && 'on')} aria-pressed={choice.days.length === 7} onClick={() => update({ days: [1, 2, 3, 4, 5, 6, 7] })}>
                 Every day
               </button>
             </span>

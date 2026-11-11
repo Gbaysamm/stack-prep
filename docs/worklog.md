@@ -15,6 +15,27 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### The least study time a day follows the days left; smaller chips; a Weekdays / Every day switch
+- **What:** onboarding and the Goal page no longer let a student pick less time a day than the
+  plan needs. `prep/studyTime.ts` works it out from the planner's own rules: every subtopic we
+  teach in the student's subjects gets at least one 15-minute run before its exam day, and in
+  the last 42 days only 60% of runs count (40% are mixed practice). The least runs a day is the
+  topics over the counted study days, rounded up, capped at 6 (90 min). Shorter times are struck
+  through, a time below the least is raised to it, saving below it is refused, and one line says
+  why ("92 days to go: at least 75 min a day to cover all your topics"). When even 90 min will
+  not do, it says so in red and suggests more days, or that the plan will put the most-asked
+  topics first. Example, Use of English and three sciences on weekdays: 30 min at six months,
+  75 min at three, the 90-min cap at one.
+  Weekdays / Every day is now a small switch (shared `.sj-seg`). Chips are 38px app-wide (were
+  42), onboarding's day and minute buttons 38px, the date field 42-44px, and the Goal page's
+  day buttons 38px without the tick circle (were 72px).
+- **Why:** the founder: 15 minutes a day with a month to go cannot work, so the time must depend
+  on how long is left; the Weekdays / Every day buttons looked wrong; the buttons were too tall.
+- **Where:** `apps/web/src/prep/studyTime.ts` (+ `studyTime.test.ts`), `pages/Onboarding.tsx`,
+  `pages/Goal.tsx`, `prep.css` (`.sj-chip`, `.sj-seg`, `.sj-least`), `Onboarding.css`, `Goal.css`.
+- **Status:** done locally, checked at 1440 and 390; web tests pass (58). Not pushed. The API does
+  not yet refuse a too-short time sent directly; the screens do.
+
 ### Our own date picker instead of the browser's
 - **What:** a new `lib/DatePicker` replaces every `<input type="date">` the app uses (onboarding's
   exam date and paper dates, the Goal page, the admin Premium "Ends on"). The field shows the day

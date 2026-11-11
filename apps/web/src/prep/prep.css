@@ -608,8 +608,8 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
-  min-height: 42px;
-  padding: 9px 16px;
+  min-height: 38px;
+  padding: 7px 14px;
   border-radius: var(--r-sm);
   background: #fff;
   box-shadow: inset 0 0 0 1.5px var(--gray-200);
@@ -632,6 +632,52 @@
   background: var(--purple-600);
   color: #fff;
   box-shadow: 0 4px 0 var(--purple-700);
+}
+
+/* A chip that can't be chosen right now (too little time a day): struck through. */
+.sj .sj-chip:disabled {
+  background: var(--gray-050, #f7f6fa);
+  box-shadow: none;
+  color: var(--gray-300);
+  text-decoration: line-through;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Weekdays | Every day: a small switch, the chosen side raised in white. */
+.sj .sj-seg {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--gray-100);
+}
+.sj .sj-seg button {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-600);
+  transition:
+    background var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease);
+}
+.sj .sj-seg button:hover:not(.on) {
+  color: var(--ink-900);
+}
+.sj .sj-seg button.on {
+  background: #fff;
+  color: var(--purple-700);
+  box-shadow: 0 1px 2px rgba(31, 0, 80, 0.12);
+}
+/* How little time is enough, under the minutes. */
+.sj .sj-least {
+  margin: 0;
+  font-size: 13px;
+  color: var(--gray-600);
+}
+.sj .sj-least.short {
+  color: #9c1d4c;
 }
 
 /* ---------------------------------------------------------------- glass */
