@@ -16,8 +16,8 @@ The spec's planner rules, and where each is kept:
 
 =====================================  =====================================================
 Subject balance ≥ 30% (two subjects)   :func:`_shares`; with four subjects, 15% each
-Coverage: every topic below            :func:`_coverage`: half of them each week, so each
-Exam-ready gets an activity every      gets one in any fourteen days
+Coverage: every topic below            :func:`_syllabus_queue`: the open subtopics in turn,
+Exam-ready gets an activity every      each up to the run limit, before any review
 14 days
 ≤ 30 minutes on one skill in a row     one run is ~15 minutes and the next run is always a
                                        different subtopic or subject
@@ -375,65 +375,59 @@ def _advice(spec: RoadmapInput, status: Status, target: float | None) -> str | N
     return "Give it more time each day to reach it."
 
 
-def _value_bands(projection: Projection) -> dict[str, Value]:
-    """High, medium or low value, relative to the rest of this subject's plan.
-
-    The marks one session adds are small in a subject with many subtopics, so an absolute
-    scale would call everything low. What helps a student is the ranking: the top third of
-    what is planned is high value, the next third medium, the rest low.
-    """
-    planned = sorted(
-        (line for line in projection.plan if line.sessions > 0),
-        key=lambda line: (-line.marks_gained / line.sessions, line.unit_id),
-    )
-    bands: dict[str, Value] = {}
-    for index, line in enumerate(planned):
-        third = index * 3 // max(1, len(planned))
-        bands[line.unit_id] = "high" if third == 0 else "medium" if third == 1 else "low"
-    return bands
-
-
-def _queue(projection: Projection) -> list[tuple[str, str, Reason, Value, PlannedUnit]]:
-    """This subject's runs in order: each planned subtopic in turn, highest marks first."""
-    plan = [line for line in projection.plan if line.sessions > 0]
-    bands = _value_bands(projection)
-    left = {line.unit_id: line.sessions for line in plan}
-    order: list[tuple[str, str, Reason, Value, PlannedUnit]] = []
-    while any(left.values()):
-        for line in plan:
-            if left[line.unit_id]:
-                left[line.unit_id] -= 1
-                order.append((line.unit_id, line.name, "high_value_gap", bands[line.unit_id], line))
-    return order
-
-
-def _coverage(
-    projection: Projection, today: date
+def _syllabus_queue(
+    units: Sequence[UnitStanding], slots: int, ahead: int
 ) -> list[tuple[str, str, Reason, Value, PlannedUnit]]:
-    """Topics below Exam-ready that this week's runs miss: half of them this week.
+    """A subject's runs for the week, in the syllabus's order.
 
-    The plan is re-built each week, so taking alternate halves (by the week's number) gives
-    every such topic an activity within any fourteen days, as the spec asks.
+    The open subtopics not yet moved past are taken a few at a time (``ahead`` of them), in
+    turn, each up to the runs it has left under STUCK_AFTER_RUNS; when they cannot fill the
+    week, the next ones in the syllabus open. Only then do secured subtopics get review runs,
+    weakest first. So no subtopic is given a pile of runs because the week had room, and a
+    subtopic the student has not met is never skipped as "probably fine".
     """
-    planned_topics = set()
-    first_week = _queue(projection)[: max(1, len(_queue(projection)) // 4)]
-    for _, _, _, _, line in first_week:
-        planned_topics.add(line.topic_name)
-    by_topic: dict[str, list[PlannedUnit]] = {}
-    for line in projection.plan:
-        by_topic.setdefault(line.topic_name, []).append(line)
-    behind = sorted(
-        (
-            max(lines, key=lambda line: line.share)
-            for topic, lines in by_topic.items()
-            if topic not in planned_topics
-            and sum(line.mastery_now for line in lines) / len(lines) < EXAM_READY
-        ),
-        key=lambda line: (-line.share, line.unit_id),
+    teachable = [u for u in units if u.teachable]
+    heavy = sorted((u.share for u in teachable), reverse=True)
+    cut_high = heavy[len(heavy) // 3] if heavy else 0.0
+    cut_medium = heavy[2 * len(heavy) // 3] if heavy else 0.0
+
+    def entry(unit: UnitStanding, reason: Reason) -> tuple[str, str, Reason, Value, PlannedUnit]:
+        value: Value = (
+            "high" if unit.share >= cut_high else "medium" if unit.share >= cut_medium else "low"
+        )
+        now = unit.mastery or 0.0
+        line = PlannedUnit(
+            unit.unit_id, unit.name, unit.topic_name, unit.share, now, now, 1, 0.0, ""
+        )
+        return (unit.unit_id, unit.name, reason, value, line)
+
+    learning: list[UnitStanding] = []
+    width = max(1, ahead)
+    while True:
+        opened = open_units(units, width)
+        learning = [u for u in opened if not moved_past(u)]
+        room = sum(max(1, STUCK_AFTER_RUNS - u.runs) for u in learning)
+        if room >= slots or len(open_units(units, width + 1)) == len(opened):
+            break
+        width += 1
+
+    queue: list[tuple[str, str, Reason, Value, PlannedUnit]] = []
+    left = {u.unit_id: max(1, STUCK_AFTER_RUNS - u.runs) for u in learning}
+    for start in range(0, len(learning), max(1, ahead)):
+        group = learning[start : start + max(1, ahead)]
+        while any(left[u.unit_id] for u in group) and len(queue) < slots:
+            for unit in group:
+                if left[unit.unit_id] and len(queue) < slots:
+                    queue.append(entry(unit, "high_value_gap"))
+                    left[unit.unit_id] -= 1
+    reviews = sorted(
+        (u for u in open_units(units, width) if secured(u)), key=lambda u: u.mastery or 0.0
     )
-    parity = (today.toordinal() // 7) % 2
-    chosen = behind[parity::2] if len(behind) > 1 else behind
-    return [(line.unit_id, line.name, "coverage", "low", line) for line in chosen]
+    turn = 0
+    while reviews and len(queue) < slots:
+        queue.append(entry(reviews[turn % len(reviews)], "coverage"))
+        turn += 1
+    return queue
 
 
 def _sessions_to_exam_ready(mastery: float) -> int:
@@ -570,25 +564,15 @@ def _next_days(
     horizon = spec.today + timedelta(days=FIXED_DAYS - 1)
     units = {u.unit_id: u for s in measured for u in s.units}
     queues: dict[str, list[tuple[str, str, Reason, Value, PlannedUnit]]] = {}
+    week_days = sum(1 for d in dates if d <= horizon)
     for subject in measured:
         # The runs come from the open subtopics only (syllabus order); the scores above still
-        # count every subtopic, since the exam does.
-        count = allocated[subject.subject_id][0]
-        opened = open_units(subject.units, ahead.get(subject.subject_id, OPEN_AHEAD))
-        if not opened:
-            queues[subject.subject_id] = []
-            continue
-        projection = project(opened, sessions_available=max(count, len(opened)))
-        planned = _queue(projection)
-        extra = _coverage(projection, spec.today)
-        # Coverage runs go in every fourth place, so they never crowd out the high-value work.
-        merged: list[tuple[str, str, Reason, Value, PlannedUnit]] = []
-        while planned or extra:
-            merged.extend(planned[:3])
-            planned = planned[3:]
-            if extra:
-                merged.append(extra.pop(0))
-        queues[subject.subject_id] = merged
+        # count every subtopic, since the exam does. Enough for this subject's share of the
+        # week, with a day's worth to spare.
+        slots = ceil(week_days * per_day * shares.get(subject.subject_id, 0.0)) + per_day
+        queues[subject.subject_id] = _syllabus_queue(
+            subject.units, slots, ahead.get(subject.subject_id, OPEN_AHEAD)
+        )
     used = dict.fromkeys(queues, 0)
     placed_runs = 0
     phase_runs = 0
@@ -666,13 +650,16 @@ def _next_days(
             else:
                 queue = queues[subject_id]
                 pick = None
-                for step in range(len(queue)):
-                    candidate = queue[(used[subject_id] + step) % len(queue)]
+                # In order, never wrapping round: a subtopic gets no more runs than its place
+                # in the queue gave it. A spent queue is a mixed run of what is open.
+                while used[subject_id] < len(queue):
+                    candidate = queue[used[subject_id]]
                     if _startable(
                         candidate[4], units.get(candidate[0]), day, spec.exam_date, remaining
                     ):
                         pick = candidate
                         break
+                    used[subject_id] += 1
                 if pick is None:
                     items.append(
                         PlannedItem(

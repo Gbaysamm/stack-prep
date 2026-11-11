@@ -1123,47 +1123,41 @@
 }
 
 /* Today's plan, inside the hero (the roadmap's step). */
+/* Today in the hero: the next step's subject, then one dot per planned item. */
 .sj .home-today {
   display: grid;
-  gap: 6px;
-  margin: 12px 0 0;
-  padding: 0;
-  list-style: none;
+  gap: 14px;
+  margin-top: 6px;
 }
-.sj .home-today li {
+.sj .home-today-sub {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.7);
+}
+.sj .home-dots {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  font-size: 14.5px;
-  font-weight: 600;
-  color: #fff;
+  gap: 6px;
 }
-.sj .home-today li em {
-  font-style: normal;
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.65);
+.sj .home-dots i {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.18);
 }
-.sj .home-today .mark {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.4);
-  color: var(--ink-900);
-}
-.sj .home-today li.done {
-  color: rgba(255, 255, 255, 0.6);
-  text-decoration: line-through;
-  text-decoration-color: rgba(255, 255, 255, 0.35);
-}
-.sj .home-today li.done .mark {
+.sj .home-dots i.on {
   background: var(--green-400);
-  box-shadow: none;
 }
-.sj .home-today li.in_progress .mark {
+.sj .home-dots i.now {
+  background: transparent;
   box-shadow: inset 0 0 0 2px var(--green-400);
+}
+.sj .home-dots-count {
+  margin-left: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 /* A row of sections with only one left in it takes the whole width. */

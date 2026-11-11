@@ -30,12 +30,10 @@ import {
   StatusCell,
   SubjectName,
   SubjectRows,
-  SubjectSwitcher,
   byUrgency,
   isDemoSubject,
   subjectStatus,
   useOverview,
-  useSubjectChoice,
   type SubjectColumn,
 } from '../SubjectSwitcher.js';
 import { Journey, type Stop } from '../Journey.js';
@@ -43,6 +41,7 @@ import { itemLabel, roadmapApi, today as todayOf, useRoadmap, useStartItem, type
 import { usePageTitle, useStudent } from '../store.js';
 import { Badge, Button, CountUp, PageHero, ShowMore, Skeleton, Track, cx, greeting, useShowMore, useToast } from '../ui.js';
 import { HOW_PATH, MetricTip, type MetricId } from './HowItsWorkedOut.js';
+import { RoadmapSubjects, pathStops } from './Roadmap.js';
 import './Home.css';
 import { friendly } from '../../lib/friendlyError.js';
 
@@ -819,38 +818,31 @@ function Hero({ overview, step }: { overview: Overview; step: NextStep; focus?: 
     case 'today': {
       const { items, next } = todayOf(step.roadmap);
       const done = items.filter((item) => item.state === 'done').length;
-      lead = next ? "Today's plan" : "Today's plan is done.";
+      lead = next ? (next.kind === 'checkup' ? `${next.subject_name} check-up` : itemLabel(next)) : 'Done for today';
       body = (
-        <ol className="home-today">
-          {items.map((item) => (
-            <li key={item.id} className={item.state}>
-              <span className="mark" aria-hidden="true">
-                {item.state === 'done' ? <IconCheck size={12} /> : null}
-              </span>
-              <span>
-                {itemLabel(item)}
-                {item.kind !== 'mock' && item.subject_name ? <em> · {item.subject_name}</em> : null}
-              </span>
-            </li>
-          ))}
-        </ol>
+        <span className="home-today">
+          {next && next.kind !== 'checkup' && next.subject_name ? <span className="home-today-sub">{next.subject_name}</span> : null}
+          {/* Today's progress as dots, one per planned item: the list itself is on the roadmap. */}
+          <span className="home-dots" aria-label={`${done} of ${items.length} done today`}>
+            {items.map((item) => (
+              <i key={item.id} className={item.state === 'done' ? 'on' : next && item.id === next.id ? 'now' : undefined} />
+            ))}
+            <span className="home-dots-count sj-mono">
+              {done} of {items.length} today
+            </span>
+          </span>
+        </span>
       );
       action = next ? (
-        <Button
-          tone="lime"
-          size="lg"
-          busy={planned.busy === next.id}
-          onClick={() => void planned.start(next)}
-          trailing={<IconArrowRight size={18} />}
-        >
-          {next.state === 'in_progress' ? 'Carry on' : done ? 'Next' : 'Start'}
+        <Button tone="lime" size="lg" busy={planned.busy === next.id} onClick={() => void planned.start(next)} icon={<IconPlay size={16} />}>
+          {next.state === 'in_progress' ? 'Carry on' : 'Start'}
         </Button>
       ) : (
         <Button to="/roadmap" tone="lime" size="lg" trailing={<IconArrowRight size={18} />}>
           See tomorrow
         </Button>
       );
-      secondary = <Link to="/roadmap">Your roadmap</Link>;
+      secondary = null;
       break;
     }
     case 'resume-run': {
@@ -1003,9 +995,9 @@ function Hero({ overview, step }: { overview: Overview; step: NextStep; focus?: 
         <>
           {action}
           {/* One quiet way to read more, never two: the step's own link, else how the numbers work. */}
-          <span className="home-hero-link">
-            {secondary ?? <Link to={HOW_PATH}>How your numbers are worked out</Link>}
-          </span>
+          {step.kind === 'today' ? null : (
+            <span className="home-hero-link">{secondary ?? <Link to={HOW_PATH}>How your numbers are worked out</Link>}</span>
+          )}
         </>
       }
       aside={stats.length > 0 ? <HeroStats stats={stats} /> : undefined}
@@ -1240,83 +1232,67 @@ export function Home() {
   }
 
   const focus = focusSubject(subjects);
-  const many = subjects.length > 1;
   const step = decideNext(data, focus, roadmap.data);
 
-  return <HomeBody data={data} focus={focus} many={many} step={step} />;
+  return <HomeBody data={data} focus={focus} step={step} roadmap={roadmap.data ?? null} />;
 }
 
+/** The few stops after today's next one, as on the roadmap; the full path is one tap away. */
+function UpNext({ roadmap, heroHasNext }: { roadmap: Roadmap; heroHasNext: boolean }) {
+  const { next } = todayOf(roadmap);
+  // When the hero already holds today's next stop, the path starts after it.
+  const stops = pathStops(roadmap, next)
+    .filter((stop) => stop.state === 'locked' || (!heroHasNext && stop.state === 'current'))
+    .map((stop) => (stop.state === 'current' ? { ...stop, state: 'locked' as const } : stop))
+    .slice(0, 4);
+  if (stops.length === 0) return null;
+  return (
+    <Section
+      eyebrow="Up next"
+      title="Your path"
+      id="home-path"
+      className="sj-rise d1"
+      action={
+        <Link className="sj-link" to="/roadmap">
+          Roadmap <IconArrowRight size={14} />
+        </Link>
+      }
+    >
+      <Journey stops={stops} />
+    </Section>
+  );
+}
+
+/**
+ * Home is where a student starts the day: the next step and today's progress, what comes after
+ * it, and how each subject stands. Scores in depth and past runs are on Progress.
+ */
 function HomeBody({
   data,
   focus,
-  many,
   step,
+  roadmap,
 }: {
   data: Overview;
   focus: SubjectOverview | undefined;
-  many: boolean;
   step: NextStep;
+  roadmap: Roadmap | null;
 }) {
   const subjects = data.subjects;
-  const recent = useShowMore(data.recent_runs, 4);
-  // The subject the score and weak spots follow: ?subject=, else the last one chosen, else the
-  // most urgent.
-  const [chosenId, choose] = useSubjectChoice(subjects);
-  const chosen = subjects.find((s) => s.subject_id === chosenId) ?? focus;
   return (
     <div className="sj-page home">
       <Hero overview={data} step={step} focus={focus} />
 
-      {many ? <SubjectsGlance subjects={subjects} selected={chosen?.subject_id ?? null} /> : null}
-
-      {chosen ? (
-        <Section
-          eyebrow={`Your score · ${chosen.examination_short_name} ${chosen.subject_name}`}
-          title="Where you stand"
-          id="home-stand"
-          className="sj-rise d2"
-          action={
-            <Link className="sj-link" to={`/subjects/${chosen.subject_id}`}>
-              {chosen.subject_name} plan <IconArrowRight size={14} />
-            </Link>
-          }
-        >
-          {many ? <SubjectSwitcher subjects={subjects} value={chosen.subject_id} onChange={choose} label="Show subject" /> : null}
-          <Standing key={chosen.subject_id} subject={chosen} />
-        </Section>
-      ) : null}
-
-      <div className="home-duo">
-        <Section
-          eyebrow={many ? 'Recent practice · every subject' : 'Recent practice'}
-          title="Your practice so far"
-          id="home-runs"
-          className="sj-rise d4"
-        >
-          <div className="sj-card home-panel">
-            <PracticeSplit subjects={subjects} />
-            {data.recent_runs.length > 0 ? (
-              <>
-                <ul className="home-runs" id="home-run-list">
-                  {recent.items.map((run) => (
-                    <RunRow key={run.session_id} run={run} showSubject />
-                  ))}
-                </ul>
-                <div className="home-panel-foot">
-                  <ShowMore more={recent} noun="recent runs" controls="home-run-list" />
-                  <Link className="sj-link home-panel-link" to="/progress">
-                    See every run <IconArrowRight size={14} />
-                  </Link>
-                </div>
-              </>
-            ) : (
-              <Note icon={<IconBolt size={18} />} tone="lime" title="No runs yet">
-                Your first run shows up here the moment you start it.
-              </Note>
-            )}
-          </div>
-        </Section>
-      </div>
+      {roadmap && roadmap.subjects.length > 0 ? (
+        <>
+          <UpNext roadmap={roadmap} heroHasNext={step.kind === 'today'} />
+          <Section eyebrow="By exam day" title="Your subjects" id="home-subjects" className="sj-rise d2">
+            <RoadmapSubjects subjects={roadmap.subjects} />
+          </Section>
+        </>
+      ) : (
+        <SubjectsGlance subjects={subjects} selected={null} />
+      )}
     </div>
   );
 }

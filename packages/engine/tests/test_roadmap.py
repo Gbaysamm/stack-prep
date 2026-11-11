@@ -135,7 +135,9 @@ def test_every_weak_topic_gets_an_activity_within_fourteen_days() -> None:
     opened = {u.unit_id for u in open_units(many.units)}
     weak = {u.unit_id for u in many.units if (u.mastery or 0) < EXAM_READY} & opened
     assert weak <= touched
-    assert touched <= opened
+    # What else is touched follows the syllabus: a prefix of it, never a jump ahead.
+    order = [u.unit_id for u in many.units]
+    assert set(order[: max(order.index(t) for t in touched) + 1]) >= touched
 
 
 def test_the_syllabus_order_comes_first() -> None:
@@ -144,8 +146,43 @@ def test_the_syllabus_order_comes_first() -> None:
     maths = subject("maths", [0.2, None, None, None, 0.1, 0.1], target=80)
     opened = [u.unit_id for u in open_units(maths.units)]
     assert opened == ["maths-u0", "maths-u1", "maths-u2"]
-    plan = build(spec(maths, target_total=None, minutes=60))
-    assert {i.subtopic_id for i in runs(plan.items) if i.subtopic_id} <= set(opened)
+    # A short week: only the first three get runs.
+    short = build(spec(maths, target_total=None, minutes=15))
+    assert {i.subtopic_id for i in runs(short.items) if i.subtopic_id} <= set(opened)
+    # A long week: no subtopic gets more than the run limit; the room goes to the next ones,
+    # in order, rather than piling onto the first three.
+    long = build(spec(maths, target_total=None, minutes=120))
+    count = Counter(i.subtopic_id for i in runs(long.items) if i.subtopic_id)
+    assert max(count.values()) <= 4
+    used = [u.unit_id for u in maths.units if u.unit_id in count]
+    assert used == [u.unit_id for u in maths.units][: len(used)]
+
+
+def test_a_subtopic_never_met_is_planned_not_skipped() -> None:
+    # The founder's Physics: three open subtopics, two never answered and one right once. All
+    # three get runs; none is called "probably fine" and swapped for mixed practice.
+    physics = subject("physics", [None, None, 1.0], target=90)
+    physics = SubjectInput(
+        "physics",
+        "Physics",
+        tuple(
+            UnitStanding(
+                u.unit_id,
+                u.name,
+                u.topic_id,
+                u.topic_name,
+                u.share,
+                u.mastery,
+                1 if u.mastery else 0,
+            )
+            for u in physics.units
+        ),
+        90,
+        TODAY - timedelta(days=1),
+    )
+    plan = build(spec(physics, target_total=None, minutes=15))
+    assert all(i.kind == "run" for i in runs(plan.items))
+    assert {i.subtopic_id for i in runs(plan.items)} >= {"physics-u0", "physics-u1"}
 
 
 def test_a_secured_subtopic_opens_the_next() -> None:
@@ -244,11 +281,19 @@ def test_students_see_a_value_band_not_marks() -> None:
 def test_value_bands_rank_the_plan() -> None:
     # Spec §9.3: a band, never marks; ranked within the student's own plan, so a subject with
     # many subtopics still has high-value work.
-    plan = build(spec(*FOUR, minutes=90))
-    assert {i.value for i in plan.items if i.kind == "run" and i.reason == "high_value_gap"} >= {
-        "high",
-        "medium",
-    }
+    weighted = SubjectInput(
+        "maths",
+        "Maths",
+        tuple(
+            UnitStanding(f"m{i}", f"m {i}", f"t{i}", f"t {i}", share, 0.2, 4)
+            for i, share in enumerate([0.4, 0.3, 0.2, 0.1])
+        ),
+        70,
+        TODAY - timedelta(days=1),
+    )
+    plan = build(spec(weighted, target_total=None, minutes=90))
+    bands = {i.subtopic_id: i.value for i in plan.items if i.kind == "run"}
+    assert bands["m0"] == "high" and bands["m3"] == "low"
 
 
 def test_no_total_out_of_400_from_fewer_than_four_subjects() -> None:

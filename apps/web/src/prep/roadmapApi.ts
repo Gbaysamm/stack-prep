@@ -107,7 +107,8 @@ export function itemLabel(item: RoadmapItem): string {
     case 'run':
       return item.subtopic_name ?? `${item.subject_name} practice`;
     case 'mixed':
-      return 'Mixed practice';
+      // Questions from the topics already covered, to keep them fresh.
+      return `${item.subject_name ?? ''} review`.trim();
     case 'checkup':
       return 'Check-up';
     case 'mock':

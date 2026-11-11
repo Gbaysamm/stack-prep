@@ -15,6 +15,30 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### Home redone around today; the week's runs spread in syllabus order, never piled up
+- **What:**
+  - Home: the hero holds the next stop (its name and subject), today's progress as dots
+    ("0 of 12 today") and ▶ Start; under it the next four stops on the ladder and one slim row
+    per subject (score now → by exam day, target). "Where you stand" and "Your practice so
+    far" left Home (Progress has scores and runs).
+  - The week's runs per subject (`_syllabus_queue`): the open subtopics in syllabus order, a
+    few at a time, each up to its runs left under the 4-run limit; if that cannot fill the
+    subject's share of the week, the next subtopics open, still in order; only then reviews of
+    secured ones. The day loop no longer wraps round a short list (which gave one subtopic 11
+    runs in a week), and a subtopic never answered is no longer judged "probably fine" from
+    its topic and swapped for mixed practice (which gave the founder's Physics only mixed runs).
+  - Path labels: no "N runs", no "3 of 3 done this week"; a mixed run reads "Physics review ·
+    Topics you have covered".
+  - Check-up card: with the question number gone, the topic and tools start on the left and
+    the topic may use the full width.
+- **Why:** the founder: Home was very bad and overwhelming; "11 runs", "3 of 3 done this week"
+  and "Mixed practice · Physics" made no sense; a gap on the left of the check-up card.
+- **Where:** `packages/engine/src/engine/roadmap.py` (+ tests; `_queue`, `_coverage`,
+  `_value_bands` removed); `apps/web/src/prep/pages/Home.tsx`, `Home.css`, `Roadmap.tsx`,
+  `roadmapApi.ts`, `CheckupRoom.css`.
+- **Status:** done locally; engine 105, roadmap API and web tests pass; checked at 1440 and 390.
+  Not pushed.
+
 ### A slow student is never stuck: a run limit, a pace check, and each student's own run time
 - **What:**
   - Run limit: a subtopic not secured after 4 runs (`STUCK_AFTER_RUNS`) stops holding the rest

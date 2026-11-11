@@ -57,7 +57,7 @@
 .sj .cr-qhead {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 12px;
   margin-bottom: 22px;
   min-height: 26px;
@@ -72,9 +72,14 @@
 .sj .cr-qnum .of {
   color: var(--gray-500);
 }
+/* The question number is in the bar above, so the topic and tools start the card, on the left. */
+.sj .cr-qhead .qt-group {
+  justify-content: flex-start;
+  min-width: 0;
+}
 .sj .cr-topic {
   min-width: 0;
-  max-width: 60%;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
 }

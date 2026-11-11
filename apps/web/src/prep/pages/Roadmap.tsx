@@ -108,13 +108,6 @@ export function Roadmap() {
         eyebrow={roadmap.subjects.length === 0 ? 'Getting started' : next ? 'Today, then next' : 'Done for today'}
         title="Your path"
         id="rm-path"
-        action={
-          roadmap.record.last_7_days_due > 0 ? (
-            <span className="rm-record">
-              {roadmap.record.last_7_days_done} of {roadmap.record.last_7_days_due} done this week
-            </span>
-          ) : undefined
-        }
       >
         <Journey
           stops={roadmap.subjects.length === 0 ? FIRST_PATH : pathStops(roadmap, next)}
@@ -140,11 +133,7 @@ export function Roadmap() {
 
       {roadmap.subjects.length ? (
         <Section eyebrow="By exam day" title="Your subjects" id="rm-subjects" className="rm-aside">
-          <ul className="rm-subjects">
-            {roadmap.subjects.map((subject) => (
-              <SubjectLine key={subject.subject_id} subject={subject} />
-            ))}
-          </ul>
+          <RoadmapSubjects subjects={roadmap.subjects} />
         </Section>
       ) : null}
       </div>
@@ -153,7 +142,7 @@ export function Roadmap() {
 }
 
 /** The path: today's items (finished ones done), what comes after, and exam day at the end. */
-function pathStops(roadmap: RoadmapData, next: RoadmapItem | null): Stop[] {
+export function pathStops(roadmap: RoadmapData, next: RoadmapItem | null): Stop[] {
   const upcoming = roadmap.items.filter((item) => item.day >= roadmap.today && item.state !== 'missed');
   // One stop per subtopic: its runs this week are grouped, so the path reads as the syllabus's
   // steps rather than the same three names over and over. Check-ups, mocks and mixed runs stand
@@ -181,19 +170,17 @@ function pathStops(roadmap: RoadmapData, next: RoadmapItem | null): Stop[] {
     const holdsNext = next != null && items.some((i) => i.id === next.id);
     const state: Stop['state'] = done ? 'done' : holdsNext ? 'current' : 'locked';
     const level = item.level ?? undefined;
-    const left = items.filter((i) => i.state !== 'done').length;
-    const runs = left > 1 ? `${left} runs` : null;
     return {
       key: item.id,
       title: item.kind === 'checkup' ? `${item.subject_name} check-up` : itemLabel(item),
       line:
         item.kind === 'run'
-          ? [item.subject_name, level ? LEVEL_NAMES[level] : null, runs].filter(Boolean).join(' · ')
+          ? [item.subject_name, level ? LEVEL_NAMES[level] : null].filter(Boolean).join(' · ')
           : item.kind === 'checkup'
             ? 'Checkpoint'
             : item.kind === 'mock'
               ? 'The whole paper'
-              : (item.subject_name ?? undefined),
+              : 'Topics you have covered',
       icon:
         item.kind === 'checkup' ? <IconTarget size={20} /> : item.kind === 'mock' ? <IconClock size={20} /> : <IconBolt size={20} />,
       state,
@@ -201,6 +188,17 @@ function pathStops(roadmap: RoadmapData, next: RoadmapItem | null): Stop[] {
     };
   });
   return stops;
+}
+
+/** Each subject in one slim row: its score now, where the plan takes it, and its target. */
+export function RoadmapSubjects({ subjects }: { subjects: RoadmapSubject[] }) {
+  return (
+    <ul className="rm-subjects">
+      {subjects.map((subject) => (
+        <SubjectLine key={subject.subject_id} subject={subject} />
+      ))}
+    </ul>
+  );
 }
 
 function SubjectLine({ subject }: { subject: RoadmapSubject }) {

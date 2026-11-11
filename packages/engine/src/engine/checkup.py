@@ -233,9 +233,7 @@ def summarise(
             )
         )
 
-    unassessed = tuple(
-        estimate.topic_id for estimate in estimates if estimate.answered == 0
-    )
+    unassessed = tuple(estimate.topic_id for estimate in estimates if estimate.answered == 0)
     priority = tuple(
         estimate.topic_id
         for estimate in sorted(
