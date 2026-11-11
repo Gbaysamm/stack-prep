@@ -5,7 +5,7 @@
  */
 import { Link } from 'react-router-dom';
 
-import { IconArrowRight, IconBolt, IconClock, IconTarget, IconTrophy } from '../icons.js';
+import { IconArrowRight, IconBolt, IconPlay, IconClock, IconTarget, IconTrophy } from '../icons.js';
 import { Journey, LEVEL_NAMES, type Stop } from '../Journey.js';
 import {
   itemLabel,
@@ -127,7 +127,7 @@ export function Roadmap() {
                 size="sm"
                 busy={starter.busy === next.id}
                 onClick={() => void starter.start(next)}
-                trailing={<IconArrowRight size={16} />}
+                icon={<IconPlay size={14} />}
               >
                 {next.state === 'in_progress' ? 'Carry on' : 'Start'}
               </Button>

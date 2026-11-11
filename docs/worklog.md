@@ -15,6 +15,17 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### The path's Start button and level squares
+- **What:** the roadmap's Start (and Carry on) button has a play icon in front instead of an
+  arrow behind, and a step's button can no longer shrink or wrap (the arrow had dropped under
+  the word in the founder's window). The five level squares show only once a topic has a level
+  (three or more answers); a topic not started shows none. They carry their meaning as a
+  tooltip and for screen readers ("Level 1 of 5: Weak").
+- **Why:** the founder asked what the dots meant (grey squares on unstarted topics said
+  nothing) and did not like the arrow under "Start".
+- **Where:** `apps/web/src/prep/Journey.tsx`, `Journey.css`, `pages/Roadmap.tsx`.
+- **Status:** done locally, checked at 1440 and 390; not pushed.
+
 ### The check-up and practice bar: a floating rounded bar the width of the content
 - **What:** the top bar of the check-up and practice rooms (`FocusShell`) is now a floating,
   fully rounded light-glass bar, like the public site's, no wider than the content under it

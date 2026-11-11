@@ -28,7 +28,7 @@ export const LEVEL_NAMES = ['Not started', 'Weak', 'Developing', 'Exam-ready', '
 
 function Pips({ level }: { level: number }) {
   return (
-    <span className="jr-pips" aria-label={`Level ${level} of 5`}>
+    <span className="jr-pips" role="img" aria-label={`Level ${level} of 5: ${LEVEL_NAMES[level]}`} title={`Level ${level} of 5: ${LEVEL_NAMES[level]}`}>
       {[1, 2, 3, 4, 5].map((n) => (
         <i key={n} className={n <= level ? 'on' : undefined} />
       ))}
@@ -54,7 +54,8 @@ export function Journey({ stops, action }: { stops: Stop[]; action?: ReactNode }
               {stop.line ? <span>{stop.line}</span> : null}
             </span>
             <span className="jr-end">
-              {stop.level !== undefined ? <Pips level={stop.level} /> : null}
+              {/* A topic not started yet has no level to show: five grey squares would say nothing. */}
+              {stop.level ? <Pips level={stop.level} /> : null}
               {stop.state === 'current' && action ? (
                 action
               ) : stop.state === 'done' ? (
