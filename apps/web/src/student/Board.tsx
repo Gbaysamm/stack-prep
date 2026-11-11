@@ -339,8 +339,11 @@ export function Board({
   onAsk,
   onListen,
   askLocked,
+  noAsk = false,
   questionLabel = "The question",
 }: {
+  /** No ask box and nothing in its place: the controls stand alone (the public showcase). */
+  noAsk?: boolean;
   /** The label over what is written at the top: a topic lesson says so, not "The question". */
   questionLabel?: string;
   /**
@@ -2400,7 +2403,7 @@ export function Board({
             {whiteboard ? <BoardTuningControls {...tuning} /> : null}
           </div>
 
-          {askLocked ? (
+          {noAsk ? null : askLocked ? (
             <div className="pb-ask pb-ask-locked">{askLocked}</div>
           ) : (
           <form className="pb-ask" onSubmit={send}>

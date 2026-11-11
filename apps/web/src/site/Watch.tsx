@@ -16,7 +16,7 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import type { QuestionFigure } from '../Figures.js';
-import { IconArrowRight, IconPlay } from '../prep/icons.js';
+import { IconPlay } from '../prep/icons.js';
 import type {
   LessonBeat,
   LessonDiagram,
@@ -32,7 +32,7 @@ import type {
 } from '../student/api.js';
 import { forceBoardPrefs } from '../student/boardPrefs.js';
 import { setSpokenWords } from '../student/wordClock.js';
-import { SHOWCASE, SIGN_UP } from './showcase.js';
+import { SHOWCASE } from './showcase.js';
 import '../prep/prep.css';
 import './site.css';
 
@@ -177,14 +177,6 @@ export function WatchPage() {
     if (embed && lesson) window.parent.postMessage({ type: 'sp-watch-ready', lesson: lessonId }, window.location.origin);
   }, [embed, lesson, lessonId]);
 
-  const signUp = (
-    <span className="wt-ask">
-      Ask the coach about any step, by typing or speaking.{' '}
-      <Link to={SIGN_UP} target={embed ? '_top' : undefined}>
-        Start free to ask <IconArrowRight size={14} />
-      </Link>
-    </span>
-  );
 
   if (missing) {
     return (
@@ -234,7 +226,7 @@ export function WatchPage() {
         answerLine={`The answer is ${lesson.answer}.`}
         loadLesson={() => Promise.resolve(narrated(lesson))}
         onDone={() => (embed ? (setPlaying(false), setRun((n) => n + 1)) : navigate('/'))}
-        askLocked={signUp}
+        noAsk
         onAsk={() => Promise.reject(new Error('Sign up to ask the coach.'))}
       />
       </Suspense>
