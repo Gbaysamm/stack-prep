@@ -1242,7 +1242,7 @@ function UpNext({ roadmap, heroHasNext }: { roadmap: Roadmap; heroHasNext: boole
   const { next } = todayOf(roadmap);
   // When the hero already holds today's next stop, the path starts after it.
   const stops = pathStops(roadmap, next)
-    .filter((stop) => stop.state === 'locked' || (!heroHasNext && stop.state === 'current'))
+    .filter((stop) => !stop.heading && (stop.state === 'locked' || (!heroHasNext && stop.state === 'current')))
     .map((stop) => (stop.state === 'current' ? { ...stop, state: 'locked' as const } : stop))
     .slice(0, 4);
   if (stops.length === 0) return null;
@@ -1258,7 +1258,7 @@ function UpNext({ roadmap, heroHasNext }: { roadmap: Roadmap; heroHasNext: boole
         </Link>
       }
     >
-      <Journey stops={stops} />
+      <Journey stops={stops} continues />
     </Section>
   );
 }

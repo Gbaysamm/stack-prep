@@ -15,6 +15,27 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### The path never "ends"; runs never outnumber a subtopic's new questions; a half-done run carries over
+- **What:**
+  - The path is shown day by day ("Today", "Tomorrow", then the weekday), at most 14 stops,
+    and it fades out with its line running off the card, as Duolingo's path never shows an
+    end. Home's "Up next" fades the same way.
+  - The planner caps a subtopic's runs at its new questions for the student (one run per 10
+    unseen; `UnitStanding.fresh`, `_runs_left`); a subtopic out of new questions stops holding
+    the syllabus back (its misses still come back as comebacks). A three-question subtopic no
+    longer gets a week of runs that each serve three questions.
+  - A run left half-done is attached to the first stop on its subtopic after a re-plan, so the
+    path says "Carry on", not "Start".
+  - The 1-2-3 strip and "2 to go" are gone from the hint box after a miss; the bar at the top
+    already counts the run's questions.
+- **Why:** the founder: the path looked like all there was to do; "1/3" and "2 to go" read as
+  three chances; a started run showed "Start".
+- **Where:** `apps/web/src/prep/Journey.tsx`, `Journey.css`, `pages/Roadmap.tsx`, `Home.tsx`,
+  `PracticeRoom.tsx`; `packages/engine/src/engine/roadmap.py`, `projection.py`, tests;
+  `apps/api/src/app/routers/roadmap.py` (`_fresh_by_subtopic`, run carry-over).
+- **Status:** done locally; engine 106, roadmap and practice API tests pass; checked at 1440 and
+  390. Not pushed.
+
 ### Home redone around today; the week's runs spread in syllabus order, never piled up
 - **What:**
   - Home: the hero holds the next stop (its name and subject), today's progress as dots

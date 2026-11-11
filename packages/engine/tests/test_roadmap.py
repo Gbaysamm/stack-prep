@@ -338,3 +338,16 @@ def test_a_slower_runner_fits_fewer_runs_in_the_same_time() -> None:
         RoadmapInput(TODAY, TODAY + timedelta(weeks=20), (1, 2, 3, 4, 5, 6), 60, FOUR, 250, 20)
     )
     assert slower.runs_per_day < slow.runs_per_day
+
+
+def test_runs_never_outnumber_the_new_questions() -> None:
+    # A subtopic with three questions left is one run, not four; with none left it no longer
+    # holds the syllabus back.
+    from dataclasses import replace
+
+    from engine.roadmap import _runs_left
+
+    base = units("chem", [None, None, None, None, None])
+    small = (replace(base[0], fresh=3), replace(base[1], fresh=0), *base[2:])
+    assert _runs_left(small[0]) == 1
+    assert [u.unit_id for u in open_units(small)] == ["chem-u0", "chem-u1", "chem-u2", "chem-u3"]

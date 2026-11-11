@@ -217,7 +217,41 @@ async def _standings(
     found = await _standings_from_history(conn, student_id, subject_id, units)
     taught = await _teachable(conn, subject_id)
     runs = await _runs_by_subtopic(conn, student_id, subject_id)
-    return [replace(u, teachable=u.unit_id in taught, runs=runs.get(u.unit_id, 0)) for u in found]
+    fresh = await _fresh_by_subtopic(conn, student_id, subject_id)
+    return [
+        replace(
+            u,
+            teachable=u.unit_id in taught,
+            runs=runs.get(u.unit_id, 0),
+            fresh=fresh.get(u.unit_id, 0),
+        )
+        for u in found
+    ]
+
+
+async def _fresh_by_subtopic(
+    conn: AsyncConnection, student_id: UUID, subject_id: UUID
+) -> dict[str, int]:
+    """Practice questions per subtopic this student has not met yet (what a run can serve)."""
+    rows = await fetch_all(
+        conn,
+        """
+        SELECT skill.parent_id AS sub, count(DISTINCT dq.question_id) AS fresh
+        FROM deliverable_questions dq
+        JOIN questions q ON q.id = dq.question_id AND q.usage_pool <> :pool
+        JOIN curriculum_items skill ON skill.id = dq.primary_skill_id
+        WHERE dq.subject_id = :subject
+          AND NOT EXISTS (
+            SELECT 1 FROM student_question_history h
+            WHERE h.student_id = :s AND h.question_id = dq.question_id
+          )
+        GROUP BY skill.parent_id
+        """,
+        s=student_id,
+        subject=subject_id,
+        pool=EXCLUDED_POOL,
+    )
+    return {str(r["sub"]): int(r["fresh"]) for r in rows}
 
 
 async def _runs_by_subtopic(
@@ -440,6 +474,34 @@ async def _link_outside_sittings(conn: AsyncConnection, student_id: UUID, tz: st
             )
             WHERE i.student_id = :s AND i.kind IN ('checkup', 'mock') AND i.session_id IS NULL
               AND i.day <= (now() AT TIME ZONE :tz)::date
+            """
+        ),
+        {"s": student_id, "tz": tz},
+    )
+    # A run left half-done carries over to the current plan: the first stop on its subtopic
+    # takes it, so the path says "Carry on", not "Start", after a re-plan.
+    await conn.execute(
+        text(
+            """
+            UPDATE roadmap_items i
+            SET (session_id, started_at) = (SELECT ss.id, ss.started_at FROM study_sessions ss
+              WHERE ss.student_id = i.student_id AND ss.session_type = 'guided'
+                AND ss.ended_at IS NULL AND ss.hidden_at IS NULL
+                AND ss.practice_filters -> 'subtopic_ids' = jsonb_build_array(i.subtopic_id::text)
+                AND NOT EXISTS (SELECT 1 FROM roadmap_items o
+                                WHERE o.session_id = ss.id AND o.roadmap_id = i.roadmap_id)
+              ORDER BY ss.started_at DESC LIMIT 1)
+            WHERE i.id IN (
+              SELECT DISTINCT ON (f.subtopic_id) f.id FROM roadmap_items f
+              JOIN roadmaps r ON r.id = f.roadmap_id AND r.status = 'active'
+              WHERE f.student_id = :s AND f.kind = 'run' AND f.session_id IS NULL
+                AND f.day >= (now() AT TIME ZONE :tz)::date
+              ORDER BY f.subtopic_id, f.day, f.position)
+              AND EXISTS (SELECT 1 FROM study_sessions ss
+                WHERE ss.student_id = i.student_id AND ss.session_type = 'guided'
+                  AND ss.ended_at IS NULL AND ss.hidden_at IS NULL
+                  AND ss.practice_filters -> 'subtopic_ids'
+                      = jsonb_build_array(i.subtopic_id::text))
             """
         ),
         {"s": student_id, "tz": tz},

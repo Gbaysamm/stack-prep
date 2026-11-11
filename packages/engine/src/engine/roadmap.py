@@ -192,8 +192,18 @@ def secured(unit: UnitStanding) -> bool:
 
 
 def moved_past(unit: UnitStanding) -> bool:
-    """Secured, or given STUCK_AFTER_RUNS runs already: it no longer holds the rest back."""
-    return secured(unit) or unit.runs >= STUCK_AFTER_RUNS
+    """Secured, given STUCK_AFTER_RUNS runs already, or out of new questions: it no longer
+    holds the rest back (its missed questions still come back as comebacks)."""
+    return secured(unit) or unit.runs >= STUCK_AFTER_RUNS or unit.fresh == 0
+
+
+def _runs_left(unit: UnitStanding) -> int:
+    """Runs it can still be given: within the run limit, and no more than its new questions
+    fill (a run of three questions is not a run)."""
+    left = max(1, STUCK_AFTER_RUNS - unit.runs)
+    if unit.fresh is not None:
+        left = min(left, ceil(unit.fresh / RUN_LENGTH))
+    return left
 
 
 def open_units(units: Sequence[UnitStanding], ahead: int = OPEN_AHEAD) -> list[UnitStanding]:
@@ -406,13 +416,13 @@ def _syllabus_queue(
     while True:
         opened = open_units(units, width)
         learning = [u for u in opened if not moved_past(u)]
-        room = sum(max(1, STUCK_AFTER_RUNS - u.runs) for u in learning)
+        room = sum(_runs_left(u) for u in learning)
         if room >= slots or len(open_units(units, width + 1)) == len(opened):
             break
         width += 1
 
     queue: list[tuple[str, str, Reason, Value, PlannedUnit]] = []
-    left = {u.unit_id: max(1, STUCK_AFTER_RUNS - u.runs) for u in learning}
+    left = {u.unit_id: _runs_left(u) for u in learning}
     for start in range(0, len(learning), max(1, ahead)):
         group = learning[start : start + max(1, ahead)]
         while any(left[u.unit_id] for u in group) and len(queue) < slots:

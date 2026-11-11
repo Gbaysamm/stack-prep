@@ -102,6 +102,9 @@ class UnitStanding:
     teachable: bool = True
     #: Practice runs the student has had on it, for the run limit (roadmap.STUCK_AFTER_RUNS).
     runs: int = 0
+    #: Questions in it this student has not met yet; None when not known. A run is ten of
+    #: them, so this caps how many runs it can be given (roadmap._runs_left).
+    fresh: int | None = None
 
 
 @dataclass(frozen=True)

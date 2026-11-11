@@ -905,7 +905,6 @@ function Asking({
   state,
   question,
   number,
-  total,
   selected,
   wrong,
   busy,
@@ -966,12 +965,6 @@ function Asking({
               <Maths text={state.misconception.description} />
             </p>
           ) : null}
-          <RunStrip
-            total={total}
-            number={number}
-            tone="miss"
-            right={state.correct_unaided}
-          />
         </section>
       ) : null}
 

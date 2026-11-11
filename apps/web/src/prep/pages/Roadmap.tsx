@@ -22,7 +22,6 @@ import { FIRST_PATH, HeroStats, Section } from './Home.js';
 import './Roadmap.css';
 
 /** How many planned items the path shows before exam day. */
-const PATH_LENGTH = 10;
 
 function headline(roadmap: RoadmapData): string {
   if (roadmap.subjects.length === 0) return 'Start with your goal';
@@ -111,6 +110,7 @@ export function Roadmap() {
       >
         <Journey
           stops={roadmap.subjects.length === 0 ? FIRST_PATH : pathStops(roadmap, next)}
+          continues={roadmap.subjects.length > 0}
           action={
             roadmap.subjects.length === 0 ? (
               <Button to="/onboarding" tone="lime" size="sm" trailing={<IconArrowRight size={16} />}>
@@ -142,51 +142,65 @@ export function Roadmap() {
 }
 
 /** The path: today's items (finished ones done), what comes after, and exam day at the end. */
+/** "Today", "Tomorrow", then the weekday. */
+function dayLabel(day: string, today: string): string {
+  const gap = Math.round((Date.parse(`${day}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 864e5);
+  if (gap <= 0) return 'Today';
+  if (gap === 1) return 'Tomorrow';
+  return new Date(`${day}T00:00:00Z`).toLocaleDateString('en-GB', { weekday: 'long', timeZone: 'UTC' });
+}
+
+/** Days shown on the path, and stops at most; the rest is implied by the path fading out. */
+const PATH_DAYS = 3;
+const PATH_STOPS = 14;
+
+/**
+ * The path, day by day: a label for each day, then its stops (a subtopic's runs on one day are
+ * one stop). Only the next few days are shown; the path fades out after them, as it goes on to
+ * exam day.
+ */
 export function pathStops(roadmap: RoadmapData, next: RoadmapItem | null): Stop[] {
   const upcoming = roadmap.items.filter((item) => item.day >= roadmap.today && item.state !== 'missed');
-  // One stop per subtopic: its runs this week are grouped, so the path reads as the syllabus's
-  // steps rather than the same three names over and over. Check-ups, mocks and mixed runs stand
-  // on their own.
-  type Group = { first: RoadmapItem; items: RoadmapItem[] };
-  const groups: Group[] = [];
-  const bySubtopic = new Map<string, Group>();
-  for (const item of upcoming) {
-    if (item.kind === 'run' && item.subtopic_id) {
-      const found = bySubtopic.get(item.subtopic_id);
+  const days = [...new Set(upcoming.map((item) => item.day))].sort().slice(0, PATH_DAYS);
+  const stops: Stop[] = [];
+  for (const day of days) {
+    stops.push({ key: `day-${day}`, title: dayLabel(day, roadmap.today), icon: null, state: 'locked', heading: true });
+    type Group = { first: RoadmapItem; items: RoadmapItem[] };
+    const groups: Group[] = [];
+    const bySubtopic = new Map<string, Group>();
+    for (const item of upcoming.filter((i) => i.day === day)) {
+      const found = item.kind === 'run' && item.subtopic_id ? bySubtopic.get(item.subtopic_id) : undefined;
       if (found) {
         found.items.push(item);
         continue;
       }
       const group = { first: item, items: [item] };
-      bySubtopic.set(item.subtopic_id, group);
+      if (item.kind === 'run' && item.subtopic_id) bySubtopic.set(item.subtopic_id, group);
       groups.push(group);
-    } else {
-      groups.push({ first: item, items: [item] });
+    }
+    for (const { first: item, items } of groups) {
+      if (stops.filter((stop) => !stop.heading).length >= PATH_STOPS) return stops;
+      const done = items.every((i) => i.state === 'done');
+      const holdsNext = next != null && items.some((i) => i.id === next.id);
+      const level = item.level ?? undefined;
+      stops.push({
+        key: item.id,
+        title: item.kind === 'checkup' ? `${item.subject_name} check-up` : itemLabel(item),
+        line:
+          item.kind === 'run'
+            ? [item.subject_name, level ? LEVEL_NAMES[level] : null].filter(Boolean).join(' · ')
+            : item.kind === 'checkup'
+              ? 'Checkpoint'
+              : item.kind === 'mock'
+                ? 'The whole paper'
+                : 'Topics you have covered',
+        icon:
+          item.kind === 'checkup' ? <IconTarget size={20} /> : item.kind === 'mock' ? <IconClock size={20} /> : <IconBolt size={20} />,
+        state: done ? 'done' : holdsNext ? 'current' : 'locked',
+        level: item.kind === 'run' ? level : undefined,
+      });
     }
   }
-  const shownGroups = groups.slice(0, PATH_LENGTH);
-  const stops: Stop[] = shownGroups.map(({ first: item, items }) => {
-    const done = items.every((i) => i.state === 'done');
-    const holdsNext = next != null && items.some((i) => i.id === next.id);
-    const state: Stop['state'] = done ? 'done' : holdsNext ? 'current' : 'locked';
-    const level = item.level ?? undefined;
-    return {
-      key: item.id,
-      title: item.kind === 'checkup' ? `${item.subject_name} check-up` : itemLabel(item),
-      line:
-        item.kind === 'run'
-          ? [item.subject_name, level ? LEVEL_NAMES[level] : null].filter(Boolean).join(' · ')
-          : item.kind === 'checkup'
-            ? 'Checkpoint'
-            : item.kind === 'mock'
-              ? 'The whole paper'
-              : 'Topics you have covered',
-      icon:
-        item.kind === 'checkup' ? <IconTarget size={20} /> : item.kind === 'mock' ? <IconClock size={20} /> : <IconBolt size={20} />,
-      state,
-      level: item.kind === 'run' ? level : undefined,
-    };
-  });
   return stops;
 }
 

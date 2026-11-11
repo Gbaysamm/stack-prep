@@ -22,6 +22,8 @@ export interface Stop {
   finish?: boolean;
   /** A subtopic's level, 0 to 5: five pips, filled to it. */
   level?: number;
+  /** A label between stops ("Today", "Tomorrow"), not a stop itself. */
+  heading?: boolean;
 }
 
 export const LEVEL_NAMES = ['Not started', 'Weak', 'Developing', 'Exam-ready', 'Strong', 'Mastered'];
@@ -36,11 +38,22 @@ function Pips({ level }: { level: number }) {
   );
 }
 
-export function Journey({ stops, action }: { stops: Stop[]; action?: ReactNode }) {
+/**
+ * `continues`: the path goes on past what is shown. The last stops fade and the line runs out
+ * of the card, so the list never reads as all there is.
+ */
+export function Journey({ stops, action, continues }: { stops: Stop[]; action?: ReactNode; continues?: boolean }) {
   return (
-    <ol className="sj-card sticker jr">
+    <ol className={cx('sj-card sticker jr', continues && 'continues')}>
       {stops.map((stop, index) => {
         const next = stops[index + 1];
+        if (stop.heading) {
+          return (
+            <li key={stop.key} className="jr-head sj-mono">
+              {stop.title}
+            </li>
+          );
+        }
         return (
           <li
             key={stop.key}
