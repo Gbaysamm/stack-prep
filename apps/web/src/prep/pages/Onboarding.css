@@ -361,6 +361,102 @@
 }
 .sj .onb-actions .sj-btn {
   min-width: 140px;
+  min-height: 44px;
+  /* A touch more above than below: the ledge underneath reads as part of the button. */
+  padding: 12px 22px 9px;
+  box-shadow: 0 4px 0 var(--ledge);
+}
+.sj .onb-actions .sj-btn.ghost {
+  box-shadow: inset 0 0 0 1.5px var(--gray-200);
+}
+
+/* ------------------------------------------------------------ welcome: a page of its own */
+.sj .onb-welcome {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 440px);
+  gap: 56px;
+  align-items: center;
+  width: 100%;
+  max-width: 1100px;
+  min-height: calc(100dvh - 160px);
+  margin: 0 auto;
+  padding: 40px 32px 56px;
+}
+.sj .onb-welcome-words {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+.sj .onb-welcome-words .sj-eyebrow {
+  color: var(--purple-600);
+}
+.sj .onb-welcome-title {
+  margin: 0;
+  max-width: 13ch;
+  font-size: clamp(36px, 5vw, 56px);
+  line-height: 1.02;
+  color: var(--ink-900);
+}
+.sj .onb-welcome-words .onb-lede {
+  margin: 0 0 8px;
+}
+.sj .onb-welcome-words .sj-btn {
+  min-width: 180px;
+}
+
+/* ------------------------------------------------------------ the exam card's facts */
+.sj .onb-exam-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+.sj .onb-exam-fact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--r-md, 12px);
+  background: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--purple-100);
+}
+.sj .onb-exam-fact > span:last-child {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.sj .onb-exam-fact b {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink-900);
+}
+.sj .onb-exam-fact > span:last-child > span {
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--gray-600);
+}
+.sj .onb-exam-fact-ico {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+.sj .onb-exam-fact-ico.purple {
+  background: var(--purple-100);
+  color: var(--purple-600);
+}
+.sj .onb-exam-fact-ico.yellow {
+  background: var(--yellow-100);
+  color: var(--gray-900);
+}
+.sj .onb-exam-fact-ico.lime {
+  background: var(--green-100);
+  color: var(--green-600);
 }
 .sj .onb-actions-note {
   min-width: 0;
@@ -1265,9 +1361,22 @@
   .sj .onb-actions .sj-btn {
     flex: 0 0 auto;
     min-width: 0;
-    min-height: 44px;
-    padding: 0 20px;
-    font-size: 15px;
+    min-height: 42px;
+    padding: 3px 20px 0;
+  }
+  .sj .onb-welcome {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+    min-height: 0;
+    padding: 28px 16px 40px;
+  }
+  .sj .onb-welcome-words .sj-btn {
+    align-self: stretch;
+  }
+  .sj .onb-exam-facts {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
   }
   .sj .onb-actions .sj-btn[type='submit'] {
     margin-left: auto;

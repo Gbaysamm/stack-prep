@@ -26,9 +26,11 @@ import {
   IconCalendar,
   IconCheck,
   IconClock,
+  IconFlag,
   IconLock,
   IconReplay,
   IconTarget,
+  IconTrophy,
   IconUser,
 } from '../icons.js';
 import { progressApi, type Overview } from '../progressApi.js';
@@ -36,6 +38,7 @@ import { useLoad, usePageTitle, useStudent } from '../store.js';
 import { Button, CountUp, Skeleton, cx, daysUntil, useToast } from '../ui.js';
 import { examTitle, isHiddenExam } from './Exams.js';
 import { CountdownTip } from '../countdown.js';
+import { Journey } from '../Journey.js';
 import './Onboarding.css';
 import { friendly } from '../../lib/friendlyError.js';
 
@@ -286,6 +289,8 @@ function Flow({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState<Record<string, GoalRow>>({});
   const [done, setDone] = useState(hasDev && devStep > REVIEW);
+  // A new student is greeted on a page of its own before the first step.
+  const [welcomed, setWelcomed] = useState(returning || hasDev);
   // School, class and aim, asked in their own step; all optional, saved with the goals.
   const [about, setAbout] = useState<AboutDraft>(() => draftOf(profile));
   const [aboutSaved, setAboutSaved] = useState<AboutDraft>(() => draftOf(profile));
@@ -465,11 +470,8 @@ function Flow({
   const StepIcon = STEPS[step]!.icon;
   const pieces: { title: string; lede: ReactNode }[] = [
     {
-      title: !returning ? `Welcome, ${firstName}` : exams.length === 1 ? 'Your exam' : 'Which exam are you sitting?',
-      lede:
-        exams.length === 1
-          ? `${exams[0]!.short_name} is picked for you.`
-          : 'Pick the exam you are preparing for.',
+      title: exams.length === 1 ? 'Your exam' : 'Which exam are you sitting?',
+      lede: exams.length === 1 ? 'Picked for you.' : 'Pick the exam you are preparing for.',
     },
     {
       title: 'A little about you',
@@ -490,6 +492,8 @@ function Flow({
       lede: 'Check it over. You can change any of it later.',
     },
   ];
+
+  if (!welcomed) return <Welcome firstName={firstName} onStart={() => setWelcomed(true)} />;
 
   return (
     <div className="onb-main">
@@ -611,7 +615,7 @@ function Flow({
                 Back
               </Button>
             ) : (
-              <span className="onb-actions-note sj-small sj-muted">About a minute. You can change it all later.</span>
+              <span className="onb-actions-note" />
             )}
             {step < REVIEW ? (
               <Button type="submit" trailing={<IconArrowRight size={18} />}>
@@ -628,6 +632,34 @@ function Flow({
     </div>
   );
 
+}
+
+/* ------------------------------------------------------------------ welcome */
+
+function Welcome({ firstName, onStart }: { firstName: string; onStart: () => void }) {
+  return (
+    <div className="onb-welcome">
+      <div className="onb-welcome-words sj-rise">
+        <span className="sj-eyebrow">Welcome</span>
+        <h1 className="sj-display onb-welcome-title">Hi {firstName}, let's set up your plan</h1>
+        <p className="onb-lede">About a minute. You can change it all later.</p>
+        <Button tone="lime" onClick={onStart} trailing={<IconArrowRight size={18} />}>
+          Let's start
+        </Button>
+      </div>
+      <div className="onb-welcome-path sj-rise d2">
+        <Journey
+          stops={[
+            { key: 'exam', title: 'Your exam', icon: <IconTarget size={20} />, state: 'current' },
+            { key: 'about', title: 'About you', icon: <IconUser size={20} />, state: 'locked' },
+            { key: 'subjects', title: 'Your subjects', icon: <IconBook size={20} />, state: 'locked' },
+            { key: 'goal', title: 'Your goal', icon: <IconCalendar size={20} />, state: 'locked' },
+            { key: 'plan', title: 'Your plan', icon: <IconFlag size={20} />, state: 'locked', finish: true },
+          ]}
+        />
+      </div>
+    </div>
+  );
 }
 
 /* ------------------------------------------------------------------ the rail */
@@ -693,6 +725,29 @@ function Rail({
 
 /* ------------------------------------------------------------------ step 1: exam */
 
+/** What the exam itself is like: how many subjects, how it is sat, the top score. */
+function examFacts(exam: ExaminationOffer): { value: string; label: string; icon: ReactNode; tone: string }[] {
+  const must = exam.subjects.filter((subject) => subject.compulsory).map((subject) => subject.name);
+  const facts: { value: string; label: string; icon: ReactNode; tone: string }[] = [];
+  if (exam.max_subjects != null) {
+    facts.push({
+      value: `${exam.max_subjects} subjects`,
+      label: must.length ? `${listText(must)} for everyone` : 'Your choice',
+      icon: <IconBook size={18} />,
+      tone: 'purple',
+    });
+  }
+  facts.push(
+    exam.sits_together
+      ? { value: 'One sitting', label: 'All subjects on one day', icon: <IconCalendar size={18} />, tone: 'yellow' }
+      : { value: 'Paper by paper', label: 'Each subject on its own day', icon: <IconCalendar size={18} />, tone: 'yellow' },
+  );
+  if (exam.sits_together && exam.max_subjects != null) {
+    facts.push({ value: `${exam.max_subjects * 100}`, label: 'Top score', icon: <IconTrophy size={18} />, tone: 'lime' });
+  }
+  return facts;
+}
+
 function ExamStep({ exams, examId, onPick }: { exams: ExaminationOffer[]; examId: string; onPick: (id: string) => void }) {
   const name = useId();
   if (exams.length === 0) {
@@ -727,6 +782,19 @@ function ExamStep({ exams, examId, onPick }: { exams: ExaminationOffer[]; examId
             </span>
             <span className="onb-exam-name">{examTitle(exam)}</span>
             <span className="onb-opt-meta">Set by {exam.exam_body}</span>
+            <span className="onb-exam-facts">
+              {examFacts(exam).map((fact) => (
+                <span key={fact.label} className="onb-exam-fact">
+                  <span className={cx('onb-exam-fact-ico', fact.tone)} aria-hidden="true">
+                    {fact.icon}
+                  </span>
+                  <span>
+                    <b>{fact.value}</b>
+                    <span>{fact.label}</span>
+                  </span>
+                </span>
+              ))}
+            </span>
           </label>
         );
       })}

@@ -15,6 +15,18 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### Onboarding: a welcome page of its own, "Your exam" with what the exam is like, shorter buttons
+- **What:** a new student first sees a welcome page ("Hi Ada, let's set up your plan", one
+  line, Let's start, and the setup path drawn as the ladder card). The first step is now
+  "Your exam", and the exam card shows what the exam is like: 4 subjects (Use of English for
+  everyone), one sitting, top score 400. These come from the exam's own rules, not our bank.
+  Back and Continue are shorter (44px, 42px on a phone) with a thinner ledge, and the label is
+  nudged so it sits in the middle of the face and ledge together.
+- **Why:** the founder: the welcome and the exam card did not belong in one box, the exam page
+  was too blank, the old card looked poor, and the button was too tall with its text sitting high.
+- **Where:** `apps/web/src/prep/pages/Onboarding.tsx` (`Welcome`, `examFacts`), `Onboarding.css`.
+- **Status:** done locally, checked at 1440 and 390; not pushed.
+
 ### Onboarding: no counts, "About you" on its own step, smaller phone buttons
 - **What:** the exam card no longer shows how many subjects and past questions we have, and the
   subject cards no longer show question and topic counts. "A little about you" moved off the
