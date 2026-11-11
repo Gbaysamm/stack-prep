@@ -15,6 +15,17 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-11
 
+### The path's level reads as the topic's, not the subject's
+- **What:** a path stop's line is just its subject ("Chemistry"); the level word sits beside
+  the five boxes ("▪▫▫▫▫ Weak"), so it reads as that topic's level, not "Chemistry is weak".
+- **Why:** the founder read "Chemistry · Weak" as the whole subject being weak.
+- **Notes (from checking the data):** "Elements, compounds and mixtures" has 3 questions in all
+  (two at difficulty 1, one at 2). Chemistry has 16 sections ("topics" in the data) and 61 of
+  JAMB's topics ("subtopics"); a weekly check-up asks one question in each of the 15
+  heaviest sections, never-seen questions and unasked subtopics first.
+- **Where:** `apps/web/src/prep/Journey.tsx`, `Journey.css`, `pages/Roadmap.tsx`.
+- **Status:** done locally, checked at 1440 and 390; not pushed.
+
 ### Home's score bar no longer catches the public site's band style; no "Done" word on the path
 - **What:** the gain stretch on Home's score bar was class `band`, which the public site also
   styles (64px padding, for its edge-to-edge sections). After visiting the site in the same

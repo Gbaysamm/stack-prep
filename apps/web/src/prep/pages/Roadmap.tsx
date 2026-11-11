@@ -6,7 +6,7 @@
 import { Link } from 'react-router-dom';
 
 import { IconArrowRight, IconBolt, IconPlay, IconClock, IconTarget } from '../icons.js';
-import { Journey, LEVEL_NAMES, type Stop } from '../Journey.js';
+import { Journey, type Stop } from '../Journey.js';
 import {
   itemLabel,
   today,
@@ -188,7 +188,7 @@ export function pathStops(roadmap: RoadmapData, next: RoadmapItem | null): Stop[
         title: item.kind === 'checkup' ? `${item.subject_name} check-up` : itemLabel(item),
         line:
           item.kind === 'run'
-            ? [item.subject_name, level ? LEVEL_NAMES[level] : null].filter(Boolean).join(' · ')
+            ? (item.subject_name ?? undefined)
             : item.kind === 'checkup'
               ? 'Checkpoint'
               : item.kind === 'mock'

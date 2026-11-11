@@ -34,6 +34,8 @@ function Pips({ level }: { level: number }) {
       {[1, 2, 3, 4, 5].map((n) => (
         <i key={n} className={n <= level ? 'on' : undefined} />
       ))}
+      {/* The level in words, beside its boxes: this topic's level, not the subject's. */}
+      <b className="jr-level">{LEVEL_NAMES[level]}</b>
     </span>
   );
 }
