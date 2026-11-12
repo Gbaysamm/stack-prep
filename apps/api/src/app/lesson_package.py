@@ -176,6 +176,12 @@ async def build(
     async with voice_store.making(f"package-{version}"):
         if kept.is_file():
             return Built(version=version, data=kept.read_bytes(), complete=True)
+        if voice == "studio":
+            # The hosted voice answers several at once: the lines are made four at a time
+            # rather than one after another while the first student waits. (Kokoro runs one
+            # line at a time on this server whatever is asked: voice_store._kokoro_turn.)
+            said_lines = [str(beat.say).strip() for beat in beats if str(beat.say).strip()]
+            await voice_store.voice_all(said_lines, settings, at_once=4, engine="studio")
         clips: list[dict[str, Any] | None] = []
         audio = bytearray()
         complete = True

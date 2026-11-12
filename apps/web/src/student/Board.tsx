@@ -434,6 +434,23 @@ export function Board({
   const [draft, setDraft] = useState("");
   //: On a phone the ask box is a floating chat, opened from its button (founder, 12 Nov 2026).
   const [askOpen, setAskOpen] = useState(false);
+  //: The words of what the coach says, under the board: off unless the student turns them on.
+  const [captions, setCaptions] = useState(() => {
+    try {
+      return localStorage.getItem("sp.board.captions") === "1";
+    } catch {
+      return false;
+    }
+  });
+  const toggleCaptions = () =>
+    setCaptions((on) => {
+      try {
+        localStorage.setItem("sp.board.captions", on ? "0" : "1");
+      } catch {
+        // Private window: the choice lasts this lesson.
+      }
+      return !on;
+    });
   const [turn, setTurn] = useState<(TutorReply & { asked: string }) | null>(
     null,
   );
@@ -1964,8 +1981,10 @@ export function Board({
   // no voice (read along), the voice blocked, getting ready, a tap to start, or the coach
   // answering a question.
   const heard = lines.some((line) => line.voice) && !silent && !voiceBlocked;
+  // Not even reading along where there is no voice (founder, 12 Nov 2026): the words under the
+  // board only when the student turns them on (the CC button), kept for next time.
   const coachShown =
-    !heard || waiting || turn !== null || played > 0 || needsTap || preparing || gettingReady || finished;
+    captions || waiting || turn !== null || played > 0 || needsTap || preparing || gettingReady || finished;
   const nextLabel = finished ? "Done" : "Next step";
 
   return (
@@ -2436,16 +2455,34 @@ export function Board({
               {finished ? <IconCheck /> : <IconNext />}
             </button>
             {whiteboard ? <BoardTuningControls {...tuning} /> : null}
+            <button
+              type="button"
+              className={`pb-cc sj-mono ${captions ? "on" : ""}`}
+              title={captions ? "Hide the words" : heard ? "Show the words" : "No sound: show the words"}
+              aria-label={captions ? "Hide the words" : "Show the words"}
+              aria-pressed={captions}
+              onClick={toggleCaptions}
+            >
+              CC
+            </button>
+            {/* A PHONE: asking opens from here, not a box always under the board. */}
+            {noAsk || askLocked ? null : (
+              <button
+                type="button"
+                className="pb-askbtn"
+                title="Ask the coach"
+                aria-label="Ask the coach"
+                aria-expanded={askOpen}
+                onClick={() => {
+                  setAskOpen((open) => !open);
+                  setPaused(true);
+                }}
+              >
+                <IconAsk />
+              </button>
+            )}
           </div>
-          {/* The coach's buddy, beside the controls (founder, 12 Nov 2026: not over the board),
-              reacting to the lesson as it goes (Buddy.tsx). */}
-          <Buddy
-            moment={shown > 0 ? lines[shown - 1] : undefined}
-            index={shown - 1}
-            marked={pointing !== null && pointing === shown - 1}
-            finished={finished}
-            paused={paused}
-          />
+
 
           {noAsk ? null : askLocked ? (
             <div className="pb-ask pb-ask-locked">{askLocked}</div>
@@ -2543,21 +2580,16 @@ export function Board({
             </span>
           </form>
           )}
+          {/* The coach's buddy, at the right of the dock (founder, 12 Nov 2026: not over the board),
+              reacting to the lesson as it goes (Buddy.tsx). */}
+          <Buddy
+            moment={shown > 0 ? lines[shown - 1] : undefined}
+            index={shown - 1}
+            marked={pointing !== null && pointing === shown - 1}
+            finished={finished}
+            paused={paused}
+          />
         </div>
-        {/* A PHONE: asking is a floating chat button, not a box always under the board. */}
-        {noAsk || askLocked ? null : (
-          <button
-            type="button"
-            className={`pb-askfab ${askOpen ? "hidden" : ""}`}
-            aria-label="Ask the coach"
-            onClick={() => {
-              setAskOpen(true);
-              setPaused(true);
-            }}
-          >
-            <IconAsk />
-          </button>
-        )}
       </footer>
     </div>
   );

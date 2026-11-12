@@ -15,6 +15,19 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-12
 
+### The board's dock, second pass: buddy on the right, no words unless asked, chat in the controls
+- **What:** on a desktop the buddy sits at the right of the dock, after the ask box. The words
+  of what the coach says are no longer shown under the board even where there is no voice: a
+  CC button among the controls turns them on (off by default, remembered). On a phone the chat
+  button is one of the controls (no button floating over the board); it opens the ask box as
+  a card above the dock. A lesson package in the studio voice is made four lines at a time,
+  so the first student to open a lesson does not wait for 40 lines one after another.
+- **Why:** founder, 12 Nov 2026, on the first pass: the buddy's place on desktop, the
+  read-along words still showing on a phone, the floating chat button's place.
+- **Where:** `apps/web/src/student/Board.tsx` (`captions`, the CC and chat buttons, the
+  buddy's place), `apps/web/src/prep/board.css`, `apps/api/src/app/lesson_package.py`.
+- **Status:** done locally; screenshots at 1440 and 390. Not pushed.
+
 ### The board's dock on a phone: one slim row; asking as a floating chat; the buddy by the controls
 - **What:** on a phone the timeline is one line (the track and "20 / 40"; the section's name
   only in a bubble while it is held), and the controls run the whole width in one row. The
