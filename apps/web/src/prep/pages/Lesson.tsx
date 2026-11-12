@@ -143,7 +143,8 @@ export function Lesson() {
                 ? `Lesson ${board.part} of ${board.parts} · ${board.partTitle ?? board.subject}`
                 : `Lesson · ${board.subject}`
             }
-            question={board.title}
+            // No box: the lesson's own first line writes its title (founder, 12 Nov 2026).
+            question=""
             questionLabel="Today's lesson"
             steps={board.lesson.beats.flatMap((beat) => beat.write)}
             loadLesson={heard ? () => Promise.resolve(board.lesson) : undefined}

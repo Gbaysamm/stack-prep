@@ -551,10 +551,15 @@ export function Board({
         const answer = beat.answer || beat.board_index === steps.length;
         // A written lesson writes its own answer line; a narration's closing borrows ours.
         const bare = answer && beat.write.length === 0;
+        // NOT WRITTEN TWICE (founder, 12 Nov 2026): a line that only restates the question
+        // already in the box above is not written again; it is still said.
+        const kept = beat.write
+          .map((item, n) => [item, beat.write_at[n] ?? 0] as const)
+          .filter(([item]) => !restates(item, question));
         return {
           label: null,
-          items: bare ? [answerLine] : beat.write,
-          at: bare ? [0] : beat.write_at,
+          items: bare ? [answerLine] : kept.map(([item]) => item),
+          at: bare ? [0] : kept.map(([, at]) => at),
           say: beat.say,
           voice: withVoice(beat.voice_url, voice),
           step: beat.board_index !== null && !answer ? beat.board_index : null,
@@ -2147,7 +2152,7 @@ export function Board({
                 : undefined
             }
           >
-            {questionUp ? (
+            {questionUp && question.trim() ? (
               <section className="pb-question" aria-label={questionLabel}>
                 <span className="sj-eyebrow">{questionLabel}</span>
                 <div
@@ -5721,6 +5726,25 @@ const IconNext = icon(
   </>,
 );
 const IconCheck = icon(<path d="m5 12.5 4.5 4.5L19 7.5" />);
+
+/** The words of a line as compared: no maths markup, case, spaces or punctuation. */
+function plainWords(text: string): string {
+  return text
+    .replace(/\\ce\{([^}]*)\}/g, "$1")
+    .replace(/[$\\{}]/g, "")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, "");
+}
+
+/** Does this line only restate the question in the box (the same words, or nearly all of
+ *  them)? Then it is not written a second time. */
+export function restates(line: string, question: string): boolean {
+  const said = plainWords(line);
+  const asked = plainWords(question);
+  if (!said || !asked) return false;
+  if (said === asked) return true;
+  return said.length >= 20 && asked.includes(said) && said.length >= 0.8 * asked.length;
+}
 const IconAsk = icon(
   <path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4.2A8 8 0 1 1 20 12Z" />,
 );

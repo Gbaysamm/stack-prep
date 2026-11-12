@@ -15,6 +15,16 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-12
 
+### Nothing written twice on the board
+- **What:** a subtopic lesson no longer shows its title in a box above the board (its first
+  line already writes it), and on a question's board a line that only restates the question
+  in the box (the same words, ignoring maths markup, case and punctuation) is not written a
+  second time; it is still said.
+- **Why:** founder, 12 Nov 2026: the title, and the question, appeared twice.
+- **Where:** `apps/web/src/student/Board.tsx` (`restates`, the box only with a question),
+  `prep/pages/Lesson.tsx`, `student/restates.test.ts`.
+- **Status:** done locally; screenshots at 1440 and 390. Not pushed.
+
 ### Chemistry lessons, first batch: 8 subtopics as 18 short lessons
 - **What:** the first eight Chemistry subtopics in syllabus order (Elements, compounds and
   mixtures through The gas laws) written as 18 short lessons of 26–42 moments, each with a
