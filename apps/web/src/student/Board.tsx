@@ -34,6 +34,7 @@
  */
 
 import {
+  Fragment,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -2212,7 +2213,9 @@ export function Board({
                   whiteboard && line.section ? (
                     <SectionHeading key={`section-${index}`} text={line.section} />
                   ) : null;
-                if (items.length === 0) return heading;
+                // One stable slot per moment, so the heading is not put up again (its entrance
+                // replayed: a blink) when the line's first words arrive (founder, 12 Nov 2026).
+                if (items.length === 0) return <Fragment key={`moment-${index}`}>{heading}</Fragment>;
                 // The line of a lit pair lights with its marks: one explanation, lit together.
                 const litHere =
                   litPair !== null && links.some((link) => link.line === index && link.number === litPair);
@@ -2253,7 +2256,12 @@ export function Board({
                     ))}
                   </div>
                 );
-                return heading ? [heading, lineDiv] : lineDiv;
+                return (
+                  <Fragment key={`moment-${index}`}>
+                    {heading}
+                    {lineDiv}
+                  </Fragment>
+                );
               })}
             </div>
 

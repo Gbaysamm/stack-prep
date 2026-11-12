@@ -15,6 +15,32 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-12
 
+### The board in step with the teacher: no blinking heading, pictures pop in on their word
+- **What:**
+  - A section heading no longer blinks out and back when its line starts (each moment keeps
+    one place on the board, so the heading is not put up twice; `Board.tsx`).
+  - A scene's pieces pop into place, each whole with its label, instead of being drawn stroke
+    by stroke; a caption fades in whole instead of being wiped in letter by letter (no more
+    "matter aro" between frames; `doodleEngine.ts`, `Doodle.tsx`).
+  - A new doodle action, `show`: a part marked `data-later` waits hidden and pops in on its
+    word (checked by both loaders). The matter picture brings in the air, the water and the
+    salt as each is named.
+  - Elements and compounds: the three kinds are named and written first, then the element,
+    the compound and the mixture are each explained in a moment of their own with their
+    picture coming in as they are explained. The guide has the rule ("Name the list, then
+    teach each item"), and `docs/lessons/sequencing-brief.md` is the brief for reviewing the
+    other lessons the same way.
+  - The voice reads ions, bracketed groups and general formulas as a teacher does: "Ca²⁺" is
+    "C A 2 plus", "OH⁻" "O H minus", "Mg(OH)₂" "M G O H twice", "CₙH₂ₙ₊₁OH" "C N H 2 N plus 1
+    O H" (`tutor.for_the_voice`).
+  - Tooling for the question-bank language pass: `database/check_lesson_edit.py` (a file's
+    edit changed words only; cues and marks still land) and `docs/questions/bank-editor-brief.md`.
+- **Why:** founder, 12 Nov 2026: the Introduction heading blinked; the water and the salt
+  should pop in where they are named, not be drawn from scratch; the caption was cut in half;
+  "Three kinds" was written, and the pictures shown, before they were said.
+- **Where:** as above. Checked on the board at 1440 and 390 (filmed frame by frame).
+- **Status:** done locally.
+
 ### Lessons open fast on a refresh; no credit on Inworld no longer breaks them
 - **What:** three fixes to the lesson download.
   1. When Inworld refuses the account (401/402/403: no credit left, a wrong key), the API

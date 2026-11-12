@@ -357,6 +357,17 @@ def test_symbols_and_formulas_are_read_letter_by_letter() -> None:
     assert for_the_voice("option C") == "option C"
 
 
+def test_ions_brackets_and_general_formulas_are_read_as_a_teacher_says_them() -> None:
+    """The bank's lessons write formulas as formulas, so ions, bracketed groups and general
+    formulas are read too: "Ca²⁺" is "C A 2 plus", "Mg(OH)₂" is "M G O H twice"."""
+    assert for_the_voice("Ca²⁺ meets CO₃²⁻.") == "C A 2 plus meets C O 3 2 minus."
+    assert for_the_voice("H⁺ and OH⁻ make water.") == "H plus and O H minus make water."
+    assert for_the_voice("Mg(OH)₂ is a base.") == "M G O H twice is a base."
+    assert for_the_voice("Al₂(SO₄)₃") == "A L 2 S O 4 three times"
+    assert for_the_voice("CₙH₂ₙ₊₁OH") == "C N H 2 N plus 1 O H"
+    assert for_the_voice("The area is 5 cm².") == "The area is 5 cm²."
+
+
 def test_an_oxidation_state_is_said_the_nigerian_way() -> None:
     """carbon(IV) oxide is "carbon four oxide" in a Nigerian classroom (sources.md)."""
     assert for_the_voice("Carbon(IV) oxide.") == "Carbon four oxide."

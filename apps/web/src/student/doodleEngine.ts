@@ -75,7 +75,13 @@ export interface EngineEnv {
   other: (id: string) => DoodleEngine | null;
   /** Room kept to the right of the art for notes, in pixels (0: none, notes go inside). */
   noteRoom: number;
+  /** Pieces pop into place, each whole, rather than being drawn stroke by stroke: a scene, so
+   *  the student watches the lesson, not the drawing (founder, 12 Nov 2026). */
+  pop?: boolean;
 }
+
+/** How long one piece takes to pop in. */
+const POP_MS = 240;
 
 interface Xf {
   tx: number;
@@ -204,7 +210,53 @@ export class DoodleEngine {
     this.ink = el("g", { class: "dd-ink" }, svg);
     this.host.replaceChildren(svg);
     this.setUpLevels(this.art);
+    this.hideLater(this.art);
     return true;
+  }
+
+  /** Parts marked `data-later` wait, hidden, for the `show` that brings them in on their word. */
+  private hideLater(root: Element) {
+    for (const part of Array.from(root.querySelectorAll<SVGGraphicsElement>("[data-later]"))) {
+      if (!part.hasAttribute("data-shown")) part.style.opacity = "0";
+    }
+  }
+
+  /** One piece popping into place: faded in and settling from a little smaller. */
+  private popItem(element: SVGGraphicsElement): DrawItem {
+    element.style.opacity = "0";
+    element.style.transformBox = "fill-box";
+    element.style.transformOrigin = "center";
+    return {
+      kind: "fill",
+      ms: POP_MS,
+      show: (p) => {
+        const q = ease(p);
+        element.style.opacity = q.toFixed(3);
+        element.style.transform = `scale(${(0.82 + 0.18 * q).toFixed(3)})`;
+      },
+      tip: () => null,
+      finish: () => {
+        element.style.opacity = "";
+        element.style.transform = "";
+      },
+    };
+  }
+
+  /** The pieces these elements belong to, each whole: the topmost group under the drawing's
+   *  layer (or a build-up's), in order. */
+  private pieces(elements: SVGGraphicsElement[]): SVGGraphicsElement[] {
+    const found: SVGGraphicsElement[] = [];
+    for (const element of elements) {
+      let top: SVGGraphicsElement = element;
+      for (;;) {
+        const parent = top.parentElement as unknown as SVGGraphicsElement | null;
+        if (!parent || parent === this.art || parent.classList.contains("dd-stage")) break;
+        if ((parent as unknown) === this.svg) break;
+        top = parent;
+      }
+      if (!found.includes(top)) found.push(top);
+    }
+    return found;
   }
 
   private mountCrowd(source: Extract<ArtSource, { kind: "repeat" }>) {
@@ -337,9 +389,19 @@ export class DoodleEngine {
     );
   }
 
-  /** The pen's steps for drawing these, or none when they are to be there at once. */
-  private draw(elements: SVGGraphicsElement[]): DrawItem[] {
-    return this.instant || elements.length === 0 ? [] : planDrawing(this.svg, elements);
+  /** The pen's steps for drawing these, or none when they are to be there at once. A scene's
+   *  own pieces pop in instead (`EngineEnv.pop`); marks made on it are still drawn. */
+  private draw(elements: SVGGraphicsElement[], pieces = false): DrawItem[] {
+    if (this.instant || elements.length === 0) return [];
+    if (pieces && this.env.pop) return this.pieces(elements).map((piece) => this.popItem(piece));
+    return planDrawing(this.svg, elements);
+  }
+
+  /** The art's own elements to bring in now: all but parts kept back for a `show`. */
+  private toBring(root: Element): SVGGraphicsElement[] {
+    return this.drawable(root).filter(
+      (element) => !element.closest("[data-later]:not([data-shown])"),
+    );
   }
 
   /* ---------------------------------------------------------------- levels (fill) */
@@ -448,9 +510,17 @@ export class DoodleEngine {
       const n = this.crowd.members.length;
       return { items, totalMs: 1400 + n * 115 };
     }
-    const items = this.draw(this.drawable(this.art));
+    const items = this.draw(this.toBring(this.art), true);
     if (caption) items.push(caption);
     return { items };
+  }
+
+  /** A part kept back (`data-later`) pops into place, label and all. */
+  private show(op: LessonDoodleOp): Build {
+    const part = this.part(op.part);
+    if (!part) return { items: [] };
+    part.setAttribute("data-shown", "");
+    return { items: [this.popItem(part)] };
   }
 
   /** One action, as the pen does it. */
@@ -458,6 +528,8 @@ export class DoodleEngine {
     switch (op.op) {
       case "pulse":
         return this.pulse(op);
+      case "show":
+        return this.show(op);
       case "circle":
       case "highlight":
       case "underline":
@@ -726,7 +798,8 @@ export class DoodleEngine {
       for (const child of fresh) holder.appendChild(child);
       this.raw = next;
       this.setUpLevels(holder);
-      return { items: this.draw(this.drawable(holder)) };
+      this.hideLater(holder);
+      return { items: this.draw(this.toBring(holder), true) };
     }
     // Crossed out, wiped, and drawn again.
     const old = this.contentBox();
@@ -751,6 +824,7 @@ export class DoodleEngine {
     this.notes = [];
     this.art.style.visibility = "hidden";
     this.setUpLevels(this.art);
+    this.hideLater(this.art);
     // The wipe: the old drawing rubbed out left to right, the pen scrubbing up and down.
     ids += 1;
     const mask = el("mask", { id: `dd-wipe-${ids}`, maskUnits: "userSpaceOnUse" }, this.defs);
@@ -773,7 +847,7 @@ export class DoodleEngine {
         this.art.style.visibility = "";
       },
     };
-    const drawn = this.draw(this.drawable(this.art));
+    const drawn = this.draw(this.toBring(this.art), true);
     // Shown for the pen to draw into once the old one is gone.
     const reveal: DrawItem = {
       kind: "stroke",

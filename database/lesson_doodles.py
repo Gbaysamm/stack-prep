@@ -92,6 +92,8 @@ SCENE_MAX_BYTES = 8704
 #: What each action is, and the keys it takes beyond `id` and `op` (required ones first).
 OPS: dict[str, tuple[set[str], set[str]]] = {
     "pulse": (set(), {"part", "n"}),
+    # A part kept back in the art (`data-later` on its group) pops into place on its word.
+    "show": ({"part"}, set()),
     "circle": (set(), {"part", "n", "text"}),
     "highlight": (set(), {"part", "n", "text"}),
     "underline": (set(), {"part", "n", "text"}),

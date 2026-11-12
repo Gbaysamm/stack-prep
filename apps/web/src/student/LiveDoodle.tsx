@@ -62,6 +62,7 @@ export function LiveDoodle({
   stageArt,
   lit,
   onLit,
+  pop = false,
 }: {
   /** Names this drawing, so one drawn already this visit is not drawn again. */
   drawKey: string;
@@ -84,6 +85,8 @@ export function LiveDoodle({
   stageArt: (name: string) => string | null;
   lit: number | null;
   onLit: (number: number | null, tapped?: boolean) => void;
+  /** Its pieces pop into place rather than being drawn stroke by stroke (a scene). */
+  pop?: boolean;
 }) {
   const rootRef = useRef<HTMLElement>(null);
   const artRef = useRef<HTMLDivElement>(null);
@@ -212,6 +215,7 @@ export function LiveDoodle({
       stageArt,
       other: (id) => engines.get(id) ?? null,
       noteRoom,
+      pop,
     });
     engineRef.current = engine;
     if (doodleId) engines.set(doodleId, engine);
@@ -226,11 +230,11 @@ export function LiveDoodle({
     return () => {
       running.current?.();
       running.current = null;
-      if (captionRef.current) captionRef.current.style.clipPath = "";
+      if (captionRef.current) captionRef.current.style.opacity = "";
       if (doodleId && engines.get(doodleId) === engine) engines.delete(doodleId);
     };
     // `source` follows `sourceKey`; the helpers are stable.
-  }, [sourceKey, width, height, noteRoom, caption]);
+  }, [sourceKey, width, height, noteRoom, caption, pop]);
 
   // New tasks as the lesson reaches them.
   useEffect(() => {

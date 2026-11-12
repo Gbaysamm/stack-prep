@@ -55,6 +55,7 @@ function actionSound(op: LessonDoodleOp): SfxName | null {
     case "cross":
       return "error";
     case "stage":
+    case "show":
     case "grow":
     case "shrink":
     case "pulse":

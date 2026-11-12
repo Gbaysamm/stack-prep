@@ -355,6 +355,8 @@ export interface LessonDoodleOp {
   id: string;
   op:
     | 'pulse'
+    /** A part kept back in the art (`data-later`) pops into place. */
+    | 'show'
     | 'circle'
     | 'highlight'
     | 'underline'

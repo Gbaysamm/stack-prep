@@ -37,6 +37,8 @@ DoodleSize = Literal["small", "medium", "scene"]
 DoodleLayout = Literal["row", "grid", "cluster"]
 DoodleOpName = Literal[
     "pulse",
+    # A part kept back in the art (`data-later`) pops into place on its word.
+    "show",
     "circle",
     "highlight",
     "underline",

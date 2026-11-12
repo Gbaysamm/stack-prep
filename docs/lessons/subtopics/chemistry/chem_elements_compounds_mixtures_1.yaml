@@ -25,18 +25,24 @@ moments:
     write: 'Matter: everything around you'
     doodle: {name: 'custom:sub_chem_elements_compounds_mixtures_m', id: mat, size: scene, caption: 'matter around you', 'on': matter}
     doodle_do:
-      - {id: mat, op: pulse, part: air, 'on': air}
-      - {id: mat, op: pulse, part: water, 'on': water}
-      - {id: mat, op: pulse, part: salt, 'on': salt}
+      - {id: mat, op: show, part: air, 'on': air}
+      - {id: mat, op: show, part: water, 'on': water}
+      - {id: mat, op: show, part: salt, 'on': salt}
   - say: 'All matter is made of very tiny particles called atoms. They are far too small to see, even with a hand lens.'
     write: 'All matter is made of tiny particles called atoms'
     doodle_do:
       - {id: mat, op: stage, stage: 'custom:sub_chem_elements_compounds_mixtures_m2', 'on': atoms}
-  - say: 'Chemists sort every substance into three kinds. In an element, every atom is the same kind. In a compound, different atoms are joined together. In a mixture, different substances are only mixed, not joined.'
+  # The three kinds named first, then each explained with its picture brought in as it is
+  # explained (founder, 12 Nov 2026).
+  - say: 'Chemists sort every substance into three kinds. They are elements, compounds and mixtures.'
     write: 'Three kinds: element, compound, mixture'
-    doodle: {name: 'custom:sub_chem_elements_compounds_mixtures_a', id: dia, size: scene, caption: 'element, compound, mixture', 'on': element}
+  - say: 'In an element, every atom is the same kind.'
+    doodle: {name: 'custom:sub_chem_elements_compounds_mixtures_a', id: dia, size: scene, caption: 'three kinds of substance', 'on': element}
+  - say: 'In a compound, different atoms are joined together.'
     doodle_do:
       - {id: dia, op: stage, stage: 'custom:sub_chem_elements_compounds_mixtures_a2', 'on': compound}
+  - say: 'In a mixture, different substances are only mixed, not joined.'
+    doodle_do:
       - {id: dia, op: stage, stage: 'custom:sub_chem_elements_compounds_mixtures_a3', 'on': mixture}
 
   # ---------------------------------------------------------------- objectives
@@ -51,7 +57,7 @@ moments:
     doodle_do:
       - {id: dia, op: pulse, part: element-box, 'on': box}
     point:
-      - {line: 5, kind: underline, at: 'cannot be split'}
+      - {line: 8, kind: underline, at: 'cannot be split'}
   - say: 'All the atoms in an element are of one kind. In this box every atom is sodium, Na. Iron, copper, gold and carbon are other elements.'
     write: 'One kind of atom, e.g. sodium (Na), iron (Fe), copper (Cu), gold (Au), carbon (C)'
     doodle_do:
@@ -70,7 +76,7 @@ moments:
   - say: 'So the elements are O₂, Fe and N₂.'
     write: '∴ elements: $\ce{O2}$, Fe, $\ce{N2}$'
     point:
-      - {line: 10, kind: circle, at: 'elements'}
+      - {line: 13, kind: circle, at: 'elements'}
 
   # worked example 2: split by heating
   - say: 'Let us solve another. When red mercury(II) oxide, HgO, is heated, it gives mercury and oxygen gas. Is mercury(II) oxide an element?'
@@ -78,7 +84,7 @@ moments:
   - say: 'Heating split it into two simpler substances. An element cannot be split by chemical means. So mercury(II) oxide is not an element. It is a compound.'
     write: '∴ split into simpler substances, so not an element'
     point:
-      - {line: 12, kind: underline, at: 'not an element'}
+      - {line: 15, kind: underline, at: 'not an element'}
 
   # ---------------------------------------------------------------- compound
   - section: 'Compound'
@@ -87,7 +93,7 @@ moments:
     doodle_do:
       - {id: dia, op: circle, part: compound-tag, 'on': compound}
     point:
-      - {line: 13, kind: underline, at: 'fixed ratio'}
+      - {line: 16, kind: underline, at: 'fixed ratio'}
   - say: 'Look at the second box. In each particle, sodium and chlorine are joined together. Sodium burns in chlorine to form sodium chloride, which is table salt.'
     write: 'Sodium + chlorine → sodium chloride: $\ce{2Na + Cl2 -> 2NaCl}$'
     doodle_do:
@@ -115,7 +121,7 @@ moments:
     doodle_do:
       - {id: dia, op: circle, part: compound-tag, 'on': fixed}
     point:
-      - {line: 21, kind: circle, at: 'compound'}
+      - {line: 24, kind: circle, at: 'compound'}
 
   # worked example 4: using the fixed ratio
   - say: 'Let us solve one more. 7 g of iron always combines with 4 g of sulphur to form iron(II) sulphide, FeS. What mass of sulphur combines with 14 g of iron?'
@@ -125,7 +131,7 @@ moments:
   - say: 'The ratio is fixed, so the sulphur must also double. 2 times 4 g is 8 g of sulphur.'
     write: '∴ sulphur = 2 × 4 g = 8 g'
     point:
-      - {line: 24, kind: circle, at: '8 g'}
+      - {line: 27, kind: circle, at: '8 g'}
 
 
   # ---------------------------------------------------------------- traps
@@ -137,7 +143,7 @@ moments:
   - say: 'JAMB also sets the reverse as a wrong option. It says a compound keeps the properties of its elements. It does not. Sodium chloride is not a soft metal or a poisonous gas.'
     write: 'Wrong: a compound keeps its elements'' properties ✗'
     point:
-      - {line: 26, kind: strike, at: 'keeps its elements'' properties'}
+      - {line: 29, kind: strike, at: 'keeps its elements'' properties'}
   - say: 'WAEC examiners say many students write a formula when a name is asked. If asked to name it, write sodium chloride, not NaCl.'
     write: 'Name asked? Write the name: sodium chloride, not NaCl'
 
@@ -154,7 +160,7 @@ moments:
     doodle_do:
       - {id: dia, op: circle, part: element-tag, 'on': element}
     point:
-      - {line: 30, kind: circle, at: 'element'}
+      - {line: 33, kind: circle, at: 'element'}
 
   # ---------------------------------------------------------------- recap
   - section: 'Recap'

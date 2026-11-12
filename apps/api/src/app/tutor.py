@@ -1526,32 +1526,94 @@ _SYMBOLS = frozenset(
 #: Symbols that are also everyday words or letters: left alone when they stand by themselves.
 _WORDLIKE = frozenset({"He", "In", "As", "Be", "No", "At", "Am", "Pa", "I", "A", "U", "Y", "W"})
 _SUBSCRIPT = str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789")
-#: A run of element symbols with their counts, standing alone: Na, NaCl, H₂O, CO2, CaCO₃.
-_FORMULA = re.compile(r"(?<![\w$])((?:[A-Z][a-z]?[₀-₉0-9]*)+)(?![\w])")
-_PART = re.compile(r"([A-Z][a-z]?)([₀-₉0-9]*)")
+_SUPERSCRIPT = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹", "0123456789")
+#: A count written under a symbol, as said: digits, and a general formula's n ("CₙH₂ₙ₊₁").
+_COUNT_SAID = {"ₙ": " N ", "₊": " plus ", "₋": " minus ", "ₓ": " X "}
+#: A formula standing alone: symbols with their counts, brackets with theirs, and an ion's
+#: charge. Na, NaCl, H₂O, CO2, Mg(OH)₂, [Cu(NH₃)₄]²⁺, CO₃²⁻, OH⁻, CₙH₂ₙ₊₁OH.
+_FORMULA = re.compile(
+    r"(?<![\w$])([(\[]?[A-Z][A-Za-z0-9₀-₉ₙₓ₊₋()\[\]]*[⁰¹²³⁴⁵⁶⁷⁸⁹]*[⁺⁻]?)(?![\w⁺⁻⁰¹²³⁴⁵⁶⁷⁸⁹])"
+)
+_COUNT = re.compile(r"[0-9₀-₉ₙₓ₊₋]+")
+_TIMES = {"2": "twice", "3": "three times", "4": "four times", "6": "six times"}
+
+
+def _count_said(count: str) -> str:
+    said = "".join(_COUNT_SAID.get(ch, ch) for ch in count.translate(_SUBSCRIPT))
+    return re.sub(r"\s+", " ", said).strip()
+
+
+def _formula_words(token: str) -> list[str] | None:
+    """A formula's words as a teacher reads it, or None when it is not a formula."""
+    words: list[str] = []
+    at = 0
+    while at < len(token):
+        ch = token[at]
+        if ch in "([":
+            close = ")" if ch == "(" else "]"
+            depth, end = 0, at
+            for end in range(at, len(token)):
+                if token[end] in "([":
+                    depth += 1
+                elif token[end] in ")]":
+                    depth -= 1
+                    if depth == 0:
+                        break
+            if depth != 0 or token[end] != close:
+                return None
+            inner = _formula_words(token[at + 1 : end])
+            if not inner:
+                return None
+            at = end + 1
+            found = _COUNT.match(token, at)
+            words.extend(inner)
+            if found:
+                count = found.group(0).translate(_SUBSCRIPT)
+                words.append(_TIMES.get(count, f"{_count_said(count)} times"))
+                at = found.end()
+            continue
+        found = re.compile(r"[A-Z][a-z]?").match(token, at)
+        if not found or found.group(0) not in _SYMBOLS:
+            return None
+        words.extend(found.group(0).upper())
+        at = found.end()
+        counted = _COUNT.match(token, at)
+        if counted:
+            words.append(_count_said(counted.group(0)))
+            at = counted.end()
+    return words
 
 
 def _spelled(match: re.Match[str]) -> str:
     token = match.group(1)
-    if re.fullmatch(r"[IVXLCDM]+", token):
-        return token  # a Roman numeral (World War II, Section IV), not a formula
-    parts = _PART.findall(token)
-    if "".join(symbol + count for symbol, count in parts) != token:
-        return token
-    if not all(symbol in _SYMBOLS for symbol, _ in parts):
-        return token
-    if len(parts) == 1 and not parts[0][1]:
-        symbol = parts[0][0]
+    # Brackets round a whole formula in prose ("sodium hydroxide (NaOH)") or one closing a
+    # sentence's bracket: kept as they are, the formula inside read.
+    lead = trail = charge = ""
+    found = re.search(r"([⁰¹²³⁴⁵⁶⁷⁸⁹]*)([⁺⁻])$", token)
+    if found:
+        charge, token = found.group(0), token[: found.start()]
+    while token and token[0] in "([" and _formula_words(token) is None:
+        lead, token = lead + token[0], token[1:]
+    while token and token[-1] in ")]" and _formula_words(token) is None:
+        trail, token = token[-1] + trail, token[:-1]
+    if not token or re.fullmatch(r"[IVXLCDM]+", token):
+        return match.group(1)  # a Roman numeral (World War II, Section IV), not a formula
+    words = _formula_words(token)
+    if not words:
+        return match.group(1)
+    plain = re.fullmatch(r"[A-Z][a-z]?", token)
+    if plain and not charge and (len(token) == 1 or token in _WORDLIKE):
         # One symbol alone: a single letter is already said as a letter; a word-like one is
         # most likely the word.
-        if len(symbol) == 1 or symbol in _WORDLIKE:
-            return token
-    pieces: list[str] = []
-    for symbol, count in parts:
-        pieces.extend(symbol)  # "Na" -> "N", "a" -> spoken as letters
-        if count:
-            pieces.append(count.translate(_SUBSCRIPT))
-    return " ".join(piece.upper() for piece in pieces)
+        return match.group(1)
+    if charge:
+        size = charge[:-1].translate(_SUPERSCRIPT)
+        words.append(f"{size} {'plus' if charge[-1] == '⁺' else 'minus'}".strip())
+    said = " ".join(words)
+    # A bracket that was prose, not part of the formula, stays round it.
+    if lead or trail:
+        return f"{lead}{said}{trail}" if lead.count("(") == trail.count(")") else said
+    return said
 
 
 #: A Roman-numeral oxidation state written onto a name, as in carbon(IV) or iron(III).
@@ -1585,17 +1647,19 @@ def for_the_voice(line: str) -> str:
     # Bracketed maths written as plain words, outside any $...$: a point "(2, 4)", a product
     # "3(2 + x)", "f(3)". Read as maths, so the comma and the bracket are said (founder, 12 Nov
     # 2026: a coordinate was heard as "2 to 4"). Brackets in prose ("(1)", "(see above)") stay.
-    line = "$".join(
-        part if index % 2 else _BARE_BRACKETS.sub(lambda m: f"${m.group(0)}$", part)
-        for index, part in enumerate(line.split("$"))
-    )
     # An oxidation state as Nigerian classrooms say it: "carbon(IV) oxide" is "carbon four
     # oxide", "iron(II)" is "iron two". Only a numeral in brackets straight after a word.
     line = _OXIDATION.sub(lambda m: f"{m.group(1)} {_ROMAN[m.group(2)]}", line)
     # Symbols and formulas letter by letter, as a teacher reads them: "Na" is "N A", not a
-    # word; "NaCl" is "N A C L"; "H₂O" is "H 2 O" (founder, 12 Nov 2026). Outside $...$ only.
+    # word; "NaCl" is "N A C L"; "H₂O" is "H 2 O"; "Ca²⁺" is "C A 2 plus"; "Mg(OH)₂" is
+    # "M G O H twice" (founder, 12 Nov 2026). Outside $...$ only, and before the brackets
+    # below, so a formula's brackets are not read as maths.
     line = "$".join(
         part if index % 2 else _FORMULA.sub(_spelled, part)
+        for index, part in enumerate(line.split("$"))
+    )
+    line = "$".join(
+        part if index % 2 else _BARE_BRACKETS.sub(lambda m: f"${m.group(0)}$", part)
         for index, part in enumerate(line.split("$"))
     )
     spoken = speak_text(line)

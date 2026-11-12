@@ -96,5 +96,15 @@ not repeat an earlier one: it may say "In the last lesson you met …" in one li
   the big picture in plain words with the diagram coming in as it is said, built a piece at a
   time with the talk; the objectives are one or two short lines. Never say the same thing
   three times before teaching starts.
+- **Name the list, then teach each item in its own moment** (founder, 12 Nov 2026): a moment
+  that names several things ("three kinds: element, compound, mixture") says the names and
+  writes them, and stops. Each item is then explained in a moment of its own, and its picture
+  (or the stage that adds it) comes in on that moment, as it is explained, never before. A
+  board line says what its own moment says, never a summary of what later moments will say.
+- **Pictures pop in on their word:** where a picture's pieces are named one by one ("the air,
+  the water you drink and the salt"), each piece is a `data-later` part of the art, label
+  inside its group, brought in with `{op: show, part: …, 'on': <word>}`. A scene's pieces pop
+  into place rather than being drawn stroke by stroke; a caption names the whole picture
+  ("three kinds of substance"), not a list of pieces still to come.
 - **Plain section titles:** "Welcome", "Objectives", "Element", "Compound", "Comparison",
   "JAMB traps", "Check yourself", "Recap".

@@ -708,6 +708,7 @@ export function DoodleLayer({
       stageArt={stageArt}
       lit={lit}
       onLit={onLit}
+      pop={doodle.size === "scene"}
     />
   );
   const inPanel = due.filter((doodle) => spots.get(doodle.key)?.panel);

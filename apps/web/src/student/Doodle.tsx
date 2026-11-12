@@ -40,7 +40,7 @@ const KEEP_ATTRS = new Set([
   "opacity", "font-family", "font-size", "font-weight", "font-style", "text-anchor",
   "dominant-baseline", "letter-spacing", "data-anim", "data-origin", "data-react",
   // Doodles v2: the parts actions name, a route to move along, a level to fill.
-  "data-part", "data-path", "data-fill", "data-level",
+  "data-part", "data-path", "data-fill", "data-level", "data-later",
 ]);
 export const ANIMS = new Set(["bob", "blink", "wiggle", "pulse", "sway", "spin-slow", "shake", "pop"]);
 export const REACTS = new Set(["wiggle", "shake", "pop"]);
@@ -145,23 +145,19 @@ export function DoodlePen({ penRef, lift = "1" }: { penRef: RefObject<HTMLDivEle
   );
 }
 
-/** The caption, written left to right under the picture with the nib riding its end. */
+/** The caption under the picture: it comes in whole, faded in, never wiped in letter by letter
+ *  (founder, 12 Nov 2026: a caption half written between frames, "matter aro", distracts). */
 export function captionItem(element: HTMLElement): DrawItem {
-  const chars = Math.max(1, (element.textContent ?? "").length);
-  element.style.clipPath = "inset(-0.3em 100% -0.3em -0.3em)";
+  element.style.opacity = "0";
   return {
     kind: "text",
-    ms: 150 + chars * 55,
+    ms: 260,
     show: (p) => {
-      element.style.clipPath = `inset(-0.3em ${((1 - p) * 100).toFixed(2)}% -0.3em -0.3em)`;
+      element.style.opacity = p.toFixed(3);
     },
-    tip: (p) => {
-      const box = element.getBoundingClientRect();
-      const lift = Math.abs(Math.sin(p * chars * Math.PI)) * box.height * 0.18;
-      return [box.left + box.width * p, box.top + box.height * 0.78 - lift];
-    },
+    tip: () => null,
     finish: () => {
-      element.style.clipPath = "";
+      element.style.opacity = "";
     },
   };
 }
@@ -261,7 +257,7 @@ export function Doodle({
     });
     return () => {
       stop();
-      if (captionRef.current) captionRef.current.style.clipPath = "";
+      if (captionRef.current) captionRef.current.style.opacity = "";
     };
     // The caption is part of the drawing; a new caption is a new drawing.
   }, [svg, drawKey, instant, caption, parkPen]);
