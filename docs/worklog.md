@@ -15,6 +15,21 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-12
 
+### Every lesson line read and edited for language
+- **What:** an editor read every spoken and written line of all 20 lesson files (one per
+  subtopic, `docs/lessons/editor-brief.md`): ~440 lines changed. Spoken sentences complete,
+  lists joined with "and" in a sentence with a verb, no colons or "e.g." in speech, JAMB
+  options asked as questions, welcomes "Today's lesson is …" (no "lesson one of two"),
+  objectives as plain sentences, names before symbols on the board. Teaching, numbers, cues
+  and marks unchanged. Fixed on review: a surd's decimal "never ends and never repeats";
+  sodium chloride not "a sodium atom joined to a chlorine atom"; an overclaim about melting
+  points removed.
+- **Why:** founder, 12 Nov 2026: "The air, the water you drink, the salt in your food." is
+  not a sentence; go through each content one by one.
+- **Where:** `docs/lessons/subtopics/**`, `docs/lessons/editor-brief.md`, the guide.
+- **Status:** done locally, loaded. The question bank's explanations (~71,000 spoken
+  sentences) need the same pass: waiting on the founder's go for a paid model run.
+
 ### Lessons read and written like a teacher: symbols, timing, opening; Emeka by default
 - **What:**
   - The voice reads symbols and formulas letter by letter ("Na" as "N A", "NaCl" as "N A C
