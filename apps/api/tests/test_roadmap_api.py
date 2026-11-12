@@ -47,9 +47,7 @@ async def _subject() -> str | None:
 
 async def _checkup(client: httpx.AsyncClient, student: str, subject: str) -> str:
     state = (
-        await client.post(
-            "/v1/checkup/start", json={"student_id": student, "subject_id": subject}
-        )
+        await client.post("/v1/checkup/start", json={"student_id": student, "subject_id": subject})
     ).json()
     session = state["session_id"]
     for _ in range(30):
@@ -214,3 +212,99 @@ async def test_a_bank_lesson_comes_down_as_one_kept_file(client: httpx.AsyncClie
     nothing = "00000000-0000-0000-0000-000000000000"
     missing = await client.get(f"/v1/roadmap/{student}/lessons/{nothing}/package?engine=none")
     assert missing.status_code == 404
+
+
+async def test_a_weak_run_puts_its_lesson_next_then_the_run_again(
+    client: httpx.AsyncClient,
+) -> None:
+    """Founder, 12 Nov 2026: below the bar after a run, the very next stops today are the
+    subtopic's lesson, then a run on it again: two stops, not one."""
+    subject = await _subject()
+    if subject is None:
+        pytest.skip("no subject with questions in several topics in this database")
+    student = str((await client.post("/v1/dev/students", json={})).json()["student_id"])
+    try:
+        await _checkup(client, student, subject)
+        plan = (await client.get(f"/v1/roadmap/{student}")).json()
+        today = [i for i in plan["items"] if i["day"] == plan["today"]]
+        run = next(i for i in today if i["kind"] == "run")
+        started = await client.post(f"/v1/roadmap/{student}/items/{run['id']}/start")
+        assert started.status_code == 200, started.text
+        # The run ends without passing: three answers, every one wrong.
+        session = started.json()["session_id"]
+        for _ in range(3):
+            state = (await client.get(f"/v1/practice/{session}")).json()
+            if not state.get("question"):
+                break
+            right = {
+                r["option_key"]
+                for r in await _rows(
+                    "SELECT option_key FROM question_options"
+                    " WHERE question_version_id = :v AND is_correct",
+                    v=state["question"]["question_version_id"],
+                )
+            }
+            wrong = next(
+                o["option_key"]
+                for o in state["question"]["options"]
+                if o["option_key"] not in right
+            )
+            await client.post(
+                f"/v1/practice/{session}/answer",
+                json={
+                    "question_version_id": state["question"]["question_version_id"],
+                    "selected_option_key": wrong,
+                    "response_ms": 9000,
+                },
+            )
+        async with get_engine().begin() as conn:
+            await conn.execute(
+                text("UPDATE study_sessions SET ended_at = now() WHERE id = :id"),
+                {"id": started.json()["session_id"]},
+            )
+
+        after = (await client.get(f"/v1/roadmap/{student}")).json()
+        day = sorted(
+            (i for i in after["items"] if i["day"] == after["today"]),
+            key=lambda i: i["position"],
+        )
+        at = next(n for n, i in enumerate(day) if i["id"] == run["id"])
+        assert day[at]["state"] == "done"
+        lesson, again = day[at + 1], day[at + 2]
+        assert (lesson["kind"], lesson["subtopic_id"]) == ("lesson", run["subtopic_id"])
+        assert (again["kind"], again["subtopic_id"]) == ("run", run["subtopic_id"])
+        assert again["state"] == "to_do"
+        positions = [i["position"] for i in day]
+        assert len(set(positions)) == len(positions)
+
+        # Read again: nothing more is added.
+        steady = (await client.get(f"/v1/roadmap/{student}")).json()
+        assert len(steady["items"]) == len(after["items"])
+
+        # The lesson taken: the run again is next, and no second lesson appears.
+        done = await client.post(
+            f"/v1/roadmap/{student}/lessons/{run['subtopic_id']}/done",
+            json={"item_id": lesson["id"]},
+        )
+        assert done.status_code in (200, 204), done.text
+        later = (await client.get(f"/v1/roadmap/{student}")).json()
+        lessons = [
+            i
+            for i in later["items"]
+            if i["day"] == later["today"]
+            and i["kind"] == "lesson"
+            and i["subtopic_id"] == run["subtopic_id"]
+        ]
+        assert len(lessons) == 1 and lessons[0]["state"] == "done"
+    finally:
+        async with get_engine().begin() as conn:
+            await conn.execute(text("SET LOCAL scorepilot.allow_erasure = 'on'"))
+            for statement in (
+                "DELETE FROM subtopic_lessons WHERE student_id = :id",
+                "DELETE FROM roadmaps WHERE student_id = :id",
+                "DELETE FROM attempts WHERE student_id = :id",
+                "DELETE FROM study_sessions WHERE student_id = :id",
+                "DELETE FROM consents WHERE student_id = :id",
+                "DELETE FROM students WHERE id = :id",
+            ):
+                await conn.execute(text(statement), {"id": student})

@@ -15,6 +15,19 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-12
 
+### A weak run puts its lesson next today, then the run again
+- **What:** when a run finishes below the 80% bar, today's plan gets the subtopic's lesson as
+  the very next stop, and a run on the same subtopic after it: two separate stops. A run of
+  that subtopic already planned later today moves up to follow the lesson instead of a second
+  one being added. The engine's own test decides (`needs_lesson`: run on, below the bar, not
+  taught since, not moved past), so a passed run adds nothing and a subtopic past four runs is
+  not looped on. Before, the plan only changed the next morning, so the lesson waited a day.
+- **Why:** founder, 12 Nov 2026: the lesson must be the next thing after a weak run, and the
+  run after it certifies the subtopic; each its own item on the roadmap.
+- **Where:** `apps/api/src/app/routers/roadmap.py` (`_lessons_after_weak_runs`, called when
+  the roadmap is read), `tests/test_roadmap_api.py`.
+- **Status:** done locally, tested. Not pushed.
+
 ### The board's dock, second pass: buddy on the right, no words unless asked, chat in the controls
 - **What:** on a desktop the buddy sits at the right of the dock, after the ask box. The words
   of what the coach says are no longer shown under the board even where there is no voice: a

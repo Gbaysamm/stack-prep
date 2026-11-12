@@ -559,6 +559,118 @@ async def _link_outside_sittings(conn: AsyncConnection, student_id: UUID, tz: st
     await conn.commit()
 
 
+async def _lessons_after_weak_runs(
+    conn: AsyncConnection, student_id: UUID, roadmap_id: UUID, today: date
+) -> None:
+    """A run finished below the bar puts its lesson next in today's plan, then the run again.
+
+    Founder, 12 Nov 2026: the lesson is the very next thing after a weak run, and after it the
+    student runs the subtopic again to show they have it. Each is its own stop on the path. The
+    plan is otherwise only re-made each morning, so without this the lesson would wait for
+    tomorrow. The engine's own test decides (engine.needs_lesson: run on, below the bar, not
+    taught since, not moved past), so a passed run adds nothing, and a subtopic past
+    STUCK_AFTER_RUNS is not looped on. A later run of the same subtopic already planned today
+    moves up to follow the lesson, rather than a second one being added.
+    """
+    for _ in range(8):  # Each pass handles one subtopic; a day never has more than a few.
+        rows = await fetch_all(
+            conn,
+            ITEM_SQL + " WHERE i.roadmap_id = :r AND i.day = :today ORDER BY i.position",
+            r=roadmap_id,
+            today=today,
+        )
+        done = [
+            row
+            for row in rows
+            if row["kind"] == "run" and row["state"] == "done" and row["subtopic_id"] is not None
+        ]
+        if not done:
+            return
+        standing: dict[str, UnitStanding] = {}
+        for subject_id in {row["subject_id"] for row in done}:
+            for unit in await _standings(conn, student_id, subject_id):
+                standing[unit.unit_id] = unit
+        target = None
+        for row in reversed(done):  # The latest run of each subtopic is the one that counts.
+            sub = str(row["subtopic_id"])
+            if any(
+                str(other["subtopic_id"]) == sub and other["position"] > row["position"]
+                for other in done
+            ):
+                continue
+            found = standing.get(sub)
+            if found is None or not engine.needs_lesson(found):
+                continue
+            after = [other for other in rows if other["position"] > row["position"]]
+            if any(o["kind"] == "lesson" and str(o["subtopic_id"]) == sub for o in after):
+                continue
+            target = (row, after)
+            break
+        if target is None:
+            return
+        row, after = target
+        sub, at = row["subtopic_id"], row["position"]
+        again = next(
+            (
+                o
+                for o in after
+                if o["kind"] == "run" and o["subtopic_id"] == sub and o["state"] == "to_do"
+            ),
+            None,
+        )
+        # Make room for two stops after the run (in two moves: a position is unique per day).
+        await conn.execute(
+            text(
+                "UPDATE roadmap_items SET position = position + 10000"
+                " WHERE roadmap_id = :r AND day = :today AND position > :at"
+            ),
+            {"r": roadmap_id, "today": today, "at": at},
+        )
+        await conn.execute(
+            text(
+                "UPDATE roadmap_items SET position = position - 9998"
+                " WHERE roadmap_id = :r AND day = :today AND position > 10000"
+            ),
+            {"r": roadmap_id, "today": today},
+        )
+        insert = text(
+            """
+            INSERT INTO roadmap_items (roadmap_id, student_id, day, position, kind, subject_id,
+              subtopic_id, length, reason, value)
+            VALUES (:r, :s, :today, :pos, :kind, :subject, :sub, :length, :reason, :value)
+            """
+        )
+        common = {
+            "r": roadmap_id,
+            "s": student_id,
+            "today": today,
+            "subject": row["subject_id"],
+            "sub": sub,
+            "value": row["value"],
+        }
+        await conn.execute(
+            insert,
+            {**common, "pos": at + 1, "kind": "lesson", "length": 0, "reason": "reteach"},
+        )
+        if again is not None:
+            await conn.execute(
+                text("UPDATE roadmap_items SET position = :pos WHERE id = :id"),
+                {"pos": at + 2, "id": again["id"]},
+            )
+        else:
+            await conn.execute(
+                insert,
+                {
+                    **common,
+                    "pos": at + 2,
+                    "kind": "run",
+                    "length": engine.RUN_LENGTH,
+                    "reason": "high_value_gap",
+                },
+            )
+        await conn.commit()
+
+
 ITEM_SQL = """
     SELECT i.id, i.day, i.position, i.kind, i.subject_id, sub.name AS subject_name,
            i.subtopic_id, ci.name AS subtopic_name, i.length, i.reason, i.value, i.session_id,
@@ -607,6 +719,7 @@ async def read(
     active = await ensure_roadmap(conn, student_id)
     today, tz = await _today(conn, student_id)
     await _link_outside_sittings(conn, student_id, tz)
+    await _lessons_after_weak_runs(conn, student_id, active["id"], today)
     items = await fetch_all(
         conn,
         ITEM_SQL + " WHERE i.roadmap_id = :r ORDER BY i.day, i.position",
