@@ -21,19 +21,23 @@ moments:
 
   # ---------------------------------------------------------------- introduction: the big picture, drawn
   - section: 'Introduction'
-    say: 'Everything around you is matter. The air, the water you drink, the salt in your food. All matter is made of very tiny particles called atoms.'
+    say: 'Everything around you is matter. The air, the water you drink, the salt in your food.'
+    write: 'Matter: everything around you'
+    doodle: {name: 'custom:sub_chem_elements_compounds_mixtures_m', id: mat, size: medium, caption: 'matter around you', 'on': matter}
+    doodle_do:
+      - {id: mat, op: pulse, part: air, 'on': air}
+      - {id: mat, op: pulse, part: water, 'on': water}
+      - {id: mat, op: pulse, part: salt, 'on': salt}
+  - say: 'All matter is made of very tiny particles called atoms. They are far too small to see, even with a hand lens.'
     write: 'All matter is made of tiny particles called atoms'
-    doodle: {name: 'custom:sub_chem_elements_compounds_mixtures_a', id: dia, size: scene, caption: 'element, compound, mixture', 'on': atoms}
-  - say: 'Chemists sort every substance into three kinds. Look at the three boxes. Each dot is an atom.'
-    write: 'Three kinds of substance: element, compound, mixture'
     doodle_do:
-      - {id: dia, op: stage, stage: 'custom:sub_chem_elements_compounds_mixtures_a3', 'on': three}
-  - say: 'In an element, every atom is the same kind. In a compound, different atoms are joined together. In a mixture, different substances are only mixed, not joined.'
-    write: 'Element: one kind of atom; compound: atoms joined; mixture: only mixed'
+      - {id: mat, op: stage, stage: 'custom:sub_chem_elements_compounds_mixtures_m2', 'on': atoms}
+  - say: 'Chemists sort every substance into three kinds. In an element, every atom is the same kind. In a compound, different atoms are joined together. In a mixture, different substances are only mixed, not joined.'
+    write: 'Three kinds: element, compound, mixture'
+    doodle: {name: 'custom:sub_chem_elements_compounds_mixtures_a', id: dia, size: scene, caption: 'element, compound, mixture', 'on': element}
     doodle_do:
-      - {id: dia, op: circle, part: element-tag, 'on': element}
-      - {id: dia, op: circle, part: compound-tag, 'on': compound}
-      - {id: dia, op: circle, part: mixture-tag, 'on': mixture}
+      - {id: dia, op: stage, stage: 'custom:sub_chem_elements_compounds_mixtures_a2', 'on': compound}
+      - {id: dia, op: stage, stage: 'custom:sub_chem_elements_compounds_mixtures_a3', 'on': mixture}
 
   # ---------------------------------------------------------------- objectives
   - section: 'Objectives'
@@ -49,7 +53,7 @@ moments:
     point:
       - {line: 5, kind: underline, at: 'cannot be split'}
   - say: 'All the atoms in an element are of one kind. In this box every atom is sodium, Na. Iron, Fe, copper, Cu, gold, Au, and carbon, C, are other elements.'
-    write: 'An element has only one kind of atom: Na, Fe, Cu, Au, C'
+    write: 'One kind of atom, e.g. sodium (Na), iron (Fe), copper (Cu), gold (Au), carbon (C)'
     doodle_do:
       - {id: dia, op: circle, part: element-tag, 'on': kind}
       - {id: dia, op: pulse, part: element-box, 'on': sodium}

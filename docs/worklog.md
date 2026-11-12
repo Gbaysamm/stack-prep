@@ -15,6 +15,27 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-12
 
+### Lessons read and written like a teacher: symbols, timing, opening; Emeka by default
+- **What:**
+  - The voice reads symbols and formulas letter by letter ("Na" as "N A", "NaCl" as "N A C
+    L", "H₂O" as "H 2 O"); word-like symbols standing alone (He, In, As, I) and Roman numerals
+    are left as words.
+  - A line is written as its own first words are said, where they come later in the moment,
+    instead of as the voice begins (wordClock.ts `derivedWriteCue`).
+  - Elements and compounds opens with a drawn "matter around you" (air, a glass of water, a
+    salt shaker, pulsed as named; a magnifier showing the particles on "atoms"), then each of
+    the three boxes drawn as it is named; its board writes "sodium (Na), iron (Fe)…".
+  - The guide: names before symbols; a line on its words, with the board busy meanwhile.
+  - Defaults: the whiteboard and the Inworld voice (Emeka) for everyone; saved choices from
+    before today are read as these once.
+  - The lesson's loading screen redesigned: the board's paper, a pen writing on a small board,
+    the lesson's name, a moving bar while it is prepared and a percentage as it downloads.
+- **Why:** founder, 12 Nov 2026, watching the first lesson.
+- **Where:** `apps/api/src/app/tutor.py` (`_FORMULA`, `_spelled`), `apps/web/src/student/
+  wordClock.ts`, `Board.tsx`, `boardPrefs.ts`, `prep/pages/Lesson.tsx`, `Lesson.css`,
+  `roadmapApi.ts`; the lesson file and its `_m`, `_m2` doodles; the guide.
+- **Status:** done locally. Not pushed.
+
 ### Inworld as a third voice; the whiteboard is everyone's board
 - **What:** the board's voice picker has Inworld (Nigerian English, voice Emeka by default)
   beside Studio and Kokoro. Its clips are made once with each word's time and kept like

@@ -64,6 +64,7 @@ import { sharedAudioContext } from "./sfx.js";
 import {
   cueSeconds,
   derivedCue,
+  derivedWriteCue,
   momentCues,
   setSpokenWords,
   spokenWordsFor,
@@ -581,7 +582,7 @@ export function Board({
           doodleDo: beat.doodle_do ?? null,
           diagram: beat.diagram ?? null,
           diagramDo: beat.diagram_do ?? null,
-          on: beat.on ?? null,
+          on: beat.on ?? derivedWriteCue(beat.write[0], beat.say),
           words: (beat as { words?: SpokenWord[] | null }).words ?? null,
           section: beat.section ?? null,
           mouth: beat.mouth ?? null,

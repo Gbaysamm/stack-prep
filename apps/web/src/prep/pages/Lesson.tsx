@@ -9,7 +9,7 @@
  * missed instead. Either way, the subtopic's next run is their real attempt, on new questions.
  */
 import { Suspense, lazy, useEffect, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { request } from "../../lib/friendlyError.js";
 import { Maths } from "../../Maths.js";
@@ -19,7 +19,7 @@ import {
   lessonVoice,
   type LessonPackage,
 } from "../lessonPackage.js";
-import { IconCheck } from "../icons.js";
+import { IconCheck, IconClose } from "../icons.js";
 import { FocusShell } from "../shell.js";
 import { useLoad, usePageTitle, useStudent } from "../store.js";
 import { Button, Skeleton, cx } from "../ui.js";
@@ -51,6 +51,8 @@ export function Lesson() {
   const { subtopicId = "" } = useParams();
   const [search] = useSearchParams();
   const item = search.get("item");
+  // What the roadmap called this stop, so the lesson says what is coming while it loads.
+  const named = (useLocation().state ?? null) as { title?: string; subject?: string | null } | null;
   // Which of the subtopic's lessons (a broad subtopic is several short ones).
   const part = Math.max(1, Number(search.get("part") ?? 1) || 1);
   const student = useStudent();
@@ -166,39 +168,48 @@ export function Lesson() {
     );
   }
   if (board === null) {
+    // ON THE BOARD'S OWN PAPER (founder, 12 Nov 2026: the plain bar was ugly). A pen writing
+    // on a small board while the voice is prepared; a real percentage once it downloads.
     const share = Math.round((progress ?? 0) * 100);
+    const downloading = progress !== null && progress > 0;
     return (
-      <FocusShell title="Lesson" exitTo="/roadmap">
-        <main className="ls-page ls-getting">
+      <div className="sj ls-loading">
+        <Link to="/roadmap" className="ls-loading-close" aria-label="Close">
+          <IconClose size={18} />
+        </Link>
+        <main className="ls-loading-card" role="status" aria-live="polite">
+          <div className={cx("ls-loading-board", failed && "still")} aria-hidden>
+            <span className="ls-loading-line a" />
+            <span className="ls-loading-line b" />
+            <span className="ls-loading-line c" />
+            <span className="ls-loading-pen" />
+          </div>
+          <span className="sj-eyebrow">
+            {named?.subject ? `Lesson · ${named.subject}` : "Lesson"}
+          </span>
+          <h1 className="sj-display ls-loading-title">{named?.title ?? "Your lesson"}</h1>
           {failed ? (
-            <div className="ls-ready">
-              <h1 className="sj-display sj-h3">The lesson didn’t download</h1>
-              <p className="ls-lede">
-                Check your connection, then try again. Once it’s on your phone,
-                it plays without the internet.
+            <>
+              <p className="ls-loading-note">
+                It didn’t download. Check your connection and try again.
               </p>
               <Button tone="lime" onClick={() => setAttempt((n) => n + 1)}>
                 Try again
               </Button>
-            </div>
+            </>
           ) : (
-            <div className="ls-ready" role="status" aria-live="polite">
-              <h1 className="sj-display sj-h3">Getting your lesson ready</h1>
-              <div className="ls-meter" aria-hidden>
-                <span
-                  style={{
-                    width: `${progress === null ? 4 : Math.max(4, share)}%`,
-                  }}
-                />
+            <>
+              <div className={cx("ls-loading-meter", !downloading && "waiting")}>
+                <span style={downloading ? { width: `${Math.max(6, share)}%` } : undefined} />
               </div>
-              <p className="ls-lede">
-                {progress === null ? "Starting…" : `${share}%`} · Once it’s
-                here, it plays without the internet.
+              <p className="ls-loading-note">
+                {downloading ? `Downloading · ${share}%` : "Preparing the lesson and its voice…"}
               </p>
-            </div>
+              <p className="ls-loading-small">Once it’s here, it plays without the internet.</p>
+            </>
           )}
         </main>
-      </FocusShell>
+      </div>
     );
   }
 

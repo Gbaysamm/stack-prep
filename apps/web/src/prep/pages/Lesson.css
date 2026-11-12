@@ -148,3 +148,139 @@
   background: var(--purple-600);
   transition: width 0.2s ease;
 }
+
+/* ---------------------------------------------------------------- getting the lesson */
+/* On the board's own warm paper: a small board with a pen writing while the voice is
+   prepared, then a real percentage as it downloads. */
+.sj.ls-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  background: #fbfaf6;
+}
+.sj .ls-loading-close {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: var(--gray-900);
+  background: var(--white);
+  box-shadow: inset 0 0 0 1.5px var(--gray-200);
+}
+.sj .ls-loading-card {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+}
+.sj .ls-loading-title {
+  margin: 0;
+  font-size: clamp(22px, 5vw, 28px);
+  line-height: 1.2;
+}
+.sj .ls-loading-note {
+  margin: 4px 0 0;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+.sj .ls-loading-small {
+  margin: 0;
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+/* The little board and its pen. */
+.sj .ls-loading-board {
+  position: relative;
+  width: 180px;
+  height: 112px;
+  margin-bottom: 10px;
+  border-radius: 14px;
+  background: var(--white);
+  box-shadow: inset 0 0 0 1.5px var(--gray-200), 0 10px 30px rgba(31, 0, 80, 0.08);
+}
+.sj .ls-loading-line {
+  position: absolute;
+  left: 22px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--purple-300);
+  transform-origin: left center;
+  animation: ls-write 2.4s ease-in-out infinite;
+}
+.sj .ls-loading-line.a { top: 28px; width: 110px; }
+.sj .ls-loading-line.b { top: 50px; width: 136px; animation-delay: 0.6s; background: var(--gray-300); }
+.sj .ls-loading-line.c { top: 72px; width: 84px; animation-delay: 1.2s; background: var(--gray-300); }
+.sj .ls-loading-pen {
+  position: absolute;
+  top: 18px;
+  left: 22px;
+  width: 8px;
+  height: 30px;
+  border-radius: 3px 3px 1px 1px;
+  background: linear-gradient(var(--gray-900) 0 30%, var(--purple-600) 30% 55%, #fff 55%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  transform: rotate(32deg);
+  transform-origin: bottom center;
+  animation: ls-pen 2.4s ease-in-out infinite;
+}
+.sj .ls-loading-board.still .ls-loading-line,
+.sj .ls-loading-board.still .ls-loading-pen {
+  animation: none;
+}
+@keyframes ls-write {
+  0% { transform: scaleX(0); opacity: 1; }
+  45%, 80% { transform: scaleX(1); opacity: 1; }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+@keyframes ls-pen {
+  0% { transform: translate(0, 0) rotate(32deg); }
+  25% { transform: translate(104px, 0) rotate(32deg); }
+  33% { transform: translate(0, 22px) rotate(32deg); }
+  58% { transform: translate(130px, 22px) rotate(32deg); }
+  66% { transform: translate(0, 44px) rotate(32deg); }
+  90% { transform: translate(78px, 44px) rotate(32deg); }
+  100% { transform: translate(0, 0) rotate(32deg); }
+}
+
+/* The meter: a moving stripe while the voice is prepared, then the real share. */
+.sj .ls-loading-meter {
+  position: relative;
+  width: 100%;
+  height: 10px;
+  margin-top: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--gray-100);
+}
+.sj .ls-loading-meter span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--purple-600);
+  transition: width 0.25s ease;
+}
+.sj .ls-loading-meter.waiting span {
+  width: 35%;
+  animation: ls-wait 1.4s ease-in-out infinite;
+}
+@keyframes ls-wait {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(290%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sj .ls-loading-line,
+  .sj .ls-loading-pen,
+  .sj .ls-loading-meter.waiting span {
+    animation: none;
+  }
+}

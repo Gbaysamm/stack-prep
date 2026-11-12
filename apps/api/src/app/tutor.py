@@ -1415,6 +1415,145 @@ _BARE_BRACKETS = re.compile(
     rf"|(?<![\w$])[a-z]\(\s*{_TERM}\s*\)(?=[\s,.;:?!]|$)"
     rf"|(?<=\b[A-Z])\(\s*{_TERM}\s*,\s*{_TERM}\s*\)"
 )
+#: The chemical elements' symbols, for reading a symbol or formula letter by letter.
+_SYMBOLS = frozenset(
+    [
+        "H",
+        "He",
+        "Li",
+        "Be",
+        "B",
+        "C",
+        "N",
+        "O",
+        "F",
+        "Ne",
+        "Na",
+        "Mg",
+        "Al",
+        "Si",
+        "P",
+        "S",
+        "Cl",
+        "Ar",
+        "K",
+        "Ca",
+        "Sc",
+        "Ti",
+        "V",
+        "Cr",
+        "Mn",
+        "Fe",
+        "Co",
+        "Ni",
+        "Cu",
+        "Zn",
+        "Ga",
+        "Ge",
+        "As",
+        "Se",
+        "Br",
+        "Kr",
+        "Rb",
+        "Sr",
+        "Y",
+        "Zr",
+        "Nb",
+        "Mo",
+        "Tc",
+        "Ru",
+        "Rh",
+        "Pd",
+        "Ag",
+        "Cd",
+        "In",
+        "Sn",
+        "Sb",
+        "Te",
+        "I",
+        "Xe",
+        "Cs",
+        "Ba",
+        "La",
+        "Ce",
+        "Pr",
+        "Nd",
+        "Pm",
+        "Sm",
+        "Eu",
+        "Gd",
+        "Tb",
+        "Dy",
+        "Ho",
+        "Er",
+        "Tm",
+        "Yb",
+        "Lu",
+        "Hf",
+        "Ta",
+        "W",
+        "Re",
+        "Os",
+        "Ir",
+        "Pt",
+        "Au",
+        "Hg",
+        "Tl",
+        "Pb",
+        "Bi",
+        "Po",
+        "At",
+        "Rn",
+        "Fr",
+        "Ra",
+        "Ac",
+        "Th",
+        "Pa",
+        "U",
+        "Np",
+        "Pu",
+        "Am",
+        "Cm",
+        "Bk",
+        "Cf",
+        "Es",
+        "Fm",
+        "Md",
+        "No",
+        "Lr",
+    ]
+)
+#: Symbols that are also everyday words or letters: left alone when they stand by themselves.
+_WORDLIKE = frozenset({"He", "In", "As", "Be", "No", "At", "Am", "Pa", "I", "A", "U", "Y", "W"})
+_SUBSCRIPT = str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789")
+#: A run of element symbols with their counts, standing alone: Na, NaCl, H₂O, CO2, CaCO₃.
+_FORMULA = re.compile(r"(?<![\w$])((?:[A-Z][a-z]?[₀-₉0-9]*)+)(?![\w])")
+_PART = re.compile(r"([A-Z][a-z]?)([₀-₉0-9]*)")
+
+
+def _spelled(match: re.Match[str]) -> str:
+    token = match.group(1)
+    if re.fullmatch(r"[IVXLCDM]+", token):
+        return token  # a Roman numeral (World War II, Section IV), not a formula
+    parts = _PART.findall(token)
+    if "".join(symbol + count for symbol, count in parts) != token:
+        return token
+    if not all(symbol in _SYMBOLS for symbol, _ in parts):
+        return token
+    if len(parts) == 1 and not parts[0][1]:
+        symbol = parts[0][0]
+        # One symbol alone: a single letter is already said as a letter; a word-like one is
+        # most likely the word.
+        if len(symbol) == 1 or symbol in _WORDLIKE:
+            return token
+    pieces: list[str] = []
+    for symbol, count in parts:
+        pieces.extend(symbol)  # "Na" -> "N", "a" -> spoken as letters
+        if count:
+            pieces.append(count.translate(_SUBSCRIPT))
+    return " ".join(piece.upper() for piece in pieces)
+
+
 #: A Roman-numeral oxidation state written onto a name, as in carbon(IV) or iron(III).
 _ROMAN = {
     "I": "one",
@@ -1453,6 +1592,12 @@ def for_the_voice(line: str) -> str:
     # An oxidation state as Nigerian classrooms say it: "carbon(IV) oxide" is "carbon four
     # oxide", "iron(II)" is "iron two". Only a numeral in brackets straight after a word.
     line = _OXIDATION.sub(lambda m: f"{m.group(1)} {_ROMAN[m.group(2)]}", line)
+    # Symbols and formulas letter by letter, as a teacher reads them: "Na" is "N A", not a
+    # word; "NaCl" is "N A C L"; "H₂O" is "H 2 O" (founder, 12 Nov 2026). Outside $...$ only.
+    line = "$".join(
+        part if index % 2 else _FORMULA.sub(_spelled, part)
+        for index, part in enumerate(line.split("$"))
+    )
     spoken = speak_text(line)
     # "the point 5, 7" in words: the comma is said, as a teacher reads a coordinate.
     spoken = _SAID_POINT.sub(r"\1 \2 comma \3", spoken)

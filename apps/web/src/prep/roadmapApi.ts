@@ -137,7 +137,9 @@ export function useStartItem(studentId: string) {
     setError(null);
     try {
       const started = await roadmapApi.start(studentId, item.id);
-      navigate(started.path);
+      navigate(started.path, {
+        state: { title: itemLabel(item), subject: item.subject_name ?? null },
+      });
     } catch (problem) {
       setError(friendly(problem));
     } finally {

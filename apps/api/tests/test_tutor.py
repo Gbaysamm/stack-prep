@@ -348,6 +348,15 @@ def test_a_model_that_does_not_reason_is_not_sent_the_setting() -> None:
 # --- what the voice is given ------------------------------------------------------------
 
 
+def test_symbols_and_formulas_are_read_letter_by_letter() -> None:
+    """Founder, 12 Nov 2026: "Na" was read as a word. A teacher says "N A", "H 2 O"."""
+    assert for_the_voice("sodium, Na.") == "sodium, N A."
+    assert for_the_voice("NaCl is table salt.") == "N A C L is table salt."
+    assert for_the_voice("Water is H₂O.") == "Water is H 2 O."
+    assert for_the_voice("He said it. As we saw, I am here.") == "He said it. As we saw, I am here."
+    assert for_the_voice("option C") == "option C"
+
+
 def test_an_oxidation_state_is_said_the_nigerian_way() -> None:
     """carbon(IV) oxide is "carbon four oxide" in a Nigerian classroom (sources.md)."""
     assert for_the_voice("Carbon(IV) oxide.") == "Carbon four oxide."

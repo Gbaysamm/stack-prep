@@ -79,6 +79,12 @@ not repeat an earlier one: it may say "In the last lesson you met …" in one li
   "2³ × 2⁴"), never spelled out as separate words ("H two O"): the voice reads a formula as one
   thing when it is written as one. Nigerian place and food names go in the pronunciation list,
   not respelled in the script.
+- **Names before symbols:** the first time an element or compound is written, its name comes
+  first with the symbol or formula in brackets: "sodium (Na)", "water (H₂O)". The voice reads
+  a symbol or formula letter by letter ("N A", "H 2 O").
+- **Write a line on its words:** when a moment says something before its summary line, the
+  line is written as its own words are said (the board does this from the line's first two
+  words), and the board is busy meanwhile: pictures of what is named, pulsed as named.
 - **Board lines are sentences:** each starts with a capital, as a teacher writes on the board
   (maths, units and abbreviations such as "x = 4", "pH", "e.g." as they are).
 - **Open like a teacher** (founder, 12 Nov 2026): the welcome names the lesson once ("Today's

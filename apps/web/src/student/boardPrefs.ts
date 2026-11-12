@@ -8,8 +8,9 @@
  * - `voice`: 'studio' is the hosted voice the API has always used; 'kokoro' is a free voice made
  *   on our own server, with no paid service behind it; 'inworld' is Inworld's Nigerian English.
  *
- * The whiteboard is the board for everyone (founder, 12 Nov 2026): a choice saved before then
- * (`v` below 2) is read as whiteboard once; classic stays one tap away.
+ * The whiteboard and the Inworld voice (Emeka) are everyone's default (founder, 12 Nov 2026): a
+ * choice saved before then (`v` below 3) is read as those once; the others stay one tap away.
+ * Where Inworld is not configured the server answers with the studio voice.
  *
  * Kept in localStorage, which can be missing or throw (private windows, blocked storage), so
  * every read falls back to the defaults and every write is allowed to fail.
@@ -27,9 +28,9 @@ export interface BoardPrefs {
 
 const KEY = 'sp.board.prefs';
 const EVENT = 'sp:board-prefs';
-export const DEFAULT_PREFS: BoardPrefs = { style: 'whiteboard', voice: 'studio' };
+export const DEFAULT_PREFS: BoardPrefs = { style: 'whiteboard', voice: 'inworld' };
 /** Saved choices from before the whiteboard became everyone's board are read as whiteboard. */
-const PREFS_VERSION = 2;
+const PREFS_VERSION = 3;
 
 /** Set by a page that shows the board its own way (the public lesson showcase): read in place
  *  of the student's saved choice, and changed in place of it, so their choice is never touched. */
@@ -44,7 +45,8 @@ export function readBoardPrefs(): BoardPrefs {
     const raw = JSON.parse(localStorage.getItem(KEY) ?? '{}') as Partial<BoardPrefs> & { v?: number };
     return {
       style: raw.v === PREFS_VERSION && raw.style === 'classic' ? 'classic' : 'whiteboard',
-      voice: raw.voice === 'kokoro' || raw.voice === 'inworld' ? raw.voice : 'studio',
+      voice:
+        raw.v === PREFS_VERSION && (raw.voice === 'kokoro' || raw.voice === 'studio') ? raw.voice : 'inworld',
     };
   } catch {
     return DEFAULT_PREFS;

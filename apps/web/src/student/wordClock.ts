@@ -201,6 +201,20 @@ export function derivedCue(at: string | null | undefined, say: string): LessonCu
   return null;
 }
 
+/**
+ * THE LINE ON ITS WORDS (founder, 12 Nov 2026): a moment that says something first and sums
+ * it up on the board ("Everything around you is matter… All matter is made of atoms") wrote
+ * the summary as the voice began, before its words were said. A moment the lesson gave no cue
+ * for writes its line when its first two words are said, where they come later in the moment.
+ */
+export function derivedWriteCue(line: string | null | undefined, say: string): LessonCue | null {
+  if (!line) return null;
+  const first = spokenWords(line).slice(0, 2);
+  if (first.length < 2) return null;
+  const at = findRun(spokenWords(say), first, 1);
+  return at > 2 ? { word: first.join(" "), nth: 1 } : null;
+}
+
 function runCount(heard: string[], want: string[]): number {
   let count = 0;
   while (findRun(heard, want, count + 1) >= 0) count += 1;
