@@ -7,7 +7,7 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from app import kokoro_voice
+from app import inworld_voice, kokoro_voice
 from app.config import Settings, get_settings
 from app.db import database_is_reachable
 from engine import ENGINE_VERSION
@@ -47,6 +47,8 @@ class Features(BaseModel):
     student_voice: bool
     #: The free Kokoro voice can be asked for (`engine=kokoro`) on the lesson's voice.
     kokoro_voice: bool = False
+    #: The Inworld voice (Nigerian English) can be asked for (`engine=inworld`).
+    inworld_voice: bool = False
 
 
 @router.get("/v1/features", response_model=Features, summary="What is switched on here")
@@ -55,4 +57,5 @@ async def features(settings: Annotated[Settings, Depends(get_settings)]) -> Feat
         coach_voice=settings.ai_speak,
         student_voice=settings.ai_listen,
         kokoro_voice=kokoro_voice.available(settings),
+        inworld_voice=inworld_voice.available(settings),
     )

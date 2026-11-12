@@ -14,6 +14,7 @@ from collections.abc import AsyncIterator
 # (environment variables win over .env). A test that wants a key sets one itself.
 os.environ["OPENAI_API_KEY"] = ""
 os.environ["PAYSTACK_SECRET_KEY"] = ""
+os.environ["INWORLD_API_KEY"] = ""
 os.environ["LESSON_PACKAGES_WARM"] = "false"
 
 import pytest

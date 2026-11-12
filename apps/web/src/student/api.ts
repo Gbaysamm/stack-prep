@@ -721,6 +721,8 @@ export interface Features {
   student_voice: boolean;
   /** The free Kokoro voice can be asked for. Absent from an older server. */
   kokoro_voice?: boolean;
+  /** Inworld's Nigerian English voice can be asked for. Absent from an older server. */
+  inworld_voice?: boolean;
 }
 
 /**
@@ -737,7 +739,7 @@ export interface EarlierTurn {
 export function withVoice(url: string, voice: BoardVoice): string {
   // No voice, or a clip already in memory (a lesson package, prep/lessonPackage.ts): as it is.
   if (!url || url.startsWith('blob:')) return url;
-  return voice === 'kokoro' ? `${url}${url.includes('?') ? '&' : '?'}engine=kokoro` : url;
+  return voice === 'studio' ? url : `${url}${url.includes('?') ? '&' : '?'}engine=${voice}`;
 }
 
 /** One spoken word of a beat and when it is said, in seconds from the clip's start. */

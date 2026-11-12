@@ -15,6 +15,22 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-12
 
+### Inworld as a third voice; the whiteboard is everyone's board
+- **What:** the board's voice picker has Inworld (Nigerian English, voice Emeka by default)
+  beside Studio and Kokoro. Its clips are made once with each word's time and kept like
+  Kokoro's, so the whiteboard writes and marks in step; lesson packages, question lessons,
+  warming and the coach's spoken answers all take `engine=inworld`; `/v1/features` says
+  whether it is on (it needs INWORLD_API_KEY; without it those requests get the studio voice).
+  The whiteboard is now the board for everyone: a style saved before today is read as
+  whiteboard once; classic is still one tap away.
+- **Why:** founder, 12 Nov 2026, after the voice comparison.
+- **Where:** `apps/api/src/app/inworld_voice.py`, `voice_store.py` (`inworld`, `TIMED`),
+  `config.py` (`inworld_api_key`, `inworld_voice`, `inworld_model`), `routers/practice.py`,
+  `roadmap.py`, `health.py`, `lesson_package.py`; web `boardPrefs.ts`, `Whiteboard.tsx`,
+  `api.ts`, `Board.tsx`, `lessonPackage.ts`; `tests/test_inworld_voice.py`.
+- **Status:** done locally; a whole lesson played in Inworld with word timings. Needs
+  INWORLD_API_KEY on each server. Not pushed.
+
 ### Marks land on their word, and the marked line is brought into sight
 - **What:** a mark the lesson gave no word cue for (most question lessons) is now cued on what
   it points at, where that is said in the moment (the number; "−4" as "negative 4"; the short

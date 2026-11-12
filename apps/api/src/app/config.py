@@ -88,6 +88,13 @@ class Settings(BaseSettings):
     kokoro_model: str = "kokoro-v1.0.onnx"
     kokoro_voice: str = "af_heart"
     kokoro_speed: float = Field(default=1.0, ge=0.5, le=2.0)
+    #: A third voice: Inworld's Nigerian English (app/inworld_voice.py), asked for with
+    #: `engine=inworld`. Off without a key; then those requests get the studio voice.
+    ai_inworld: bool = True
+    #: The "Basic (Base64)" key from the Inworld portal, as copied.
+    inworld_api_key: str = ""
+    inworld_voice: str = "Emeka"
+    inworld_model: str = "inworld-tts-2"
     #: Make every bank lesson's package in the free voice after start-up, behind any student
     #: waiting on a voice (app/lesson_package.py), so the first student to open one does not
     #: wait for it to be voiced.

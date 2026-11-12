@@ -6,7 +6,10 @@
  *   'whiteboard' is the explainer-video look (docs/lesson-style-guide.md): everything written
  *   by hand, warm paper, sections, sound effects, words landing as they are said.
  * - `voice`: 'studio' is the hosted voice the API has always used; 'kokoro' is a free voice made
- *   on our own server, with no paid service behind it.
+ *   on our own server, with no paid service behind it; 'inworld' is Inworld's Nigerian English.
+ *
+ * The whiteboard is the board for everyone (founder, 12 Nov 2026): a choice saved before then
+ * (`v` below 2) is read as whiteboard once; classic stays one tap away.
  *
  * Kept in localStorage, which can be missing or throw (private windows, blocked storage), so
  * every read falls back to the defaults and every write is allowed to fail.
@@ -15,7 +18,7 @@
 import { useEffect, useState } from 'react';
 
 export type BoardStyle = 'classic' | 'whiteboard';
-export type BoardVoice = 'studio' | 'kokoro';
+export type BoardVoice = 'studio' | 'kokoro' | 'inworld';
 
 export interface BoardPrefs {
   style: BoardStyle;
@@ -24,7 +27,9 @@ export interface BoardPrefs {
 
 const KEY = 'sp.board.prefs';
 const EVENT = 'sp:board-prefs';
-export const DEFAULT_PREFS: BoardPrefs = { style: 'classic', voice: 'studio' };
+export const DEFAULT_PREFS: BoardPrefs = { style: 'whiteboard', voice: 'studio' };
+/** Saved choices from before the whiteboard became everyone's board are read as whiteboard. */
+const PREFS_VERSION = 2;
 
 /** Set by a page that shows the board its own way (the public lesson showcase): read in place
  *  of the student's saved choice, and changed in place of it, so their choice is never touched. */
@@ -36,10 +41,10 @@ export function forceBoardPrefs(prefs: BoardPrefs): void {
 export function readBoardPrefs(): BoardPrefs {
   if (forced) return forced;
   try {
-    const raw = JSON.parse(localStorage.getItem(KEY) ?? '{}') as Partial<BoardPrefs>;
+    const raw = JSON.parse(localStorage.getItem(KEY) ?? '{}') as Partial<BoardPrefs> & { v?: number };
     return {
-      style: raw.style === 'whiteboard' ? 'whiteboard' : 'classic',
-      voice: raw.voice === 'kokoro' ? 'kokoro' : 'studio',
+      style: raw.v === PREFS_VERSION && raw.style === 'classic' ? 'classic' : 'whiteboard',
+      voice: raw.voice === 'kokoro' || raw.voice === 'inworld' ? raw.voice : 'studio',
     };
   } catch {
     return DEFAULT_PREFS;
@@ -54,7 +59,7 @@ export function writeBoardPrefs(change: Partial<BoardPrefs>): BoardPrefs {
     return next;
   }
   try {
-    localStorage.setItem(KEY, JSON.stringify(next));
+    localStorage.setItem(KEY, JSON.stringify({ ...next, v: PREFS_VERSION }));
   } catch {
     // Not kept past this page; the choice still applies now.
   }

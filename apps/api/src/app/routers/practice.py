@@ -68,7 +68,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import kokoro_voice, premium, scoring, tutor, voice_store
+from app import inworld_voice, kokoro_voice, premium, scoring, tutor, voice_store
 from app.auth import require_session_owner, require_student
 from app.config import Settings, get_settings
 from app.db import connection, fetch_all
@@ -2821,7 +2821,7 @@ async def lesson_voice_words(
     if not 0 <= beat < len(beats):
         raise HTTPException(status_code=404, detail="no such beat")
     said = beats[beat].say
-    if voice_store.engine_for(engine, settings) == "kokoro":
+    if voice_store.engine_for(engine, settings) in voice_store.TIMED:
         await voice_store.voiced(said, settings, engine=engine)
     found = voice_store.timings(said, settings, engine)
     if found is None:
@@ -2861,6 +2861,11 @@ async def warm_lesson(
         # In step order, one at a time, and only while no student is waiting on a line.
         background.add_task(
             voice_store.voice_all, lines, settings, at_once=1, patient=True, engine="kokoro"
+        )
+    elif voice_store.engine_for(engine, settings) == "inworld":
+        # Hosted, so a few at once; each line is kept and paid for once.
+        background.add_task(
+            voice_store.voice_all, lines, settings, at_once=3, patient=True, engine="inworld"
         )
     elif settings.ai_speak:
         background.add_task(voice_store.voice_all, lines, settings)
@@ -2965,6 +2970,11 @@ async def speech(
             clip = await asyncio.to_thread(kokoro_voice.synthesize, said, settings)
             if clip is not None:
                 yield clip.mp3
+            return
+        if voice_store.engine_for(engine, settings) == "inworld":
+            made = await inworld_voice.synthesize(tutor.for_the_voice(line), settings)
+            if made is not None:
+                yield made.mp3
             return
         async for chunk in tutor.speak_streaming(line, settings):
             yield chunk

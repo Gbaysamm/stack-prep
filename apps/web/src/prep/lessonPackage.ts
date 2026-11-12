@@ -20,7 +20,7 @@ import { setSpokenWords, type SpokenWord } from "../student/wordClock.js";
 const CACHE = "sp-lessons-v1";
 const MAGIC = "SPL1";
 
-export type LessonVoice = "studio" | "kokoro" | "none";
+export type LessonVoice = "studio" | "kokoro" | "inworld" | "none";
 
 export interface LessonPackage {
   version: string;

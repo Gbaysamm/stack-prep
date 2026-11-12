@@ -141,6 +141,7 @@ export function BoardStyleSwitch() {
             options={[
               { value: "studio", text: "Studio" },
               { value: "kokoro", text: "Kokoro" },
+              { value: "inworld", text: "Inworld" },
             ]}
             onPick={(voice) => writeBoardPrefs({ voice })}
           />

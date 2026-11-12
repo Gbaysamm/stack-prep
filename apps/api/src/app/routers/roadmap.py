@@ -1190,7 +1190,7 @@ async def lesson_voice_words(
 ) -> dict[str, Any]:
     await require_student(request, conn, student_id)
     said = await _said(conn, student_id, subtopic_id, beat, part)
-    if voice_store.engine_for(engine, settings) == "kokoro":
+    if voice_store.engine_for(engine, settings) in voice_store.TIMED:
         await voice_store.voiced(said, settings, engine=engine)
     found = voice_store.timings(said, settings, engine)
     if found is None:
@@ -1208,7 +1208,7 @@ async def lesson_package(
     request: Request,
     conn: Annotated[AsyncConnection, Depends(connection)],
     settings: Annotated[Settings, Depends(get_settings)],
-    engine: Literal["studio", "kokoro", "none"] = "studio",
+    engine: Literal["studio", "kokoro", "inworld", "none"] = "studio",
     part: int = 1,
 ) -> Any:
     """One file the phone keeps, so the lesson plays to the end with no network (app/

@@ -25,7 +25,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, Literal
 
-from app import kokoro_voice, tutor
+from app import inworld_voice, kokoro_voice, tutor
 from app.config import Settings, get_settings
 
 #: A spoken moment or stretch of talk. Well past the longest a lesson is written with, once
@@ -87,13 +87,18 @@ def write_atomically(path: Path, data: bytes) -> None:
     partial.replace(path)
 
 
-Engine = Literal["studio", "kokoro"]
+Engine = Literal["studio", "kokoro", "inworld"]
+#: The voices that keep each word's time beside the clip (the whiteboard reads them).
+TIMED: frozenset[str] = frozenset({"kokoro", "inworld"})
 
 
 def engine_for(asked: Engine, settings: Settings) -> Engine:
-    """The voice a request will get: Kokoro when asked for and on offer here, else studio."""
+    """The voice a request will get: Kokoro or Inworld when asked for and on offer here, else
+    studio."""
     if asked == "kokoro" and kokoro_voice.available(settings):
         return "kokoro"
+    if asked == "inworld" and inworld_voice.available(settings):
+        return "inworld"
     return "studio"
 
 
@@ -103,6 +108,11 @@ def path_for(line: str, settings: Settings, engine: Engine = "studio") -> Path:
         key = (
             f"kokoro|{settings.kokoro_model}|{settings.kokoro_voice}|{settings.kokoro_speed}"
             f"|{kokoro_voice.RECIPE}|{said}"
+        )
+    elif engine == "inworld":
+        key = (
+            f"inworld|{settings.inworld_model}|{settings.inworld_voice}"
+            f"|{inworld_voice.RECIPE}|{said}"
         )
     else:
         # Unchanged since before there were two voices, so every studio clip already kept
@@ -160,6 +170,19 @@ async def _made_by_kokoro(
     return cached
 
 
+async def _made_by_inworld(line: str, settings: Settings, cached: Path) -> Path | None:
+    said = tutor.for_the_voice(line)
+    if not said or len(said) > MAX_SPOKEN_CHARS:
+        return None
+    clip = await inworld_voice.synthesize(said, settings)
+    if clip is None:
+        return None
+    # The timings first: a clip found on disk is taken as finished, words and all.
+    write_atomically(words_path(cached), inworld_voice.dumps(clip))
+    write_atomically(cached, clip.mp3)
+    return cached
+
+
 async def voiced(
     line: str, settings: Settings, patient: bool = False, engine: Engine = "studio"
 ) -> Path | None:
@@ -176,6 +199,8 @@ async def voiced(
             return cached
         if engine == "kokoro":
             return await _made_by_kokoro(line, settings, cached, patient=patient)
+        if engine == "inworld":
+            return await _made_by_inworld(line, settings, cached)
         audio = await tutor.speak(line, settings, max_chars=MAX_SPOKEN_CHARS, patient=patient)
         if audio is None:
             return None
@@ -189,6 +214,8 @@ async def packaged(
     """The line's audio as a lesson package carries it: Kokoro's lighter copy, made again
     where the clip was kept before there were copies; the studio voice's clip as it is."""
     engine = engine_for(engine, settings)
+    if engine == "inworld":
+        return await voiced(line, settings, patient=patient, engine=engine)
     if engine != "kokoro":
         return await voiced(line, settings, patient=patient, engine=engine)
     cached = path_for(line, settings, engine)

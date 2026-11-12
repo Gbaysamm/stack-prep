@@ -996,7 +996,7 @@ export function Board({
     if (!whiteboard) return;
     for (let index = Math.max(0, shown - 1); index < Math.min(lines.length, shown + 2); index += 1) {
       const url = lines[index]?.voice;
-      if (!url || !url.includes("engine=kokoro") || wordsAsked.current.has(url)) continue;
+      if (!url || !/engine=(kokoro|inworld)/.test(url) || wordsAsked.current.has(url)) continue;
       wordsAsked.current.add(url);
       void api
         .lessonVoiceWords(url)

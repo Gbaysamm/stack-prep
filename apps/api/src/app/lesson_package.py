@@ -46,7 +46,7 @@ MAGIC = b"SPL1"
 #: Bumped when the file's layout changes, so every package is made again.
 FORMAT = "1"
 
-Voice = Literal["studio", "kokoro", "none"]
+Voice = Literal["studio", "kokoro", "inworld", "none"]
 
 
 class Built(BaseModel):
