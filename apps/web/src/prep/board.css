@@ -2000,3 +2000,173 @@
 .pb .pb-item:has(.op-limits:not(:has(.op-symbol))) {
   padding-top: 0.4em;
 }
+
+/* ---------------------------------------------------------------- the subtitle */
+/* What the coach is saying, as a film subtitle (founder, 12 Nov 2026: no card round it). No
+   box, no avatar, no "Coach · step 4 of 40" (the count is in the bar above): the sentence,
+   centred, over a fade of the board's own paper so the writing behind it never fights it. */
+.pb-coach.subtitle {
+  justify-content: center;
+  padding: 34px 0 2px;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: linear-gradient(to bottom, rgb(255 255 255 / 0), var(--pb-fade, var(--white)) 46%);
+}
+.pb.wb .pb-coach.subtitle {
+  --pb-fade: var(--wb-paper);
+}
+.pb-coach.subtitle .pb-avatar,
+.pb-coach.subtitle .pb-who {
+  display: none;
+}
+.pb-coach.subtitle .pb-coach-body {
+  flex: 0 1 auto;
+  max-width: 720px;
+  padding: 0;
+  text-align: center;
+}
+.pb-coach.subtitle .pb-caption {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--gray-900);
+  text-wrap: balance;
+}
+@media (max-width: 720px) {
+  .pb-coach.subtitle {
+    padding-top: 26px;
+  }
+  .pb-coach.subtitle .pb-caption {
+    font-size: 15px;
+  }
+}
+
+/* While the lesson is heard, no box: the buddy keeps its place on the right. */
+.pb-coach-gap {
+  flex: 1 1 auto;
+}
+
+/* ---------------------------------------------------------------- the timeline */
+/* The whole lesson as one line, a mark where each section starts; drag or tap to go there. */
+.pb .pb-timeline {
+  display: grid;
+  gap: 6px;
+  padding-top: 10px;
+}
+.pb-tl-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12.5px;
+  line-height: 1.2;
+}
+.pb-tl-where {
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 600;
+  color: var(--gray-700);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pb-tl-where.held {
+  color: var(--purple-700);
+}
+.pb-tl-count {
+  flex: none;
+  font-size: 11.5px;
+  color: var(--gray-500);
+}
+.pb-tl-track {
+  position: relative;
+  height: 22px;
+}
+/* The rail, the part played, and each section's mark, under a range input that takes the
+   touches: its own track is invisible, its thumb is the handle. */
+.pb-tl-track::before,
+.pb-tl-fill {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 999px;
+  pointer-events: none;
+}
+.pb-tl-track::before {
+  right: 0;
+  background: var(--gray-100);
+}
+.pb-tl-fill {
+  background: var(--purple-600);
+  transition: width 0.25s ease;
+}
+.pb-tl-mark,
+.pb-tl-ghost {
+  position: absolute;
+  top: 50%;
+  width: 2px;
+  height: 10px;
+  margin: -5px 0 0 -1px;
+  border-radius: 1px;
+  background: var(--gray-300);
+  pointer-events: none;
+}
+.pb-tl-mark.past {
+  background: var(--purple-300);
+}
+.pb-tl-ghost {
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  background: var(--purple-200);
+}
+.sj .pb-tl-track input[type='range'] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.sj .pb-tl-track input[type='range']::-webkit-slider-runnable-track {
+  height: 22px;
+  background: transparent;
+}
+.sj .pb-tl-track input[type='range']::-moz-range-track {
+  height: 22px;
+  background: transparent;
+}
+.sj .pb-tl-track input[type='range']::-webkit-slider-thumb {
+  width: 16px;
+  height: 16px;
+  margin-top: 3px;
+  border: 3px solid var(--white);
+  border-radius: 50%;
+  background: var(--purple-600);
+  box-shadow: 0 1px 4px rgba(31, 0, 80, 0.3);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.sj .pb-tl-track input[type='range']::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: 3px solid var(--white);
+  border-radius: 50%;
+  background: var(--purple-600);
+  box-shadow: 0 1px 4px rgba(31, 0, 80, 0.3);
+}
+.sj .pb-tl-track input[type='range']:focus-visible {
+  outline: 2px solid var(--purple-300);
+  outline-offset: 2px;
+  border-radius: 6px;
+}

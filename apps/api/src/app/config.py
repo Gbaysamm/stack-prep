@@ -88,6 +88,10 @@ class Settings(BaseSettings):
     kokoro_model: str = "kokoro-v1.0.onnx"
     kokoro_voice: str = "af_heart"
     kokoro_speed: float = Field(default=1.0, ge=0.5, le=2.0)
+    #: Make every bank lesson's package in the free voice after start-up, behind any student
+    #: waiting on a voice (app/lesson_package.py), so the first student to open one does not
+    #: wait for it to be voiced.
+    lesson_packages_warm: bool = True
 
     #: Outgoing email (password-reset codes). Empty host: nothing is sent, and outside
     #: production the code is written to the log instead, so it can be used locally.

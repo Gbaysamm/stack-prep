@@ -13,6 +13,54 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ---
 
+## 2026-11-12
+
+### Lessons: one download, kept on the phone; a timeline to move through; no caption box
+- **What:**
+  - A bank lesson now comes down as ONE file (its board, every line's voice, the voice's word
+    timings), with a progress bar ("Getting your lesson ready… 70%"), and is kept in the
+    browser's Cache Storage. Opened again, the phone only asks "is this still current?" (a
+    304, a few bytes); with no network the kept copy plays. Once downloaded, a lesson plays to
+    the end with no network at all.
+  - The roadmap fetches lessons ahead: every lesson stop not yet taken, and the next run's
+    subtopic while it is still weak (level 2 or below). Not on a "save data" connection.
+  - The free voice's clips go in at 32 kbps: a 40-line lesson is about 1.5 MB (it was about
+    4 MB as separate 64 kbps clips). The API makes every bank lesson's package in the free
+    voice after start-up, behind any student waiting on a voice (`LESSON_PACKAGES_WARM`).
+  - The board's caption box is gone while the lesson is heard: the student listens and
+    watches the writing. It comes back only where it is needed (no voice, read along; the
+    voice blocked; a tap to start; the coach answering a question).
+  - A timeline under the board: one mark where each section starts (Welcome, Objectives, each
+    term, Recap). Drag or tap to go to any point; it says where it will land while held.
+    "Replay this step" is now Back (the previous step).
+- **Why:** founder, 12 Nov 2026: a lesson fetched a line at a time stops dead on a weak
+  network and the student leaves; many students at once must not all hit that. The caption
+  pulled eyes off the board. Replay-this-step alone was too limiting.
+- **Where:** `apps/api/src/app/lesson_package.py` (the file format, building, warm-up),
+  `routers/roadmap.py` (`GET …/lessons/{subtopic}/package`, ETag/304), `voice_store.py`
+  (`packaged`, the lite copy), `kokoro_voice.py` (`LITE_KBPS`), `main.py` (start-up warm-up);
+  `apps/web/src/prep/lessonPackage.ts` (download, keep, unpack, fetch ahead),
+  `prep/pages/Lesson.tsx`, `prep/roadmapApi.ts` (`lessonsAhead`), `student/Board.tsx`
+  (`Timeline`, `seek`, the caption only when needed; the room under the board is now measured
+  from the coach's dock, which is always there), `prep/board.css`.
+- **Status:** done locally, tested (API 210, web 63; screenshots at 1440 and 390). Not
+  pushed. On a server, the first start-up after deploy voices the bank lessons once (the free
+  voice on the CPU took about 10 seconds a line here).
+
+### The voice reads plain-written maths properly
+- **What:** a coordinate written as plain text is said with its comma ("the point 5, 7" →
+  "the point 5 comma 7"; "(2, 4)" → "2 comma 4"; "A(1, -2)" → "A 1 comma minus 2"); a bracket
+  holding a sum is said as one ("3(2 + x)" → "3 times the bracket 2 plus x"; "f(3)" → "f of
+  3"); "$y$-intercept" no longer comes out as "y -intercept". Brackets in prose ("(1)", "(like
+  air)") are left alone.
+- **Why:** founder, 12 Nov 2026: a coordinate in an algebra lesson was heard as "2 to 4". 19
+  question-lesson lines said a point as "the point 5, 7" with no comma said.
+- **Where:** `apps/api/src/app/tutor.py` (`for_the_voice`, `_BARE_BRACKETS`, `_SAID_POINT`),
+  `tests/test_tutor.py`.
+- **Status:** done locally. Lines it changes get new audio when next played (their words
+  changed). The homepage showcase lessons are recorded files: they keep the old reading until
+  they are re-made (`scripts/showcase_lessons.py`).
+
 ## 2026-11-11
 
 ### Subtopic lesson bank: three pilot lessons, played on the board

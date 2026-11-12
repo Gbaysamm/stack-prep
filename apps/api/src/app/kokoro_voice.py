@@ -50,6 +50,9 @@ PAD_AFTER_S = 0.150
 #: Quieter than this is silence when trimming, as in SternHost's tts.mjs.
 SILENCE = 0.01
 MP3_KBPS = 64
+#: The copy a lesson package carries (app/lesson_package.py): half the weight, the same
+#: voice to a listener.
+LITE_KBPS = 32
 
 #: Punctuation and spaces in the phoneme stream: timed, but not a sound of any word.
 _NOT_A_SOUND = frozenset(" .,!?;:—…\"()“”-'")
@@ -67,6 +70,8 @@ class Clip:
     #: The model's own timed phoneme tokens, as said in the trimmed clip: kept beside it as the
     #: talking mouth's sounds (app/mouth_voice.py), so they are never made again.
     tokens: list[tuple[str, float, float]] = field(default_factory=list)
+    #: The same clip at `LITE_KBPS`, for lesson packages.
+    lite: bytes = b""
 
     def timings(self) -> dict[str, Any]:
         return {
@@ -156,13 +161,13 @@ def trim(audio: Any, sample_rate: int = SAMPLE_RATE) -> tuple[Any, float]:
     return cut, PAD_BEFORE_S - first / sample_rate
 
 
-def to_mp3(audio: Any, sample_rate: int = SAMPLE_RATE) -> bytes:
+def to_mp3(audio: Any, sample_rate: int = SAMPLE_RATE, kbps: int = MP3_KBPS) -> bytes:
     import lameenc
     import numpy as np
 
     pcm = (np.clip(audio, -1.0, 1.0) * 32767).astype("<i2").tobytes()
     encoder = lameenc.Encoder()
-    encoder.set_bit_rate(MP3_KBPS)
+    encoder.set_bit_rate(kbps)
     encoder.set_in_sample_rate(sample_rate)
     encoder.set_channels(1)
     encoder.set_quality(2)
@@ -308,7 +313,14 @@ def synthesize(said: str, settings: Settings) -> Clip | None:
             estimated = not placed
             if estimated:
                 placed = estimated_words(words, PAD_BEFORE_S, duration - PAD_AFTER_S)
-            return Clip(to_mp3(audio, rate), duration, placed, estimated, shifted)
+            return Clip(
+                to_mp3(audio, rate),
+                duration,
+                placed,
+                estimated,
+                shifted,
+                lite=to_mp3(audio, rate, LITE_KBPS),
+            )
     except Exception as failed:
         _log.warning("kokoro failed: %s: %s", type(failed).__name__, failed)
         return None

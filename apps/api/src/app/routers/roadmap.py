@@ -899,7 +899,7 @@ async def _bank_lesson(conn: AsyncConnection, subtopic_id: UUID) -> dict[str, An
 
 
 async def _bank_beats(
-    conn: AsyncConnection, student_id: UUID, subtopic_id: UUID
+    conn: AsyncConnection, subtopic_id: UUID
 ) -> tuple[list[Any], list[Any]] | None:
     """The lesson's beats and its doodles: the same lesson for every student (the run's own
     board already went over each question they missed)."""
@@ -935,7 +935,7 @@ async def lesson_board(
     from app.routers.practice import LessonBeat, NarratedLesson
 
     await require_student(request, conn, student_id)
-    found = await _bank_beats(conn, student_id, subtopic_id)
+    found = await _bank_beats(conn, subtopic_id)
     if found is None:
         raise HTTPException(status_code=404, detail="No written lesson for this topic yet.")
     beats, doodles = found
@@ -968,7 +968,7 @@ async def lesson_board(
 
 
 async def _said(conn: AsyncConnection, student_id: UUID, subtopic_id: UUID, beat: int) -> str:
-    found = await _bank_beats(conn, student_id, subtopic_id)
+    found = await _bank_beats(conn, subtopic_id)
     if found is None or not 0 <= beat < len(found[0]):
         raise HTTPException(status_code=404, detail="no such beat")
     return str(found[0][beat].say)
@@ -1025,3 +1025,50 @@ async def lesson_voice_words(
     if found is None:
         raise HTTPException(status_code=404, detail="no word timings for this beat")
     return dict(found)
+
+
+@router.get(
+    "/{student_id}/lessons/{subtopic_id}/package",
+    summary="The subtopic's whole lesson in one download: its board, voice and word timings",
+)
+async def lesson_package(
+    student_id: UUID,
+    subtopic_id: UUID,
+    request: Request,
+    conn: Annotated[AsyncConnection, Depends(connection)],
+    settings: Annotated[Settings, Depends(get_settings)],
+    engine: Literal["studio", "kokoro", "none"] = "studio",
+) -> Any:
+    """One file the phone keeps, so the lesson plays to the end with no network (app/
+    lesson_package.py). 304 when the phone already has this version (`If-None-Match`).
+    Without the voice on the student's plan, the package is the board alone."""
+    from fastapi.responses import Response
+
+    from app import lesson_package
+
+    await require_student(request, conn, student_id)
+    voice: lesson_package.Voice = engine
+    if voice != "none":
+        studio_off = voice_store.engine_for(voice, settings) == "studio" and not (
+            settings.ai_speak and settings.openai_api_key
+        )
+        if studio_off or not (await premium.standing(conn, student_id)).allowance.voice:
+            voice = "none"
+    found = await lesson_package.describe(conn, subtopic_id, settings, voice)
+    if found is None:
+        raise HTTPException(status_code=404, detail="No written lesson for this topic yet.")
+    etag = f'"{found.version}"'
+    caching = {"ETag": etag, "Cache-Control": "private, no-cache"}
+    if request.headers.get("if-none-match") == etag:
+        return Response(status_code=304, headers=caching)
+    built = await lesson_package.build(conn, subtopic_id, settings, voice)
+    if built is None:
+        raise HTTPException(status_code=404, detail="No written lesson for this topic yet.")
+    return Response(
+        content=built.data,
+        media_type="application/octet-stream",
+        headers={
+            **(caching if built.complete else {"Cache-Control": "no-store"}),
+            "X-Lesson-Complete": "1" if built.complete else "0",
+        },
+    )

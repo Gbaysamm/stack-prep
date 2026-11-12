@@ -729,6 +729,8 @@ export interface Features {
  * voice (or silence, if that is off too), so the board needs no fallback of its own.
  */
 export function withVoice(url: string, voice: BoardVoice): string {
+  // No voice, or a clip already in memory (a lesson package, prep/lessonPackage.ts): as it is.
+  if (!url || url.startsWith('blob:')) return url;
   return voice === 'kokoro' ? `${url}${url.includes('?') ? '&' : '?'}engine=kokoro` : url;
 }
 

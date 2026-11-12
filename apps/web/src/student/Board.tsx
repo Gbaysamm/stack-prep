@@ -927,7 +927,7 @@ export function Board({
       if (!clip || fresh) {
         clip?.pause();
         // A second try asks again rather than replaying the browser's cached failure.
-        clip = new Audio(fresh ? `${url}${url.includes("?") ? "&" : "?"}try=${Date.now()}` : url);
+        clip = new Audio(fresh && !url.startsWith("blob:") ? `${url}${url.includes("?") ? "&" : "?"}try=${Date.now()}` : url);
         clip.preload = "auto";
         clips.current.set(index, clip);
       }
@@ -1335,6 +1335,31 @@ export function Board({
   }, [keep, rewind]);
 
   const finished = shown >= lines.length;
+  /** Go to any step of the lesson, from the timeline or Back: the board shows everything up
+   *  to it, written, and the step is said from its start. The step already on is said again. */
+  const seek = (target: number) => {
+    const to = Math.max(1, Math.min(lines.length, target));
+    resume();
+    following.current = true;
+    narrating.current = null;
+    setPaused(false);
+    if (to === shown) setReplayed((count) => count + 1);
+    else setShown(to);
+    // Once the board has redrawn: the step gone to sits just above the dock, the writing
+    // before it above that. Going back, that line was already seen, so the usual follow (which
+    // only reaches for new writing) would leave the board scrolled where it was.
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        const ink = inkRef.current;
+        const written = sheetRef.current?.querySelectorAll<HTMLElement>(".pb-line");
+        const line = written?.[written.length - 1];
+        if (!ink || !line) return;
+        newest.current = line;
+        const floor = ink.getBoundingClientRect().bottom - coachRoom.current - FOLLOW_GAP;
+        ink.scrollTo({ top: Math.max(0, ink.scrollTop + line.getBoundingClientRect().bottom - floor) });
+      }),
+    );
+  };
   const caption = finished
     ? "That is the whole working. This one goes back in the pile — you will meet the same ground again, with a different question."
     : needsTap
@@ -1931,6 +1956,14 @@ export function Board({
   const progress = lines.length ? Math.min(1, shown / lines.length) : 0;
   const showCaption = played === 0;
   const showTranscript = voiceBlocked && played > 0;
+  // THE BOARD AND THE VOICE, NOTHING ELSE (founder, 12 Nov 2026). While the lesson is heard,
+  // the sentence is not also written under the board: the student listens and watches the
+  // writing, and a caption pulls their eyes off it. The box comes back where it is needed:
+  // no voice (read along), the voice blocked, getting ready, a tap to start, or the coach
+  // answering a question.
+  const heard = lines.some((line) => line.voice) && !silent && !voiceBlocked;
+  const coachShown =
+    !heard || waiting || turn !== null || played > 0 || needsTap || preparing || gettingReady || finished;
   const nextLabel = finished ? "Done" : "Next step";
 
   return (
@@ -2299,13 +2332,17 @@ export function Board({
           a lesson lost to a muted phone, a failed call or a student who cannot hear it, so
           where there is no audio the sentence is written out instead.
         */}
-        <div className="pb-coachdock">
+        {/* Measured for the room it takes over the board: the coach's box when it is up, else
+            just the buddy (the box is gone while the lesson is heard). */}
+        <div className="pb-coachdock" ref={coachRef}>
           <div className="pb-col">
+            {coachShown ? (
             <div
-              ref={coachRef}
               className={`pb-coach ${paused ? "paused" : ""} ${
                 talking ? "talking" : ""
-              } ${showCaption || showTranscript ? "" : "slim"}`}
+              } ${showCaption || showTranscript ? "" : "slim"} ${
+                showCaption && !showTranscript ? "subtitle" : ""
+              }`}
               aria-live="polite"
             >
               <span className="pb-avatar">
@@ -2344,6 +2381,9 @@ export function Board({
                 ) : null}
               </div>
             </div>
+            ) : (
+              <span className="pb-coach-gap" />
+            )}
             {/* The coach's buddy, reacting to the lesson as it goes (Buddy.tsx). */}
             <Buddy
               moment={shown > 0 ? lines[shown - 1] : undefined}
@@ -2357,21 +2397,23 @@ export function Board({
       </main>
 
       <footer className="pb-dock">
+        {lines.length > 1 ? (
+          <Timeline
+            lines={lines}
+            shown={shown}
+            onSeek={seek}
+          />
+        ) : null}
         <div className={`pb-col pb-dock-in ${noAsk ? "no-ask" : ""}`}>
           <div className="pb-ctl" role="group" aria-label="Lesson controls">
             <button
               type="button"
-              title="Replay this step"
-              aria-label="Replay this step"
-              onClick={() => {
-                resume();
-                following.current = true;
-                narrating.current = null;
-                setReplayed((count) => count + 1);
-              }}
-              disabled={shown === 0}
+              title="Previous step"
+              aria-label="Previous step"
+              onClick={() => seek(shown - 1)}
+              disabled={shown <= 1}
             >
-              <IconReplay />
+              <IconBack />
             </button>
             <button
               type="button"
@@ -5545,10 +5587,10 @@ const IconClose = icon(
     <path d="M18 6 6 18" />
   </>,
 );
-const IconReplay = icon(
+const IconBack = icon(
   <>
-    <path d="M3 12a9 9 0 1 0 3-6.7" />
-    <path d="M3 4v5h5" />
+    <path d="M19 12H5" />
+    <path d="m11 6-6 6 6 6" />
   </>,
 );
 const IconPlay = icon(
@@ -5567,6 +5609,77 @@ const IconNext = icon(
   </>,
 );
 const IconCheck = icon(<path d="m5 12.5 4.5 4.5L19 7.5" />);
+
+/**
+ * THE LESSON'S TIMELINE (founder, 12 Nov 2026: "no place to move the video to a specific point
+ * in time"). One mark where each section starts (Welcome, Objectives, each term, Recap). Drag or
+ * tap along it: while it is held it says where it will land; let go and the lesson goes there.
+ * The arrow keys step through it, Home and End go to the ends.
+ */
+function Timeline({
+  lines,
+  shown,
+  onSeek,
+}: {
+  lines: Entry[];
+  shown: number;
+  onSeek: (step: number) => void;
+}) {
+  const [held, setHeld] = useState<number | null>(null);
+  const total = lines.length;
+  const at = held ?? Math.max(1, shown);
+  const share = (step: number) => (total > 1 ? ((step - 1) / (total - 1)) * 100 : 0);
+  const sections = lines.flatMap((line, index) =>
+    line.section ? [{ step: index + 1, name: line.section }] : [],
+  );
+  const sectionOf = (step: number) =>
+    [...sections].reverse().find((section) => section.step <= step)?.name ?? null;
+  const name = sectionOf(at);
+  const commit = (step: number) => {
+    setHeld(null);
+    if (step !== shown) onSeek(step);
+  };
+  return (
+    <div className="pb-col pb-timeline">
+      <div className="pb-tl-head">
+        <span className={`pb-tl-where ${held !== null ? "held" : ""}`}>{name ?? "Lesson"}</span>
+        <span className="pb-tl-count sj-mono">
+          {at} / {total}
+        </span>
+      </div>
+      <div className="pb-tl-track">
+        <span className="pb-tl-fill" style={{ width: `${share(Math.max(1, shown))}%` }} />
+        {sections.map((section) => (
+          <span
+            key={section.step}
+            className={`pb-tl-mark ${section.step <= shown ? "past" : ""}`}
+            style={{ left: `${share(section.step)}%` }}
+            title={section.name}
+          />
+        ))}
+        {held !== null ? <span className="pb-tl-ghost" style={{ left: `${share(held)}%` }} /> : null}
+        <input
+          type="range"
+          min={1}
+          max={total}
+          step={1}
+          value={at}
+          aria-label="Go to a point in the lesson"
+          aria-valuetext={`${name ? `${name}, ` : ""}step ${at} of ${total}`}
+          onChange={(event) => {
+            const step = Number(event.target.value);
+            // A drag or a held key: show where it would land. A click, or a key let go,
+            // lands there (below).
+            setHeld(step);
+          }}
+          onPointerUp={(event) => commit(Number((event.target as HTMLInputElement).value))}
+          onKeyUp={(event) => commit(Number((event.target as HTMLInputElement).value))}
+          onBlur={() => setHeld(null)}
+        />
+      </div>
+    </div>
+  );
+}
 const IconMic = icon(
   <>
     <rect x="9" y="3" width="6" height="11" rx="3" />

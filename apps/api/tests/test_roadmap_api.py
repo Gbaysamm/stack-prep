@@ -179,3 +179,38 @@ def test_levels_follow_the_spec_mastery_bands() -> None:
 
     assert level_of(None, 0) == 0 and level_of(0.9, 2) == 0  # not enough answers yet
     assert [level_of(m, 5) for m in (0.2, 0.4, 0.65, 0.8, 0.9)] == [1, 2, 3, 4, 5]
+
+
+async def test_a_bank_lesson_comes_down_as_one_kept_file(client: httpx.AsyncClient) -> None:
+    """The whole lesson in one download (app/lesson_package.py); asked again with the version
+    the phone holds, a 304 and nothing more. Without a voice it is the board alone."""
+    import json
+    import struct
+
+    found = await _rows(
+        "SELECT c.subtopic_id, jsonb_array_length(c.moments) AS n FROM subtopic_lesson_content c"
+        " LIMIT 1"
+    )
+    if not found:
+        pytest.skip("no written lesson in the bank in this database")
+    subtopic, moments = str(found[0]["subtopic_id"]), int(found[0]["n"])
+    student = str((await client.post("/v1/dev/students", json={})).json()["student_id"])
+    url = f"/v1/roadmap/{student}/lessons/{subtopic}/package?engine=none"
+
+    first = await client.get(url)
+    assert first.status_code == 200
+    data = first.content
+    assert data[:4] == b"SPL1"
+    (size,) = struct.unpack(">I", data[4:8])
+    header = json.loads(data[8 : 8 + size])
+    assert header["engine"] == "none" and header["title"]
+    assert len(header["lesson"]["beats"]) == moments
+    assert header["clips"] == [None] * moments
+    assert first.headers["x-lesson-complete"] == "1"
+
+    again = await client.get(url, headers={"If-None-Match": first.headers["etag"]})
+    assert again.status_code == 304 and again.content == b""
+
+    nothing = "00000000-0000-0000-0000-000000000000"
+    missing = await client.get(f"/v1/roadmap/{student}/lessons/{nothing}/package?engine=none")
+    assert missing.status_code == 404

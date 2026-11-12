@@ -52,7 +52,19 @@ API_VERSION = "0.1.0"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    import asyncio
+
+    from app import lesson_package
+
+    settings = get_settings()
+    warming = (
+        asyncio.create_task(lesson_package.warm_all(settings))
+        if settings.lesson_packages_warm
+        else None
+    )
     yield
+    if warming is not None:
+        warming.cancel()
     await dispose_engine()
 
 

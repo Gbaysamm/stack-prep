@@ -115,6 +115,15 @@ def words_path(clip: Path) -> Path:
     return clip.with_name(f"{clip.stem}.words.json")
 
 
+#: How a package's copy of a Kokoro clip is made (kokoro_voice.LITE_KBPS); part of a package's
+#: version, so a change makes every package again.
+LITE_RECIPE = "lite-32k"
+
+
+def lite_path(clip: Path) -> Path:
+    return clip.with_name(f"{clip.stem}.lite.mp3")
+
+
 def timings(line: str, settings: Settings, engine: Engine = "studio") -> dict[str, Any] | None:
     """When each word of a voiced line is said, if that was kept. Only Kokoro keeps it."""
     found = words_path(path_for(line, settings, engine_for(engine, settings)))
@@ -145,6 +154,8 @@ async def _made_by_kokoro(
 
     # In a thread: its British sounds come from espeak (app/phonemes_rp.py).
     await asyncio.to_thread(mouth_voice.keep_kokoro_phones, cached, clip)
+    if clip.lite:
+        write_atomically(lite_path(cached), clip.lite)
     write_atomically(cached, clip.mp3)
     return cached
 
@@ -170,6 +181,26 @@ async def voiced(
             return None
         write_atomically(cached, audio)
         return cached
+
+
+async def packaged(
+    line: str, settings: Settings, engine: Engine, patient: bool = False
+) -> Path | None:
+    """The line's audio as a lesson package carries it: Kokoro's lighter copy, made again
+    where the clip was kept before there were copies; the studio voice's clip as it is."""
+    engine = engine_for(engine, settings)
+    if engine != "kokoro":
+        return await voiced(line, settings, patient=patient, engine=engine)
+    cached = path_for(line, settings, engine)
+    lite = lite_path(cached)
+    if lite.is_file():
+        return lite
+    async with making(cached.stem):
+        if not lite.is_file():
+            await _made_by_kokoro(line, settings, cached, patient=patient)
+    if lite.is_file():
+        return lite
+    return cached if cached.is_file() else None
 
 
 async def voice_all(
