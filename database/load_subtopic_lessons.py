@@ -136,9 +136,13 @@ def read_lesson(path: Path) -> dict[str, Any]:
 async def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="check the files, load nothing")
+    parser.add_argument(
+        "--file", help="only this lesson file (a writer checking theirs while others write)"
+    )
     parser.add_argument("--database-url", default=os.environ.get("DATABASE_URL", ""))
     args = parser.parse_args()
-    lessons = [read_lesson(path) for path in sorted(BANK.glob("*/*.yaml"))]
+    paths = [Path(args.file).resolve()] if args.file else sorted(BANK.glob("*/*.yaml"))
+    lessons = [read_lesson(path) for path in paths]
     print(f"{len(lessons)} subtopic lesson(s) checked.")
     if args.check:
         return
