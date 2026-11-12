@@ -54,7 +54,7 @@ import type {
   NarratedLesson,
   TutorReply,
 } from "./api.js";
-import { api, withVoice } from "./api.js";
+import { api, withVoice, type EarlierTurn } from "./api.js";
 import { useBoardPrefs } from "./boardPrefs.js";
 import { drawnMarks } from "./travel.js";
 import { BoardStyleSwitch, SectionHeading, Sparkle, WhiteboardFx } from "./Whiteboard.js";
@@ -341,7 +341,10 @@ export function Board({
   askLocked,
   noAsk = false,
   questionLabel = "The question",
+  loadEarlier,
 }: {
+  /** What the student asked the coach about this before, shown again (founder, 12 Nov 2026). */
+  loadEarlier?: () => Promise<EarlierTurn[]>;
   /** No ask box and nothing in its place: the controls stand alone (the public showcase). */
   noAsk?: boolean;
   /** The label over what is written at the top: a topic lesson says so, not "The question". */
@@ -434,6 +437,22 @@ export function Board({
   const [draft, setDraft] = useState("");
   //: On a phone the ask box is a floating chat, opened from its button (founder, 12 Nov 2026).
   const [askOpen, setAskOpen] = useState(false);
+  //: The kept conversation about this question, and whether its panel is open.
+  const [earlier, setEarlier] = useState<EarlierTurn[]>([]);
+  const [earlierOpen, setEarlierOpen] = useState(false);
+  // Once, when the board opens: the caller's function may be a new one on every render.
+  const earlierLoader = useRef(loadEarlier);
+  useEffect(() => {
+    const load = earlierLoader.current;
+    if (!load) return;
+    let live = true;
+    load()
+      .then((turns) => live && setEarlier(turns))
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, []);
   //: The words of what the coach says, under the board: off unless the student turns them on.
   const [captions, setCaptions] = useState(() => {
     try {
@@ -2409,6 +2428,34 @@ export function Board({
       </main>
 
       <footer className="pb-dock">
+        {earlier.length ? (
+          <div className="pb-col pb-earlier">
+            <button
+              type="button"
+              className="pb-earlier-toggle"
+              aria-expanded={earlierOpen}
+              onClick={() => setEarlierOpen((open) => !open)}
+            >
+              {earlierOpen ? "Hide" : "Show"} your earlier questions ({earlier.length})
+            </button>
+            {earlierOpen ? (
+              <div className="pb-earlier-list">
+                {earlier.map((turn, index) => (
+                  <div key={index} className="pb-earlier-turn">
+                    <p className="pb-earlier-me">{turn.asked}</p>
+                    <div className="pb-earlier-coach">
+                      {turn.lines.map((line, n) => (
+                        <p key={n} className={line.channel}>
+                          <Maths text={line.text} />
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
         {lines.length > 1 ? (
           <Timeline
             lines={lines}

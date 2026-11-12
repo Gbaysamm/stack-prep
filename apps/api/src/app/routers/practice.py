@@ -1505,13 +1505,14 @@ async def _figures(conn: AsyncConnection, version_id: UUID) -> list[tutor.Figure
 
 
 async def _prior_turns(
-    conn: AsyncConnection, session_id: UUID, version_id: UUID
+    conn: AsyncConnection, student_id: UUID, version_id: UUID
 ) -> list[tutor.Turn]:
-    """What has already been said about this question, in this sitting, oldest first.
+    """What this student has already been told about this question, oldest first.
 
-    Scoped to the one question and the one session on purpose. A conversation is about the
-    thing in front of you; carrying yesterday's exchange into today's board would put text
-    from another lesson into this packet without anyone choosing to.
+    THE CONVERSATION IS KEPT (founder, 12 Nov 2026). A student who comes back to a question
+    they missed, in this sitting or a later one (a comeback, a review), carries on the same
+    conversation: they see it again on the board, and the coach is sent it. Scoped to the one
+    question (its version) and the one student, so no other lesson's text enters the packet.
 
     Fallback turns are left out. They are what the student read when the coach could not
     answer, not something the coach said, and replaying them as its own words would have it
@@ -1521,11 +1522,11 @@ async def _prior_turns(
         conn,
         """
         SELECT asked, reply FROM tutor_turns
-        WHERE session_id = :session AND question_version_id = :version
+        WHERE student_id = :student AND question_version_id = :version
           AND source = 'model'
         ORDER BY asked_at
         """,
-        session=session_id,
+        student=student_id,
         version=version_id,
     )
     turns = [tutor.Turn(asked=str(row["asked"]), replied=str(row["reply"])) for row in rows]
@@ -1630,7 +1631,7 @@ async def _lesson_on_the_board(
         **await _record_in(conn, student_id, subtopic_id),
         history=await _practice_history(conn, student_id, subtopic_id, version_id),
         figures=await _figures(conn, version_id) if settings.ai_send_figures else [],
-        prior=await _prior_turns(conn, session_id, version_id),
+        prior=await _prior_turns(conn, student_id, version_id),
     )
 
 
@@ -1931,6 +1932,62 @@ class Heard(BaseModel):
     #: Put in the box for them to read and send, never sent on their behalf. Transcription
     #: gets things wrong, and a student should see the question before it becomes one.
     asked: str
+
+
+class ConversationLine(BaseModel):
+    #: "say" (what the coach said) or "board" (what it wrote up).
+    channel: str
+    text: str
+
+
+class ConversationTurn(BaseModel):
+    asked: str
+    lines: list[ConversationLine]
+
+
+class Conversation(BaseModel):
+    turns: list[ConversationTurn]
+
+
+@router.get(
+    "/{session_id}/conversation/{question_version_id}",
+    response_model=Conversation,
+    summary="What this student has asked the coach about this question before, and its replies",
+)
+async def conversation(
+    request: Request,
+    conn: Annotated[AsyncConnection, Depends(connection)],
+    session_id: UUID,
+    question_version_id: UUID,
+) -> Conversation:
+    """The kept conversation about one question (founder, 12 Nov 2026), in every sitting,
+    oldest first, so the board can show it again when the student comes back to it. Only the
+    student's own turns; drawings are left out (they belonged to that moment's board)."""
+    await require_session_owner(request, conn, session_id)
+    session = await _session(conn, session_id)
+    rows = await fetch_all(
+        conn,
+        """
+        SELECT asked, reply FROM tutor_turns
+        WHERE student_id = :student AND question_version_id = :version
+        ORDER BY asked_at
+        """,
+        student=session["student_id"],
+        version=question_version_id,
+    )
+    return Conversation(
+        turns=[
+            ConversationTurn(
+                asked=str(row["asked"]),
+                lines=[
+                    ConversationLine(channel=said.channel, text=said.text)
+                    for said in tutor.parse(str(row["reply"]))
+                    if said.channel in ("say", "board")
+                ],
+            )
+            for row in rows
+        ]
+    )
 
 
 @router.post(

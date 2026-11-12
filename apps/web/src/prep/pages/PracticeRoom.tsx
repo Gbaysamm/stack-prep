@@ -731,6 +731,9 @@ export function PracticeRoom() {
           }
           answerLine={`The answer is ${state.correct_option_key}.`}
           askLocked={premiumCoach ? undefined : <VoiceLocked />}
+          loadEarlier={() =>
+            api.practiceConversation(sessionId, question.question_version_id)
+          }
           onListen={
             micOpen
               ? (recording) =>
@@ -1396,6 +1399,7 @@ function ReviewBoard({
         }
         answerLine={`The answer is ${outcome.chose}.`}
         askLocked={premiumCoach ? undefined : <VoiceLocked />}
+        loadEarlier={() => api.practiceConversation(sessionId, version)}
         onListen={
           canSpeak
             ? (recording) => api.practiceListen(sessionId, version, recording)

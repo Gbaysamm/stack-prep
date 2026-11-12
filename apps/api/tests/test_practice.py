@@ -1038,10 +1038,11 @@ async def test_only_a_reviewed_image_is_sent_as_a_figure(
     assert figures[0].data_uri.startswith("data:image/png;base64,iVBOR")
 
 
-async def test_the_conversation_is_this_question_in_this_sitting(
+async def test_the_conversation_is_this_question_and_is_kept(
     client: httpx.AsyncClient, fixture: dict[str, str], tutor_settings: None
 ) -> None:
-    """Memory is scoped, and a fallback is not something the coach said.
+    """Memory is this student's talk about this question, in any sitting (founder, 12 Nov
+    2026), and a fallback is not something the coach said.
 
     Replaying a fallback as an assistant turn would have the coach building on an apology it
     never wrote. Replaying another question's turns would put text from a different lesson
@@ -1083,10 +1084,19 @@ async def test_the_conversation_is_this_question_in_this_sitting(
             )
         await conn.commit()
 
-        turns = await _prior_turns(conn, uuid.UUID(session), uuid.UUID(version))
+        turns = await _prior_turns(conn, uuid.UUID(fixture["student"]), uuid.UUID(version))
 
     assert [turn.asked for turn in turns] == ["first question", "second question"]
     assert [turn.replied for turn in turns] == ["first answer", "second answer"]
+
+    # The board shows it again: every turn the student read, fallbacks included.
+    shown = (await client.get(f"/v1/practice/{session}/conversation/{version}")).json()
+    assert [turn["asked"] for turn in shown["turns"]] == [
+        "first question",
+        "a turn the coach could not take",
+        "second question",
+    ]
+    assert shown["turns"][0]["lines"] == [{"channel": "say", "text": "first answer"}]
 
 
 # --- watching the coach write ----------------------------------------------------------

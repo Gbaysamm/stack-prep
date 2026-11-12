@@ -15,6 +15,17 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-12
 
+### The coach on a missed question keeps the conversation
+- **What:** the coach on a question's board is now sent everything this student asked it about
+  that question in any sitting (it was this sitting only), and the board shows those earlier
+  questions and replies again ("Show your earlier questions (n)") when the student comes back
+  to the question, e.g. as a comeback.
+- **Why:** founder, 12 Nov 2026: conversations are saved, seen again, and the coach has them.
+- **Where:** `apps/api/src/app/routers/practice.py` (`_prior_turns` by student, `GET
+  /v1/practice/{session}/conversation/{version}`), `apps/web/src/student/Board.tsx`
+  (`loadEarlier`, the panel), `PracticeRoom.tsx`, `board.css`, `tests/test_practice.py`.
+- **Status:** done locally; tested; screenshots at 1440 and 390. Not pushed.
+
 ### After the lesson: a rating, one or two problems, and the coach (with the talk kept)
 - **What:** when a subtopic lesson finishes, the student gets: "How well did you understand
   it?" (Not yet, Mostly, Got it); "Try it", the lesson's one or two short problems, answered by

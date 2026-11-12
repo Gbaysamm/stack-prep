@@ -728,6 +728,12 @@ export interface Features {
  * URLs are left as they were; where Kokoro is not offered the server answers with the studio
  * voice (or silence, if that is off too), so the board needs no fallback of its own.
  */
+/** One earlier question to the coach and its reply, as the board shows it again. */
+export interface EarlierTurn {
+  asked: string;
+  lines: { channel: 'say' | 'board'; text: string }[];
+}
+
 export function withVoice(url: string, voice: BoardVoice): string {
   // No voice, or a clip already in memory (a lesson package, prep/lessonPackage.ts): as it is.
   if (!url || url.startsWith('blob:')) return url;
@@ -950,6 +956,11 @@ export const api = {
       }),
     }),
 
+  /** What this student asked the coach about this question before, in any sitting. */
+  practiceConversation: (sessionId: string, questionVersionId: string) =>
+    call<{ turns: EarlierTurn[] }>(
+      `/v1/practice/${sessionId}/conversation/${questionVersionId}`,
+    ).then((found) => found.turns),
   /**
    * Send a spoken question to be turned into words.
    *
