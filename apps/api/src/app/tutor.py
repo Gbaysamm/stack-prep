@@ -1405,6 +1405,20 @@ _BARE_MATHS = re.compile(
     r"|\w+\^(?:\{[^{}]*\}|\w)"
 )
 
+#: A term in plain-written maths: a number or a single letter, maybe negative.
+_TERM = r"-?(?:\d+(?:\.\d+)?|[a-zA-Z])"
+#: Plain-written bracketed maths: a point "(2, -4)", or a bracket holding a sum or product,
+#: maybe after a number or a function letter ("3(2 + x)", "f(x + 1)") and maybe squared.
+_BARE_BRACKETS = re.compile(
+    rf"(?<![\w$])(?:\d+|[a-z])?\(\s*{_TERM}\s*,\s*{_TERM}\s*\)"
+    rf"|(?<![\w$])(?:\d+|[a-z])?\(\s*{_TERM}(?:\s*[-+*/=]\s*{_TERM})+\s*\)(?:\^\w)?"
+    rf"|(?<![\w$])[a-z]\(\s*{_TERM}\s*\)(?=[\s,.;:?!]|$)"
+    rf"|(?<=\b[A-Z])\(\s*{_TERM}\s*,\s*{_TERM}\s*\)"
+)
+#: "point 5, 7" or "points 0, 1" once read: a coordinate said without its brackets.
+_NUM = r"(-?\d+(?:\.\d+)?|minus \d+(?:\.\d+)?)"
+_SAID_POINT = re.compile(rf"\b(points?)\s+{_NUM},\s*{_NUM}\b")
+
 
 def for_the_voice(line: str) -> str:
     """A spoken line with its mathematics turned into words.
@@ -1417,7 +1431,18 @@ def for_the_voice(line: str) -> str:
     """
     if "$" not in line:
         line = _BARE_MATHS.sub(lambda m: f"${m.group(0)}$", line)
+    # Bracketed maths written as plain words, outside any $...$: a point "(2, 4)", a product
+    # "3(2 + x)", "f(3)". Read as maths, so the comma and the bracket are said (founder, 12 Nov
+    # 2026: a coordinate was heard as "2 to 4"). Brackets in prose ("(1)", "(see above)") stay.
+    line = "$".join(
+        part if index % 2 else _BARE_BRACKETS.sub(lambda m: f"${m.group(0)}$", part)
+        for index, part in enumerate(line.split("$"))
+    )
     spoken = speak_text(line)
+    # "the point 5, 7" in words: the comma is said, as a teacher reads a coordinate.
+    spoken = _SAID_POINT.sub(r"\1 \2 comma \3", spoken)
+    # "$y$-axis", "$x$-intercept" come out of the reader as "y -axis".
+    spoken = re.sub(r"\b([xyz]) -(?=[a-z])", r"\1-", spoken)
     spoken = spoken.replace("<", " is less than ").replace(">", " is greater than ")
     spoken = re.sub(r"[${}\\^]", " ", spoken)
     # English items mark the tested word as *word*; the voice says the word, not the stars.

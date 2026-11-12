@@ -348,6 +348,20 @@ def test_a_model_that_does_not_reason_is_not_sent_the_setting() -> None:
 # --- what the voice is given ------------------------------------------------------------
 
 
+def test_plain_written_maths_is_said_with_its_commas_and_brackets() -> None:
+    """A coordinate was heard as "2 to 4" (founder, 12 Nov 2026): the comma and the bracket
+    are said, and brackets in prose are left as they are."""
+    assert for_the_voice("The point (2, 4) lies on it.") == "The point 2 comma 4 lies on it."
+    assert for_the_voice("the point 5, 7 is on it") == "the point 5 comma 7 is on it"
+    assert for_the_voice("Plot A(1, -2).") == "Plot A 1 comma minus 2."
+    assert for_the_voice("Expand 3(2 + x).") == "Expand 3 times the bracket 2 plus x."
+    assert for_the_voice("Find f(3).") == "Find f of 3."
+    assert for_the_voice("the $y$-intercept") == "the y-intercept"
+    assert for_the_voice("So equate (2) and (1).") == "So equate (2) and (1)."
+    assert for_the_voice("Mixtures (like air) vary.") == "Mixtures (like air) vary."
+    assert for_the_voice("The pair is 5, 5.") == "The pair is 5, 5."
+
+
 def test_latex_in_a_spoken_line_is_turned_into_words() -> None:
     """The prompt says not to write LaTeX in a spoken line. This is for when it does anyway.
 
