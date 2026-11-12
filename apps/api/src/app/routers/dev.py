@@ -82,6 +82,15 @@ cleared_roadmaps AS (
 cleared_lessons AS (
     DELETE FROM subtopic_lessons WHERE student_id IN (SELECT id FROM doomed)
 ),
+cleared_lesson_ratings AS (
+    DELETE FROM lesson_ratings WHERE student_id IN (SELECT id FROM doomed)
+),
+cleared_lesson_answers AS (
+    DELETE FROM lesson_problem_attempts WHERE student_id IN (SELECT id FROM doomed)
+),
+cleared_lesson_asks AS (
+    DELETE FROM lesson_coach_turns WHERE student_id IN (SELECT id FROM doomed)
+),
 cleared_attempts AS (
     DELETE FROM attempts WHERE student_id IN (SELECT id FROM doomed)
 ),

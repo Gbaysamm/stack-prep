@@ -31,6 +31,7 @@ from app.routers import (
     curriculum,
     dev,
     health,
+    lesson_after,
     mock,
     mouth,
     pool,
@@ -84,6 +85,7 @@ def create_app() -> FastAPI:
         allow_headers=["content-type", "authorization"],
     )
     app.include_router(health.router)
+    app.include_router(lesson_after.router)
     app.include_router(accounts.router)
     app.include_router(admin.router)
     app.include_router(admin_ai.router)

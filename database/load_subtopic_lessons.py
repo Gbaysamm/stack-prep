@@ -39,6 +39,47 @@ ROOT = Path(__file__).resolve().parent.parent
 BANK = ROOT / "docs" / "lessons" / "subtopics"
 
 
+def read_problems(raw: object, where: str) -> list[dict[str, object]]:
+    """The one or two short problems tried after the lesson (subtopic-lesson-guide.md §9).
+
+    Each: `ask` (what is set, maths in $...$), `answer` (the expected answer, as a student
+    would type it), `accept` (other ways of writing it that are right), `working` (the steps,
+    shown once the student has tried) and `needs_working` (answered with a photo of the
+    working rather than a typed answer).
+    """
+    if raw is None:
+        return []
+    if not isinstance(raw, list) or len(raw) > 2:
+        raise SystemExit(f"{where}: problems is a list of one or two")
+    problems: list[dict[str, object]] = []
+    for n, item in enumerate(raw):
+        here = f"{where} problem {n}"
+        if not isinstance(item, dict):
+            raise SystemExit(f"{here}: a problem is a mapping")
+        ask, answer = item.get("ask"), item.get("answer")
+        if not isinstance(ask, str) or not ask.strip():
+            raise SystemExit(f"{here}: a problem needs `ask`")
+        if not isinstance(answer, (str, int, float)) or not str(answer).strip():
+            raise SystemExit(f"{here}: a problem needs `answer`")
+        accept = item.get("accept") or []
+        working = item.get("working") or []
+        answers_ok = all(isinstance(a, (str, int, float)) for a in accept)
+        if not isinstance(accept, list) or not answers_ok:
+            raise SystemExit(f"{here}: accept is a list of answers")
+        if not isinstance(working, list) or not all(isinstance(w, str) for w in working):
+            raise SystemExit(f"{here}: working is a list of lines")
+        problems.append(
+            {
+                "ask": ask.strip(),
+                "answer": str(answer).strip(),
+                "accept": [str(a).strip() for a in accept],
+                "working": [w.strip() for w in working],
+                "needs_working": bool(item.get("needs_working", False)),
+            }
+        )
+    return problems
+
+
 def read_lesson(path: Path) -> dict[str, Any]:
     """One lesson file, checked, as the row to store."""
     doc = yaml.safe_load(path.read_text(encoding="utf-8"))
@@ -87,6 +128,7 @@ def read_lesson(path: Path) -> dict[str, Any]:
         "subtopic_id": subtopic_id,
         "moments": clean,
         "doodles": doodles,
+        "problems": read_problems(doc.get("problems"), where),
         "file": where,
     }
 
@@ -114,15 +156,18 @@ async def main() -> None:
                     raise SystemExit(f"{lesson['file']}: no subtopic {lesson['subtopic_id']}")
                 await conn.execute(
                     """
-                    INSERT INTO subtopic_lesson_content (subtopic_id, moments, doodles, source_file)
-                    VALUES ($1, $2::jsonb, $3::jsonb, $4)
+                    INSERT INTO subtopic_lesson_content
+                      (subtopic_id, moments, doodles, problems, source_file)
+                    VALUES ($1, $2::jsonb, $3::jsonb, $4::jsonb, $5)
                     ON CONFLICT (subtopic_id) DO UPDATE
                       SET moments = EXCLUDED.moments, doodles = EXCLUDED.doodles,
+                          problems = EXCLUDED.problems,
                           source_file = EXCLUDED.source_file, updated_at = now()
                     """,
                     lesson["subtopic_id"],
                     json.dumps(lesson["moments"]),
                     json.dumps(lesson["doodles"]),
+                    json.dumps(lesson["problems"]),
                     lesson["file"],
                 )
         print(f"{len(lessons)} subtopic lesson(s) loaded.")

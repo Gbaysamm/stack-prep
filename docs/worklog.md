@@ -15,6 +15,26 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-12
 
+### After the lesson: a rating, one or two problems, and the coach (with the talk kept)
+- **What:** when a subtopic lesson finishes, the student gets: "How well did you understand
+  it?" (Not yet, Mostly, Got it); "Try it", the lesson's one or two short problems, answered by
+  typing (marked against the answer key, free) or with a photo of the working (marked by the
+  coach); and "Ask the coach", whose conversation is kept per student and lesson, shown again
+  when they come back (`/lesson/<subtopic>?after=1`), and sent with each new question so the
+  coach answers in its light. The answer and working of a problem are sent only once tried.
+  Lesson questions and photos come out of the same daily coach allowance as a run's.
+  Then Continue marks the lesson done; the run again is the roadmap's next stop.
+  Also: the lesson guide now asks for worked examples straight after each rule, the after-
+  lesson part, Nigerian-classroom content, and formulas written as formulas; and
+  `docs/lessons/sources.md` maps the Nigerian sources (JAMB/WAEC/NECO syllabuses, WAEC Chief
+  Examiner's reports, the textbooks JAMB recommends, lesson-note sites) with rules for writers.
+- **Why:** founder, 12 Nov 2026.
+- **Where:** migration 046; `apps/api/src/app/routers/lesson_after.py`, `lesson_coach.py`;
+  `database/load_subtopic_lessons.py` (`problems:`); `apps/web/src/prep/pages/LessonAfter.tsx`;
+  the Chemistry pilot's two problems; `docs/lessons/subtopic-lesson-guide.md`, `sources.md`.
+- **Status:** done locally; tested; screenshots at 1440 and 390. The coach's replies and photo
+  marking were not called locally (paid). Not pushed.
+
 ### A weak run puts its lesson next today, then the run again
 - **What:** when a run finishes below the 80% bar, today's plan gets the subtopic's lesson as
   the very next stop, and a run on the same subtopic after it: two separate stops. A run of

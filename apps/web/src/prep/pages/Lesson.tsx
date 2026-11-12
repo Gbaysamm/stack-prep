@@ -23,6 +23,7 @@ import { IconCheck } from "../icons.js";
 import { FocusShell } from "../shell.js";
 import { useLoad, usePageTitle, useStudent } from "../store.js";
 import { Button, Skeleton, cx } from "../ui.js";
+import { LessonAfter } from "./LessonAfter.js";
 import "./Lesson.css";
 
 /** The board is a large module and only a lesson needs it, so it loads when first opened. */
@@ -53,6 +54,12 @@ export function Lesson() {
   const student = useStudent();
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
+  // The board, then what comes after it (LessonAfter.tsx); `?after=1` opens straight on that,
+  // for a student coming back to their conversation with the coach.
+  const [stage, setStage] = useState<"board" | "after">(
+    search.get("after") === "1" ? "after" : "board",
+  );
+  const [watch, setWatch] = useState(0);
   // The written lesson, from the phone or downloaded whole; 'none': the bank has none yet.
   const [board, setBoard] = useState<LessonPackage | "none" | null>(null);
   const [progress, setProgress] = useState<number | null>(null);
@@ -105,12 +112,27 @@ export function Lesson() {
     }
   };
 
+  if (stage === "after" && board !== "none") {
+    return (
+      <LessonAfter
+        studentId={student.studentId}
+        subtopicId={subtopicId}
+        continuing={saving}
+        onContinue={() => void finish()}
+        onWatchAgain={() => {
+          setWatch((n) => n + 1);
+          setStage("board");
+        }}
+      />
+    );
+  }
   if (board && board !== "none") {
     const heard = board.engine !== "none";
     return (
       <div className="sj ls-board">
         <Suspense fallback={null}>
           <Board
+            key={watch}
             title={board.title}
             subtitle={`Lesson · ${board.subject}`}
             question={board.title}
@@ -128,7 +150,7 @@ export function Lesson() {
                 new Error("Asking during a lesson is not open yet."),
               )
             }
-            onDone={() => void finish()}
+            onDone={() => setStage("after")}
           />
         </Suspense>
       </div>

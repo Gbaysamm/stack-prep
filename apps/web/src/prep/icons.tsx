@@ -228,3 +228,9 @@ export const IconMegaphone = make(
     <path d="M8 15v3.5a1.5 1.5 0 0 0 3 0V16M19.5 9.5a3.5 3.5 0 0 1 0 5" />
   </>,
 );
+export const IconCamera = make(
+  <>
+    <path d="M4 8.5a2 2 0 0 1 2-2h2l1.5-2h5L16 6.5h2a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z" />
+    <circle cx="12" cy="12.5" r="3.5" />
+  </>,
+);
