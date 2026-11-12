@@ -176,6 +176,31 @@ export function cueSeconds(
 }
 
 /** How many times the run of `want` occurs in `heard`. */
+/**
+ * THE MARK ON ITS WORD (founder, 12 Nov 2026: marks lagged up to two seconds behind the word
+ * they belong to). A mark the lesson gave no cue for is cued on what it points at, where that
+ * is said in the moment: the number, "−4" said as "negative 4", or the short phrase itself.
+ * Nothing when it is not said (the mark then keeps its turn with the others).
+ */
+export function derivedCue(at: string | null | undefined, say: string): LessonCue | null {
+  if (!at) return null;
+  const heard = spokenWords(say);
+  const plain = at.replace(/\$/g, " ").replace(/[()[\]{}]/g, " ").trim();
+  const signed = (text: string) => text.replace(/^[−-]\s*/, "").trim();
+  const negative = /^[−-]/.test(plain);
+  const candidates = [
+    negative ? `negative ${signed(plain)}` : plain,
+    negative ? `minus ${signed(plain)}` : null,
+    plain.split(/[\s,;:=]+/).filter(Boolean)[0] ?? null,
+  ];
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    const want = spokenWords(candidate);
+    if (want.length && findRun(heard, want, 1) >= 0) return { word: candidate, nth: 1 };
+  }
+  return null;
+}
+
 function runCount(heard: string[], want: string[]): number {
   let count = 0;
   while (findRun(heard, want, count + 1) >= 0) count += 1;

@@ -63,6 +63,7 @@ import { BoardTuningControls, useAnimationRate, useBoardTuning } from "./BoardTu
 import { sharedAudioContext } from "./sfx.js";
 import {
   cueSeconds,
+  derivedCue,
   momentCues,
   setSpokenWords,
   spokenWordsFor,
@@ -564,8 +565,11 @@ export function Board({
           voice: withVoice(beat.voice_url, voice),
           step: beat.board_index !== null && !answer ? beat.board_index : null,
           answer,
-          // A `travel` is drawn as the arrow it rides (travel.ts).
-          point: drawnMarks(beat.point),
+          // A `travel` is drawn as the arrow it rides (travel.ts). A mark with no word of its
+          // own is cued on what it points at, where that is said (wordClock.ts, `derivedCue`).
+          point: drawnMarks(beat.point).map((point) =>
+            point.on || point.line == null ? point : { ...point, on: derivedCue(point.at, beat.say) },
+          ),
           showSketch:
             beat.show_sketch === true
               ? "sketch"
@@ -1797,6 +1801,37 @@ export function Board({
     newest.current = latest.closest<HTMLElement>(".pb-line, .pb-coachline") ?? latest;
     if (following.current) keepInView(newest.current);
   }, [inkTick, keepInView]);
+
+  // THE MARKED LINE IN SIGHT (founder, 12 Nov 2026). When the moment marks an earlier line that
+  // has scrolled out of view, the board scrolls back to it as the mark goes up, holds it there
+  // while it is drawn, then follows the writing again.
+  const shownMarked = useRef<string>("");
+  useEffect(() => {
+    const ink = inkRef.current;
+    const sheet = sheetRef.current;
+    const current = shown - 1;
+    if (!ink || !sheet || current < 0) return;
+    const live = markSets.find((set) => set.index === current && set.state === "live");
+    const earlier = (live?.points ?? [])
+      .map((point) => (point.line == null ? null : point.line < 0 ? current + point.line : point.line))
+      .filter((line): line is number => line !== null && line < current);
+    if (!earlier.length) return;
+    const key = `${current}:${earlier.join(",")}`;
+    if (shownMarked.current === key) return;
+    shownMarked.current = key;
+    const target = lineAt(sheet, Math.min(...earlier));
+    if (!target || inSight(target)) return;
+    const view = ink.getBoundingClientRect();
+    const box = target.getBoundingClientRect();
+    ink.scrollTo({
+      top: ink.scrollTop + box.top - view.top - view.height * 0.25,
+      behavior: stillMotion() ? "auto" : "smooth",
+    });
+    const back = window.setTimeout(() => {
+      if (following.current) keepInView(newest.current);
+    }, 2600 / speed);
+    return () => window.clearTimeout(back);
+  }, [markSets, shown, inSight, keepInView, speed]);
 
   // Whether the student has moved the board themselves. Only their own scrolling counts —
   // the board's smooth scrolling fires the same events and must not switch itself off.

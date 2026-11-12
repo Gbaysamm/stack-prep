@@ -15,6 +15,20 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-12
 
+### Marks land on their word, and the marked line is brought into sight
+- **What:** a mark the lesson gave no word cue for (most question lessons) is now cued on what
+  it points at, where that is said in the moment (the number; "−4" as "negative 4"; the short
+  phrase), so it is drawn as the word is spoken. Measured on the homepage maths lesson (UTME
+  2002 Q11): marks that started 0.5–1.7 s after their word now land on it. When a moment marks
+  an earlier line that has scrolled out of view, the board scrolls back to it while the mark
+  is drawn, then follows the writing again.
+- **Why:** founder, 12 Nov 2026: annotations lagged behind the voice, sometimes two steps, and
+  what they pointed at was off screen.
+- **Where:** `apps/web/src/student/wordClock.ts` (`derivedCue`), `student/Board.tsx` (cues on
+  every mark; the marked line in sight), `derivedCue.test.ts`.
+- **Status:** done locally, in the whiteboard style (lessons, the homepage). The classic style
+  does not time marks by words; not changed. Not pushed.
+
 ### Nothing written twice on the board
 - **What:** a subtopic lesson no longer shows its title in a box above the board (its first
   line already writes it), and on a question's board a line that only restates the question
