@@ -79,5 +79,12 @@ not repeat an earlier one: it may say "In the last lesson you met …" in one li
   "2³ × 2⁴"), never spelled out as separate words ("H two O"): the voice reads a formula as one
   thing when it is written as one. Nigerian place and food names go in the pronunciation list,
   not respelled in the script.
+- **Board lines are sentences:** each starts with a capital, as a teacher writes on the board
+  (maths, units and abbreviations such as "x = 4", "pH", "e.g." as they are).
+- **Open like a teacher** (founder, 12 Nov 2026): the welcome names the lesson once ("Today's
+  lesson is…"), never "lesson one of two" (the app shows that). The introduction explains
+  the big picture in plain words with the diagram coming in as it is said, built a piece at a
+  time with the talk; the objectives are one or two short lines. Never say the same thing
+  three times before teaching starts.
 - **Plain section titles:** "Welcome", "Objectives", "Element", "Compound", "Comparison",
   "JAMB traps", "Check yourself", "Recap".
