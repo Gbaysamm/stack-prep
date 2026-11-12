@@ -1415,6 +1415,18 @@ _BARE_BRACKETS = re.compile(
     rf"|(?<![\w$])[a-z]\(\s*{_TERM}\s*\)(?=[\s,.;:?!]|$)"
     rf"|(?<=\b[A-Z])\(\s*{_TERM}\s*,\s*{_TERM}\s*\)"
 )
+#: A Roman-numeral oxidation state written onto a name, as in carbon(IV) or iron(III).
+_ROMAN = {
+    "I": "one",
+    "II": "two",
+    "III": "three",
+    "IV": "four",
+    "V": "five",
+    "VI": "six",
+    "VII": "seven",
+    "VIII": "eight",
+}
+_OXIDATION = re.compile(r"\b([A-Za-z]+)\((VIII|VII|VI|IV|V|III|II|I)\)")
 #: "point 5, 7" or "points 0, 1" once read: a coordinate said without its brackets.
 _NUM = r"(-?\d+(?:\.\d+)?|minus \d+(?:\.\d+)?)"
 _SAID_POINT = re.compile(rf"\b(points?)\s+{_NUM},\s*{_NUM}\b")
@@ -1438,6 +1450,9 @@ def for_the_voice(line: str) -> str:
         part if index % 2 else _BARE_BRACKETS.sub(lambda m: f"${m.group(0)}$", part)
         for index, part in enumerate(line.split("$"))
     )
+    # An oxidation state as Nigerian classrooms say it: "carbon(IV) oxide" is "carbon four
+    # oxide", "iron(II)" is "iron two". Only a numeral in brackets straight after a word.
+    line = _OXIDATION.sub(lambda m: f"{m.group(1)} {_ROMAN[m.group(2)]}", line)
     spoken = speak_text(line)
     # "the point 5, 7" in words: the comma is said, as a teacher reads a coordinate.
     spoken = _SAID_POINT.sub(r"\1 \2 comma \3", spoken)

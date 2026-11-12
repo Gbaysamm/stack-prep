@@ -348,6 +348,14 @@ def test_a_model_that_does_not_reason_is_not_sent_the_setting() -> None:
 # --- what the voice is given ------------------------------------------------------------
 
 
+def test_an_oxidation_state_is_said_the_nigerian_way() -> None:
+    """carbon(IV) oxide is "carbon four oxide" in a Nigerian classroom (sources.md)."""
+    assert for_the_voice("Carbon(IV) oxide.") == "Carbon four oxide."
+    assert for_the_voice("tetraoxosulphate(VI) acid") == "tetraoxosulphate six acid"
+    assert for_the_voice("iron(III) oxide") == "iron three oxide"
+    assert for_the_voice("World War II") == "World War II"
+
+
 def test_plain_written_maths_is_said_with_its_commas_and_brackets() -> None:
     """A coordinate was heard as "2 to 4" (founder, 12 Nov 2026): the comma and the bracket
     are said, and brackets in prose are left as they are."""
