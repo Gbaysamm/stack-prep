@@ -91,6 +91,11 @@ def read_lesson(path: Path) -> dict[str, Any]:
     if not isinstance(moments, list) or not moments:
         raise SystemExit(f"{where}: a lesson needs moments")
     slug = path.stem
+    # One of a subtopic's several lessons (<slug>_2.yaml, part: 2) draws from the subtopic's
+    # shared doodles, sub_<slug>_x.svg.
+    split = isinstance(doc.get("part"), int) and slug.endswith(f"_{doc['part']}")
+    if split:
+        slug = slug[: -len(f"_{doc['part']}")]
     doodles = read_subtopic_doodles(path.parent / "doodles", slug)
     book = DoodleBook(library_names(), doodles, SUBTOPIC, SUBTOPIC)
     diagrams = DiagramBook()
@@ -123,7 +128,9 @@ def read_lesson(path: Path) -> dict[str, Any]:
         entry.update(drawing)
         attach_cues(entry, cues)
         clean.append(entry)
-    check_all_used(doodles, clean, where)
+    if not split:
+        # A one-lesson subtopic uses every doodle drawn for it; split lessons share theirs.
+        check_all_used(doodles, clean, where)
     part = doc.get("part", 1)
     if not isinstance(part, int) or part < 1:
         raise SystemExit(f"{where}: part is a whole number from 1")
