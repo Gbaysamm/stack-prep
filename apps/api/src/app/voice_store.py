@@ -94,10 +94,10 @@ TIMED: frozenset[str] = frozenset({"kokoro", "inworld"})
 
 def engine_for(asked: Engine, settings: Settings) -> Engine:
     """The voice a request will get: Kokoro or Inworld when asked for and on offer here, else
-    studio."""
+    studio (also while Inworld is refusing the account: inworld_voice.refusing)."""
     if asked == "kokoro" and kokoro_voice.available(settings):
         return "kokoro"
-    if asked == "inworld" and inworld_voice.available(settings):
+    if asked == "inworld" and inworld_voice.available(settings) and not inworld_voice.refusing():
         return "inworld"
     return "studio"
 

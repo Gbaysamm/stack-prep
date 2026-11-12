@@ -14,6 +14,7 @@ from __future__ import annotations
 import base64
 import json
 import logging
+import time
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -27,6 +28,24 @@ URL = "https://api.inworld.ai/tts/v1/voice"
 #: Bumped when how a clip is asked for changes, so a kept clip is never one made another way.
 RECIPE = "mp3-24k-48kbps|words"
 TIMEOUT_SECONDS = 30.0
+#: How long an account refusal (no credit left, a wrong key) is believed before asking again.
+REFUSAL_SECONDS = 300.0
+#: An account refusal answers 401, 402 or 403 for every line, not just one.
+_ACCOUNT_REFUSALS = frozenset({401, 402, 403})
+_refused_until = 0.0
+
+
+def refusing() -> bool:
+    """True for a few minutes after Inworld refused the account (founder, 12 Nov 2026: with
+    the credit used up every line failed one by one, so no lesson was ever whole, kept, or
+    quick to open). Meanwhile the lines go to the studio voice instead (voice_store.engine_for)."""
+    return time.monotonic() < _refused_until
+
+
+def _refused(status: int) -> None:
+    global _refused_until
+    if status in _ACCOUNT_REFUSALS:
+        _refused_until = time.monotonic() + REFUSAL_SECONDS
 
 
 def available(settings: Settings) -> bool:
@@ -70,7 +89,7 @@ def words_from(alignment: dict[str, Any]) -> list[dict[str, Any]]:
 async def synthesize(said: str, settings: Settings) -> Clip | None:
     """The line spoken by the configured Inworld voice, with its word timings. None on any
     failure: the caller treats it as no voice, and the board reads the line along instead."""
-    if not said.strip() or not available(settings):
+    if not said.strip() or not available(settings) or refusing():
         return None
     body = {
         "text": said,
@@ -88,6 +107,7 @@ async def synthesize(said: str, settings: Settings) -> Clip | None:
             response = await client.post(URL, json=body, headers=headers)
         if response.status_code != 200:
             _log.warning("inworld refused: %s %s", response.status_code, response.text[:200])
+            _refused(response.status_code)
             return None
         reply = response.json()
         audio = base64.b64decode(reply["audioContent"])

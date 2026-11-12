@@ -27,3 +27,17 @@ def test_without_a_key_the_studio_voice_answers() -> None:
     assert voice_store.engine_for("inworld", on) == "inworld"
     # Its clips are kept apart from the other voices'.
     assert voice_store.path_for("Hello.", on, "inworld") != voice_store.path_for("Hello.", on)
+
+
+def test_a_refused_account_sends_lessons_to_the_studio_voice(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    """No credit left: every line would fail, so no lesson is ever whole or kept. For a few
+    minutes after the refusal the studio voice answers instead; a one-line failure does not."""
+    on = Settings(inworld_api_key="abc")
+    monkeypatch.setattr(inworld_voice, "_refused_until", 0.0)
+    inworld_voice._refused(500)
+    assert voice_store.engine_for("inworld", on) == "inworld"
+    inworld_voice._refused(402)
+    assert inworld_voice.refusing()
+    assert voice_store.engine_for("inworld", on) == "studio"
+    monkeypatch.setattr(inworld_voice, "_refused_until", 0.0)
+    assert voice_store.engine_for("inworld", on) == "inworld"

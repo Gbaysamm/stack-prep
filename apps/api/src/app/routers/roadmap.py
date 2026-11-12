@@ -1236,6 +1236,8 @@ async def lesson_package(
     built = await lesson_package.build(conn, subtopic_id, settings, voice, part=part)
     if built is None:
         raise HTTPException(status_code=404, detail="No written lesson for this topic yet.")
+    # The version built, which differs from the one asked about when the voice fell back.
+    caching["ETag"] = f'"{built.version}"'
     return Response(
         content=built.data,
         media_type="application/octet-stream",

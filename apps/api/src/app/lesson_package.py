@@ -37,7 +37,7 @@ from uuid import UUID
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import voice_store
+from app import inworld_voice, voice_store
 from app.config import Settings
 
 _log = logging.getLogger(__name__)
@@ -193,12 +193,17 @@ async def build(
     async with voice_store.making(f"package-{version}"):
         if kept.is_file():
             return Built(version=version, data=kept.read_bytes(), complete=True)
-        if voice == "studio":
-            # The hosted voice answers several at once: the lines are made four at a time
-            # rather than one after another while the first student waits. (Kokoro runs one
-            # line at a time on this server whatever is asked: voice_store._kokoro_turn.)
+        if voice in ("studio", "inworld"):
+            # The hosted voices answer several at once: the lines are made six at a time
+            # rather than one after another while the first student waits (founder, 12 Nov
+            # 2026: a lesson took most of a minute to open after its words changed). Kokoro
+            # runs one line at a time on this server whatever is asked: voice_store._kokoro_turn.
             said_lines = [str(beat.say).strip() for beat in beats if str(beat.say).strip()]
-            await voice_store.voice_all(said_lines, settings, at_once=4, engine="studio")
+            await voice_store.voice_all(said_lines, settings, at_once=6, engine=voice)
+            if voice == "inworld" and inworld_voice.refusing():
+                # The account was refused part way (no credit left): the whole lesson in the
+                # studio voice instead, complete and kept, rather than half voiced every time.
+                return await build(conn, subtopic_id, settings, "studio", patient, part)
         clips: list[dict[str, Any] | None] = []
         audio = bytearray()
         complete = True

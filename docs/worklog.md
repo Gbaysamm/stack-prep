@@ -15,6 +15,29 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-12
 
+### Lessons open fast on a refresh; no credit on Inworld no longer breaks them
+- **What:** three fixes to the lesson download.
+  1. When Inworld refuses the account (401/402/403: no credit left, a wrong key), the API
+     remembers it for five minutes (`inworld_voice.refusing`) and the lesson is made in the
+     studio voice instead, whole, so it is kept on the server and the phone. Before, every
+     line failed one by one, the lesson was never complete, never kept, and each refresh
+     tried again (117 s for one lesson).
+  2. The hosted voices (Inworld, studio) make a lesson's lines six at a time, not one after
+     another (`lesson_package.build`).
+  3. The phone plays its kept copy at once when the server takes more than 1.2 s to say
+     whether it is current; a newer version downloads in the background for next time
+     (`lessonPackage.ts`). The route's ETag is now the version actually built.
+- **Why:** founder, 12 Nov 2026: "Having this load every time I refresh is annoying… as if
+  it's generating from scratch every time." Found: the Inworld account has run out of credit
+  (402 on every line), and today's wording edits had changed every clip, so each lesson was
+  being voiced afresh, one line at a time, and failing.
+- **Where:** `apps/api/src/app/inworld_voice.py`, `voice_store.py`, `lesson_package.py`,
+  `routers/roadmap.py`, `apps/web/src/prep/lessonPackage.ts`, `tests/test_inworld_voice.py`.
+  Measured: a kept lesson opens in about 2 s, refreshes 304; a lesson with no voice yet took
+  45 s once (studio fallback), then 1–2 s.
+- **Status:** done locally. Inworld needs credit added for Emeka's voice to come back; until
+  then lessons play in the studio voice.
+
 ### Every lesson line read and edited for language
 - **What:** an editor read every spoken and written line of all 20 lesson files (one per
   subtopic, `docs/lessons/editor-brief.md`): ~440 lines changed. Spoken sentences complete,

@@ -165,6 +165,33 @@ export async function getLessonPackage(
   const kept = cache
     ? await cache.match(url).catch(() => undefined)
     : undefined;
+  if (kept) {
+    // The phone has a copy: ask the server whether it is current, but never keep the student
+    // waiting on that answer (founder, 12 Nov 2026: a refresh felt like the lesson was made
+    // from scratch). A quick 304 plays the copy; a slow or new answer is downloaded in the
+    // background and kept for next time, while the copy plays now.
+    const fresh = download(url, cache, kept, undefined);
+    const quick = await Promise.race([
+      fresh.then(
+        (lesson) => lesson,
+        () => null,
+      ),
+      wait(1200).then(() => null),
+    ]);
+    if (quick) return quick;
+    fresh.catch(() => undefined);
+    return unpack(await kept.clone().arrayBuffer());
+  }
+  return download(url, cache, undefined, onProgress);
+}
+
+/** Download the lesson (tried three times, waiting longer each time) and keep it whole. */
+async function download(
+  url: string,
+  cache: Cache | null,
+  kept: Response | undefined,
+  onProgress?: (share: number) => void,
+): Promise<LessonPackage> {
   let lastError: unknown = null;
   for (const pause of [0, 1500, 4000]) {
     if (pause) await wait(pause);
@@ -178,7 +205,7 @@ export async function getLessonPackage(
       });
     } catch (failed) {
       // No network: the kept copy plays as it is.
-      if (kept) return unpack(await kept.arrayBuffer());
+      if (kept) return unpack(await kept.clone().arrayBuffer());
       lastError = failed;
       continue;
     }
@@ -186,7 +213,7 @@ export async function getLessonPackage(
       return unpack(await kept.clone().arrayBuffer());
     if (response.status === 404) throw new LessonMissing();
     if (!response.ok) {
-      if (kept) return unpack(await kept.arrayBuffer());
+      if (kept) return unpack(await kept.clone().arrayBuffer());
       lastError = new Error(`The lesson did not load (${response.status}).`);
       if (response.status < 500) break;
       continue;
