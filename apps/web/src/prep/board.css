@@ -1054,18 +1054,8 @@
 .sj .pb-ctl button:disabled {
   opacity: 0.35;
 }
-.sj .pb-ctl button.next {
-  color: var(--white);
-  background: var(--purple-600);
-  box-shadow: 0 3px 0 var(--purple-700);
-}
-.sj .pb-ctl button.next:hover:not(:disabled) {
-  background: var(--purple-500);
-}
-.sj .pb-ctl button.next:active:not(:disabled) {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 var(--purple-700);
-}
+/* Next is one control among the others, not the loudest thing on the screen (founder, 12 Nov
+   2026). Only the last step's Done stands out, as the way off the board. */
 .sj .pb-ctl button.next.done {
   color: var(--ink-900);
   background: var(--green-400);
@@ -2045,9 +2035,10 @@
   }
 }
 
-/* While the lesson is heard, no box: the buddy keeps its place on the right. */
-.pb-coach-gap {
-  flex: 1 1 auto;
+/* The buddy beside the controls, not over the board. */
+.pb .pb-dock-in > .pb-buddy {
+  align-self: center;
+  margin: 0;
 }
 
 /* ---------------------------------------------------------------- the timeline */
@@ -2169,4 +2160,129 @@
   outline: 2px solid var(--purple-300);
   outline-offset: 2px;
   border-radius: 6px;
+}
+
+/* ---------------------------------------------------------------- a phone's dock */
+/* Desktop: the ask box beside the controls, as before; no chat button, no bubble. */
+.pb-askfab,
+.pb-ask-close,
+.pb-tl-bubble {
+  display: none;
+}
+.pb .pb-dock {
+  position: relative;
+}
+
+@media (max-width: 640px) {
+  /* The timeline on one line: the track, and where it is. The section's name only while it
+     is held, in a bubble over the thumb. */
+  .pb .pb-timeline {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-top: 6px;
+  }
+  .pb-tl-track {
+    flex: 1 1 auto;
+    order: 1;
+  }
+  .pb-tl-head {
+    flex: none;
+    order: 2;
+  }
+  .pb-tl-where {
+    display: none;
+  }
+  .pb-tl-bubble {
+    display: block;
+    position: absolute;
+    bottom: calc(100% + 6px);
+    transform: translateX(-50%);
+    max-width: 70vw;
+    padding: 5px 10px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--gray-900);
+    color: var(--white);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  /* The controls across the whole width, one row; nothing else under the board. */
+  .pb .pb-dock-in {
+    flex-direction: row;
+    gap: 0;
+    padding-block: 6px 10px;
+  }
+  .pb-ctl {
+    flex: 1 1 auto;
+    align-self: stretch;
+    justify-content: space-between;
+  }
+  .sj .pb-ctl > button,
+  .sj .pb-ctl > * {
+    flex: 1 1 0;
+  }
+  .sj .pb-ctl button {
+    width: auto;
+  }
+  .pb-ask-locked {
+    display: none;
+  }
+
+  /* Asking: a round chat button floating over the board, opening the box as a card. */
+  .sj .pb-askfab {
+    display: grid;
+    place-items: center;
+    position: absolute;
+    left: 16px;
+    bottom: calc(100% + 12px);
+    z-index: 6;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    color: var(--white);
+    background: var(--purple-600);
+    box-shadow:
+      0 3px 0 var(--purple-700),
+      0 8px 20px rgba(31, 0, 80, 0.22);
+  }
+  .sj .pb-askfab.hidden {
+    display: none;
+  }
+  /* The coach's sentence, where it shows (read along), starts clear of the chat button. */
+  .pb:has(.pb-askfab:not(.hidden)) .pb-coachdock > .pb-col {
+    padding-left: 76px;
+  }
+  .pb .pb-ask:not(.pb-ask-locked) {
+    display: none;
+  }
+  .pb .pb-ask.open {
+    display: grid;
+    gap: 8px;
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: calc(100% + 10px);
+    z-index: 7;
+    padding: 40px 12px 12px;
+    border-radius: var(--r-lg);
+    background: var(--white);
+    box-shadow: 0 16px 40px rgba(31, 0, 80, 0.22);
+  }
+  .sj .pb-ask.open .pb-ask-close {
+    display: grid;
+    place-items: center;
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: var(--gray-700);
+  }
 }

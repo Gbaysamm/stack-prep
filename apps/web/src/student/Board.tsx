@@ -432,6 +432,8 @@ export function Board({
     () => ({ index: -1, all: false, keys: new Set() }),
   );
   const [draft, setDraft] = useState("");
+  //: On a phone the ask box is a floating chat, opened from its button (founder, 12 Nov 2026).
+  const [askOpen, setAskOpen] = useState(false);
   const [turn, setTurn] = useState<(TutorReply & { asked: string }) | null>(
     null,
   );
@@ -2381,17 +2383,8 @@ export function Board({
                 ) : null}
               </div>
             </div>
-            ) : (
-              <span className="pb-coach-gap" />
-            )}
-            {/* The coach's buddy, reacting to the lesson as it goes (Buddy.tsx). */}
-            <Buddy
-              moment={shown > 0 ? lines[shown - 1] : undefined}
-              index={shown - 1}
-              marked={pointing !== null && pointing === shown - 1}
-              finished={finished}
-              paused={paused}
-            />
+            ) : null}
+
           </div>
         </div>
       </main>
@@ -2444,11 +2437,34 @@ export function Board({
             </button>
             {whiteboard ? <BoardTuningControls {...tuning} /> : null}
           </div>
+          {/* The coach's buddy, beside the controls (founder, 12 Nov 2026: not over the board),
+              reacting to the lesson as it goes (Buddy.tsx). */}
+          <Buddy
+            moment={shown > 0 ? lines[shown - 1] : undefined}
+            index={shown - 1}
+            marked={pointing !== null && pointing === shown - 1}
+            finished={finished}
+            paused={paused}
+          />
 
           {noAsk ? null : askLocked ? (
             <div className="pb-ask pb-ask-locked">{askLocked}</div>
           ) : (
-          <form className="pb-ask" onSubmit={send}>
+          <form
+            className={`pb-ask ${askOpen ? "open" : ""}`}
+            onSubmit={(event) => {
+              setAskOpen(false);
+              void send(event);
+            }}
+          >
+            <button
+              type="button"
+              className="pb-ask-close"
+              aria-label="Close"
+              onClick={() => setAskOpen(false)}
+            >
+              <IconClose />
+            </button>
             <div className={`pb-askbox ${recording ? "recording" : ""}`}>
               <input
                 value={draft}
@@ -2462,7 +2478,10 @@ export function Board({
                   // Submitted here rather than left to the form, because this box is mostly
                   // used on a phone, where sending is the keyboard's own Go key and not a tap
                   // on the button beside it.
-                  if (event.key === "Enter") void send(event);
+                  if (event.key === "Enter") {
+                    setAskOpen(false);
+                    void send(event);
+                  }
                 }}
                 placeholder={
                   stepIndex === null
@@ -2525,6 +2544,20 @@ export function Board({
           </form>
           )}
         </div>
+        {/* A PHONE: asking is a floating chat button, not a box always under the board. */}
+        {noAsk || askLocked ? null : (
+          <button
+            type="button"
+            className={`pb-askfab ${askOpen ? "hidden" : ""}`}
+            aria-label="Ask the coach"
+            onClick={() => {
+              setAskOpen(true);
+              setPaused(true);
+            }}
+          >
+            <IconAsk />
+          </button>
+        )}
       </footer>
     </div>
   );
@@ -5609,6 +5642,9 @@ const IconNext = icon(
   </>,
 );
 const IconCheck = icon(<path d="m5 12.5 4.5 4.5L19 7.5" />);
+const IconAsk = icon(
+  <path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4.2A8 8 0 1 1 20 12Z" />,
+);
 
 /**
  * THE LESSON'S TIMELINE (founder, 12 Nov 2026: "no place to move the video to a specific point
@@ -5657,7 +5693,14 @@ function Timeline({
             title={section.name}
           />
         ))}
-        {held !== null ? <span className="pb-tl-ghost" style={{ left: `${share(held)}%` }} /> : null}
+        {held !== null ? (
+          <>
+            <span className="pb-tl-ghost" style={{ left: `${share(held)}%` }} />
+            <span className="pb-tl-bubble" style={{ left: `${share(held)}%` }}>
+              {name ?? "Lesson"} · {held}
+            </span>
+          </>
+        ) : null}
         <input
           type="range"
           min={1}

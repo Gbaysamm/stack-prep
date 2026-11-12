@@ -15,6 +15,20 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-12
 
+### The board's dock on a phone: one slim row; asking as a floating chat; the buddy by the controls
+- **What:** on a phone the timeline is one line (the track and "20 / 40"; the section's name
+  only in a bubble while it is held), and the controls run the whole width in one row. The
+  ask box is no longer always under the board: where asking is open it is a round chat button
+  over the board's corner that opens the box as a card (and pauses the lesson); in a bank
+  lesson, where asking is not open yet, nothing is shown. On every screen the buddy sits beside
+  the controls instead of over the board, and Next is a plain control like the others (only the
+  last step's Done stands out).
+- **Why:** founder, 12 Nov 2026: on a phone the dock took a lot of the screen and too much was
+  going on at once; the ask box can come later, as a floating chat; Next drew too much attention.
+- **Where:** `apps/web/src/student/Board.tsx` (`askOpen`, the chat button, the buddy's place,
+  the timeline's bubble), `apps/web/src/prep/board.css`.
+- **Status:** done locally; screenshots at 1440 and 390. Not pushed.
+
 ### Lessons: one download, kept on the phone; a timeline to move through; no caption box
 - **What:**
   - A bank lesson now comes down as ONE file (its board, every line's voice, the voice's word
