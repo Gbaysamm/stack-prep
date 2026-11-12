@@ -1,0 +1,206 @@
+# The gas laws, lesson 1 of 2: Kelvin and s.t.p., Boyle's law, Charles's law, the pressure law and the general gas equation, each stated and worked step by step, on one growing gas diagram.
+format_version: 1
+subject: chemistry
+subtopic: 'The gas laws'
+subtopic_id: 475d9837-e728-5acf-99be-2a5313095800
+part: 1
+title: 'Boyle''s law, Charles''s law, the pressure law and the general gas equation'
+sources:            # pages consulted for the approach, for reviewers
+  - https://syllabus.ng/jamb/chemistry
+  - https://waeconline.org.ng/e-learning/Chemistry/chemmain.html
+  - https://edupadi.com/classroom/l/gas-laws
+  - https://schoolings.org/chemistry-lesson-note-for-ss1-second-term/
+  - https://myschool.ng/classroom/chemistry
+moments:
+  # ---------------------------------------------------------------- welcome
+  - section: 'Welcome'
+    say: 'Welcome. This is lesson one of two on the gas laws: Boyle''s law, Charles''s law, the pressure law and the general gas equation.'
+    write: 'Boyle''s law, Charles''s law, the pressure law and the general gas equation'
+
+  # ---------------------------------------------------------------- introduction
+  - section: 'Introduction'
+    say: 'A gas has no fixed volume. Its volume changes with its pressure and its temperature, and the gas laws tell us exactly how.'
+    write: 'a gas: its volume changes with pressure and temperature'
+  - say: 'JAMB asks on the gas laws almost every year, mostly as calculations. So we will state each law, explain it, then solve problems step by step.'
+    write: 'JAMB: mostly calculations, so every law is worked'
+
+  # ---------------------------------------------------------------- objectives
+  - section: 'Objectives'
+    say: 'By the end of this lesson you will be able to do two things. One, use Boyle''s law, Charles''s law and the pressure law. Two, use the general gas equation, and avoid the traps JAMB sets.'
+    write: '1. Boyle, Charles, pressure law  2. general gas equation, the JAMB traps'
+
+  # ---------------------------------------------------------------- kelvin and s.t.p.
+  - section: 'Kelvin and s.t.p.'
+    say: 'Every gas law uses the absolute temperature, in kelvin. To change degrees Celsius to kelvin, add 273.'
+    write: 'T (in K) = temperature in °C + 273'
+    point:
+      - {line: 4, kind: underline, at: 'in K'}
+  - say: 'So 27 degrees Celsius is 27 plus 273, which is 300 kelvin. And 0 degrees Celsius is 273 kelvin.'
+    write: '27 °C = 27 + 273 = 300 K;  0 °C = 273 K'
+  - say: 'Standard temperature and pressure, or s.t.p., is 273 kelvin and 760 millimetres of mercury. That pressure is 1 atmosphere, about 101 000 pascals.'
+    write: 's.t.p. = 273 K and 760 mmHg (1 atm = 1.01 × 10⁵ Pa)'
+
+  # ---------------------------------------------------------------- Boyle
+  - section: 'Boyle''s law'
+    say: 'Boyle''s law states that at constant temperature, the volume of a fixed mass of gas is inversely proportional to its pressure.'
+    write: 'Boyle''s law: at constant temperature, $V \propto \dfrac{1}{P}$'
+    doodle: {name: 'custom:sub_chem_gas_laws_a', id: dia, size: scene, caption: 'a gas: P, V and T', 'on': volume}
+    doodle_do:
+      - {id: dia, op: pulse, part: pressure-tag, 'on': pressure}
+    point:
+      - {line: 7, kind: underline, at: 'at constant temperature'}
+  - say: 'Look at the gas in the cylinder. Push the piston down with twice the pressure, and the volume becomes half. The molecules are squeezed closer together.'
+    write: 'double the pressure, and the volume halves'
+    doodle_do:
+      - {id: dia, op: pulse, part: piston, 'on': piston}
+      - {id: dia, op: label, part: volume-tag, text: 'P × 2, so V ÷ 2', 'on': half}
+  - say: 'So pressure times volume stays the same. For a change from state one to state two, P₁V₁ = P₂V₂.'
+    write: '$PV = \text{constant}$, so $P_1V_1 = P_2V_2$'
+  - say: 'Let us solve this. A gas occupies 300 cubic centimetres at 760 millimetres of mercury. Find its volume at 950 millimetres of mercury, at constant temperature.'
+    write: 'Example: 300 cm³ at 760 mmHg. Volume at 950 mmHg?'
+  - say: 'First list what we know. P₁ is 760 millimetres of mercury, V₁ is 300 cubic centimetres, P₂ is 950, and V₂ is what we want.'
+    write: '$P_1 = 760$ mmHg, $V_1 = 300$ cm³, $P_2 = 950$ mmHg, $V_2 = ?$'
+  - say: 'Make V₂ the subject by dividing both sides by P₂. Then put in the numbers, with their units.'
+    write: '$V_2 = \dfrac{P_1V_1}{P_2} = \dfrac{760 \text{ mmHg} \times 300 \text{ cm}^3}{950 \text{ mmHg}}$'
+  - say: '760 times 300 is 228 000. The millimetres of mercury cancel, and 228 000 divided by 950 is 240. So the new volume is 240 cubic centimetres. The pressure went up and the volume went down, which makes sense.'
+    write: '$V_2 = \dfrac{228\,000}{950}$ cm³ $\therefore V_2 = 240$ cm³ (less than 300 ✓)'
+    point:
+      - {line: 13, kind: circle, at: '240'}
+  - say: 'JAMB also asks for the graph. Let me draw volume against pressure. It is a curve that falls steeply, then gently, and never touches either axis.'
+    write: 'graph of V against P: a falling curve'
+    diagram:
+      id: g
+      kind: graph
+      'on': draw
+      x: [0, 6]
+      y: [0, 12]
+      step: 2
+      x_label: 'pressure, P'
+      y_label: 'volume, V'
+      plots:
+        - {fn: '12/x', domain: [1, 6], label: 'V = k ÷ P', colour: purple}
+  - say: 'And for an ideal gas, PV against P is a flat, horizontal line, because PV does not change. A line that bends or slopes is a real gas.'
+    write: 'ideal gas: PV against P is a horizontal line'
+    point:
+      - {line: 15, kind: underline, at: 'horizontal line'}
+
+  # ---------------------------------------------------------------- Charles
+  - section: 'Charles''s law'
+    say: 'Charles''s law states that at constant pressure, the volume of a fixed mass of gas is directly proportional to its absolute temperature.'
+    write: 'Charles''s law: at constant pressure, $V \propto T$ (T in kelvin)'
+    doodle_do:
+      - {id: dia, op: stage, stage: 'custom:sub_chem_gas_laws_a2', 'on': temperature}
+    point:
+      - {line: 16, kind: underline, at: 'at constant pressure'}
+  - say: 'Heat the gas with the flame under the cylinder. The molecules move faster and push the piston up. Double the kelvin temperature, and the volume doubles.'
+    write: 'double T in kelvin, and the volume doubles'
+    doodle_do:
+      - {id: dia, op: pulse, part: flame, 'on': flame}
+      - {id: dia, op: pulse, part: piston, 'on': piston}
+  - say: 'So volume divided by temperature stays the same. V₁ over T₁ equals V₂ over T₂.'
+    write: '$\dfrac{V}{T} = \text{constant}$, so $\dfrac{V_1}{T_1} = \dfrac{V_2}{T_2}$'
+  - say: 'Draw volume against temperature in degrees Celsius and extend the line backwards. The volume reaches zero at minus 273 degrees Celsius, which is 0 kelvin, absolute zero.'
+    write: 'V = 0 at −273 °C = 0 K, absolute zero'
+    doodle_do:
+      - {id: dia, op: circle, part: temp-tag, 'on': kelvin}
+  - say: 'Let us solve this. 250 cubic centimetres of a gas at 27 degrees Celsius is heated to 87 degrees Celsius at constant pressure. Find the new volume.'
+    write: 'Example: 250 cm³ at 27 °C is heated to 87 °C. New volume?'
+  - say: 'First change both temperatures to kelvin. 27 plus 273 is 300 kelvin, and 87 plus 273 is 360 kelvin.'
+    write: '$T_1 = 27 + 273 = 300$ K,  $T_2 = 87 + 273 = 360$ K'
+  - say: 'Make V₂ the subject by multiplying both sides by T₂. Then put in the numbers.'
+    write: '$V_2 = \dfrac{V_1T_2}{T_1} = \dfrac{250 \text{ cm}^3 \times 360 \text{ K}}{300 \text{ K}}$'
+  - say: '250 times 360 is 90 000, the kelvins cancel, and 90 000 divided by 300 is 300. So the new volume is 300 cubic centimetres. The gas was heated and it expanded, which makes sense.'
+    write: '$V_2 = \dfrac{90\,000}{300}$ cm³ $\therefore V_2 = 300$ cm³ (more than 250 ✓)'
+    point:
+      - {line: 23, kind: circle, at: '= 300'}
+
+  # ---------------------------------------------------------------- pressure law
+  - section: 'Pressure law'
+    say: 'The pressure law states that at constant volume, the pressure of a fixed mass of gas is directly proportional to its absolute temperature. So P₁ over T₁ equals P₂ over T₂.'
+    write: 'Pressure law: at constant volume, $\dfrac{P_1}{T_1} = \dfrac{P_2}{T_2}$'
+  - say: 'Let us solve this. A gas in a sealed steel cylinder is at 2.0 atmospheres and 27 degrees Celsius. It is heated to 177 degrees Celsius. Find the new pressure. In kelvin, that is 300 and 450.'
+    write: 'Example: 2.0 atm at 27 °C, heated to 177 °C.  $T_1 = 300$ K, $T_2 = 450$ K'
+  - say: 'Make P₂ the subject and put in the numbers. 2.0 times 450 is 900, and 900 divided by 300 is 3.0. So the pressure rises to 3.0 atmospheres.'
+    write: '$P_2 = \dfrac{P_1T_2}{T_1} = \dfrac{2.0 \text{ atm} \times 450 \text{ K}}{300 \text{ K}} = 3.0$ atm'
+
+  # ---------------------------------------------------------------- general gas equation
+  - section: 'General gas equation'
+    say: 'When pressure, volume and temperature all change, we join the three laws into the general gas equation. P₁V₁ over T₁ equals P₂V₂ over T₂.'
+    write: 'General gas equation: $\dfrac{P_1V_1}{T_1} = \dfrac{P_2V_2}{T_2}$'
+    doodle_do:
+      - {id: dia, op: pulse, part: pressure-tag, 'on': pressure}
+      - {id: dia, op: pulse, part: volume-tag, 'on': volume}
+      - {id: dia, op: pulse, part: temp-tag, 'on': temperature}
+  - say: 'Let us solve this. 380 cubic centimetres of a gas is collected at 27 degrees Celsius and 800 millimetres of mercury. Find its volume at s.t.p.'
+    write: 'Example: 380 cm³ at 27 °C and 800 mmHg. Volume at s.t.p.?'
+  - say: 'List state one. P₁ is 800 millimetres of mercury, V₁ is 380 cubic centimetres, and T₁ is 27 plus 273, which is 300 kelvin.'
+    write: '$P_1 = 800$ mmHg, $V_1 = 380$ cm³, $T_1 = 300$ K'
+  - say: 'State two is s.t.p. So P₂ is 760 millimetres of mercury, T₂ is 273 kelvin, and V₂ is what we want.'
+    write: '$P_2 = 760$ mmHg, $T_2 = 273$ K, $V_2 = ?$'
+  - say: 'Make V₂ the subject, by multiplying both sides by T₂ and dividing by P₂. Put in the numbers. The millimetres of mercury cancel, and so do the kelvins.'
+    write: '$V_2 = \dfrac{P_1V_1T_2}{T_1P_2} = \dfrac{800 \times 380 \times 273}{300 \times 760}$ cm³'
+  - say: 'Simplify step by step. 380 over 760 is a half, and 800 times a half is 400. Then 400 times 273 is 109 200, and 109 200 divided by 300 is 364. So the volume at s.t.p. is 364 cubic centimetres.'
+    write: '$V_2 = \dfrac{400 \times 273}{300} = \dfrac{109\,200}{300}$ cm³ $\therefore V_2 = 364$ cm³'
+    point:
+      - {line: 32, kind: circle, at: '364'}
+
+  # ---------------------------------------------------------------- comparison
+  - section: 'Comparison'
+    say: 'Here are the four laws side by side. Each one keeps something constant, always a fixed mass of gas, and every temperature is in kelvin.'
+    write: 'every law: a fixed mass of gas, T in kelvin'
+    diagram:
+      id: t
+      kind: table
+      'on': side
+      columns: [Law, Kept constant, Equation]
+      rows:
+        - ['Boyle', 'temperature', 'P₁V₁ = P₂V₂']
+        - ['Charles', 'pressure', 'V₁/T₁ = V₂/T₂']
+        - ['Pressure law', 'volume', 'P₁/T₁ = P₂/T₂']
+        - ['General', 'mass only', 'P₁V₁/T₁=P₂V₂/T₂']
+
+  # ---------------------------------------------------------------- traps
+  - section: 'JAMB traps'
+    say: 'Here is a real JAMB question. 200 cubic centimetres of a gas at 25 degrees Celsius exerts 700 millimetres of mercury. Find its pressure at 350 cubic centimetres and 75 degrees Celsius.'
+    write: 'JAMB: 200 cm³, 25 °C, 700 mmHg, then 350 cm³, 75 °C. Pressure?'
+  - say: 'Change to kelvin, 298 and 348. Then P₂ = P₁V₁T₂ over T₁V₂, which is 700 times 200 times 348, over 298 times 350.'
+    write: '$P_2 = \dfrac{700 \times 200 \times 348}{298 \times 350}$ mmHg'
+  - say: '700 times 200 over 350 is 400. Then 400 times 348 is 139 200, and 139 200 over 298 is 467.11 millimetres of mercury, rounded only at the end.'
+    write: '$P_2 = \dfrac{400 \times 348}{298} = \dfrac{139\,200}{298} = 467.11$ mmHg'
+    point:
+      - {line: 36, kind: circle, at: '467.11'}
+  - say: 'The traps. 400 forgets the temperature change. 342.53 puts the temperatures upside down. And using 25 and 75 without adding 273 gives 1200, far too big.'
+    write: 'traps: 400 (no T), 342.53 (T upside down), °C not kelvin'
+    point:
+      - {line: 37, kind: strike, at: '°C not kelvin'}
+
+  # ---------------------------------------------------------------- check
+  - section: 'Check yourself'
+    say: 'Your turn. A gas occupies 200 cubic centimetres at 0 degrees Celsius. At what temperature, in degrees Celsius, will it occupy 400 cubic centimetres at the same pressure? Pause and work it.'
+    write: 'Check: 200 cm³ at 0 °C becomes 400 cm³. Temperature in °C?'
+  - say: 'This is Charles''s law. T₁ is 273 kelvin. T₂ = V₂T₁ over V₁, which is 400 times 273 over 200, which is 546 kelvin.'
+    write: '$T_2 = \dfrac{V_2T_1}{V_1} = \dfrac{400 \times 273}{200} = 546$ K'
+    doodle_do:
+      - {id: dia, op: pulse, part: temp-tag, 'on': kelvin}
+  - say: 'The question asks for degrees Celsius, so take away 273. 546 minus 273 is 273 degrees Celsius.'
+    write: '$546 - 273 = 273$ °C ✓'
+    point:
+      - {line: 40, kind: circle, at: '= 273'}
+
+  # ---------------------------------------------------------------- recap
+  - section: 'Recap'
+    say: 'Let us recap. Boyle, P₁V₁ = P₂V₂ at constant temperature. Charles, V over T is constant at constant pressure. The pressure law, P over T is constant at constant volume. The general gas equation joins them. Always use kelvin, and round only at the end. That''s the lesson. Next, the gas laws with moles, mixtures and diffusion.'
+    write: 'Boyle, Charles, pressure law; $\dfrac{P_1V_1}{T_1} = \dfrac{P_2V_2}{T_2}$, T in kelvin'
+
+# ---------------------------------------------------------------- after the lesson: try it
+problems:
+  - ask: 'A gas occupies 120 cm³ at 27 °C and 750 mmHg. Find its volume at s.t.p. (273 K, 760 mmHg), to the nearest cm³.'
+    answer: '108 cm³'
+    accept: ['108', '108cm³', '108 cm3', '107.8', '107.8 cm³', '107.76']
+    needs_working: true
+    working:
+      - 'General gas equation: $\dfrac{P_1V_1}{T_1} = \dfrac{P_2V_2}{T_2}$, so $V_2 = \dfrac{P_1V_1T_2}{T_1P_2}$.'
+      - '$T_1 = 27 + 273 = 300$ K; $P_1 = 750$ mmHg, $V_1 = 120$ cm³; $P_2 = 760$ mmHg, $T_2 = 273$ K.'
+      - '$V_2 = \dfrac{750 \times 120 \times 273}{300 \times 760}$'
+      - '$750 \times 120 = 90\,000$; $90\,000 \times 273 = 24\,570\,000$; $300 \times 760 = 228\,000$.'
+      - '$V_2 = 24\,570\,000 \div 228\,000 = 107.76$ cm³, so 108 cm³ to the nearest cm³.'

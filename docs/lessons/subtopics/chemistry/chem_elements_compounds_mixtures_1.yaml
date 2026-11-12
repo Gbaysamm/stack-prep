@@ -1,0 +1,167 @@
+# Elements and compounds (lesson 1 of 2): definitions, worked classifications and fixed mass ratios, and the traps, on one annotated particle diagram.
+format_version: 1
+subject: chemistry
+subtopic: 'Elements, compounds and mixtures'
+subtopic_id: 4657fe1f-0818-5df4-b5ce-36b724e9b42a
+part: 1
+title: 'Elements and compounds'
+sources:            # pages consulted for the approach, for reviewers
+  - https://jambsyllabus.pages.dev/chemistry/
+  - https://syllabus.ng/jamb/chemistry
+  - https://edupadi.com/classroom/l/classification-of-matter
+  - https://schoolings.org/chemistry-lesson-note-for-ss1-first-term-2/
+  - https://www.headteacher.ng/first-term-chemistry-revision-for-ss-1/
+  - https://syllabus.ng/ss1-scheme-of-work/chemistry/
+  - https://waeconline.org.ng/e-learning/Chemistry/chemmain.html
+moments:
+  # ---------------------------------------------------------------- welcome
+  - section: 'Welcome'
+    say: 'Welcome. This is lesson one of two on elements, compounds and mixtures: elements and compounds.'
+    write: 'Elements and compounds'
+
+  # ---------------------------------------------------------------- introduction
+  - section: 'Introduction'
+    say: 'Every substance around you is an element, a compound or a mixture. That includes the air, the water you drink and the salt in your food.'
+    write: 'every substance is an element, a compound or a mixture'
+  - say: 'This lesson covers elements and compounds. The next lesson covers mixtures, and how to tell all three apart.'
+    write: 'today: elements and compounds; next: mixtures'
+
+  # ---------------------------------------------------------------- objectives
+  - section: 'Objectives'
+    say: 'By the end of this lesson you will be able to do two things. One, define an element and a compound.'
+    write: '1. Define an element and a compound'
+  - say: 'Two, classify a substance with the reason, and use a mass ratio to show that a substance is a compound.'
+    write: '2. Classify a substance; use a mass ratio to spot a compound'
+
+  # ---------------------------------------------------------------- element
+  - section: 'Element'
+    say: 'An element is a substance that cannot be split into two or more simpler substances by chemical means. Look at the first box.'
+    write: 'Element: cannot be split into simpler substances by chemical means'
+    doodle: {name: 'custom:sub_chem_elements_compounds_mixtures_a', id: dia, size: scene, caption: 'element, compound, mixture', 'on': box}
+    point:
+      - {line: 5, kind: underline, at: 'cannot be split'}
+  - say: 'All the atoms in an element are of one kind. In this box every atom is sodium, Na. Iron, Fe, copper, Cu, gold, Au, and carbon, C, are other elements.'
+    write: 'an element has only one kind of atom: Na, Fe, Cu, Au, C'
+    doodle_do:
+      - {id: dia, op: circle, part: element-tag, 'on': kind}
+      - {id: dia, op: pulse, part: element-box, 'on': sodium}
+
+  # worked example 1: which are elements?
+  - say: 'Let us solve this. Which of these are elements? O₂, CO₂, Fe, NaCl and N₂. For each one, ask: does it have only one kind of atom?'
+    write: 'Which are elements? $\ce{O2}$, $\ce{CO2}$, Fe, NaCl, $\ce{N2}$'
+  - say: 'O₂ has only oxygen atoms and N₂ has only nitrogen atoms. Each molecule has two atoms, but of the same kind, so both are elements. Fe has only iron atoms, so it is an element too.'
+    write: '$\ce{O2}$: only O ✓; $\ce{N2}$: only N ✓; Fe: only Fe ✓'
+    doodle_do:
+      - {id: dia, op: pulse, part: element-box, 'on': same}
+  - say: 'CO₂ has carbon and oxygen atoms. NaCl has sodium and chlorine atoms. Two kinds of atom, so neither is an element.'
+    write: '$\ce{CO2}$: C and O ✗; NaCl: Na and Cl ✗'
+  - say: 'So the elements are O₂, Fe and N₂.'
+    write: '∴ elements: $\ce{O2}$, Fe, $\ce{N2}$'
+    point:
+      - {line: 10, kind: circle, at: 'elements'}
+
+  # worked example 2: split by heating
+  - say: 'Let us solve another. When red mercury(II) oxide, HgO, is heated, it gives mercury and oxygen gas. Is mercury(II) oxide an element?'
+    write: 'Is HgO an element? $\ce{2HgO -> 2Hg + O2}$'
+  - say: 'Heating split it into two simpler substances. An element cannot be split by chemical means. So mercury(II) oxide is not an element. It is a compound.'
+    write: '∴ split into simpler substances, so not an element'
+    point:
+      - {line: 12, kind: underline, at: 'not an element'}
+
+  # ---------------------------------------------------------------- compound
+  - section: 'Compound'
+    say: 'A compound is a substance formed when two or more elements are chemically combined in a fixed ratio by mass.'
+    write: 'Compound: elements chemically combined in a fixed ratio by mass'
+    doodle_do:
+      - {id: dia, op: stage, stage: 'custom:sub_chem_elements_compounds_mixtures_a2', 'on': compound}
+    point:
+      - {line: 13, kind: underline, at: 'fixed ratio'}
+  - say: 'Look at the second box. Each particle is a sodium atom joined to a chlorine atom. Sodium burns in chlorine to form sodium chloride, which is table salt.'
+    write: '$\ce{2Na + Cl2 -> 2NaCl}$'
+    doodle_do:
+      - {id: dia, op: pulse, part: compound-box, 'on': joined}
+  - say: 'The composition of a compound is fixed. So every compound has a chemical formula, such as NaCl, H₂O or CO₂.'
+    write: 'fixed composition, so a formula: NaCl, $\ce{H2O}$, $\ce{CO2}$'
+    doodle_do:
+      - {id: dia, op: circle, part: compound-tag, 'on': formula}
+  - say: 'A compound has new properties. Sodium is a soft metal that reacts violently with water. Chlorine is a poisonous greenish yellow gas. Sodium chloride is the salt we eat.'
+    write: 'new properties, unlike those of its elements'
+  - say: 'A compound can be split only by chemical means. Electrolysis of molten sodium chloride gives back sodium and chlorine. Filtering or boiling never will.'
+    write: 'separated only by chemical means, e.g. electrolysis'
+    doodle_do:
+      - {id: dia, op: pulse, part: compound-box, 'on': Electrolysis}
+
+  # worked example 3: water's fixed mass ratio
+  - say: 'Let us solve this. Well water and rain water are each decomposed into hydrogen and oxygen. Show that water is a compound.'
+    write: 'Show that water is a compound'
+  - say: 'Sample A, 9 g of well water, gives 1 g of hydrogen and 8 g of oxygen. The ratio of hydrogen to oxygen by mass is 1 g to 8 g, which is 1 to 8.'
+    write: 'A (9 g): H : O = 1 g : 8 g = 1 : 8'
+  - say: 'Sample B, 18 g of rain water, gives 2 g of hydrogen and 16 g of oxygen. The ratio is 2 g to 16 g. Divide both by 2, and it is also 1 to 8.'
+    write: 'B (18 g): H : O = 2 g : 16 g = 1 : 8'
+  - say: 'Both samples, from different sources, have the same fixed ratio by mass. So water is a compound, and its formula is always H₂O.'
+    write: '∴ same fixed ratio 1 : 8, so water is a compound'
+    doodle_do:
+      - {id: dia, op: circle, part: compound-tag, 'on': fixed}
+    point:
+      - {line: 21, kind: circle, at: 'compound'}
+
+  # worked example 4: using the fixed ratio
+  - say: 'Let us solve one more. 7 g of iron always combines with 4 g of sulphur to form iron(II) sulphide, FeS. What mass of sulphur combines with 14 g of iron?'
+    write: '7 g Fe + 4 g S → FeS. 14 g Fe needs ? g S'
+  - say: '14 g of iron is twice 7 g, because 14 divided by 7 is 2.'
+    write: '14 g ÷ 7 g = 2'
+  - say: 'The ratio is fixed, so the sulphur must also double. 2 times 4 g is 8 g of sulphur.'
+    write: '∴ sulphur = 2 × 4 g = 8 g'
+    point:
+      - {line: 24, kind: circle, at: '8 g'}
+
+
+  # ---------------------------------------------------------------- traps
+  - section: 'JAMB traps'
+    say: 'A common trap. O₂ and N₂ have two atoms in each molecule, so students call them compounds. The atoms are of one kind, so each is an element.'
+    write: '$\ce{O2}$, $\ce{N2}$: two atoms, one kind, so elements, not compounds'
+    doodle_do:
+      - {id: dia, op: circle, part: element-tag, 'on': element}
+  - say: 'JAMB also sets the reverse as a wrong option: a compound that keeps the properties of its elements. It does not. Sodium chloride is not a soft metal or a poisonous gas.'
+    write: 'wrong: a compound keeps its elements'' properties ✗'
+    point:
+      - {line: 26, kind: strike, at: 'keeps its elements'' properties'}
+  - say: 'WAEC examiners say many students write a formula when a name is asked. If asked to name it, write sodium chloride, not NaCl.'
+    write: 'name asked? write the name: sodium chloride, not NaCl'
+
+  # ---------------------------------------------------------------- check
+  - section: 'Check yourself'
+    say: 'Your turn. Which of these is an element? Sodium chloride, carbon(IV) oxide, copper, or water. Pause and decide before I go on.'
+    write: 'Which is an element? NaCl, $\ce{CO2}$, Cu, $\ce{H2O}$'
+  - say: 'Sodium chloride has sodium and chlorine atoms. Carbon(IV) oxide has carbon and oxygen. Water has hydrogen and oxygen. Each has two kinds of atom and a formula, so each is a compound.'
+    write: 'NaCl, $\ce{CO2}$, $\ce{H2O}$: two kinds of atom = compounds ✗'
+    doodle_do:
+      - {id: dia, op: pulse, part: compound-box, 'on': compound}
+  - say: 'Copper has only copper atoms. So copper is the element.'
+    write: 'Cu: one kind of atom = element ✓'
+    doodle_do:
+      - {id: dia, op: circle, part: element-tag, 'on': element}
+    point:
+      - {line: 30, kind: circle, at: 'element'}
+
+  # ---------------------------------------------------------------- recap
+  - section: 'Recap'
+    say: 'Let us recap. An element has one kind of atom and cannot be split by chemical means. A compound is elements chemically combined in a fixed ratio by mass.'
+    write: '1. element: one kind of atom; compound: elements combined, fixed ratio'
+    doodle_do:
+      - {id: dia, op: pulse, part: element-tag, 'on': element}
+      - {id: dia, op: pulse, part: compound-tag, 'on': compound}
+  - say: 'To classify, ask: only one kind of atom? Then it is an element. A formula and a fixed mass ratio, like 1 to 8 for hydrogen to oxygen in water? Then it is a compound. That''s the lesson. Next, try the problem.'
+    write: '2. one kind of atom: element; fixed ratio, formula: compound'
+
+# ---------------------------------------------------------------- after the lesson: try it
+problems:
+  - ask: 'In carbon(IV) oxide, 3 g of carbon always combines with 8 g of oxygen. What mass of oxygen combines with 12 g of carbon?'
+    answer: '32 g'
+    accept: ['32', '32g', '32 grams']
+    working:
+      - 'carbon : oxygen = 3 g : 8 g, a fixed ratio'
+      - '12 g ÷ 3 g = 4, so there is 4 times as much carbon'
+      - 'oxygen = 4 × 8 g = 32 g'
+      - 'Check: 12 g : 32 g, divide both by 4, gives 3 : 8 ✓'
+    needs_working: true

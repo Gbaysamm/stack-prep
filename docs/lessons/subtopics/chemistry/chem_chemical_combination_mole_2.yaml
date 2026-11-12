@@ -1,0 +1,151 @@
+# Lesson 2 of 4 on chemical combination and the mole: formulae and equations: percentage composition, empirical and molecular formulae, water of crystallisation and balancing, each with worked calculations.
+format_version: 1
+subject: chemistry
+subtopic: 'Laws of chemical combination, formulae, equations and the mole'
+subtopic_id: bf0c2ac8-4a5f-54e0-99a2-37ff23fb0988
+sources:            # the source map's pages for this topic (docs/lessons/sources.md), for reviewers
+  - https://ibass.jamb.gov.ng
+  - https://syllabus.ng/jamb/chemistry
+  - https://syllabus.ng/waec/chemistry/
+  - https://syllabus.ng/neco/chemistry
+  - https://waeconline.org.ng/e-learning/Chemistry/chemmain.html
+  - https://elearn.education.gov.ng
+part: 2
+title: 'Formulae and equations'
+moments:
+  # ---------------------------------------------------------------- welcome
+  - section: 'Welcome'
+    say: 'Welcome. This is lesson two of four on chemical combination and the mole: formulae and equations.'
+    write: 'Formulae and equations'
+
+  # ---------------------------------------------------------------- introduction
+  - section: 'Introduction'
+    say: 'In the last lesson you met the laws of chemical combination. This lesson uses masses to find formulae, and shows how to balance equations. JAMB sets these calculations most years.'
+    write: 'formulae from masses; balanced equations'
+
+  # ---------------------------------------------------------------- objectives
+  - section: 'Objectives'
+    say: 'By the end of this lesson you will be able to do two things. One, work out percentage composition, empirical and molecular formulae, and water of crystallisation.'
+    write: '1. Percentage composition, empirical and molecular formulae, water of crystallisation'
+  - say: 'Two, balance chemical equations.'
+    write: '2. Balance equations'
+
+  # ---------------------------------------------------------------- formulae and percentage composition
+  - section: 'Percentage composition'
+    say: 'A formula shows the elements and the number of atoms of each. In Al₂(SO₄)₃, the 3 multiplies everything in the bracket: 2 aluminium, 3 sulphur, 12 oxygen.'
+    write: '$\ce{Al2(SO4)3}$: 2 Al, 3 S, 12 O'
+  - say: 'The percentage by mass of an element is its mass in one mole of the compound, divided by the molar mass, times 100.'
+    write: '% of element = mass of element in 1 mol ÷ molar mass × 100'
+  - say: 'Let us solve this. Find the percentage of nitrogen in ammonium trioxonitrate(V), NH₄NO₃. Its molar mass is 14 plus 4 plus 14 plus 48, which is 80.'
+    write: '$\ce{NH4NO3}$: M = 14 + 4(1) + 14 + 3(16) = 80 g mol⁻¹'
+  - say: 'There are two nitrogen atoms, one in each ion, so 28 grams of nitrogen. 28 divided by 80, times 100, is 35 percent.'
+    write: '% N = 2(14) g ÷ 80 g × 100 = 35%'
+
+  # ---------------------------------------------------------------- empirical formula
+  - section: 'Empirical formula'
+    say: 'The empirical formula is the simplest whole number ratio of atoms. Divide the mass or percentage of each element by its relative atomic mass, then by the smallest answer.'
+    write: 'Empirical formula: simplest whole number ratio of atoms. Mass or % ÷ Ar, then ÷ the smallest'
+  - say: 'Let us solve this. 2.4 grams of magnesium burns to give 4.0 grams of oxide. By conservation of mass, the oxygen is 1.6 grams.'
+    write: '[Mg = 24, O = 16]  O = 4.0 g − 2.4 g = 1.6 g'
+  - say: 'Magnesium is 2.4 divided by 24, which is 0.1 mole. Oxygen is 1.6 divided by 16, also 0.1 mole. The ratio is 1 to 1, so it is MgO.'
+    write: 'Mg: 2.4 g ÷ 24 g mol⁻¹ = 0.1 mol;  O: 1.6 g ÷ 16 g mol⁻¹ = 0.1 mol ∴ MgO'
+  - say: 'Another one. A compound contains 40.0 percent carbon, 6.7 percent hydrogen and 53.3 percent oxygen. Find its empirical formula. Let me set out the table.'
+    write: 'C 40.0%, H 6.7%, O 53.3%  [C = 12, H = 1, O = 16]'
+    diagram:
+      id: ef
+      kind: table
+      caption: 'empirical formula'
+      'on': table
+      columns: ['Element', '% by mass', '÷ Ar', '÷ smallest']
+      rows:
+        - ['C', '40.0', '', '']
+        - ['H', '6.7', '', '']
+        - ['O', '53.3', '', '']
+  - say: 'Divide each by its relative atomic mass. Carbon is 40.0 over 12, which is 3.33. Hydrogen is 6.7 over 1. Oxygen is 53.3 over 16, which is 3.33.'
+    write: 'C: 40.0 ÷ 12 = 3.33;  H: 6.7 ÷ 1 = 6.7;  O: 53.3 ÷ 16 = 3.33'
+    diagram_do:
+      - {id: ef, op: fill, part: 'cell:1,3', text: '3.33', 'on': Carbon}
+      - {id: ef, op: fill, part: 'cell:2,3', text: '6.7', 'on': Hydrogen}
+      - {id: ef, op: fill, part: 'cell:3,3', text: '3.33', 'on': Oxygen}
+  - say: 'The smallest is 3.33, so divide each by it. Carbon gives 1, hydrogen gives 2.01, which is 2, and oxygen gives 1.'
+    write: '÷ 3.33:  C = 1, H = 2.01 ≈ 2, O = 1'
+    diagram_do:
+      - {id: ef, op: fill, part: 'cell:1,4', text: '1', 'on': Carbon}
+      - {id: ef, op: fill, part: 'cell:2,4', text: '2', 'on': hydrogen}
+      - {id: ef, op: fill, part: 'cell:3,4', text: '1', 'on': oxygen}
+  - say: 'So the empirical formula is CH₂O.'
+    write: '∴ empirical formula = $\ce{CH2O}$'
+    diagram_do:
+      - {id: ef, op: highlight, part: 'col:4', text: 'C 1 : H 2 : O 1', answer: true, 'on': formula}
+  - say: 'If a ratio comes out near a half, like 1 to 1.5, do not round it. Multiply all by 2: 1 to 1.5 becomes 2 to 3, as in Fe₂O₃.'
+    write: 'Fe : O = 1 : 1.5 → × 2 → 2 : 3 ∴ $\ce{Fe2O3}$'
+
+  # ---------------------------------------------------------------- molecular formula
+  - section: 'Molecular formula'
+    say: 'The molecular formula shows the actual atoms in one molecule. It is n times the empirical formula, where n is the molar mass over the empirical formula mass.'
+    write: 'Molecular formula = (empirical formula)ₙ;  n = molar mass ÷ empirical formula mass'
+  - say: 'Let us solve this. The compound with empirical formula CH₂O has a vapour density of 30. Its molar mass is 2 times 30, which is 60 grams per mole.'
+    write: 'M = 2 × 30 = 60 g mol⁻¹'
+  - say: 'The empirical formula mass is 12 plus 2 plus 16, which is 30. So n is 60 divided by 30, which is 2.'
+    write: '$\ce{CH2O}$ = 12 + 2(1) + 16 = 30;  n = 60 ÷ 30 = 2'
+  - say: 'The molecular formula is CH₂O times 2, which is C₂H₄O₂. That is ethanoic acid, the acid in vinegar.'
+    write: '∴ ($\ce{CH2O}$)₂ = $\ce{C2H4O2}$, ethanoic acid'
+
+  # ---------------------------------------------------------------- water of crystallisation
+  - section: 'Water of crystallisation'
+    say: 'The same method finds water of crystallisation. Let us solve this. 2.86 grams of washing soda, Na₂CO₃·xH₂O, is heated until all its water is lost. 1.06 grams is left.'
+    write: '2.86 g of Na₂CO₃·xH₂O → 1.06 g of $\ce{Na2CO3}$;  find x  [Na = 23, C = 12, O = 16, H = 1]'
+  - say: 'The water lost is 2.86 minus 1.06, which is 1.80 grams, or 1.80 over 18, which is 0.100 mole. Na₂CO₃ is 106, so 1.06 grams is 0.0100 mole.'
+    write: 'water: 1.80 g ÷ 18 g mol⁻¹ = 0.100 mol;  $\ce{Na2CO3}$: 1.06 g ÷ 106 g mol⁻¹ = 0.0100 mol'
+  - say: 'Divide by the smaller. 0.100 over 0.0100 is 10, so x is 10, and the formula is Na₂CO₃·10H₂O.'
+    write: 'x = 0.100 mol ÷ 0.0100 mol = 10 ∴ Na₂CO₃·10H₂O'
+
+  # ---------------------------------------------------------------- balancing
+  - section: 'Balancing equations'
+    say: 'A chemical equation shows the reactants and products by their formulae. It is balanced when each kind of atom has the same number on both sides.'
+    write: 'balanced: the same number of each kind of atom on both sides'
+  - say: 'First write every formula correctly. Then balance only with numbers in front. Never change the small numbers in a formula, because that makes a different substance.'
+    write: 'change the numbers in front, never the subscripts'
+  - say: 'Let us solve this. Balance the equation for aluminium burning in oxygen to form aluminium oxide.'
+    write: '$\ce{Al + O2 -> Al2O3}$'
+  - say: 'Start with oxygen: 2 on the left, 3 on the right. The lowest common multiple is 6, so put 3 in front of O₂ and 2 in front of Al₂O₃.'
+    write: '$\ce{Al + 3O2 -> 2Al2O3}$  (O: 6 = 6)'
+  - say: 'Now there are 4 aluminium atoms on the right, so put 4 in front of Al. Check: aluminium is 4 on each side, and oxygen is 6.'
+    write: '$\ce{4Al + 3O2 -> 2Al2O3}$  check: Al 4 = 4, O 6 = 6 ✓'
+  - say: 'Another one. Balance the burning of propane, C₃H₈. 3 carbons give 3CO₂. 8 hydrogens give 4H₂O. That is 10 oxygen atoms on the right, so 5O₂.'
+    write: '$\ce{C3H8(g) + 5O2(g) -> 3CO2(g) + 4H2O(l)}$  (O: 10 = 10)'
+  - say: 'Add state symbols when asked. s is solid, l is liquid, g is gas, and aq means dissolved in water.'
+    write: '(s) solid, (l) liquid, (g) gas, (aq) dissolved in water'
+
+  # ---------------------------------------------------------------- traps
+  - section: 'JAMB traps'
+    say: 'A real JAMB question. Find the percentage of nitrogen in calcium trioxonitrate(V), with calcium 40, nitrogen 14 and oxygen 16.'
+    write: '% N in calcium trioxonitrate(V) = ?  [Ca = 40, N = 14, O = 16]'
+  - say: 'Calcium is +2 and the nitrate ion is −1, so the formula is Ca(NO₃)₂, with 2 nitrogen atoms. The molar mass is 40 plus 2 times 62, which is 164.'
+    write: '$\ce{Ca(NO3)2}$: M = 40 + 2(14 + 48) = 164 g mol⁻¹'
+  - say: 'So the percentage is 28 over 164, times 100, which is 17.1 percent. The trap is counting one nitrogen: 14 over 164 gives 8.5 percent.'
+    write: '% N = 28 g ÷ 164 g × 100 = 17.1%  (14 ÷ 164 × 100 = 8.5% ✗)'
+
+  # ---------------------------------------------------------------- check
+  - section: 'Check yourself'
+    say: 'Your turn. Balance the equation for making ammonia from nitrogen and hydrogen. Pause and work it before I go on.'
+    write: '$\ce{N2 + H2 -> NH3}$: balance it'
+  - say: 'Nitrogen is 2 on the left, so put 2 in front of NH₃. That makes 6 hydrogen atoms on the right, so put 3 in front of H₂.'
+    write: '$\ce{N2 + 3H2 -> 2NH3}$  check: N 2 = 2, H 6 = 6 ✓'
+
+  # ---------------------------------------------------------------- recap
+  - section: 'Recap'
+    say: 'Let us recap. The percentage of an element is its mass in one mole of the compound, over the molar mass, times 100.'
+    write: '1. % of element = mass of element in 1 mol ÷ molar mass × 100'
+  - say: 'Empirical formula: divide by the relative atomic masses, then by the smallest. The molecular formula is n times it. Balance with numbers in front only. That''s the lesson. Next lesson: the mole.'
+    write: '2. empirical: ÷ Ar, ÷ smallest; molecular = (empirical)ₙ; balance in front only'
+
+# ---------------------------------------------------------------- after the lesson: try it
+problems:
+  - ask: 'A hydrocarbon contains 75% carbon and 25% hydrogen by mass. Find its empirical formula. [C = 12, H = 1]'
+    answer: 'CH4'
+    accept: ['CH₄', 'ch4']
+    working:
+      - 'C: 75 ÷ 12 = 6.25;  H: 25 ÷ 1 = 25'
+      - 'Divide by the smallest, 6.25: C = 1, H = 25 ÷ 6.25 = 4'
+      - 'C : H = 1 : 4, so the empirical formula is $\ce{CH4}$.'

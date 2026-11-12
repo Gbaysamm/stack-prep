@@ -1,0 +1,140 @@
+# Lesson two of two on boiling, density, freezing and melting points: what impurities do and the purity test, density and its calculations, separating liquids by density, and JAMB's traps.
+format_version: 1
+subject: chemistry
+subtopic: 'Boiling, density, freezing and melting points'
+subtopic_id: 181e119e-6a41-5215-816d-834d6d563163
+part: 2
+title: 'Purity tests, density and separation'
+sources:            # pages consulted for the approach, for reviewers
+  - https://syllabus.ng/jamb/chemistry
+  - https://waeconline.org.ng/e-learning/Chemistry/chemmain.html
+  - https://edupadi.com/classroom/l/classification-of-matter
+  - https://schoolings.org/chemistry-lesson-note-for-ss1-first-term-2/
+moments:
+  # ---------------------------------------------------------------- welcome
+  - section: 'Welcome'
+    say: 'Welcome. This is lesson two of two on boiling, density, freezing and melting points: purity tests, density and separation.'
+    write: 'Purity tests, density and separation'
+
+  # ---------------------------------------------------------------- introduction
+  - section: 'Introduction'
+    say: 'In the last lesson you met melting, freezing and boiling points and the heating curve. Now we use them to test whether a substance is pure, and we add density.'
+    write: 'last lesson: m.p., f.p., b.p.; now purity and density'
+  - say: 'JAMB asks what an impurity does to these points, and asks you to calculate density.'
+    write: 'JAMB: what impurities do; density calculations'
+
+  # ---------------------------------------------------------------- objectives
+  - section: 'Objectives'
+    say: 'By the end of this lesson you will be able to do two things. One, say what an impurity does to the melting, freezing and boiling points, and test for purity.'
+    write: '1. Say what impurities do; test for purity'
+  - say: 'Two, define density and calculate it, with its units, and use it to separate liquids.'
+    write: '2. Define and calculate density, with units; separate liquids'
+
+  # ---------------------------------------------------------------- purity
+  - section: 'Testing for purity'
+    say: 'You met this test in the lesson on pure and impure substances. A pure substance has a sharp, fixed melting point and boiling point.'
+    write: 'pure: sharp, fixed m.p. and b.p.'
+    diagram:
+      id: t
+      kind: table
+      'on': test
+      columns: ['point', 'pure', 'impure']
+      rows:
+        - ['melting point', 'sharp, fixed', '']
+        - ['freezing point', 'sharp, fixed', '']
+        - ['boiling point', 'sharp, fixed', '']
+  - say: 'An impurity lowers the melting point, and the solid melts over a range of temperatures instead of at one point.'
+    write: 'impurity: lower m.p., melts over a range'
+    diagram_do:
+      - {id: t, op: fill, part: 'cell:1,impure', text: 'lower, a range', colour: orange, 'on': lowers}
+  - say: 'An impurity lowers the freezing point too. Sea water, with salt dissolved in it, freezes at about minus 2 degrees Celsius, not 0 degrees Celsius.'
+    write: 'impurity: lower f.p., e.g. sea water about −2 °C'
+    diagram_do:
+      - {id: t, op: fill, part: 'cell:2,impure', text: 'lower', colour: orange, 'on': lowers}
+  - say: 'But a dissolved impurity raises the boiling point. Salt water boils above one hundred degrees Celsius.'
+    write: 'dissolved impurity: higher b.p., e.g. salt water'
+    diagram_do:
+      - {id: t, op: fill, part: 'cell:3,impure', text: 'higher', colour: orange, 'on': raises}
+    point:
+      - {line: 8, kind: underline, at: 'higher b.p.'}
+
+  # ---------------------------------------------------------------- density
+  - section: 'Density'
+    say: 'Density is the mass per unit volume of a substance. It tells you how much mass is packed into each cubic centimetre.'
+    write: 'Density: mass per unit volume'
+  - say: 'In symbols, density, rho, equals mass over volume. Its units are grams per cubic centimetre, or kilograms per cubic metre.'
+    write: '$\rho = \dfrac{m}{V}$, in g/cm³ or kg/m³'
+  - say: 'Water has a density of one gram per cubic centimetre, which is the same as one thousand kilograms per cubic metre.'
+    write: 'water: 1 g/cm³ = 1000 kg/m³'
+  - say: 'Let us solve this. A metal block has a mass of fifty four grams and a volume of twenty cubic centimetres. Find its density.'
+    write: 'Example 1: m = 54 g, V = 20 cm³, ρ = ?'
+  - say: 'Write the formula, then put in the numbers with their units.'
+    write: '$\rho = \dfrac{m}{V} = \dfrac{54\ \text{g}}{20\ \text{cm}^3}$'
+  - say: 'Divide the top and the bottom by two to get twenty seven over ten, which is two point seven. So the density is two point seven grams per cubic centimetre.'
+    write: '$\rho = \dfrac{27}{10} = 2.7\ \text{g/cm}^3$'
+  - say: 'Let us solve another. Kerosene has a density of zero point eight grams per cubic centimetre. What is the mass of two hundred and fifty cubic centimetres of it?'
+    write: 'Example 2: ρ = 0.8 g/cm³, V = 250 cm³, m = ?'
+  - say: 'Rearrange the formula. Mass equals density times volume.'
+    write: '$m = \rho \times V$'
+  - say: 'Zero point eight times two hundred and fifty. Eight times two hundred and fifty is two thousand, and dividing by ten gives two hundred grams.'
+    write: '$m = 0.8\ \text{g/cm}^3 \times 250\ \text{cm}^3 = 200\ \text{g}$'
+  - say: 'Density decides which liquid floats. Look at the beaker. Palm oil, at about zero point nine grams per cubic centimetre, floats on water, at one gram per cubic centimetre.'
+    write: 'the less dense liquid floats: palm oil on water'
+    doodle: {name: 'custom:sub_chem_boiling_melting_density_a', id: dia, size: scene, caption: 'oil floats on water', 'on': beaker}
+    doodle_do:
+      - {id: dia, op: circle, part: oil-tag, 'on': Palm}
+      - {id: dia, op: pulse, part: water-tag, 'on': water}
+  - say: 'Two liquids that do not mix, like palm oil and water or kerosene and water, are separated with a separating funnel. The denser water is run off from the bottom.'
+    write: 'immiscible liquids: separating funnel; the denser layer runs off first'
+    doodle_do:
+      - {id: dia, op: pulse, part: water, 'on': denser}
+      - {id: dia, op: pulse, part: oil, 'on': palm}
+
+  # ---------------------------------------------------------------- comparison
+  - section: 'Comparison'
+    say: 'In separation, a lower boiling point distils over first, and a less dense liquid floats on top.'
+    write: 'separation: lower b.p. distils first; less dense floats'
+    doodle_do:
+      - {id: dia, op: pulse, part: oil, 'on': floats}
+
+  # ---------------------------------------------------------------- traps
+  - section: 'JAMB traps'
+    say: 'JAMB asks what an impurity does to the melting point. You worked that question in the lesson on pure and impure substances: it reduces it. The trap is to say increase, because an impurity raises the boiling point, not the melting point.'
+    write: 'JAMB: impurity → m.p. reduced, b.p. raised; do not swap them'
+    diagram_do:
+      - {id: t, op: highlight, part: 'col:impure', colour: green, 'on': reduces}
+  - say: 'Another trap is units. Density always has a unit, grams per cubic centimetre or kilograms per cubic metre. Writing only grams, or no unit at all, loses marks.'
+    write: 'density needs its unit: g/cm³ or kg/m³, never just g'
+
+  # ---------------------------------------------------------------- check
+  - section: 'Check yourself'
+    say: 'Your turn. A stone of mass seventy five grams is lowered into a measuring cylinder, and the water rises from forty to seventy cubic centimetres. Find its density. Pause and work it out.'
+    write: 'm = 75 g; water rises from 40 cm³ to 70 cm³; ρ = ?'
+  - say: 'The volume of the stone is the rise in the water. Seventy minus forty is thirty cubic centimetres.'
+    write: '$V = 70\ \text{cm}^3 - 40\ \text{cm}^3 = 30\ \text{cm}^3$'
+  - say: 'Density is mass over volume. Seventy five over thirty is five over two, which is two point five grams per cubic centimetre.'
+    write: '$\rho = \dfrac{75}{30} = \dfrac{5}{2} = 2.5\ \text{g/cm}^3$'
+
+  # ---------------------------------------------------------------- recap
+  - section: 'Recap'
+    say: 'Let us recap. A pure substance has sharp, fixed points. Impurities lower the melting and freezing points and raise the boiling point.'
+    write: '1. impurities: lower m.p. and f.p., raise b.p.'
+    diagram_do:
+      - {id: t, op: highlight, part: 'col:impure', 'on': Impurities}
+  - say: 'Density is mass over volume, in grams per cubic centimetre or kilograms per cubic metre.'
+    write: '2. $\rho = \dfrac{m}{V}$, in g/cm³ or kg/m³'
+  - say: 'The less dense liquid floats on top, and a separating funnel runs off the denser layer first. That''s the lesson. Next, try new questions on it.'
+    write: '3. less dense floats; separating funnel runs off the denser layer'
+    doodle_do:
+      - {id: dia, op: pulse, part: oil, 'on': floats}
+
+# ---------------------------------------------------------------- after the lesson: try it
+problems:
+  - ask: 'A metal block has a mass of 39 g and a volume of 5 cm³. Find its density.'
+    answer: '7.8 g/cm³'
+    accept: ['7.8', '7.8 g/cm3', '7.8 g cm-3', '7.8g/cm³', '7.8 g per cm³']
+    working:
+      - '$\rho = \dfrac{m}{V}$'
+      - '$\rho = \dfrac{39\ \text{g}}{5\ \text{cm}^3}$'
+      - '$39 \div 5 = 7.8$, so $\rho = 7.8\ \text{g/cm}^3$'
+    needs_working: false

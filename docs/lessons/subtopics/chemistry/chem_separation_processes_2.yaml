@@ -1,0 +1,166 @@
+# Separation processes, lesson 2 of 2: separating liquids (separating funnel, simple and fractional distillation) and chromatography, with a worked "which method?" example after each, on the liquids-and-dyes and distillation scenes.
+format_version: 1
+subject: chemistry
+subtopic: 'Separation processes'
+subtopic_id: c6a7158d-ee05-5392-bb4b-a39693edd7ac
+part: 2
+title: 'Separating liquids, distillation and chromatography'
+sources:            # pages consulted for the approach, for reviewers
+  - https://syllabus.ng/jamb/chemistry
+  - https://syllabus.ng/waec/chemistry/
+  - https://edupadi.com/classroom/l/separation-techniques
+  - https://schoolings.org/chemistry-lesson-note-for-ss1-first-term-2/
+  - https://waeconline.org.ng/e-learning/Chemistry/chemmain.html
+moments:
+  # ---------------------------------------------------------------- welcome
+  - section: 'Welcome'
+    say: 'Welcome. This is lesson two of two on separation processes: separating liquids, distillation and chromatography.'
+    write: 'Separating liquids, distillation and chromatography'
+
+  # ---------------------------------------------------------------- introduction
+  - section: 'Introduction'
+    say: 'In the last lesson you separated solids. Now the mixture is two liquids, a liquid to be kept from a solution, or a set of dyes. Each method still uses one difference between the parts.'
+    write: 'now: liquids and dyes; each method still uses one difference'
+
+  # ---------------------------------------------------------------- objectives
+  - section: 'Objectives'
+    say: 'By the end of this lesson you will be able to do two things. One, choose between a separating funnel, distillation, fractional distillation and chromatography, and say why.'
+    write: '1. Separating funnel, distillation, fractional distillation, chromatography: which and why'
+  - say: 'Two, describe the apparatus, and spot the traps JAMB sets on it.'
+    write: '2. The apparatus and the JAMB traps'
+
+  # ---------------------------------------------------------------- separating funnel
+  - section: 'Separating funnel'
+    say: 'A separating funnel separates two immiscible liquids, which means liquids that do not mix. They form two layers, and the denser liquid is the bottom layer.'
+    write: 'Separating funnel: two immiscible liquids, in layers by density'
+    doodle: {name: 'custom:sub_chem_separation_processes_c', id: liq, size: scene, caption: 'liquids and dyes', 'on': funnel}
+    doodle_do:
+      - {id: liq, op: pulse, part: water, 'on': bottom}
+  - say: 'Open the tap and run the bottom layer into a beaker. Close the tap as the boundary reaches it. The top layer is then poured out of the funnel.'
+    write: 'run off the bottom layer through the tap; pour out the top layer'
+    doodle_do:
+      - {id: liq, op: circle, part: tap, 'on': tap}
+  - say: 'Let us solve this. Separate kerosene from water. They do not mix, and kerosene is less dense, so it floats on top. We use a separating funnel, and the water runs out first.'
+    write: 'Example: kerosene and water ∴ separating funnel; water (denser) out first'
+    doodle_do:
+      - {id: liq, op: pulse, part: kerosene, 'on': floats}
+      - {id: liq, op: pulse, part: water, 'on': water, on_nth: 2}
+
+  # ---------------------------------------------------------------- simple distillation
+  - section: 'Simple distillation'
+    say: 'Simple distillation separates a liquid from a solution, and keeps the liquid. The solution is boiled, the vapour is cooled in a condenser, and the pure liquid collects as the distillate.'
+    write: 'Simple distillation: a liquid from a solution; the liquid is kept'
+    doodle: {name: 'custom:sub_chem_separation_processes_b', id: dis, size: scene, caption: 'distillation', 'on': condenser}
+    doodle_do:
+      - {id: dis, op: pulse, part: distillate, 'on': distillate}
+  - say: 'Look at the apparatus. The thermometer bulb is level with the side arm, to read the temperature of the vapour leaving. Cold water enters the condenser at the bottom and leaves at the top.'
+    write: 'thermometer bulb at the side arm; water in at the bottom of the condenser'
+    doodle_do:
+      - {id: dis, op: circle, part: thermometer, 'on': thermometer}
+      - {id: dis, op: pulse, part: water-in, 'on': enters}
+      - {id: dis, op: pulse, part: water-out, 'on': leaves}
+  - say: 'Let us solve this. How do we get pure water from sea water? We want to keep the water, so we distil it. The steam condenses to pure water, and the salt stays in the flask.'
+    write: 'Example: pure water from sea water ∴ distillation; salt stays in the flask'
+    doodle_do:
+      - {id: dis, op: pulse, part: mixture, 'on': flask}
+      - {id: dis, op: circle, part: distillate, 'on': condenses}
+
+  # ---------------------------------------------------------------- fractional distillation
+  - section: 'Fractional distillation'
+    say: 'Fractional distillation separates miscible liquids, which mix completely, when their boiling points are close. A fractionating column is fitted between the flask and the condenser.'
+    write: 'Fractional distillation: miscible liquids with close boiling points'
+    doodle_do:
+      - {id: dis, op: stage, stage: 'custom:sub_chem_separation_processes_b2', 'on': column}
+  - say: 'The column is packed with glass beads. The vapour condenses and boils again many times on them. So the liquid with the lower boiling point reaches the top and distils over first.'
+    write: 'in the column, the lower boiling point distils over first'
+    doodle_do:
+      - {id: dis, op: circle, part: column, 'on': beads}
+  - say: 'Let us solve this. Separate methanol, which boils at about 65 °C, from ethanol, which boils at 78 °C. They are both liquids and they mix completely. Their boiling points are close, so we use fractional distillation.'
+    write: 'Example: methanol (65 °C) and ethanol (78 °C) ∴ fractional distillation'
+    point:
+      - {line: 12, kind: underline, at: 'fractional distillation'}
+  - say: 'The thermometer stays near 65 °C while the methanol distils over. When it starts to rise towards 78 °C, ethanol is coming over, so we change the receiver.'
+    write: 'methanol first, at 65 °C; change the receiver as the reading rises'
+    doodle_do:
+      - {id: dis, op: pulse, part: thermometer, 'on': thermometer}
+  - say: 'In a refinery, such as those at Port Harcourt, Warri and Kaduna, crude oil is separated by fractional distillation into fractions such as petrol, kerosene and diesel. Liquid air is separated the same way, and nitrogen boils off before oxygen.'
+    write: 'uses: crude oil into fractions; liquid air into $\ce{N2}$ and $\ce{O2}$'
+
+  # ---------------------------------------------------------------- chromatography
+  - section: 'Chromatography'
+    say: 'Chromatography separates the parts of a mixture because they move at different speeds, carried by a solvent. It separates coloured substances, such as the dyes in ink and the pigments in leaves.'
+    write: 'Chromatography: the parts move at different speeds with a solvent'
+    doodle_do:
+      - {id: liq, op: pulse, part: chroma-tag, 'on': Chromatography}
+  - say: 'In paper chromatography, a spot of the mixture is put on a pencil line near the bottom of the paper. The paper stands in the solvent, with the line above the solvent level.'
+    write: 'spot on a pencil line, above the solvent level'
+    doodle_do:
+      - {id: liq, op: label, part: start-line, text: 'ink spot here', 'on': spot}
+      - {id: liq, op: pulse, part: solvent, 'on': solvent, on_nth: 2}
+  - say: 'Why pencil? Pencil does not dissolve and run, but an ink line would. Why above the solvent? If the spot sat in the solvent, it would wash off into the beaker.'
+    write: 'pencil does not run; the spot sits above the solvent, not in it'
+  - say: 'The solvent soaks up the paper. A part that dissolves well and clings weakly to the paper moves far. A part that clings strongly moves only a little. So the spots separate.'
+    write: 'held weakly → moves far; held strongly → moves little'
+    doodle_do:
+      - {id: liq, op: stage, stage: 'custom:sub_chem_separation_processes_c2', 'on': separate}
+      - {id: liq, op: circle, part: spots, 'on': spots}
+  - say: 'Column chromatography works the same way. The mixture runs down a glass column packed with a solid such as alumina, and its parts come out as separate bands.'
+    write: 'column chromatography: same idea, in a packed column'
+
+  # ---------------------------------------------------------------- comparison
+  - section: 'Comparison'
+    say: 'Now put the methods side by side. Immiscible liquids need a separating funnel. Miscible liquids need distillation, and fractional distillation when their boiling points are close. Dyes and pigments need chromatography.'
+    write: 'immiscible → separating funnel; miscible → (fractional) distillation; dyes → chromatography'
+    doodle_do:
+      - {id: liq, op: pulse, part: funnel-tag, 'on': funnel}
+      - {id: dis, op: pulse, part: distillation-tag, 'on': distillation}
+      - {id: liq, op: pulse, part: chroma-tag, 'on': chromatography}
+
+  # ---------------------------------------------------------------- traps
+  - section: 'JAMB traps'
+    say: 'Here is a real JAMB question. Methanoic acid mixes with water and boils at about the same temperature. How do you get pure water from a mixture of sand, water and methanoic acid?'
+    write: 'JAMB: pure water from sand + water + methanoic acid?'
+  - say: 'Filtration removes the sand. But distilling next carries the acid over with the water, because their boiling points are almost the same. Fractional distillation fails for the same reason.'
+    write: 'filtration then distillation ✗; fractional distillation ✗ (boiling points too close)'
+    point:
+      - {line: 22, kind: circle, at: 'boiling points too close'}
+  - say: 'So first neutralise the acid with sodium hydroxide. It becomes sodium methanoate, a salt that does not boil off. Then distil. Only water comes over, and the sand and salt stay behind.'
+    write: '$\ce{HCOOH + NaOH -> HCOONa + H2O}$, then distil ✓'
+    doodle_do:
+      - {id: dis, op: pulse, part: distillate, 'on': water}
+  - say: 'The other trap is neutralisation then filtration. The sodium methanoate is dissolved, so it passes straight through the filter paper with the water.'
+    write: 'neutralise then filter ✗: the dissolved salt passes through'
+  - say: 'Another real question asks for ethanol of 95 percent or more from palm wine. Fractional distillation alone stops at about 95.6 percent ethanol, where ethanol and water boil off together as one mixture. A dehydrant such as quicklime, CaO, takes up the last water, and the ethanol is distilled again.'
+    write: 'high quality ethanol from palm wine: fractional distillation + a dehydrant (CaO)'
+  - say: 'A third asks the principle of column chromatography. The answer is that the parts move at different speeds in the column. They do not react with the solvent or with each other.'
+    write: 'column chromatography: different speeds ✓; reactions ✗'
+  - say: 'Students often mix up evaporation and distillation. Evaporation loses the liquid, but distillation keeps it.'
+    write: 'evaporation loses the liquid, distillation keeps it'
+
+  # ---------------------------------------------------------------- check
+  - section: 'Check yourself'
+    say: 'Your turn. Which method separates groundnut oil from water, and which liquid leaves the tap first? Pause and decide before I go on.'
+    write: 'groundnut oil and water: which method? which comes out first?'
+  - say: 'Oil and water do not mix, so they form two layers, and we use a separating funnel. Water is denser than the oil, so water is the bottom layer and runs out of the tap first.'
+    write: 'immiscible ∴ separating funnel ✓; water (denser) out first'
+    doodle_do:
+      - {id: liq, op: circle, part: tap, 'on': tap}
+
+  # ---------------------------------------------------------------- recap
+  - section: 'Recap'
+    say: 'Let us recap. Use a separating funnel when liquids do not mix, and distillation when you keep a liquid, fractional when the boiling points are close.'
+    write: '1. liquids: separating funnel, distillation, fractional distillation'
+  - say: 'Chromatography separates dyes and pigments, because the parts move at different speeds. That''s the lesson. Next, try new questions on separation processes.'
+    write: '2. dyes and pigments: chromatography, different speeds'
+
+# ---------------------------------------------------------------- after the lesson: try it
+problems:
+problems:
+  - ask: 'Which method gives pure water from copper(II) tetraoxosulphate(VI) solution? A. evaporation  B. filtration  C. simple distillation  D. crystallisation'
+    answer: 'C'
+    accept: ['simple distillation', 'distillation', 'C. simple distillation']
+    working:
+      - 'We want to keep the water, the liquid.'
+      - 'Evaporation and crystallisation keep the solid and lose the water; filtration cannot hold back a dissolved solid.'
+      - 'Simple distillation boils off the water and condenses it as pure distillate; the salt stays in the flask. Answer: C.'
+    needs_working: false

@@ -15,6 +15,24 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-12
 
+### Chemistry lessons, first batch: 8 subtopics as 18 short lessons
+- **What:** the first eight Chemistry subtopics in syllabus order (Elements, compounds and
+  mixtures through The gas laws) written as 18 short lessons of 26–42 moments, each with a
+  welcome, objectives, worked examples straight after each rule, JAMB traps from the real past
+  questions in our bank, a check, a recap and one problem; annotated diagrams that grow.
+  Process: one writer per subtopic (`docs/lessons/writer-brief.md`), then one checker each
+  (`checker-brief.md`: every fact and calculation re-done, past-question answers against the
+  key, repeats between neighbouring lessons removed, length cut), then split into short
+  lessons (`splitter-brief.md`). Checkers fixed real errors (a heating curve drawn wrongly, a
+  wrong gas-law explanation, an over-broad boiling-point rule, missing methods two past
+  questions need, board circles on the wrong number).
+- **Why:** founder, 12 Nov 2026: start writing the lessons, Nigerian-classroom style, short.
+- **Where:** `docs/lessons/subtopics/chemistry/*.yaml` and `doodles/`.
+- **Status:** loaded locally, not pushed. Each checker listed points for a human teacher
+  (e.g. NH₄Cl "sublimes", FeS and the magnet, brass as homogeneous, R = 0.082). Two answer-
+  bank notes are wrong (the Ca(NO₃)₂ distractor reasons; the 2018 dilution working's trap
+  value): to fix at the source.
+
 ### A subtopic holds several short lessons, each its own stop on the roadmap
 - **What:** a lesson is about five minutes (at most about 40 moments); a broad subtopic is
   taught as two to four lessons, played in order, each its own roadmap stop ("Lesson 2 of 4 ·

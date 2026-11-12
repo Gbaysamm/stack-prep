@@ -1,0 +1,170 @@
+# Lesson one of two on boiling, density, freezing and melting points: melting, freezing and boiling points, the heating curve, pressure, kelvin and distillation, and JAMB's traps.
+format_version: 1
+subject: chemistry
+subtopic: 'Boiling, density, freezing and melting points'
+subtopic_id: 181e119e-6a41-5215-816d-834d6d563163
+part: 1
+title: 'Melting, freezing and boiling points: the heating curve'
+sources:            # pages consulted for the approach, for reviewers
+  - https://syllabus.ng/jamb/chemistry
+  - https://waeconline.org.ng/e-learning/Chemistry/chemmain.html
+  - https://edupadi.com/classroom/l/classification-of-matter
+  - https://schoolings.org/chemistry-lesson-note-for-ss1-first-term-2/
+moments:
+  # ---------------------------------------------------------------- welcome
+  - section: 'Welcome'
+    say: 'Welcome. This is lesson one of two on boiling, density, freezing and melting points: melting, freezing and boiling points, and the heating curve.'
+    write: 'Melting, freezing and boiling points: the heating curve'
+
+  # ---------------------------------------------------------------- introduction
+  - section: 'Introduction'
+    say: 'Every pure substance melts, freezes and boils at its own fixed temperature. These numbers identify the substance.'
+    write: 'each pure substance has its own m.p., f.p. and b.p.'
+  - say: 'Chemists use them to identify a substance, and to choose how to separate a mixture.'
+    write: 'used to identify substances and to separate mixtures'
+
+  # ---------------------------------------------------------------- objectives
+  - section: 'Objectives'
+    say: 'By the end of this lesson you will be able to do two things. One, define melting, freezing and boiling points, and read a heating curve.'
+    write: '1. Define m.p., f.p. and b.p.; read a heating curve'
+  - say: 'Two, say how pressure changes the boiling point, and use boiling points in kelvin and in distillation.'
+    write: '2. Use b.p.: pressure, kelvin, distillation'
+
+  # ---------------------------------------------------------------- melting point
+  - section: 'Melting point'
+    say: 'The melting point of a solid is the temperature at which it changes into a liquid. At that temperature the solid and the liquid are both present.'
+    write: 'Melting point: the temperature at which a solid becomes a liquid'
+    point:
+      - {line: 5, kind: underline, at: 'solid becomes a liquid'}
+  - say: 'Let me draw the heating curve of ice. Time in minutes goes along, and temperature in degrees Celsius goes up.'
+    write: 'heating curve: temperature against time'
+    diagram:
+      id: g
+      kind: graph
+      'on': draw
+      caption: 'heating curve of ice'
+      size: scene
+      x: [0, 24]
+      y: [-20, 120]
+      x_step: 2
+      y_step: 20
+      x_label: 'time (min)'
+      y_label: 'temperature (°C)'
+      plots:
+        - {points: [[0, -20], [1, 0]], join: straight, label: 'ice warms', colour: blue, later: true}
+        - {points: [[1, 0], [4, 0]], join: straight, label: 'melting', colour: purple, later: true}
+        - {points: [[4, 0], [14, 100]], join: straight, label: 'water warms', colour: blue, later: true}
+        - {points: [[14, 100], [22, 100]], join: straight, label: 'boiling', colour: purple, later: true}
+  - say: 'We start with ice at minus twenty degrees. As heat is supplied, the ice warms up steadily to zero degrees Celsius.'
+    write: 'ice warms from −20 °C to 0 °C'
+    diagram_do:
+      - {id: g, op: plot, 'on': warms}
+  - say: 'Then the line goes flat. The ice is melting, and the temperature stays at zero degrees until all of it has melted.'
+    write: 'flat part: ice melting at 0 °C, the melting point'
+    diagram_do:
+      - {id: g, op: plot, 'on': flat}
+      - {id: g, op: point, x: 1, y: 0, text: 'm.p. = 0 °C', colour: purple, 'on': zero}
+  - say: 'Why is it flat? The heat is used to break the forces holding the particles together in the solid, so it does not raise the temperature.'
+    write: 'heat breaks the forces between particles; temperature steady'
+    diagram_do:
+      - {id: g, op: highlight, part: 'plot:2', 'on': forces}
+  - say: 'Let us solve this. A white solid melts sharply at 133 degrees Celsius. The data book gives naphthalene 80 degrees Celsius, urea 133 degrees Celsius and sodium chloride 801 degrees Celsius. Which is the solid?'
+    write: 'Example 1: melts sharply at 133 °C. Naphthalene 80 °C, urea 133 °C, sodium chloride 801 °C'
+  - say: 'Step one. It melts at one sharp temperature, so it is a pure substance, and its melting point can be matched with the data book.'
+    write: 'sharp m.p. ∴ pure; match it with the data book'
+  - say: 'Step two. 133 degrees Celsius matches urea, and no other value is close. So the solid is urea.'
+    write: '133 °C = m.p. of urea ∴ the solid is urea'
+    point:
+      - {line: 12, kind: circle, at: 'the solid is urea'}
+
+  # ---------------------------------------------------------------- freezing point
+  - section: 'Freezing point'
+    say: 'The freezing point of a liquid is the temperature at which it changes into a solid.'
+    write: 'Freezing point: the temperature at which a liquid becomes a solid'
+  - say: 'Look at the flat part of the curve again. Cooling runs the curve backwards, so pure water freezes at zero degrees, the same temperature at which ice melts.'
+    write: 'pure substance: freezing point = melting point'
+    diagram_do:
+      - {id: g, op: label, part: 'plot:2', text: 'freezing point = melting point', 'on': freezes}
+  - say: 'Let us solve this. A pure liquid is cooled. Its temperature falls, stays at 17 degrees Celsius for four minutes, then falls again. What are its freezing point and its melting point?'
+    write: 'Example 2: pure liquid cooled; temperature steady at 17 °C. f.p.? m.p.?'
+  - say: 'Step one. The temperature stays steady while the liquid turns to solid. So the freezing point is 17 degrees Celsius.'
+    write: 'steady while freezing ∴ f.p. = 17 °C'
+  - say: 'Step two. For a pure substance the melting point equals the freezing point. So the melting point is also 17 degrees Celsius.'
+    write: 'pure ∴ m.p. = f.p. = 17 °C'
+  - say: 'Pure ethanoic acid freezes at about 17 degrees Celsius. It is called glacial ethanoic acid, and it can freeze in the bottle on a cold harmattan morning.'
+    write: 'e.g. pure (glacial) ethanoic acid: f.p. about 17 °C'
+
+  # ---------------------------------------------------------------- boiling point
+  - section: 'Boiling point'
+    say: 'The boiling point of a liquid is the temperature at which its saturated vapour pressure equals the external pressure, usually the pressure of the air above it. The liquid then turns to gas all through, with bubbles.'
+    write: 'Boiling point: vapour pressure = external pressure'
+    point:
+      - {line: 19, kind: underline, at: 'vapour pressure = external pressure'}
+  - say: 'Back to the curve. After the ice has melted, the water warms from zero to one hundred degrees Celsius.'
+    write: 'water warms from 0 °C to 100 °C'
+    diagram_do:
+      - {id: g, op: plot, 'on': warms}
+  - say: 'Then the line goes flat again. The water is boiling at one hundred degrees, and the heat turns the liquid into steam.'
+    write: 'second flat part: boiling at 100 °C, the boiling point'
+    diagram_do:
+      - {id: g, op: plot, 'on': flat}
+      - {id: g, op: point, x: 14, y: 100, text: 'b.p. = 100 °C', colour: purple, 'on': hundred}
+  - say: 'The boiling point depends on pressure. One hundred degrees is at standard pressure, seven hundred and sixty millimetres of mercury. Lower pressure gives a lower boiling point.'
+    write: 'b.p. of water = 100 °C at 760 mmHg; lower pressure → lower b.p.'
+  - say: 'Temperatures are also given in kelvin. To change degrees Celsius to kelvin, add two hundred and seventy three.'
+    write: '$T\,(\text{K}) = \theta\,(^\circ\text{C}) + 273$'
+  - say: 'Let us solve this. Ethanol boils at seventy eight degrees Celsius. What is its boiling point in kelvin?'
+    write: 'Example 3: ethanol, b.p. 78 °C. In kelvin?'
+  - say: 'Add two hundred and seventy three. Seventy eight plus two hundred and seventy three is three hundred and fifty one kelvin.'
+    write: '$T = 78 + 273 = 351\ \text{K}$'
+  - say: 'Let us solve another. Ethanol boils at seventy eight degrees and water at one hundred. A mixture of the two is heated slowly. Which liquid distils over first?'
+    write: 'Example 4: ethanol (78 °C) and water (100 °C). Which distils first?'
+  - say: 'The liquid with the lower boiling point turns to vapour first. Seventy eight is lower than one hundred, so ethanol distils over first. This is fractional distillation.'
+    write: 'lower b.p. boils off first ∴ ethanol (fractional distillation)'
+  - say: 'In the kitchen, a pressure cooker raises the pressure, so the water boils above one hundred degrees and beans cook faster.'
+    write: 'pressure cooker: higher pressure → b.p. above 100 °C'
+
+  # ---------------------------------------------------------------- traps
+  - section: 'JAMB traps'
+    say: 'JAMB asks how pressure changes the boiling point. On the Jos Plateau the air pressure is below 760 millimetres of mercury. Pure water there boils at exactly 100 degrees Celsius, above 100 degrees Celsius, below 100 degrees Celsius, or 0 degrees Celsius?'
+    write: 'Jos Plateau, pressure below 760 mmHg: b.p. of water? A. 100 °C B. above C. below D. 0 °C'
+  - say: 'The air pressure is lower, so the vapour pressure of the water reaches it at a lower temperature. The answer is C, below 100 degrees Celsius.'
+    write: 'lower pressure → lower b.p. ∴ C, below 100 °C ✓'
+  - say: 'The trap is A. Water boils at 100 degrees Celsius only at 760 millimetres of mercury.'
+    write: 'A ✗ 100 °C only at 760 mmHg'
+    point:
+      - {line: 31, kind: circle, at: '760 mmHg'}
+  - say: 'Another trap. While a solid melts, heat is still going in, but the temperature does not rise. The heat breaks the forces between the particles.'
+    write: 'while melting or boiling: heat in, temperature steady'
+    diagram_do:
+      - {id: g, op: highlight, part: 'plot:2', 'on': melts}
+
+  # ---------------------------------------------------------------- check
+  - section: 'Check yourself'
+    say: 'Your turn. Pure benzene melts at 5.5 degrees Celsius. What is its freezing point in kelvin? Pause and work it out.'
+    write: 'pure benzene: m.p. 5.5 °C; f.p. in kelvin = ?'
+  - say: 'Benzene is pure, so its freezing point equals its melting point, 5.5 degrees Celsius.'
+    write: 'pure ∴ f.p. = m.p. = 5.5 °C'
+  - say: 'Add two hundred and seventy three. Five point five plus two hundred and seventy three is two hundred and seventy eight point five kelvin.'
+    write: '$T = 5.5 + 273 = 278.5\ \text{K}$'
+
+  # ---------------------------------------------------------------- recap
+  - section: 'Recap'
+    say: 'Let us recap. Melting point is where a solid becomes a liquid, and freezing point the reverse, at the same temperature for a pure substance. The flat parts of the heating curve are melting and boiling.'
+    write: '1. m.p. = f.p. for a pure substance; flat parts: melting, boiling'
+    diagram_do:
+      - {id: g, op: highlight, part: 'plot:2', 'on': Melting}
+      - {id: g, op: highlight, part: 'plot:4', 'on': boiling}
+  - say: 'Boiling point changes with pressure. Add 273 to change degrees Celsius to kelvin, and the liquid with the lower boiling point distils over first. That''s the lesson. Next comes lesson two: purity tests, density and separation.'
+    write: '2. lower pressure → lower b.p.; K = °C + 273; lower b.p. distils first'
+
+# ---------------------------------------------------------------- after the lesson: try it
+problems:
+  - ask: 'Methanol boils at 65 °C at 760 mmHg. What is its boiling point in kelvin?'
+    answer: '338 K'
+    accept: ['338', '338K', '338 kelvin', '338 k']
+    working:
+      - '$T\,(\text{K}) = \theta\,(^\circ\text{C}) + 273$'
+      - '$T = 65 + 273$'
+      - '$T = 338\ \text{K}$'
+    needs_working: false
