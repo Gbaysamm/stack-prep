@@ -370,6 +370,18 @@ def test_a_weak_run_puts_the_lesson_before_the_next_run() -> None:
     assert not needs_lesson(replace(weak[0], mastery=0.85))
 
 
+def test_a_broad_subtopic_has_several_lessons_each_its_own_stop() -> None:
+    # Founder, 12 Nov: a subtopic holds several short lessons; each is a stop on the path,
+    # then the run again. Lessons already taken since the last run are not given again.
+    from dataclasses import replace
+
+    base = units("chem", [0.3, None, None])
+    weak = (replace(base[0], runs=1, lesson_parts=3, taught_parts=1), *base[1:])
+    plan = build(spec(subject_from(weak), target_total=None, minutes=60))
+    chem = [i for i in plan.items if i.subtopic_id == "chem-u0"]
+    assert [(i.kind, i.part) for i in chem[:3]] == [("lesson", 2), ("lesson", 3), ("run", None)]
+
+
 def test_a_finished_topic_gets_one_test() -> None:
     from dataclasses import replace
 

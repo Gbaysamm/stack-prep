@@ -8,6 +8,20 @@ The board rules in [the lesson style guide](../lesson-style-guide.md) and the do
 [doodles v2](../plans/doodles-v2-contract.md) apply. This page adds what a whole-topic lesson
 needs. The founder's rules (11 Nov 2026):
 
+## Short lessons: a subtopic may have several (founder, 12 Nov 2026)
+
+A lesson is about **five minutes: at most about 40 moments.** A subtopic is not a lesson: a
+broad subtopic is split into two to four lessons, each its own stop on the roadmap, played in
+order, with the run again after the last. Split at natural seams (e.g. "Laws of chemical
+combination" / "Formulae and equations" / "The mole" / "Reacting masses and concentration").
+Each lesson is its own file, `<slug>_1.yaml`, `<slug>_2.yaml`, …, with `part: 1`, `part: 2`, …
+and `title:` (what it covers). A one-lesson subtopic needs neither.
+
+Each lesson has the whole shape below, short: its own welcome ("Welcome. This is lesson two
+of four on the mole: the mole itself."), one or two objectives, its terms with worked
+examples, its traps, a one-line check, a short recap, and **one** problem. A later lesson does
+not repeat an earlier one: it may say "In the last lesson you met …" in one line.
+
 ## The shape, in this order
 
 1. **Welcome.** Greet the student and name the lesson. The title is written as it is said.

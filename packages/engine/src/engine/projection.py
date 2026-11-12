@@ -106,8 +106,14 @@ class UnitStanding:
     #: them, so this caps how many runs it can be given (roadmap._runs_left).
     fresh: int | None = None
     #: The student has taken this subtopic's lesson since their last run on it, so the next
-    #: stop is a run, not another lesson (roadmap._syllabus_queue).
+    #: stop is a run, not another lesson (roadmap._syllabus_queue). With several lessons in a
+    #: subtopic, taught means all of them.
     taught: bool = False
+    #: A subtopic's lessons (founder, 12 Nov 2026): a broad subtopic is taught as several short
+    #: ones, each its own stop on the path. How many it has, and how many of them the student
+    #: has finished since their last run on it.
+    lesson_parts: int = 1
+    taught_parts: int = 0
 
 
 @dataclass(frozen=True)

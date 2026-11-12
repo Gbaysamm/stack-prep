@@ -308,3 +308,89 @@ async def test_a_weak_run_puts_its_lesson_next_then_the_run_again(
                 "DELETE FROM students WHERE id = :id",
             ):
                 await conn.execute(text(statement), {"id": student})
+
+
+async def test_a_weak_run_puts_every_lesson_of_the_subtopic_next(
+    client: httpx.AsyncClient,
+) -> None:
+    """Founder, 12 Nov 2026: a broad subtopic is several short lessons, each its own stop on
+    the path, then the run again."""
+    subject = await _subject()
+    if subject is None:
+        pytest.skip("no subject with questions in several topics in this database")
+    student = str((await client.post("/v1/dev/students", json={})).json()["student_id"])
+    made: list[str] = []
+    try:
+        await _checkup(client, student, subject)
+        plan = (await client.get(f"/v1/roadmap/{student}")).json()
+        run = next(i for i in plan["items"] if i["day"] == plan["today"] and i["kind"] == "run")
+        sub = run["subtopic_id"]
+        have = await _rows("SELECT part FROM subtopic_lesson_content WHERE subtopic_id = :s", s=sub)
+        if have:
+            pytest.skip("that subtopic already has written lessons")
+        async with get_engine().begin() as conn:
+            for part in (1, 2):
+                await conn.execute(
+                    text(
+                        "INSERT INTO subtopic_lesson_content (subtopic_id, part, title, moments,"
+                        " source_file) VALUES (:s, :p, :t, CAST(:m AS jsonb), 'test')"
+                    ),
+                    {"s": sub, "p": part, "t": f"Part {part}", "m": '[{"say": "x"}]'},
+                )
+        made.append(sub)
+
+        started = await client.post(f"/v1/roadmap/{student}/items/{run['id']}/start")
+        session = started.json()["session_id"]
+        state = (await client.get(f"/v1/practice/{session}")).json()
+        right = {
+            r["option_key"]
+            for r in await _rows(
+                "SELECT option_key FROM question_options"
+                " WHERE question_version_id = :v AND is_correct",
+                v=state["question"]["question_version_id"],
+            )
+        }
+        await client.post(
+            f"/v1/practice/{session}/answer",
+            json={
+                "question_version_id": state["question"]["question_version_id"],
+                "selected_option_key": next(
+                    o["option_key"]
+                    for o in state["question"]["options"]
+                    if o["option_key"] not in right
+                ),
+                "response_ms": 9000,
+            },
+        )
+        async with get_engine().begin() as conn:
+            await conn.execute(
+                text("UPDATE study_sessions SET ended_at = now() WHERE id = :id"), {"id": session}
+            )
+
+        after = (await client.get(f"/v1/roadmap/{student}")).json()
+        day = sorted(
+            (i for i in after["items"] if i["day"] == after["today"]), key=lambda i: i["position"]
+        )
+        at = next(n for n, i in enumerate(day) if i["id"] == run["id"])
+        nxt = [(i["kind"], i["part"], i["lesson_parts"]) for i in day[at + 1 : at + 4]]
+        assert nxt == [("lesson", 1, 2), ("lesson", 2, 2), ("run", None, None)]
+        assert day[at + 1]["lesson_title"] == "Part 1"
+        started = (
+            await client.post(f"/v1/roadmap/{student}/items/{day[at + 2]['id']}/start")
+        ).json()
+        assert started["path"].endswith("&part=2")
+    finally:
+        async with get_engine().begin() as conn:
+            await conn.execute(text("SET LOCAL scorepilot.allow_erasure = 'on'"))
+            for sub in made:
+                await conn.execute(
+                    text("DELETE FROM subtopic_lesson_content WHERE subtopic_id = :s"), {"s": sub}
+                )
+            for statement in (
+                "DELETE FROM roadmaps WHERE student_id = :id",
+                "DELETE FROM attempts WHERE student_id = :id",
+                "DELETE FROM study_sessions WHERE student_id = :id",
+                "DELETE FROM consents WHERE student_id = :id",
+                "DELETE FROM students WHERE id = :id",
+            ):
+                await conn.execute(text(statement), {"id": student})

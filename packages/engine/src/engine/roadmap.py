@@ -162,6 +162,8 @@ class PlannedItem:
     length: int
     reason: Reason
     value: Value | None = None
+    #: Which of the subtopic's lessons a lesson stop is (1, 2, ...); None for anything else.
+    part: int | None = None
 
 
 @dataclass(frozen=True)
@@ -423,7 +425,7 @@ def _syllabus_queue(
     slots: int,
     ahead: int,
     tested: frozenset[str] = frozenset(),
-) -> list[tuple[str, str, Reason, Value, PlannedUnit]]:
+) -> list[tuple[str, str, Reason, Value, PlannedUnit, int | None]]:
     """A subject's runs for the week, in the syllabus's order.
 
     The open subtopics not yet moved past are taken a few at a time (``ahead`` of them), in
@@ -437,7 +439,9 @@ def _syllabus_queue(
     cut_high = heavy[len(heavy) // 3] if heavy else 0.0
     cut_medium = heavy[2 * len(heavy) // 3] if heavy else 0.0
 
-    def entry(unit: UnitStanding, reason: Reason) -> tuple[str, str, Reason, Value, PlannedUnit]:
+    def entry(
+        unit: UnitStanding, reason: Reason, part: int | None = None
+    ) -> tuple[str, str, Reason, Value, PlannedUnit, int | None]:
         value: Value = (
             "high" if unit.share >= cut_high else "medium" if unit.share >= cut_medium else "low"
         )
@@ -445,7 +449,7 @@ def _syllabus_queue(
         line = PlannedUnit(
             unit.unit_id, unit.name, unit.topic_name, unit.share, now, now, 1, 0.0, ""
         )
-        return (unit.unit_id, unit.name, reason, value, line)
+        return (unit.unit_id, unit.name, reason, value, line, part)
 
     learning: list[UnitStanding] = []
     width = max(1, ahead)
@@ -457,11 +461,11 @@ def _syllabus_queue(
             break
         width += 1
 
-    queue: list[tuple[str, str, Reason, Value, PlannedUnit]] = []
+    queue: list[tuple[str, str, Reason, Value, PlannedUnit, int | None]] = []
     # A finished topic's test comes first: it is the check that the topic is really done.
     for first in topics_to_test(units, tested):
         test = entry(first, "topic_test")
-        queue.append((first.topic_id, first.topic_name, "topic_test", test[3], test[4]))
+        queue.append((first.topic_id, first.topic_name, "topic_test", test[3], test[4], None))
     left = {u.unit_id: _runs_left(u) for u in learning}
     lesson_due = {u.unit_id for u in learning if needs_lesson(u)}
     for start in range(0, len(learning), max(1, ahead)):
@@ -469,9 +473,11 @@ def _syllabus_queue(
         while any(left[u.unit_id] for u in group) and len(queue) < slots:
             for unit in group:
                 if left[unit.unit_id] and len(queue) < slots:
-                    # Below the bar after a run: its lesson first, then the run again.
+                    # Below the bar after a run: its lessons first, each its own stop (a
+                    # broad subtopic has several), then the run again.
                     if unit.unit_id in lesson_due:
-                        queue.append(entry(unit, "reteach"))
+                        for part in range(unit.taught_parts + 1, unit.lesson_parts + 1):
+                            queue.append(entry(unit, "reteach", part))
                         lesson_due.discard(unit.unit_id)
                         if len(queue) >= slots:
                             break
@@ -620,7 +626,7 @@ def _next_days(
     """The next seven days, slot by slot."""
     horizon = spec.today + timedelta(days=FIXED_DAYS - 1)
     units = {u.unit_id: u for s in measured for u in s.units}
-    queues: dict[str, list[tuple[str, str, Reason, Value, PlannedUnit]]] = {}
+    queues: dict[str, list[tuple[str, str, Reason, Value, PlannedUnit, int | None]]] = {}
     week_days = sum(1 for d in dates if d <= horizon)
     for subject in measured:
         # The runs come from the open subtopics only (syllabus order); the scores above still
@@ -731,7 +737,7 @@ def _next_days(
                         )
                     )
                 else:
-                    unit_id, name, reason, value, _ = pick
+                    unit_id, name, reason, value, _, part = pick
                     kind: Kind = (
                         "lesson"
                         if reason == "reteach"
@@ -750,6 +756,7 @@ def _next_days(
                             0 if kind == "lesson" else RUN_LENGTH,
                             reason,
                             value,
+                            part if kind == "lesson" else None,
                         )
                     )
             if exam_phase:

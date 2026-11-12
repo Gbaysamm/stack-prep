@@ -111,30 +111,40 @@ class Lesson(BaseModel):
     #: The subtopic's and subject's names, so the lesson opens with no other request.
     title: str
     subject: str
+    #: Which of the subtopic's lessons this is, how many it has, and what this one covers.
+    part: int = 1
+    parts: int = 1
+    part_title: str | None = None
 
 
 async def describe(
-    conn: AsyncConnection, subtopic_id: UUID, settings: Settings, engine: Voice
+    conn: AsyncConnection, subtopic_id: UUID, settings: Settings, engine: Voice, part: int = 1
 ) -> Lesson | None:
-    """The package's contents and version. None: the bank has no lesson for this subtopic."""
+    """The package's contents and version. None: the bank has no such lesson."""
     from app.db import fetch_all
     from app.routers.roadmap import _bank_beats
 
-    found = await _bank_beats(conn, subtopic_id)
+    found = await _bank_beats(conn, subtopic_id, part)
     if found is None:
         return None
     beats, doodles = found
     names = await fetch_all(
         conn,
         """
-        SELECT sub.name AS title, s.name AS subject
+        SELECT sub.name AS title, s.name AS subject, c.title AS part_title,
+               (SELECT count(*) FROM subtopic_lesson_content x
+                WHERE x.subtopic_id = sub.id) AS parts
         FROM curriculum_items sub JOIN subjects s ON s.id = sub.subject_id
+        LEFT JOIN subtopic_lesson_content c ON c.subtopic_id = sub.id AND c.part = :part
         WHERE sub.id = :sub
         """,
         sub=subtopic_id,
+        part=part,
     )
     title = str(names[0]["title"]) if names else "Lesson"
     subject = str(names[0]["subject"]) if names else ""
+    part_title = str(names[0]["part_title"]) if names and names[0]["part_title"] else None
+    parts = int(names[0]["parts"]) if names else 1
     voice: Voice = voice_store.engine_for(engine, settings) if engine != "none" else "none"
     keys = [_clip_key(str(beat.say), settings, voice) for beat in beats]
     stamp = json.dumps(
@@ -144,6 +154,9 @@ async def describe(
             voice_store.LITE_RECIPE,
             title,
             subject,
+            part,
+            parts,
+            part_title,
             _lesson_json(beats, doodles),
             keys,
         ],
@@ -157,6 +170,9 @@ async def describe(
         doodles=doodles,
         title=title,
         subject=subject,
+        part=part,
+        parts=parts,
+        part_title=part_title,
     )
 
 
@@ -166,9 +182,10 @@ async def build(
     settings: Settings,
     engine: Voice,
     patient: bool = False,
+    part: int = 1,
 ) -> Built | None:
-    """The subtopic's lesson package, from disk when it was made before. None: no bank lesson."""
-    found = await describe(conn, subtopic_id, settings, engine)
+    """One lesson's package, from disk when it was made before. None: no such lesson."""
+    found = await describe(conn, subtopic_id, settings, engine, part)
     if found is None:
         return None
     beats, doodles, voice, version = found.beats, found.doodles, found.voice, found.version
@@ -210,6 +227,9 @@ async def build(
                 "engine": voice,
                 "title": found.title,
                 "subject": found.subject,
+                "part": found.part,
+                "parts": found.parts,
+                "part_title": found.part_title,
                 "lesson": _lesson_json(beats, doodles),
                 "clips": clips,
             },
@@ -231,9 +251,11 @@ async def warm_all(settings: Settings) -> None:
         return
     try:
         async with get_engine().connect() as conn:
-            rows = await fetch_all(conn, "SELECT subtopic_id FROM subtopic_lesson_content")
+            rows = await fetch_all(conn, "SELECT subtopic_id, part FROM subtopic_lesson_content")
             for row in rows:
-                await build(conn, row["subtopic_id"], settings, "kokoro", patient=True)
+                await build(
+                    conn, row["subtopic_id"], settings, "kokoro", patient=True, part=row["part"]
+                )
     except asyncio.CancelledError:
         raise
     except Exception:  # A warm-up never takes the API down: the package is made when asked.

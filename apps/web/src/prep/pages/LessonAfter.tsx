@@ -43,25 +43,29 @@ const RATINGS = [
 export function LessonAfter({
   studentId,
   subtopicId,
+  part = 1,
   onWatchAgain,
   onContinue,
   continuing,
 }: {
   studentId: string;
   subtopicId: string;
+  /** Which of the subtopic's lessons this follows. */
+  part?: number;
   onWatchAgain: () => void;
   onContinue: () => void;
   continuing: boolean;
 }) {
   const base = `/v1/roadmap/${studentId}/lessons/${subtopicId}`;
+  const q = `?part=${part}`;
   const [page, setPage] = useState<After | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    request<After>(`${base}/after`)
+    request<After>(`${base}/after${q}`)
       .then(setPage)
       .catch((problem) => setError(friendly(problem)));
-  }, [base]);
+  }, [base, q]);
 
   if (!page) {
     return (
@@ -73,7 +77,7 @@ export function LessonAfter({
 
   const rate = (rating: number) => {
     setPage({ ...page, rating });
-    void request<void>(`${base}/rating`, { method: 'POST', body: JSON.stringify({ rating }) }).catch(() => undefined);
+    void request<void>(`${base}/rating${q}`, { method: 'POST', body: JSON.stringify({ rating }) }).catch(() => undefined);
   };
   const tried = (index: number, result: Tried) =>
     setPage((now) =>
@@ -113,6 +117,7 @@ export function LessonAfter({
                 <Problem
                   key={index}
                   base={base}
+                  q={q}
                   index={index}
                   ask={problem.ask}
                   needsWorking={problem.needs_working}
@@ -124,7 +129,7 @@ export function LessonAfter({
           </section>
         ) : null}
 
-        <Ask base={base} page={page} onTurn={(turn, left) => setPage((now) => (now ? { ...now, conversation: [...now.conversation, turn], asks_left: left } : now))} />
+        <Ask base={base} q={q} page={page} onTurn={(turn, left) => setPage((now) => (now ? { ...now, conversation: [...now.conversation, turn], asks_left: left } : now))} />
 
         <div className="la-foot">
           <Button tone="ghost" icon={<IconReplay size={16} />} onClick={onWatchAgain}>
@@ -141,6 +146,7 @@ export function LessonAfter({
 
 function Problem({
   base,
+  q,
   index,
   ask,
   needsWorking,
@@ -148,6 +154,7 @@ function Problem({
   onTried,
 }: {
   base: string;
+  q: string;
   index: number;
   ask: string;
   needsWorking: boolean;
@@ -165,7 +172,7 @@ function Problem({
     setBusy('typed');
     setError(null);
     try {
-      onTried(await request<Tried>(`${base}/problems/${index}/answer`, { method: 'POST', body: JSON.stringify({ text: typed }) }));
+      onTried(await request<Tried>(`${base}/problems/${index}/answer${q}`, { method: 'POST', body: JSON.stringify({ text: typed }) }));
     } catch (problem) {
       setError(friendly(problem));
     } finally {
@@ -178,7 +185,7 @@ function Problem({
     try {
       const form = new FormData();
       form.append('photo', file);
-      const response = await fetch(`${base}/problems/${index}/photo`, { method: 'POST', body: form, credentials: 'same-origin' });
+      const response = await fetch(`${base}/problems/${index}/photo${q}`, { method: 'POST', body: form, credentials: 'same-origin' });
       if (!response.ok) {
         const detail = ((await response.json().catch(() => ({}))) as { detail?: string }).detail;
         throw new Error(detail ?? 'The photo did not send. Try again.');
@@ -255,10 +262,12 @@ function Problem({
 
 function Ask({
   base,
+  q,
   page,
   onTurn,
 }: {
   base: string;
+  q: string;
   page: After;
   onTurn: (turn: { asked: string; reply: string }, left: number) => void;
 }) {
@@ -279,7 +288,7 @@ function Ask({
     setWaiting(asked);
     setError(null);
     try {
-      const got = await request<{ reply: string; asks_left: number }>(`${base}/ask`, {
+      const got = await request<{ reply: string; asks_left: number }>(`${base}/ask${q}`, {
         method: 'POST',
         body: JSON.stringify({ question: asked }),
       });

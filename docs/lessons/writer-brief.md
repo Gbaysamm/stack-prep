@@ -7,7 +7,9 @@ After the lesson the student rates their understanding, tries the lesson's 1–2
 and can ask the coach.
 
 Repo: c:\Users\yakub\stack-prep (Git Bash: /c/Users/yakub/stack-prep). Do NOT commit or
-push. Touch only your own lesson file and its doodles.
+push. Touch only your own lesson file and its doodles. Other writers run at the same time:
+keep any working files (generator scripts, renders) in a scratch folder named after your
+lesson, never a shared file name.
 
 ## Read first, fully
 
@@ -50,7 +52,13 @@ Then your subtopic's syllabus scope and real JAMB past questions:
   where a photo of the working makes sense).
 - **Correct at JAMB level.** Every fact checked. In our own words: nothing copied from WAEC
   reports or textbooks.
-- Length: as long as the subtopic needs, typically 35–60 moments.
+- **No repeats across neighbouring lessons:** read the other lessons already written in your
+  topic (`docs/lessons/subtopics/<subject>/`, and `subtopic_brief.py --list <Subject>` for
+  what each covers). Do not reuse their worked examples or past questions; where two
+  subtopics overlap, teach your own part and mention the other in one line.
+- **Length: a lesson is about five minutes, at most about 40 moments.** If the subtopic needs
+  more, split it into two to four lessons (`<slug>_1.yaml`, `_2`, … with `part:` and
+  `title:`), each complete and short, as the guide's "Short lessons" section says.
 
 ## Check and load
 

@@ -124,8 +124,16 @@ def read_lesson(path: Path) -> dict[str, Any]:
         attach_cues(entry, cues)
         clean.append(entry)
     check_all_used(doodles, clean, where)
+    part = doc.get("part", 1)
+    if not isinstance(part, int) or part < 1:
+        raise SystemExit(f"{where}: part is a whole number from 1")
+    title = doc.get("title")
+    if title is not None and (not isinstance(title, str) or not title.strip()):
+        raise SystemExit(f"{where}: title is what this lesson covers, or nothing")
     return {
         "subtopic_id": subtopic_id,
+        "part": part,
+        "title": title.strip() if isinstance(title, str) else None,
         "moments": clean,
         "doodles": doodles,
         "problems": read_problems(doc.get("problems"), where),
@@ -143,6 +151,15 @@ async def main() -> None:
     args = parser.parse_args()
     paths = [Path(args.file).resolve()] if args.file else sorted(BANK.glob("*/*.yaml"))
     lessons = [read_lesson(path) for path in paths]
+    # A subtopic's lessons are parts 1, 2, 3 ... with none missing and none twice.
+    parts: dict[str, list[int]] = {}
+    for lesson in lessons:
+        parts.setdefault(lesson["subtopic_id"], []).append(lesson["part"])
+    for subtopic, numbers in parts.items():
+        if sorted(numbers) != list(range(1, len(numbers) + 1)) and not args.file:
+            raise SystemExit(f"subtopic {subtopic}: its lessons are parts {sorted(numbers)}")
+        if len(set(numbers)) != len(numbers):
+            raise SystemExit(f"subtopic {subtopic}: a part is written twice")
     print(f"{len(lessons)} subtopic lesson(s) checked.")
     if args.check:
         return
@@ -161,11 +178,11 @@ async def main() -> None:
                 await conn.execute(
                     """
                     INSERT INTO subtopic_lesson_content
-                      (subtopic_id, moments, doodles, problems, source_file)
-                    VALUES ($1, $2::jsonb, $3::jsonb, $4::jsonb, $5)
-                    ON CONFLICT (subtopic_id) DO UPDATE
+                      (subtopic_id, part, title, moments, doodles, problems, source_file)
+                    VALUES ($1, $6, $7, $2::jsonb, $3::jsonb, $4::jsonb, $5)
+                    ON CONFLICT (subtopic_id, part) DO UPDATE
                       SET moments = EXCLUDED.moments, doodles = EXCLUDED.doodles,
-                          problems = EXCLUDED.problems,
+                          problems = EXCLUDED.problems, title = EXCLUDED.title,
                           source_file = EXCLUDED.source_file, updated_at = now()
                     """,
                     lesson["subtopic_id"],
@@ -173,7 +190,17 @@ async def main() -> None:
                     json.dumps(lesson["doodles"]),
                     json.dumps(lesson["problems"]),
                     lesson["file"],
+                    lesson["part"],
+                    lesson["title"],
                 )
+            if not args.file:
+                # A subtopic rewritten as fewer lessons: its old later parts go.
+                for subtopic, numbers in parts.items():
+                    await conn.execute(
+                        "DELETE FROM subtopic_lesson_content WHERE subtopic_id = $1 AND part > $2",
+                        subtopic,
+                        len(numbers),
+                    )
         print(f"{len(lessons)} subtopic lesson(s) loaded.")
     finally:
         await conn.close()

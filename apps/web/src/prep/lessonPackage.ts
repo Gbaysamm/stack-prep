@@ -29,6 +29,10 @@ export interface LessonPackage {
   /** The subtopic's and its subject's names. */
   title: string;
   subject: string;
+  /** Which of the subtopic's lessons this is, how many it has, and what this one covers. */
+  part: number;
+  parts: number;
+  partTitle: string | null;
   lesson: NarratedLesson;
   /** True when every line that should have a voice has one. */
   voiced: boolean;
@@ -39,6 +43,9 @@ interface Header {
   engine: LessonVoice;
   title: string;
   subject: string;
+  part?: number;
+  parts?: number;
+  part_title?: string | null;
   lesson: NarratedLesson;
   clips: ({
     offset: number;
@@ -51,8 +58,9 @@ function packageUrl(
   studentId: string,
   subtopicId: string,
   voice: LessonVoice,
+  part = 1,
 ): string {
-  return `/v1/roadmap/${studentId}/lessons/${subtopicId}/package?engine=${voice}`;
+  return `/v1/roadmap/${studentId}/lessons/${subtopicId}/package?engine=${voice}&part=${part}`;
 }
 
 /** The voice the student chose on the board. The server answers with the board alone where
@@ -129,6 +137,9 @@ export function unpack(bytes: ArrayBuffer): LessonPackage {
     engine: header.engine,
     title: header.title,
     subject: header.subject,
+    part: header.part ?? 1,
+    parts: header.parts ?? 1,
+    partTitle: header.part_title ?? null,
     lesson: { ...header.lesson, beats },
     voiced,
   };
@@ -147,8 +158,9 @@ export async function getLessonPackage(
   subtopicId: string,
   voice: LessonVoice,
   onProgress?: (share: number) => void,
+  part = 1,
 ): Promise<LessonPackage> {
-  const url = packageUrl(studentId, subtopicId, voice);
+  const url = packageUrl(studentId, subtopicId, voice, part);
   const cache = await openCache();
   const kept = cache
     ? await cache.match(url).catch(() => undefined)
@@ -218,23 +230,31 @@ const missing = new Set<string>();
  * Fetch a lesson ahead, quietly, so it is on the phone before the student reaches it. Nothing
  * happens on a metered or "save data" connection, nor when it is already being fetched.
  */
-export function prefetchLesson(studentId: string, subtopicId: string): void {
+export function prefetchLesson(
+  studentId: string,
+  subtopicId: string,
+  part = 1,
+): void {
   const connection = (
     navigator as Navigator & { connection?: { saveData?: boolean } }
   ).connection;
   if (connection?.saveData) return;
-  const key = `${subtopicId}:${lessonVoice()}`;
-  if (fetching.has(key) || missing.has(subtopicId)) return;
+  const key = `${subtopicId}:${part}:${lessonVoice()}`;
+  if (fetching.has(key) || missing.has(`${subtopicId}:${part}`)) return;
   fetching.add(key);
   void (async () => {
     const cache = await openCache();
     if (!cache) return;
-    const url = packageUrl(studentId, subtopicId, lessonVoice());
+    const url = packageUrl(studentId, subtopicId, lessonVoice(), part);
     if (await cache.match(url).catch(() => undefined)) return;
-    await getLessonPackage(studentId, subtopicId, lessonVoice()).catch(
-      (error: unknown) => {
-        if (error instanceof LessonMissing) missing.add(subtopicId);
-      },
-    );
+    await getLessonPackage(
+      studentId,
+      subtopicId,
+      lessonVoice(),
+      undefined,
+      part,
+    ).catch((error: unknown) => {
+      if (error instanceof LessonMissing) missing.add(`${subtopicId}:${part}`);
+    });
   })().finally(() => fetching.delete(key));
 }

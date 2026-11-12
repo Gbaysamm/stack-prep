@@ -190,7 +190,9 @@ export function pathStops(roadmap: RoadmapData, next: RoadmapItem | null): Stop[
           item.kind === 'run'
             ? (item.subject_name ?? undefined)
             : item.kind === 'lesson'
-              ? `Lesson · ${item.subject_name ?? ''}`
+              ? (item.lesson_parts ?? 1) > 1
+                ? `Lesson ${item.part ?? 1} of ${item.lesson_parts} · ${item.subtopic_name ?? item.subject_name ?? ''}`
+                : `Lesson · ${item.subject_name ?? ''}`
               : item.kind === 'topic_test'
                 ? `Whole topic · ${item.subject_name ?? ''}`
                 : item.kind === 'checkup'

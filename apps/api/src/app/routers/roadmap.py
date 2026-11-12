@@ -66,6 +66,11 @@ class ItemOut(BaseModel):
     #: The subtopic's level, 1 (weak) to 5 (mastered), from the spec's mastery bands; 0 when
     #: it has fewer than 3 answers; None for an item that is not a single subtopic.
     level: int | None = None
+    #: A lesson stop: which of the subtopic's lessons it is, what it covers, and how many
+    #: lessons the subtopic has (founder, 12 Nov 2026: a broad subtopic is several lessons).
+    part: int | None = None
+    lesson_title: str | None = None
+    lesson_parts: int | None = None
 
 
 class Milestone(BaseModel):
@@ -221,45 +226,64 @@ async def _standings(
     taught = await _teachable(conn, subject_id)
     runs = await _runs_by_subtopic(conn, student_id, subject_id)
     fresh = await _fresh_by_subtopic(conn, student_id, subject_id)
-    lessoned = await _taught_since_last_run(conn, student_id, subject_id)
+    lessoned = await _parts_taught_since_last_run(conn, student_id, subject_id)
+    parts = await _lesson_parts(conn, subject_id)
     return [
         replace(
             u,
             teachable=u.unit_id in taught,
             runs=runs.get(u.unit_id, 0),
             fresh=fresh.get(u.unit_id, 0),
-            taught=u.unit_id in lessoned,
+            taught=lessoned.get(u.unit_id, 0) >= parts.get(u.unit_id, 1),
+            lesson_parts=parts.get(u.unit_id, 1),
+            taught_parts=min(lessoned.get(u.unit_id, 0), parts.get(u.unit_id, 1)),
         )
         for u in found
     ]
 
 
-async def _taught_since_last_run(
+async def _parts_taught_since_last_run(
     conn: AsyncConnection, student_id: UUID, subject_id: UUID
-) -> set[str]:
-    """Subtopics whose lesson the student finished after their last run there."""
+) -> dict[str, int]:
+    """How many of each subtopic's lessons the student has finished since their last run
+    there (a subtopic may have several: migration 047)."""
     rows = await fetch_all(
         conn,
         """
-        SELECT l.subtopic_id AS sub
+        SELECT l.subtopic_id AS sub, count(DISTINCT l.part) AS parts
         FROM subtopic_lessons l
         JOIN curriculum_items sub ON sub.id = l.subtopic_id AND sub.subject_id = :subject
         WHERE l.student_id = :s
+          AND l.finished_at > coalesce((
+            SELECT max(a.answered_at_client) FROM attempts a
+            JOIN study_sessions ss ON ss.id = a.session_id AND ss.session_type = 'guided'
+            JOIN question_versions v ON v.id = a.question_version_id
+            JOIN question_classifications c
+              ON c.question_id = v.question_id AND c.classification_role = 'primary'
+            JOIN curriculum_items skill ON skill.id = c.curriculum_item_id
+            WHERE a.student_id = :s AND skill.parent_id = l.subtopic_id
+          ), '-infinity'::timestamptz)
         GROUP BY l.subtopic_id
-        HAVING max(l.finished_at) > coalesce((
-          SELECT max(a.answered_at_client) FROM attempts a
-          JOIN study_sessions ss ON ss.id = a.session_id AND ss.session_type = 'guided'
-          JOIN question_versions v ON v.id = a.question_version_id
-          JOIN question_classifications c
-            ON c.question_id = v.question_id AND c.classification_role = 'primary'
-          JOIN curriculum_items skill ON skill.id = c.curriculum_item_id
-          WHERE a.student_id = :s AND skill.parent_id = l.subtopic_id
-        ), '-infinity'::timestamptz)
         """,
         s=student_id,
         subject=subject_id,
     )
-    return {str(r["sub"]) for r in rows}
+    return {str(r["sub"]): int(r["parts"]) for r in rows}
+
+
+async def _lesson_parts(conn: AsyncConnection, subject_id: UUID) -> dict[str, int]:
+    """How many written lessons each of the subject's subtopics has."""
+    rows = await fetch_all(
+        conn,
+        """
+        SELECT c.subtopic_id AS sub, count(*) AS parts
+        FROM subtopic_lesson_content c
+        JOIN curriculum_items sub ON sub.id = c.subtopic_id AND sub.subject_id = :subject
+        GROUP BY c.subtopic_id
+        """,
+        subject=subject_id,
+    )
+    return {str(r["sub"]): int(r["parts"]) for r in rows}
 
 
 async def _tested_topics(conn: AsyncConnection, student_id: UUID, subject_id: UUID) -> set[str]:
@@ -479,9 +503,9 @@ async def ensure_roadmap(conn: AsyncConnection, student_id: UUID) -> dict[str, A
                 text(
                     """
                     INSERT INTO roadmap_items (roadmap_id, student_id, day, position, kind,
-                      subject_id, subtopic_id, length, reason, value)
+                      subject_id, subtopic_id, length, reason, value, part)
                     VALUES (:r, :s, :day, :pos, :kind, :subject, :subtopic, :length, :reason,
-                      :value)
+                      :value, :part)
                     """
                 ),
                 {
@@ -495,6 +519,7 @@ async def ensure_roadmap(conn: AsyncConnection, student_id: UUID) -> dict[str, A
                     "length": item.length,
                     "reason": item.reason,
                     "value": item.value,
+                    "part": item.part,
                 },
             )
         await conn.commit()
@@ -610,6 +635,9 @@ async def _lessons_after_weak_runs(
             return
         row, after = target
         sub, at = row["subtopic_id"], row["position"]
+        weak = standing[str(sub)]
+        parts = list(range(weak.taught_parts + 1, weak.lesson_parts + 1)) or [1]
+        room = len(parts) + 1
         again = next(
             (
                 o
@@ -618,7 +646,8 @@ async def _lessons_after_weak_runs(
             ),
             None,
         )
-        # Make room for two stops after the run (in two moves: a position is unique per day).
+        # Make room for the lessons and the run after it (in two moves: a position is unique
+        # per day).
         await conn.execute(
             text(
                 "UPDATE roadmap_items SET position = position + 10000"
@@ -628,16 +657,17 @@ async def _lessons_after_weak_runs(
         )
         await conn.execute(
             text(
-                "UPDATE roadmap_items SET position = position - 9998"
+                "UPDATE roadmap_items SET position = position - 10000 + :room"
                 " WHERE roadmap_id = :r AND day = :today AND position > 10000"
             ),
-            {"r": roadmap_id, "today": today},
+            {"r": roadmap_id, "today": today, "room": room},
         )
         insert = text(
             """
             INSERT INTO roadmap_items (roadmap_id, student_id, day, position, kind, subject_id,
-              subtopic_id, length, reason, value)
-            VALUES (:r, :s, :today, :pos, :kind, :subject, :sub, :length, :reason, :value)
+              subtopic_id, length, reason, value, part)
+            VALUES (:r, :s, :today, :pos, :kind, :subject, :sub, :length, :reason, :value,
+              :part)
             """
         )
         common = {
@@ -648,24 +678,33 @@ async def _lessons_after_weak_runs(
             "sub": sub,
             "value": row["value"],
         }
-        await conn.execute(
-            insert,
-            {**common, "pos": at + 1, "kind": "lesson", "length": 0, "reason": "reteach"},
-        )
+        for n, part in enumerate(parts, 1):
+            await conn.execute(
+                insert,
+                {
+                    **common,
+                    "pos": at + n,
+                    "kind": "lesson",
+                    "length": 0,
+                    "reason": "reteach",
+                    "part": part,
+                },
+            )
         if again is not None:
             await conn.execute(
                 text("UPDATE roadmap_items SET position = :pos WHERE id = :id"),
-                {"pos": at + 2, "id": again["id"]},
+                {"pos": at + room, "id": again["id"]},
             )
         else:
             await conn.execute(
                 insert,
                 {
                     **common,
-                    "pos": at + 2,
+                    "pos": at + room,
                     "kind": "run",
                     "length": engine.RUN_LENGTH,
                     "reason": "high_value_gap",
+                    "part": None,
                 },
             )
         await conn.commit()
@@ -674,6 +713,9 @@ async def _lessons_after_weak_runs(
 ITEM_SQL = """
     SELECT i.id, i.day, i.position, i.kind, i.subject_id, sub.name AS subject_name,
            i.subtopic_id, ci.name AS subtopic_name, i.length, i.reason, i.value, i.session_id,
+           i.part, lc.title AS lesson_title,
+           CASE WHEN i.kind = 'lesson' THEN (SELECT count(*) FROM subtopic_lesson_content x
+             WHERE x.subtopic_id = i.subtopic_id) END AS lesson_parts,
            CASE
              WHEN i.done_at IS NOT NULL OR ss.ended_at IS NOT NULL THEN 'done'
              WHEN ss.id IS NOT NULL THEN 'in_progress'
@@ -684,6 +726,8 @@ ITEM_SQL = """
     LEFT JOIN subjects sub ON sub.id = i.subject_id
     LEFT JOIN curriculum_items ci ON ci.id = i.subtopic_id
     LEFT JOIN study_sessions ss ON ss.id = i.session_id
+    LEFT JOIN subtopic_lesson_content lc
+      ON i.kind = 'lesson' AND lc.subtopic_id = i.subtopic_id AND lc.part = coalesce(i.part, 1)
 """
 
 
@@ -804,7 +848,7 @@ async def start_item(
         conn,
         """
         SELECT i.id, i.kind, i.subject_id, i.subtopic_id, i.length, i.session_id,
-               ss.ended_at
+               i.part, ss.ended_at
         FROM roadmap_items i LEFT JOIN study_sessions ss ON ss.id = i.session_id
         WHERE i.id = :i AND i.student_id = :s
         """,
@@ -820,7 +864,7 @@ async def start_item(
         return Started(
             kind="lesson",
             session_id=None,
-            path=f"/lesson/{item['subtopic_id']}?item={item_id}",
+            path=f"/lesson/{item['subtopic_id']}?item={item_id}&part={item['part'] or 1}",
         )
     if item["session_id"] is not None and item["ended_at"] is None:
         session_id = item["session_id"]  # already open: carry on with it
@@ -966,6 +1010,8 @@ async def lesson(
 class LessonDone(BaseModel):
     #: The roadmap stop it was taken from, ticked off with it.
     item_id: UUID | None = None
+    #: Which of the subtopic's lessons was taken.
+    part: int = 1
 
 
 @router.post("/{student_id}/lessons/{subtopic_id}/done", status_code=204, summary="Finish a lesson")
@@ -980,8 +1026,10 @@ async def lesson_done(
     are the student's real attempt at it (scoring.after_lessons)."""
     await require_student(request, conn, student_id)
     await conn.execute(
-        text("INSERT INTO subtopic_lessons (student_id, subtopic_id) VALUES (:s, :sub)"),
-        {"s": student_id, "sub": subtopic_id},
+        text(
+            "INSERT INTO subtopic_lessons (student_id, subtopic_id, part) VALUES (:s, :sub, :part)"
+        ),
+        {"s": student_id, "sub": subtopic_id, "part": body.part},
     )
     if body.item_id is not None:
         await conn.execute(
@@ -994,12 +1042,16 @@ async def lesson_done(
     await conn.commit()
 
 
-async def _bank_lesson(conn: AsyncConnection, subtopic_id: UUID) -> dict[str, Any] | None:
-    """The subtopic's written lesson from the bank (migration 045), or None."""
+async def _bank_lesson(
+    conn: AsyncConnection, subtopic_id: UUID, part: int = 1
+) -> dict[str, Any] | None:
+    """One of the subtopic's written lessons from the bank (migrations 045, 047), or None."""
     rows = await fetch_all(
         conn,
-        "SELECT moments, doodles FROM subtopic_lesson_content WHERE subtopic_id = :sub",
+        "SELECT moments, doodles FROM subtopic_lesson_content"
+        " WHERE subtopic_id = :sub AND part = :part",
         sub=subtopic_id,
+        part=part,
     )
     if not rows:
         return None
@@ -1012,14 +1064,14 @@ async def _bank_lesson(conn: AsyncConnection, subtopic_id: UUID) -> dict[str, An
 
 
 async def _bank_beats(
-    conn: AsyncConnection, subtopic_id: UUID
+    conn: AsyncConnection, subtopic_id: UUID, part: int = 1
 ) -> tuple[list[Any], list[Any]] | None:
     """The lesson's beats and its doodles: the same lesson for every student (the run's own
     board already went over each question they missed)."""
     from app.lesson_doodles import LessonDoodle
     from app.routers.practice import beats_from_moments
 
-    bank = await _bank_lesson(conn, subtopic_id)
+    bank = await _bank_lesson(conn, subtopic_id, part)
     if bank is None:
         return None
     doodles = []
@@ -1040,6 +1092,7 @@ async def lesson_board(
     subtopic_id: UUID,
     request: Request,
     conn: Annotated[AsyncConnection, Depends(connection)],
+    part: int = 1,
 ) -> Any:
     """404 when the bank has no lesson for this subtopic yet: the page shows the missed
     questions' working instead."""
@@ -1048,7 +1101,7 @@ async def lesson_board(
     from app.routers.practice import LessonBeat, NarratedLesson
 
     await require_student(request, conn, student_id)
-    found = await _bank_beats(conn, subtopic_id)
+    found = await _bank_beats(conn, subtopic_id, part)
     if found is None:
         raise HTTPException(status_code=404, detail="No written lesson for this topic yet.")
     beats, doodles = found
@@ -1061,7 +1114,8 @@ async def lesson_board(
                 write=beat.write,
                 write_at=beat.at,
                 say=beat.say,
-                voice_url=f"{base}/{index}?v={hashlib.sha256(beat.say.encode()).hexdigest()[:12]}",
+                voice_url=f"{base}/{index}?part={part}"
+                f"&v={hashlib.sha256(beat.say.encode()).hexdigest()[:12]}",
                 answer=beat.answer,
                 point=beat.point,
                 show_sketch=beat.show_sketch,
@@ -1080,8 +1134,10 @@ async def lesson_board(
     )
 
 
-async def _said(conn: AsyncConnection, student_id: UUID, subtopic_id: UUID, beat: int) -> str:
-    found = await _bank_beats(conn, subtopic_id)
+async def _said(
+    conn: AsyncConnection, student_id: UUID, subtopic_id: UUID, beat: int, part: int = 1
+) -> str:
+    found = await _bank_beats(conn, subtopic_id, part)
     if found is None or not 0 <= beat < len(found[0]):
         raise HTTPException(status_code=404, detail="no such beat")
     return str(found[0][beat].say)
@@ -1096,6 +1152,7 @@ async def lesson_voice(
     conn: Annotated[AsyncConnection, Depends(connection)],
     settings: Annotated[Settings, Depends(get_settings)],
     engine: voice_store.Engine = "studio",
+    part: int = 1,
 ) -> Any:
     from fastapi.responses import FileResponse
 
@@ -1103,7 +1160,7 @@ async def lesson_voice(
     if not (await premium.standing(conn, student_id)).allowance.voice:
         raise HTTPException(status_code=402, detail=premium.PREMIUM_FOR_VOICE)
     path = await voice_store.voiced(
-        await _said(conn, student_id, subtopic_id, beat), settings, engine=engine
+        await _said(conn, student_id, subtopic_id, beat, part), settings, engine=engine
     )
     if path is None:
         raise HTTPException(status_code=404, detail="no voice for this beat")
@@ -1129,9 +1186,10 @@ async def lesson_voice_words(
     conn: Annotated[AsyncConnection, Depends(connection)],
     settings: Annotated[Settings, Depends(get_settings)],
     engine: voice_store.Engine = "studio",
+    part: int = 1,
 ) -> dict[str, Any]:
     await require_student(request, conn, student_id)
-    said = await _said(conn, student_id, subtopic_id, beat)
+    said = await _said(conn, student_id, subtopic_id, beat, part)
     if voice_store.engine_for(engine, settings) == "kokoro":
         await voice_store.voiced(said, settings, engine=engine)
     found = voice_store.timings(said, settings, engine)
@@ -1151,6 +1209,7 @@ async def lesson_package(
     conn: Annotated[AsyncConnection, Depends(connection)],
     settings: Annotated[Settings, Depends(get_settings)],
     engine: Literal["studio", "kokoro", "none"] = "studio",
+    part: int = 1,
 ) -> Any:
     """One file the phone keeps, so the lesson plays to the end with no network (app/
     lesson_package.py). 304 when the phone already has this version (`If-None-Match`).
@@ -1167,14 +1226,14 @@ async def lesson_package(
         )
         if studio_off or not (await premium.standing(conn, student_id)).allowance.voice:
             voice = "none"
-    found = await lesson_package.describe(conn, subtopic_id, settings, voice)
+    found = await lesson_package.describe(conn, subtopic_id, settings, voice, part)
     if found is None:
         raise HTTPException(status_code=404, detail="No written lesson for this topic yet.")
     etag = f'"{found.version}"'
     caching = {"ETag": etag, "Cache-Control": "private, no-cache"}
     if request.headers.get("if-none-match") == etag:
         return Response(status_code=304, headers=caching)
-    built = await lesson_package.build(conn, subtopic_id, settings, voice)
+    built = await lesson_package.build(conn, subtopic_id, settings, voice, part=part)
     if built is None:
         raise HTTPException(status_code=404, detail="No written lesson for this topic yet.")
     return Response(

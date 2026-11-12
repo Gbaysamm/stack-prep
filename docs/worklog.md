@@ -15,6 +15,23 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-12
 
+### A subtopic holds several short lessons, each its own stop on the roadmap
+- **What:** a lesson is about five minutes (at most about 40 moments); a broad subtopic is
+  taught as two to four lessons, played in order, each its own roadmap stop ("Lesson 2 of 4 ·
+  The mole"), with the run again after the last. A subtopic counts as taught only when all its
+  lessons are done since the last run. Each lesson has its own problems, rating and kept
+  conversation with the coach, and its own downloaded package.
+- **Why:** founder, 12 Nov 2026: subtopics are not lessons; a 20-minute subtopic is four
+  five-minute lessons.
+- **Where:** migration 047 (`part`, `title`); engine `UnitStanding.lesson_parts/taught_parts`,
+  `PlannedItem.part`; `apps/api/src/app/routers/roadmap.py` (parts in the plan, the weak-run
+  insert, every lesson endpoint takes `?part=`), `lesson_after.py`, `lesson_package.py`;
+  `database/load_subtopic_lessons.py` (`part:`, `title:`, parts 1..n checked); web
+  `Lesson.tsx`, `LessonAfter.tsx`, `lessonPackage.ts`, `roadmapApi.ts`, `Roadmap.tsx`; the
+  lesson guide and writer brief.
+- **Status:** done locally; engine 109, API and web tests pass. The eight Chemistry lessons
+  are next to be split. Not pushed.
+
 ### The coach on a missed question keeps the conversation
 - **What:** the coach on a question's board is now sent everything this student asked it about
   that question in any sitting (it was this sitting only), and the board shows those earlier

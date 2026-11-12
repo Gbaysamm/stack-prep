@@ -99,7 +99,23 @@ describe('lessons fetched ahead', () => {
         item({ kind: 'run', subtopic_id: 'later', level: 0 }),
       ]),
     );
-    expect(ahead).toEqual(['l1', 'weak']);
+    expect(ahead).toEqual([
+      { subtopic: 'l1', part: 1 },
+      { subtopic: 'weak', part: 1 },
+    ]);
+  });
+
+  it('fetches each lesson of a subtopic that has several', () => {
+    const ahead = lessonsAhead(
+      roadmap([
+        item({ kind: 'lesson', subtopic_id: 'big', part: 1 }),
+        item({ kind: 'lesson', subtopic_id: 'big', part: 2 }),
+      ]),
+    );
+    expect(ahead).toEqual([
+      { subtopic: 'big', part: 1 },
+      { subtopic: 'big', part: 2 },
+    ]);
   });
 
   it('leaves out the next run once its subtopic is strong', () => {

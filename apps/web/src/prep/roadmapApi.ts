@@ -29,6 +29,11 @@ export interface RoadmapItem {
   session_id: string | null;
   /** 0 (not levelled yet) to 5 (mastered); null for a check-up, mock or mixed run. */
   level: number | null;
+  /** A lesson stop: which of the subtopic's lessons it is, what it covers, and how many
+   *  lessons the subtopic has (a broad subtopic is several short lessons). */
+  part?: number | null;
+  lesson_title?: string | null;
+  lesson_parts?: number | null;
 }
 
 export interface RoadmapSubject {
@@ -88,8 +93,8 @@ export function useRoadmap(studentId: string) {
   const roadmap = loaded.data;
   useEffect(() => {
     if (!roadmap) return;
-    for (const subtopic of lessonsAhead(roadmap))
-      prefetchLesson(studentId, subtopic);
+    for (const { subtopic, part } of lessonsAhead(roadmap))
+      prefetchLesson(studentId, subtopic, part);
   }, [roadmap, studentId]);
   return loaded;
 }
@@ -99,7 +104,7 @@ export function useRoadmap(studentId: string) {
  * taken, and the lesson of the next run's subtopic while it is still weak (level 2 or below),
  * since a weak run is what puts a lesson on the path. Each is one download, kept.
  */
-export function lessonsAhead(roadmap: Roadmap): string[] {
+export function lessonsAhead(roadmap: Roadmap): { subtopic: string; part: number }[] {
   const open = roadmap.items.filter(
     (item) => item.state !== "done" && item.subtopic_id,
   );
@@ -108,11 +113,18 @@ export function lessonsAhead(roadmap: Roadmap): string[] {
     (item) => item.kind === "run" && item.state !== "missed",
   );
   const likely = nextRun && (nextRun.level ?? 0) <= 2 ? [nextRun] : [];
-  return [
-    ...new Set(
-      [...lessons, ...likely].map((item) => item.subtopic_id as string),
-    ),
-  ];
+  const seen = new Set<string>();
+  return [...lessons, ...likely]
+    .map((item) => ({
+      subtopic: item.subtopic_id as string,
+      part: item.kind === "lesson" ? (item.part ?? 1) : 1,
+    }))
+    .filter(({ subtopic, part }) => {
+      const key = `${subtopic}:${part}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 }
 
 /** Start a planned item and go to it. */
@@ -149,8 +161,9 @@ export function today(roadmap: Roadmap) {
 export function itemLabel(item: RoadmapItem): string {
   switch (item.kind) {
     case "run":
-    case "lesson":
       return item.subtopic_name ?? `${item.subject_name} practice`;
+    case "lesson":
+      return item.lesson_title ?? item.subtopic_name ?? `${item.subject_name} lesson`;
     case "topic_test":
       return `${item.subtopic_name ?? "Topic"} test`;
     case "mixed":

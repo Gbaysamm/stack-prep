@@ -86,17 +86,19 @@ class AskOut(BaseModel):
     asks_left: int
 
 
-async def _lesson(conn: AsyncConnection, subtopic_id: UUID) -> dict[str, Any]:
+async def _lesson(conn: AsyncConnection, subtopic_id: UUID, part: int) -> dict[str, Any]:
+    """One of the subtopic's lessons (migration 047: a subtopic may have several)."""
     rows = await fetch_all(
         conn,
         """
-        SELECT c.moments, c.problems, sub.name AS title, s.name AS subject
+        SELECT c.moments, c.problems, coalesce(c.title, sub.name) AS title, s.name AS subject
         FROM subtopic_lesson_content c
         JOIN curriculum_items sub ON sub.id = c.subtopic_id
         JOIN subjects s ON s.id = sub.subject_id
-        WHERE c.subtopic_id = :sub
+        WHERE c.subtopic_id = :sub AND c.part = :part
         """,
         sub=subtopic_id,
+        part=part,
     )
     if not rows:
         raise HTTPException(status_code=404, detail="No written lesson for this topic yet.")
@@ -217,19 +219,22 @@ async def after(
     request: Request,
     conn: Annotated[AsyncConnection, Depends(connection)],
     settings: Annotated[Settings, Depends(get_settings)],
+    part: int = 1,
 ) -> AfterOut:
     await require_student(request, conn, student_id)
-    lesson = await _lesson(conn, subtopic_id)
+    lesson = await _lesson(conn, subtopic_id, part)
     tried = await fetch_all(
         conn,
         """
         SELECT DISTINCT ON (problem_index) problem_index, correct, feedback, answer_text,
                by_photo
-        FROM lesson_problem_attempts WHERE student_id = :s AND subtopic_id = :sub
+        FROM lesson_problem_attempts
+        WHERE student_id = :s AND subtopic_id = :sub AND part = :part
         ORDER BY problem_index, tried_at DESC
         """,
         s=student_id,
         sub=subtopic_id,
+        part=part,
     )
     last = {int(r["problem_index"]): r for r in tried}
     problems = []
@@ -254,16 +259,18 @@ async def after(
     rating = await fetch_all(
         conn,
         "SELECT rating FROM lesson_ratings WHERE student_id = :s AND subtopic_id = :sub"
-        " ORDER BY rated_at DESC LIMIT 1",
+        " AND part = :part ORDER BY rated_at DESC LIMIT 1",
         s=student_id,
         sub=subtopic_id,
+        part=part,
     )
     turns = await fetch_all(
         conn,
         "SELECT asked, reply FROM lesson_coach_turns WHERE student_id = :s AND subtopic_id = :sub"
-        " ORDER BY asked_at",
+        " AND part = :part ORDER BY asked_at",
         s=student_id,
         sub=subtopic_id,
+        part=part,
     )
     can_ask, left = await _coach_left(conn, student_id, settings)
     return AfterOut(
@@ -284,13 +291,17 @@ async def rate(
     body: RatingIn,
     request: Request,
     conn: Annotated[AsyncConnection, Depends(connection)],
+    part: int = 1,
 ) -> None:
     """How well the student says they understood: 1 not yet, 2 mostly, 3 got it."""
     await require_student(request, conn, student_id)
-    await _lesson(conn, subtopic_id)
+    await _lesson(conn, subtopic_id, part)
     await conn.execute(
-        text("INSERT INTO lesson_ratings (student_id, subtopic_id, rating) VALUES (:s, :sub, :r)"),
-        {"s": student_id, "sub": subtopic_id, "r": body.rating},
+        text(
+            "INSERT INTO lesson_ratings (student_id, subtopic_id, part, rating)"
+            " VALUES (:s, :sub, :part, :r)"
+        ),
+        {"s": student_id, "sub": subtopic_id, "part": part, "r": body.rating},
     )
     await conn.commit()
 
@@ -299,6 +310,7 @@ async def _record(
     conn: AsyncConnection,
     student_id: UUID,
     subtopic_id: UUID,
+    part: int,
     index: int,
     answer_text: str | None,
     marked: lesson_coach.Marked,
@@ -306,14 +318,15 @@ async def _record(
     await conn.execute(
         text(
             """
-            INSERT INTO lesson_problem_attempts (student_id, subtopic_id, problem_index,
+            INSERT INTO lesson_problem_attempts (student_id, subtopic_id, part, problem_index,
               answer_text, by_photo, correct, feedback, marked_by, input_tokens, output_tokens)
-            VALUES (:s, :sub, :i, :typed, :photo, :correct, :feedback, :by, :tin, :tout)
+            VALUES (:s, :sub, :part, :i, :typed, :photo, :correct, :feedback, :by, :tin, :tout)
             """
         ),
         {
             "s": student_id,
             "sub": subtopic_id,
+            "part": part,
             "i": index,
             "typed": answer_text,
             "photo": answer_text is None,
@@ -350,9 +363,10 @@ async def answer_problem(
     body: AnswerIn,
     request: Request,
     conn: Annotated[AsyncConnection, Depends(connection)],
+    part: int = 1,
 ) -> Tried:
     await require_student(request, conn, student_id)
-    problem = _problem(await _lesson(conn, subtopic_id), index)
+    problem = _problem(await _lesson(conn, subtopic_id, part), index)
     right = matches(body.text, problem["answer"], list(problem.get("accept") or []))
     feedback = (
         "Correct."
@@ -360,7 +374,7 @@ async def answer_problem(
         else "Not quite. Look at the working below, step by step, and see where yours differs."
     )
     marked = lesson_coach.Marked(right, feedback, "key")
-    await _record(conn, student_id, subtopic_id, index, body.text.strip(), marked)
+    await _record(conn, student_id, subtopic_id, part, index, body.text.strip(), marked)
     return _tried(problem, marked, body.text.strip())
 
 
@@ -377,10 +391,11 @@ async def photo_problem(
     request: Request,
     conn: Annotated[AsyncConnection, Depends(connection)],
     settings: Annotated[Settings, Depends(get_settings)],
+    part: int = 1,
 ) -> Tried:
     """The photo is read and dropped inside this request; only the marking is kept."""
     await require_student(request, conn, student_id)
-    lesson = await _lesson(conn, subtopic_id)
+    lesson = await _lesson(conn, subtopic_id, part)
     problem = _problem(lesson, index)
     mime = (photo.content_type or "").lower()
     if mime not in PHOTO_TYPES:
@@ -409,7 +424,7 @@ async def photo_problem(
             mime=mime,
             settings=settings,
         )
-    await _record(conn, student_id, subtopic_id, index, None, marked)
+    await _record(conn, student_id, subtopic_id, part, index, None, marked)
     return _tried(problem, marked, None)
 
 
@@ -425,9 +440,10 @@ async def ask(
     request: Request,
     conn: Annotated[AsyncConnection, Depends(connection)],
     settings: Annotated[Settings, Depends(get_settings)],
+    part: int = 1,
 ) -> AskOut:
     await require_student(request, conn, student_id)
-    lesson = await _lesson(conn, subtopic_id)
+    lesson = await _lesson(conn, subtopic_id, part)
     open_, left = await _coach_left(conn, student_id, settings)
     if not open_:
         raise HTTPException(status_code=402, detail="Asking the coach comes with a plan.")
@@ -441,9 +457,10 @@ async def ask(
         history = await fetch_all(
             conn,
             "SELECT asked, reply FROM lesson_coach_turns WHERE student_id = :s"
-            " AND subtopic_id = :sub AND source = 'model' ORDER BY asked_at",
+            " AND subtopic_id = :sub AND part = :part AND source = 'model' ORDER BY asked_at",
             s=student_id,
             sub=subtopic_id,
+            part=part,
         )
         lines = [str(m["write"]) for m in lesson["moments"] if m.get("write")]
         reply = await lesson_coach.answer(
@@ -457,14 +474,15 @@ async def ask(
     await conn.execute(
         text(
             """
-            INSERT INTO lesson_coach_turns (student_id, subtopic_id, asked, reply, source,
+            INSERT INTO lesson_coach_turns (student_id, subtopic_id, part, asked, reply, source,
               input_tokens, output_tokens)
-            VALUES (:s, :sub, :asked, :reply, :source, :tin, :tout)
+            VALUES (:s, :sub, :part, :asked, :reply, :source, :tin, :tout)
             """
         ),
         {
             "s": student_id,
             "sub": subtopic_id,
+            "part": part,
             "asked": asked,
             "reply": reply.text,
             "source": reply.source,

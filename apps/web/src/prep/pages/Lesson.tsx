@@ -51,6 +51,8 @@ export function Lesson() {
   const { subtopicId = "" } = useParams();
   const [search] = useSearchParams();
   const item = search.get("item");
+  // Which of the subtopic's lessons (a broad subtopic is several short ones).
+  const part = Math.max(1, Number(search.get("part") ?? 1) || 1);
   const student = useStudent();
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
@@ -73,6 +75,7 @@ export function Lesson() {
       subtopicId,
       lessonVoice(),
       (share) => live && setProgress(share),
+      part,
     )
       .then((found) => live && setBoard(found))
       .catch((error: unknown) => {
@@ -83,7 +86,7 @@ export function Lesson() {
     return () => {
       live = false;
     };
-  }, [student.studentId, subtopicId, attempt]);
+  }, [student.studentId, subtopicId, attempt, part]);
 
   // The missed questions' working: only where the bank has no lesson for this subtopic.
   const loaded = useLoad(
@@ -103,7 +106,7 @@ export function Lesson() {
         `/v1/roadmap/${student.studentId}/lessons/${subtopicId}/done`,
         {
           method: "POST",
-          body: JSON.stringify({ item_id: item }),
+          body: JSON.stringify({ item_id: item, part }),
         },
       );
       navigate("/roadmap");
@@ -117,6 +120,7 @@ export function Lesson() {
       <LessonAfter
         studentId={student.studentId}
         subtopicId={subtopicId}
+        part={part}
         continuing={saving}
         onContinue={() => void finish()}
         onWatchAgain={() => {
@@ -134,7 +138,11 @@ export function Lesson() {
           <Board
             key={watch}
             title={board.title}
-            subtitle={`Lesson · ${board.subject}`}
+            subtitle={
+              board.parts > 1
+                ? `Lesson ${board.part} of ${board.parts} · ${board.partTitle ?? board.subject}`
+                : `Lesson · ${board.subject}`
+            }
             question={board.title}
             questionLabel="Today's lesson"
             steps={board.lesson.beats.flatMap((beat) => beat.write)}
