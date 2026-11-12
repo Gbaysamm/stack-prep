@@ -79,6 +79,10 @@ not repeat an earlier one: it may say "In the last lesson you met …" in one li
   "2³ × 2⁴"), never spelled out as separate words ("H two O"): the voice reads a formula as one
   thing when it is written as one. Nigerian place and food names go in the pronunciation list,
   not respelled in the script.
+- **Whole sentences when spoken** (founder, 12 Nov 2026): every spoken sentence is complete,
+  correct English; a list joins its last item with "and" and sits in a sentence with a verb
+  ("The air, the water you drink and the salt in your food are all matter."). Short signposts
+  ("Now a plant cell.") are fine. No colons, semicolons, "e.g." or "i.e." in what is said.
 - **Names before symbols:** the first time an element or compound is written, its name comes
   first with the symbol or formula in brackets: "sodium (Na)", "water (H₂O)". The voice reads
   a symbol or formula letter by letter ("N A", "H 2 O").
