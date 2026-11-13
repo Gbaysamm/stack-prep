@@ -15,6 +15,17 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-13
 
+### Bank review: Accounts, Biology and Physics 2018; the founder tracker
+- **What:** the bank's line-by-line review (`docs/questions/bank-review-brief.md`) ran for
+  Accounts (9 files), Biology (9) and Physics 2018: answer checks removed, analogies and
+  decorative examples cut, openings say what is given and what to find (no hints at the
+  options), traps traced to real slips only, each line one job; every file passes
+  `check_lesson_edit.py --review` and its loader. The run hit the 5-hour usage limit once
+  and was then paused at the founder's word to spare the weekly limit; the other 83 files
+  wait. `docs/tracker.md` is new: every founder ask, what was done, where, and its status.
+- **Why:** founder, 13 Nov 2026.
+- **Status:** done locally, loaded. 83 bank files open (see the tracker).
+
 ### Every short lesson reviewed line by line; the bank review set up
 - **What:** the other 60 short lessons were reviewed sentence by sentence against "the one
   test" (`docs/lessons/review-brief.md`), as Elements was: repetition that adds nothing

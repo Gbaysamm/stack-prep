@@ -55,6 +55,23 @@ Keep the facts, the answer and the options. Keep whole spoken sentences, formula
 formulas, names before symbols, board lines with a capital, no colons, semicolons or "e.g." in
 what is said. Never say JAMB or the key is wrong.
 
+## Board timing and marks (founder, 13 Nov 2026)
+
+What is written goes up while its own words are said, and never before the point before it is
+finished. When you reword or split, keep the board in step:
+
+- **A line goes up on its own words.** The board writes a moment's line when the line's first
+  two words are said (or else the first weighty word of the speech that is also on the line).
+  So open each `write` with words the voice says as that point begins, and do not put the next
+  point's line on a moment whose speech is still finishing the last point: split the moment.
+- **One point said, then written, then the next.** A moment whose speech goes through several
+  items one after another, while its line holds all of them, is split into one moment each.
+- **Marks land on their word.** A mark (circle, underline, arrow, label) lands on its `'on':`
+  word, or else on its `at:` text when the speech says it. When you reword, keep the word the
+  mark lands on in the speech at the place where that thing is talked about; a mark whose word
+  is no longer said comes too early. When you split, the mark goes on the moment that talks
+  about what it marks, and its `line:` still points at the line holding its `at:` text.
+
 ## Keep (the checker fails otherwise)
 
 - The answer moment (`answer: true`) and the traps' option letters.
