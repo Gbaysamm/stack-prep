@@ -1,0 +1,125 @@
+# Dilute solutions are treated using hydrogen ion concentration in mol dm⁻³; the more exact definition uses activity.
+format_version: 1
+subject: chemistry
+subtopic: 'pH and pOH'
+subtopic_id: 6b976312-19b7-511a-93b0-37765885dfc3
+part: 1
+title: 'What pH means, and working it out'
+sources:
+  - https://jambsyllabus.pages.dev/chemistry/
+  - https://syllabus.ng/jamb/chemistry
+  - https://waeconline.org.ng/e-learning/Chemistry/chemmain.html
+
+moments:
+  - section: 'Welcome'
+    say: 'Welcome. Today''s lesson is what pH means, and working it out.'
+    write: 'What pH means, and working it out'
+
+  - section: 'Introduction'
+    say: 'Chemists use pH to describe how acidic or alkaline a solution is. JAMB can ask you to interpret a pH value or calculate one.'
+    write: 'pH describes how acidic or alkaline a solution is'
+
+  - section: 'Objectives'
+    say: 'By the end of this lesson, you will be able to use the pH scale to identify acidic, neutral and alkaline solutions.'
+    write: '1. Identify acidic, neutral and alkaline solutions'
+  - say: 'You will also be able to calculate pH from a hydrogen ion concentration written as a power of ten.'
+    write: '2. Calculate pH from hydrogen ion concentration'
+
+  - section: 'Hydrogen ions'
+    say: 'A hydrogen ion is a hydrogen particle with a positive electric charge. We write it as H⁺.'
+    write: 'Hydrogen ion: $\ce{H+}$'
+  - say: 'The concentration of hydrogen ions tells us how much of them is present in a given volume of solution.'
+    write: 'Concentration: amount of hydrogen ions per unit volume'
+  - say: 'Square brackets around H⁺ mean its concentration. We will give it in moles per cubic decimetre.'
+    write: '$[\ce{H+}]$: concentration in $\mathrm{mol\,dm^{-3}}$'
+  - say: 'The pH of a solution is related to its hydrogen ion concentration. A lower pH means a higher hydrogen ion concentration.'
+    write: 'Lower pH → higher hydrogen ion concentration'
+
+  - section: 'The pH scale'
+    say: 'At twenty five degrees Celsius, the usual pH scale runs from zero to fourteen. Some solutions can have pH values outside this range.'
+    write: 'At $25^\circ\mathrm{C}$, usual pH scale: $0$ to $14$'
+    diagram:
+      id: phscale
+      kind: numberline
+      range: [0, 14]
+      step: 1
+      caption: 'Usual pH scale'
+      'on': scale
+  - say: 'On this scale, the acidic range goes from zero up to, but not including, seven.'
+    write: 'Acidic: pH below $7$'
+    diagram_do:
+      - {id: phscale, op: interval, from: 0, to: 7, to_open: true, text: 'acidic', colour: orange, 'on': acidic}
+  - say: 'A neutral solution has a pH of seven at twenty five degrees Celsius.'
+    write: 'Neutral: pH $= 7$'
+    diagram_do:
+      - {id: phscale, op: point, x: 7, text: 'neutral', colour: green, 'on': neutral}
+  - say: 'The alkaline range is above seven, up to fourteen on this scale.'
+    write: 'Alkaline: pH above $7$'
+    diagram_do:
+      - {id: phscale, op: interval, from: 7, to: 14, from_open: true, text: 'alkaline', colour: purple, 'on': alkaline}
+
+  - section: 'Calculating pH'
+    say: 'To calculate pH, we use the negative of the log to base ten of the hydrogen ion concentration.'
+    write: 'pH $= -\log_{10}[\ce{H+}]$'
+  - say: 'In this calculation, use the numerical value of the concentration in moles per cubic decimetre inside the logarithm.'
+    write: 'Use the numerical value of $[\ce{H+}]$ in $\mathrm{mol\,dm^{-3}}$'
+  - say: 'A log to base ten tells us the power to which ten is raised to produce a number.'
+    write: '$\log_{10}$ gives the power of $10$'
+  - say: 'A negative power gives a reciprocal. For example, ten to the power minus three is one over one thousand, which is zero point zero zero one.'
+    write: '$10^{-3} = \frac{1}{1000} = 0.001$'
+  - say: 'So the log to base ten of ten to the power minus three is minus three.'
+    write: '$\log_{10}(10^{-3}) = -3$'
+
+  - section: 'Worked example'
+    say: 'Let us calculate the pH of a solution whose hydrogen ion concentration is one times ten to the power minus three moles per cubic decimetre.'
+    write: '$[\ce{H+}] = 1.0 \times 10^{-3}\,\mathrm{mol\,dm^{-3}}$; find pH'
+  - say: 'We substitute the numerical concentration into the pH formula.'
+    write: 'pH $= -\log_{10}(10^{-3})$'
+  - say: 'The log to base ten of ten to the power minus three is minus three.'
+    write: '$\log_{10}(10^{-3}) = -3$'
+  - say: 'The minus sign in the pH formula changes minus three to positive three.'
+    write: 'pH $= -(-3) = 3$'
+  - say: 'The pH is three, so the solution is acidic.'
+    write: '∴ pH $= 3$: acidic'
+
+  - section: 'Worked example'
+    say: 'Now let us find the pH when the hydrogen ion concentration is one times ten to the power minus nine moles per cubic decimetre.'
+    write: '$[\ce{H+}] = 1.0 \times 10^{-9}\,\mathrm{mol\,dm^{-3}}$; find pH'
+  - say: 'We put the numerical concentration into the same formula.'
+    write: 'pH $= -\log_{10}(10^{-9})$'
+  - say: 'The log to base ten of ten to the power minus nine is minus nine.'
+    write: '$\log_{10}(10^{-9}) = -9$'
+  - say: 'Taking the negative of minus nine gives a pH of nine.'
+    write: 'pH $= -(-9) = 9$'
+  - say: 'The pH is nine, so the solution is alkaline.'
+    write: '∴ pH $= 9$: alkaline'
+
+  - section: 'JAMB trap'
+    say: 'Do not leave out the minus sign in the pH formula. The logarithm of a concentration below one is negative, but its pH is positive.'
+    write: 'Trap: keep the minus sign in $-\log_{10}[\ce{H+}]$'
+
+  - section: 'Check yourself'
+    say: 'Now it is your turn. What is the pH when the hydrogen ion concentration is one times ten to the power minus six moles per cubic decimetre? Pause and try it.'
+    write: '$[\ce{H+}] = 1.0 \times 10^{-6}\,\mathrm{mol\,dm^{-3}}$; find pH'
+  - say: 'Put the numerical concentration into the formula.'
+    write: 'pH $= -\log_{10}(10^{-6})$'
+  - say: 'The log to base ten of ten to the power minus six is minus six.'
+    write: '$\log_{10}(10^{-6}) = -6$'
+  - say: 'The negative of minus six is six. The pH is six, so the solution is acidic.'
+    write: '∴ pH $= 6$: acidic'
+
+  - section: 'Recap'
+    say: 'At twenty five degrees Celsius, a pH below seven is acidic, seven is neutral, and above seven is alkaline.'
+    write: '1. Below $7$: acidic; $7$: neutral; above $7$: alkaline'
+  - say: 'To find pH, take the negative of the log to base ten of the hydrogen ion concentration. A lower pH means a higher concentration. Now try the problem.'
+    write: '2. pH $= -\log_{10}[\ce{H+}]$; lower pH means higher $[\ce{H+}]$'
+
+problems:
+  - ask: 'A solution has $[\ce{H+}] = 1.0 \times 10^{-4}\,\mathrm{mol\,dm^{-3}}$. Find its pH.'
+    answer: '4'
+    accept: ['4.0', 'pH 4', 'pH = 4']
+    working:
+      - 'Use pH $= -\log_{10}[\ce{H+}]$.'
+      - 'Substitute the numerical concentration: pH $= -\log_{10}(10^{-4})$.'
+      - '$\log_{10}(10^{-4}) = -4$, so pH $= -(-4) = 4$.'
+    needs_working: true

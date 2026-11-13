@@ -16,9 +16,9 @@ Pushed (on `company/integration`, deploys to both servers) · Waiting (on the fo
 - **Last thing done:** the bank's line-by-line review (`docs/questions/bank-review-brief.md`)
   ran for Accounts (9 files), Biology (9) and Physics 2018, then was paused to save the weekly
   usage limit. Those 19 files are checked; to be loaded and committed with this tracker.
-- **Next:** the founder's yes to the cost of writing lessons with AI (about $0.50 a lesson on
-  Opus 5.5), then that button on the Lessons page. The reviewer side (sets, import, question
-  view, Lessons page) is done-local.
+- **Next:** before writing lessons in bulk, add a blind second solve of every problem; the
+  founder listens to one trial lesson; then the Write a lesson button (gpt-6.1-terra, about
+  $0.05 a lesson). Pictures stay hand-drawn SVG; an image model may be tried later.
 - **Paused:** the bank review for the remaining 83 files, one subject at a time when the
   founder says (Chemistry, Commerce, Economics, English, Government, Literature, Mathematics,
   Physics 2010–2017); then a timing audit of every moment, film a few lessons, commit.
@@ -76,6 +76,7 @@ Order of work (each shown at 1440 and 390 before the next):
 | Subject page: can't rename or delete a year; design poor | Sections (past papers, own sets, AI sets); rename and remove as icons; cards two to a row on a phone; smaller header buttons | `BankPages.tsx`, `bank.css`, `bank.py` | Done-local |
 | Question detail page: poor UI/UX | Checks strip; question in its own box; each wrong option with its reason; "B is right" to confirm; numbered worked steps and a hint box (Edit to change); level and topic below | `ReviewPage.tsx`, `review.css`, `routers/review.py` (`why`) | Done-local |
 | Lessons managed from the reviewer side: status per topic, edit, generate | Lessons page: every topic and subtopic with its lessons (or "No lessons yet"); a lesson read as said and written; Edit the words with a check that keeps cues and marks; edits kept from the loader (migration 049) | `routers/bank_lessons.py`, `review/LessonsPages.tsx`, `049_lesson_edits.sql`, `load_subtopic_lessons.py` | Done-local (edit); generate waits on the founder's yes to the cost |
+| Write lessons with AI; LaTeX never broken; correct answers; a moderately priced model | Trial: gpt-6.1-terra writes a lesson, checked for format, LaTeX (KaTeX), speech as spoken and the answer key; 3 Chemistry lessons passed | `database/write_subtopic_lesson.py`, `check_latex.mjs` | In progress (blind second solve next) |
 | Review the uploaded questions one by one next week | Re-solve, check key, options, wording, fit, figure | — | Waiting (questions to be uploaded; weekly limit) |
 
 ## Voice

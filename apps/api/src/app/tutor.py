@@ -1610,9 +1610,11 @@ def _spelled(match: re.Match[str]) -> str:
         size = charge[:-1].translate(_SUPERSCRIPT)
         words.append(f"{size} {'plus' if charge[-1] == '⁺' else 'minus'}".strip())
     said = " ".join(words)
-    # A bracket that was prose, not part of the formula, stays round it.
+    # A bracket that was prose, not part of the formula, stays round it. An opening one whose
+    # partner sits just past the match (the charge in "(Na⁺)" ends the match before it) is kept
+    # too, so the sentence's brackets still pair up.
     if lead or trail:
-        return f"{lead}{said}{trail}" if lead.count("(") == trail.count(")") else said
+        return f"{lead}{said}{trail}"
     return said
 
 
@@ -1633,6 +1635,47 @@ _NUM = r"(-?\d+(?:\.\d+)?|minus \d+(?:\.\d+)?)"
 _SAID_POINT = re.compile(rf"\b(points?)\s+{_NUM},\s*{_NUM}\b")
 
 
+_POWER_DIGITS = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹⁻", "0123456789-")
+#: Units as written in Chemistry and Physics, and as they are said.
+_UNITS_SAID = [
+    (re.compile(r"\bmol\s*dm⁻³"), "moles per cubic decimetre"),
+    (re.compile(r"\bg\s*dm⁻³"), "grams per cubic decimetre"),
+    (re.compile(r"\bg\s*mol⁻¹"), "grams per mole"),
+    (re.compile(r"\bmol⁻¹"), "per mole"),
+    (re.compile(r"\bdm³"), "cubic decimetres"),
+    (re.compile(r"\bcm³"), "cubic centimetres"),
+    (re.compile(r"\bm³"), "cubic metres"),
+]
+#: "6.02 x 10²³", "1.0 x 10⁻³", "10⁻⁵": a power of ten in prose.
+_TIMES_POWER = re.compile(r"(\d+(?:\.\d+)?)\s*[×x]\s*10([⁻]?[⁰¹²³⁴⁵⁶⁷⁸⁹]+)")  # noqa: RUF001
+_POWER_OF_TEN = re.compile(r"(?<![\d.])10([⁻]?[⁰¹²³⁴⁵⁶⁷⁸⁹]+)")
+#: "[H⁺]", "[OH⁻]": a concentration in square brackets.
+_CONCENTRATION = re.compile(r"\[([A-Z][A-Za-z0-9₀-₉]*[⁰¹²³⁴⁵⁶⁷⁸⁹]*[⁺⁻])\]")
+
+
+def _power_said(power: str) -> str:
+    value = power.translate(_POWER_DIGITS)
+    return f"minus {value[1:]}" if value.startswith("-") else value
+
+
+def _science_said(line: str) -> str:
+    """Scientific notation, units, log₁₀ and [ion] in prose, in the words a teacher says.
+
+    A lesson's speech is meant to be written as it is said, but "6.02 x 10²³" and
+    "mol dm⁻³" slip in (founder's trial of AI-written lessons, 13 Nov 2026, and 21 lines of
+    our own), and a voice reading them stumbles.
+    """
+    line = _TIMES_POWER.sub(
+        lambda m: f"{m.group(1)} times ten to the power {_power_said(m.group(2))}", line
+    )
+    line = _POWER_OF_TEN.sub(lambda m: f"ten to the power {_power_said(m.group(1))}", line)
+    for pattern, said in _UNITS_SAID:
+        line = pattern.sub(said, line)
+    line = line.replace("log₁₀", "log to base ten")
+    line = _CONCENTRATION.sub(r"the concentration of \1", line)
+    return re.sub(r"(?<=\d)\s*×\s*(?=\d)", " times ", line)  # noqa: RUF001
+
+
 def for_the_voice(line: str) -> str:
     """A spoken line with its mathematics turned into words.
 
@@ -1642,6 +1685,9 @@ def for_the_voice(line: str) -> str:
     screen to correct it against. The words themselves come from `spoken_maths`, which the
     stored worked steps go through too, so the coach and a replayed lesson sound the same.
     """
+    line = "$".join(
+        part if index % 2 else _science_said(part) for index, part in enumerate(line.split("$"))
+    )
     if "$" not in line:
         line = _BARE_MATHS.sub(lambda m: f"${m.group(0)}$", line)
     # Bracketed maths written as plain words, outside any $...$: a point "(2, 4)", a product

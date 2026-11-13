@@ -646,3 +646,21 @@ def test_a_drawing_that_will_not_pass_costs_the_picture_and_not_the_lesson() -> 
     )
     assert reply.drawings == []
     assert reply.spoken == "Look at the triangle. The height splits it in two."
+
+
+def test_scientific_notation_units_and_ions_in_brackets_are_said() -> None:
+    from app.tutor import for_the_voice
+
+    assert (
+        for_the_voice("It is 6.02 × 10²³ particles.")  # noqa: RUF001
+        == "It is 6.02 times ten to the power 23 particles."
+    )
+    assert "1.0 times ten to the power minus 3 moles per cubic decimetre" in for_the_voice(
+        "[H⁺] is 1.0 × 10⁻³ mol dm⁻³."  # noqa: RUF001
+    )
+    assert for_the_voice("[H⁺] is low.").startswith("the concentration of H plus")
+    assert "250 cubic centimetres" in for_the_voice("Take 250 cm³ of it.")
+    assert "log to base ten" in for_the_voice("Use log₁₀ here.")
+    assert for_the_voice("sodium ions (Na⁺) and chloride ions (Cl⁻)") == (
+        "sodium ions (N A plus) and chloride ions (C L minus)"
+    )

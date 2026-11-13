@@ -15,6 +15,22 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-13
 
+### Lessons written by AI: a trial, its checks, and voice fixes found on the way
+- **What:** `database/write_subtopic_lesson.py` writes one subtopic lesson with OpenAI's
+  gpt-6.1-terra (middle tier, high reasoning) and checks it: our loader's checks, every bit of
+  LaTeX rendered with the board's KaTeX and mhchem (`database/check_latex.mjs`), speech written
+  as spoken (no $, powers, × or unit symbols), and a sure answer key that matches its working.
+  Three trial lessons (pH, oxidation numbers, electrolysis of brine) passed, about $0.05 each.
+  The voice now reads "6.02 × 10²³", "mol dm⁻³", "log₁₀" and "[H⁺]" in words and keeps the
+  brackets in "(Na⁺)" (`tutor.for_the_voice`), which also fixes about 23 lines of our lessons.
+- **Why:** founder, 13 Nov 2026: try the "write a lesson" button; LaTeX must never break; a
+  moderately priced reasoning model (gpt-6-luna wrote speech in symbols and repeated itself).
+- **Where:** `database/write_subtopic_lesson.py`, `database/check_latex.mjs`,
+  `apps/api/src/app/tutor.py`, `tests/test_tutor.py`, three files under
+  `docs/lessons/subtopics/chemistry/` (part 1 of pH, oxidation numbers, electrolysis).
+- **Status:** done locally. Next: a second, blind solve of each problem before saving; the
+  founder to listen to one trial lesson; then the button on the Lessons page.
+
 ### The reviewer side rebuilt: AI sets and the JSON import, the subject page, the question view, a Lessons page
 - **What:** a subject's papers are in three sections (past papers, our own sets, AI-generated
   sets) with rename and remove as icons, and cards two to a row on a phone. An AI set has an
