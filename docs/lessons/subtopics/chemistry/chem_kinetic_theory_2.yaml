@@ -28,15 +28,15 @@ moments:
 
   # ---------------------------------------------------------------- solid
   - section: 'Solid'
-    say: 'Let us start with a solid. In a solid, the particles are packed close together in a regular pattern. Look at this box.'
+    say: 'Let us start with a solid. In a solid, the particles are packed close together in a regular pattern. Look at the first box, which shows a solid.'
     write: 'Solid: particles close together, in a regular pattern'
     doodle: {name: 'custom:sub_chem_kinetic_theory_a', id: dia, size: scene, caption: 'the three states as particles', 'on': packed}
-  - say: 'Strong forces of attraction hold each particle in a fixed position. It cannot move about. It only vibrates, which means it moves to and fro about that fixed position.'
+  - say: 'Strong forces of attraction hold each particle in a fixed position. It cannot move from place to place. It only vibrates, which means it moves to and fro about that fixed position.'
     write: 'Strong forces: particles vibrate about fixed positions'
     doodle_do:
       - {id: dia, op: circle, part: solid-tag, 'on': fixed}
       - {id: dia, op: pulse, part: solid-box, 'on': vibrates}
-  - say: 'So a solid has a definite shape and a definite volume. For example, a block of wood keeps its shape on any table. Its particles are already packed close, so a solid can hardly be compressed.'
+  - say: 'So a solid has a definite shape and a definite volume, which means that its shape and size stay the same wherever it is put. For example, a block of wood keeps the same shape whether it is on a table or in a box. A solid can also hardly be compressed, which means squeezed into a smaller space, because its particles are already packed close.'
     write: 'Definite shape and volume; hardly compressed'
 
   # ---------------------------------------------------------------- liquid
@@ -58,8 +58,8 @@ moments:
     write: 'Gas: particles far apart, moving fast at random'
     doodle_do:
       - {id: dia, op: stage, stage: 'custom:sub_chem_kinetic_theory_a3', 'on': gas}
-  - say: 'The forces between gas particles are very weak. So a gas has no definite shape and no definite volume. It spreads out to fill any container.'
-    write: 'No definite shape or volume; fills its container'
+  - say: 'The forces between gas particles are very weak, so nothing holds the particles together. They spread out to fill any container, so a gas has no definite shape and no definite volume.'
+    write: 'Very weak forces: fills its container, no definite shape or volume'
     doodle_do:
       - {id: dia, op: circle, part: gas-tag, 'on': fill}
   - say: 'There are large spaces between gas particles, so a gas is easily compressed.'
@@ -69,7 +69,7 @@ moments:
 
   # ---------------------------------------------------------------- the three joined
   - section: 'Comparison'
-    say: 'Now let us join the three. From solid to liquid to gas, the particles move faster, so their kinetic energy increases.'
+    say: 'Now that we have seen each state, let us compare them. From solid to liquid to gas, the particles move faster, so their kinetic energy increases.'
     write: 'Solid → liquid → gas: K.E. increases'
     doodle_do:
       - {id: dia, op: pulse, part: solid-box, 'on': solid}
@@ -80,8 +80,10 @@ moments:
 
   # worked example: put them in order
   - section: 'Worked example'
-    say: 'Let us use this. We are given ice, water and steam, and we must arrange them in order of increasing kinetic energy of their particles. For each one, we first name its state.'
+    say: 'Now let us use this order to solve a problem. We are given ice, water and steam, and we must arrange them in order of increasing kinetic energy of their particles.'
     write: 'Arrange ice, water and steam by increasing K.E.'
+  - say: 'For each one, we ask which state it is in, because the state tells us how fast its particles move.'
+    write: 'Ask: which state is it in?'
   - say: 'Ice is a solid, so its particles only vibrate. They have the least kinetic energy.'
     write: 'Ice: solid, particles vibrate, least K.E.'
     doodle_do:
@@ -97,24 +99,24 @@ moments:
   - say: 'So the order is ice, then water, then steam.'
     write: '∴ ice < water < steam'
     point:
-      - {line: 18, kind: circle, at: 'ice < water < steam'}
+      - {line: 19, kind: circle, at: 'ice < water < steam'}
 
   # ---------------------------------------------------------------- traps
   - section: 'JAMB traps'
     say: 'Here is a real JAMB question. Which statement about the states of matter is not correct? Option D says that the random motion of particles increases from gas to solid.'
     write: 'Which is not correct? D: random motion increases from gas to solid'
-  - say: 'From gas to solid, the particles slow down and settle into fixed positions, so their random motion decreases. Option D has it backwards, so D is the answer.'
+  - say: 'From gas to solid, the particles slow down and settle into fixed positions, so their random motion decreases. Option D has it backwards, so D is the answer. The rule to remember is that random motion increases from solid to liquid to gas, and decreases the other way.'
     write: 'Gas → solid: random motion decreases, so D ✓'
     point:
-      - {line: 20, kind: circle, at: 'decreases'}
-  - say: 'A second trap. A solid has a definite shape because of the strong forces of attraction between its particles, not because of its high melting point.'
+      - {line: 21, kind: circle, at: 'decreases'}
+  - say: 'A second trap. A solid has a definite shape because of the strong forces of attraction between its particles. It is not because of its high melting point, which is the temperature at which it melts.'
     write: 'Definite shape: strong forces, not a high melting point'
   - say: 'Some students also say that the particles of a solid do not move. They do move. They vibrate about their fixed positions.'
     write: 'Solid particles do move: they vibrate'
   - say: 'Others say that heated particles get bigger. They do not. They move faster, and the spaces between them grow.'
     write: 'Heated particles do not swell: they move faster'
     point:
-      - {line: 23, kind: underline, at: 'do not swell'}
+      - {line: 24, kind: underline, at: 'do not swell'}
 
   # ---------------------------------------------------------------- check
   - section: 'Check yourself'
@@ -129,11 +131,11 @@ moments:
     doodle_do:
       - {id: dia, op: pulse, part: solid-box, 'on': packed}
     point:
-      - {line: 26, kind: underline, at: 'almost no space'}
+      - {line: 27, kind: underline, at: 'almost no space'}
 
   # ---------------------------------------------------------------- recap
   - section: 'Recap'
-    say: 'Let us recap. In a solid, the particles vibrate about fixed positions. In a liquid, they are close together but slide past one another. In a gas, they are far apart and move fast.'
+    say: 'Let us recap. In a solid, the particles vibrate about fixed positions, so it has a definite shape and volume. In a liquid, they are close together but slide past one another, so it has a definite volume but takes the shape of its container. In a gas, they are far apart and move fast, so it fills any container.'
     write: '1. Solid: vibrate; liquid: slide; gas: far apart, fast'
     doodle_do:
       - {id: dia, op: pulse, part: solid-tag, 'on': solid}

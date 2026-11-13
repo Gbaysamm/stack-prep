@@ -15,6 +15,24 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-13
 
+### Every short lesson reviewed line by line; the bank review set up
+- **What:** the other 60 short lessons were reviewed sentence by sentence against "the one
+  test" (`docs/lessons/review-brief.md`), as Elements was: repetition that adds nothing
+  removed, each line one job, plain exact wording, transitions into worked examples, traps
+  that give the general rule, one verdict per moment, precise recaps. Fixed on the way: "a
+  compound because it has a formula" (elements have formulae too) became "two kinds of atom
+  chemically combined"; balanced equations before equations are taught became word
+  equations; terms ("properties", "heredity") explained before use.
+  For the bank: `docs/questions/bank-review-brief.md` (no answer checks; analogies and
+  doodles only where they help; the six standards: context, continuity, completeness,
+  conciseness, diagnosis, subject not template) and `check_lesson_edit.py --review` (an
+  action may be removed, never added or reordered; the answer stays).
+- **Why:** founder, 13 Nov 2026, with a reviewer's line-by-line notes on Elements and on three
+  bank lessons; "we need to fix for other lessons too"; remove the bank answer checks; reduce
+  analogies and doodles to where they make sense.
+- **Where:** `docs/lessons/subtopics/**`, the two briefs, `database/check_lesson_edit.py`.
+- **Status:** lessons done locally, loaded. The bank review runs next.
+
 ### A weak run always brings its lessons; pages several times faster; Elements reviewed
 - **What:**
   - A weak run's lessons come even when the subtopic has no new questions left (Elements,

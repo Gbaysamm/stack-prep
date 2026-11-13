@@ -19,15 +19,15 @@ moments:
 
   # ---------------------------------------------------------------- introduction: the big picture
   - section: 'Introduction'
-    say: 'This lesson begins a topic about powers and roots. The topic has three parts. They are indices, logarithms and surds.'
+    say: 'This lesson begins a topic about powers and roots. The topic has three parts, which are indices, logarithms and surds.'
     write: 'Three parts: indices, logarithms, surds'
   - say: 'Indices are powers, such as two to the power three.'
     write: 'Indices: powers, such as $2^{3}$'
-  - say: 'A logarithm works a power backwards. It finds the power when we know the answer.'
+  - say: 'Logarithms go the other way. A logarithm finds the power when we know the answer. For example, it tells us that 2 must be raised to the power 3 to give 8.'
     write: 'Logarithms: find the power from the answer'
-  - say: 'A surd is a root that does not come out whole, such as the square root of 2.'
-    write: 'Surds: roots that are not whole, such as $\sqrt{2}$'
-  - say: 'JAMB asks this topic nearly every year. You may be asked to simplify logs without tables, solve an equation in indices, or rationalise a surd. We start with indices.'
+  - say: 'Surds are roots that cannot be worked out exactly, such as the square root of 2. It is about 1.414, and its decimals never end.'
+    write: 'Surds: roots that cannot be worked out exactly, such as $\sqrt{2}$'
+  - say: 'JAMB asks this topic nearly every year. You may be asked to simplify logarithms without tables, to solve an equation in indices, or to rationalise a surd, which means clearing it from the bottom of a fraction. We start with indices.'
     write: 'In JAMB: simplify, solve, rationalise'
 
   # ---------------------------------------------------------------- objectives
@@ -37,23 +37,23 @@ moments:
 
   # ---------------------------------------------------------------- index and base
   - section: 'Index'
-    say: 'An index, or power, tells us how many times a number is multiplied by itself.'
-    write: 'Index (power): how many times a number is multiplied by itself'
+    say: 'An index, or power, tells us how many copies of a number are multiplied together.'
+    write: 'Index (power): how many copies of a number are multiplied together'
     doodle: {name: 'custom:sub_maths_indices_logs_surds_a', id: d, caption: 'base and index', size: scene, 'on': 'index'}
   - say: 'For example, look at two to the power three. The big 2 is the number being multiplied, and it is called the base.'
     write: 'Base: the number being multiplied'
     doodle_do:
       - {id: d, op: pulse, part: base, 'on': 'big'}
       - {id: d, op: show, part: base-label, 'on': 'base'}
-  - say: 'The small 3, written up and to the right, is the index. It tells us how many 2s are multiplied.'
-    write: 'Index: how many of the base are multiplied'
+  - say: 'The small 3, written up and to the right of the base, is the index. It tells us that three 2s are multiplied.'
+    write: 'Index: the small 3, up and to the right'
     doodle_do:
       - {id: d, op: show, part: index-label, 'on': 'index'}
   - say: 'So two to the power three is 2 times 2 times 2, which is 8.'
     write: '$2^{3} = 2 \times 2 \times 2 = 8$'
     doodle_do:
       - {id: d, op: show, part: expand, 'on': 'times'}
-  - say: 'In the same way, a to the power n means n copies of a, multiplied together.'
+  - say: 'We use letters to say this for any number. If a is any base and n is any whole number, a to the power n means n copies of a, multiplied together.'
     write: '$a^{n} = a \times a \times \cdots \times a$ ($n$ times)'
 
   # ---------------------------------------------------------------- the three laws, named
@@ -62,17 +62,17 @@ moments:
 
   # ---------------------------------------------------------------- law 1
   - section: 'Law 1: multiplying powers'
-    say: 'The first law is for multiplying. Let us multiply two to the power three by two to the power two. We write out every 2. That is three 2s, times two more 2s.'
+    say: 'The first law is for multiplying. Let us multiply two to the power three by two to the power two. To see what happens, we write out every 2. That is three 2s, times two more 2s.'
     write: '$2^{3} \times 2^{2} = (2 \times 2 \times 2) \times (2 \times 2)$'
-  - say: 'Count them. There are five 2s, so the answer is two to the power five, which is 32. Three plus two is five, so we added the indices.'
+  - say: 'Count them. There are five 2s in all, so the answer is two to the power five, which is 32. Notice that five is three plus two. So instead of counting, we could have added the indices.'
     write: '$= 2^{3+2} = 2^{5} = 32$'
     point:
       - {line: 14, kind: circle, at: '3+2', text: 'add the indices', 'on': 'added'}
-  - say: 'This is the first law. When we multiply powers of the same base, we add the indices.'
+  - say: 'This is the first law. When we multiply powers of the same base, we add the indices. Here m and n stand for any two indices.'
     write: 'Law 1: $a^{m} \times a^{n} = a^{m+n}$'
     doodle_do:
       - {id: d, op: pulse, part: base, 'on': 'same base'}
-  - say: 'Let us use it. We are given x to the power four, times x to the power five, and we must simplify it.'
+  - say: 'Now that we have the first law, let us use it on an example. We are given x to the power four, times x to the power five, and we must simplify it.'
     write: 'Simplify $x^{4} \times x^{5}$'
   - say: 'Both powers have the same base, x, so we add the indices. Four plus five is nine, so the answer is x to the power nine.'
     write: '$= x^{4+5} = x^{9}$'
@@ -81,52 +81,52 @@ moments:
   - section: 'Law 2: dividing powers'
     say: 'The second law is for dividing. Let us divide two to the power five by two to the power two. Written out, that is five 2s on top and two 2s at the bottom.'
     write: '$\dfrac{2^{5}}{2^{2}} = \dfrac{2 \times 2 \times 2 \times 2 \times 2}{2 \times 2}$'
-  - say: 'The two 2s at the bottom cancel two of the 2s on top. That leaves three 2s, which is two to the power three, or 8. Five minus two is three, so we subtracted the indices.'
+  - say: 'Each 2 at the bottom cancels one 2 on top, because 2 divided by 2 is 1. That leaves three 2s on top, which is two to the power three, or 8. Notice that three is five minus two. So instead of cancelling, we could have subtracted the indices.'
     write: '$= 2^{5-2} = 2^{3} = 8$'
   - say: 'This is the second law. When we divide powers of the same base, we subtract the index of the bottom from the index of the top.'
     write: 'Law 2: $a^{m} \div a^{n} = a^{m-n}$'
-  - say: 'Let us use it. We are given y to the power seven, divided by y to the power three, and we must simplify it.'
+  - say: 'Let us use the second law on an example. We are given y to the power seven, divided by y to the power three, and we must simplify it.'
     write: 'Simplify $y^{7} \div y^{3}$'
   - say: 'The base is y in both, so we subtract the indices. Seven minus three is four, so the answer is y to the power four.'
     write: '$= y^{7-3} = y^{4}$'
 
   # ---------------------------------------------------------------- law 3
   - section: 'Law 3: power of a power'
-    say: 'The third law is for a power of a power. Two to the power three, all squared, means two to the power three multiplied by itself.'
+    say: 'The third law is for a power of a power. Take two to the power three, all squared. Squared means to the power two, so this is two copies of two to the power three, multiplied together.'
     write: '$(2^{3})^{2} = 2^{3} \times 2^{3}$'
-  - say: 'By the first law, we add the indices. Three plus three is six. That is the same as three times two, so in effect we multiplied the indices.'
+  - say: 'By the first law, we add the indices. Three plus three is six, so this is two to the power six. Adding two 3s is the same as three times two, so we could have multiplied the indices.'
     write: '$= 2^{3+3} = 2^{6}$, and $3 \times 2 = 6$'
   - say: 'This is the third law. For a power of a power, we multiply the indices.'
     write: 'Law 3: $(a^{m})^{n} = a^{mn}$'
-  - say: 'Let us use it. We are given x squared, all to the power four, and we must simplify it.'
+  - say: 'Let us use the third law on an example. We are given x squared, all to the power four, and we must simplify it.'
     write: 'Simplify $(x^{2})^{4}$'
   - say: 'It is a power of a power, so we multiply the indices. Two times four is eight, so the answer is x to the power eight.'
     write: '$= x^{2 \times 4} = x^{8}$'
 
   # ---------------------------------------------------------------- traps
   - section: 'JAMB traps'
-    say: 'Here is a common trap. The laws work only when the bases are the same. Two to the power three, times three to the power two, is not six to the power five. We work out each power. It is 8 times 9, which is 72.'
+    say: 'Here is a common trap. The laws work only when the bases are the same. When the bases are different, we work out each power on its own. So two to the power three, times three to the power two, is not six to the power five. It is 8 times 9, which is 72.'
     write: '$2^{3} \times 3^{2} = 8 \times 9 = 72$, not $6^{5}$'
     point:
       - {line: 28, kind: strike, at: '65', 'on': 'not'}
-  - say: 'A second trap. The laws are for multiplying, not adding. Two to the power three, plus two to the power two, is 8 plus 4, which is 12. It is not two to the power five.'
+  - say: 'A second trap. There is no law for adding powers. The laws are for multiplying and dividing, so a sum of powers is worked out power by power. Two to the power three, plus two to the power two, is 8 plus 4, which is 12. It is not two to the power five.'
     write: '$2^{3} + 2^{2} = 8 + 4 = 12$, not $2^{5}$'
 
   # ---------------------------------------------------------------- check
   - section: 'Check yourself'
     say: 'Now it is your turn. Simplify a to the power five, times a to the power three, all divided by a to the power four. Pause the lesson and work it out.'
     write: 'Simplify $\dfrac{a^{5} \times a^{3}}{a^{4}}$'
-  - say: 'Take the top first. By the first law, five plus three is eight, so the top is a to the power eight.'
+  - say: 'Work out the top first. It is a product of powers of a, so by the first law, five plus three is eight, so the top is a to the power eight.'
     write: 'Top: $a^{5} \times a^{3} = a^{5+3} = a^{8}$'
-  - say: 'Now divide. By the second law, eight minus four is four, so the answer is a to the power four.'
+  - say: 'Now divide a to the power eight by a to the power four. By the second law, eight minus four is four, so the answer is a to the power four.'
     write: '$\dfrac{a^{8}}{a^{4}} = a^{8-4} = a^{4}$'
 
   # ---------------------------------------------------------------- recap
   - section: 'Recap'
-    say: 'Let us recap. An index tells us how many times the base is multiplied by itself.'
-    write: '1. Index: how many times the base is multiplied'
-  - say: 'With the same base, multiplying adds the indices, dividing subtracts them, and a power of a power multiplies them. In the next lesson, we look at zero, negative and fractional indices. Now try the problem.'
-    write: '2. Same base: multiply, add; divide, subtract; power, multiply'
+    say: 'Let us recap. An index tells us how many copies of the base are multiplied together.'
+    write: '1. Index: how many copies of the base are multiplied'
+  - say: 'With the same base, multiplying powers adds the indices, dividing subtracts the bottom index from the top one, and a power of a power multiplies the indices. In the next lesson, we look at zero, negative and fractional indices. Now try the problem.'
+    write: '2. Same base: $a^{m} \times a^{n} = a^{m+n}$, $a^{m} \div a^{n} = a^{m-n}$, $(a^{m})^{n} = a^{mn}$'
 
 # ---------------------------------------------------------------- after the lesson: try it
 problems:

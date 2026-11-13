@@ -31,21 +31,21 @@ moments:
 
   # ---------------------------------------------------------------- particles
   - section: 'Number of particles'
-    say: 'Each mole holds 6.02 × 10²³ particles. So to find the number of particles, we multiply the number of moles by the Avogadro constant, L.'
+    say: 'In the last lesson, you learnt that each mole holds 6.02 × 10²³ particles, the Avogadro constant. So to find the number of particles, we multiply the number of moles by the Avogadro constant, L.'
     write: 'Number of particles = n × L'
     doodle_do:
       - {id: mm, op: stage, stage: 'custom:sub_chem_chemical_combination_mole_a2', 'on': particles}
       - {id: mm, op: circle, part: to-particles, 'on': multiply}
-  - say: 'On the mole map, moles times L gives particles, and particles divided by L gives moles.'
+  - say: 'To go the other way on the mole map, the number of particles divided by L gives the moles.'
     write: 'Particles ÷ L = moles'
     doodle_do:
       - {id: mm, op: circle, part: from-particles, 'on': divided}
 
   # worked example
   - section: 'Worked example'
-    say: 'Let us use this. How many molecules are in 8.8 g of carbon(IV) oxide, CO₂? Carbon is 12 and oxygen is 16.'
+    say: 'Let us use this. How many molecules are in 8.8 g of carbon(IV) oxide, CO₂? We are given a mass, and we must find a number of molecules. Carbon is 12 and oxygen is 16.'
     write: 'Molecules in 8.8 g of carbon(IV) oxide ($\ce{CO2}$)? C = 12, O = 16'
-  - say: 'We cannot go from mass to particles in one step, so first we change the mass into moles. M of CO₂ is 12 plus 32, which is 44 grams per mole, so 8.8 g is 0.2 mole.'
+  - say: 'We cannot go from mass to particles in one step, so first we change the mass into moles. M of CO₂ is 12 plus 2 times 16, which is 44 grams per mole, so 8.8 g is 0.2 mole.'
     write: 'M = 12 + 2(16) = 44 g mol⁻¹; n = 8.8 g ÷ 44 g mol⁻¹ = 0.2 mol'
     doodle_do:
       - {id: mm, op: pulse, part: to-moles, 'on': moles}
@@ -60,9 +60,9 @@ moments:
 
   # ---------------------------------------------------------------- molar volume
   - section: 'Molar volume of a gas'
-    say: 'Now gases. By Avogadro''s law, one mole of any gas takes up the same volume at the same temperature and pressure.'
+    say: 'Now gases. One mole of any gas holds the same number of molecules, so by Avogadro''s law it takes up the same volume at the same temperature and pressure.'
     write: 'One mole of any gas: the same volume'
-  - say: 'At s.t.p., that volume is 22.4 cubic decimetres. S.t.p. means standard temperature and pressure, which is 0 degrees Celsius, or 273 K, and 760 millimetres of mercury.'
+  - say: 'Chemists compare gases at s.t.p., which means standard temperature and pressure. That is 0 degrees Celsius, or 273 K, and 760 millimetres of mercury. At s.t.p., one mole of any gas takes up 22.4 cubic decimetres, and this is called the molar volume.'
     write: 'Molar volume = 22.4 dm³ mol⁻¹ at s.t.p. (273 K, 760 mmHg)'
     doodle_do:
       - {id: mm, op: stage, stage: 'custom:sub_chem_chemical_combination_mole_a3', 'on': volume}
@@ -86,7 +86,7 @@ moments:
     write: 'V = 0.1 mol × 22.4 dm³ mol⁻¹ = 2.24 dm³'
     doodle_do:
       - {id: mm, op: pulse, part: to-gas, 'on': times}
-  - say: 'Another one, going the other way. 560 cubic centimetres of a gas at s.t.p. has a mass of 1.1 g. We must find its molar mass.'
+  - say: 'Another one. This time we are given a volume and a mass. 560 cubic centimetres of a gas at s.t.p. has a mass of 1.1 g. We must find its molar mass.'
     write: '560 cm³ of a gas at s.t.p. has a mass of 1.1 g. M = ?'
   - say: 'The molar volume is in cubic decimetres, so first we change the volume. There are 1000 cubic centimetres in a cubic decimetre, so 560 divided by 1000 is 0.560 cubic decimetres.'
     write: '560 cm³ ÷ 1000 = 0.560 dm³'
@@ -99,28 +99,31 @@ moments:
 
   # ---------------------------------------------------------------- vapour density
   - section: 'Vapour density'
-    say: 'Avogadro''s law gives one more tool, vapour density. The vapour density of a gas is the mass of some volume of the gas divided by the mass of the same volume of hydrogen.'
+    say: 'Avogadro''s law also lets us find a molar mass by comparing a gas with hydrogen. This comparison is called the vapour density. The vapour density of a gas is the mass of some volume of the gas divided by the mass of the same volume of hydrogen.'
     write: 'Vapour density = mass of a volume of gas ÷ mass of the same volume of hydrogen'
   - say: 'Equal volumes hold equal numbers of molecules, so this compares one molecule of the gas with one molecule of hydrogen, H₂. The relative molecular mass of H₂ is 2, so the relative molecular mass of the gas is 2 times its vapour density.'
     write: 'Relative molecular mass = 2 × vapour density'
     point:
       - {line: 20, kind: underline, at: '2 × vapour density'}
-  - say: 'For example, a gas has a vapour density of 32. Its relative molecular mass is 2 times 32, which is 64. That matches sulphur(IV) oxide, SO₂, which is 32 plus 2 times 16.'
+  - say: 'For example, suppose a gas has a vapour density of 32. Its relative molecular mass is 2 times 32, which is 64. Sulphur is 32 and oxygen is 16, so sulphur(IV) oxide, SO₂, is 32 plus 2 times 16, which is also 64. So the gas could be sulphur(IV) oxide.'
     write: 'Vapour density 32, so M = 2 × 32 = 64, e.g. sulphur(IV) oxide ($\ce{SO2}$) = 32 + 2(16)'
 
   # ---------------------------------------------------------------- trap
   - section: 'JAMB trap'
-    say: 'Here is a common trap. Students forget to change cubic centimetres into cubic decimetres. Dividing 560 by 22.4 gives 25 moles, which is a thousand times too many.'
+    say: 'Here is a common trap. Students forget to change cubic centimetres into cubic decimetres. Dividing 560 by 22.4 gives 25 moles, which is a thousand times too many. The molar volume is in cubic decimetres, so every volume must be in cubic decimetres before you divide by 22.4.'
     write: 'Trap: change cm³ to dm³ before ÷ 22.4 (560 ÷ 22.4 = 25 ✗)'
 
   # ---------------------------------------------------------------- check
   - section: 'Check yourself'
     say: 'Now it is your turn. How many molecules are in 9 g of water, H₂O? Hydrogen is 1 and oxygen is 16. Pause the lesson and work it out.'
     write: 'Molecules in 9 g of water ($\ce{H2O}$)? H = 1, O = 16'
-  - say: 'M of water is 18 grams per mole, so 9 g is 0.5 mole. 0.5 times 6.02 × 10²³ is 3.01 × 10²³ molecules.'
-    write: 'n = 9 g ÷ 18 g mol⁻¹ = 0.5 mol; molecules = 0.5 × 6.02 × 10²³ = 3.01 × 10²³'
+  - say: 'First the moles. M of water is 2 times 1, plus 16, which is 18 grams per mole, so 9 g is 0.5 mole.'
+    write: 'n = 9 g ÷ 18 g mol⁻¹ = 0.5 mol'
     doodle_do:
       - {id: mm, op: pulse, part: to-moles, 'on': mole}
+  - say: 'Then we multiply by L. 0.5 times 6.02 × 10²³ is 3.01 × 10²³ molecules.'
+    write: 'Molecules = 0.5 × 6.02 × 10²³ = 3.01 × 10²³'
+    doodle_do:
       - {id: mm, op: pulse, part: to-particles, 'on': times}
 
   # ---------------------------------------------------------------- recap

@@ -36,7 +36,7 @@ moments:
 
   # ---------------------------------------------------------------- separating funnel
   - section: 'Separating funnel'
-    say: 'A separating funnel separates two immiscible liquids. In the funnel, they form two layers, and the denser liquid sinks to the bottom.'
+    say: 'A separating funnel is a glass vessel with a tap at its lower end, and it separates two immiscible liquids. In the funnel, the liquids form two layers. The denser liquid, which is heavier for the same volume, sinks to the bottom.'
     write: 'Separating funnel: two immiscible liquids, in layers'
     doodle: {name: 'custom:sub_chem_separation_processes_c', id: liq, size: scene, caption: 'separating funnel', 'on': separating funnel}
     doodle_do:
@@ -49,9 +49,9 @@ moments:
     write: 'Pour the top layer into another beaker'
     doodle_do:
       - {id: liq, op: pulse, part: kerosene, 'on': top layer}
-  - say: 'Now let us use this. We are given kerosene and water, and we must separate them. They do not mix, so they are immiscible, and we use a separating funnel.'
+  - say: 'Now that we know how the funnel works, let us use it. We are given kerosene and water, and we must separate them. First, we ask whether they mix. They do not, so they are immiscible, and we use a separating funnel.'
     write: 'Kerosene and water: immiscible ∴ separating funnel'
-  - say: 'Which comes out first? Kerosene is less dense than water, so it floats on top. The water is the bottom layer, so the water runs out of the tap first.'
+  - say: 'Next, which liquid comes out first? Kerosene is less dense than water, so it floats on top. The water is the bottom layer, so the water runs out of the tap first.'
     write: 'Kerosene floats; water (denser) runs out first'
     doodle_do:
       - {id: liq, op: pulse, part: kerosene, 'on': floats}
@@ -66,7 +66,7 @@ moments:
     doodle: {name: 'custom:sub_chem_separation_processes_b', id: dis, size: scene, caption: 'distillation', 'on': flask}
     doodle_do:
       - {id: dis, op: pulse, part: condenser, 'on': condenser}
-  - say: 'In the condenser, the vapour cools and turns back into a liquid. The pure liquid that collects is called the distillate.'
+  - say: 'In the condenser, the vapour cools and turns back into a liquid. This pure liquid drips into a receiver, and it is called the distillate. The dissolved solid cannot boil off, so it stays in the flask.'
     write: 'The vapour condenses; the pure liquid is the distillate'
     doodle_do:
       - {id: dis, op: circle, part: distillate, 'on': distillate}
@@ -91,25 +91,27 @@ moments:
 
   # ---------------------------------------------------------------- trap
   - section: 'JAMB trap'
-    say: 'Here is a common trap. Students often mix up evaporation and distillation. Evaporation loses the liquid and keeps the solid, but distillation keeps the liquid.'
+    say: 'Here is a common trap. Students often mix up evaporation and distillation. To choose between them, ask which part you want to keep. Evaporation keeps the solid and loses the liquid. Distillation keeps the liquid as well as the solid.'
     write: 'Trap: evaporation loses the liquid; distillation keeps it'
 
   # ---------------------------------------------------------------- check
   - section: 'Check yourself'
     say: 'Now it is your turn. Which method separates groundnut oil from water, and which liquid leaves the tap first? Pause the lesson and decide before I go on.'
     write: 'Groundnut oil and water: which method? Which comes out first?'
-  - say: 'Oil and water do not mix, so they are immiscible, and we use a separating funnel. Water is denser than the oil, so water is the bottom layer and runs out of the tap first.'
-    write: 'Immiscible ∴ separating funnel; water (denser) out first ✓'
-    doodle_do:
-      - {id: liq, op: circle, part: tap, 'on': tap}
+  - say: 'Oil and water do not mix, so they are immiscible, and we use a separating funnel.'
+    write: 'Immiscible ∴ separating funnel ✓'
     point:
       - {line: 19, kind: circle, at: 'separating funnel'}
+  - say: 'Water is denser than the oil, so water is the bottom layer, and it runs out of the tap first.'
+    write: 'Water (denser) out first ✓'
+    doodle_do:
+      - {id: liq, op: circle, part: tap, 'on': tap}
 
   # ---------------------------------------------------------------- recap
   - section: 'Recap'
-    say: 'Let us recap. A separating funnel separates immiscible liquids, and the denser liquid runs out of the tap first.'
+    say: 'Let us recap. A separating funnel separates immiscible liquids. The denser liquid forms the bottom layer, and it runs out of the tap first.'
     write: '1. Immiscible liquids: separating funnel, denser layer out first'
-  - say: 'Simple distillation keeps the liquid from a solution, as the distillate. In the next lesson, we separate miscible liquids. Now try the problem.'
+  - say: 'Simple distillation boils off the liquid from a solution and condenses it, so the liquid is kept as the distillate and the solid stays in the flask. In the next lesson, we separate miscible liquids. Now try the problem.'
     write: '2. Simple distillation: the liquid is kept as the distillate'
 
 # ---------------------------------------------------------------- after the lesson: try it

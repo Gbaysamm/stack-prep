@@ -56,41 +56,43 @@ moments:
     write: 'Centrioles: animal, yes; flowering plant, no'
     doodle_do:
       - {id: cell, op: circle, part: centrioles, 'on': centrioles}
-  - say: 'A plant stores its food as starch, but an animal stores its food as glycogen.'
+  - say: 'A plant stores its food as starch, but an animal stores its food as glycogen, a substance like starch that is kept in the liver and the muscles.'
     write: 'Food store: plant, starch; animal, glycogen'
-  - say: 'Last, a plant cell has a regular shape, because of its wall, but an animal cell has an irregular shape.'
+  - say: 'Last, a plant cell has a regular shape, because its wall holds it in place. An animal cell has no wall, so its shape is irregular.'
     write: 'Shape: plant, regular; animal, irregular'
     doodle_do:
       - {id: plant, op: pulse, part: wall, 'on': wall}
 
   # ---------------------------------------------------------------- JAMB question
   - section: 'JAMB question'
-    say: 'Here is a JAMB question. Which cell organelle is responsible for aerobic respiration? Is it the nucleus, the nucleolus, the endoplasmic reticulum or the mitochondrion?'
+    say: 'Now that we have compared the two cells, let us answer a JAMB question on the parts of a cell. Which cell organelle is responsible for aerobic respiration? Is it the nucleus, the nucleolus, the endoplasmic reticulum or the mitochondrion?'
     write: 'Organelle for aerobic respiration? Nucleus, nucleolus, ER, mitochondrion'
-  - say: 'The nucleus is the control centre of the cell. It does not respire.'
+  - say: 'We are given a job, aerobic respiration, and we must find the organelle that does it. So for each organelle we ask one question. Is aerobic respiration its job?'
+    write: 'Ask: is aerobic respiration its job?'
+  - say: 'The nucleus is the control centre of the cell. Respiration is not its job, so it is not the answer.'
     write: 'Nucleus: controls the cell ✗'
-  - say: 'The nucleolus makes ribosomes.'
+  - say: 'The nucleolus makes ribosomes, so it is not the answer either.'
     write: 'Nucleolus: makes ribosomes ✗'
-  - say: 'The endoplasmic reticulum transports materials.'
+  - say: 'The endoplasmic reticulum transports materials, so it is not the answer.'
     write: 'ER: transports materials ✗'
   - say: 'Aerobic respiration takes place in the mitochondrion, so that is the answer.'
     write: '∴ mitochondrion ✓'
     doodle_do:
       - {id: cell, op: circle, part: mitochondrion, 'on': mitochondrion}
     point:
-      - {line: 15, kind: circle, at: 'mitochondrion'}
+      - {line: 16, kind: circle, at: 'mitochondrion'}
 
   # ---------------------------------------------------------------- traps
   - section: 'JAMB traps'
     say: 'Here is a trap. A diagram shows a cell with a cell wall and a large vacuole, but no chloroplasts. Some students call it an animal cell, because there are no chloroplasts.'
     write: 'Wall and large vacuole, but no chloroplasts: plant or animal?'
-  - say: 'But an animal cell has no wall at all. The wall shows that it is a plant cell, perhaps from a root, where there is no light.'
+  - say: 'But an animal cell has no wall at all, while some plant cells, such as root cells in the dark soil, have no chloroplasts. So the wall, not the chloroplasts, decides that this is a plant cell.'
     write: '∴ a plant cell, such as a root cell: the wall decides'
     doodle_do:
       - {id: plant, op: pulse, part: wall, 'on': wall}
     point:
-      - {line: 17, kind: underline, at: 'the wall decides'}
-  - say: 'Here is one more. Some students say that plant cells have no mitochondria. They do, because every living plant cell respires.'
+      - {line: 18, kind: underline, at: 'the wall decides'}
+  - say: 'Here is one more. Some students say that plant cells have no mitochondria. They do, because every living plant cell respires, and having chloroplasts does not take the place of mitochondria.'
     write: 'Plant cells have mitochondria too'
     doodle_do:
       - {id: plant, op: circle, part: mitochondrion, 'on': mitochondria}
@@ -108,16 +110,18 @@ moments:
     doodle_do:
       - {id: plant, op: pulse, part: chloroplasts, 'on': chloroplasts}
     point:
-      - {line: 21, kind: circle, at: 'mitochondria and chloroplasts'}
+      - {line: 22, kind: circle, at: 'mitochondria and chloroplasts'}
 
   # ---------------------------------------------------------------- recap
   - section: 'Recap'
     say: 'Let us recap. Both cells have a membrane, cytoplasm, a nucleus, mitochondria, ribosomes, endoplasmic reticulum and a Golgi body.'
     write: '1. Both: membrane, cytoplasm, nucleus, mitochondria, ribosomes, ER, Golgi body'
-  - say: 'Only plant cells have a cell wall, chloroplasts and a large central vacuole, and only animal cells have centrioles. Now try the problem.'
+  - say: 'Only plant cells have a cell wall, chloroplasts and a large central vacuole, and only animal cells have centrioles.'
     write: '2. Plant only: wall, chloroplasts, large vacuole. Animal only: centrioles'
     doodle_do:
       - {id: plant, op: pulse, 'on': plant}
+  - say: 'A plant cell stores starch and has a regular shape, while an animal cell stores glycogen and has an irregular shape. Now try the problem.'
+    write: '3. Plant: starch, regular shape. Animal: glycogen, irregular shape'
 
 # ---------------------------------------------------------------- after the lesson: try it
 problems:

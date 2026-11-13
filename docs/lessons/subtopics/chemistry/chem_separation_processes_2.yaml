@@ -19,12 +19,12 @@ moments:
 
   # ---------------------------------------------------------------- introduction
   - section: 'Introduction'
-    say: 'In the last lesson, you saw that filtration separates an insoluble solid from a liquid. But a soluble solid, like salt in water, passes through the filter paper. So we need other methods.'
+    say: 'In the last lesson, you saw that filtration separates an insoluble solid from a liquid. But a soluble solid, such as salt in water, passes through the filter paper. So we need other methods.'
     write: 'A soluble solid passes through filter paper'
     doodle: {name: 'custom:sub_chem_separation_processes_a', id: sol, size: scene, caption: 'separating solids', 'on': filtration}
     doodle_do:
       - {id: sol, op: pulse, part: filtrate, 'on': passes}
-  - say: 'A solid dissolved in a liquid forms a solution. The solid is called the solute, and the liquid is called the solvent.'
+  - say: 'First, three words. A solid dissolved in a liquid forms a solution. The solid that dissolves is called the solute, and the liquid it dissolves in is called the solvent.'
     write: 'Solution: a solute (solid) dissolved in a solvent (liquid)'
 
   # ---------------------------------------------------------------- objectives
@@ -39,14 +39,16 @@ moments:
     doodle_do:
       - {id: sol, op: stage, stage: 'custom:sub_chem_separation_processes_a2', 'on': evaporating dish}
       - {id: sol, op: pulse, part: flame, 'on': heated}
-  - say: 'The liquid boils off as vapour and is lost to the air. The solid is left behind in the dish.'
+  - say: 'The liquid turns to vapour and escapes into the air, so the liquid is lost. The solid cannot escape, so it is left behind in the dish.'
     write: 'The liquid is lost; the solid is left'
     doodle_do:
       - {id: sol, op: pulse, part: vapour, 'on': vapour}
       - {id: sol, op: circle, part: solution, 'on': left}
-  - say: 'Now let us use this. We are given sea water, and we must get common salt from it. Salt is a solid that dissolves in water, so filtration cannot work.'
-    write: 'Salt from sea water: salt is soluble, so not filtration'
-  - say: 'We want to keep the salt, and we do not need the water. So we evaporate the sea water to dryness. The water leaves as steam, and the salt is left in the dish.'
+  - say: 'Now that we know what evaporation does, let us use it. We are given sea water, and we must get common salt from it.'
+    write: 'Salt from sea water: which method?'
+  - say: 'We ask how the parts differ. Salt is soluble in water, so it would pass through filter paper, and filtration cannot work.'
+    write: 'Salt is soluble, so not filtration'
+  - say: 'We want to keep the salt, and we do not need the water. So we heat the sea water until all the water has gone, which is called evaporating to dryness. The water leaves as steam, and the salt is left in the dish.'
     write: 'Evaporate to dryness: water leaves, salt is left ✓'
     doodle_do:
       - {id: sol, op: pulse, part: vapour, 'on': steam}
@@ -54,58 +56,62 @@ moments:
 
   # ---------------------------------------------------------------- crystallisation
   - section: 'Crystallisation'
-    say: 'We have seen evaporation. Now let us look at crystallisation. Crystallisation gives a pure solid, as crystals, from its solution.'
+    say: 'We have seen evaporation. Now let us look at crystallisation. Crystallisation gives a pure solid, in the form of crystals, from its solution.'
     write: 'Crystallisation: pure crystals from a solution'
-  - say: 'First, we need one new word. A saturated solution holds all the solute it can dissolve at that temperature. No more solute will dissolve in it.'
+  - say: 'First, we need one new word. A saturated solution holds all the solute it can dissolve at that temperature. Any more solute added to it stays undissolved.'
     write: 'Saturated: holds all the solute it can at that temperature'
   - say: 'In crystallisation, the solution is heated only until it is saturated. Then it is left to cool.'
     write: 'Heat until saturated, then leave to cool'
     doodle_do:
       - {id: sol, op: pulse, part: dish, 'on': heated}
-  - say: 'Most solids dissolve less in cold water than in hot water. So as the saturated solution cools, the extra solid comes out as crystals.'
-    write: 'On cooling, the extra solid comes out as crystals'
+  - say: 'Why does cooling give crystals? Most solids dissolve less in cold water than in hot water. So as the saturated solution cools, it can no longer hold all its solute, and the solute it cannot hold comes out as crystals.'
+    write: 'On cooling, the solute it cannot hold comes out as crystals'
   - say: 'Why not simply evaporate to dryness? Because strong heat spoils some solids. For example, sugar chars and turns black when it is heated strongly.'
     write: 'Strong heat spoils some solids, e.g. sugar chars'
   - say: 'Here is an example. We are given a solution of copper(II) tetraoxosulphate(VI), also called copper sulphate, and we must get its blue crystals.'
     write: 'Copper(II) tetraoxosulphate(VI) (copper sulphate): get the blue crystals'
-  - say: 'The blue crystals hold water inside them, called water of crystallisation. Heating to dryness drives this water out, and the blue crystals turn into a white powder.'
+  - say: 'First, can we evaporate it to dryness? No. The blue crystals hold water inside them, which is called water of crystallisation. Heating to dryness drives this water out, and the blue crystals turn into a white powder.'
     write: 'To dryness: water of crystallisation lost, white powder ✗'
-  - say: 'So we heat the solution only until it is saturated, and let it cool. Blue crystals of CuSO₄·5H₂O form. What does this tell us? When strong heat would spoil the solid, we use crystallisation.'
+  - say: 'So we heat the solution only until it is saturated, and let it cool. Blue crystals form, and their formula is written CuSO₄·5H₂O. The 5H₂O shows the five water molecules of crystallisation held in each unit.'
     write: '∴ crystallisation gives blue $\ce{CuSO4.5H2O}$ crystals ✓'
     point:
-      - {line: 15, kind: underline, at: 'crystallisation'}
+      - {line: 16, kind: underline, at: 'crystallisation'}
+  - say: 'What does this tell us? When strong heat would spoil the solid, we use crystallisation, not evaporation to dryness.'
+    write: 'Strong heat would spoil it: crystallisation'
 
   # ---------------------------------------------------------------- fractional crystallisation
   - section: 'Fractional crystallisation'
     say: 'Crystallisation also lets us separate two soluble solids. This is called fractional crystallisation, and it works when the two solids have different solubilities.'
     write: 'Fractional crystallisation: two soluble solids, different solubilities'
-  - say: 'As a hot solution of both solids cools, the solid whose solubility drops sharply crystallises out first. The other solid stays dissolved.'
-    write: 'On cooling, the one whose solubility drops sharply crystallises first'
+  - say: 'A hot solution of both solids is left to cool. The solid that becomes much less soluble as the water cools crystallises out first. The other solid stays dissolved.'
+    write: 'On cooling, the one that becomes much less soluble crystallises first'
   - say: 'Here is an example. We are given potassium trioxonitrate(V), KNO₃, mixed with sodium chloride, NaCl, and we must separate them. Both are white solids that dissolve in water, so filtration fails.'
     write: 'Potassium trioxonitrate(V) ($\ce{KNO3}$) and sodium chloride (NaCl): both soluble'
-  - say: 'KNO₃ is far less soluble in cold water than in hot water, but NaCl dissolves about the same amount, hot or cold. So when the hot solution cools, KNO₃ crystallises out and NaCl stays dissolved.'
+  - say: 'So we ask how each one''s solubility changes as the water cools. KNO₃ is far less soluble in cold water than in hot water, but NaCl dissolves about the same amount, hot or cold. So when the hot solution cools, KNO₃ crystallises out and NaCl stays dissolved.'
     write: '$\ce{KNO3}$ crystallises, NaCl stays ∴ fractional crystallisation ✓'
 
   # ---------------------------------------------------------------- trap
   - section: 'JAMB trap'
-    say: 'Here is a common trap. Evaporation and crystallisation both start by heating a solution. But evaporation heats it to dryness, while crystallisation stops at saturation and lets it cool.'
+    say: 'Here is a common trap. Evaporation and crystallisation both start by heating a solution, so students mix them up. The difference is where the heating stops. Evaporation heats until all the liquid has gone. Crystallisation stops when the solution is saturated, and the crystals form as it cools.'
     write: 'Trap: evaporation goes to dryness; crystallisation stops at saturation'
 
   # ---------------------------------------------------------------- check
   - section: 'Check yourself'
     say: 'Now it is your turn. Which method gives sugar from a sugar solution without charring it? Pause the lesson and decide before I go on.'
     write: 'Sugar from sugar solution, without charring: which method?'
-  - say: 'Strong heat would char the sugar, so we cannot evaporate to dryness. We heat the solution until it is saturated and let it cool. So the answer is crystallisation.'
+  - say: 'Strong heat would char the sugar, so we cannot evaporate to dryness. Instead, we heat the solution until it is saturated and let it cool. So the answer is crystallisation.'
     write: 'Sugar chars on strong heat ∴ crystallisation ✓'
     point:
-      - {line: 22, kind: circle, at: 'crystallisation'}
+      - {line: 24, kind: circle, at: 'crystallisation'}
 
   # ---------------------------------------------------------------- recap
   - section: 'Recap'
-    say: 'Let us recap. Evaporation recovers a soluble solid by boiling off the liquid. Crystallisation gives pure crystals by heating to saturation and then cooling.'
-    write: '1. Evaporation: to dryness; crystallisation: saturate, then cool'
-  - say: 'Fractional crystallisation separates two soluble solids with different solubilities. In the next lesson, we separate two solids in other ways. Now try the problem.'
-    write: '2. Fractional crystallisation: two soluble solids'
+    say: 'Let us recap. Evaporation recovers a soluble solid by heating its solution until all the liquid has gone.'
+    write: '1. Evaporation: heat to dryness; the solid is left'
+  - say: 'Crystallisation heats the solution only until it is saturated, then lets it cool, so pure crystals form without strong heat.'
+    write: '2. Crystallisation: heat to saturation, then cool'
+  - say: 'Fractional crystallisation separates two soluble solids, because the one that becomes much less soluble on cooling crystallises first. In the next lesson, we separate mixtures of two solids in other ways. Now try the problem.'
+    write: '3. Fractional crystallisation: two soluble solids'
 
 # ---------------------------------------------------------------- after the lesson: try it
 problems:

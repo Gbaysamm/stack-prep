@@ -24,12 +24,12 @@ moments:
 
   # ---------------------------------------------------------------- objectives
   - section: 'Objectives'
-    say: 'You will learn to match each mixture to its method, and to work through a harder JAMB question.'
+    say: 'In this lesson you will learn to match each mixture to its method, and to work through a harder JAMB question.'
     write: 'Today: match each mixture to its method'
 
   # ---------------------------------------------------------------- comparison
   - section: 'Comparison'
-    say: 'Remember the two questions. Is each part a solid or a liquid? And how do the parts differ?'
+    say: 'In the first lesson, you met two questions for choosing a method. Is each part a solid or a liquid? And how do the parts differ? Let us go through the answers, one kind of mixture at a time.'
     write: 'Ask: solid or liquid? How do the parts differ?'
   - say: 'An insoluble solid in a liquid needs filtration, or decantation if the solid is heavy.'
     write: 'Insoluble solid + liquid → filtration or decantation'
@@ -42,10 +42,12 @@ moments:
       - {id: sol, op: pulse, part: evaporation-tag, 'on': evaporation}
   - say: 'Two soluble solids with different solubilities need fractional crystallisation.'
     write: 'Two soluble solids → fractional crystallisation'
-  - say: 'A solid that sublimes needs sublimation, and a magnetic solid needs a magnet.'
-    write: 'Sublimes → sublimation; magnetic → a magnet'
+  - say: 'A solid that sublimes is separated from one that does not by sublimation.'
+    write: 'Sublimes → sublimation'
     doodle_do:
       - {id: sol, op: pulse, part: sublimation-tag, 'on': sublimation}
+  - say: 'A magnetic solid, such as iron, is pulled out with a magnet.'
+    write: 'Magnetic → a magnet'
   - say: 'Immiscible liquids, which do not mix, need a separating funnel.'
     write: 'Immiscible liquids → separating funnel'
   - say: 'To keep the liquid from a solution, we use simple distillation.'
@@ -55,19 +57,19 @@ moments:
     write: 'Miscible, close boiling points → fractional distillation'
     doodle_do:
       - {id: dis, op: stage, stage: 'custom:sub_chem_separation_processes_b2', 'on': fractional distillation}
-  - say: 'Dyes and pigments need chromatography.'
+  - say: 'Coloured substances, such as dyes and pigments, need chromatography.'
     write: 'Dyes and pigments → chromatography'
 
   # ---------------------------------------------------------------- JAMB question
   - section: 'JAMB question'
-    say: 'Here is a real JAMB question. Methanoic acid mixes with water and boils at about the same temperature as water. How do we get pure water from a mixture of sand, water and methanoic acid?'
+    say: 'Now that the methods are side by side, let us use them on a harder question from JAMB. We are given a mixture of sand, water and methanoic acid, and we must get pure water from it. Methanoic acid mixes with water, and it boils at about the same temperature as water.'
     write: 'JAMB: pure water from sand + water + methanoic acid (HCOOH)?'
-  - say: 'Filtration removes the sand. But if we then distil, the acid comes over with the water, because their boiling points are almost the same.'
+  - say: 'The sand is insoluble, so filtration removes it. But if we then distil the liquid, the acid comes over with the water, because their boiling points are almost the same.'
     write: 'Filter, then distil ✗: the acid comes over too'
   - say: 'Fractional distillation fails for the same reason. The boiling points are too close for even the column to separate them.'
     write: 'Fractional distillation ✗: boiling points too close'
     point:
-      - {line: 14, kind: circle, at: 'boiling points too close'}
+      - {line: 15, kind: circle, at: 'boiling points too close'}
   # Neutralisation is a later topic: named in passing only (no gaps rule).
   - say: 'So we first change the acid into something that does not boil off. We add an alkali, sodium hydroxide, which neutralises the acid and turns it into a salt called sodium methanoate.'
     write: 'Add sodium hydroxide (NaOH): the acid becomes sodium methanoate, a salt'
@@ -76,7 +78,7 @@ moments:
     doodle_do:
       - {id: dis, op: pulse, part: distillate, 'on': only water}
       - {id: dis, op: pulse, part: mixture, 'on': stay behind}
-  - say: 'The other wrong option is to neutralise and then filter. The sodium methanoate is dissolved, so it passes straight through the filter paper with the water.'
+  - say: 'The other wrong option is to neutralise and then filter. Filtration removes only a solid that has not dissolved. The sodium methanoate is dissolved, so it passes straight through the filter paper with the water.'
     write: 'Neutralise, then filter ✗: the dissolved salt passes through'
 
   # ---------------------------------------------------------------- check
@@ -88,13 +90,13 @@ moments:
     doodle_do:
       - {id: dis, op: circle, part: column, 'on': fractional distillation}
     point:
-      - {line: 19, kind: circle, at: 'fractional distillation'}
+      - {line: 20, kind: circle, at: 'fractional distillation'}
 
   # ---------------------------------------------------------------- recap
   - section: 'Recap'
-    say: 'Let us recap. Every method uses one difference between the parts, so first ask what the parts are and how they differ.'
+    say: 'Let us recap. Every method uses one difference between the parts. So first ask whether each part is a solid or a liquid and how the parts differ, and then choose the method that uses that difference.'
     write: '1. Find the difference, then the method'
-  - say: 'When one method leaves a part behind, use methods one after another, as with the methanoic acid. Now try the problem, and then you will try new questions on separation processes.'
+  - say: 'When no single method works, use methods one after another. With the methanoic acid, we filtered off the sand, neutralised the acid, and then distilled the water. Now try the problem, and then you will try new questions on separation processes.'
     write: '2. Hard mixtures: one method after another'
 
 # ---------------------------------------------------------------- after the lesson: try it

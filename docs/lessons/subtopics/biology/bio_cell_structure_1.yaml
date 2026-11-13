@@ -20,7 +20,7 @@ moments:
 
   # ---------------------------------------------------------------- introduction: the big picture
   - section: 'Introduction'
-    say: 'Every living thing is made of cells. The cell is the basic unit of structure and function of life.'
+    say: 'Every living thing is made of cells. The cell is the basic unit of structure and function of life. This means that a living thing is built of cells, and everything it does is done by its cells.'
     write: 'Cell: the basic unit of structure and function of life'
     doodle: {name: 'custom:sub_bio_cell_structure_a', id: cell, size: scene, caption: 'an animal cell', 'on': cells}
   - say: 'For example, an amoeba is a living thing made of just one cell, and your body is made of trillions of cells.'
@@ -47,33 +47,33 @@ moments:
     write: 'Job: controls what enters and leaves the cell'
     doodle_do:
       - {id: cell, op: pulse, part: membrane, 'on': control}
-  - say: 'It can do this because it is selectively permeable. This means that it lets some substances through and holds others back. For example, water and oxygen pass through it easily.'
+  - say: 'It can do this because it is selectively permeable, which is also called differentially permeable. This means that it lets some substances through and holds others back. For example, water and oxygen pass through it easily, but large molecules such as starch are held back.'
     write: 'Selectively (differentially) permeable: lets some substances through, not others'
     point:
       - {line: 8, kind: underline, at: 'some substances through'}
 
   # ---------------------------------------------------------------- cytoplasm
   - section: 'Cytoplasm'
-    say: 'Inside the membrane is the cytoplasm, a jelly-like fluid. It holds all the organelles, and many of the cell''s reactions take place in it.'
+    say: 'Now that we have the outside of the cell, let us move inward. Inside the membrane is the cytoplasm, a jelly-like fluid. It holds all the organelles, and many of the cell''s chemical reactions take place in it.'
     write: 'Cytoplasm: jelly that holds the organelles; site of many reactions'
     doodle_do:
       - {id: cell, op: stage, stage: 'custom:sub_bio_cell_structure_a3', 'on': cytoplasm}
 
   # ---------------------------------------------------------------- nucleus
   - section: 'Nucleus'
-    say: 'Now the nucleus. It is the large round body in the cytoplasm. It is wrapped in a double membrane, called the nuclear membrane, which has small pores in it.'
+    say: 'Sitting in the cytoplasm is the nucleus, the large round body in the drawing. It is wrapped in a double membrane, called the nuclear membrane, which has small pores in it.'
     write: 'Nucleus: large round body with a double nuclear membrane'
     doodle_do:
       - {id: cell, op: stage, stage: 'custom:sub_bio_cell_structure_a3n', 'on': nucleus}
-  - say: 'The nucleus is the control centre of the cell. It controls everything the cell does.'
+  - say: 'The nucleus is the control centre of the cell. It directs the cell''s activities, such as when it grows and when it divides.'
     write: 'Job: the control centre of the cell'
     doodle_do:
       - {id: cell, op: circle, part: nucleus, 'on': control}
-  - say: 'It can do this because it holds the chromosomes. Chromosomes are made of DNA, and they carry the genes. The genes are the instructions for everything the cell does.'
+  - say: 'It can do this because it holds thread-like bodies called chromosomes. Chromosomes are made of DNA, and they carry the genes. A gene is an instruction for one feature or activity of the cell.'
     write: 'It holds the chromosomes, made of DNA, which carry the genes'
     doodle_do:
       - {id: cell, op: pulse, part: nucleus, 'on': chromosomes}
-  - say: 'Genes pass from parents to their children. So heredity depends on the DNA in the nucleus, and so does a test of who a child''s father is.'
+  - say: 'Genes pass from parents to their children. The passing of features from parents to children is called heredity, so heredity depends on the DNA in the nucleus. That is also why a paternity test, which shows who a child''s father is, uses this DNA.'
     write: 'Heredity and paternity tests: DNA in the nucleus'
   - say: 'Inside the nucleus is a small dark body called the nucleolus. Its job is to make ribosomes. Ribosomes are tiny granules that make proteins, and we meet them in the next lesson.'
     write: 'Nucleolus: small dark body in the nucleus; makes ribosomes'
@@ -82,50 +82,54 @@ moments:
 
   # ---------------------------------------------------------------- worked example
   - section: 'Worked example'
-    say: 'Now let us use this. A question names a job and gives four parts. Which part of the cell controls what enters and leaves it? Is it the nucleus, the nucleolus, the cytoplasm or the cell membrane?'
+    say: 'Now that we know the job of each part, let us use these jobs to answer a question. Which part of the cell controls what enters and leaves it? Is it the nucleus, the nucleolus, the cytoplasm or the cell membrane?'
     write: 'Which part controls what enters and leaves? Nucleus, nucleolus, cytoplasm, cell membrane'
-  - say: 'We take each part in turn and ask what its job is. The nucleus controls the cell''s activities, but it does not decide what crosses the outside of the cell.'
+  - say: 'We are given a job, and we must find the part that does it. So for each part we ask one question. Is controlling entry and exit its job?'
+    write: 'Ask: is controlling entry and exit its job?'
+  - say: 'The nucleus directs the cell''s activities, but it does not decide what crosses the outside of the cell. So the nucleus is not the answer.'
     write: 'Nucleus: control centre, not entry and exit ✗'
     doodle_do:
       - {id: cell, op: pulse, part: nucleus, 'on': nucleus}
   - say: 'The nucleolus makes ribosomes, so it is not the answer either.'
     write: 'Nucleolus: makes ribosomes ✗'
-  - say: 'The cytoplasm holds the organelles, and reactions take place in it, so it is not the answer.'
+  - say: 'The cytoplasm holds the organelles, and reactions take place in it, so it is not the answer either.'
     write: 'Cytoplasm: holds the organelles ✗'
-  - say: 'The cell membrane is the selectively permeable layer round the cell. It lets some substances in and keeps others out, so the answer is the cell membrane.'
+  - say: 'The cell membrane is the selectively permeable layer round the cell. Letting some substances in and keeping others out is its job, so the answer is the cell membrane.'
     write: '∴ cell membrane: controls entry and exit ✓'
     doodle_do:
       - {id: cell, op: circle, part: membrane, 'on': answer}
     point:
-      - {line: 19, kind: circle, at: 'cell membrane'}
+      - {line: 20, kind: circle, at: 'cell membrane'}
 
   # ---------------------------------------------------------------- traps
   - section: 'JAMB traps'
-    say: 'Here is a common trap. Students mix up the nucleus and the nucleolus, because the names are close. The nucleus is the control centre, and the nucleolus is the small body inside it that makes ribosomes.'
-    write: 'Trap: the nucleus controls; the nucleolus, inside it, makes ribosomes'
+    say: 'Here is a common trap. Students mix up the nucleus and the nucleolus, because the names are close. Two parts with similar names can have quite different jobs, so learn each part by its job. The nucleus is the control centre, and the nucleolus is the small body inside it that makes ribosomes.'
+    write: 'Trap: similar names, different jobs. The nucleus controls; the nucleolus makes ribosomes'
     doodle_do:
       - {id: cell, op: circle, part: nucleolus, 'on': small}
-  - say: 'Here is another fact that JAMB likes. Most cells have a nucleus, but a mature red blood cell of a mammal, such as a human, has none.'
+  - say: 'Here is another fact that JAMB likes. Most cells have a nucleus, but a mature red blood cell of a mammal, such as a human, has none. It loses its nucleus as it matures, which leaves more room for carrying oxygen.'
     write: 'Mature red blood cell of a mammal: no nucleus'
 
   # ---------------------------------------------------------------- check
   - section: 'Check yourself'
     say: 'Now it is your turn. Which part of the cell holds the chromosomes? Is it the cytoplasm, the nucleus, the cell membrane or the nucleolus? Pause the lesson and decide before I go on.'
     write: 'Which part holds the chromosomes? Cytoplasm, nucleus, cell membrane, nucleolus'
-  - say: 'The cytoplasm holds the organelles, the membrane controls entry and exit, and the nucleolus makes ribosomes. So none of these three is the answer.'
+  - say: 'For each part we ask whether it holds the chromosomes. The cytoplasm holds the organelles, the membrane controls entry and exit, and the nucleolus makes ribosomes.'
+    write: 'Cytoplasm: organelles. Membrane: entry and exit. Nucleolus: ribosomes'
+  - say: 'None of these three jobs is holding the chromosomes, so none of them is the answer.'
     write: 'Cytoplasm, membrane, nucleolus ✗'
   - say: 'The chromosomes, made of DNA, are kept in the nucleus, the control centre. So the answer is the nucleus.'
     write: '∴ nucleus: holds the chromosomes ✓'
     doodle_do:
       - {id: cell, op: circle, part: nucleus, 'on': answer}
     point:
-      - {line: 24, kind: circle, at: 'nucleus'}
+      - {line: 26, kind: circle, at: 'nucleus'}
 
   # ---------------------------------------------------------------- recap
   - section: 'Recap'
-    say: 'Let us recap. The cell membrane is selectively permeable, and it controls what enters and leaves the cell. The cytoplasm holds the organelles.'
+    say: 'Let us recap. The cell membrane is selectively permeable. It lets some substances through and holds others back, so it controls what enters and leaves the cell. The cytoplasm is the jelly that holds the organelles, and many reactions take place in it.'
     write: '1. Membrane: controls entry and exit. Cytoplasm: holds the organelles'
-  - say: 'The nucleus is the control centre and holds the chromosomes, and the nucleolus makes ribosomes. In the next lesson, we look at the parts that release energy and make proteins. Now try the problem.'
+  - say: 'The nucleus is the control centre. It holds the chromosomes, which are made of DNA and carry the genes. The nucleolus, inside the nucleus, makes ribosomes. In the next lesson, we look at the parts that release energy and make proteins. Now try the problem.'
     write: '2. Nucleus: control centre, chromosomes. Nucleolus: makes ribosomes'
     doodle_do:
       - {id: cell, op: pulse, part: nucleus, 'on': nucleus}

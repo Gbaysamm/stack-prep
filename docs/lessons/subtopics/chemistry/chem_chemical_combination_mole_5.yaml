@@ -30,9 +30,9 @@ moments:
 
   # ---------------------------------------------------------------- relative masses
   - section: 'Relative masses'
-    say: 'First, we need the masses of atoms. The relative atomic mass of an element compares the mass of its atom with one twelfth of the mass of a carbon-12 atom.'
+    say: 'To count atoms by weighing, we first need the masses of atoms. The relative atomic mass of an element tells us how many times heavier one of its atoms is than one twelfth of a carbon-12 atom. Carbon-12 is the usual kind of carbon atom, and it is used as the standard.'
     write: 'Relative atomic mass: compared with 1/12 of a carbon-12 atom'
-  - say: 'For example, hydrogen is 1, carbon is 12 and oxygen is 16. JAMB gives you these values in the question.'
+  - say: 'For example, the relative atomic mass of hydrogen is 1, of carbon 12 and of oxygen 16. These numbers have no unit, and JAMB gives them to you in the question.'
     write: 'E.g. H = 1, C = 12, O = 16 (given in the question)'
   - say: 'The relative molecular mass of a substance is the sum of the relative atomic masses of all the atoms in its formula.'
     write: 'Relative molecular mass = sum of the relative atomic masses in the formula'
@@ -63,11 +63,11 @@ moments:
 
   # ---------------------------------------------------------------- mass and moles
   - section: 'Mass and moles'
-    say: 'Now we can change a mass into moles. The number of moles is the mass divided by the molar mass.'
+    say: 'Now we can change a mass into moles. One mole has a mass of M grams, so the number of moles in a sample is its mass divided by the molar mass.'
     write: 'Number of moles, n = mass ÷ molar mass'
     point:
       - {line: 14, kind: underline, at: 'mass ÷ molar mass'}
-  - say: 'Look at the mole map. To go from mass to moles, we divide by M. To go back from moles to mass, we multiply by M.'
+  - say: 'This is the mole map, a picture of these changes with moles in the middle. To go from mass to moles, we divide by M. To go back from moles to mass, we multiply by M.'
     write: 'Mass ÷ M = moles; moles × M = mass'
     doodle: {name: 'custom:sub_chem_chemical_combination_mole_a', id: mm, size: scene, caption: 'the mole map', 'on': map}
     doodle_do:
@@ -82,26 +82,32 @@ moments:
     write: 'n = 4.9 g ÷ 98 g mol⁻¹ = 0.05 mol'
     doodle_do:
       - {id: mm, op: pulse, part: to-moles, 'on': divide}
-  - say: 'Now the other way. What is the mass of 2 moles of water? We are going from moles to mass, so we multiply by the molar mass. 2 times 18 is 36 g.'
-    write: 'Mass of 2 mol of water = 2 mol × 18 g mol⁻¹ = 36 g'
+  - say: 'Now the other way. What is the mass of 2 moles of water? We found earlier that its molar mass is 18 grams per mole.'
+    write: 'Mass of 2 mol of water? (M = 18 g mol⁻¹)'
+  - say: 'We are going from moles to mass, so we multiply by the molar mass. 2 moles times 18 grams per mole is 36 g.'
+    write: 'Mass = 2 mol × 18 g mol⁻¹ = 36 g'
     doodle_do:
       - {id: mm, op: pulse, part: to-mass, 'on': multiply}
 
   # ---------------------------------------------------------------- JAMB trap
   - section: 'JAMB trap'
-    say: 'Here is a JAMB trap. The number of atoms in 24 g of magnesium equals the number of molecules in what mass of oxygen gas? Magnesium is 24 grams per mole, so 24 g is 1 mole of atoms.'
-    write: 'Atoms in 24 g of magnesium (Mg) = 24 g ÷ 24 g mol⁻¹ = 1 mol'
-  - say: 'So we need 1 mole of oxygen molecules. Oxygen gas is O₂, with a molar mass of 32 grams per mole, so the answer is 32 g. 16 g is the trap, because it is only half a mole of O₂.'
+    say: 'Here is a JAMB trap. The number of atoms in 24 g of magnesium equals the number of molecules in what mass of oxygen gas?'
+    write: 'Atoms in 24 g of magnesium (Mg) = molecules in ? g of oxygen gas'
+  - say: 'The molar mass of magnesium is 24 grams per mole, so 24 g of magnesium is 1 mole of atoms.'
+    write: 'Atoms in 24 g of Mg = 24 g ÷ 24 g mol⁻¹ = 1 mol'
+  - say: 'So we need 1 mole of oxygen molecules. Oxygen gas is O₂, with a molar mass of 32 grams per mole, so the answer is 32 g. 16 g is the trap, because it is only half a mole of O₂. Always check whether a question counts atoms or molecules, and use the formula of the substance.'
     write: '$\ce{O2}$: 1 mol = 32 g ✓; 16 g is only 0.5 mol ✗'
 
   # ---------------------------------------------------------------- check
   - section: 'Check yourself'
     say: 'Now it is your turn. How many moles are in 10 g of calcium trioxocarbonate(IV), CaCO₃? Calcium is 40, carbon is 12 and oxygen is 16. Pause the lesson and work it out.'
     write: 'Moles in 10 g of calcium trioxocarbonate(IV) ($\ce{CaCO3}$)? Ca = 40, C = 12, O = 16'
-  - say: 'First the molar mass. 40 plus 12 plus 3 times 16 is 100 grams per mole. Then 10 g divided by 100 grams per mole is 0.1 mole.'
-    write: 'M = 40 + 12 + 3(16) = 100 g mol⁻¹; n = 10 g ÷ 100 g mol⁻¹ = 0.1 mol'
+  - say: 'First the molar mass. 40 plus 12 plus 3 times 16 is 100 grams per mole.'
+    write: 'M = 40 + 12 + 3(16) = 100 g mol⁻¹'
+  - say: 'Then the moles. 10 g divided by 100 grams per mole is 0.1 mole.'
+    write: 'n = 10 g ÷ 100 g mol⁻¹ = 0.1 mol'
     point:
-      - {line: 22, kind: circle, at: '0.1 mol'}
+      - {line: 25, kind: circle, at: '0.1 mol'}
 
   # ---------------------------------------------------------------- recap
   - section: 'Recap'

@@ -19,7 +19,7 @@ moments:
 
   # ---------------------------------------------------------------- introduction
   - section: 'Introduction'
-    say: 'In the last lesson, you saw that squeezing a gas makes its volume smaller. Now we heat the gas, and see what happens to its volume and its pressure.'
+    say: 'In the last lesson, you saw that squeezing a gas at constant temperature makes its volume smaller. Now we heat the gas, and see what happens to its volume and its pressure.'
     write: 'Last lesson: squeeze a gas. Today: heat it'
     doodle: {name: 'custom:sub_chem_gas_laws_a2', id: dia, size: scene, caption: 'a gas in a cylinder', 'on': heat}
     doodle_do:
@@ -32,13 +32,13 @@ moments:
 
   # ---------------------------------------------------------------- kelvin
   - section: 'Temperature in kelvin'
-    say: 'Every gas law that uses temperature needs it in kelvin, not in degrees Celsius. Temperature in kelvin is also called the absolute temperature.'
-    write: 'Gas laws use temperature in kelvin (K), the absolute temperature'
+    say: 'Every gas law that uses temperature needs it on the kelvin scale, written K, not in degrees Celsius.'
+    write: 'Gas laws use temperature in kelvin (K)'
     point:
       - {line: 3, kind: underline, at: 'in kelvin (K)'}
-  - say: 'The kelvin scale starts at absolute zero, the coldest temperature possible. Absolute zero is minus 273 degrees Celsius, so it is 0 kelvin.'
-    write: 'Absolute zero: −273 °C = 0 K'
-  - say: 'So to change degrees Celsius to kelvin, we add 273.'
+  - say: 'The kelvin scale starts at absolute zero, the coldest temperature possible. Absolute zero is minus 273 degrees Celsius, and on the kelvin scale it is 0 kelvin. Because it starts from absolute zero, temperature in kelvin is called the absolute temperature.'
+    write: 'Absolute zero: −273 °C = 0 K. T in K is the absolute temperature'
+  - say: 'One kelvin is the same size as one degree Celsius, but the kelvin scale starts 273 lower. So to change degrees Celsius to kelvin, we add 273.'
     write: 'T (in K) = temperature in °C + 273'
     doodle_do:
       - {id: dia, op: show, part: temp-tag, 'on': kelvin}
@@ -49,61 +49,61 @@ moments:
 
   # ---------------------------------------------------------------- Charles
   - section: 'Charles''s law'
-    say: 'Now we can state Charles''s law. At constant pressure, the volume of a fixed mass of gas is directly proportional to its absolute temperature.'
+    say: 'Now that we can write temperatures in kelvin, we can state Charles''s law. At constant pressure, the volume of a fixed mass of gas is directly proportional to its absolute temperature.'
     write: 'Charles''s law: at constant pressure, $V \propto T$ (T in kelvin)'
     point:
       - {line: 8, kind: underline, at: 'at constant pressure'}
-  - say: 'Directly proportional means that both go up together by the same factor. If the kelvin temperature doubles, the volume doubles too.'
+  - say: 'Directly proportional means that when one of them is multiplied by a number, the other is multiplied by the same number. So if the kelvin temperature doubles, the volume doubles too.'
     write: 'Directly proportional: double T in kelvin, and V doubles'
-  - say: 'Look at the cylinder. The flame heats the gas, so its particles move faster and push the piston up. The volume grows.'
+  - say: 'Look at the cylinder. The flame heats the gas, so its particles move faster and push harder on the piston. The piston rises, and the volume grows.'
     write: 'Heated gas pushes the piston up: the volume grows'
     doodle_do:
       - {id: dia, op: pulse, part: flame, 'on': flame}
       - {id: dia, op: pulse, part: piston, 'on': piston}
-  - say: 'So volume divided by kelvin temperature does not change. From state one to state two, V₁ over T₁ equals V₂ over T₂.'
+  - say: 'Since the volume and the kelvin temperature go up by the same number, volume divided by kelvin temperature stays the same. So, with 1 for before the change and 2 for after it, V₁ over T₁ equals V₂ over T₂.'
     write: '$\dfrac{V}{T} = \text{constant}$, so $\dfrac{V_1}{T_1} = \dfrac{V_2}{T_2}$'
-  - say: 'This is where absolute zero comes from. Draw volume against temperature in degrees Celsius and extend the line backwards. The volume reaches zero at minus 273 degrees Celsius.'
+  - say: 'Charles''s law also shows where absolute zero comes from. If we plot volume against temperature in degrees Celsius, we get a straight line. When we extend that line backwards, the volume reaches zero at minus 273 degrees Celsius. A gas cannot have less than no volume, so nothing can be colder than this.'
     write: 'Extend V against T (°C) back: V = 0 at −273 °C'
     doodle_do:
       - {id: dia, op: circle, part: temp-tag, 'on': absolute}
 
   # ---------------------------------------------------------------- Charles: worked example
   - section: 'Worked example'
-    say: 'Let us solve this. 250 cubic centimetres of a gas at 27 degrees Celsius is heated to 87 degrees Celsius at constant pressure. Find the new volume.'
+    say: 'Let us use Charles''s law to find a new volume. 250 cubic centimetres of a gas at 27 degrees Celsius is heated to 87 degrees Celsius at constant pressure. Find the new volume.'
     write: 'Example: 250 cm³ at 27 °C is heated to 87 °C. New volume?'
-  - say: 'We are given V₁ as 250 cubic centimetres, and we must find V₂. The pressure is constant, so this is Charles''s law. First we change both temperatures to kelvin.'
+  - say: 'We are given V₁ as 250 cubic centimetres, T₁ as 27 degrees Celsius and T₂ as 87 degrees Celsius. We must find V₂. The pressure is constant, so we use Charles''s law. First we change both temperatures to kelvin.'
     write: '$V_1 = 250$ cm³, $V_2 = ?$; Charles''s law'
   - say: '27 plus 273 is 300 kelvin, and 87 plus 273 is 360 kelvin.'
     write: '$T_1 = 27 + 273 = 300$ K,  $T_2 = 87 + 273 = 360$ K'
-  - say: 'We want V₂ on its own, so we multiply both sides by T₂. Then we put in the numbers.'
+  - say: 'We want V₂ on its own, so we multiply both sides of V₁ over T₁ = V₂ over T₂ by T₂. Then we put in the numbers.'
     write: '$V_2 = \dfrac{V_1T_2}{T_1} = \dfrac{250 \text{ cm}^3 \times 360 \text{ K}}{300 \text{ K}}$'
-  - say: '250 times 360 is 90 000, the kelvins cancel, and 90 000 divided by 300 is 300. So the new volume is 300 cubic centimetres. The gas was heated and it expanded, which makes sense.'
+  - say: '250 times 360 is 90 000. The kelvins on the top and the bottom cancel, and 90 000 divided by 300 is 300. So the new volume is 300 cubic centimetres. The gas was heated and it expanded, just as Charles''s law says.'
     write: '$V_2 = \dfrac{90\,000}{300}$ cm³ $\therefore V_2 = 300$ cm³ (more than 250 ✓)'
     point:
       - {line: 17, kind: circle, at: '= 300'}
 
   # ---------------------------------------------------------------- pressure law
   - section: 'Pressure law'
-    say: 'Now suppose the gas cannot expand, as in a sealed steel cylinder. Heating it makes the particles hit the walls harder and more often, so the pressure rises instead.'
+    say: 'We have seen what heating does when the piston is free to move. Now suppose the gas cannot expand, as in a sealed steel cylinder. When we heat it, the particles move faster and hit the walls harder and more often, so the pressure rises instead.'
     write: 'Volume fixed: heating raises the pressure'
     doodle_do:
       - {id: dia, op: pulse, part: pressure-tag, 'on': pressure}
-  - say: 'The pressure law states that at constant volume, the pressure of a fixed mass of gas is directly proportional to its absolute temperature. So P₁ over T₁ equals P₂ over T₂.'
+  - say: 'This is the pressure law. It states that at constant volume, the pressure of a fixed mass of gas is directly proportional to its absolute temperature. So P₁ over T₁ equals P₂ over T₂.'
     write: 'Pressure law: at constant volume, $\dfrac{P_1}{T_1} = \dfrac{P_2}{T_2}$'
     point:
       - {line: 19, kind: underline, at: 'at constant volume'}
-  - say: 'Let us solve this. A gas in a sealed steel cylinder is at 2.0 atmospheres and 27 degrees Celsius. It is heated to 177 degrees Celsius. Find the new pressure.'
+  - say: 'Let us use the pressure law. Here pressure is measured in atmospheres, written atm. One atmosphere is the pressure of the air around us at sea level. A gas in a sealed steel cylinder is at 2.0 atmospheres and 27 degrees Celsius. It is heated to 177 degrees Celsius. Find the new pressure.'
     write: 'Example: 2.0 atm at 27 °C, heated to 177 °C. New pressure?'
-  - say: 'The atmosphere, written atm, is another unit of pressure. We are given P₁ as 2.0 atmospheres. In kelvin, T₁ is 27 plus 273, which is 300, and T₂ is 177 plus 273, which is 450.'
+  - say: 'We are given P₁ as 2.0 atmospheres, and we must find P₂. In kelvin, T₁ is 27 plus 273, which is 300, and T₂ is 177 plus 273, which is 450.'
     write: '$P_1 = 2.0$ atm, $T_1 = 300$ K, $T_2 = 450$ K, $P_2 = ?$'
-  - say: 'We make P₂ the subject by multiplying both sides by T₂. 2.0 times 450 is 900, and 900 divided by 300 is 3.0. So the pressure rises to 3.0 atmospheres.'
+  - say: 'We make P₂ the subject by multiplying both sides by T₂. 2.0 times 450 is 900, and 900 divided by 300 is 3.0. So the pressure rises to 3.0 atmospheres. The gas was heated in a fixed space, so its pressure went up, as the pressure law says.'
     write: '$P_2 = \dfrac{P_1T_2}{T_1} = \dfrac{2.0 \text{ atm} \times 450 \text{ K}}{300 \text{ K}} = 3.0$ atm'
     point:
       - {line: 22, kind: circle, at: '3.0$ atm'}
 
   # ---------------------------------------------------------------- trap
   - section: 'JAMB trap'
-    say: 'The most common trap is using degrees Celsius. In the Charles''s law example, 250 times 87 over 27 gives about 806 cubic centimetres, which is far too big. Always add 273 first.'
+    say: 'The most common trap is putting degrees Celsius into the formula. In the Charles''s law example, 250 times 87 over 27 gives about 806 cubic centimetres, which is far too big. The Celsius scale does not start at absolute zero, so the gas laws work only in kelvin. Always add 273 first.'
     write: 'Trap: °C in the formula gives 806 cm³ ✗. Add 273 first'
     point:
       - {line: 23, kind: strike, at: '806 cm³'}
@@ -112,7 +112,7 @@ moments:
   - section: 'Check yourself'
     say: 'Now it is your turn. A gas occupies 200 cubic centimetres at 0 degrees Celsius. At what temperature, in degrees Celsius, will it occupy 400 cubic centimetres at the same pressure? Pause the lesson and work it out.'
     write: 'Check: 200 cm³ at 0 °C becomes 400 cm³. Temperature in °C?'
-  - say: 'This is Charles''s law, and T₁ is 273 kelvin. T₂ is V₂T₁ over V₁, so 400 times 273 over 200 gives 546 kelvin.'
+  - say: 'The pressure stays the same, so this is Charles''s law. T₁ is 0 plus 273, which is 273 kelvin. T₂ is V₂T₁ over V₁, so 400 times 273 over 200 gives 546 kelvin.'
     write: '$T_2 = \dfrac{V_2T_1}{V_1} = \dfrac{400 \times 273}{200} = 546$ K'
     doodle_do:
       - {id: dia, op: pulse, part: temp-tag, 'on': kelvin}
@@ -123,9 +123,9 @@ moments:
 
   # ---------------------------------------------------------------- recap
   - section: 'Recap'
-    say: 'Let us recap. Gas laws use temperature in kelvin, so add 273 to degrees Celsius. Charles''s law says V over T is constant at constant pressure.'
+    say: 'Let us recap. Gas laws use temperature in kelvin, so add 273 to degrees Celsius. Charles''s law says that at constant pressure, V over T stays the same, so V₁ over T₁ equals V₂ over T₂.'
     write: '1. T in K = °C + 273; Charles: $\dfrac{V_1}{T_1} = \dfrac{V_2}{T_2}$'
-  - say: 'The pressure law says P over T is constant at constant volume. In the next lesson, we join all the laws into one equation. Now try the problem.'
+  - say: 'The pressure law says that at constant volume, P over T stays the same, so P₁ over T₁ equals P₂ over T₂. In the next lesson, we join all the laws into one equation. Now try the problem.'
     write: '2. Pressure law: $\dfrac{P_1}{T_1} = \dfrac{P_2}{T_2}$'
 
 # ---------------------------------------------------------------- after the lesson: try it

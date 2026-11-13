@@ -80,7 +80,16 @@ def cue_problems(moments: list[dict[str, Any]], where: str) -> dict[int, str]:
 #: `--teaching`: a teaching pass may also split a moment into several and add moments that
 #: only say and write; every action (doodle, diagram, mark, sketch, answer flag) stays, in its
 #: order, and every cue and mark still lands. Mark line numbers may move with the moments.
-TEACHING = "--teaching" in sys.argv
+TEACHING = "--teaching" in sys.argv or "--review" in sys.argv
+#: `--review` (docs/questions/bank-review-brief.md): as `--teaching`, and an action may also be
+#: removed (an answer check, an analogy, a decorative doodle), never added or reordered; the
+#: answer moment stays.
+REVIEW = "--review" in sys.argv
+
+
+def _subsequence(small: list[Any], big: list[Any]) -> bool:
+    found = iter(big)
+    return all(any(piece == other for other in found) for piece in small)
 
 
 def _no_lines(value: Any) -> Any:
@@ -109,7 +118,21 @@ def teaching_problems(
     where: str, old: list[dict[str, Any]], new: list[dict[str, Any]]
 ) -> list[str]:
     problems: list[str] = []
-    if actions(old) != actions(new):
+    if REVIEW:
+        before, after = actions(old), actions(new)
+        answer_before = sum(1 for m in old if m.get("answer"))
+        answer_after = sum(1 for m in new if m.get("answer"))
+        if answer_after != answer_before:
+            problems.append(f"{where}: the answer moment was lost or added")
+        for kind, pieces in after.items():
+            if kind == "answer":
+                continue
+            if not _subsequence(pieces, before.get(kind, [])):
+                problems.append(
+                    f"{where}: a {kind} action was added or reordered (a review may only "
+                    "remove actions)"
+                )
+    elif actions(old) != actions(new):
         problems.append(
             f"{where}: an action changed, moved out of order, or was lost (only say, write "
             "and section may change; a split moment keeps its actions on the part that says "

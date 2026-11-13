@@ -22,7 +22,7 @@ moments:
     say: 'In the last lesson, you saw that a pure substance is one substance only, while an impure substance has impurities mixed in.'
     write: 'Pure: one substance; impure: impurities mixed in'
     doodle: {name: 'custom:sub_chem_pure_impure_substances_a2', id: dia, size: scene, caption: 'pure and impure', 'on': pure}
-  - say: 'But we cannot see the particles, so how do we know whether a sample is pure? We test it.'
+  - say: 'But the particles are far too small to see. So how can we tell whether a sample is pure? We test it.'
     write: 'We cannot see the particles, so we test the sample'
   - say: 'There are four main tests. They are the melting point, the boiling point, the density and paper chromatography.'
     write: 'Four tests: melting point, boiling point, density, chromatography'
@@ -40,29 +40,29 @@ moments:
     write: 'Pure solid: melts sharply at one fixed temperature'
     point:
       - {line: 6, kind: underline, at: 'melts sharply'}
-  - say: 'We can see this on a heating graph. The temperature goes up the side, and the time goes along the bottom.'
+  - say: 'We can see this on a heating graph. A heating graph shows how the temperature of a substance changes as we heat it. The temperature goes up the side, and the time goes along the bottom.'
     write: 'Heating graph: temperature up the side, time along the bottom'
     doodle_do:
       - {id: dia, op: stage, stage: 'custom:sub_chem_pure_impure_substances_a3', 'on': graph}
       - {id: dia, op: pulse, part: axes, 'on': temperature}
-  - say: 'As a pure solid is heated, its temperature rises. While it melts, the temperature stays flat. When it has all melted, the temperature rises again.'
+  - say: 'As a pure solid is heated, its temperature rises. While it melts, the temperature stays the same, so the line goes flat. When it has all melted, the temperature rises again.'
     write: 'It rises, stays flat while melting, then rises again'
     doodle_do:
       - {id: dia, op: pulse, part: pure-curve, 'on': flat}
-  - say: 'The flat part is the melting point. It is flat because the pure solid melts at one temperature.'
+  - say: 'So the flat part of the line marks the melting point. Because the line is level there, the whole solid melts at that one temperature, and this is what we mean by a sharp melting point.'
     write: 'The flat part is the sharp m.p.'
     doodle_do:
       - {id: dia, op: circle, part: pure-curve, 'on': flat}
-  - say: 'Each pure substance has its own melting point, listed in data books. For example, pure ice melts at 0 degrees Celsius, and pure naphthalene melts at 80 degrees Celsius.'
+  - say: 'Each pure substance has its own melting point, and these values are listed in books of data, called data books. For example, pure ice melts at 0 degrees Celsius, and pure naphthalene, the substance in mothballs, melts at 80 degrees Celsius.'
     write: 'Data book values, e.g. ice 0 °C, naphthalene 80 °C'
 
   # ---------------------------------------------------------------- impure solid
   - section: 'Impure solid'
-    say: 'An impure solid is different. It does not melt sharply. It melts over a range of temperatures, and below the data book value.'
+    say: 'We have seen how a pure solid melts. An impure solid is different. It does not melt sharply. Instead, it melts over a range of temperatures, and below its data book value.'
     write: 'Impure solid: melts over a range, below the book value'
     doodle_do:
       - {id: dia, op: stage, stage: 'custom:sub_chem_pure_impure_substances_a4', 'on': range}
-  - say: 'Look at the orange line. It slopes instead of staying flat, and it is lower than the blue line. In a later lesson, you will see more of what impurities do.'
+  - say: 'Look at the orange line, which is the impure solid. It slopes instead of staying flat, which shows the range. It is also lower than the blue line, the pure solid, which shows that it melts at a lower temperature. In a later lesson, you will see more of what impurities do.'
     write: 'Orange line: sloped, and lower'
     doodle_do:
       - {id: dia, op: pulse, part: impure-curve, 'on': orange}
@@ -70,7 +70,7 @@ moments:
 
   # ---------------------------------------------------------------- worked example
   - section: 'Worked example'
-    say: 'Now let us use this. Pure naphthalene melts at 80 degrees Celsius. Sample A melts sharply at 80 degrees Celsius, and sample B melts between 74 and 78 degrees Celsius. We must find which sample is pure.'
+    say: 'Now that we know how pure and impure solids melt, let us use this to test two samples. We are given that pure naphthalene melts at 80 degrees Celsius. Sample A melts sharply at 80 degrees Celsius, and sample B melts between 74 and 78 degrees Celsius. Which sample is pure?'
     write: 'Naphthalene m.p. 80 °C. A: sharp at 80 °C; B: 74 to 78 °C. Which is pure?'
   - say: 'To decide, we ask two questions about each sample. Does it melt sharply, and does it melt at the data book value?'
     write: 'Ask: sharp? At the book value?'
@@ -78,7 +78,7 @@ moments:
     write: 'A: sharp, at 80 °C, so pure ✓'
     doodle_do:
       - {id: dia, op: pulse, part: pure-curve, 'on': sharply}
-  - say: 'Sample B melts over a range of 4 degrees, and below 80 degrees Celsius. Both are signs of an impurity, so sample B is impure.'
+  - say: 'Sample B melts over a range of 4 degrees, from 74 to 78, and below 80 degrees Celsius. Both answers are no, and both are signs of an impurity, so sample B is impure.'
     write: 'B: over a range, below 80 °C, so impure ✗'
     doodle_do:
       - {id: dia, op: pulse, part: impure-curve, 'on': range}
@@ -87,16 +87,16 @@ moments:
 
   # ---------------------------------------------------------------- boiling point
   - section: 'Boiling point'
-    say: 'The boiling point works in the same way. The boiling point is the temperature at which a liquid boils and turns into a gas.'
+    say: 'We have used the melting point to test solids. For liquids, we use the boiling point, and it works in the same way. The boiling point is the temperature at which a liquid boils and turns into a gas.'
     write: 'Boiling point (b.p.): the temperature at which a liquid boils'
   - say: 'A pure liquid boils at one fixed temperature. For example, pure water boils at 100 degrees Celsius at sea level.'
     write: 'Pure liquid: boils at one fixed temperature, e.g. water at 100 °C'
-  - say: 'An impure liquid boils over a range of temperatures instead. So if a liquid boils steadily at its data book value, it is pure.'
+  - say: 'An impure liquid boils over a range of temperatures instead. So a liquid that boils steadily at one temperature, its data book value, is pure.'
     write: 'Impure liquid: boils over a range'
 
   # ---------------------------------------------------------------- trap
   - section: 'JAMB trap'
-    say: 'Here is a trap for written answers. Every solid has a melting point, so do not just write that a pure substance has a melting point. Write that it has a sharp, fixed melting point.'
+    say: 'Here is a trap for written answers. Every solid has a melting point, so having one does not show that a substance is pure. What shows purity is that the melting point is sharp and fixed. So do not just write that a pure substance has a melting point. Write that it has a sharp, fixed melting point.'
     write: 'Write "a sharp, fixed m.p.", not just "a m.p."'
     point:
       - {line: 20, kind: underline, at: 'sharp, fixed m.p.'}
@@ -105,11 +105,11 @@ moments:
   - section: 'Check yourself'
     say: 'Now it is your turn. Pure benzoic acid melts at 122 degrees Celsius. A sample melts between 115 and 119 degrees Celsius. Is the sample pure? Pause the lesson and decide before I go on.'
     write: 'Benzoic acid m.p. 122 °C; a sample melts at 115 to 119 °C. Pure?'
-  - say: 'First, is it sharp? No. The sample melts over a range of 4 degrees.'
+  - say: 'First, does it melt sharply? No. The sample melts over a range of 4 degrees.'
     write: 'Over a range, not sharp'
     doodle_do:
       - {id: dia, op: pulse, part: impure-curve, 'on': range}
-  - say: 'Second, is it at the data book value? No. It melts below 122 degrees Celsius. So the sample is impure.'
+  - say: 'Second, does it melt at the data book value? No. It melts below 122 degrees Celsius. So the sample is impure.'
     write: 'Below 122 °C, so impure ✓'
     point:
       - {line: 23, kind: circle, at: 'impure'}
@@ -120,7 +120,7 @@ moments:
     write: '1. Pure: sharp m.p. and fixed b.p., at the book values'
     doodle_do:
       - {id: dia, op: pulse, part: pure-curve, 'on': sharply}
-  - say: 'An impure substance melts and boils over a range, and it melts below the book value. In the next lesson, we meet the other two tests. Now try the problem.'
+  - say: 'An impure solid melts over a range, below its data book value, and an impure liquid boils over a range. In the next lesson, we meet the other two tests, density and chromatography. Now try the problem.'
     write: '2. Impure: over a range, and m.p. below the book value'
 
 # ---------------------------------------------------------------- after the lesson: try it
