@@ -1,0 +1,111 @@
+# Density and chromatography as tests of purity (lesson 3 of 5): density defined and used in a guided example, then paper chromatography explained, with one spot for a pure substance and two or more for an impure one.
+format_version: 1
+subject: chemistry
+subtopic: 'Pure and impure substances'
+subtopic_id: 2bd073d8-69e8-59b2-9839-192158a09fe7
+part: 3
+title: 'Density and chromatography as tests of purity'
+sources:            # pages consulted for the approach, for reviewers
+  - https://syllabus.ng/jamb/chemistry
+  - https://waeconline.org.ng/e-learning/Chemistry/chemmain.html
+  - https://edupadi.com/classroom/l/classification-of-matter
+  - https://schoolings.org/chemistry-lesson-note-for-ss1-first-term-2/
+moments:
+  # ---------------------------------------------------------------- welcome
+  - section: 'Welcome'
+    say: 'Welcome. Today''s lesson is testing for purity with density and chromatography.'
+    write: 'Testing for purity: density and chromatography'
+
+  # ---------------------------------------------------------------- introduction
+  - section: 'Introduction'
+    say: 'In the last lesson, you tested for purity with melting and boiling points. Now we meet the other two tests, density and paper chromatography.'
+    write: 'Two more tests: density and chromatography'
+
+  # ---------------------------------------------------------------- objectives
+  - section: 'Objectives'
+    say: 'You will learn how each test works, and how to use it to decide whether a sample is pure.'
+    write: 'Today: use density and chromatography to test purity'
+
+  # ---------------------------------------------------------------- density
+  - section: 'Density'
+    say: 'Let us start with density. The density of a substance is its mass divided by its volume.'
+    write: 'Density = mass ÷ volume'
+  - say: 'We measure mass in grams and volume in cubic centimetres, so density is in grams per cubic centimetre.'
+    write: 'Unit: grams per cubic centimetre (g/cm³)'
+  - say: 'A pure substance has a fixed density. For example, pure water has a density of about 1.00 gram per cubic centimetre.'
+    write: 'Pure: a fixed density, e.g. pure water about 1.00 g/cm³'
+    point:
+      - {line: 5, kind: underline, at: 'a fixed density'}
+  - say: 'If something is dissolved or mixed in, the density changes. So a density different from the data book value shows that the sample is impure.'
+    write: 'Different from the book value, so impure'
+
+  # ---------------------------------------------------------------- worked example
+  - section: 'Worked example'
+    say: 'Let us solve this. A clear liquid is sold as pure water. 20.0 cubic centimetres of it has a mass of 20.6 grams. We must find whether it is pure water.'
+    write: 'A liquid sold as pure water: 20.0 cm³ has a mass of 20.6 g. Pure?'
+  - say: 'First, we find its density. Density is mass divided by volume, so it is 20.6 grams divided by 20.0 cubic centimetres.'
+    write: 'Density = 20.6 g ÷ 20.0 cm³'
+  - say: '20.6 divided by 20.0 is 1.03, so the density is 1.03 grams per cubic centimetre.'
+    write: '= 1.03 g/cm³'
+  - say: 'What does this tell us? Pure water is about 1.00 gram per cubic centimetre, but this liquid is 1.03. So something is dissolved in it, such as salt, and the liquid is not pure water.'
+    write: '1.03, not 1.00, so not pure water ✗'
+    point:
+      - {line: 10, kind: circle, at: 'not pure water'}
+
+  # ---------------------------------------------------------------- chromatography
+  - section: 'Chromatography'
+    say: 'Now the last test, paper chromatography. It uses a solvent, which is a liquid that dissolves other substances, such as water.'
+    write: 'Chromatography uses a solvent, a liquid that dissolves things'
+  - say: 'A spot of the sample is put near the bottom of a strip of paper, and the bottom end of the paper is dipped in the solvent.'
+    write: 'A spot of sample near the bottom; the end dipped in solvent'
+    doodle: {name: 'custom:sub_chem_pure_impure_substances_a5', id: dia, size: scene, caption: 'pure and impure', 'on': strip}
+  - say: 'As the solvent soaks up the paper, it carries each substance in the sample with it. Different substances travel different distances, so they end up as separate spots.'
+    write: 'Each substance travels its own distance, as a separate spot'
+  - say: 'A pure substance is one substance, so it gives only one spot. Look at the first strip.'
+    write: 'Pure: one spot only'
+    doodle_do:
+      - {id: dia, op: show, part: chroma-pure, 'on': first}
+  - say: 'An impure sample gives two or more spots. The second strip gives three spots, so that sample holds at least three substances.'
+    write: 'Impure: two or more spots; three spots, so at least three substances'
+    doodle_do:
+      - {id: dia, op: show, part: chroma-impure, 'on': second}
+
+  # ---------------------------------------------------------------- trap
+  - section: 'JAMB trap'
+    say: 'Here is a trap. Three spots means at least three substances, not exactly three. Two substances that travel the same distance sit together as one spot.'
+    write: 'Three spots: at least three substances, not exactly three'
+    doodle_do:
+      - {id: dia, op: circle, part: chroma-impure, 'on': spots}
+    point:
+      - {line: 16, kind: underline, at: 'at least three'}
+
+  # ---------------------------------------------------------------- check
+  - section: 'Check yourself'
+    say: 'Now it is your turn. A drop of black ink is tested on chromatography paper, and it gives four spots. Is the ink pure? Pause the lesson and decide before I go on.'
+    write: 'Black ink gives 4 spots. Pure?'
+  - say: 'A pure substance gives only one spot. The ink gives four, so the ink is impure, and it holds at least four substances.'
+    write: '4 spots, not 1, so impure: at least four substances ✓'
+    doodle_do:
+      - {id: dia, op: pulse, part: chroma-impure, 'on': four}
+    point:
+      - {line: 18, kind: circle, at: 'impure'}
+
+  # ---------------------------------------------------------------- recap
+  - section: 'Recap'
+    say: 'Let us recap. A pure substance has a fixed density, so a density different from the data book value shows an impurity.'
+    write: '1. Density = mass ÷ volume; a different value shows an impurity'
+  - say: 'On chromatography paper, a pure substance gives one spot, and an impure one gives two or more. In the next lesson, we look at what impurities do to melting and boiling points. Now try the problem.'
+    write: '2. Chromatography: pure, one spot; impure, two or more'
+    doodle_do:
+      - {id: dia, op: pulse, part: chroma-pure, 'on': one}
+
+# ---------------------------------------------------------------- after the lesson: try it
+problems:
+  - ask: 'A liquid sold as pure water has a mass of 10.4 g and a volume of 10.0 cm³. Pure water has a density of about 1.00 g/cm³. What does this show? A. its density is 1.04 g/cm³, so it is pure water  B. its density is 1.04 g/cm³, so it is not pure water  C. its density is 0.96 g/cm³, so it is pure water  D. its density is 0.96 g/cm³, so it is not pure water'
+    answer: 'B'
+    accept: ['B. its density is 1.04 g/cm³, so it is not pure water', 'not pure water', 'impure']
+    working:
+      - 'Density = mass ÷ volume = 10.4 g ÷ 10.0 cm³ = 1.04 g/cm³, so C and D are wrong.'
+      - 'Pure water is about 1.00 g/cm³. The liquid is 1.04 g/cm³, so something is dissolved in it.'
+      - 'So it is not pure water. Answer: B.'
+    needs_working: false

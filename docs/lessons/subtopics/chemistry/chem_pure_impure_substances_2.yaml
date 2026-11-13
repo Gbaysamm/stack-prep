@@ -1,129 +1,135 @@
-# Pure and impure substances, lesson 2 of 2: the effect of impurities on melting and boiling points, percentage purity and JAMB's traps, on one annotated diagram (two particle boxes, a heating graph and two chromatography strips).
+# Melting and boiling points as tests of purity (lesson 2 of 5): the four tests named, then melting point and boiling point taught, the heating graph read, and a guided naphthalene example.
 format_version: 1
 subject: chemistry
 subtopic: 'Pure and impure substances'
 subtopic_id: 2bd073d8-69e8-59b2-9839-192158a09fe7
+part: 2
+title: 'Melting and boiling points as tests of purity'
 sources:            # pages consulted for the approach, for reviewers
   - https://syllabus.ng/jamb/chemistry
   - https://waeconline.org.ng/e-learning/Chemistry/chemmain.html
   - https://edupadi.com/classroom/l/classification-of-matter
   - https://schoolings.org/chemistry-lesson-note-for-ss1-first-term-2/
   - JAMB 2013 and 2017 Q (effect of an impurity on melting point), 2011 Q (impurities in iron), in our bank under related subtopics
-part: 2
-title: 'The effect of impurities and percentage purity'
 moments:
   # ---------------------------------------------------------------- welcome
   - section: 'Welcome'
-    say: 'Welcome. Today''s lesson is the effect of impurities and percentage purity.'
-    write: 'The effect of impurities and percentage purity'
+    say: 'Welcome. Today''s lesson is testing for purity with melting and boiling points.'
+    write: 'Testing for purity: melting and boiling points'
 
   # ---------------------------------------------------------------- introduction
   - section: 'Introduction'
-    say: 'In the last lesson you met pure and impure substances and the tests for purity. An impurity does more than spoil a sample. It changes the melting point and the boiling point, and JAMB asks about this often.'
-    write: 'Impurities change the melting point (m.p.) and boiling point (b.p.)'
+    say: 'In the last lesson, you saw that a pure substance is one substance only, while an impure substance has impurities mixed in.'
+    write: 'Pure: one substance; impure: impurities mixed in'
+    doodle: {name: 'custom:sub_chem_pure_impure_substances_a2', id: dia, size: scene, caption: 'pure and impure', 'on': pure}
+  - say: 'But we cannot see the particles, so how do we know whether a sample is pure? We test it.'
+    write: 'We cannot see the particles, so we test the sample'
+  - say: 'There are four main tests. They are the melting point, the boiling point, the density and paper chromatography.'
+    write: 'Four tests: melting point, boiling point, density, chromatography'
 
   # ---------------------------------------------------------------- objectives
   - section: 'Objectives'
-    say: 'By the end of this lesson you will be able to state the effect of an impurity and work out a percentage purity.'
-    write: '1. State the effect of impurities; work out % purity'
-  - say: 'You will also be able to spot the traps JAMB sets on this topic.'
-    write: '2. Spot the JAMB traps'
+    say: 'In this lesson you will learn the first two tests, and how to use them to decide whether a sample is pure.'
+    write: 'Today: melting and boiling points as tests of purity'
 
-  # ---------------------------------------------------------------- effect of impurities
-  - section: 'Effect of impurities'
-    say: 'Now the key rule. An impurity lowers the melting point of a solid and makes it melt over a range of temperatures instead of sharply.'
-    write: 'Impurity: lowers m.p. and makes it melt over a range'
-    doodle: {name: 'custom:sub_chem_pure_impure_substances_a4', id: dia, size: scene, caption: 'pure and impure', 'on': lowers}
+  # ---------------------------------------------------------------- melting point
+  - section: 'Melting point'
+    say: 'Let us start with the melting point. The melting point is the temperature at which a solid turns into a liquid.'
+    write: 'Melting point (m.p.): the temperature at which a solid turns to liquid'
+  - say: 'A pure solid melts sharply at one fixed temperature. Sharp means that the whole solid melts at that one temperature, not over a spread of temperatures.'
+    write: 'Pure solid: melts sharply at one fixed temperature'
     point:
-      - {line: 4, kind: underline, at: 'lowers m.p.'}
-  - say: 'Look at the orange line on the graph. The impure solid melts at a lower temperature, and its line slopes instead of staying flat. That slope is the range.'
-    write: 'Impure: melts lower, and the line slopes, not flat'
+      - {line: 6, kind: underline, at: 'melts sharply'}
+  - say: 'We can see this on a heating graph. The temperature goes up the side, and the time goes along the bottom.'
+    write: 'Heating graph: temperature up the side, time along the bottom'
+    doodle_do:
+      - {id: dia, op: stage, stage: 'custom:sub_chem_pure_impure_substances_a3', 'on': graph}
+      - {id: dia, op: pulse, part: axes, 'on': temperature}
+  - say: 'As a pure solid is heated, its temperature rises. While it melts, the temperature stays flat. When it has all melted, the temperature rises again.'
+    write: 'It rises, stays flat while melting, then rises again'
+    doodle_do:
+      - {id: dia, op: pulse, part: pure-curve, 'on': flat}
+  - say: 'The flat part is the melting point. It is flat because the pure solid melts at one temperature.'
+    write: 'The flat part is the sharp m.p.'
+    doodle_do:
+      - {id: dia, op: circle, part: pure-curve, 'on': flat}
+  - say: 'Each pure substance has its own melting point, listed in data books. For example, pure ice melts at 0 degrees Celsius, and pure naphthalene melts at 80 degrees Celsius.'
+    write: 'Data book values, e.g. ice 0 °C, naphthalene 80 °C'
+
+  # ---------------------------------------------------------------- impure solid
+  - section: 'Impure solid'
+    say: 'An impure solid is different. It does not melt sharply. It melts over a range of temperatures, and below the data book value.'
+    write: 'Impure solid: melts over a range, below the book value'
+    doodle_do:
+      - {id: dia, op: stage, stage: 'custom:sub_chem_pure_impure_substances_a4', 'on': range}
+  - say: 'Look at the orange line. It slopes instead of staying flat, and it is lower than the blue line. In a later lesson, you will see more of what impurities do.'
+    write: 'Orange line: sloped, and lower'
     doodle_do:
       - {id: dia, op: pulse, part: impure-curve, 'on': orange}
-      - {id: dia, op: pulse, part: pure-curve, 'on': flat}
-  - say: 'A solid impurity dissolved in a liquid raises its boiling point, and the liquid boils over a range. Salt water boils above 100 degrees Celsius.'
-    write: 'Dissolved solid impurity: raises b.p.; boils over a range'
-  - say: 'So remember the pair. An impurity lowers the melting point and raises the boiling point.'
-    write: 'Impurity: m.p. lowered ↓, b.p. raised ↑'
+      - {id: dia, op: pulse, part: pure-curve, 'on': blue}
+
+  # ---------------------------------------------------------------- worked example
+  - section: 'Worked example'
+    say: 'Now let us use this. Pure naphthalene melts at 80 degrees Celsius. Sample A melts sharply at 80 degrees Celsius, and sample B melts between 74 and 78 degrees Celsius. We must find which sample is pure.'
+    write: 'Naphthalene m.p. 80 °C. A: sharp at 80 °C; B: 74 to 78 °C. Which is pure?'
+  - say: 'To decide, we ask two questions about each sample. Does it melt sharply, and does it melt at the data book value?'
+    write: 'Ask: sharp? At the book value?'
+  - say: 'Sample A melts sharply, at exactly 80 degrees Celsius. Both answers are yes, so sample A is pure.'
+    write: 'A: sharp, at 80 °C, so pure ✓'
+    doodle_do:
+      - {id: dia, op: pulse, part: pure-curve, 'on': sharply}
+  - say: 'Sample B melts over a range of 4 degrees, and below 80 degrees Celsius. Both are signs of an impurity, so sample B is impure.'
+    write: 'B: over a range, below 80 °C, so impure ✗'
+    doodle_do:
+      - {id: dia, op: pulse, part: impure-curve, 'on': range}
     point:
-      - {line: 7, kind: circle, at: 'm.p. lowered'}
-  - say: 'Let us solve this. Pure water freezes at 0 degrees Celsius and boils at 100 degrees Celsius. Some salt is dissolved in it. What happens to each temperature?'
-    write: 'Example 4: Salt dissolved in pure water. Freezing point? Boiling point?'
-  - say: 'The salt is an impurity. The freezing point is the same temperature as the melting point, so it is lowered. Salt water freezes below 0 degrees Celsius.'
-    write: 'Freezing point lowered: below 0 °C'
-  - say: 'The salt also raises the boiling point. So salt water boils above 100 degrees Celsius.'
-    write: 'Boiling point raised: above 100 °C'
-  - say: 'The same rule works for metals. The carbon in cast iron lowers its melting point below that of pure iron, so cast iron is easier to melt and pour into moulds.'
-    write: 'Carbon in cast iron lowers its m.p., so it is easy to cast'
-    doodle_do:
-      - {id: dia, op: pulse, part: impure-curve, 'on': lowers}
+      - {line: 16, kind: circle, at: 'impure'}
 
-  # ---------------------------------------------------------------- percentage purity
-  - section: 'Percentage purity'
-    say: 'We can also say how pure a sample is. Percentage purity is the mass of the pure substance divided by the mass of the whole sample, times 100.'
-    write: '% purity = $\frac{\text{mass of pure substance}}{\text{mass of sample}} \times 100$'
-  - say: 'Let us solve this. A 25.0 gram sample of impure salt contains 22.5 grams of sodium chloride. Find its percentage purity.'
-    write: 'Example 5: Sample = 25.0 g, sodium chloride (NaCl) = 22.5 g, % purity = ?'
-  - say: 'Put the masses into the formula. That gives 22.5 grams over 25.0 grams, times 100.'
-    write: '% purity = $\frac{22.5\text{ g}}{25.0\text{ g}} \times 100$'
-  - say: 'The grams cancel. 22.5 divided by 25.0 is 0.900, and 0.900 times 100 is 90.0.'
-    write: '$= 0.900 \times 100 = 90.0\%$'
-  - say: 'So the sample is 90.0 percent pure. The other 2.5 grams is the impurity.'
-    write: '∴ % purity = 90.0%; impurity = 25.0 g − 22.5 g = 2.5 g'
+  # ---------------------------------------------------------------- boiling point
+  - section: 'Boiling point'
+    say: 'The boiling point works in the same way. The boiling point is the temperature at which a liquid boils and turns into a gas.'
+    write: 'Boiling point (b.p.): the temperature at which a liquid boils'
+  - say: 'A pure liquid boils at one fixed temperature. For example, pure water boils at 100 degrees Celsius at sea level.'
+    write: 'Pure liquid: boils at one fixed temperature, e.g. water at 100 °C'
+  - say: 'An impure liquid boils over a range of temperatures instead. So if a liquid boils steadily at its data book value, it is pure.'
+    write: 'Impure liquid: boils over a range'
 
-  # ---------------------------------------------------------------- comparison
-  - section: 'Comparison'
-    say: 'Now compare the two boxes. A pure substance is one substance, with a fixed composition, a sharp melting point and a fixed boiling point.'
-    write: 'Pure: one substance, fixed composition, sharp m.p. and b.p.'
-    doodle_do:
-      - {id: dia, op: stage, stage: 'custom:sub_chem_pure_impure_substances_a5', 'on': compare}
-      - {id: dia, op: pulse, part: pure-box, 'on': pure}
-      - {id: dia, op: pulse, part: pure-curve, 'on': sharp}
-  - say: 'An impure substance is a mixture. It melts lower and over a range. It boils higher and over a range. It also gives more than one spot on chromatography paper.'
-    write: 'Impure: m.p. lower, b.p. higher, both over a range; 2 or more spots'
-    doodle_do:
-      - {id: dia, op: pulse, part: impure-box, 'on': mixture}
-      - {id: dia, op: pulse, part: impure-curve, 'on': lower}
-      - {id: dia, op: pulse, part: chroma-impure, 'on': spot}
-
-  # ---------------------------------------------------------------- traps
-  - section: 'JAMB traps'
-    say: 'Here is a real JAMB question. The presence of an impurity in a substance will cause the melting point to be zero, to reduce, to increase or to be stable. Which is it?'
-    write: 'JAMB: an impurity makes the m.p. A. be zero B. reduce C. increase D. be stable'
-  - say: 'The answer is reduce, option B. An impurity lowers the melting point.'
-    write: 'B. reduce ✓'
-    doodle_do:
-      - {id: dia, op: circle, part: impure-curve, 'on': lowers}
-  - say: 'Many students pick increase, because they mix up the melting point with the boiling point. It is the boiling point that an impurity raises.'
-    write: 'C. increase ✗ (that is the b.p.)'
+  # ---------------------------------------------------------------- trap
+  - section: 'JAMB trap'
+    say: 'Here is a trap for written answers. Every solid has a melting point, so do not just write that a pure substance has a melting point. Write that it has a sharp, fixed melting point.'
+    write: 'Write "a sharp, fixed m.p.", not just "a m.p."'
     point:
-      - {line: 21, kind: circle, at: 'b.p.'}
-  - say: 'Option D, be stable, is wrong too, because a steady, sharp melting point is the sign of a pure substance. Option A is wrong because an impurity never makes the melting point zero.'
-    write: 'D. be stable ✗ (sign of purity); A. be zero ✗'
+      - {line: 20, kind: underline, at: 'sharp, fixed m.p.'}
 
   # ---------------------------------------------------------------- check
   - section: 'Check yourself'
-    say: 'Your turn. A 20.0 gram sample of impure sulphur contains 16.0 grams of pure sulphur. What is its percentage purity? Pause and work it out before I go on.'
-    write: 'Sample = 20.0 g, sulphur = 16.0 g, % purity = ?'
-  - say: 'Put the masses into the formula. That gives 16.0 grams over 20.0 grams, times 100.'
-    write: '% purity = $\frac{16.0\text{ g}}{20.0\text{ g}} \times 100$'
-  - say: '16.0 divided by 20.0 is 0.800, and 0.800 times 100 is 80.0. So the sample is 80.0 percent pure.'
-    write: '$= 0.800 \times 100 = 80.0\%$ pure'
+    say: 'Now it is your turn. Pure benzoic acid melts at 122 degrees Celsius. A sample melts between 115 and 119 degrees Celsius. Is the sample pure? Pause the lesson and decide before I go on.'
+    write: 'Benzoic acid m.p. 122 °C; a sample melts at 115 to 119 °C. Pure?'
+  - say: 'First, is it sharp? No. The sample melts over a range of 4 degrees.'
+    write: 'Over a range, not sharp'
+    doodle_do:
+      - {id: dia, op: pulse, part: impure-curve, 'on': range}
+  - say: 'Second, is it at the data book value? No. It melts below 122 degrees Celsius. So the sample is impure.'
+    write: 'Below 122 °C, so impure ✓'
+    point:
+      - {line: 23, kind: circle, at: 'impure'}
 
   # ---------------------------------------------------------------- recap
   - section: 'Recap'
-    say: 'Let us recap. An impurity lowers the melting point and raises the boiling point, and the substance melts and boils over a range. Percentage purity is the mass of the pure substance over the mass of the sample, times 100.'
-    write: '1. Impurity: m.p. ↓, b.p. ↑; % purity = mass pure ÷ mass of sample × 100'
-  - say: 'And for the traps, remember the pair. An impurity gives a lower melting point and a higher boiling point. That''s the lesson. Next, you will try new questions on pure and impure substances.'
-    write: '2. Impurity: m.p. lower, b.p. higher'
+    say: 'Let us recap. A pure solid melts sharply at its data book value, and a pure liquid boils at one fixed temperature.'
+    write: '1. Pure: sharp m.p. and fixed b.p., at the book values'
+    doodle_do:
+      - {id: dia, op: pulse, part: pure-curve, 'on': sharply}
+  - say: 'An impure substance melts and boils over a range, and it melts below the book value. In the next lesson, we meet the other two tests. Now try the problem.'
+    write: '2. Impure: over a range, and m.p. below the book value'
 
 # ---------------------------------------------------------------- after the lesson: try it
 problems:
-  - ask: 'A 40.0 g sample of impure sodium chloride contains 34.0 g of pure sodium chloride. Calculate its percentage purity.'
-    answer: '85.0%'
-    accept: ['85%', '85', '85.0', '85 %', '85.0 %', '85 percent']
+  - ask: 'Pure naphthalene melts at 80 °C. A sample of naphthalene melts between 75 °C and 78 °C. What does this show? A. the sample is pure  B. the sample is impure  C. the sample melts sharply  D. the impurity raised its melting point'
+    answer: 'B'
+    accept: ['B. the sample is impure', 'impure', 'the sample is impure']
     working:
-      - '% purity = mass of pure substance ÷ mass of sample × 100'
-      - '= 34.0 g ÷ 40.0 g × 100'
-      - '= 0.850 × 100'
-      - '= 85.0%'
+      - 'It melts over a range (75 to 78 °C), not sharply: a sign of an impurity. So C is wrong.'
+      - 'It melts below 80 °C, the data book value, so the melting point has gone down, not up. So D is wrong.'
+      - 'A pure sample would melt sharply at 80 °C, so A is wrong. The sample is impure. Answer: B.'
+    needs_working: false

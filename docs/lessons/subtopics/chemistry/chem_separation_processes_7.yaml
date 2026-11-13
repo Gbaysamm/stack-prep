@@ -1,0 +1,108 @@
+# Choosing the right method (lesson 7 of 7): every method matched to its mixture, one line each, then the methanoic acid JAMB question worked step by step and its wrong options.
+format_version: 1
+subject: chemistry
+subtopic: 'Separation processes'
+subtopic_id: c6a7158d-ee05-5392-bb4b-a39693edd7ac
+part: 7
+title: 'Choosing the right method'
+sources:            # pages consulted for the approach, for reviewers
+  - https://syllabus.ng/jamb/chemistry
+  - https://syllabus.ng/waec/chemistry/
+  - https://edupadi.com/classroom/l/separation-techniques
+  - https://schoolings.org/chemistry-lesson-note-for-ss1-first-term-2/
+  - https://waeconline.org.ng/e-learning/Chemistry/chemmain.html
+moments:
+  # ---------------------------------------------------------------- welcome
+  - section: 'Welcome'
+    say: 'Welcome. Today''s lesson is choosing the right method of separation.'
+    write: 'Choosing the right method'
+
+  # ---------------------------------------------------------------- introduction
+  - section: 'Introduction'
+    say: 'You have now met every method in this topic. JAMB often gives a mixture and asks which method separates it, so in this lesson we put the methods side by side.'
+    write: 'Which method separates this mixture?'
+
+  # ---------------------------------------------------------------- objectives
+  - section: 'Objectives'
+    say: 'You will learn to match each mixture to its method, and to work through a harder JAMB question.'
+    write: 'Today: match each mixture to its method'
+
+  # ---------------------------------------------------------------- comparison
+  - section: 'Comparison'
+    say: 'Remember the two questions. Is each part a solid or a liquid? And how do the parts differ?'
+    write: 'Ask: solid or liquid? How do the parts differ?'
+  - say: 'An insoluble solid in a liquid needs filtration, or decantation if the solid is heavy.'
+    write: 'Insoluble solid + liquid → filtration or decantation'
+    doodle: {name: 'custom:sub_chem_separation_processes_a3', id: sol, size: scene, caption: 'separating solids', 'on': filtration}
+    doodle_do:
+      - {id: sol, op: pulse, part: filtration-tag, 'on': filtration}
+  - say: 'A soluble solid is recovered by evaporation, or by crystallisation when strong heat would spoil it.'
+    write: 'Soluble solid → evaporation or crystallisation'
+    doodle_do:
+      - {id: sol, op: pulse, part: evaporation-tag, 'on': evaporation}
+  - say: 'Two soluble solids with different solubilities need fractional crystallisation.'
+    write: 'Two soluble solids → fractional crystallisation'
+  - say: 'A solid that sublimes needs sublimation, and a magnetic solid needs a magnet.'
+    write: 'Sublimes → sublimation; magnetic → a magnet'
+    doodle_do:
+      - {id: sol, op: pulse, part: sublimation-tag, 'on': sublimation}
+  - say: 'Immiscible liquids, which do not mix, need a separating funnel.'
+    write: 'Immiscible liquids → separating funnel'
+  - say: 'To keep the liquid from a solution, we use simple distillation.'
+    write: 'Keep the liquid from a solution → simple distillation'
+    doodle: {name: 'custom:sub_chem_separation_processes_b', id: dis, size: scene, caption: 'distillation', 'on': distillation}
+  - say: 'Miscible liquids with close boiling points need fractional distillation.'
+    write: 'Miscible, close boiling points → fractional distillation'
+    doodle_do:
+      - {id: dis, op: stage, stage: 'custom:sub_chem_separation_processes_b2', 'on': fractional distillation}
+  - say: 'Dyes and pigments need chromatography.'
+    write: 'Dyes and pigments → chromatography'
+
+  # ---------------------------------------------------------------- JAMB question
+  - section: 'JAMB question'
+    say: 'Here is a real JAMB question. Methanoic acid mixes with water and boils at about the same temperature as water. How do we get pure water from a mixture of sand, water and methanoic acid?'
+    write: 'JAMB: pure water from sand + water + methanoic acid (HCOOH)?'
+  - say: 'Filtration removes the sand. But if we then distil, the acid comes over with the water, because their boiling points are almost the same.'
+    write: 'Filter, then distil ✗: the acid comes over too'
+  - say: 'Fractional distillation fails for the same reason. The boiling points are too close for even the column to separate them.'
+    write: 'Fractional distillation ✗: boiling points too close'
+    point:
+      - {line: 14, kind: circle, at: 'boiling points too close'}
+  # Neutralisation is a later topic: named in passing only (no gaps rule).
+  - say: 'So we first change the acid into something that does not boil off. We add an alkali, sodium hydroxide, which neutralises the acid and turns it into a salt called sodium methanoate.'
+    write: 'Add sodium hydroxide (NaOH): the acid becomes sodium methanoate, a salt'
+  - say: 'A salt does not boil off with the water. So when we now distil, only water comes over, and the sand and the salt stay behind.'
+    write: 'Then distil: only water comes over ✓'
+    doodle_do:
+      - {id: dis, op: pulse, part: distillate, 'on': only water}
+      - {id: dis, op: pulse, part: mixture, 'on': stay behind}
+  - say: 'The other wrong option is to neutralise and then filter. The sodium methanoate is dissolved, so it passes straight through the filter paper with the water.'
+    write: 'Neutralise, then filter ✗: the dissolved salt passes through'
+
+  # ---------------------------------------------------------------- check
+  - section: 'Check yourself'
+    say: 'Now it is your turn. Kerosene and petrol mix completely, and their boiling points are close. Which method separates them? Pause the lesson and decide before I go on.'
+    write: 'Kerosene and petrol: which method?'
+  - say: 'Kerosene and petrol are both liquids, and they mix completely, so they are miscible. Their boiling points are close, so we use fractional distillation, as in a refinery.'
+    write: 'Miscible, close boiling points ∴ fractional distillation ✓'
+    doodle_do:
+      - {id: dis, op: circle, part: column, 'on': fractional distillation}
+    point:
+      - {line: 19, kind: circle, at: 'fractional distillation'}
+
+  # ---------------------------------------------------------------- recap
+  - section: 'Recap'
+    say: 'Let us recap. Every method uses one difference between the parts, so first ask what the parts are and how they differ.'
+    write: '1. Find the difference, then the method'
+  - say: 'When one method leaves a part behind, use methods one after another, as with the methanoic acid. Now try the problem, and then you will try new questions on separation processes.'
+    write: '2. Hard mixtures: one method after another'
+
+# ---------------------------------------------------------------- after the lesson: try it
+problems:
+  - ask: 'A mixture contains sand, common salt and water. Give, in order, the steps to obtain dry salt.'
+    answer: 'filter off the sand, then evaporate the filtrate to dryness'
+    accept: ['filtration then evaporation', 'filtration, evaporation', 'filter, then evaporate', 'filter and evaporate the filtrate']
+    working:
+      - 'Sand is insoluble, so filter: the sand is the residue, and the salt solution is the filtrate.'
+      - 'The salt is dissolved in the filtrate, so evaporate the filtrate to dryness: the salt is left. Order: filtration, then evaporation.'
+    needs_working: false

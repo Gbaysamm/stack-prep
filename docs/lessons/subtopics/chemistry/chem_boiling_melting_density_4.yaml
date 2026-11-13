@@ -1,0 +1,124 @@
+# Impurities and the purity test (lesson 4 of 6): what an impurity is, the sharp fixed points of a pure substance, an impurity lowering the melting and freezing points and raising the boiling point (with why), the purity test, and the trap of swapping them.
+format_version: 1
+subject: chemistry
+subtopic: 'Boiling, density, freezing and melting points'
+subtopic_id: 181e119e-6a41-5215-816d-834d6d563163
+part: 4
+title: 'Impurities and the purity test'
+sources:            # pages consulted for the approach, for reviewers
+  - https://syllabus.ng/jamb/chemistry
+  - https://waeconline.org.ng/e-learning/Chemistry/chemmain.html
+  - https://edupadi.com/classroom/l/classification-of-matter
+  - https://schoolings.org/chemistry-lesson-note-for-ss1-first-term-2/
+moments:
+  # ---------------------------------------------------------------- welcome
+  - section: 'Welcome'
+    say: 'Welcome. Today''s lesson is impurities and the purity test.'
+    write: 'Impurities and the purity test'
+
+  # ---------------------------------------------------------------- introduction
+  - section: 'Introduction'
+    say: 'In the last lessons, you met the melting, freezing and boiling points of pure substances. Many substances we use are not perfectly pure, and an impurity changes these points.'
+    write: 'An impurity changes the m.p., f.p. and b.p.'
+  - say: 'An impurity is any other substance mixed into a pure one. For example, salt dissolved in water is an impurity in the water.'
+    write: 'Impurity: another substance mixed in, e.g. salt in water'
+
+  # ---------------------------------------------------------------- objectives
+  - section: 'Objectives'
+    say: 'In this lesson you will learn what an impurity does to each of these points, and how to use them to test whether a substance is pure.'
+    write: 'Today: what an impurity does, and the purity test'
+
+  # ---------------------------------------------------------------- pure
+  - section: 'A pure substance'
+    say: 'Let us start with a pure substance. It melts at one sharp, fixed temperature, and it boils at one sharp, fixed temperature.'
+    write: 'Pure: sharp, fixed m.p. and b.p.'
+    diagram:
+      id: t
+      kind: table
+      'on': pure
+      columns: ['point', 'pure', 'impure']
+      rows:
+        - ['melting point', 'sharp, fixed', '']
+        - ['freezing point', 'sharp, fixed', '']
+        - ['boiling point', 'sharp, fixed', '']
+  - say: 'Sharp means that all of it melts at one temperature, not bit by bit over a range of temperatures.'
+    write: 'Sharp: at one temperature, not over a range'
+
+  # ---------------------------------------------------------------- melting point
+  - section: 'Melting point'
+    say: 'Now add an impurity. An impurity lowers the melting point, and the solid melts over a range of temperatures instead of at one point.'
+    write: 'Impurity: lower m.p., melts over a range'
+    diagram_do:
+      - {id: t, op: fill, part: 'cell:1,impure', text: 'lower, a range', colour: orange, 'on': lowers}
+  - section: 'Worked example'
+    say: 'Here is an example. Pure naphthalene melts sharply at 80 degrees Celsius. A sample of naphthalene melts slowly between 74 and 78 degrees Celsius. We must decide whether the sample is pure.'
+    write: 'Example: pure naphthalene, m.p. 80 °C. A sample melts from 74 °C to 78 °C. Pure?'
+  - say: 'First, the sample melts below 80 degrees Celsius, so its melting point is lowered.'
+    write: 'Below 80 °C, so the m.p. is lowered'
+  - say: 'Second, it melts over a range, from 74 to 78 degrees Celsius, not at one sharp temperature.'
+    write: 'Over a range, 74 °C to 78 °C, so not sharp'
+  - say: 'What does this tell us? A lowered melting point and a range both show an impurity. So the sample is impure.'
+    write: 'So the sample is impure'
+    point:
+      - {line: 10, kind: circle, at: 'impure'}
+
+  # ---------------------------------------------------------------- freezing point
+  - section: 'Freezing point'
+    say: 'An impurity lowers the freezing point too. For example, sea water has salt dissolved in it, so it freezes at about minus 2 degrees Celsius, not at 0 degrees Celsius.'
+    write: 'Impurity: lower f.p., e.g. sea water about −2 °C'
+    diagram_do:
+      - {id: t, op: fill, part: 'cell:2,impure', text: 'lower', colour: orange, 'on': lowers}
+
+  # ---------------------------------------------------------------- boiling point
+  - section: 'Boiling point'
+    say: 'The boiling point goes the other way. A dissolved impurity raises the boiling point. For example, salt water boils above 100 degrees Celsius at 760 millimetres of mercury.'
+    write: 'Dissolved impurity: higher b.p., e.g. salt water above 100 °C'
+    diagram_do:
+      - {id: t, op: fill, part: 'cell:3,impure', text: 'higher', colour: orange, 'on': raises}
+    point:
+      - {line: 12, kind: underline, at: 'higher b.p.'}
+  - say: 'Why? In the last lessons, you saw that a liquid boils when its vapour pressure equals the air pressure. The dissolved particles hold back some water particles from escaping, so the vapour pressure is lower, and the liquid must get hotter before it boils.'
+    write: 'Lower vapour pressure, so it must get hotter to boil'
+
+  # ---------------------------------------------------------------- the test
+  - section: 'The purity test'
+    say: 'So here is the purity test. Measure the melting point of a solid, or the boiling point of a liquid, and compare it with the value in the data book.'
+    write: 'Purity test: measure the m.p. or b.p.; compare it with the data book'
+  - say: 'If it is sharp and matches the data book, the substance is pure. If it is off, or spread over a range, the substance is impure.'
+    write: 'Sharp and matching: pure. Off, or over a range: impure'
+
+  # ---------------------------------------------------------------- traps
+  - section: 'JAMB trap'
+    say: 'JAMB asks what an impurity does to the melting point of a solid. The answer is that it lowers it. The trap is to say it raises the melting point. An impurity raises the boiling point, not the melting point.'
+    write: 'Trap: an impurity lowers the m.p. but raises the b.p.; do not swap them'
+    diagram_do:
+      - {id: t, op: highlight, part: 'col:impure', colour: green, 'on': lowers}
+
+  # ---------------------------------------------------------------- check
+  - section: 'Check yourself'
+    say: 'Now it is your turn. Pure water boils at 100 degrees Celsius at 760 millimetres of mercury. A sample of water boils at 101 degrees Celsius at the same pressure. Is it pure? Pause the lesson and decide before I go on.'
+    write: 'A water sample boils at 101 °C at 760 mmHg. Pure?'
+  - say: 'Its boiling point is above 100 degrees Celsius, and a dissolved impurity raises the boiling point. So the water is impure, because something is dissolved in it.'
+    write: 'b.p. raised, so impure: something is dissolved in it ✓'
+    point:
+      - {line: 18, kind: circle, at: 'impure'}
+
+  # ---------------------------------------------------------------- recap
+  - section: 'Recap'
+    say: 'Let us recap. A pure substance has sharp, fixed melting and boiling points.'
+    write: '1. Pure: sharp, fixed m.p. and b.p.'
+  - say: 'An impurity lowers the melting and freezing points, and a dissolved impurity raises the boiling point. In the next lesson, we move on to density. Now try the problem.'
+    write: '2. Impurity: lower m.p. and f.p.; higher b.p.'
+    diagram_do:
+      - {id: t, op: highlight, part: 'col:impure', 'on': impurity}
+
+# ---------------------------------------------------------------- after the lesson: try it
+problems:
+  - ask: 'Pure urea melts sharply at 133 °C. A sample of urea melts between 125 °C and 129 °C. Is the sample pure or impure?'
+    answer: 'impure'
+    accept: ['impure', 'it is impure', 'not pure', 'the sample is impure']
+    working:
+      - 'The sample melts below 133 °C, so its melting point is lowered.'
+      - 'It melts over a range, 125 °C to 129 °C, not at one sharp temperature.'
+      - 'A lowered melting point over a range shows an impurity, so the sample is impure.'
+    needs_working: false

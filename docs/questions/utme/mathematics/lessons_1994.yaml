@@ -278,7 +278,7 @@ lessons:
     traps:
       A: 'You went for 0.141. That is 1.414 divided by 10, a decimal point slip. Rationalising gives 1.414 divided by 2, which is 0.707.'
       B: 'You went for 0.301. That is the log of 2 from the tables, not 1 over root 2. Rationalise to root 2 over 2, then halve 1.414.'
-      C: 'You went for 0.667. That is 2 over 3, a guess near the answer. Rationalise to root 2 over 2 and halve 1.414 to get 0.707.'
+      C: 'You went for 0.667. That is 1 over 1.5, from rounding root 2 up to 1.5 before dividing. Rounding that much changes the answer. Rationalise to root 2 over 2 and halve 1.414 to get 0.707.'
   7:
     moments:
       - section: 'The question'
@@ -718,7 +718,7 @@ lessons:
       - section: 'Solution'
         say: 'Solution. Write it as an identity, with the three-line sign. It means both sides are equal for every value of $x$.'
         write: 'Let $\dfrac{x - 3}{(1 - x)(x + 2)} \equiv \dfrac{P}{1 - x} + \dfrac{Q}{x + 2}$'
-      - say: 'Multiply through by the denominator, $1 - x$ times $x + 2$. On the right, $P$ keeps $x + 2$, and $Q$ keeps $1 - x$.'
+      - say: 'Multiply through by the denominator, $1 - x$ times $x + 2$. On the left the whole denominator cancels, leaving $x - 3$. Under $P$ the $1 - x$ cancels, so $P$ keeps $x + 2$. Under $Q$ the $x + 2$ cancels, so $Q$ keeps $1 - x$.'
         write: '$x - 3 \equiv P(x + 2) + Q(1 - x)$'
       - section: 'Find P'
         say: 'We want $P$, so choose the value of $x$ that makes the $Q$ bracket zero. Let $1 - x$ equal zero, and then $x$ is 1.'
@@ -1341,7 +1341,7 @@ lessons:
         answer: true
     traps:
       B: 'You went for 36,000. That is the internal volume, the space inside, not the wood. Subtract it from the external volume, and 47,520 minus 36,000 is 11,520.'
-      C: 'You went for 38,200. Recheck the external measurements. 54 by 40 by 22 gives 47,520, and 47,520 minus 36,000 is 11,520.'
+      C: 'You went for 38,200. No correct working gives that number. It sits just above the internal volume, 36,000, as if a little wood were added to the space inside. But the wood is the solid block, 54 by 40 by 22, which is 47,520, minus the space, 36,000. That leaves 11,520.'
       D: 'You went for 47,520. That is the external volume, the solid block. Take away the internal space, 36,000, and the wood is 11,520.'
   30:
     moments:
@@ -1479,7 +1479,7 @@ lessons:
         point:
           - {figure: 0, kind: circle, target: '7 cm', text: 'base'}
           - {figure: 0, kind: circle, target: h, text: 'height'}
-      - say: 'Both give the same area. So 7 $h$ over 2 equals 6 root 6.'
+      - say: 'Half of 7 times $h$ is 7 $h$ over 2. Both ways give the same area, so 7 $h$ over 2 equals 6 root 6.'
         write: '$\dfrac{7h}{2} = 6\sqrt{6}$'
         point:
           - {line: 8, kind: move, from: {line: 6, at: '= [[66]]'}, at: '= [[66]]', text: 'Heron'}
@@ -1969,14 +1969,14 @@ lessons:
       - section: 'Check'
         say: 'Check by substitution. Let $u$ equal $2x$ plus 1, so $du$ equals 2 $dx$. When $x$ is minus 1, $u$ is minus 1. When $x$ is 1, $u$ is 3.'
         write: 'Check: let $u = 2x + 1$, $\ du = 2\,dx$; $\ x = -1 \Rightarrow u = -1,\ x = 1 \Rightarrow u = 3$'
-      - say: 'Then the integral is a half times the integral of $u$ squared from minus 1 to 3, which is a half of 27 over 3 plus 1 over 3, and that is 14 over 3.'
+      - say: 'Since $du$ is 2 $dx$, $dx$ is a half of $du$. So the integral is a half times the integral of $u$ squared from minus 1 to 3. $u$ cubed over 3 is 27 over 3 at the top and minus 1 over 3 at the bottom, so we get a half of 27 over 3 plus 1 over 3, and that is 14 over 3.'
         write: '$\dfrac{1}{2}\displaystyle\int_{-1}^{3}u^{2}\,du = \dfrac{1}{2}\left[\dfrac{u^{3}}{3}\right]_{-1}^{3} = \dfrac{1}{2}\left(\dfrac{27}{3} + \dfrac{1}{3}\right) = \dfrac{14}{3}\ \checkmark$'
       - say: 'Therefore the integral is 4 and two thirds, which is option D.'
         write: '$\therefore \displaystyle\int_{-1}^{1}(2x + 1)^{2}\,dx = 4\tfrac{2}{3}$'
         answer: true
     traps:
       A: 'You went for 3 and two thirds. That is 11 over 3, from a slip in the lower bracket. At minus 1 the value is minus 4 over 3 plus 2 minus 1, which is minus 1 over 3, and 13 over 3 minus minus 1 over 3 is 14 over 3.'
-      B: 'You went for 4. That is 12 over 3. Upper minus lower is 13 over 3 minus minus 1 over 3, which is 14 over 3, or 4 and two thirds.'
+      B: 'You went for 4, which is 12 over 3. That comes from 13 over 3 minus 1 over 3, so the lower value lost its minus sign. At minus 1 the value is minus 4 over 3 plus 2 minus 1, which is minus 1 over 3. Minus a negative is plus, so 13 over 3 plus 1 over 3 is 14 over 3, or 4 and two thirds.'
       C: 'You went for 4 and a third. That is 13 over 3, the upper limit only. Subtract the lower value, minus 1 over 3, and 13 over 3 plus 1 over 3 is 14 over 3.'
   43:
     moments:
@@ -2201,7 +2201,7 @@ lessons:
         write: 'Solution'
         diagram_do:
           - {id: t, op: highlight, part: 'col:2', text: 'halfway across each gap', 'on': 'boundary'}
-      - say: 'Now the cf column, which is a running total of $f$ down the table. It goes 6, then 21, 41, 48 and 50.'
+      - say: 'Now the cf column, which is a running total of $f$ down the table. It starts at 6. 6 plus 15 is 21, 21 plus 20 is 41, 41 plus 7 is 48, and 48 plus 2 is 50.'
         diagram_do:
           - {id: t, op: total, part: 'col:3', into: 'col:4', 'on': 'running'}
       - say: 'The last cf is the total frequency. So $N$, the sum of $f$, is 50.'

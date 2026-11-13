@@ -221,23 +221,20 @@ export class DoodleEngine {
     }
   }
 
-  /** One piece popping into place: faded in and settling from a little smaller. */
+  /** One piece popping into place: faded in where it stands. Only its opacity is touched: a
+   *  CSS transform would override the art's own `transform` (a scaled group) and throw the
+   *  piece out of place, as it did with the plant cell (13 Nov 2026). */
   private popItem(element: SVGGraphicsElement): DrawItem {
     element.style.opacity = "0";
-    element.style.transformBox = "fill-box";
-    element.style.transformOrigin = "center";
     return {
       kind: "fill",
       ms: POP_MS,
       show: (p) => {
-        const q = ease(p);
-        element.style.opacity = q.toFixed(3);
-        element.style.transform = `scale(${(0.82 + 0.18 * q).toFixed(3)})`;
+        element.style.opacity = p >= 1 ? "" : ease(p).toFixed(3);
       },
       tip: () => null,
       finish: () => {
         element.style.opacity = "";
-        element.style.transform = "";
       },
     };
   }

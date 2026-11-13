@@ -15,6 +15,29 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-13
 
+### Every subtopic as short lessons; the bank's explanations taught without gaps
+- **What:**
+  - The other nine subtopics are rebuilt as short lessons on the Elements, compounds and
+    mixtures model (`docs/lessons/restructure-brief.md`): 61 lessons in all, about three to
+    five minutes each, each with its welcome, link back, guided worked examples, traps, check,
+    recap and problem. The database matches (each subtopic's parts 1..N, old parts removed).
+  - The bank's 5,390 past-question lessons had a teaching pass (`docs/questions/
+    bank-teaching-brief.md`): 1,944 lessons changed, 1,096 moments added. Gaps closed, terms
+    taught before use, working guided (given, find, why, answer), one verdict per moment,
+    traps that say the student's thinking. Facts, answers, options, pictures and marks kept
+    (`check_lesson_edit.py --teaching`, fixed to allow added moments and marks handed to the
+    split moment that says them; every subject's loader dry run passes).
+  - 64 of the 135 flags were checked against their questions: 37 fixed, 27 not errors, none
+    an answer-key problem. The other 71 were missed (the flag list's headings did not match
+    the files' names): a follow-up pass checks them.
+  - A scene piece pops in by fading only: a CSS transform had thrown the plant cell's wall out
+    of place. The plant cell's labels clear its wall; its whole-cell parts pulse, not circle.
+- **Why:** founder, 12 and 13 Nov 2026: lessons of about three minutes, no gaps; the bank's
+  explanations to make sense the way the lessons now do; fix the flags.
+- **Where:** `docs/lessons/subtopics/**`, `docs/questions/utme/*/lessons_*.yaml`,
+  `apps/web/src/student/doodleEngine.ts`, `database/check_lesson_edit.py`.
+- **Status:** done locally, loaded. Follow-up on 71 flags running.
+
 ### The roadmap keeps what you did on earlier days; lessons have a play icon
 - **What:** the roadmap sends the last seven days' sittings from the plans those days had
   (`RoadmapOut.earlier`), and the path shows the latest four under "Earlier", above Today

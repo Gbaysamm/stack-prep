@@ -1,10 +1,10 @@
-# Separation processes, lesson 2 of 2: separating liquids (separating funnel, simple and fractional distillation) and chromatography, with a worked "which method?" example after each, on the liquids-and-dyes and distillation scenes.
+# Evaporation and crystallisation (lesson 2 of 7): solution, solute and solvent taught first, then evaporation, crystallisation (saturated taught before it is used) and fractional crystallisation, each with a guided example.
 format_version: 1
 subject: chemistry
 subtopic: 'Separation processes'
 subtopic_id: c6a7158d-ee05-5392-bb4b-a39693edd7ac
 part: 2
-title: 'Separating liquids, distillation and chromatography'
+title: 'Evaporation and crystallisation'
 sources:            # pages consulted for the approach, for reviewers
   - https://syllabus.ng/jamb/chemistry
   - https://syllabus.ng/waec/chemistry/
@@ -14,152 +14,106 @@ sources:            # pages consulted for the approach, for reviewers
 moments:
   # ---------------------------------------------------------------- welcome
   - section: 'Welcome'
-    say: 'Welcome. Today''s lesson is separating liquids, distillation and chromatography.'
-    write: 'Separating liquids, distillation and chromatography'
+    say: 'Welcome. Today''s lesson is evaporation and crystallisation.'
+    write: 'Evaporation and crystallisation'
 
   # ---------------------------------------------------------------- introduction
   - section: 'Introduction'
-    say: 'In the last lesson you separated solids. Now the mixture may be two liquids, a solution whose liquid we want to keep, or a set of dyes. Each method still uses one difference between the parts.'
-    write: 'Liquids and dyes: each method still uses one difference between the parts'
+    say: 'In the last lesson, you saw that filtration separates an insoluble solid from a liquid. But a soluble solid, like salt in water, passes through the filter paper. So we need other methods.'
+    write: 'A soluble solid passes through filter paper'
+    doodle: {name: 'custom:sub_chem_separation_processes_a', id: sol, size: scene, caption: 'separating solids', 'on': filtration}
+    doodle_do:
+      - {id: sol, op: pulse, part: filtrate, 'on': passes}
+  - say: 'A solid dissolved in a liquid forms a solution. The solid is called the solute, and the liquid is called the solvent.'
+    write: 'Solution: a solute (solid) dissolved in a solvent (liquid)'
 
   # ---------------------------------------------------------------- objectives
   - section: 'Objectives'
-    say: 'By the end of this lesson, you will be able to choose between a separating funnel, distillation, fractional distillation and chromatography, and say why.'
-    write: '1. Choose the right method for liquids and dyes, and say why'
-  - say: 'You will also describe the apparatus and spot the traps JAMB sets on it.'
-    write: '2. Describe the apparatus and spot the JAMB traps'
+    say: 'In this lesson you will learn how evaporation, crystallisation and fractional crystallisation recover a soluble solid from its solution.'
+    write: 'Today: recovering a soluble solid from its solution'
 
-  # ---------------------------------------------------------------- separating funnel
-  - section: 'Separating funnel'
-    say: 'A separating funnel separates two immiscible liquids, which means liquids that do not mix. They form two layers, and the denser liquid is the bottom layer.'
-    write: 'Separating funnel: two immiscible liquids, in layers by density'
-    doodle: {name: 'custom:sub_chem_separation_processes_c', id: liq, size: scene, caption: 'liquids and dyes', 'on': funnel}
+  # ---------------------------------------------------------------- evaporation
+  - section: 'Evaporation'
+    say: 'Let us start with evaporation. Evaporation recovers a soluble solid from its solution. The solution is heated in an evaporating dish.'
+    write: 'Evaporation: a soluble solid from its solution'
     doodle_do:
-      - {id: liq, op: pulse, part: water, 'on': bottom}
-  - say: 'Open the tap and run the bottom layer into a beaker. Close the tap as the boundary reaches it. Then the top layer is poured out of the funnel.'
-    write: 'Run off the bottom layer through the tap; pour out the top layer'
+      - {id: sol, op: stage, stage: 'custom:sub_chem_separation_processes_a2', 'on': evaporating dish}
+      - {id: sol, op: pulse, part: flame, 'on': heated}
+  - say: 'The liquid boils off as vapour and is lost to the air. The solid is left behind in the dish.'
+    write: 'The liquid is lost; the solid is left'
     doodle_do:
-      - {id: liq, op: circle, part: tap, 'on': tap}
-  - say: 'Let us solve this. Separate kerosene from water. They do not mix, and kerosene is less dense, so it floats on top. We use a separating funnel, and the water runs out first.'
-    write: 'Example: kerosene and water ∴ separating funnel; water (denser) out first'
+      - {id: sol, op: pulse, part: vapour, 'on': vapour}
+      - {id: sol, op: circle, part: solution, 'on': left}
+  - say: 'Now let us use this. We are given sea water, and we must get common salt from it. Salt is a solid that dissolves in water, so filtration cannot work.'
+    write: 'Salt from sea water: salt is soluble, so not filtration'
+  - say: 'We want to keep the salt, and we do not need the water. So we evaporate the sea water to dryness. The water leaves as steam, and the salt is left in the dish.'
+    write: 'Evaporate to dryness: water leaves, salt is left ✓'
     doodle_do:
-      - {id: liq, op: pulse, part: kerosene, 'on': floats}
-      - {id: liq, op: pulse, part: water, 'on': water, on_nth: 2}
+      - {id: sol, op: pulse, part: vapour, 'on': steam}
+      - {id: sol, op: circle, part: solution, 'on': salt, on_nth: 2}
 
-  # ---------------------------------------------------------------- simple distillation
-  - section: 'Simple distillation'
-    say: 'Simple distillation separates a liquid from a solution, and keeps the liquid. The solution is boiled, the vapour is cooled in a condenser, and the pure liquid collects as the distillate.'
-    write: 'Simple distillation: a liquid from a solution; the liquid is kept'
-    doodle: {name: 'custom:sub_chem_separation_processes_b', id: dis, size: scene, caption: 'distillation', 'on': condenser}
+  # ---------------------------------------------------------------- crystallisation
+  - section: 'Crystallisation'
+    say: 'We have seen evaporation. Now let us look at crystallisation. Crystallisation gives a pure solid, as crystals, from its solution.'
+    write: 'Crystallisation: pure crystals from a solution'
+  - say: 'First, we need one new word. A saturated solution holds all the solute it can dissolve at that temperature. No more solute will dissolve in it.'
+    write: 'Saturated: holds all the solute it can at that temperature'
+  - say: 'In crystallisation, the solution is heated only until it is saturated. Then it is left to cool.'
+    write: 'Heat until saturated, then leave to cool'
     doodle_do:
-      - {id: dis, op: pulse, part: distillate, 'on': distillate}
-  - say: 'Look at the apparatus. The thermometer bulb is level with the side arm, to read the temperature of the vapour leaving. Cold water enters the condenser at the bottom and leaves at the top.'
-    write: 'Thermometer bulb at the side arm; water in at the bottom of the condenser'
-    doodle_do:
-      - {id: dis, op: circle, part: thermometer, 'on': thermometer}
-      - {id: dis, op: pulse, part: water-in, 'on': enters}
-      - {id: dis, op: pulse, part: water-out, 'on': leaves}
-  - say: 'Let us solve this. How do we get pure water from sea water? We want to keep the water, so we distil it. The steam condenses to pure water, and the salt stays in the flask.'
-    write: 'Example: pure water from sea water ∴ distillation; salt stays in the flask'
-    doodle_do:
-      - {id: dis, op: pulse, part: mixture, 'on': flask}
-      - {id: dis, op: circle, part: distillate, 'on': condenses}
-
-  # ---------------------------------------------------------------- fractional distillation
-  - section: 'Fractional distillation'
-    say: 'Fractional distillation separates miscible liquids, which mix completely, when their boiling points are close. A fractionating column is fitted between the flask and the condenser.'
-    write: 'Fractional distillation: miscible liquids with close boiling points'
-    doodle_do:
-      - {id: dis, op: stage, stage: 'custom:sub_chem_separation_processes_b2', 'on': column}
-  - say: 'The column is packed with glass beads. The vapour condenses and boils again many times on them. So the liquid with the lower boiling point reaches the top and distils over first.'
-    write: 'In the column, the lower boiling point distils over first'
-    doodle_do:
-      - {id: dis, op: circle, part: column, 'on': beads}
-  - say: 'Let us solve this. Separate methanol, which boils at about 65 °C, from ethanol, which boils at 78 °C. They are both liquids and they mix completely. Their boiling points are close, so we use fractional distillation.'
-    write: 'Example: methanol (65 °C) and ethanol (78 °C) ∴ fractional distillation'
+      - {id: sol, op: pulse, part: dish, 'on': heated}
+  - say: 'Most solids dissolve less in cold water than in hot water. So as the saturated solution cools, the extra solid comes out as crystals.'
+    write: 'On cooling, the extra solid comes out as crystals'
+  - say: 'Why not simply evaporate to dryness? Because strong heat spoils some solids. For example, sugar chars and turns black when it is heated strongly.'
+    write: 'Strong heat spoils some solids, e.g. sugar chars'
+  - say: 'Here is an example. We are given a solution of copper(II) tetraoxosulphate(VI), also called copper sulphate, and we must get its blue crystals.'
+    write: 'Copper(II) tetraoxosulphate(VI) (copper sulphate): get the blue crystals'
+  - say: 'The blue crystals hold water inside them, called water of crystallisation. Heating to dryness drives this water out, and the blue crystals turn into a white powder.'
+    write: 'To dryness: water of crystallisation lost, white powder ✗'
+  - say: 'So we heat the solution only until it is saturated, and let it cool. Blue crystals of CuSO₄·5H₂O form. What does this tell us? When strong heat would spoil the solid, we use crystallisation.'
+    write: '∴ crystallisation gives blue $\ce{CuSO4.5H2O}$ crystals ✓'
     point:
-      - {line: 12, kind: underline, at: 'fractional distillation'}
-  - say: 'The thermometer stays near 65 °C while the methanol distils over. When it starts to rise towards 78 °C, ethanol is coming over, so we change the receiver.'
-    write: 'Methanol first, at 65 °C; change the receiver as the reading rises'
-    doodle_do:
-      - {id: dis, op: pulse, part: thermometer, 'on': thermometer}
-  - say: 'In the refineries at Port Harcourt, Warri and Kaduna, crude oil is separated by fractional distillation into fractions such as petrol, kerosene and diesel. Liquid air is separated the same way, and nitrogen boils off before oxygen.'
-    write: 'Uses: crude oil into fractions; liquid air into nitrogen ($\ce{N2}$) and oxygen ($\ce{O2}$)'
+      - {line: 15, kind: underline, at: 'crystallisation'}
 
-  # ---------------------------------------------------------------- chromatography
-  - section: 'Chromatography'
-    say: 'Chromatography separates the parts of a mixture because they move at different speeds, carried by a solvent. It separates coloured substances, such as the dyes in ink and the pigments in leaves.'
-    write: 'Chromatography: the parts move at different speeds with a solvent'
-    doodle_do:
-      - {id: liq, op: pulse, part: chroma-tag, 'on': Chromatography}
-  - say: 'In paper chromatography, a spot of the mixture is put on a pencil line near the bottom of the paper. The paper stands in the solvent, with the line above the solvent level.'
-    write: 'Spot on a pencil line, above the solvent level'
-    doodle_do:
-      - {id: liq, op: label, part: start-line, text: 'ink spot here', 'on': spot}
-      - {id: liq, op: pulse, part: solvent, 'on': solvent, on_nth: 2}
-  - say: 'Why pencil? Pencil does not dissolve and run, but an ink line would. Why above the solvent? If the spot sat in the solvent, it would wash off into the beaker.'
-    write: 'Pencil does not run; the spot sits above the solvent, not in it'
-  - say: 'The solvent soaks up through the paper. A part that dissolves well and clings weakly to the paper moves far. A part that clings strongly moves only a little. So the spots separate.'
-    write: 'Held weakly → moves far; held strongly → moves little'
-    doodle_do:
-      - {id: liq, op: stage, stage: 'custom:sub_chem_separation_processes_c2', 'on': separate}
-      - {id: liq, op: circle, part: spots, 'on': spots}
-  - say: 'Column chromatography works the same way. The mixture runs down a glass column packed with a solid such as alumina, and its parts come out as separate bands.'
-    write: 'Column chromatography: same idea, in a packed column'
+  # ---------------------------------------------------------------- fractional crystallisation
+  - section: 'Fractional crystallisation'
+    say: 'Crystallisation also lets us separate two soluble solids. This is called fractional crystallisation, and it works when the two solids have different solubilities.'
+    write: 'Fractional crystallisation: two soluble solids, different solubilities'
+  - say: 'As a hot solution of both solids cools, the solid whose solubility drops sharply crystallises out first. The other solid stays dissolved.'
+    write: 'On cooling, the one whose solubility drops sharply crystallises first'
+  - say: 'Here is an example. We are given potassium trioxonitrate(V), KNO₃, mixed with sodium chloride, NaCl, and we must separate them. Both are white solids that dissolve in water, so filtration fails.'
+    write: 'Potassium trioxonitrate(V) ($\ce{KNO3}$) and sodium chloride (NaCl): both soluble'
+  - say: 'KNO₃ is far less soluble in cold water than in hot water, but NaCl dissolves about the same amount, hot or cold. So when the hot solution cools, KNO₃ crystallises out and NaCl stays dissolved.'
+    write: '$\ce{KNO3}$ crystallises, NaCl stays ∴ fractional crystallisation ✓'
 
-  # ---------------------------------------------------------------- comparison
-  - section: 'Comparison'
-    say: 'Now put the methods side by side. Immiscible liquids need a separating funnel. Miscible liquids need distillation, and fractional distillation when their boiling points are close. Dyes and pigments need chromatography.'
-    write: 'Immiscible → separating funnel; miscible → (fractional) distillation; dyes → chromatography'
-    doodle_do:
-      - {id: liq, op: pulse, part: funnel-tag, 'on': funnel}
-      - {id: dis, op: pulse, part: distillation-tag, 'on': distillation}
-      - {id: liq, op: pulse, part: chroma-tag, 'on': chromatography}
-
-  # ---------------------------------------------------------------- traps
-  - section: 'JAMB traps'
-    say: 'Here is a real JAMB question. Methanoic acid mixes with water and boils at about the same temperature. How do you get pure water from a mixture of sand, water and methanoic acid?'
-    write: 'JAMB: pure water from sand + water + methanoic acid?'
-  - say: 'Filtration removes the sand. But if you then distil, the acid comes over with the water, because their boiling points are almost the same. Fractional distillation fails for the same reason.'
-    write: 'Filtration then distillation ✗; fractional distillation ✗ (boiling points too close)'
-    point:
-      - {line: 22, kind: circle, at: 'boiling points too close'}
-  - say: 'So first neutralise the acid with sodium hydroxide. It becomes sodium methanoate, a salt that does not boil off. Then distil. Only water comes over, and the sand and salt stay behind.'
-    write: '$\ce{HCOOH + NaOH -> HCOONa + H2O}$, then distil ✓'
-    doodle_do:
-      - {id: dis, op: pulse, part: distillate, 'on': water}
-  - say: 'The other trap is neutralisation then filtration. The sodium methanoate is dissolved, so it passes straight through the filter paper with the water.'
-    write: 'Neutralise then filter ✗: the dissolved salt passes through'
-  - say: 'Another real question asks for ethanol of 95 percent or more from palm wine. Fractional distillation alone stops at about 95.6 percent ethanol, where ethanol and water boil off together as one mixture. A dehydrant such as quicklime, CaO, takes up the last water, and the ethanol is distilled again.'
-    write: 'High-quality ethanol from palm wine: fractional distillation + a dehydrant (CaO)'
-  - say: 'A third asks for the principle of column chromatography. The answer is that the parts move at different speeds in the column. They do not react with the solvent or with each other.'
-    write: 'Column chromatography: different speeds ✓; reactions ✗'
-  - say: 'Students often mix up evaporation and distillation. Evaporation loses the liquid, but distillation keeps it.'
-    write: 'Evaporation loses the liquid, distillation keeps it'
+  # ---------------------------------------------------------------- trap
+  - section: 'JAMB trap'
+    say: 'Here is a common trap. Evaporation and crystallisation both start by heating a solution. But evaporation heats it to dryness, while crystallisation stops at saturation and lets it cool.'
+    write: 'Trap: evaporation goes to dryness; crystallisation stops at saturation'
 
   # ---------------------------------------------------------------- check
   - section: 'Check yourself'
-    say: 'Your turn. Which method separates groundnut oil from water, and which liquid leaves the tap first? Pause and decide before I go on.'
-    write: 'Groundnut oil and water: which method? which comes out first?'
-  - say: 'Oil and water do not mix, so they form two layers, and we use a separating funnel. Water is denser than the oil, so water is the bottom layer and runs out of the tap first.'
-    write: 'Immiscible ∴ separating funnel ✓; water (denser) out first'
-    doodle_do:
-      - {id: liq, op: circle, part: tap, 'on': tap}
+    say: 'Now it is your turn. Which method gives sugar from a sugar solution without charring it? Pause the lesson and decide before I go on.'
+    write: 'Sugar from sugar solution, without charring: which method?'
+  - say: 'Strong heat would char the sugar, so we cannot evaporate to dryness. We heat the solution until it is saturated and let it cool. So the answer is crystallisation.'
+    write: 'Sugar chars on strong heat ∴ crystallisation ✓'
+    point:
+      - {line: 22, kind: circle, at: 'crystallisation'}
 
   # ---------------------------------------------------------------- recap
   - section: 'Recap'
-    say: 'Let us recap. Use a separating funnel when the liquids do not mix. Use distillation when you want to keep the liquid, and fractional distillation when the boiling points are close.'
-    write: '1. Liquids: separating funnel, distillation, fractional distillation'
-  - say: 'Chromatography separates dyes and pigments, because the parts move at different speeds. That''s the lesson. Next, you will try new questions on separation processes.'
-    write: '2. Dyes and pigments: chromatography, different speeds'
+    say: 'Let us recap. Evaporation recovers a soluble solid by boiling off the liquid. Crystallisation gives pure crystals by heating to saturation and then cooling.'
+    write: '1. Evaporation: to dryness; crystallisation: saturate, then cool'
+  - say: 'Fractional crystallisation separates two soluble solids with different solubilities. In the next lesson, we separate two solids in other ways. Now try the problem.'
+    write: '2. Fractional crystallisation: two soluble solids'
 
 # ---------------------------------------------------------------- after the lesson: try it
 problems:
-  - ask: 'Which method gives pure water from copper(II) tetraoxosulphate(VI) solution? A. evaporation  B. filtration  C. simple distillation  D. crystallisation'
+  - ask: 'Which method is best for getting blue crystals of copper(II) tetraoxosulphate(VI) from its solution? A. filtration  B. evaporation to dryness  C. crystallisation  D. decantation'
     answer: 'C'
-    accept: ['simple distillation', 'distillation', 'C. simple distillation']
+    accept: ['crystallisation', 'crystallization', 'C. crystallisation']
     working:
-      - 'We want to keep the water, the liquid.'
-      - 'Evaporation and crystallisation keep the solid and lose the water; filtration cannot hold back a dissolved solid.'
-      - 'Simple distillation boils off the water and condenses it as pure distillate; the salt stays in the flask. Answer: C.'
+      - 'The salt is dissolved, so filtration and decantation cannot hold it back.'
+      - 'Evaporation to dryness drives out the water of crystallisation and leaves a white powder, not blue crystals.'
+      - 'Heating only to saturation and cooling gives the blue crystals: crystallisation. Answer: C.'
     needs_working: false

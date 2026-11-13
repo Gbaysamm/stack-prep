@@ -91,14 +91,17 @@ def _no_lines(value: Any) -> Any:
     return value
 
 
-def actions(moments: list[dict[str, Any]]) -> list[Any]:
-    """Each moment's actions (all but its words and section), marks without line numbers, in
-    order; moments that only say and write are left out."""
-    found = []
+def actions(moments: list[dict[str, Any]]) -> dict[str, list[Any]]:
+    """Every action in the lesson, by kind (marks, doodle actions, doodles, diagrams, the
+    answer flag…), each kind in its order, marks without line numbers. A split moment may hand
+    its marks to the parts that say them; nothing may be lost, added or reordered."""
+    found: dict[str, list[Any]] = {}
     for moment in moments:
-        acts = {k: v for k, v in moment.items() if k not in (*TEXT, "section")}
-        if acts:
-            found.append(_no_lines(acts))
+        for key, value in moment.items():
+            if key in (*TEXT, "section"):
+                continue
+            pieces = value if isinstance(value, list) else [value]
+            found.setdefault(key, []).extend(_no_lines(piece) for piece in pieces)
     return found
 
 
@@ -160,7 +163,11 @@ def check(path: Path) -> tuple[list[str], int]:
         elif len(old_moments) != len(new_moments):
             problems.append(f"{where}: moments were added or removed")
             continue
-        for index, (a, b) in enumerate(zip(old_moments, new_moments, strict=True)):
+        # The language pass compares moment by moment; the teaching pass may add moments, and
+        # its checks are teaching_problems above.
+        for index, (a, b) in enumerate(
+            [] if TEACHING else zip(old_moments, new_moments, strict=True)
+        ):
             if without_text(a) != without_text(b):
                 problems.append(f"{where} moment {index}: changed beyond say and write")
             if set(a) & set(TEXT) != set(b) & set(TEXT):

@@ -1,0 +1,105 @@
+# Equations in indices (lesson 3 of 7): the one key idea (same base, so equal indices), a first example, the JAMB-style 9^(x+1) = 27^x worked and checked, one with a negative index, the traps.
+format_version: 1
+subject: mathematics
+subtopic: 'Indices, Logarithms and Surds'
+subtopic_id: a33da1ac-bc18-55d5-83af-029e0acd9980
+part: 3
+title: 'Equations in indices'
+sources:            # pages consulted for the approach, for reviewers
+  - https://www.headteacher.ng/lesson-note-on-indices-laws-and-exponential-equations-for-sss-1/
+  - https://ancourage.academy/articles/a-maths-indices-surds-logarithms-exponentials-singapore
+  - https://syllabus.ng/jamb/mathematics
+moments:
+  # ---------------------------------------------------------------- welcome
+  - section: 'Welcome'
+    say: 'Welcome. Today''s lesson is equations in indices.'
+    write: 'Equations in indices'
+
+  # ---------------------------------------------------------------- introduction
+  - section: 'Introduction'
+    say: 'In the last two lessons, you learnt the laws of indices, and what zero, negative and fractional indices mean. Now we use them to solve equations. In an equation in indices, the unknown is in the index.'
+    write: 'Equation in indices: the unknown is in the index'
+    doodle: {name: 'custom:sub_maths_indices_logs_surds_a', id: d, caption: 'base and index', size: scene, 'on': 'unknown'}
+    doodle_do:
+      - {id: d, op: show, part: index-label, 'on': 'index'}
+  - say: 'For example, 2 to the power x equals 8 is an equation in indices. We must find the index, x.'
+    write: 'For example, $2^{x} = 8$'
+
+  # ---------------------------------------------------------------- objectives
+  - section: 'Objectives'
+    say: 'In this lesson you will learn to solve an equation in indices by writing both sides with the same base.'
+    write: 'Today: solve by making the bases the same'
+
+  # ---------------------------------------------------------------- the method
+  - section: 'The method'
+    say: 'The method rests on one idea. If two powers of the same base are equal, then their indices are equal.'
+    write: 'If $a^{x} = a^{y}$, then $x = y$'
+    doodle_do:
+      - {id: d, op: show, part: base-label, 'on': 'same base'}
+  - say: 'Let us use it on 2 to the power x equals 8. The left side is a power of 2, so we write 8 as a power of 2 too. 8 is 2 times 2 times 2, which is two to the power three.'
+    write: '$2^{x} = 2^{3}$'
+    doodle_do:
+      - {id: d, op: show, part: expand, 'on': 'times'}
+  - say: 'Both sides now have the base 2, so the indices must be equal. So x is 3.'
+    write: '$\therefore x = 3$'
+  - say: 'We check it. Two to the power three is 8, so x equals 3 is right.'
+    write: 'Check: $2^{3} = 8$ ✓'
+
+  # ---------------------------------------------------------------- JAMB-style example
+  - section: 'Worked example'
+    say: 'Here is a typical JAMB question. Solve 9 to the power x plus 1 equals 27 to the power x. We are given powers of 9 and of 27, which are different bases, and we must find x.'
+    write: 'Solve $9^{x+1} = 27^{x}$'
+  - say: 'The first step is to write both sides with the same base. 9 is three squared, and 27 is three cubed. So both sides can be written in base 3.'
+    write: '$(3^{2})^{x+1} = (3^{3})^{x}$'
+  - say: 'Each side is now a power of a power. By the third law, we multiply the indices. 2 times, x plus 1, is 2x plus 2, and 3 times x is 3x.'
+    write: '$3^{2x+2} = 3^{3x}$'
+  - say: 'The bases are now the same, so the indices must be equal. We equate the indices.'
+    write: '$2x + 2 = 3x$'
+  - say: 'Now we solve for x. Subtract 2x from both sides. 3x minus 2x is x, so x is 2.'
+    write: '$\therefore x = 2$'
+  - say: 'What does this tell us? We check it. With x equal to 2, the left side is 9 cubed, which is 729. The right side is 27 squared, which is also 729. So x equals 2 is right.'
+    write: 'Check: $9^{3} = 729$ and $27^{2} = 729$ ✓'
+
+  # ---------------------------------------------------------------- negative index
+  - section: 'With a negative index'
+    say: 'Here is one that uses a negative index. Solve 2 to the power x equals one over 16.'
+    write: 'Solve $2^{x} = \dfrac{1}{16}$'
+  - say: '16 is two to the power four. One over two to the power four is two to the power minus four, because a negative index means one over the positive power.'
+    write: '$\dfrac{1}{16} = \dfrac{1}{2^{4}} = 2^{-4}$'
+  - say: 'So two to the power x equals two to the power minus four. The bases are the same, so x is minus 4.'
+    write: '$2^{x} = 2^{-4}$, so $x = -4$'
+
+  # ---------------------------------------------------------------- traps
+  - section: 'JAMB traps'
+    say: 'Here is a common trap. You can equate the indices only when the bases are the same. In 9 to the power x plus 1 equals 27 to the power x, the bases are 9 and 27, so you cannot write x plus 1 equals x. First change both sides to base 3.'
+    write: 'Equate the indices only when the bases are the same'
+  - say: 'Another slip is to multiply only part of the bracket. 2 times, x plus 1, is 2x plus 2, not 2x plus 1.'
+    write: '$2(x + 1) = 2x + 2$, not $2x + 1$'
+
+  # ---------------------------------------------------------------- check
+  - section: 'Check yourself'
+    say: 'Now it is your turn. Solve 4 to the power x equals 32. Here is a hint. Both 4 and 32 are powers of 2. Pause the lesson and work it out.'
+    write: 'Solve $4^{x} = 32$ (hint: base 2)'
+  - say: '4 is two squared, and 32 is two to the power five. By the third law, two squared, all to the power x, is two to the power 2x.'
+    write: '$(2^{2})^{x} = 2^{5}$, so $2^{2x} = 2^{5}$'
+  - say: 'The bases are the same, so we equate the indices. 2x equals 5, so x is five over two, which is two and a half.'
+    write: '$2x = 5$, so $x = \dfrac{5}{2}$'
+
+  # ---------------------------------------------------------------- recap
+  - section: 'Recap'
+    say: 'Let us recap. To solve an equation in indices, first write both sides as powers of the same base.'
+    write: '1. Write both sides with the same base'
+  - say: 'Then equate the indices, solve, and check. In the next lesson, we meet logarithms, which look at indices the other way round. Now try the problem.'
+    write: '2. Equate the indices, solve and check'
+
+# ---------------------------------------------------------------- after the lesson: try it
+problems:
+  - ask: 'Solve $8^{x} = 4^{x+1}$.'
+    answer: '2'
+    accept: ['x = 2', 'x=2']
+    working:
+      - '8 = 2³ and 4 = 2², so write both sides in base 2: (2³)ˣ = (2²)ˣ⁺¹.'
+      - 'Multiply the indices: 2³ˣ = 2²ˣ⁺².'
+      - 'Same base, so equate the indices: 3x = 2x + 2.'
+      - 'x = 2. Check: 8² = 64 and 4³ = 64 ✓'
+    needs_working: true

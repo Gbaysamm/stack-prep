@@ -12,8 +12,8 @@ lessons:
       - section: 'The question'
         say: 'We must evaluate two-one-two base three, minus one-two-one base three, plus two-two-two base three. We work in base three itself, column by column, as WAEC expects.'
         write: 'Evaluate $212_{3} - 121_{3} + 222_{3}$'
-      - say: 'Work from left to right, first the subtraction, then the addition. There is one rule for base three, which is that a borrow or a carry is worth 3, not 10.'
-        write: 'Solution'
+      - say: 'Work from left to right, first the subtraction, then the addition. In base three, the columns from the right are worth 1, 3 and 9, so we call them the units, the threes and the nines. So a borrow or a carry is worth 3, not 10.'
+        write: 'Solution. Columns: units, threes, nines'
       - section: 'First: 212₃ − 121₃'
         say: 'Set out the subtraction in columns, units under units.'
         write: '$\begin{array}{rrrr} & 2 & 1 & 2 \\ - & 1 & 2 & 1 \\ \hline & & & \end{array}$'
@@ -108,11 +108,11 @@ lessons:
         diagram_do:
           - {id: L, op: highlight, part: divisors, text: 'common to all three'}
       - section: 'The L.C.M.'
-        say: 'For the L.C.M., keep dividing by any prime that goes into at least one number, and carry down the numbers it does not divide, until every number is 1.'
+        say: 'For the L.C.M., keep dividing by any prime that goes into at least one number, and carry down the numbers it does not divide, until every number is 1. From 3, 4 and 5, 2 goes into the 4 twice, then 3 clears the 3, and 5 clears the 5.'
         write: 'Continue: $2,\ 2,\ 3,\ 5$'
         diagram_do:
           - {id: L, op: step, n: 4}
-      - say: 'The L.C.M. is the product of all the divisors down the side, which are six 2s, then 3, then 5.'
+      - say: 'The L.C.M. is the product of all the divisors down the side. The four common 2s and the two new 2s make six 2s, then 3, then 5.'
         write: 'L.C.M. $= 2 \times 2 \times 2 \times 2 \times 2 \times 2 \times 3 \times 5 = 2^{6} \times 3 \times 5$'
         diagram_do:
           - {id: L, op: read}
@@ -245,12 +245,12 @@ lessons:
         doodle_do: [{id: share, op: stage, stage: 'custom:1986_q06_a3', 'on': 'second boy'}, {id: share, op: label, part: b2, text: '4 of 9'}]
       - say: 'The third boy gets what is left, which is $x$, minus the first share, minus the second share.'
         write: '3rd boy $= x - \tfrac{1}{3}x - \tfrac{4}{9}x$'
-      - say: 'The L.C.M. of 3 and 9 is 9. So $x$ is 9 over 9 of $x$, and a third of $x$ is 3 over 9 of $x$.'
+      - say: 'The L.C.M. of 3 and 9 is 9. So $x$ is 9 over 9 of $x$, and a third of $x$ is 3 over 9 of $x$. Now 9 minus 3 minus 4 is 2, so the third boy gets $2x$ over 9.'
         write: '$= \dfrac{9x - 3x - 4x}{9} = \dfrac{2x}{9}$'
         doodle_do: [{id: share, op: stage, stage: 'custom:1986_q06_a4', 'on': 'L.C.M.'}, {id: share, op: label, part: b3, text: '2 of 9 = 12 oranges'}]
       - say: 'The third boy received 12 oranges. So $2x$ over 9 equals 12.'
         write: '$\dfrac{2x}{9} = 12$'
-      - say: 'Cross multiply, so $2x$ equals 12 times 9, which is 108.'
+      - say: 'Multiply both sides by 9 to clear the fraction, so $2x$ equals 12 times 9, which is 108.'
         write: '$2x = 12 \times 9 = 108$'
       - say: 'Divide both sides by 2. 108 divided by 2 is 54.'
         write: '$x = \dfrac{108}{2} = 54$'
@@ -348,7 +348,7 @@ lessons:
         point:
           - {line: 10, kind: move, from: {line: 7, at: '= 340'}, at: '340', text: 'numbers'}
           - {line: 10, kind: move, from: {line: 9, at: '= 10−3'}, at: '× 10−3 =', text: 'powers'}
-      - say: '13.33 is not between 1 and 10. Move the point one place to the left, and add 1 to the index, giving 1.333 times 10 to the minus 2.'
+      - say: '13.33 is not between 1 and 10, as standard form needs. But 13.33 is 1.333 times 10, so move the point one place to the left and add 1 to the index. Minus 3 plus 1 is minus 2, giving 1.333 times 10 to the minus 2.'
         write: '$= 1.333 \times 10^{-2}$'
       - say: 'To 2 significant figures, the next digit after 1.3 is 3, which is less than 5. So it is 1.3 times 10 to the minus 2.'
         write: '$\therefore$ Value $\approx 1.3 \times 10^{-2}$'
@@ -465,7 +465,7 @@ lessons:
       - say: 'Subtract 187 from both sides, so the right-hand side is zero.'
         write: '$y^{2} + 6y - 187 = 0$'
       - section: 'Factorise'
-        say: 'The product is negative 187 and the sum is 6.'
+        say: 'To factorise, we need two numbers whose product is the constant term, negative 187, and whose sum is the coefficient of $y$, which is 6.'
         write: 'Product $= -187$, Sum $= 6$'
       - say: '187 is 11 times 17, and 17 minus 11 is 6. So plus 17 and negative 11 multiply to negative 187 and add to 6.'
         write: 'Factors: $+17$ and $-11$'
@@ -602,11 +602,11 @@ lessons:
       - say: 'By the quotient law, log base 2 of 28 minus log base 2 of $n$ is log base 2 of 28 over $n$.'
         write: '$\log_{2}\dfrac{28}{n} = 1$'
       - section: 'Index form'
-        say: 'Change to index form, so the base 2, to the power 1, gives the number 28 over $n$. Picture log base 2 as counting doubling steps up from 1, where one step lands on 2.'
+        say: 'Change to index form. Log base $a$ of $N$ equals $x$ means $a$ to the power $x$ equals $N$. So the base 2, to the power 1, gives the number 28 over $n$. Picture log base 2 as counting doubling steps up from 1, where one step lands on 2.'
         doodle: {name: 'custom:1986_q14_a', id: stairs, caption: 'log base 2 counts doubling steps'}
         doodle_do: [{id: stairs, op: circle, part: s1}]
         write: '$\dfrac{28}{n} = 2^{1} = 2$'
-      - say: 'Cross multiply, so 28 equals 2 times $n$.'
+      - say: 'Multiply both sides by $n$, so 28 equals 2 times $n$.'
         write: '$28 = 2n$'
       - say: 'Divide both sides by 2, to get $n$ by itself.'
         write: '$n = \dfrac{28}{2}$'
@@ -954,7 +954,7 @@ lessons:
         write: 'When $y = 0$: $-x^{2} + 3x + 4 = 0$'
       - say: 'Multiply through by negative 1, so that $x$ squared is positive. Every sign changes.'
         write: '$x^{2} - 3x - 4 = 0$'
-      - say: 'The product is negative 4 and the sum is negative 3.'
+      - say: 'To factorise, we need two numbers whose product is the constant term, negative 4, and whose sum is the coefficient of $x$, negative 3.'
         write: 'Product $= -4$, Sum $= -3$'
       - say: 'Negative 4 and plus 1 multiply to negative 4 and add to negative 3.'
         write: 'Factors: $-4$ and $+1$'
@@ -974,9 +974,9 @@ lessons:
       - say: 'Therefore the three points are 0, 4, then 4, 0, and negative 1, 0.'
         write: '$\therefore (0, 4),\ (4, 0),\ (-1, 0)$'
       - section: 'Check'
-        say: 'Check 4, 0 in the equation. Negative 4 squared is negative 16, plus 12, plus 4, is 0.'
+        say: 'Check 4, 0 in the equation. 4 squared is 16, and the minus in front of $x$ squared makes it minus 16. 3 times 4 is 12, so minus 16 plus 12 plus 4 is 0.'
         write: '$x = 4$: $-16 + 12 + 4 = 0\ \checkmark$'
-      - say: 'Check negative 1, 0. Negative 1 squared is negative 1, minus 3, plus 4, is 0.'
+      - say: 'Check negative 1, 0. Negative 1 squared is 1, and the minus in front makes it minus 1. 3 times negative 1 is minus 3, so minus 1 minus 3 plus 4 is 0.'
         write: '$x = -1$: $-1 - 3 + 4 = 0\ \checkmark$'
       - say: 'So the points are option D.'
         write: '$\therefore (0, 4), (4, 0), (-1, 0)$ (D)'
@@ -1083,7 +1083,7 @@ lessons:
         write: '$x^{2} - 4 = (x - 2)(x + 2)$'
       - say: 'So the L.C.M. of the three denominators is $x$ minus 2, times $x$ plus 2.'
         write: 'L.C.M. $= (x - 2)(x + 2)$'
-      - say: 'Write everything over the L.C.M. The first top is multiplied by $x$ plus 2, the second by $x$ minus 2, and the third stays $2x$.'
+      - say: 'Write everything over the L.C.M. The first denominator lacks $x$ plus 2, so its top is multiplied by $x$ plus 2. The second lacks $x$ minus 2, so its top is multiplied by $x$ minus 2. The third already has the L.C.M., so its top stays $2x$.'
         write: '$= \dfrac{(x + 2) + (x - 2) + 2x}{(x - 2)(x + 2)}$'
       - say: 'Collect like terms on top. $x$ plus $x$ plus $2x$ is $4x$, and 2 minus 2 is 0.'
         write: '$= \dfrac{4x}{(x - 2)(x + 2)}$'
@@ -2048,7 +2048,7 @@ lessons:
         write: 'Even, not prime: $40,\ 42,\ 44,\ 46,\ 48,\ 50$'
         doodle_do:
           - {id: cards, op: stage, stage: 'custom:1986_q47_a3'}
-      - say: 'Now test the odd ones. 45 is 5 times 9, and 49 is 7 times 7. It looks prime, but it is 7 squared. Cross both out.'
+      - say: 'Now test the odd ones. 45 is 5 times 9, so it is not prime. 49 looks prime, but it is 7 times 7, which is 7 squared. Cross both out.'
         write: '$45 = 5 \times 9,\quad 49 = 7 \times 7$'
         doodle_do:
           - {id: cards, op: cross, part: c45}

@@ -1,10 +1,10 @@
-# Lesson two of two on boiling, density, freezing and melting points: what impurities do and the purity test, density and its calculations, separating liquids by density, and JAMB's traps.
+# The boiling point (lesson 2 of 6): the second flat part of the heating curve, vapour pressure taught before the definition, the boiling point and standard pressure, how pressure changes it, the pressure cooker, and JAMB's Jos Plateau question.
 format_version: 1
 subject: chemistry
 subtopic: 'Boiling, density, freezing and melting points'
 subtopic_id: 181e119e-6a41-5215-816d-834d6d563163
 part: 2
-title: 'Purity tests, density and separation'
+title: 'The boiling point'
 sources:            # pages consulted for the approach, for reviewers
   - https://syllabus.ng/jamb/chemistry
   - https://waeconline.org.ng/e-learning/Chemistry/chemmain.html
@@ -13,128 +13,130 @@ sources:            # pages consulted for the approach, for reviewers
 moments:
   # ---------------------------------------------------------------- welcome
   - section: 'Welcome'
-    say: 'Welcome. Today''s lesson is purity tests, density and separation.'
-    write: 'Purity tests, density and separation'
+    say: 'Welcome. Today''s lesson is the boiling point.'
+    write: 'The boiling point'
 
   # ---------------------------------------------------------------- introduction
   - section: 'Introduction'
-    say: 'In the last lesson you met melting, freezing and boiling points and the heating curve. These same points tell you whether a substance is pure, and density tells you which liquid floats.'
-    write: 'The m.p., f.p. and b.p. show purity; density decides what floats'
-  - say: 'JAMB asks what an impurity does to these points, and it asks you to calculate density.'
-    write: 'JAMB: what impurities do; density calculations'
+    say: 'In the last lesson, you saw the flat part of the heating curve where ice melts at 0 degrees Celsius. Now we heat the water further, until it boils.'
+    write: 'After melting: heat the water until it boils'
+    diagram:
+      id: g
+      kind: graph
+      'on': curve
+      caption: 'heating curve of ice'
+      size: scene
+      x: [0, 24]
+      y: [-20, 120]
+      x_step: 2
+      y_step: 20
+      x_label: 'time (min)'
+      y_label: 'temperature (°C)'
+      plots:
+        - {points: [[0, -20], [1, 0]], join: straight, label: 'ice warms', colour: blue}
+        - {points: [[1, 0], [4, 0]], join: straight, label: 'melting', colour: purple}
+        - {points: [[4, 0], [14, 100]], join: straight, label: 'water warms', colour: blue, later: true}
+        - {points: [[14, 100], [22, 100]], join: straight, label: 'boiling', colour: purple, later: true}
 
   # ---------------------------------------------------------------- objectives
   - section: 'Objectives'
-    say: 'By the end of this lesson you will be able to say what an impurity does to the melting, freezing and boiling points, and test for purity.'
-    write: '1. Say what impurities do; test for purity'
-  - say: 'You will also be able to define density, calculate it with its units and use it to separate liquids.'
-    write: '2. Define and calculate density, with units; separate liquids'
+    say: 'In this lesson you will learn what the boiling point is, and how pressure changes it.'
+    write: 'Today: the boiling point, and how pressure changes it'
 
-  # ---------------------------------------------------------------- purity
-  - section: 'Testing for purity'
-    say: 'You met this test in the lesson on pure and impure substances. A pure substance has a sharp, fixed melting point and boiling point.'
-    write: 'Pure: sharp, fixed m.p. and b.p.'
-    diagram:
-      id: t
-      kind: table
-      'on': test
-      columns: ['point', 'pure', 'impure']
-      rows:
-        - ['melting point', 'sharp, fixed', '']
-        - ['freezing point', 'sharp, fixed', '']
-        - ['boiling point', 'sharp, fixed', '']
-  - say: 'An impurity lowers the melting point, and the solid melts over a range of temperatures instead of at one point.'
-    write: 'Impurity: lower m.p., melts over a range'
+  # ---------------------------------------------------------------- the curve
+  - section: 'The heating curve'
+    say: 'Back to the curve. After the ice has melted, the water warms steadily from 0 to 100 degrees Celsius.'
+    write: 'Water warms from 0 °C to 100 °C'
     diagram_do:
-      - {id: t, op: fill, part: 'cell:1,impure', text: 'lower, a range', colour: orange, 'on': lowers}
-  - say: 'An impurity lowers the freezing point too. Sea water, with salt dissolved in it, freezes at about minus 2 degrees Celsius, not 0 degrees Celsius.'
-    write: 'Impurity: lower f.p., e.g. sea water about −2 °C'
+      - {id: g, op: plot, 'on': warms}
+  - say: 'Then the line goes flat again. The water is boiling, and the temperature stays at 100 degrees Celsius until all of it has turned to steam.'
+    write: 'Second flat part: water boiling at 100 °C'
     diagram_do:
-      - {id: t, op: fill, part: 'cell:2,impure', text: 'lower', colour: orange, 'on': lowers}
-  - say: 'But a dissolved impurity raises the boiling point. Salt water boils above one hundred degrees Celsius.'
-    write: 'Dissolved impurity: higher b.p., e.g. salt water'
+      - {id: g, op: plot, 'on': flat}
+      - {id: g, op: point, x: 14, y: 100, text: 'b.p. = 100 °C', colour: purple, 'on': boiling}
+  - say: 'Once again, the heat is used to break the forces between the particles, this time to set them free as a gas. So the temperature does not rise.'
+    write: 'Heat sets the particles free as a gas, so the temperature is steady'
     diagram_do:
-      - {id: t, op: fill, part: 'cell:3,impure', text: 'higher', colour: orange, 'on': raises}
+      - {id: g, op: highlight, part: 'plot:4', 'on': forces}
+
+  # ---------------------------------------------------------------- vapour pressure, taught before it is used
+  - section: 'Vapour pressure'
+    say: 'Why does water boil at 100 degrees Celsius? To see this, we need an idea called vapour pressure.'
+    write: 'Why 100 °C? We need vapour pressure'
+  - say: 'Even below its boiling point, some particles escape from the surface of a liquid as vapour. The pressure this vapour exerts is called the vapour pressure of the liquid.'
+    write: 'Vapour pressure: the pressure of the vapour from a liquid'
+  - say: 'When the space above the liquid holds as much vapour as it can, we call it the saturated vapour pressure.'
+    write: 'Saturated vapour pressure: the most vapour the space can hold'
+  - say: 'As the liquid gets hotter, more particles escape, so its vapour pressure rises.'
+    write: 'Hotter liquid, higher vapour pressure'
+  - say: 'Meanwhile, the air above the liquid presses down on it. This is the external pressure.'
+    write: 'External pressure: the air pressing on the liquid'
+
+  # ---------------------------------------------------------------- boiling point
+  - section: 'Boiling point'
+    say: 'Now we can define the boiling point. The boiling point of a liquid is the temperature at which its saturated vapour pressure equals the external pressure. We write boiling point in short as b.p.'
+    write: 'Boiling point (b.p.): saturated vapour pressure = external pressure'
     point:
-      - {line: 8, kind: underline, at: 'higher b.p.'}
+      - {line: 11, kind: underline, at: 'saturated vapour pressure = external pressure'}
+  - say: 'At that temperature, bubbles of vapour can form all through the liquid without being crushed by the air, and the liquid boils.'
+    write: 'Then bubbles form all through the liquid, and it boils'
 
-  # ---------------------------------------------------------------- density
-  - section: 'Density'
-    say: 'Density is the mass per unit volume of a substance. It tells you how much mass is packed into each cubic centimetre.'
-    write: 'Density: mass per unit volume'
-  - say: 'In symbols, density, rho, equals mass over volume. Its units are grams per cubic centimetre, or kilograms per cubic metre.'
-    write: '$\rho = \dfrac{m}{V}$, in g/cm³ or kg/m³'
-  - say: 'Water has a density of one gram per cubic centimetre, which is the same as one thousand kilograms per cubic metre.'
-    write: 'Water: 1 g/cm³ = 1000 kg/m³'
-  - say: 'Let us solve this. A metal block has a mass of fifty four grams and a volume of twenty cubic centimetres. Find its density.'
-    write: 'Example 1: m = 54 g, V = 20 cm³, ρ = ?'
-  - say: 'Write the formula, then put in the numbers with their units.'
-    write: '$\rho = \dfrac{m}{V} = \dfrac{54\ \text{g}}{20\ \text{cm}^3}$'
-  - say: 'Divide the top and the bottom by two to get twenty seven over ten, which is two point seven. So the density is two point seven grams per cubic centimetre.'
-    write: '$\rho = \dfrac{27}{10} = 2.7\ \text{g/cm}^3$'
-  - say: 'Let us solve another. Kerosene has a density of zero point eight grams per cubic centimetre. What is the mass of two hundred and fifty cubic centimetres of it?'
-    write: 'Example 2: ρ = 0.8 g/cm³, V = 250 cm³, m = ?'
-  - say: 'Rearrange the formula. Mass equals density times volume.'
-    write: '$m = \rho \times V$'
-  - say: 'Now work out zero point eight times two hundred and fifty. Eight times two hundred and fifty is two thousand, and two thousand divided by ten is two hundred. So the mass is two hundred grams.'
-    write: '$m = 0.8\ \text{g/cm}^3 \times 250\ \text{cm}^3 = 200\ \text{g}$'
-  - say: 'Density decides which liquid floats. Look at the beaker. Palm oil, with a density of about zero point nine grams per cubic centimetre, floats on water, which has a density of one gram per cubic centimetre.'
-    write: 'The less dense liquid floats: palm oil on water'
-    doodle: {name: 'custom:sub_chem_boiling_melting_density_a', id: dia, size: scene, caption: 'oil floats on water', 'on': beaker}
-    doodle_do:
-      - {id: dia, op: circle, part: oil-tag, 'on': Palm}
-      - {id: dia, op: pulse, part: water-tag, 'on': water}
-  - say: 'Two liquids that do not mix, such as palm oil and water or kerosene and water, are separated with a separating funnel. The denser water is run off from the bottom.'
-    write: 'Immiscible liquids: separating funnel; the denser layer runs off first'
-    doodle_do:
-      - {id: dia, op: pulse, part: water, 'on': denser}
-      - {id: dia, op: pulse, part: oil, 'on': palm}
+  # ---------------------------------------------------------------- pressure
+  - section: 'Pressure'
+    say: 'Air pressure is measured by the height of mercury it can hold up in a tube, in millimetres of mercury. Standard pressure, the usual air pressure at sea level, is 760 millimetres of mercury.'
+    write: 'Standard pressure: 760 mmHg (millimetres of mercury)'
+  - say: 'Water boils at 100 degrees Celsius only at standard pressure.'
+    write: 'Water: b.p. 100 °C at 760 mmHg'
+  - say: 'If the external pressure is lower, the vapour pressure reaches it at a lower temperature. So the liquid boils at a lower temperature.'
+    write: 'Lower external pressure → lower b.p.'
+  - say: 'If the external pressure is higher, the liquid must get hotter before its vapour pressure reaches it. So the boiling point is higher.'
+    write: 'Higher external pressure → higher b.p.'
 
-  # ---------------------------------------------------------------- comparison
-  - section: 'Comparison'
-    say: 'In separation, a lower boiling point distils over first, and a less dense liquid floats on top.'
-    write: 'Separation: lower b.p. distils first; less dense floats'
-    doodle_do:
-      - {id: dia, op: pulse, part: oil, 'on': floats}
+  # worked example: pressure cooker
+  - section: 'Worked example'
+    say: 'Here is an example. A pressure cooker traps the steam, so the pressure inside rises above 760 millimetres of mercury. We must find what happens to the boiling point of the water inside.'
+    write: 'Example: pressure cooker, pressure above 760 mmHg. b.p. of the water?'
+  - say: 'The pressure inside is higher than standard pressure, so the water must get hotter before it boils. It boils above 100 degrees Celsius.'
+    write: 'Higher pressure, so b.p. above 100 °C'
+  - say: 'What does this tell us? The water is hotter than in an open pot, so beans cook faster in a pressure cooker.'
+    write: 'Hotter water, so the beans cook faster'
 
   # ---------------------------------------------------------------- traps
   - section: 'JAMB traps'
-    say: 'JAMB asks what an impurity does to the melting point. You worked that question in the lesson on pure and impure substances, and an impurity reduces it. The trap is to say it increases the melting point. An impurity raises the boiling point, not the melting point.'
-    write: 'JAMB: impurity → m.p. reduced, b.p. raised; do not swap them'
-    diagram_do:
-      - {id: t, op: highlight, part: 'col:impure', colour: green, 'on': reduces}
-  - say: 'Another trap is units. Density always has a unit, either grams per cubic centimetre or kilograms per cubic metre. Writing only grams, or no unit at all, loses marks.'
-    write: 'Density needs its unit: g/cm³ or kg/m³, never just g'
+    say: 'Here is a question of the kind JAMB sets. On the Jos Plateau, the air pressure is below 760 millimetres of mercury. Does pure water there boil at exactly 100 degrees Celsius, above 100 degrees Celsius, below 100 degrees Celsius or at 0 degrees Celsius?'
+    write: 'Jos Plateau, pressure below 760 mmHg: b.p. of water? A. 100 °C B. above 100 °C C. below 100 °C D. 0 °C'
+  - say: 'The air pressure is lower, so the vapour pressure of the water reaches it at a lower temperature. The answer is C, below 100 degrees Celsius.'
+    write: 'Lower pressure, so lower b.p.: C, below 100 °C ✓'
+  - say: 'The trap is A. Water boils at exactly 100 degrees Celsius only at 760 millimetres of mercury.'
+    write: 'A ✗: 100 °C only at 760 mmHg'
+    point:
+      - {line: 22, kind: circle, at: '760 mmHg'}
 
   # ---------------------------------------------------------------- check
   - section: 'Check yourself'
-    say: 'Your turn. A stone of mass seventy five grams is lowered into a measuring cylinder, and the water rises from forty to seventy cubic centimetres. Find its density. Pause and work it out.'
-    write: 'm = 75 g; water rises from 40 cm³ to 70 cm³; ρ = ?'
-  - say: 'The volume of the stone is the rise in the water. Seventy minus forty is thirty cubic centimetres.'
-    write: '$V = 70\ \text{cm}^3 - 40\ \text{cm}^3 = 30\ \text{cm}^3$'
-  - say: 'Density is mass over volume. Seventy five over thirty is five over two, which is two point five grams per cubic centimetre.'
-    write: '$\rho = \dfrac{75}{30} = \dfrac{5}{2} = 2.5\ \text{g/cm}^3$'
+    say: 'Now it is your turn. A liquid boils at 78 degrees Celsius at 760 millimetres of mercury. On a high mountain, the air pressure is lower. Does the liquid boil above or below 78 degrees Celsius there? Pause the lesson and decide before I go on.'
+    write: 'b.p. 78 °C at 760 mmHg. On a mountain, lower pressure: above or below 78 °C?'
+  - say: 'The external pressure is lower, so the vapour pressure reaches it at a lower temperature. The liquid boils below 78 degrees Celsius.'
+    write: 'Lower pressure, so b.p. below 78 °C ✓'
+    point:
+      - {line: 24, kind: circle, at: 'below 78 °C'}
 
   # ---------------------------------------------------------------- recap
   - section: 'Recap'
-    say: 'Let us recap. A pure substance has sharp, fixed points. Impurities lower the melting and freezing points and raise the boiling point.'
-    write: '1. Impurities: lower m.p. and f.p., raise b.p.'
+    say: 'Let us recap. The boiling point is the temperature at which the saturated vapour pressure of a liquid equals the external pressure. On the heating curve, it is the second flat part.'
+    write: '1. b.p.: vapour pressure = external pressure; the second flat part'
     diagram_do:
-      - {id: t, op: highlight, part: 'col:impure', 'on': Impurities}
-  - say: 'Density is mass over volume, measured in grams per cubic centimetre or kilograms per cubic metre.'
-    write: '2. $\rho = \dfrac{m}{V}$, in g/cm³ or kg/m³'
-  - say: 'The less dense liquid floats on top, and a separating funnel runs off the denser layer first. That''s the lesson. Next, try new questions on it.'
-    write: '3. Less dense floats; separating funnel runs off the denser layer'
-    doodle_do:
-      - {id: dia, op: pulse, part: oil, 'on': floats}
+      - {id: g, op: highlight, part: 'plot:4', 'on': flat}
+  - say: 'Water boils at 100 degrees Celsius only at 760 millimetres of mercury. A lower pressure gives a lower boiling point, and a higher pressure gives a higher one. In the next lesson, we meet the kelvin scale. Now try the problem.'
+    write: '2. 100 °C at 760 mmHg; lower pressure → lower b.p.'
 
 # ---------------------------------------------------------------- after the lesson: try it
 problems:
-  - ask: 'A metal block has a mass of 39 g and a volume of 5 cm³. Find its density.'
-    answer: '7.8 g/cm³'
-    accept: ['7.8', '7.8 g/cm3', '7.8 g cm-3', '7.8g/cm³', '7.8 g per cm³']
+  - ask: 'At the top of a high mountain, the air pressure is 500 mmHg. Pure water there boils at: A. exactly 100 °C  B. above 100 °C  C. below 100 °C  D. 0 °C'
+    answer: 'C'
+    accept: ['below 100 °C', 'below 100', 'below', 'C. below 100 °C']
     working:
-      - '$\rho = \dfrac{m}{V}$'
-      - '$\rho = \dfrac{39\ \text{g}}{5\ \text{cm}^3}$'
-      - '$39 \div 5 = 7.8$, so $\rho = 7.8\ \text{g/cm}^3$'
+      - '500 mmHg is lower than standard pressure, 760 mmHg.'
+      - 'With a lower external pressure, the vapour pressure of the water reaches it at a lower temperature.'
+      - 'So the water boils below 100 °C. Answer: C.'
     needs_working: false

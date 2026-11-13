@@ -317,12 +317,12 @@ lessons:
         write: 'Let $\log_{\sqrt{2}}4 = a \Rightarrow (\sqrt{2})^{a} = 4$'
       - say: 'Write both sides with base 2. Root 2 is 2 to the power a half, and 4 is 2 squared.'
         write: '$\left(2^{\frac{1}{2}}\right)^{a} = 2^{2}$'
-      - say: 'Multiply the indices, so a half times $a$ is $a$ over 2. Equate the indices, and $a$ over 2 equals 2, so $a$ is 4.'
+      - say: 'A power of a power means we multiply the indices, so a half times $a$ is $a$ over 2. Both sides now have base 2, so their indices must be equal. $a$ over 2 equals 2, so $a$ is 4.'
         write: '$2^{\frac{a}{2}} = 2^{2} \Rightarrow \dfrac{a}{2} = 2 \quad \therefore a = 4$'
       - section: 'The second log'
         say: 'Let log base a half of 16 be $b$. In index form, a half to the power $b$ equals 16.'
         write: 'Let $\log_{1/2}16 = b \Rightarrow \left(\tfrac{1}{2}\right)^{b} = 16$'
-      - say: 'By the negative index law, a half is 2 to the power minus 1. And 16 is 2 to the power 4.'
+      - say: 'The negative index law says 2 to the power minus 1 means 1 over 2, so a half is 2 to the power minus 1. And 16 is 2 to the power 4.'
         write: '$\left(2^{-1}\right)^{b} = 2^{4}$'
       - say: 'Multiply the indices, so minus 1 times $b$ is minus $b$. Equate the indices, and minus $b$ equals 4, so $b$ is minus 4. Keep that minus sign.'
         write: '$2^{-b} = 2^{4} \Rightarrow -b = 4 \quad \therefore b = -4$'
@@ -408,7 +408,7 @@ lessons:
   9:
     moments:
       - section: 'The question'
-        say: 'A class has 40 students. 32 offer Mathematics and 24 offer Physics. But 32 plus 24 is 56, more than the whole class. So some students offer both. How many?'
+        say: 'A class has 40 students. 32 offer Mathematics, 24 offer Physics and 4 offer neither. But 32 plus 24 is 56, more than the whole class. So some students offer both. How many?'
         write: 'Class 40: Maths 32, Physics 24, neither 4. Both $= ?$'
       - section: 'Solution'
         say: 'Solution. First, the givens. The whole class is the universal set, epsilon, so n of epsilon is 40. n of M, the Maths set, is 32. n of P, the Physics set, is 24.'
@@ -1396,7 +1396,7 @@ lessons:
       - section: 'Solution'
         say: 'Solution. To integrate a power of $x$, add 1 to the power, and divide by the new power. Then add $c$, the constant of integration.'
         write: 'Solution: $\displaystyle\int x^{n}\,dx = \dfrac{x^{n+1}}{n+1} + c$'
-      - say: 'Integrate term by term. $x$ squared becomes $x$ cubed over 3. Minus $2x$ becomes minus $2x$ squared over 2. The $c$ cancels in a definite integral.'
+      - say: 'Integrate term by term. $x$ squared becomes $x$ cubed over 3. Minus $2x$ becomes minus $2x$ squared over 2. In a definite integral we leave out $c$, because it is added at the upper limit and taken away again at the lower limit.'
         write: '$\displaystyle\int_{2}^{3} (x^{2} - 2x)\,dx = \left[\dfrac{x^{3}}{3} - \dfrac{2x^{2}}{2}\right]_{2}^{3}$'
         diagram_do:
           - {id: g, op: shade, part: 'plot:1', x: [2, 3], text: 'Area = ?', colour: orange}
@@ -1414,7 +1414,7 @@ lessons:
         diagram_do:
           - {id: g, op: label, part: 'shade:1', text: 'Area = 4/3', colour: green}
       - section: 'Check'
-        say: 'To check, from 2 to 3 the curve is above the $x$-axis, so the answer must be positive. At $x$ equals 3, $y$ is 3, so the area is less than a 1 by 3 rectangle. 4 over 3 fits.'
+        say: 'To check, from 2 to 3 the curve is above the $x$-axis, so the answer must be positive. The curve climbs from 0 at $x$ equals 2 to 3 at $x$ equals 3, so the area is less than a rectangle 1 wide and 3 high. 4 over 3 fits.'
         write: 'Check: $0 < \dfrac{4}{3} < 1 \times 3\ \checkmark$'
       - say: 'Therefore the integral is 4 over 3, which is option A.'
         write: '$\therefore \displaystyle\int_{2}^{3} (x^{2} - 2x)\,dx = \dfrac{4}{3}$'
@@ -1433,7 +1433,7 @@ lessons:
         say: 'Solution. Let $u$ be the inside, minus $4x$. Then $y$ is 3 sin $u$.'
         write: 'Solution: Let $u = -4x$, $\ \therefore y = 3\sin u$'
         doodle: {name: 'custom:2003_q37_a', id: chain, caption: 'a function of a function'}
-      - say: 'Differentiate each. Minus $4x$ gives minus 4. Sin gives cos, so 3 sin $u$ gives 3 cos $u$.'
+      - say: 'Differentiate each part. The inside, minus $4x$, gives minus 4. The derivative of sin is cos, so the outside, 3 sin $u$, gives 3 cos $u$.'
         write: '$\dfrac{du}{dx} = -4$, $\ \dfrac{dy}{du} = 3\cos u$'
         doodle_do:
           - {id: chain, op: label, part: inner, text: 'du/dx = −4'}
@@ -1725,7 +1725,7 @@ lessons:
         diagram_do:
           - {id: d, op: total, part: 'col:3', 'on': 'Add'}
       - section: 'The S.D.'
-        say: 'The variance is 10 over 5, which is 2.'
+        say: 'The variance is the sum of the squared deviations over $n$. So it is 10 over 5, which is 2.'
         write: 'Variance $= \dfrac{10}{5} = 2$'
       - say: 'The S.D. is the square root of the variance, which is root 2.'
         write: '$\therefore$ S.D. $= \sqrt{2}$'
@@ -1952,7 +1952,7 @@ lessons:
         write: '$\dfrac{1}{(n - 3)!} = \dfrac{1}{4\,(n - 4)!}$'
       - say: 'Cross-multiply.'
         write: '$(n - 3)! = 4\,(n - 4)!$'
-      - say: 'Expand n minus 3 factorial down to n minus 4 factorial, so it is n minus 3, times n minus 4 factorial.'
+      - say: 'A factorial is a number times every whole number below it, down to 1. So n minus 3 factorial is n minus 3, times n minus 4 factorial.'
         write: '$(n - 3)(n - 4)! = 4\,(n - 4)!$'
         point:
           - {line: 7, kind: underline, at: '(n − 3)!'}

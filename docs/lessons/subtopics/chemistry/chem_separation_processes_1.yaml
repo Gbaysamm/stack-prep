@@ -1,10 +1,10 @@
-# Separation processes, lesson 1 of 2: separating solids from liquids and from other solids (filtration to magnetic separation), with a worked "which method?" example after each, on the solids apparatus scene.
+# Filtration and decantation (lesson 1 of 7): the big picture of separating a mixture, the two questions for choosing a method, soluble and insoluble taught first, then filtration and decantation, each with a guided example.
 format_version: 1
 subject: chemistry
 subtopic: 'Separation processes'
 subtopic_id: c6a7158d-ee05-5392-bb4b-a39693edd7ac
 part: 1
-title: 'Separating solids from liquids and from other solids'
+title: 'Filtration and decantation'
 sources:            # pages consulted for the approach, for reviewers
   - https://syllabus.ng/jamb/chemistry
   - https://syllabus.ng/waec/chemistry/
@@ -14,175 +14,114 @@ sources:            # pages consulted for the approach, for reviewers
 moments:
   # ---------------------------------------------------------------- welcome
   - section: 'Welcome'
-    say: 'Welcome. Today''s lesson is separating solids from liquids and from other solids.'
-    write: 'Separating solids from liquids and from other solids'
+    say: 'Welcome. Today''s lesson is separating mixtures, starting with filtration and decantation.'
+    write: 'Separating mixtures: filtration and decantation'
 
-  # ---------------------------------------------------------------- introduction
+  # ---------------------------------------------------------------- introduction: the big picture
   - section: 'Introduction'
-    say: 'The parts of a mixture are not chemically joined, so a mixture is separated by physical means. Each method uses one property in which the parts differ.'
-    write: 'A mixture is separated by physical means, using a difference between its parts'
+    say: 'In the lesson on mixtures, you learnt that the parts of a mixture are not chemically joined. So a mixture can be separated by physical means, without any chemical change.'
+    write: 'A mixture is separated by physical means'
+  - say: 'Each method of separation uses one property in which the parts differ. For example, iron filings are pulled by a magnet, but sand is not.'
+    write: 'Each method uses one difference between the parts'
   - say: 'Almost every year, JAMB asks which method separates a given mixture. It is also the first topic in the JAMB chemistry syllabus.'
-    write: 'JAMB asks: which method separates this mixture?'
+    write: 'JAMB asks which method separates a mixture'
 
   # ---------------------------------------------------------------- objectives
   - section: 'Objectives'
-    say: 'By the end of this lesson, you will be able to name each method for separating solids and the difference it uses.'
-    write: '1. Name each method and the difference it uses'
-  - say: 'You will also choose the right method for a given mixture, say why, and spot the traps JAMB sets.'
-    write: '2. Choose the method for a mixture and spot the JAMB traps'
+    say: 'In this lesson you will learn how to choose a method, and how filtration and decantation separate a solid from a liquid.'
+    write: 'Today: choosing a method; filtration and decantation'
 
-  # ---------------------------------------------------------------- choosing
+  # ---------------------------------------------------------------- choosing a method
   - section: 'Choosing a method'
-    say: 'For every mixture, ask two questions. Is each part a solid or a liquid? And how do the parts differ, in solubility, boiling point, density, magnetism or how fast they move?'
-    write: 'Ask: solid or liquid? How do the parts differ?'
-    point:
-      - {line: 5, kind: circle, at: 'How do the parts differ?'}
+    say: 'To choose a method, we ask two questions about the mixture. The first question is whether each part is a solid or a liquid.'
+    write: '1. Is each part a solid or a liquid?'
+  - say: 'The second question is how the parts differ. They may differ in how well they dissolve, in boiling point, in density, in magnetism or in how fast they move.'
+    write: '2. How do the parts differ?'
+  # Soluble and insoluble taught before filtration uses them (no gaps).
+  - say: 'How well a substance dissolves is called its solubility. For example, salt dissolves in water, so we say that salt is soluble in water.'
+    write: 'Soluble: dissolves, e.g. salt in water'
+  - say: 'Sand does not dissolve in water, so we say that sand is insoluble in water. Today''s two methods both separate an insoluble solid from a liquid.'
+    write: 'Insoluble: does not dissolve, e.g. sand in water'
 
   # ---------------------------------------------------------------- filtration
   - section: 'Filtration'
-    say: 'Filtration separates an insoluble solid from a liquid. The liquid passes through the tiny holes in the filter paper, but the solid particles are too big to pass.'
+    say: 'Let us start with filtration. Filtration separates an insoluble solid from a liquid. The mixture is poured into a funnel lined with filter paper.'
     write: 'Filtration: an insoluble solid from a liquid'
-    doodle: {name: 'custom:sub_chem_separation_processes_a', id: sol, size: scene, caption: 'separating solids', 'on': filter}
+    doodle: {name: 'custom:sub_chem_separation_processes_a', id: sol, size: scene, caption: 'filtration', 'on': funnel}
     doodle_do:
-      - {id: sol, op: pulse, part: paper, 'on': paper}
-  - say: 'The solid left on the filter paper is called the residue. The clear liquid that passes through is called the filtrate.'
-    write: 'Residue: stays on the paper; filtrate: passes through'
+      - {id: sol, op: pulse, part: paper, 'on': filter paper}
+  - say: 'The filter paper has tiny holes. The liquid passes through the holes, but the solid particles are too big to pass.'
+    write: 'The liquid passes through; the solid is held back'
+    doodle_do:
+      - {id: sol, op: pulse, part: paper, 'on': holes}
+  - say: 'The solid left on the filter paper is called the residue.'
+    write: 'Residue: the solid left on the paper'
     doodle_do:
       - {id: sol, op: circle, part: residue, 'on': residue}
+  - say: 'The clear liquid that passes through is called the filtrate.'
+    write: 'Filtrate: the liquid that passes through'
+    doodle_do:
       - {id: sol, op: circle, part: filtrate, 'on': filtrate}
-  - say: 'Let us solve this. Which method separates sand from water? Step one, sand is a solid and water is a liquid.'
-    write: 'Example: sand and water. Sand = solid, water = liquid'
-  - say: 'Step two, sand does not dissolve in water. An insoluble solid in a liquid is separated by filtration. Sand is the residue and water is the filtrate.'
-    write: 'Sand is insoluble ∴ filtration; residue = sand, filtrate = water'
+
+  # worked example: sand and water
+  - section: 'Worked example'
+    say: 'Now let us use this. We are given a mixture of sand and water, and we must find the method that separates it. First, we ask what each part is. Sand is a solid, and water is a liquid.'
+    write: 'Sand and water: which method? Sand is a solid, water a liquid'
+  - say: 'Next, we ask how they differ. Sand is insoluble in water, so it cannot pass through filter paper. An insoluble solid in a liquid is separated by filtration.'
+    write: 'Sand is insoluble, so filtration ✓'
+    point:
+      - {line: 14, kind: underline, at: 'filtration'}
+  - say: 'What does this tell us? The sand stays on the paper as the residue, and the water runs through as the filtrate.'
+    write: 'Residue = sand; filtrate = water'
     doodle_do:
       - {id: sol, op: pulse, part: residue, 'on': residue}
       - {id: sol, op: pulse, part: filtrate, 'on': filtrate}
-    point:
-      - {line: 9, kind: underline, at: 'filtration'}
 
   # ---------------------------------------------------------------- decantation
   - section: 'Decantation'
-    say: 'Decantation separates a heavy insoluble solid from a liquid. The mixture is left to stand until the solid settles at the bottom. Then the liquid is gently poured off.'
-    write: 'Decantation: let a heavy solid settle, then pour off the liquid'
-  - say: 'Let us solve this. Muddy water is left to stand, and the mud settles. The clear water is then poured off. That is decantation. It is quick but rough, so filtration often follows.'
-    write: 'Example: muddy water. Mud settles, water poured off = decantation'
-
-  # ---------------------------------------------------------------- evaporation
-  - section: 'Evaporation'
-    say: 'Evaporation recovers a soluble solid from its solution. The solution is heated in an evaporating dish. The liquid boils off as vapour, and the solid is left behind.'
-    write: 'Evaporation: a soluble solid from its solution; the liquid is lost'
-    doodle_do:
-      - {id: sol, op: stage, stage: 'custom:sub_chem_separation_processes_a2', 'on': evaporating}
-      - {id: sol, op: pulse, part: flame, 'on': heated}
-      - {id: sol, op: pulse, part: vapour, 'on': vapour}
-  - say: 'Let us solve this. How do we get common salt from sea water? Salt is a solid that dissolves in water. So filtration cannot work, because the dissolved salt passes through the filter paper.'
-    write: 'Example: salt from sea water. Salt is soluble, so not filtration'
-  - say: 'So we evaporate the sea water to dryness. The water leaves as steam, and the salt is left in the dish.'
-    write: 'Evaporate to dryness: water leaves, salt is left ✓'
-    doodle_do:
-      - {id: sol, op: pulse, part: vapour, 'on': steam}
-      - {id: sol, op: circle, part: solution, 'on': salt}
-
-  # ---------------------------------------------------------------- crystallisation
-  - section: 'Crystallisation'
-    say: 'Crystallisation gives a pure solid, as crystals, from its solution. The solution is heated only until it is saturated. Then it is left to cool, and crystals form.'
-    write: 'Crystallisation: heat to saturation, then cool; crystals form'
-    doodle_do:
-      - {id: sol, op: pulse, part: dish, 'on': heated}
-  - say: 'A saturated solution holds all the solute it can dissolve at that temperature. Most solids dissolve less in cold water, so as the solution cools, the extra solid comes out as crystals.'
-    write: 'Saturated: holds all the solute it can at that temperature'
-  - say: 'Why not evaporate to dryness? Strong heat spoils some solids. Sugar chars, and blue crystals of copper(II) tetraoxosulphate(VI) lose their water of crystallisation and turn into a white powder.'
-    write: 'Used when strong heat would spoil the solid, e.g. sugar and copper(II) tetraoxosulphate(VI) (copper sulphate)'
-  - say: 'Let us solve this. Which method gives blue crystals of CuSO₄·5H₂O from its solution? Heating to dryness would leave a white powder. So we use crystallisation.'
-    write: 'Example: blue $\ce{CuSO4.5H2O}$ crystals ∴ crystallisation, not evaporation to dryness'
-    point:
-      - {line: 18, kind: underline, at: 'crystallisation'}
-
-  # ---------------------------------------------------------------- fractional crystallisation
-  - section: 'Fractional crystallisation'
-    say: 'Fractional crystallisation separates two soluble solids with different solubilities. As the hot solution cools, the solid whose solubility drops sharply crystallises out first. The other stays in solution.'
-    write: 'Fractional crystallisation: two soluble solids, different solubilities'
-  - say: 'Let us solve this. Separate potassium trioxonitrate(V), KNO₃, from sodium chloride, NaCl. Both are white solids, and both dissolve in water, so filtration fails.'
-    write: 'Example: potassium trioxonitrate(V) ($\ce{KNO3}$) and sodium chloride (NaCl). Both soluble, so not filtration'
-  - say: 'KNO₃ is far less soluble in cold water than in hot water. NaCl dissolves about the same amount hot or cold. So on cooling a hot solution, KNO₃ crystallises out and NaCl stays dissolved.'
-    write: 'On cooling, $\ce{KNO3}$ crystallises, NaCl stays ∴ fractional crystallisation'
-
-  # ---------------------------------------------------------------- sublimation
-  - section: 'Sublimation'
-    say: 'Sublimation is when a solid turns straight into a gas on heating, without melting. The gas turns back into a solid on a cool surface. It separates a solid that sublimes from one that does not.'
-    write: 'Sublimation: solid → gas directly; back to solid on a cool surface'
-    doodle_do:
-      - {id: sol, op: stage, stage: 'custom:sub_chem_separation_processes_a3', 'on': Sublimation}
-  - say: 'Ammonium chloride, NH₄Cl, sublimes. So do iodine, naphthalene, camphor, dry ice, which is solid CO₂, anhydrous iron(III) chloride and anhydrous aluminium chloride.'
-    write: 'These sublime: ammonium chloride ($\ce{NH4Cl}$), iodine ($\ce{I2}$), naphthalene, camphor, dry ice, anhydrous iron(III) chloride and aluminium chloride'
-  - say: 'Let us solve this. Separate ammonium chloride from sodium chloride. Both are white solids that dissolve in water. But NH₄Cl sublimes and NaCl does not.'
-    write: 'Example: $\ce{NH4Cl}$ and NaCl. Only $\ce{NH4Cl}$ sublimes'
-    doodle_do:
-      - {id: sol, op: pulse, part: mixture, 'on': Separate}
-  - say: 'So we heat the mixture under an inverted funnel. NH₄Cl rises as a gas and collects on the cool funnel as a white solid. NaCl stays in the dish. Strictly, NH₄Cl splits into NH₃ and HCl gases, which join again on the cool funnel, but JAMB still calls this sublimation.'
-    write: '$\ce{NH4Cl}$ collects on the funnel; NaCl stays ∴ sublimation ✓'
-    doodle_do:
-      - {id: sol, op: pulse, part: cool-funnel, 'on': funnel}
-      - {id: sol, op: circle, part: sublimate, 'on': collects}
-      - {id: sol, op: pulse, part: mixture, 'on': stays}
-
-  # ---------------------------------------------------------------- magnetic separation
-  - section: 'Magnetic separation'
-    say: 'Magnetic separation removes a magnetic solid from a mixture. Iron, cobalt and nickel are pulled by a magnet. Most other substances are not.'
-    write: 'Magnetic separation: a magnetic solid (iron, cobalt, nickel) from a non-magnetic one'
-  - say: 'Let us solve this. Separate iron filings from sand. Both are insoluble solids, so filtration cannot separate them. But iron is magnetic and sand is not. Pass a magnet over the mixture, and the iron filings stick to it.'
-    write: 'Example: iron filings and sand ∴ magnet; iron sticks, sand stays'
-  - say: 'Be careful. As you saw in the lesson on elements, compounds and mixtures, iron heated with sulphur forms iron(II) sulphide, FeS, which is a compound. A magnet can no longer pull out the iron.'
-    write: 'Iron + sulphur heated → iron(II) sulphide (FeS), a compound: a magnet cannot separate it'
-    point:
-      - {line: 28, kind: circle, at: 'a compound'}
-
-  # ---------------------------------------------------------------- comparison
-  - section: 'Comparison'
-    say: 'Now put the methods side by side. An insoluble solid in a liquid needs filtration or decantation. A soluble solid needs evaporation or crystallisation.'
-    write: 'Insoluble solid + liquid → filtration, decantation; soluble solid → evaporation, crystallisation'
-    doodle_do:
-      - {id: sol, op: pulse, part: filtration-tag, 'on': filtration}
-      - {id: sol, op: pulse, part: evaporation-tag, 'on': evaporation}
-  - say: 'Two soluble solids with different solubilities need fractional crystallisation. A solid that sublimes needs sublimation. A magnetic solid needs a magnet.'
-    write: 'Different solubilities → fractional crystallisation; sublimes → sublimation; magnetic → magnet'
-    doodle_do:
-      - {id: sol, op: pulse, part: sublimation-tag, 'on': sublimation}
+    say: 'We have seen filtration. Now let us look at decantation. Decantation also separates an insoluble solid from a liquid, when the solid is heavy and settles quickly.'
+    write: 'Decantation: a heavy insoluble solid from a liquid'
+  - say: 'The mixture is left to stand until the solid settles at the bottom. Then the liquid on top is gently poured off into another container.'
+    write: 'Let the solid settle, then pour off the liquid'
+  - say: 'Here is an example. Muddy water is left to stand in a bucket, and the mud settles at the bottom. Then the clear water is gently poured off. That is decantation.'
+    write: 'Muddy water: mud settles, water poured off = decantation'
+  - say: 'Decantation is quick, but some fine solid is usually poured off with the liquid. So filtration often follows it, to remove the last of the solid.'
+    write: 'Quick but rough, so filtration often follows'
 
   # ---------------------------------------------------------------- traps
   - section: 'JAMB traps'
-    say: 'Students often mix up the residue and the filtrate. The residue stays on the paper. The filtrate is the liquid that passes through.'
-    write: 'Residue stays on the paper; filtrate passes through'
+    say: 'Students often mix up the residue and the filtrate. The residue is the solid that stays on the paper. The filtrate is the liquid that passes through.'
+    write: 'Trap: the residue stays on the paper; the filtrate passes through'
     doodle_do:
       - {id: sol, op: circle, part: residue, 'on': residue}
-  - say: 'The other trap is filtering a dissolved solid. Salt dissolved in water passes straight through the filter paper, so a soluble solid is recovered by evaporation or crystallisation, never by filtration.'
-    write: 'A dissolved solid passes through the paper: filtration ✗; evaporate or crystallise ✓'
+      - {id: sol, op: circle, part: filtrate, 'on': filtrate}
+  - say: 'A second trap is filtering a dissolved solid. Salt dissolved in water passes straight through the filter paper with the water, so filtration cannot separate salt from water.'
+    write: 'Trap: a dissolved solid passes through, so salt water cannot be filtered ✗'
 
   # ---------------------------------------------------------------- check
   - section: 'Check yourself'
-    say: 'Your turn. Which method separates a mixture of iodine and sand? Pause and decide before I go on.'
-    write: 'Which method separates iodine and sand?'
-  - say: 'Both are solids, and neither dissolves well in water. But iodine sublimes and sand does not. Heat the mixture, and iodine collects as crystals on the cool funnel. So the answer is sublimation.'
-    write: 'Iodine sublimes, sand does not ∴ sublimation ✓'
+    say: 'Now it is your turn. Which method separates chalk powder from water? Pause the lesson and decide before I go on.'
+    write: 'Which method separates chalk powder and water?'
+  - say: 'Chalk is a solid and water is a liquid. Chalk does not dissolve in water, so it is an insoluble solid in a liquid. So we use filtration, and the chalk is the residue.'
+    write: 'Chalk is insoluble, so filtration; chalk is the residue ✓'
     doodle_do:
-      - {id: sol, op: circle, part: sublimate, 'on': collects}
+      - {id: sol, op: pulse, part: residue, 'on': residue}
     point:
-      - {line: 34, kind: circle, at: 'sublimation'}
+      - {line: 23, kind: circle, at: 'filtration'}
 
   # ---------------------------------------------------------------- recap
   - section: 'Recap'
-    say: 'Let us recap. Each method uses one difference. For solids, use filtration, decantation, evaporation, crystallisation, fractional crystallisation, sublimation or a magnet.'
-    write: '1. Solids: filtration, decantation, evaporation, crystallisation, sublimation, magnet'
-  - say: 'To choose, ask whether the parts are solids or liquids, and how they differ. That''s the lesson. In the next lesson, we separate liquids.'
-    write: '2. Ask: solid or liquid? How do they differ?'
+    say: 'Let us recap. To choose a method, ask whether each part is a solid or a liquid, and how the parts differ.'
+    write: '1. Ask: solid or liquid? How do the parts differ?'
+  - say: 'Filtration and decantation separate an insoluble solid from a liquid. In the next lesson, we recover a soluble solid. Now try the problem.'
+    write: '2. Insoluble solid from a liquid: filtration or decantation'
 
 # ---------------------------------------------------------------- after the lesson: try it
 problems:
-  - ask: 'A mixture contains ammonium chloride, common salt and sand. Give, in order, the steps to separate all three.'
-    answer: 'sublimation, then dissolve in water and filter, then evaporate the filtrate'
-    accept: ['heat to sublime the ammonium chloride; add water and filter off the sand; evaporate the filtrate to get the salt', 'sublimation, filtration, evaporation', 'sublime, dissolve and filter, evaporate']
+  - ask: 'A mixture of sand and water is filtered. Which is the filtrate? A. sand  B. water  C. the filter paper  D. sand and water'
+    answer: 'B'
+    accept: ['water', 'B. water']
     working:
-      - 'Heat the mixture under a cool funnel: only $\ce{NH4Cl}$ sublimes and collects on the funnel.'
-      - 'Add water to what is left: the salt dissolves, the sand does not. Filter: sand is the residue, salt solution the filtrate.'
-      - 'Evaporate the filtrate to dryness (or crystallise it): the salt is left. Order: sublimation, filtration, evaporation.'
+      - 'Sand is insoluble in water, so it cannot pass through the filter paper: it stays behind as the residue.'
+      - 'The water passes through the paper, so the water is the filtrate. Answer: B.'
     needs_working: false

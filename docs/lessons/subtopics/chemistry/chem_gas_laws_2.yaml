@@ -1,10 +1,10 @@
-# The gas laws, lesson 2 of 2: the ideal gas equation PV = nRT, molar volume and vapour density, Gay-Lussac's law, Dalton's law of partial pressures and Graham's law of diffusion, each stated and worked step by step, on the growing gas diagram.
+# Charles's law and the pressure law (lesson 2 of 7): temperature in kelvin taught first, then Charles's law and the pressure law, each stated, explained on the heated cylinder and worked step by step.
 format_version: 1
 subject: chemistry
 subtopic: 'The gas laws'
 subtopic_id: 475d9837-e728-5acf-99be-2a5313095800
 part: 2
-title: 'The ideal gas equation, molar volume, and the laws of Gay-Lussac, Dalton and Graham'
+title: 'Charles''s law and the pressure law'
 sources:            # pages consulted for the approach, for reviewers
   - https://syllabus.ng/jamb/chemistry
   - https://waeconline.org.ng/e-learning/Chemistry/chemmain.html
@@ -14,135 +14,128 @@ sources:            # pages consulted for the approach, for reviewers
 moments:
   # ---------------------------------------------------------------- welcome
   - section: 'Welcome'
-    say: 'Welcome. Today''s lesson is the ideal gas equation, molar volume, and the laws of Gay-Lussac, Dalton and Graham.'
-    write: 'The ideal gas equation, molar volume, and the laws of Gay-Lussac, Dalton and Graham'
+    say: 'Welcome. Today''s lesson is Charles''s law and the pressure law.'
+    write: 'Charles''s law and the pressure law'
 
   # ---------------------------------------------------------------- introduction
   - section: 'Introduction'
-    say: 'In the last lesson you met Boyle''s law, Charles''s law, the pressure law and the general gas equation, with T in kelvin. Now we bring in the amount of gas, in moles. Then we look at mixtures of gases and at how fast gases spread.'
-    write: 'Last lesson: $\dfrac{P_1V_1}{T_1} = \dfrac{P_2V_2}{T_2}$. Now: moles, mixtures and diffusion'
+    say: 'In the last lesson, you saw that squeezing a gas makes its volume smaller. Now we heat the gas, and see what happens to its volume and its pressure.'
+    write: 'Last lesson: squeeze a gas. Today: heat it'
+    doodle: {name: 'custom:sub_chem_gas_laws_a2', id: dia, size: scene, caption: 'a gas in a cylinder', 'on': heat}
+    doodle_do:
+      - {id: dia, op: show, part: flame, 'on': heat}
 
   # ---------------------------------------------------------------- objectives
   - section: 'Objectives'
-    say: 'By the end of this lesson you will be able to use PV = nRT, molar volume, vapour density and Gay-Lussac''s law of combining volumes.'
-    write: '1. $PV = nRT$, molar volume, vapour density and Gay-Lussac''s law'
-  - say: 'You will also be able to use Dalton''s law of partial pressures and Graham''s law of diffusion, and avoid the traps JAMB sets.'
-    write: '2. Dalton''s law, Graham''s law and the JAMB traps'
+    say: 'In this lesson you will learn to change a temperature to kelvin, and to use Charles''s law and the pressure law.'
+    write: 'Today: kelvin, Charles''s law and the pressure law'
 
-  # ---------------------------------------------------------------- ideal gas equation
-  - section: 'Ideal gas equation'
-    say: 'The ideal gas equation is PV = nRT. Here n is the number of moles, T is in kelvin, and R is the molar gas constant.'
-    write: 'Ideal gas equation: $PV = nRT$'
+  # ---------------------------------------------------------------- kelvin
+  - section: 'Temperature in kelvin'
+    say: 'Every gas law that uses temperature needs it in kelvin, not in degrees Celsius. Temperature in kelvin is also called the absolute temperature.'
+    write: 'Gas laws use temperature in kelvin (K), the absolute temperature'
     point:
-      - {line: 4, kind: circle, at: 'Ideal gas equation'}
-  - say: 'R is 8.314 joules per kelvin per mole, when P is in pascals and V is in cubic metres. When P is in atmospheres and V is in cubic decimetres, R is 0.082.'
-    write: 'R = 8.314 J K⁻¹ mol⁻¹, or 0.082 atm dm³ K⁻¹ mol⁻¹'
-  - say: 'Let us solve this. Find the volume of 0.5 moles of a gas at 27 degrees Celsius and 1 atmosphere. Divide both sides of PV = nRT by P. T is 300 kelvin, and R is 0.082, because P is in atmospheres.'
-    write: 'Example: 0.5 mol, 27 °C, 1 atm:  $V = \dfrac{nRT}{P} = \dfrac{0.5 \times 0.082 \times 300}{1}$ dm³'
-  - say: '0.5 times 0.082 is 0.041, and 0.041 times 300 is 12.3. So the volume is 12.3 cubic decimetres.'
-    write: '$V = 0.041 \times 300$, $\therefore V = 12.3$ dm³'
-
-  # ---------------------------------------------------------------- molar volume and vapour density
-  - section: 'Molar volume and vapour density'
-    say: 'You met Avogadro''s law and the molar volume in the lesson on the mole. One mole of any gas fills 22.4 cubic decimetres at s.t.p. PV = nRT agrees, because 1 times 0.082 times 273, over 1, is about 22.4.'
-    write: 'Molar volume at s.t.p. = 22.4 dm³  ($1 \times 0.082 \times 273 \approx 22.4$)'
-    point:
-      - {line: 8, kind: underline, at: '22.4 dm³'}
-  - say: 'Use 22.4 only at s.t.p. Let us solve this. A gas occupies 11.2 cubic decimetres at 2 atmospheres and 273 degrees Celsius. How many moles of gas is this? First bring the volume to s.t.p. T₁ is 273 plus 273, which is 546 kelvin.'
-    write: 'Example: 11.2 dm³ at 2 atm, 273 °C = 546 K. Moles?'
-  - say: 'V at s.t.p. is P₁V₁T₂ over T₁P₂, which is 2 times 11.2 times 273, over 546 times 1. 273 over 546 is a half, so the volume at s.t.p. is 11.2 cubic decimetres.'
-    write: '$V_{s.t.p.} = \dfrac{2 \times 11.2 \times 273}{546 \times 1} = 11.2$ dm³'
-  - say: 'Now divide by the molar volume. 11.2 over 22.4 is 0.5 moles.'
-    write: 'Moles $= \dfrac{11.2 \text{ dm}^3}{22.4 \text{ dm}^3 \text{ mol}^{-1}} = 0.5$ mol'
-    point:
-      - {line: 11, kind: circle, at: '0.5'}
-  - say: 'Vapour density compares the mass of a gas with the mass of the same volume of hydrogen. Hydrogen, H₂, has a relative molecular mass of 2, so relative molecular mass is twice the vapour density.'
-    write: 'Vapour density: compared with hydrogen, so $M_r = 2 \times$ V.D.'
-  - say: 'Let us solve this. The relative molecular mass of carbon(IV) oxide, CO₂, is 12 plus 2 times 16, which is 44. So its vapour density is 44 over 2, which is 22.'
-    write: 'Carbon(IV) oxide ($\ce{CO2}$): $M_r = 12 + 2(16) = 44$, so V.D. $= 44 \div 2 = 22$'
-
-  # ---------------------------------------------------------------- Gay-Lussac
-  - section: 'Gay-Lussac''s law'
-    say: 'You met Gay-Lussac''s law of combining volumes in the lesson on the mole. It says gases react in simple ratios by volume, at the same temperature and pressure. The ratio comes from the balanced equation.'
-    write: 'Gay-Lussac''s law: gases react in simple ratios by volume'
-  - say: 'Let us solve this. 30 cubic centimetres of carbon(II) oxide burns in 25 cubic centimetres of oxygen. The equation says 2 volumes of CO use 1 volume of O₂, so 30 cubic centimetres of CO uses 15 cubic centimetres of O₂.'
-    write: '$\ce{2CO + O2 -> 2CO2}$: 30 cm³ of carbon(II) oxide (CO) uses 30 ÷ 2 = 15 cm³ of oxygen ($\ce{O2}$)'
-  - say: 'The oxygen left over is 25 minus 15, which is 10 cubic centimetres. And 2 volumes of CO give 2 volumes of CO₂, so 30 cubic centimetres of CO₂ is formed.'
-    write: '$\ce{O2}$ left = 25 − 15 = 10 cm³;  $\ce{CO2}$ formed = 30 cm³'
-
-  # ---------------------------------------------------------------- Dalton
-  - section: 'Dalton''s law'
-    say: 'Dalton''s law of partial pressures states that the total pressure of a mixture of gases that do not react is the sum of their partial pressures. A partial pressure is the pressure one gas would exert if it were alone in the container.'
-    write: 'Dalton''s law: $P_{total} = P_A + P_B + P_C + \dots$'
-    doodle: {name: 'custom:sub_chem_gas_laws_a3', id: dia, size: scene, caption: 'a gas: P, V and T', 'on': mixture}
-  - say: 'Look at the gas jar. A gas collected over water is wet. It holds water vapour, so the pressure inside is the gas''s pressure plus the water vapour pressure.'
-    write: 'Gas over water: $P_{atm} = P_{gas} + P_{water}$'
+      - {line: 3, kind: underline, at: 'in kelvin (K)'}
+  - say: 'The kelvin scale starts at absolute zero, the coldest temperature possible. Absolute zero is minus 273 degrees Celsius, so it is 0 kelvin.'
+    write: 'Absolute zero: −273 °C = 0 K'
+  - say: 'So to change degrees Celsius to kelvin, we add 273.'
+    write: 'T (in K) = temperature in °C + 273'
     doodle_do:
-      - {id: dia, op: pulse, part: jar-gas, 'on': jar}
-      - {id: dia, op: pulse, part: water, 'on': vapour}
-  - say: 'So the pressure of the dry gas is the atmospheric pressure minus the saturated vapour pressure, or s.v.p., of water at that temperature.'
-    write: '$P_{dry\ gas} = P_{atm} - $ s.v.p. of water'
-    doodle_do:
-      - {id: dia, op: circle, part: dalton-tag, 'on': dry}
-    point:
-      - {line: 19, kind: underline, at: 's.v.p. of water'}
-  - say: 'Let us solve this. Oxygen is collected over water at 20 degrees Celsius and 760 millimetres of mercury. The s.v.p. of water at 20 degrees Celsius is 17.5 millimetres of mercury. Subtract the two. 760 minus 17.5 is 742.5. So the dry oxygen exerts 742.5 millimetres of mercury. This is the P₁ you would put in the general gas equation.'
-    write: 'Example: s.v.p. at 20 °C = 17.5 mmHg, so $P_{O_2} = 760 - 17.5 = 742.5$ mmHg'
+      - {id: dia, op: show, part: temp-tag, 'on': kelvin}
+  - say: 'For example, 27 degrees Celsius is 27 plus 273, which is 300 kelvin.'
+    write: '27 °C = 27 + 273 = 300 K'
+  - say: 'And 0 degrees Celsius, where water freezes, is 0 plus 273, which is 273 kelvin.'
+    write: '0 °C = 0 + 273 = 273 K'
 
-  # ---------------------------------------------------------------- Graham
-  - section: 'Graham''s law'
-    say: 'Graham''s law of diffusion states that at the same temperature and pressure, the rate of diffusion of a gas is inversely proportional to the square root of its density.'
-    write: 'Graham''s law: rate $\propto \dfrac{1}{\sqrt{\text{density}}}$'
-    doodle_do:
-      - {id: dia, op: stage, stage: 'custom:sub_chem_gas_laws_a4', 'on': diffusion}
-  - say: 'Density goes with relative molecular mass, so we compare rates using masses. R₁ over R₂ equals the square root of M₂ over M₁. Notice the masses are upside down.'
-    write: '$\dfrac{R_1}{R_2} = \sqrt{\dfrac{M_2}{M_1}}$'
+  # ---------------------------------------------------------------- Charles
+  - section: 'Charles''s law'
+    say: 'Now we can state Charles''s law. At constant pressure, the volume of a fixed mass of gas is directly proportional to its absolute temperature.'
+    write: 'Charles''s law: at constant pressure, $V \propto T$ (T in kelvin)'
     point:
-      - {line: 22, kind: circle}
-  - say: 'You met this tube in the kinetic theory lesson. The ring forms nearer the hydrogen chloride, HCl, because the lighter ammonia, NH₃, moves faster. Graham''s law puts a number on it.'
-    write: 'The lighter gas diffuses faster: ammonia ($\ce{NH3}$, 17) is faster than hydrogen chloride (HCl, 36.5)'
+      - {line: 8, kind: underline, at: 'at constant pressure'}
+  - say: 'Directly proportional means that both go up together by the same factor. If the kelvin temperature doubles, the volume doubles too.'
+    write: 'Directly proportional: double T in kelvin, and V doubles'
+  - say: 'Look at the cylinder. The flame heats the gas, so its particles move faster and push the piston up. The volume grows.'
+    write: 'Heated gas pushes the piston up: the volume grows'
     doodle_do:
-      - {id: dia, op: circle, part: ring, 'on': ring}
-  - say: 'Let us solve this. Compare the rates of diffusion of hydrogen, of mass 2, and oxygen, of mass 32. 32 over 2 is 16, and the square root of 16 is 4. So hydrogen diffuses 4 times as fast as oxygen.'
-    write: '$\dfrac{R_{H_2}}{R_{O_2}} = \sqrt{\dfrac{32}{2}} = \sqrt{16} = 4$, so hydrogen ($\ce{H2}$) is 4 times as fast'
-  - say: 'Time goes the other way. The heavier gas takes longer, so for the same volume, t₁ over t₂ equals the square root of M₁ over M₂. If the volumes differ, first find each rate as volume divided by time.'
-    write: '$\dfrac{t_1}{t_2} = \sqrt{\dfrac{M_1}{M_2}}$ (same volume);  rate = volume ÷ time'
-  - say: 'Let us solve this. 50 cubic centimetres of methane, CH₄, of mass 16, diffuses in 10 seconds. How long will 50 cubic centimetres of sulphur(IV) oxide, SO₂, of mass 64, take?'
-    write: 'Example: methane ($\ce{CH4}$, 16) takes 10 s. How long for sulphur(IV) oxide ($\ce{SO2}$, 64)?'
-  - say: 'The time for SO₂ over 10 seconds equals the square root of 64 over 16. That is the square root of 4, which is 2. So t is 2 times 10, which is 20 seconds. The heavier gas takes longer, which makes sense.'
-    write: '$\dfrac{t}{10 \text{ s}} = \sqrt{\dfrac{64}{16}} = \sqrt{4} = 2$  $\therefore t = 2 \times 10 = 20$ s'
+      - {id: dia, op: pulse, part: flame, 'on': flame}
+      - {id: dia, op: pulse, part: piston, 'on': piston}
+  - say: 'So volume divided by kelvin temperature does not change. From state one to state two, V₁ over T₁ equals V₂ over T₂.'
+    write: '$\dfrac{V}{T} = \text{constant}$, so $\dfrac{V_1}{T_1} = \dfrac{V_2}{T_2}$'
+  - say: 'This is where absolute zero comes from. Draw volume against temperature in degrees Celsius and extend the line backwards. The volume reaches zero at minus 273 degrees Celsius.'
+    write: 'Extend V against T (°C) back: V = 0 at −273 °C'
+    doodle_do:
+      - {id: dia, op: circle, part: temp-tag, 'on': absolute}
 
-  # ---------------------------------------------------------------- traps
-  - section: 'JAMB traps'
-    say: 'First, a Graham''s law trap. If X diffuses twice as fast as Y, square the ratio. Y is 2 squared, which is 4, times as heavy as X. Next, a Dalton''s law trap. For a gas collected over water, take away the water vapour pressure first, before you use the general gas equation.'
-    write: 'Graham: square the rate ratio, $2^2 = 4$;  over water: subtract the s.v.p. first'
+  # ---------------------------------------------------------------- Charles: worked example
+  - section: 'Worked example'
+    say: 'Let us solve this. 250 cubic centimetres of a gas at 27 degrees Celsius is heated to 87 degrees Celsius at constant pressure. Find the new volume.'
+    write: 'Example: 250 cm³ at 27 °C is heated to 87 °C. New volume?'
+  - say: 'We are given V₁ as 250 cubic centimetres, and we must find V₂. The pressure is constant, so this is Charles''s law. First we change both temperatures to kelvin.'
+    write: '$V_1 = 250$ cm³, $V_2 = ?$; Charles''s law'
+  - say: '27 plus 273 is 300 kelvin, and 87 plus 273 is 360 kelvin.'
+    write: '$T_1 = 27 + 273 = 300$ K,  $T_2 = 87 + 273 = 360$ K'
+  - say: 'We want V₂ on its own, so we multiply both sides by T₂. Then we put in the numbers.'
+    write: '$V_2 = \dfrac{V_1T_2}{T_1} = \dfrac{250 \text{ cm}^3 \times 360 \text{ K}}{300 \text{ K}}$'
+  - say: '250 times 360 is 90 000, the kelvins cancel, and 90 000 divided by 300 is 300. So the new volume is 300 cubic centimetres. The gas was heated and it expanded, which makes sense.'
+    write: '$V_2 = \dfrac{90\,000}{300}$ cm³ $\therefore V_2 = 300$ cm³ (more than 250 ✓)'
+    point:
+      - {line: 17, kind: circle, at: '= 300'}
+
+  # ---------------------------------------------------------------- pressure law
+  - section: 'Pressure law'
+    say: 'Now suppose the gas cannot expand, as in a sealed steel cylinder. Heating it makes the particles hit the walls harder and more often, so the pressure rises instead.'
+    write: 'Volume fixed: heating raises the pressure'
+    doodle_do:
+      - {id: dia, op: pulse, part: pressure-tag, 'on': pressure}
+  - say: 'The pressure law states that at constant volume, the pressure of a fixed mass of gas is directly proportional to its absolute temperature. So P₁ over T₁ equals P₂ over T₂.'
+    write: 'Pressure law: at constant volume, $\dfrac{P_1}{T_1} = \dfrac{P_2}{T_2}$'
+    point:
+      - {line: 19, kind: underline, at: 'at constant volume'}
+  - say: 'Let us solve this. A gas in a sealed steel cylinder is at 2.0 atmospheres and 27 degrees Celsius. It is heated to 177 degrees Celsius. Find the new pressure.'
+    write: 'Example: 2.0 atm at 27 °C, heated to 177 °C. New pressure?'
+  - say: 'The atmosphere, written atm, is another unit of pressure. We are given P₁ as 2.0 atmospheres. In kelvin, T₁ is 27 plus 273, which is 300, and T₂ is 177 plus 273, which is 450.'
+    write: '$P_1 = 2.0$ atm, $T_1 = 300$ K, $T_2 = 450$ K, $P_2 = ?$'
+  - say: 'We make P₂ the subject by multiplying both sides by T₂. 2.0 times 450 is 900, and 900 divided by 300 is 3.0. So the pressure rises to 3.0 atmospheres.'
+    write: '$P_2 = \dfrac{P_1T_2}{T_1} = \dfrac{2.0 \text{ atm} \times 450 \text{ K}}{300 \text{ K}} = 3.0$ atm'
+    point:
+      - {line: 22, kind: circle, at: '3.0$ atm'}
+
+  # ---------------------------------------------------------------- trap
+  - section: 'JAMB trap'
+    say: 'The most common trap is using degrees Celsius. In the Charles''s law example, 250 times 87 over 27 gives about 806 cubic centimetres, which is far too big. Always add 273 first.'
+    write: 'Trap: °C in the formula gives 806 cm³ ✗. Add 273 first'
+    point:
+      - {line: 23, kind: strike, at: '806 cm³'}
 
   # ---------------------------------------------------------------- check
   - section: 'Check yourself'
-    say: 'Your turn. A gas has a vapour density of 16. What volume does 8 grams of it fill at s.t.p.? Pause and work it out.'
-    write: 'Check: V.D. = 16. Volume of 8 g at s.t.p.?'
-  - say: 'Relative molecular mass is twice the vapour density, so 2 times 16 is 32. The number of moles is mass over molar mass, so 8 over 32 is 0.25 moles.'
-    write: '$M_r = 2 \times 16 = 32$;  moles $= \dfrac{8 \text{ g}}{32 \text{ g mol}^{-1}} = 0.25$ mol'
-  - say: 'At s.t.p. each mole fills 22.4 cubic decimetres, so 0.25 times 22.4 is 5.6 cubic decimetres.'
-    write: '$V = 0.25 \times 22.4 = 5.6$ dm³ ✓'
+    say: 'Now it is your turn. A gas occupies 200 cubic centimetres at 0 degrees Celsius. At what temperature, in degrees Celsius, will it occupy 400 cubic centimetres at the same pressure? Pause the lesson and work it out.'
+    write: 'Check: 200 cm³ at 0 °C becomes 400 cm³. Temperature in °C?'
+  - say: 'This is Charles''s law, and T₁ is 273 kelvin. T₂ is V₂T₁ over V₁, so 400 times 273 over 200 gives 546 kelvin.'
+    write: '$T_2 = \dfrac{V_2T_1}{V_1} = \dfrac{400 \times 273}{200} = 546$ K'
+    doodle_do:
+      - {id: dia, op: pulse, part: temp-tag, 'on': kelvin}
+  - say: 'The question asks for degrees Celsius, so we take away 273. 546 minus 273 is 273 degrees Celsius.'
+    write: '$546 - 273 = 273$ °C ✓'
     point:
-      - {line: 31, kind: circle, at: '5.6'}
+      - {line: 26, kind: circle, at: '= 273'}
 
   # ---------------------------------------------------------------- recap
   - section: 'Recap'
-    say: 'Let us recap. PV = nRT brings in moles. One mole of gas fills 22.4 cubic decimetres at s.t.p., relative molecular mass is twice the vapour density, and gases react in simple volume ratios.'
-    write: '1. $PV = nRT$; 22.4 dm³ at s.t.p.; $M_r = 2 \times$ V.D.; simple volume ratios'
-  - say: 'By Dalton''s law, partial pressures add up, so take away the water vapour pressure. By Graham''s law, the lighter gas diffuses faster. That''s the lesson. Next, try some new questions on it.'
-    write: '2. Dalton: pressures add; Graham: $\dfrac{R_1}{R_2} = \sqrt{\dfrac{M_2}{M_1}}$'
+    say: 'Let us recap. Gas laws use temperature in kelvin, so add 273 to degrees Celsius. Charles''s law says V over T is constant at constant pressure.'
+    write: '1. T in K = °C + 273; Charles: $\dfrac{V_1}{T_1} = \dfrac{V_2}{T_2}$'
+  - say: 'The pressure law says P over T is constant at constant volume. In the next lesson, we join all the laws into one equation. Now try the problem.'
+    write: '2. Pressure law: $\dfrac{P_1}{T_1} = \dfrac{P_2}{T_2}$'
 
 # ---------------------------------------------------------------- after the lesson: try it
 problems:
-  - ask: 'Under the same conditions, a gas X diffuses 4 times as fast as sulphur(IV) oxide, $\ce{SO2}$ ($M_r$ = 64). What is the relative molecular mass of X?'
-    answer: '4'
-    accept: ['M = 4', 'Mr = 4', '4 g/mol', '4 g mol⁻¹']
-    needs_working: false
+  - ask: 'A gas at 1.5 atm and 27 °C is heated to 127 °C in a sealed container of fixed volume. Find its new pressure.'
+    answer: '2.0 atm'
+    accept: ['2', '2.0', '2 atm', '2.0atm', '2atm']
+    needs_working: true
     working:
-      - 'Graham''s law: $\dfrac{R_X}{R_{SO_2}} = \sqrt{\dfrac{M_{SO_2}}{M_X}}$'
-      - '$4 = \sqrt{\dfrac{64}{M_X}}$'
-      - 'Square both sides: $16 = \dfrac{64}{M_X}$'
-      - '$M_X = 64 \div 16 = 4$. The faster gas is the lighter one, which fits.'
+      - 'Pressure law: $\dfrac{P_1}{T_1} = \dfrac{P_2}{T_2}$, so $P_2 = \dfrac{P_1T_2}{T_1}$.'
+      - '$T_1 = 27 + 273 = 300$ K; $T_2 = 127 + 273 = 400$ K.'
+      - '$P_2 = \dfrac{1.5 \times 400}{300} = \dfrac{600}{300} = 2.0$ atm.'
+      - 'The gas was heated and its pressure rose, which fits.'

@@ -1,0 +1,111 @@
+# What a logarithm is (lesson 4 of 7): the log as the question "the base to what power gives the number?", its parts popping in on the picture, index form and log form both ways, finding logs (one negative), log of the base and log of 1, common logs.
+format_version: 1
+subject: mathematics
+subtopic: 'Indices, Logarithms and Surds'
+subtopic_id: a33da1ac-bc18-55d5-83af-029e0acd9980
+part: 4
+title: 'What a logarithm is'
+sources:            # pages consulted for the approach, for reviewers
+  - https://www.headteacher.ng/deducing-logarithm-from-indices-and-standard-form-and-definition-of-logarithm-for-ss-1/
+  - https://ancourage.academy/articles/a-maths-indices-surds-logarithms-exponentials-singapore
+  - https://syllabus.ng/jamb/mathematics
+moments:
+  # ---------------------------------------------------------------- welcome
+  - section: 'Welcome'
+    say: 'Welcome. Today''s lesson is logarithms.'
+    write: 'Logarithms'
+
+  # ---------------------------------------------------------------- introduction
+  - section: 'Introduction'
+    say: 'In the last three lessons, you worked with indices. In two to the power three, we knew the base and the index, and we worked out the answer, 8. A logarithm asks the question the other way round.'
+    write: 'A logarithm: indices the other way round'
+
+  # ---------------------------------------------------------------- objectives
+  - section: 'Objectives'
+    say: 'In this lesson you will learn what a logarithm is, and how to change between index form and log form.'
+    write: 'Today: what a log is; index form and log form'
+
+  # ---------------------------------------------------------------- logarithm
+  - section: 'Logarithm'
+    say: 'Look again at two to the power three, which is 8. Suppose we know the base 2 and the answer 8, but not the index. Then we ask, 2 to what power gives 8?'
+    write: '2 to what power gives 8?'
+    doodle: {name: 'custom:sub_maths_indices_logs_surds_a2', id: d, caption: 'a power and its log', size: scene, 'on': 'look'}
+    doodle_do:
+      - {id: d, op: show, part: log-question, 'on': 'what power'}
+  - say: 'The answer is 3. We write this as log base 2 of 8 equals 3.'
+    write: '$\log_{2}8 = 3$'
+    doodle_do:
+      - {id: d, op: show, part: log, 'on': 'log'}
+      - {id: d, op: show, part: log-base, 'on': 'base'}
+      - {id: d, op: show, part: log-number, 'on': 'of'}
+  - say: 'Each part has a name. The small 2, written low, is the base, just as in the power.'
+    write: 'The small 2 is the base'
+    doodle_do:
+      - {id: d, op: show, part: log-base-label, 'on': 'base'}
+  - say: 'The answer, 3, is the index that 2 must be raised to. So the answer of a log is an index.'
+    write: 'The answer, 3, is the index'
+    doodle_do:
+      - {id: d, op: show, part: log-answer, 'on': 'answer'}
+      - {id: d, op: show, part: log-answer-label, 'on': 'index'}
+      - {id: d, op: pulse, part: index, 'on': 'raised'}
+  - say: 'So a logarithm is an index. Log base a of N equals k means that a to the power k equals N.'
+    write: 'Logarithm: $\log_{a}N = k$ means $a^{k} = N$'
+
+  # ---------------------------------------------------------------- changing forms
+  - section: 'Changing forms'
+    say: 'To change from index form to log form, the base stays the base, and the index becomes the answer. For example, 10 squared is 100.'
+    write: 'Index form: $10^{2} = 100$'
+  - say: 'The base is 10 and the index is 2. So log base 10 of 100 is 2.'
+    write: 'Log form: $\log_{10}100 = 2$'
+  - say: 'To change back, we do the opposite. For example, take log base 3 of 81 equals 4. The base is 3, and the answer 4 is the index. So 3 to the power 4 is 81.'
+    write: '$\log_{3}81 = 4$ means $3^{4} = 81$'
+
+  # ---------------------------------------------------------------- finding a log
+  - section: 'Finding a log'
+    say: 'Now let us find a log. We are asked for log base 5 of 125. We ask, 5 to what power gives 125?'
+    write: 'Find $\log_{5}125$: 5 to what power gives 125?'
+  - say: '5 times 5 is 25, and 25 times 5 is 125. So 5 cubed is 125, and log base 5 of 125 is 3.'
+    write: '$5^{3} = 125$, so $\log_{5}125 = 3$'
+  - say: 'A log can be negative. Let us find log base 2 of a half. A half is one over 2, and by the meaning of a negative index, that is 2 to the power minus 1. So log base 2 of a half is minus 1.'
+    write: '$\tfrac{1}{2} = 2^{-1}$, so $\log_{2}\tfrac{1}{2} = -1$'
+
+  # ---------------------------------------------------------------- two special logs
+  - section: 'Two special logs'
+    say: 'Two results follow from the meaning of a log. Log base a of a is 1, because a to the power 1 is a. For example, log base 7 of 7 is 1.'
+    write: '$\log_{a}a = 1$, since $a^{1} = a$'
+  - say: 'Log base a of 1 is nought, because a to the power nought is 1. For example, log base 7 of 1 is nought.'
+    write: '$\log_{a}1 = 0$, since $a^{0} = 1$'
+  - say: 'When no base is written, as in log 100, the base is 10. These are called common logarithms, and they are the logs in your four-figure tables.'
+    write: 'No base written: base 10, so $\log 100 = 2$'
+
+  # ---------------------------------------------------------------- trap
+  - section: 'JAMB trap'
+    say: 'Here is a common trap. Log base 2 of 8 is not 2 to the power 8. It is the power that 2 must be raised to, to give 8, which is 3. Always ask, the base to what power gives the number?'
+    write: '$\log_{2}8 = 3$, not $2^{8}$'
+    doodle_do:
+      - {id: d, op: pulse, part: log-question, 'on': 'always ask'}
+
+  # ---------------------------------------------------------------- check
+  - section: 'Check yourself'
+    say: 'Now it is your turn. Find log base 3 of one ninth. Pause the lesson and work it out.'
+    write: 'Find $\log_{3}\tfrac{1}{9}$'
+  - say: 'We ask, 3 to what power gives one ninth? 9 is 3 squared, so one ninth is 3 to the power minus 2. So log base 3 of one ninth is minus 2.'
+    write: '$\tfrac{1}{9} = 3^{-2}$, so $\log_{3}\tfrac{1}{9} = -2$'
+
+  # ---------------------------------------------------------------- recap
+  - section: 'Recap'
+    say: 'Let us recap. A log is an index. Log base a of N equals k means a to the power k equals N.'
+    write: '1. $\log_{a}N = k$ means $a^{k} = N$'
+  - say: 'Log base a of a is 1, and log base a of 1 is nought. In the next lesson, we learn the laws of logarithms. Now try the problem.'
+    write: '2. $\log_{a}a = 1$, and $\log_{a}1 = 0$'
+
+# ---------------------------------------------------------------- after the lesson: try it
+problems:
+  - ask: 'Find $\log_{2}64$.'
+    answer: '6'
+    accept: ['six']
+    working:
+      - 'Ask: 2 to what power gives 64?'
+      - '2 × 2 × 2 × 2 × 2 × 2 = 64, so 2⁶ = 64.'
+      - 'So log₂64 = 6.'
+    needs_working: false

@@ -1,0 +1,131 @@
+# Comparing plant and animal cells (lesson 5 of 5): what the two cells share, how they differ
+# point by point, a real JAMB question and the traps. The finished animal cell (a10) and the
+# plant cell (b) side by side; the plant-only parts pop in as each difference is said.
+format_version: 1
+subject: biology
+subtopic: 'Cell structure and functions of cell components'
+subtopic_id: 3ef0e4af-860d-5467-8fd2-f23a09a82b77
+part: 5
+title: 'Comparing plant and animal cells'
+sources:            # pages consulted for the approach, for reviewers
+  - https://syllabus.ng/jamb/biology/
+  - https://www.headteacher.ng/the-cell-cell-theory-forms-of-life-cell-structures-plant-animal-cell-for-sss-1/
+  - https://edupadi.com/classroom/lessons/ss1/biology/the-cell/page/1
+  - https://classnotes.ng/?p=70074
+moments:
+  # ---------------------------------------------------------------- welcome
+  - section: 'Welcome'
+    say: 'Welcome. Today''s lesson is comparing plant and animal cells.'
+    write: 'Comparing plant and animal cells'
+
+  # ---------------------------------------------------------------- introduction
+  - section: 'Introduction'
+    say: 'You have now met the animal cell, with all its parts.'
+    write: 'The animal cell'
+    doodle: {name: 'custom:sub_bio_cell_structure_a10', id: cell, size: scene, caption: 'an animal cell', 'on': animal}
+  - say: 'You have also met the plant cell. JAMB often asks how the two differ, so in this lesson we put them side by side.'
+    write: 'The plant cell, side by side with it'
+    doodle: {name: 'custom:sub_bio_cell_structure_b', id: plant, size: scene, caption: 'a plant cell', 'on': plant}
+
+  # ---------------------------------------------------------------- objectives
+  - section: 'Objectives'
+    say: 'In this lesson you will learn how plant and animal cells differ, and how to answer JAMB questions on the parts of a cell.'
+    write: 'Today: the differences, and the JAMB questions'
+
+  # ---------------------------------------------------------------- comparison
+  - section: 'Comparison'
+    say: 'Let us start with what is the same. Both cells have a cell membrane, cytoplasm, a nucleus and mitochondria. Both also have ribosomes, endoplasmic reticulum and a Golgi body.'
+    write: 'In both: membrane, cytoplasm, nucleus, mitochondria, ribosomes, ER, Golgi body'
+    doodle_do:
+      - {id: cell, op: pulse, part: nucleus, 'on': nucleus}
+      - {id: plant, op: pulse, part: mitochondrion, 'on': mitochondria}
+  - say: 'Now the differences. A plant cell has a cellulose cell wall, but an animal cell has none.'
+    write: 'Cell wall: plant, yes; animal, no'
+    doodle_do:
+      - {id: plant, op: show, part: wall, 'on': wall}
+  - say: 'A plant cell has chloroplasts, but an animal cell has none.'
+    write: 'Chloroplasts: plant, yes; animal, no'
+    doodle_do:
+      - {id: plant, op: show, part: chloroplasts, 'on': chloroplasts}
+  - say: 'A plant cell has one large central vacuole, but an animal cell has a few small vacuoles that do not last.'
+    write: 'Vacuole: plant, one large; animal, few and small'
+    doodle_do:
+      - {id: plant, op: show, part: vacuole, 'on': large}
+      - {id: cell, op: circle, part: vacuole, 'on': small}
+  - say: 'An animal cell has centrioles, but the cells of flowering plants do not.'
+    write: 'Centrioles: animal, yes; flowering plant, no'
+    doodle_do:
+      - {id: cell, op: circle, part: centrioles, 'on': centrioles}
+  - say: 'A plant stores its food as starch, but an animal stores its food as glycogen.'
+    write: 'Food store: plant, starch; animal, glycogen'
+  - say: 'Last, a plant cell has a regular shape, because of its wall, but an animal cell has an irregular shape.'
+    write: 'Shape: plant, regular; animal, irregular'
+    doodle_do:
+      - {id: plant, op: pulse, part: wall, 'on': wall}
+
+  # ---------------------------------------------------------------- JAMB question
+  - section: 'JAMB question'
+    say: 'Here is a JAMB question. Which cell organelle is responsible for aerobic respiration? Is it the nucleus, the nucleolus, the endoplasmic reticulum or the mitochondrion?'
+    write: 'Organelle for aerobic respiration? Nucleus, nucleolus, ER, mitochondrion'
+  - say: 'The nucleus is the control centre of the cell. It does not respire.'
+    write: 'Nucleus: controls the cell ✗'
+  - say: 'The nucleolus makes ribosomes.'
+    write: 'Nucleolus: makes ribosomes ✗'
+  - say: 'The endoplasmic reticulum transports materials.'
+    write: 'ER: transports materials ✗'
+  - say: 'Aerobic respiration takes place in the mitochondrion, so that is the answer.'
+    write: '∴ mitochondrion ✓'
+    doodle_do:
+      - {id: cell, op: circle, part: mitochondrion, 'on': mitochondrion}
+    point:
+      - {line: 15, kind: circle, at: 'mitochondrion'}
+
+  # ---------------------------------------------------------------- traps
+  - section: 'JAMB traps'
+    say: 'Here is a trap. A diagram shows a cell with a cell wall and a large vacuole, but no chloroplasts. Some students call it an animal cell, because there are no chloroplasts.'
+    write: 'Wall and large vacuole, but no chloroplasts: plant or animal?'
+  - say: 'But an animal cell has no wall at all. The wall shows that it is a plant cell, perhaps from a root, where there is no light.'
+    write: '∴ a plant cell, such as a root cell: the wall decides'
+    doodle_do:
+      - {id: plant, op: pulse, part: wall, 'on': wall}
+    point:
+      - {line: 17, kind: underline, at: 'the wall decides'}
+  - say: 'Here is one more. Some students say that plant cells have no mitochondria. They do, because every living plant cell respires.'
+    write: 'Plant cells have mitochondria too'
+    doodle_do:
+      - {id: plant, op: circle, part: mitochondrion, 'on': mitochondria}
+
+  # ---------------------------------------------------------------- check
+  - section: 'Check yourself'
+    say: 'Now it is your turn. A leaf cell in sunlight is respiring and photosynthesising at the same time. Which two organelles are at work? Pause the lesson and think before I go on.'
+    write: 'Leaf cell in sunlight: respiring and photosynthesising. Which two organelles?'
+  - say: 'Respiration takes place in the mitochondria.'
+    write: 'Respiration: mitochondria'
+    doodle_do:
+      - {id: plant, op: pulse, part: mitochondrion, 'on': mitochondria}
+  - say: 'Photosynthesis takes place in the chloroplasts. So the answer is the mitochondria and the chloroplasts.'
+    write: '∴ mitochondria and chloroplasts ✓'
+    doodle_do:
+      - {id: plant, op: pulse, part: chloroplasts, 'on': chloroplasts}
+    point:
+      - {line: 21, kind: circle, at: 'mitochondria and chloroplasts'}
+
+  # ---------------------------------------------------------------- recap
+  - section: 'Recap'
+    say: 'Let us recap. Both cells have a membrane, cytoplasm, a nucleus, mitochondria, ribosomes, endoplasmic reticulum and a Golgi body.'
+    write: '1. Both: membrane, cytoplasm, nucleus, mitochondria, ribosomes, ER, Golgi body'
+  - say: 'Only plant cells have a cell wall, chloroplasts and a large central vacuole, and only animal cells have centrioles. Now try the problem.'
+    write: '2. Plant only: wall, chloroplasts, large vacuole. Animal only: centrioles'
+    doodle_do:
+      - {id: plant, op: pulse, 'on': plant}
+
+# ---------------------------------------------------------------- after the lesson: try it
+problems:
+  - ask: 'Which of these is found in an animal cell but not in the cell of a flowering plant? A. cell membrane  B. centriole  C. mitochondrion  D. cell wall'
+    answer: 'B'
+    accept: ['centriole', 'centrioles', 'B. centriole']
+    working:
+      - 'The cell membrane and the mitochondrion are in both cells.'
+      - 'The cell wall is in the plant cell only.'
+      - 'Centrioles are in animal cells, but not in the cells of flowering plants. Answer: B.'
+    needs_working: false

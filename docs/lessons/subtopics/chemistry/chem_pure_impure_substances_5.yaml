@@ -1,0 +1,105 @@
+# Percentage purity (lesson 5 of 5): what percentage purity means, its formula, a guided calculation, working backwards to a mass, and the trap of dividing the wrong way.
+format_version: 1
+subject: chemistry
+subtopic: 'Pure and impure substances'
+subtopic_id: 2bd073d8-69e8-59b2-9839-192158a09fe7
+part: 5
+title: 'Percentage purity'
+sources:            # pages consulted for the approach, for reviewers
+  - https://syllabus.ng/jamb/chemistry
+  - https://waeconline.org.ng/e-learning/Chemistry/chemmain.html
+  - https://edupadi.com/classroom/l/classification-of-matter
+  - https://schoolings.org/chemistry-lesson-note-for-ss1-first-term-2/
+moments:
+  # ---------------------------------------------------------------- welcome
+  - section: 'Welcome'
+    say: 'Welcome. Today''s lesson is percentage purity.'
+    write: 'Percentage purity'
+
+  # ---------------------------------------------------------------- introduction
+  - section: 'Introduction'
+    say: 'In the last lessons, you learnt to test whether a sample is pure. Often a sample is mostly pure, with a little impurity in it, and we want to say how pure it is.'
+    write: 'How pure is a sample?'
+    doodle: {name: 'custom:sub_chem_pure_impure_substances_a2', id: dia, size: scene, caption: 'pure and impure', 'on': mostly}
+
+  # ---------------------------------------------------------------- objectives
+  - section: 'Objectives'
+    say: 'You will learn what percentage purity means, and how to work it out from masses.'
+    write: 'Today: work out the percentage purity of a sample'
+
+  # ---------------------------------------------------------------- percentage purity
+  - section: 'Percentage purity'
+    say: 'Percentage purity tells us what percentage of a sample''s mass is the pure substance we want.'
+    write: 'Percentage purity: the percentage of the mass that is the pure substance'
+  - say: 'Look at the second box. The whole box is the sample. Most of its particles are the substance we want, and a few are impurities.'
+    write: 'Sample = pure substance + impurities'
+    doodle_do:
+      - {id: dia, op: pulse, part: impure-box, 'on': whole}
+      - {id: dia, op: circle, part: impurity, 'on': impurities}
+  - say: 'To find the percentage purity, we divide the mass of the pure substance by the mass of the whole sample, and multiply by 100.'
+    write: '% purity = $\frac{\text{mass of pure substance}}{\text{mass of sample}} \times 100$'
+
+  # ---------------------------------------------------------------- worked example
+  - section: 'Worked example'
+    say: 'Let us solve this. A 25.0 gram sample of impure salt contains 22.5 grams of sodium chloride. We must find its percentage purity.'
+    write: 'Sample = 25.0 g, sodium chloride (NaCl) = 22.5 g. % purity = ?'
+  - say: 'The pure substance is the sodium chloride, 22.5 grams, and the whole sample is 25.0 grams. We put these masses into the formula.'
+    write: '% purity = $\frac{22.5\text{ g}}{25.0\text{ g}} \times 100$'
+  - say: 'The grams cancel. 22.5 divided by 25.0 is 0.900, and 0.900 times 100 is 90.0.'
+    write: '$= 0.900 \times 100 = 90.0\%$'
+  - say: 'What does this tell us? The sample is 90.0 percent pure sodium chloride. The other 2.5 grams is the impurity.'
+    write: '∴ 90.0% pure; impurity = 25.0 g − 22.5 g = 2.5 g'
+    doodle_do:
+      - {id: dia, op: pulse, part: impurity, 'on': impurity}
+    point:
+      - {line: 9, kind: circle, at: '90.0% pure'}
+
+  # ---------------------------------------------------------------- working backwards
+  - section: 'Working backwards'
+    say: 'We can also work backwards. A 50.0 gram sample of impure sulphur is 80.0 percent pure. We must find the mass of pure sulphur in it.'
+    write: 'Sample = 50.0 g, 80.0% pure. Mass of pure sulphur = ?'
+  - say: '80.0 percent means 80.0 out of every 100, so we multiply the mass of the sample by 80.0 over 100.'
+    write: 'Mass of sulphur = $\frac{80.0}{100} \times 50.0\text{ g}$'
+  - say: '80.0 over 100 is 0.800, and 0.800 times 50.0 grams is 40.0 grams.'
+    write: '$= 0.800 \times 50.0\text{ g} = 40.0\text{ g}$'
+  - say: 'So the sample holds 40.0 grams of pure sulphur, and the other 10.0 grams is impurity.'
+    write: '∴ sulphur = 40.0 g; impurity = 50.0 g − 40.0 g = 10.0 g'
+    point:
+      - {line: 13, kind: circle, at: 'sulphur = 40.0 g'}
+
+  # ---------------------------------------------------------------- trap
+  - section: 'JAMB trap'
+    say: 'Here is a common trap. Some students divide the mass of the sample by the pure mass. For example, 25.0 over 22.5 gives 111 percent, which is impossible. A sample can never be more than 100 percent pure, so the pure mass always goes on top.'
+    write: 'Pure mass on top: % purity is never more than 100%'
+    point:
+      - {line: 14, kind: underline, at: 'Pure mass on top'}
+
+  # ---------------------------------------------------------------- check
+  - section: 'Check yourself'
+    say: 'Now it is your turn. A 20.0 gram sample of impure sulphur contains 16.0 grams of pure sulphur. What is its percentage purity? Pause the lesson and work it out before I go on.'
+    write: 'Sample = 20.0 g, sulphur = 16.0 g. % purity = ?'
+  - say: 'The pure mass goes on top, so we have 16.0 grams over 20.0 grams, times 100.'
+    write: '% purity = $\frac{16.0\text{ g}}{20.0\text{ g}} \times 100$'
+  - say: '16.0 divided by 20.0 is 0.800, and 0.800 times 100 is 80.0. So the sample is 80.0 percent pure.'
+    write: '$= 0.800 \times 100 = 80.0\%$ pure ✓'
+    point:
+      - {line: 17, kind: circle, at: '80.0\%'}
+
+  # ---------------------------------------------------------------- recap
+  - section: 'Recap'
+    say: 'Let us recap. Percentage purity is the mass of the pure substance divided by the mass of the sample, times 100.'
+    write: '1. % purity = mass of pure substance ÷ mass of sample × 100'
+  - say: 'The pure mass always goes on top, so the answer is never more than 100 percent. Now try the problem.'
+    write: '2. Pure mass on top; never more than 100%'
+
+# ---------------------------------------------------------------- after the lesson: try it
+problems:
+  - ask: 'A 40.0 g sample of impure sodium chloride contains 34.0 g of pure sodium chloride. Calculate its percentage purity.'
+    answer: '85.0%'
+    accept: ['85%', '85', '85.0', '85 %', '85.0 %', '85 percent']
+    working:
+      - '% purity = mass of pure substance ÷ mass of sample × 100'
+      - '= 34.0 g ÷ 40.0 g × 100'
+      - '= 0.850 × 100'
+      - '= 85.0%'
+    needs_working: true
