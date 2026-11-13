@@ -345,7 +345,11 @@ export function Board({
   noAsk = false,
   questionLabel = "The question",
   loadEarlier,
+  finishedLine = "That is the whole working. This one goes back in the pile — you will meet the same ground again, with a different question.",
 }: {
+  /** What is shown when the board has finished: a missed question's closing by default; a
+   *  topic lesson says what comes next instead (founder, 12 Nov 2026). */
+  finishedLine?: string;
   /** What the student asked the coach about this before, shown again (founder, 12 Nov 2026). */
   loadEarlier?: () => Promise<EarlierTurn[]>;
   /** No ask box and nothing in its place: the controls stand alone (the public showcase). */
@@ -1410,7 +1414,7 @@ export function Board({
     );
   };
   const caption = finished
-    ? "That is the whole working. This one goes back in the pile — you will meet the same ground again, with a different question."
+    ? finishedLine
     : needsTap
       ? "Tap the button on the board to hear the lesson."
       : preparing || gettingReady || shown === 0

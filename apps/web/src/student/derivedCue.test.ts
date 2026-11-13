@@ -29,4 +29,11 @@ describe('a line written on its words', () => {
     expect(derivedWriteCue('All matter is made of atoms', 'All matter is made of very tiny particles.')).toBeNull();
     expect(derivedWriteCue('Matter: everything around you', 'Everything around you is matter.')).toBeNull();
   });
+
+  it('waits for a word of the line when its first words are not said', () => {
+    // Founder, 12 Nov 2026: not while the last point is still being talked about.
+    const say = 'Both atoms are oxygen, so O₂ still has only one kind of atom, and oxygen is an element.';
+    expect(derivedWriteCue('One kind of atom, so still an element (diatomic)', say)).toEqual({ word: 'one kind', nth: 1 });
+    expect(derivedWriteCue('Element: one kind of atom', 'Look at the three boxes. In an element, all the atoms are of one kind.')).toEqual({ word: 'element', nth: 1 });
+  });
 });

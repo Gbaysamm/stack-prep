@@ -56,7 +56,7 @@ Then your subtopic's syllabus scope and real JAMB past questions:
   topic (`docs/lessons/subtopics/<subject>/`, and `subtopic_brief.py --list <Subject>` for
   what each covers). Do not reuse their worked examples or past questions; where two
   subtopics overlap, teach your own part and mention the other in one line.
-- **Length: a lesson is about five minutes, at most about 40 moments.** If the subtopic needs
+- **Length: short, about three or four minutes, one main idea (usually 18 to 30 moments); never rushed.** If the subtopic needs
   more, split it into two to four lessons (`<slug>_1.yaml`, `_2`, … with `part:` and
   `title:`), each complete and short, as the guide's "Short lessons" section says.
 

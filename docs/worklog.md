@@ -13,6 +13,46 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ---
 
+## 2026-11-13
+
+### Elements, compounds and mixtures as five short lessons; no gaps, one thing at a time
+- **What:**
+  - The subtopic is now five lessons of about four minutes each: Elements; Compounds; The
+    fixed ratio by mass; Mixtures; Telling elements, compounds and mixtures apart. Each has
+    its own welcome, a link back, a check, a recap and one problem.
+  - Rewritten to teach without gaps: symbols, molecules and the small 2 are taught before O₂
+    is classified; examples are introduced as examples; electrolysis is only named; the
+    water example says what is given, what we find, why we divide and what the answer
+    shows, and why the masses are 1 : 8 when the atoms are 2 : 1.
+  - One verdict said, then written: O₂, N₂ and Fe each get their own moment and line.
+  - The board waits for a line's words: when its first words are not said, it waits for the
+    first weighty word of the speech that is on the line, never writing the next line while
+    the voice is still on the last (`wordClock.derivedWriteCue`).
+  - A lesson ends "That is the end of the lesson…", not the missed-question closing line.
+  - The guide and the writer, splitter and sequencing briefs: lessons of about three or four
+    minutes (a guide, not a limit), one main idea; the "no gaps, no rushing", "one thing said,
+    then written" and "not while the last line is still being talked about" rules.
+- **Why:** founder, 12 Nov 2026, with ChatGPT's and Gemini's reviews of the lesson: rushed,
+  gaps, examples not introduced, electrolysis out of place, the small 2 never explained, the
+  water numbers unclear; videos of about three minutes; verdicts written before they are said.
+- **Where:** `docs/lessons/subtopics/chemistry/chem_elements_compounds_mixtures_{1..5}.yaml`,
+  `docs/lessons/*.md`, `apps/web/src/student/wordClock.ts`, `Board.tsx`, `Lesson.tsx`.
+- **Status:** done locally, loaded. The other 9 subtopics wait for the founder's go on this one.
+
+### Question bank: every spoken line of the 5,390 past-question lessons edited for language
+- **What:** one editor per `lessons_YYYY.yaml` (102 files, `docs/questions/bank-editor-brief.md`):
+  about 9,500 lines changed. Whole spoken sentences, lists joined with "and", no colons or
+  "e.g." in speech, formulas written as formulas (the voice reads them, ions and brackets too),
+  board lines with a capital. Facts, numbers, answers, cues, marks and pictures unchanged
+  (`database/check_lesson_edit.py` on every file; every subject's loader dry run passes).
+  The editors' 132 possible content errors are listed in
+  `docs/content-review/bank-lessons-flags-2026-11-12.md`; nothing was changed for them yet.
+- **Why:** founder, 12 Nov 2026: the same fragments as in the lessons were in the bank.
+- **Where:** `docs/questions/utme/*/lessons_*.yaml`. The checker gained `--teaching` and
+  `docs/questions/bank-teaching-brief.md` was written for the next pass.
+- **Status:** done locally, loaded. Next: a teaching pass on the bank (no gaps, guided
+  working, one thing at a time) with each file's flags checked against its questions.
+
 ## 2026-11-12
 
 ### The board in step with the teacher: no blinking heading, pictures pop in on their word

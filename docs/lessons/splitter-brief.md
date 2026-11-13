@@ -1,6 +1,6 @@
 # Brief for splitting a subtopic lesson into short lessons
 
-A lesson is about five minutes, at most about 40 moments (founder, 12 Nov 2026). You split
+A lesson is short: about three or four minutes, one main idea, usually 18 to 30 moments; a guide, not a limit (founder, 12 Nov 2026). You split
 ONE checked subtopic lesson into two to four short lessons. Its facts, calculations and past
 questions were already checked: **restructure, do not rewrite the teaching.** Change wording
 only where a new lesson needs its own opening, objective, recap or link line.
@@ -17,7 +17,7 @@ then your lesson file and its doodles (`docs/lessons/subtopics/<subject>/doodles
 ## Do
 
 1. Choose the seams: two to four lessons, each a natural part of the subtopic, each at most
-   about 40 moments (aim for 28–40). Fewer, fuller lessons beat many thin ones.
+   about 30 moments (aim for 18–30), one main idea each. Fewer, fuller lessons beat many thin ones.
 2. Write `<slug>_1.yaml`, `<slug>_2.yaml`, … next to the original, each with the same
    `subtopic_id`, `subject`, `subtopic`, `sources`, plus `part: N` and `title: '<what it
    covers>'`. Then delete the original `<slug>.yaml`.

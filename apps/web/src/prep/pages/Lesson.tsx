@@ -148,6 +148,7 @@ export function Lesson() {
             // No box: the lesson's own first line writes its title (founder, 12 Nov 2026).
             question=""
             questionLabel="Today's lesson"
+            finishedLine="That is the end of the lesson. Next, tell us how well you understood it, and try the problem."
             steps={board.lesson.beats.flatMap((beat) => beat.write)}
             loadLesson={heard ? () => Promise.resolve(board.lesson) : undefined}
             askLocked={

@@ -44,7 +44,7 @@ example is `docs/lessons/subtopics/chemistry/chem_elements_compounds_mixtures_1.
 
 Keep the teaching (facts, numbers, worked steps, order of ideas, wording) as it is; you change
 when things happen and split moments, with at most a few words added so each split moment is a
-whole sentence. A lesson stays at about 40 moments at most.
+whole sentence. A lesson stays short (about three or four minutes, one main idea).
 
 ## When you add or remove moments
 

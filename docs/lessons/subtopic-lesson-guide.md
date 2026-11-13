@@ -10,7 +10,12 @@ needs. The founder's rules (11 Nov 2026):
 
 ## Short lessons: a subtopic may have several (founder, 12 Nov 2026)
 
-A lesson is about **five minutes: at most about 40 moments.** A subtopic is not a lesson: a
+A lesson is **short: about three or four minutes, one main idea** (founder, 12 Nov 2026: the
+length a student watches without losing attention). That is a guide, not a limit: a lesson
+runs a little longer when its idea needs it, and roughly 18 to 30 moments is usual. Never cut
+an explanation short to fit (founder: "It is better to explain it from scratch than to rush it
+and leave gaps"); when a lesson carries a second main idea, that idea is its own lesson. Many
+short lessons beat a few long ones. A subtopic is not a lesson: a
 broad subtopic is split into two to four lessons, each its own stop on the roadmap, played in
 order, with the run again after the last. Split at natural seams (e.g. "Laws of chemical
 combination" / "Formulae and equations" / "The mole" / "Reacting masses and concentration").
@@ -101,10 +106,36 @@ not repeat an earlier one: it may say "In the last lesson you met …" in one li
   writes them, and stops. Each item is then explained in a moment of its own, and its picture
   (or the stage that adds it) comes in on that moment, as it is explained, never before. A
   board line says what its own moment says, never a summary of what later moments will say.
+- **One thing said, then written; then the next** (founder, 12 Nov 2026): when a worked example
+  goes through items one by one ("O₂ has only oxygen atoms… N₂… Fe…"), each item is its own
+  moment with its own line ("O₂: only O atoms, so an element ✓"). Never one line holding every
+  verdict, written while the voice is still on the first. A summary line goes on the moment
+  that says the summary, and that moment says it first.
+- **Not while the last line is still being talked about** (founder, 12 Nov 2026): the next
+  line waits until the voice has moved on to it, even when the two sit side by side. The
+  board writes a line on its own first words, or else on the first weighty word of the speech
+  that is also on the line; so a line opens with the words the voice says when its point
+  begins, and a moment that first finishes the last point says that before its own words.
 - **Pictures pop in on their word:** where a picture's pieces are named one by one ("the air,
   the water you drink and the salt"), each piece is a `data-later` part of the art, label
   inside its group, brought in with `{op: show, part: …, 'on': <word>}`. A scene's pieces pop
   into place rather than being drawn stroke by stroke; a caption names the whole picture
   ("three kinds of substance"), not a list of pieces still to come.
+- **No gaps, no rushing** (founder, 12 Nov 2026). The student is not new to school, but the
+  lesson never leaves a step for them to fill in:
+  - *Teach before you use.* No symbol, subscript, term, method or piece of notation is used
+    until it has been taught: what the small 2 in O₂ means comes before O₂ is classified.
+  - *Introduce an example as an example:* "For example, sodium is a soft metal…", never a
+    bare list of facts that sounds like a new topic.
+  - *Stay at the topic's level.* A harder idea from a later topic (electrolysis in a lesson on
+    compounds) is named in passing as an example ("a chemical method, such as electrolysis"),
+    never taught or made the subject of a sentence.
+  - *Guide every worked example:* what we are given, what we must find, why each step is
+    taken, and what the answer tells us ("What does this tell us?"). Numbers never appear
+    from nowhere.
+  - *Join the ideas:* each new idea is linked to the last ("We have seen that… Now let us look
+    at…"); a section ends by saying where it leads.
+  - *Sentences a teacher says:* whole, plain sentences that run on from each other, with the
+    linking words ("so", "because", "for example", "yet") that make the reasoning heard.
 - **Plain section titles:** "Welcome", "Objectives", "Element", "Compound", "Comparison",
   "JAMB traps", "Check yourself", "Recap".

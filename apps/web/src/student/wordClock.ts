@@ -209,11 +209,33 @@ export function derivedCue(at: string | null | undefined, say: string): LessonCu
  */
 export function derivedWriteCue(line: string | null | undefined, say: string): LessonCue | null {
   if (!line) return null;
-  const first = spokenWords(line).slice(0, 2);
-  if (first.length < 2) return null;
-  const at = findRun(spokenWords(say), first, 1);
-  return at > 2 ? { word: first.join(" "), nth: 1 } : null;
+  const written = spokenWords(line);
+  const heard = spokenWords(say);
+  const first = written.slice(0, 2);
+  if (first.length === 2) {
+    const at = findRun(heard, first, 1);
+    if (at >= 0) return at > 2 ? { word: first.join(" "), nth: 1 } : null;
+  }
+  // NOT WHILE THE LAST POINT IS STILL BEING SAID (founder, 12 Nov 2026): when the line's own
+  // first words are not in what is said, it waits for the first word of weight in the speech
+  // that is also on the line ("Both atoms are oxygen, so O₂ still has one kind of atom" writes
+  // "One kind of atom, so still an element" on "still"), not the moment's first word.
+  const onLine = new Set(written.map(stem));
+  const at = heard.findIndex((word) => word.length >= 4 && !QUIET.has(word) && onLine.has(stem(word)));
+  return at > 2 ? { word: heard[at]!, nth: 1 } : null;
 }
+
+/** "atoms" and "atom" are one word to the board. */
+function stem(word: string): string {
+  return word.length > 4 && word.endsWith("s") ? word.slice(0, -1) : word;
+}
+
+/** Words too common to place a line by. */
+const QUIET = new Set([
+  "that", "this", "these", "those", "there", "their", "with", "from", "have", "each", "when",
+  "what", "which", "where", "then", "than", "into", "only", "also", "they", "them", "your",
+  "will", "would", "just", "some", "very", "both", "look", "here", "next", "first", "means",
+]);
 
 function runCount(heard: string[], want: string[]): number {
   let count = 0;
