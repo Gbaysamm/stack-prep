@@ -112,6 +112,14 @@ else
   echo "    already up to date"
 fi
 
+echo "==> Loading the subtopic lessons"
+# docs/lessons/subtopics: every lesson file checked and upserted in one transaction, so a
+# failure changes nothing and is reported without stopping the release. Lessons a reviewer
+# edited on the Lessons page are kept (migration 049) until the edit is in the file.
+if ! load_content load_subtopic_lessons.py; then
+  echo "::warning::The subtopic lessons did not load; the last good ones stay."
+fi
+
 echo "==> Building the web client"
 npm ci --no-audit --no-fund
 npm run build --workspace @score-pilot/web

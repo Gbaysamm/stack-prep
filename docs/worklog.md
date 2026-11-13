@@ -15,6 +15,12 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-13
 
+### The deploy loads the subtopic lessons
+- **What:** both release scripts run `load_subtopic_lessons.py` after the question loaders, on every deploy; a failed load is a warning and changes nothing; lessons edited on the Lessons page are kept.
+- **Why:** founder, 13 Nov 2026: lessons should load on push, like the questions.
+- **Where:** `deploy/stackjunior/release.sh`, `deploy/binaax/release.sh`.
+- **Status:** pushed.
+
 ### Pushed to integration; a long line broke the deploy's lint
 - **What:** the first push of the day's work stopped at CI lint (one SQL line in `routers/review.py` over 100 characters); split and pushed again. Merged `company/integration`'s two homepage commits first (Board.tsx conflict: ours already had them).
 - **Status:** pushed; deploy running. Subtopic lessons and the Inworld key are set on each server by hand.
