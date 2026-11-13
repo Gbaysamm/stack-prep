@@ -15,6 +15,10 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-13
 
+### Pushed to integration; a long line broke the deploy's lint
+- **What:** the first push of the day's work stopped at CI lint (one SQL line in `routers/review.py` over 100 characters); split and pushed again. Merged `company/integration`'s two homepage commits first (Board.tsx conflict: ours already had them).
+- **Status:** pushed; deploy running. Subtopic lessons and the Inworld key are set on each server by hand.
+
 ### Lessons written by AI: a trial, its checks, and voice fixes found on the way
 - **What:** `database/write_subtopic_lesson.py` writes one subtopic lesson with OpenAI's
   gpt-6.1-terra (middle tier, high reasoning) and checks it: our loader's checks, every bit of

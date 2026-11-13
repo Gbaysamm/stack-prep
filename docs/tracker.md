@@ -22,7 +22,7 @@ Pushed (on `company/integration`, deploys to both servers) · Waiting (on the fo
 - **Paused:** the bank review for the remaining 83 files, one subject at a time when the
   founder says (Chemistry, Commerce, Economics, English, Government, Literature, Mathematics,
   Physics 2010–2017); then a timing audit of every moment, film a few lessons, commit.
-- **Not pushed:** nothing since `835bdc5`. Every commit after it is local only. A push needs
+- **Pushed 13 Nov 2026** to `company/integration` (deploys both servers; migrations 048 and 049 run on deploy).
   the founder's yes; before it, sync with `company/integration` (it has diverged), and each
   server's `.env` needs `INWORLD_API_KEY`.
 - **Outside work:** Inworld has no credit; lessons play in the studio voice until it is topped up.

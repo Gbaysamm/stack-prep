@@ -406,7 +406,8 @@ async def question_detail(
         conn,
         """
         SELECT o.id, o.option_key, o.body, o.is_correct, o.display_order,
-               CASE WHEN o.is_correct THEN NULL ELSE coalesce(o.distractor_note, m.description) END AS why
+               CASE WHEN o.is_correct THEN NULL
+                    ELSE coalesce(o.distractor_note, m.description) END AS why
         FROM question_options o
         LEFT JOIN misconceptions m ON m.id = o.misconception_id
         WHERE o.question_version_id = :version
