@@ -13,7 +13,8 @@ import { friendly, request } from '../../lib/friendlyError.js';
 import { Maths } from '../../Maths.js';
 import { IconCamera, IconCheck, IconClose, IconReplay, IconSend } from '../icons.js';
 import { Button, PageHero, Skeleton, cx } from '../ui.js';
-import { usePageTitle, useStudent } from '../store.js';
+import { PlainShell } from '../shell.js';
+import { useStudent } from '../store.js';
 import './LessonAfter.css';
 
 interface Tried {
@@ -160,7 +161,6 @@ export function LessonAfterPage() {
   const part = Number(search.get('part') ?? '1') || 1;
   const item = search.get('item');
   const [saving, setSaving] = useState(false);
-  usePageTitle('After the lesson');
   const finish = async () => {
     setSaving(true);
     try {
@@ -174,6 +174,7 @@ export function LessonAfterPage() {
     }
   };
   return (
+    <PlainShell title="After the lesson" backTo="/roadmap" backLabel="Roadmap">
     <LessonAfter
       studentId={student.studentId}
       subtopicId={subtopicId}
@@ -182,6 +183,7 @@ export function LessonAfterPage() {
       onContinue={() => void finish()}
       onWatchAgain={() => navigate(`/lesson/${subtopicId}?part=${part}${item ? `&item=${item}` : ''}`)}
     />
+    </PlainShell>
   );
 }
 

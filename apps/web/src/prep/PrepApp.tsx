@@ -111,7 +111,6 @@ export function PrepApp() {
                   <Route path="/progress/check-ins" element={<CheckIns />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/settings" element={<Settings />} />
-                  <Route path="/lesson/:subtopicId/after" element={<LessonAfterPage />} />
                   <Route path="/bookmarks" element={<Bookmarks />} />
                   <Route path="/plans" element={<Plans />} />
                   <Route path="/plans/paid" element={<PlanPaid />} />
@@ -121,6 +120,14 @@ export function PrepApp() {
                   <Route path="/how-its-worked-out" element={<HowItsWorkedOutRedirect />} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
+                <Route
+                  path="/lesson/:subtopicId/after"
+                  element={
+                    <RequireStudent>
+                      <LessonAfterPage />
+                    </RequireStudent>
+                  }
+                />
                 <Route
                   path="/lesson/:subtopicId"
                   element={

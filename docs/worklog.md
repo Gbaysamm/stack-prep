@@ -29,6 +29,8 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
   and top bar of every main page), a page hero ("Lesson 1 of 5 · Chemistry", the title, "Next:
   Compounds", Continue and Watch again), the problem on the left and the rating and the coach
   (always open) on the right; the API says the lesson's place and the next one's title.
+  Then without the sidebar (it distracts there): `PlainShell`, the app's own top bar and a
+  way back to the roadmap, nothing else.
 - **Why:** founder, 13 Nov 2026.
 - **Where:** `packages/engine/src/engine/roadmap.py`, `apps/web/src/student/Board.tsx`,
   `routers/lesson_after.py`, `PrepApp.tsx`,

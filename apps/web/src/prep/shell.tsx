@@ -652,3 +652,38 @@ export function FocusShell({
     </div>
   );
 }
+
+/**
+ * The app's own top bar with no sidebar (founder, 13 Nov 2026): for a page where the student
+ * has one thing to do and the menu would only distract (after a lesson). Same flat bar and
+ * crumb as every main page; on the right, the way back.
+ */
+export function PlainShell({ title, backTo, backLabel, children }: { title: string; backTo: string; backLabel: string; children: ReactNode }) {
+  return (
+    <div className="sj-shell sj-plain">
+      <div className="sj-canvas" />
+      <div className="sj-main">
+        <header className="sj-topbar">
+          <div className="sj-topbar-in">
+            <Link to="/home" className="brandmark" aria-label="Stack Prep home" style={{ flex: "none" }}>
+              <img src="/brand/mark-96.png" alt="" width={34} height={34} />
+            </Link>
+            <span className="title">{title}</span>
+            <span className="sj-crumb">
+              <span className="root">Stack Prep</span>
+              <span className="sep" aria-hidden="true">/</span>
+              <strong>{title}</strong>
+            </span>
+            <div className="right">
+              <Link to={backTo} className="sj-btn ghost sm sj-plain-back">
+                <IconArrowLeft size={16} />
+                <span>{backLabel}</span>
+              </Link>
+            </div>
+          </div>
+        </header>
+        <main id="main">{children}</main>
+      </div>
+    </div>
+  );
+}
