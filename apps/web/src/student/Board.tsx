@@ -340,6 +340,8 @@ export function Board({
   loadLesson,
   onDone,
   onClose,
+  startAt,
+  onReached,
   onAsk,
   onListen,
   askLocked,
@@ -401,6 +403,11 @@ export function Board({
   /** The close button, when leaving early is not the same as finishing (a topic lesson:
    *  closed half way, it goes back to the roadmap, not on to "after the lesson"). */
   onClose?: () => void;
+  /** Open at this step (from 1), the steps before it written: a lesson left half way picks
+   *  up where the student stopped (founder, 13 Nov 2026). */
+  startAt?: number;
+  /** Each step the board reaches, so the page can remember it. */
+  onReached?: (step: number) => void;
   /**
    * Turn a recording into words, when this deployment allows it at all. Undefined means the
    * mic is off here and no button is drawn — a client never offers what the server refuses.
@@ -1394,6 +1401,17 @@ export function Board({
   const finished = shown >= lines.length;
   /** Go to any step of the lesson, from the timeline or Back: the board shows everything up
    *  to it, written, and the step is said from its start. The step already on is said again. */
+  // A lesson left half way opens where the student stopped, once its lines are there.
+  const startedAt = useRef(false);
+  useEffect(() => {
+    if (startedAt.current || !startAt || startAt <= 1 || lines.length === 0) return;
+    startedAt.current = true;
+    setShown(Math.min(startAt, lines.length));
+  }, [startAt, lines.length]);
+  useEffect(() => {
+    if (shown > 0) onReached?.(shown);
+  }, [shown, onReached]);
+
   const seek = (target: number) => {
     const to = Math.max(1, Math.min(lines.length, target));
     resume();

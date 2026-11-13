@@ -132,6 +132,8 @@ export function Lesson() {
   }
   if (board && board !== "none") {
     const heard = board.engine !== "none";
+    // Where this student stopped in this version of the lesson (kept on the phone).
+    const placeKey = `sj.lesson.place.${student.studentId}.${subtopicId}.${part}.${board.version}`;
     return (
       <div className="sj ls-board">
         <Suspense fallback={null}>
@@ -160,7 +162,12 @@ export function Lesson() {
                 new Error("Asking during a lesson is not open yet."),
               )
             }
-            onDone={() => setStage("after")}
+            onDone={() => {
+              forgetPlace(placeKey);
+              setStage("after");
+            }}
+            startAt={readPlace(placeKey)}
+            onReached={(step) => keepPlace(placeKey, step)}
             // Closed before the end: back to the roadmap, the lesson not taken (founder, 13
             // Nov 2026: closing half way opened "after the lesson").
             onClose={() => setLeaving(true)}
@@ -311,4 +318,29 @@ export function Lesson() {
       </main>
     </FocusShell>
   );
+}
+
+/* A lesson left half way: the step the student reached, kept on the phone for that version of
+   the lesson (an edited lesson starts again from the top). */
+function readPlace(key: string): number | undefined {
+  try {
+    const found = Number(window.localStorage.getItem(key));
+    return found > 1 ? found : undefined;
+  } catch {
+    return undefined;
+  }
+}
+function keepPlace(key: string, step: number): void {
+  try {
+    window.localStorage.setItem(key, String(step));
+  } catch {
+    /* Private window: it simply starts from the top next time. */
+  }
+}
+function forgetPlace(key: string): void {
+  try {
+    window.localStorage.removeItem(key);
+  } catch {
+    /* As above. */
+  }
 }

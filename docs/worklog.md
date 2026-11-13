@@ -26,8 +26,9 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
   not lose the student's place; the coach box's button too tall, its placeholder too big.
 - **Where:** `apps/web/src/lib/leaveWarning.ts`, `prep/pages/{Lesson,LessonAfter,PracticeRoom,
   CheckupRoom}.tsx`, `prep/shell.tsx` (`PlainShell` confirm), `LessonAfter.css`.
-- **Status:** done locally. Open: a lesson does not yet remember where the student stopped
-  (it starts again from the beginning); runs and check-ups already resume.
+- **Status:** done locally. A lesson now resumes where the student stopped: the step reached
+  is kept on the phone for that version of the lesson, and the board opens there (checked:
+  a reload opened at 12 of 31).
 
 ### Lessons kept together on the path; closing a lesson early; the after-lesson page redesigned
 - **What:** a subtopic's lessons, and the run after them, now come one after another on the

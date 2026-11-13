@@ -111,7 +111,7 @@ Order of work (each shown at 1440 and 390 before the next):
 | Still weak after the lessons and the run again: what then? | Proposed: one round of lessons per subtopic; then label it "Still needs work", move on, and bring it back later as review; no loop of lessons | engine, path | Open (founder: leave for now, label it) |
 | Closing a half-watched lesson opened "after the lesson" | Close goes back to the roadmap; not counted | `Board.tsx`, `Lesson.tsx` | Done-local |
 | Leaving anything in progress asks first (close button, closing the tab): lessons, runs, check-ups, after the lesson; Continue waits for the problem | Leave warning, confirm dialogs | `lib/leaveWarning.ts`, the rooms, `Lesson.tsx`, `LessonAfter.tsx` | Done-local |
-| A lesson resumes where the student stopped | — | `Board.tsx` (a start position) | Open |
+| A lesson resumes where the student stopped | The step reached is kept on the phone per lesson version; the board opens there | `Board.tsx` (`startAt`, `onReached`), `Lesson.tsx` | Done-local |
 | After-lesson page: poor UI; wrong answer or photo gets written feedback, not video | Redesigned: problem first with tappable options, feedback box, rating row, coach collapsed | `LessonAfter.tsx/.css` | Done-local |
 
 ## Speed and load
