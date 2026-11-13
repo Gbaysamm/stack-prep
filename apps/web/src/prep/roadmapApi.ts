@@ -70,6 +70,8 @@ export interface Roadmap {
   target_total: number | null;
   subjects: RoadmapSubject[];
   items: RoadmapItem[];
+  /** What the student did on the last few days (from those days' plans). */
+  earlier?: RoadmapItem[];
   record: {
     due: number;
     done: number;

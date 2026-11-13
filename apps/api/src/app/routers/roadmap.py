@@ -116,6 +116,10 @@ class RoadmapOut(BaseModel):
     target_total: float | None
     subjects: list[SubjectOut]
     items: list[ItemOut]
+    #: What the student did on the last few days, from the plans those days had (founder, 13 Nov
+    #: 2026: a run done yesterday vanished when the plan was re-made this morning). Newest
+    #: last; each sitting once.
+    earlier: list[ItemOut] = []
     record: Record
 
 
@@ -731,6 +735,9 @@ ITEM_SQL = """
 """
 
 
+#: How many days back the roadmap shows what the student did.
+EARLIER_DAYS = 7
+
 #: Spec §9.1's mastery bands as levels: Weak, Developing, Exam-ready, Strong, Mastered.
 LEVEL_FROM = (0.40, 0.65, 0.80, 0.90)
 #: Fewer answers than this and a subtopic is not yet levelled.
@@ -800,7 +807,20 @@ async def read(
             s=student_id,
         )
     )[0]["n"]
-    levels = await _levels(conn, student_id, items)
+    taken = await fetch_all(
+        conn,
+        ITEM_SQL
+        + " WHERE i.student_id = :s AND i.day < :today AND i.day >= :since"
+        " AND i.session_id IS NOT NULL ORDER BY i.day, i.position",
+        s=student_id,
+        today=today,
+        since=today - timedelta(days=EARLIER_DAYS),
+    )
+    # A sitting carried from one morning's plan to the next is on each: shown once.
+    earlier: dict[Any, dict[str, Any]] = {}
+    for row in taken:
+        earlier[row["session_id"]] = row
+    levels = await _levels(conn, student_id, items + list(earlier.values()))
     summary = active["summary"]
     return RoadmapOut(
         built_for=active["built_for"],
@@ -817,6 +837,10 @@ async def read(
         target_total=summary["target_total"],
         subjects=[SubjectOut(**s) for s in summary["subjects"]],
         items=[ItemOut(**row, level=levels.get(str(row["subtopic_id"]))) for row in items],
+        earlier=[
+            ItemOut(**row, level=levels.get(str(row["subtopic_id"])))
+            for row in sorted(earlier.values(), key=lambda r: (r["day"], r["position"]))
+        ],
         record=Record(
             due=history["due"],
             done=history["done"],

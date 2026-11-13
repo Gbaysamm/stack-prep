@@ -15,6 +15,17 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-13
 
+### The roadmap keeps what you did on earlier days; lessons have a play icon
+- **What:** the roadmap sends the last seven days' sittings from the plans those days had
+  (`RoadmapOut.earlier`), and the path shows the latest four under "Earlier", above Today
+  ("Wednesday · Done", with the run's level). A lesson stop now has a play icon (it is a
+  video), a run keeps the bolt.
+- **Why:** founder, 13 Nov 2026: a run done on Wednesday had vanished. The plan is re-made
+  each morning as a new roadmap from today, so the earlier days were on the replaced one.
+- **Where:** `apps/api/src/app/routers/roadmap.py`, `apps/web/src/prep/pages/Roadmap.tsx`,
+  `roadmapApi.ts`. Checked at 1440 and 390.
+- **Status:** done locally.
+
 ### Elements, compounds and mixtures as five short lessons; no gaps, one thing at a time
 - **What:**
   - The subtopic is now five lessons of about four minutes each: Elements; Compounds; The

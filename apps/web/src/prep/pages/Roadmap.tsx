@@ -5,7 +5,7 @@
  */
 import { Link } from 'react-router-dom';
 
-import { IconArrowRight, IconBolt, IconBook, IconClock, IconPlay, IconTarget, IconTrophy } from '../icons.js';
+import { IconArrowRight, IconBolt, IconClock, IconPlay, IconTarget, IconTrophy } from '../icons.js';
 import { Journey, type Stop } from '../Journey.js';
 import {
   itemLabel,
@@ -150,6 +150,25 @@ function dayLabel(day: string, today: string): string {
   return new Date(`${day}T00:00:00Z`).toLocaleDateString('en-GB', { weekday: 'long', timeZone: 'UTC' });
 }
 
+/** A stop's icon: a lesson is a video, so it plays; a run is the bolt (founder, 13 Nov 2026). */
+function kindIcon(kind: RoadmapItem['kind']) {
+  if (kind === 'checkup') return <IconTarget size={20} />;
+  if (kind === 'mock') return <IconClock size={20} />;
+  if (kind === 'lesson') return <IconPlay size={20} />;
+  if (kind === 'topic_test') return <IconTrophy size={20} />;
+  return <IconBolt size={20} />;
+}
+
+/** "Yesterday", or the weekday, for a day before today. */
+function shortDay(day: string, today: string): string {
+  const gap = Math.round((Date.parse(`${today}T00:00:00Z`) - Date.parse(`${day}T00:00:00Z`)) / 864e5);
+  if (gap === 1) return 'Yesterday';
+  return new Date(`${day}T00:00:00Z`).toLocaleDateString('en-GB', { weekday: 'long', timeZone: 'UTC' });
+}
+
+/** How many of the last days' stops the path shows above today. */
+const EARLIER_STOPS = 4;
+
 /** Days shown on the path, and stops at most; the rest is implied by the path fading out. */
 const PATH_DAYS = 3;
 const PATH_STOPS = 14;
@@ -163,6 +182,22 @@ export function pathStops(roadmap: RoadmapData, next: RoadmapItem | null): Stop[
   const upcoming = roadmap.items.filter((item) => item.day >= roadmap.today && item.state !== 'missed');
   const days = [...new Set(upcoming.map((item) => item.day))].sort().slice(0, PATH_DAYS);
   const stops: Stop[] = [];
+  // EARLIER (founder, 13 Nov 2026): what the student did on the last days stays on the path,
+  // above today, though each morning's plan is a new one. The latest few, done or started.
+  const earlier = (roadmap.earlier ?? []).slice(-EARLIER_STOPS);
+  if (earlier.length) {
+    stops.push({ key: 'earlier', title: 'Earlier', icon: null, state: 'locked', heading: true });
+    for (const item of earlier) {
+      stops.push({
+        key: `earlier-${item.id}`,
+        title: item.kind === 'checkup' ? `${item.subject_name} check-up` : itemLabel(item),
+        line: `${shortDay(item.day, roadmap.today)} · ${item.state === 'done' ? 'Done' : 'Not finished'}`,
+        icon: kindIcon(item.kind),
+        state: item.state === 'done' ? 'done' : 'locked',
+        level: item.kind === 'run' ? (item.level ?? undefined) : undefined,
+      });
+    }
+  }
   for (const day of days) {
     stops.push({ key: `day-${day}`, title: dayLabel(day, roadmap.today), icon: null, state: 'locked', heading: true });
     type Group = { first: RoadmapItem; items: RoadmapItem[] };
@@ -200,18 +235,7 @@ export function pathStops(roadmap: RoadmapData, next: RoadmapItem | null): Stop[
               : item.kind === 'mock'
                 ? 'The whole paper'
                 : 'Topics you have covered',
-        icon:
-          item.kind === 'checkup' ? (
-            <IconTarget size={20} />
-          ) : item.kind === 'mock' ? (
-            <IconClock size={20} />
-          ) : item.kind === 'lesson' ? (
-            <IconBook size={20} />
-          ) : item.kind === 'topic_test' ? (
-            <IconTrophy size={20} />
-          ) : (
-            <IconBolt size={20} />
-          ),
+        icon: kindIcon(item.kind),
         state: done ? 'done' : holdsNext ? 'current' : 'locked',
         level: item.kind === 'run' ? level : undefined,
       });
