@@ -77,6 +77,59 @@ def cue_problems(moments: list[dict[str, Any]], where: str) -> dict[int, str]:
     return problems
 
 
+#: `--teaching`: a teaching pass may also split a moment into several and add moments that
+#: only say and write; every action (doodle, diagram, mark, sketch, answer flag) stays, in its
+#: order, and every cue and mark still lands. Mark line numbers may move with the moments.
+TEACHING = "--teaching" in sys.argv
+
+
+def _no_lines(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {k: _no_lines(v) for k, v in value.items() if k != "line"}
+    if isinstance(value, list):
+        return [_no_lines(v) for v in value]
+    return value
+
+
+def actions(moments: list[dict[str, Any]]) -> list[Any]:
+    """Each moment's actions (all but its words and section), marks without line numbers, in
+    order; moments that only say and write are left out."""
+    found = []
+    for moment in moments:
+        acts = {k: v for k, v in moment.items() if k not in (*TEXT, "section")}
+        if acts:
+            found.append(_no_lines(acts))
+    return found
+
+
+def teaching_problems(
+    where: str, old: list[dict[str, Any]], new: list[dict[str, Any]]
+) -> list[str]:
+    problems: list[str] = []
+    if actions(old) != actions(new):
+        problems.append(
+            f"{where}: an action changed, moved out of order, or was lost (only say, write "
+            "and section may change; a split moment keeps its actions on the part that says "
+            "their cue word)"
+        )
+    for index, moment in enumerate(new):
+        if not isinstance(moment.get("say"), str) or not moment["say"].strip():
+            problems.append(f"{where} moment {index}: every moment needs something said")
+    old_cues, new_cues = cue_problems(old, where), cue_problems(new, where)
+    if len(new_cues) > len(old_cues):
+        problems.extend(f"{p} (the cue word must be in the say)" for p in new_cues.values())
+    old_missed = sorted(at for _, _, at in missed_marks(old))
+    new_missed = missed_marks(new)
+    if len(new_missed) > len(old_missed):
+        problems.extend(
+            f"{where} moment {index}: its mark's at {at!r} is not in moment {line} "
+            "(renumber line: when moments are added)"
+            for index, line, at in sorted(new_missed)
+            if at not in old_missed
+        )
+    return problems
+
+
 def check(path: Path) -> tuple[list[str], int]:
     before = committed(path)
     after = yaml.safe_load(path.read_text(encoding="utf-8"))
@@ -99,7 +152,12 @@ def check(path: Path) -> tuple[list[str], int]:
         } or any(old[k] != new.get(k) for k in old if k not in ("moments", "traps")):
             problems.append(f"{where}: something other than moments and traps changed")
         old_moments, new_moments = old.get("moments") or [], new.get("moments") or []
-        if len(old_moments) != len(new_moments):
+        if TEACHING:
+            problems.extend(teaching_problems(where, old_moments, new_moments))
+            changed += abs(len(new_moments) - len(old_moments)) + sum(
+                a != b for a, b in zip(old_moments, new_moments, strict=False)
+            )
+        elif len(old_moments) != len(new_moments):
             problems.append(f"{where}: moments were added or removed")
             continue
         for index, (a, b) in enumerate(zip(old_moments, new_moments, strict=True)):
@@ -119,6 +177,8 @@ def check(path: Path) -> tuple[list[str], int]:
         changed += sum(old_traps.get(k) != new_traps.get(k) for k in new_traps)
         if any(not str(v).strip() for v in new_traps.values()):
             problems.append(f"{where}: an empty trap")
+        if TEACHING:
+            continue
         before_cues = cue_problems(old_moments, where)
         for index, problem in cue_problems(new_moments, where).items():
             if index not in before_cues:
@@ -132,7 +192,7 @@ def check(path: Path) -> tuple[list[str], int]:
 
 def main() -> int:
     failed = False
-    for name in sys.argv[1:]:
+    for name in [a for a in sys.argv[1:] if not a.startswith("--")]:
         problems, changed = check(Path(name))
         if problems:
             failed = True
