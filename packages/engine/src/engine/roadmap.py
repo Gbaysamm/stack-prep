@@ -405,12 +405,7 @@ def needs_lesson(unit: UnitStanding) -> bool:
     Running out of new questions does not take the lesson away (founder, 13 Nov 2026: a weak
     run on Elements, compounds and mixtures, whose few questions were all met, brought no
     lesson). A lesson needs no questions; only the run after it does."""
-    return (
-        unit.runs >= 1
-        and not unit.taught
-        and not secured(unit)
-        and unit.runs < STUCK_AFTER_RUNS
-    )
+    return unit.runs >= 1 and not unit.taught and not secured(unit) and unit.runs < STUCK_AFTER_RUNS
 
 
 def topics_to_test(units: Sequence[UnitStanding], tested: frozenset[str]) -> list[UnitStanding]:
@@ -720,13 +715,15 @@ def _next_days(
             )[0]
             # A subtopic's lessons, and the run after them, come one after another (founder,
             # 13 Nov 2026: lesson 2 sat four stops after lesson 1, between other subjects).
-            if last_subject is not None and items and items[-1].kind == "lesson":
-                held = queues[last_subject]
+            # Across a day's end too: a block longer than a day carries on the next morning.
+            lesson_by = items[-1].subject_id if items and items[-1].kind == "lesson" else None
+            if lesson_by is not None and lesson_by in queues:
+                held = queues[lesson_by]
                 if (
-                    used[last_subject] < len(held)
-                    and held[used[last_subject]][0] == items[-1].subtopic_id
+                    used[lesson_by] < len(held)
+                    and held[used[lesson_by]][0] == items[-1].subtopic_id
                 ):
-                    subject_id = last_subject
+                    subject_id = lesson_by
             if exam_phase and phase_mixed < MIXED_SHARE * (phase_runs + 1):
                 items.append(
                     PlannedItem(

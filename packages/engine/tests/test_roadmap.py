@@ -416,6 +416,29 @@ def test_a_subtopics_lessons_come_one_after_another() -> None:
     ]
 
 
+def test_a_lesson_block_longer_than_a_day_is_not_split() -> None:
+    # Five lessons and a run, at three stops a day: the block carries on the next morning
+    # before anything else.
+    from dataclasses import replace
+
+    chem = units("chem", [0.3, None, None])
+    phys = units("phys", [None, None, None])
+    weak = (replace(chem[0], runs=1, lesson_parts=5), *chem[1:])
+    physics = SubjectInput("phys", "Physics", phys, 80, TODAY - timedelta(days=1))
+    plan = build(spec(subject_from(weak), physics, target_total=None, minutes=45))
+    first = next(i for i, item in enumerate(plan.items) if item.kind == "lesson")
+    block = plan.items[first : first + 6]
+    assert [(i.kind, i.part) for i in block] == [
+        ("lesson", 1),
+        ("lesson", 2),
+        ("lesson", 3),
+        ("lesson", 4),
+        ("lesson", 5),
+        ("run", None),
+    ]
+    assert len({i.day for i in block}) > 1  # it did cross a day
+
+
 def test_a_finished_topic_gets_one_test() -> None:
     from dataclasses import replace
 

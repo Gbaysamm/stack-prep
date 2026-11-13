@@ -106,7 +106,9 @@ Order of work (each shown at 1440 and 390 before the next):
 | A weak run brought no lesson (subtopic out of questions) | Lessons come anyway; no run when none left | `engine.needs_lesson` | Done-local |
 | A finished run vanished from the roadmap | "Earlier" section above Today | `roadmap.py`, `Roadmap.tsx` | Done-local |
 | A lesson's icon differs from a run's | Play icon | `Roadmap.tsx` | Done-local |
-| A subtopic's lessons one after another (not scattered between other subjects) | Planner keeps the subject holding the next lesson | `engine/roadmap.py` | Done-local |
+| A subtopic's lessons one after another (not scattered between other subjects), also across a day's end | Planner keeps the subject holding the next lesson, whichever day | `engine/roadmap.py` | Done-local |
+| More lessons and runs for a weak student take more time than they set: adjust the time | Count lessons in the day's minutes; the pace check tells the student the time a day they now need | engine | Open (proposed, waiting for the founder's go) |
+| Still weak after the lessons and the run again: what then? | Proposed: one round of lessons per subtopic; then label it "Still needs work", move on, and bring it back later as review; no loop of lessons | engine, path | Open (founder: leave for now, label it) |
 | Closing a half-watched lesson opened "after the lesson" | Close goes back to the roadmap; not counted | `Board.tsx`, `Lesson.tsx` | Done-local |
 | After-lesson page: poor UI; wrong answer or photo gets written feedback, not video | Redesigned: problem first with tappable options, feedback box, rating row, coach collapsed | `LessonAfter.tsx/.css` | Done-local |
 
