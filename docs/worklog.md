@@ -27,16 +27,16 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
     traps that say the student's thinking. Facts, answers, options, pictures and marks kept
     (`check_lesson_edit.py --teaching`, fixed to allow added moments and marks handed to the
     split moment that says them; every subject's loader dry run passes).
-  - 64 of the 135 flags were checked against their questions: 37 fixed, 27 not errors, none
-    an answer-key problem. The other 71 were missed (the flag list's headings did not match
-    the files' names): a follow-up pass checks them.
+  - Every one of the 135 flags was checked against its question (stem, options, checked
+    key): 64 fixed in the lessons, 78 not errors, none an answer-key problem. The outcome of
+    each is at the end of `docs/content-review/bank-lessons-flags-2026-11-12.md`.
   - A scene piece pops in by fading only: a CSS transform had thrown the plant cell's wall out
     of place. The plant cell's labels clear its wall; its whole-cell parts pulse, not circle.
 - **Why:** founder, 12 and 13 Nov 2026: lessons of about three minutes, no gaps; the bank's
   explanations to make sense the way the lessons now do; fix the flags.
 - **Where:** `docs/lessons/subtopics/**`, `docs/questions/utme/*/lessons_*.yaml`,
   `apps/web/src/student/doodleEngine.ts`, `database/check_lesson_edit.py`.
-- **Status:** done locally, loaded. Follow-up on 71 flags running.
+- **Status:** done locally, loaded.
 
 ### The roadmap keeps what you did on earlier days; lessons have a play icon
 - **What:** the roadmap sends the last seven days' sittings from the plans those days had
