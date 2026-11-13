@@ -66,6 +66,9 @@ class ItemOut(BaseModel):
     #: The subtopic's level, 1 (weak) to 5 (mastered), from the spec's mastery bands; 0 when
     #: it has fewer than 3 answers; None for an item that is not a single subtopic.
     level: int | None = None
+    #: Still below the bar after its lessons and a run again: labelled on the path, practised
+    #: on, no second round of lessons (founder, 13 Nov 2026).
+    still_weak: bool = False
     #: A lesson stop: which of the subtopic's lessons it is, what it covers, and how many
     #: lessons the subtopic has (founder, 12 Nov 2026: a broad subtopic is several lessons).
     part: int | None = None
@@ -245,6 +248,7 @@ async def _standings(
     runs = await _runs_by_subtopic(conn, student_id, subject_id)
     fresh = await _fresh_by_subtopic(conn, student_id, subject_id)
     lessoned = await _parts_taught_since_last_run(conn, student_id, subject_id)
+    ever = await _parts_taught_ever(conn, student_id, subject_id)
     parts = await _lesson_parts(conn, subject_id)
     return [
         replace(
@@ -255,9 +259,29 @@ async def _standings(
             taught=lessoned.get(u.unit_id, 0) >= parts.get(u.unit_id, 1),
             lesson_parts=parts.get(u.unit_id, 1),
             taught_parts=min(lessoned.get(u.unit_id, 0), parts.get(u.unit_id, 1)),
+            lessons_taken=ever.get(u.unit_id, 0) >= parts.get(u.unit_id, 1),
         )
         for u in found
     ]
+
+
+async def _parts_taught_ever(
+    conn: AsyncConnection, student_id: UUID, subject_id: UUID
+) -> dict[str, int]:
+    """How many of each subtopic's lessons the student has ever finished."""
+    rows = await fetch_all(
+        conn,
+        """
+        SELECT l.subtopic_id AS sub, count(DISTINCT l.part) AS parts
+        FROM subtopic_lessons l
+        JOIN curriculum_items sub ON sub.id = l.subtopic_id AND sub.subject_id = :subject
+        WHERE l.student_id = :s
+        GROUP BY l.subtopic_id
+        """,
+        s=student_id,
+        subject=subject_id,
+    )
+    return {str(r["sub"]): int(r["parts"]) for r in rows}
 
 
 async def _parts_taught_since_last_run(
@@ -769,14 +793,17 @@ def level_of(mastery: float | None, answered: int) -> int:
 
 async def _levels(
     conn: AsyncConnection, student_id: UUID, items: list[dict[str, Any]]
-) -> dict[str, int]:
-    """Each planned subtopic's level, from the student's answers in its subject."""
+) -> tuple[dict[str, int], set[str]]:
+    """Each planned subtopic's level, from the student's answers in its subject, and the
+    subtopics still below the bar after their lessons and a run again ("Still needs work")."""
     out: dict[str, int] = {}
+    still: set[str] = set()
     for subject_id in {row["subject_id"] for row in items if row["subtopic_id"] is not None}:
-        units, _ = await _subtopics(conn, subject_id)
-        for standing in await _standings_from_history(conn, student_id, subject_id, units):
+        for standing in await _standings(conn, student_id, subject_id):
             out[standing.unit_id] = level_of(standing.mastery, standing.answered)
-    return out
+            if engine.still_needs_work(standing):
+                still.add(standing.unit_id)
+    return out, still
 
 
 @router.get("/{student_id}", response_model=RoadmapOut, summary="The student's roadmap")
@@ -826,8 +853,7 @@ async def read(
     )[0]["n"]
     taken = await fetch_all(
         conn,
-        ITEM_SQL
-        + " WHERE i.student_id = :s AND i.day < :today AND i.day >= :since"
+        ITEM_SQL + " WHERE i.student_id = :s AND i.day < :today AND i.day >= :since"
         " AND i.session_id IS NOT NULL ORDER BY i.day, i.position",
         s=student_id,
         today=today,
@@ -837,7 +863,7 @@ async def read(
     earlier: dict[Any, dict[str, Any]] = {}
     for row in taken:
         earlier[row["session_id"]] = row
-    levels = await _levels(conn, student_id, items + list(earlier.values()))
+    levels, still = await _levels(conn, student_id, items + list(earlier.values()))
     summary = active["summary"]
     return RoadmapOut(
         built_for=active["built_for"],
@@ -853,7 +879,14 @@ async def read(
         total_expected=summary["total_expected"],
         target_total=summary["target_total"],
         subjects=[SubjectOut(**s) for s in summary["subjects"]],
-        items=[ItemOut(**row, level=levels.get(str(row["subtopic_id"]))) for row in items],
+        items=[
+            ItemOut(
+                **row,
+                level=levels.get(str(row["subtopic_id"])),
+                still_weak=row["kind"] == "run" and str(row["subtopic_id"]) in still,
+            )
+            for row in items
+        ],
         earlier=[
             ItemOut(**row, level=levels.get(str(row["subtopic_id"])))
             for row in sorted(earlier.values(), key=lambda r: (r["day"], r["position"]))

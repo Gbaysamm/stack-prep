@@ -114,6 +114,9 @@ class UnitStanding:
     #: has finished since their last run on it.
     lesson_parts: int = 1
     taught_parts: int = 0
+    #: The subtopic's round of lessons was taken at some point (not only since the last run):
+    #: one round per subtopic, never a loop (founder, 13 Nov 2026).
+    lessons_taken: bool = False
 
 
 @dataclass(frozen=True)

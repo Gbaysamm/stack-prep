@@ -61,6 +61,9 @@ from engine.projection import (
 
 #: One run of ten questions, with hints and the odd lesson, takes about this long.
 RUN_MINUTES = 15
+#: A lesson's share of a day: about five minutes (founder, 13 Nov 2026: a weak student's
+#: lessons take real time, so the day is planned in minutes, not stops).
+LESSON_MINUTES = 5
 RUN_LENGTH = 10
 CHECKUP_LENGTH = 15
 #: Five hours of runs a day at most (the student can pick up to 300 minutes).
@@ -405,7 +408,19 @@ def needs_lesson(unit: UnitStanding) -> bool:
     Running out of new questions does not take the lesson away (founder, 13 Nov 2026: a weak
     run on Elements, compounds and mixtures, whose few questions were all met, brought no
     lesson). A lesson needs no questions; only the run after it does."""
-    return unit.runs >= 1 and not unit.taught and not secured(unit) and unit.runs < STUCK_AFTER_RUNS
+    return (
+        unit.runs >= 1
+        and not unit.taught
+        and not unit.lessons_taken
+        and not secured(unit)
+        and unit.runs < STUCK_AFTER_RUNS
+    )
+
+
+def still_needs_work(unit: UnitStanding) -> bool:
+    """Its lessons taken, run on again, and still below the bar: labelled on the path and
+    practised on, with no second round of lessons (founder, 13 Nov 2026)."""
+    return unit.lessons_taken and not unit.taught and unit.runs >= 1 and not secured(unit)
 
 
 def topics_to_test(units: Sequence[UnitStanding], tested: frozenset[str]) -> list[UnitStanding]:
@@ -698,7 +713,9 @@ def _next_days(
             continue
         remaining = sum(1 for d in dates if d >= day) * per_day
         last_subject: str | None = None
-        for _ in range(slots):
+        # The day in minutes: a run costs the student's run time, a lesson about five minutes.
+        budget = slots * spec.run_minutes
+        while budget >= min(LESSON_MINUTES, spec.run_minutes):
             # The subject furthest behind its share of the runs so far. Following the same
             # subject again costs half a run, so a day mixes subjects when the shares are close
             # but the weak subject still gets the time it needs.
@@ -725,6 +742,8 @@ def _next_days(
                 ):
                     subject_id = lesson_by
             if exam_phase and phase_mixed < MIXED_SHARE * (phase_runs + 1):
+                if budget < spec.run_minutes:
+                    break
                 items.append(
                     PlannedItem(
                         day, order, "mixed", subject_id, None, None, RUN_LENGTH, "mixed_practice"
@@ -745,6 +764,8 @@ def _next_days(
                         break
                     used[subject_id] += 1
                 if pick is None:
+                    if budget < spec.run_minutes:
+                        break
                     items.append(
                         PlannedItem(
                             day,
@@ -766,6 +787,8 @@ def _next_days(
                         if reason == "topic_test"
                         else "run"
                     )
+                    if kind != "lesson" and budget < spec.run_minutes:
+                        break  # A run that does not fit waits for tomorrow.
                     items.append(
                         PlannedItem(
                             day,
@@ -782,6 +805,7 @@ def _next_days(
                     )
             if exam_phase:
                 phase_runs += 1
+            budget -= LESSON_MINUTES if items[-1].kind == "lesson" else spec.run_minutes
             used[subject_id] += 1
             placed_runs += 1
             order += 1

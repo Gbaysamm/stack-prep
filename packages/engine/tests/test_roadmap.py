@@ -425,7 +425,7 @@ def test_a_lesson_block_longer_than_a_day_is_not_split() -> None:
     phys = units("phys", [None, None, None])
     weak = (replace(chem[0], runs=1, lesson_parts=5), *chem[1:])
     physics = SubjectInput("phys", "Physics", phys, 80, TODAY - timedelta(days=1))
-    plan = build(spec(subject_from(weak), physics, target_total=None, minutes=45))
+    plan = build(spec(subject_from(weak), physics, target_total=None, minutes=30))
     first = next(i for i, item in enumerate(plan.items) if item.kind == "lesson")
     block = plan.items[first : first + 6]
     assert [(i.kind, i.part) for i in block] == [
@@ -437,6 +437,23 @@ def test_a_lesson_block_longer_than_a_day_is_not_split() -> None:
         ("run", None),
     ]
     assert len({i.day for i in block}) > 1  # it did cross a day
+
+
+def test_one_round_of_lessons_then_still_needs_work() -> None:
+    # Founder, 13 Nov: lessons, the run again, still weak: no loop of lessons; it is labelled
+    # and practised on.
+    from dataclasses import replace
+
+    from engine.roadmap import needs_lesson, still_needs_work
+
+    base = units("chem", [0.3, None, None])
+    after = replace(base[0], runs=2, lesson_parts=2, lessons_taken=True, taught=False)
+    assert not needs_lesson(after)
+    assert still_needs_work(after)
+    plan = build(spec(subject_from((after, *base[1:])), target_total=None, minutes=60))
+    chem = [i for i in plan.items if i.subtopic_id == "chem-u0"]
+    assert chem and all(i.kind == "run" for i in chem)
+    assert not still_needs_work(replace(after, mastery=0.85))
 
 
 def test_a_finished_topic_gets_one_test() -> None:

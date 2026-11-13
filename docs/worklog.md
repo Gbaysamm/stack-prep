@@ -15,6 +15,20 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-13
 
+### The day planned in minutes; one round of lessons, then "Still needs work"
+- **What:** the roadmap plans each day in minutes: a run costs the student's run time, a lesson
+  about five minutes, and a run that does not fit waits for the next day, so a weak student's
+  extra lessons take their real time (and the plan's pace check asks for more minutes a day
+  when the work no longer fits). A subtopic gets one round of lessons: after its lessons and a
+  run again, still below the bar, it is labelled "Still needs work" on the path and practised
+  on (up to the run limit), never looped back to lessons (`engine.still_needs_work`,
+  `UnitStanding.lessons_taken`, `ItemOut.still_weak`).
+- **Why:** founder, 13 Nov 2026: more lessons for a weak student take more time; what happens
+  when the run after the lessons is still weak ("leave it, label it").
+- **Where:** `packages/engine/src/engine/{roadmap,projection}.py`, `routers/roadmap.py`,
+  `prep/pages/Roadmap.tsx`, `roadmapApi.ts`.
+- **Status:** done locally.
+
 ### Nothing in progress is lost by a slip: leaving asks first
 - **What:** a lesson playing, a run, a check-up and the after-lesson page warn before the tab is
   closed or reloaded (`lib/leaveWarning.ts`; the mock exam already did). Closing a lesson half

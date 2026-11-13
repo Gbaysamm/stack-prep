@@ -35,6 +35,8 @@ export interface RoadmapItem {
   part?: number | null;
   lesson_title?: string | null;
   lesson_parts?: number | null;
+  /** Still below the bar after its lessons and a run again (no second round of lessons). */
+  still_weak?: boolean;
 }
 
 export interface RoadmapSubject {

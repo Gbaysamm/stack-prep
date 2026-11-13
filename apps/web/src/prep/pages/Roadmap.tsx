@@ -223,7 +223,9 @@ export function pathStops(roadmap: RoadmapData, next: RoadmapItem | null): Stop[
         title: item.kind === 'checkup' ? `${item.subject_name} check-up` : itemLabel(item),
         line:
           item.kind === 'run'
-            ? (item.subject_name ?? undefined)
+            ? item.still_weak
+              ? `Still needs work · ${item.subject_name ?? ''}`
+              : (item.subject_name ?? undefined)
             : item.kind === 'lesson'
               ? (item.lesson_parts ?? 1) > 1
                 ? `Lesson ${item.part ?? 1} of ${item.lesson_parts} · ${item.subtopic_name ?? item.subject_name ?? ''}`
