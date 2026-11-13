@@ -339,6 +339,7 @@ export function Board({
   answerLine,
   loadLesson,
   onDone,
+  onClose,
   onAsk,
   onListen,
   askLocked,
@@ -397,6 +398,9 @@ export function Board({
   /** Shown last, in green: what the answer actually was. */
   answerLine: string;
   onDone: () => void;
+  /** The close button, when leaving early is not the same as finishing (a topic lesson:
+   *  closed half way, it goes back to the roadmap, not on to "after the lesson"). */
+  onClose?: () => void;
   /**
    * Turn a recording into words, when this deployment allows it at all. Undefined means the
    * mic is off here and no button is drawn — a client never offers what the server refuses.
@@ -2064,7 +2068,7 @@ export function Board({
             className="sj-btn ghost sm pb-close"
             type="button"
             aria-label="Close the board"
-            onClick={onDone}
+            onClick={finished ? onDone : (onClose ?? onDone)}
           >
             <IconClose />
             <span>Close</span>

@@ -15,6 +15,21 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-13
 
+### Lessons kept together on the path; closing a lesson early; the after-lesson page redesigned
+- **What:** a subtopic's lessons, and the run after them, now come one after another on the
+  path (lesson 2 of 5 had landed four stops after lesson 1, between other subjects;
+  `engine/roadmap.py` keeps the subject that holds the next lesson). Closing a lesson before
+  its end goes back to the roadmap and does not count it (the board's close button had opened
+  "after the lesson"; `Board.onClose`). The after-lesson page: "Lesson done" header; the
+  problem first, its options as tappable choices (or the answer box and a photo of the working
+  when working is needed); the coach's written feedback under it (Right / Not quite, the
+  explanation, the working), no video; the rating as one row; the coach one quiet row until
+  opened. Checked at 1440 and 390.
+- **Why:** founder, 13 Nov 2026.
+- **Where:** `packages/engine/src/engine/roadmap.py`, `apps/web/src/student/Board.tsx`,
+  `prep/pages/Lesson.tsx`, `prep/pages/LessonAfter.{tsx,css}`.
+- **Status:** done locally.
+
 ### AI-generated question sets and the JSON import (server side)
 - **What:** a subject's own sets can be marked AI-generated (migration 048), kept apart from
   the past papers. `POST /v1/bank/papers/{id}/import` checks a batch of AI-written questions

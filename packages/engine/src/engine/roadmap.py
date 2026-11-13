@@ -718,6 +718,15 @@ def _next_days(
                     key,
                 ),
             )[0]
+            # A subtopic's lessons, and the run after them, come one after another (founder,
+            # 13 Nov 2026: lesson 2 sat four stops after lesson 1, between other subjects).
+            if last_subject is not None and items and items[-1].kind == "lesson":
+                held = queues[last_subject]
+                if (
+                    used[last_subject] < len(held)
+                    and held[used[last_subject]][0] == items[-1].subtopic_id
+                ):
+                    subject_id = last_subject
             if exam_phase and phase_mixed < MIXED_SHARE * (phase_runs + 1):
                 items.append(
                     PlannedItem(

@@ -397,6 +397,25 @@ def test_a_weak_subtopic_out_of_questions_still_gets_its_lessons() -> None:
     assert [(i.kind, i.part) for i in chem] == [("lesson", 1), ("lesson", 2)]
 
 
+def test_a_subtopics_lessons_come_one_after_another() -> None:
+    # Founder, 13 Nov: lesson 2 of 5 sat four stops after lesson 1, other subjects between.
+    from dataclasses import replace
+
+    chem = units("chem", [0.3, None, None])
+    phys = units("phys", [None, None, None])
+    weak = (replace(chem[0], runs=1, lesson_parts=3), *chem[1:])
+    physics = SubjectInput("phys", "Physics", phys, 80, TODAY - timedelta(days=1))
+    plan = build(spec(subject_from(weak), physics, target_total=None, minutes=120))
+    first = next(i for i, item in enumerate(plan.items) if item.kind == "lesson")
+    block = plan.items[first : first + 4]
+    assert [(i.kind, i.subtopic_id, i.part) for i in block] == [
+        ("lesson", "chem-u0", 1),
+        ("lesson", "chem-u0", 2),
+        ("lesson", "chem-u0", 3),
+        ("run", "chem-u0", None),
+    ]
+
+
 def test_a_finished_topic_gets_one_test() -> None:
     from dataclasses import replace
 

@@ -88,19 +88,39 @@ export function LessonAfter({
     <FocusShell title={page.title} exitTo="/roadmap">
       <main className="la-page">
         <header className="la-head">
-          <span className="sj-eyebrow">After the lesson · {page.subject}</span>
-          <h1 className="sj-display sj-h2">{page.title}</h1>
+          <span className="la-done" aria-hidden="true">
+            <IconCheck size={18} />
+          </span>
+          <div>
+            <span className="sj-eyebrow">Lesson done · {page.subject}</span>
+            <h1 className="sj-display la-h1">{page.title}</h1>
+          </div>
         </header>
 
-        <section className="sj-card la-card">
-          <h2 className="la-title">How well did you understand it?</h2>
-          <div className="la-ratings" role="group" aria-label="How well did you understand it?">
+        {page.problems.map((problem, index) => (
+          <Problem
+            key={index}
+            base={base}
+            q={q}
+            index={index}
+            count={page.problems.length}
+            ask={problem.ask}
+            needsWorking={problem.needs_working}
+            tried={problem.tried}
+            onTried={(result) => tried(index, result)}
+          />
+        ))}
+
+        <section className="la-rate">
+          <h2>How well did you understand it?</h2>
+          <div className="la-seg" role="radiogroup" aria-label="How well did you understand it?">
             {RATINGS.map((choice) => (
               <button
                 key={choice.value}
                 type="button"
-                className="sj-chip"
-                aria-pressed={page.rating === choice.value}
+                role="radio"
+                aria-checked={page.rating === choice.value}
+                className={cx(page.rating === choice.value && 'on')}
                 onClick={() => rate(choice.value)}
               >
                 {choice.label}
@@ -108,26 +128,6 @@ export function LessonAfter({
             ))}
           </div>
         </section>
-
-        {page.problems.length ? (
-          <section className="sj-card la-card">
-            <h2 className="la-title">Try it</h2>
-            <ol className="la-problems">
-              {page.problems.map((problem, index) => (
-                <Problem
-                  key={index}
-                  base={base}
-                  q={q}
-                  index={index}
-                  ask={problem.ask}
-                  needsWorking={problem.needs_working}
-                  tried={problem.tried}
-                  onTried={(result) => tried(index, result)}
-                />
-              ))}
-            </ol>
-          </section>
-        ) : null}
 
         <Ask base={base} q={q} page={page} onTurn={(turn, left) => setPage((now) => (now ? { ...now, conversation: [...now.conversation, turn], asks_left: left } : now))} />
 
@@ -144,10 +144,24 @@ export function LessonAfter({
   );
 }
 
+/** "Which is an element? A. water  B. copper …": the question and its lettered options. */
+function splitOptions(ask: string): { stem: string; options: { key: string; text: string }[] } | null {
+  const found = [...ask.matchAll(/(?:^|\s)([A-E])\.\s+/g)];
+  if (found.length < 2 || found[0]![1] !== 'A') return null;
+  const options = found.map((match, n) => {
+    const from = match.index! + match[0].length;
+    const to = n + 1 < found.length ? found[n + 1]!.index! : ask.length;
+    return { key: match[1]!, text: ask.slice(from, to).trim() };
+  });
+  if (options.some((option, n) => option.key !== 'ABCDE'[n] || !option.text)) return null;
+  return { stem: ask.slice(0, found[0]!.index!).trim(), options };
+}
+
 function Problem({
   base,
   q,
   index,
+  count,
   ask,
   needsWorking,
   tried,
@@ -156,23 +170,27 @@ function Problem({
   base: string;
   q: string;
   index: number;
+  count: number;
   ask: string;
   needsWorking: boolean;
   tried: Tried | null;
   onTried: (result: Tried) => void;
 }) {
+  const choice = needsWorking ? null : splitOptions(ask);
   const [typed, setTyped] = useState('');
+  const [picked, setPicked] = useState<string | null>(null);
   const [busy, setBusy] = useState<'typed' | 'photo' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const camera = useRef<HTMLInputElement>(null);
+  const answer = choice ? picked : typed.trim();
 
   const check = async (event: FormEvent) => {
     event.preventDefault();
-    if (!typed.trim()) return;
+    if (!answer) return;
     setBusy('typed');
     setError(null);
     try {
-      onTried(await request<Tried>(`${base}/problems/${index}/answer${q}`, { method: 'POST', body: JSON.stringify({ text: typed }) }));
+      onTried(await request<Tried>(`${base}/problems/${index}/answer${q}`, { method: 'POST', body: JSON.stringify({ text: answer }) }));
     } catch (problem) {
       setError(friendly(problem));
     } finally {
@@ -199,64 +217,90 @@ function Problem({
   };
 
   return (
-    <li className="la-problem">
+    <section className="sj-card la-try">
+      <span className="sj-eyebrow">{count > 1 ? `Try it · ${index + 1} of ${count}` : 'Try it'}</span>
       <div className="la-ask">
-        <Maths text={ask} />
+        <Maths text={choice ? choice.stem : ask} />
       </div>
       <form className="la-answer" onSubmit={check}>
-        <input
-          className="sj-input"
-          value={typed}
-          onChange={(event) => setTyped(event.target.value)}
-          placeholder={needsWorking ? 'Your final answer (or send a photo)' : 'Your answer'}
-          aria-label={`Your answer to problem ${index + 1}`}
-          maxLength={200}
-        />
-        <Button type="submit" tone="dark" busy={busy === 'typed'} disabled={!typed.trim() || busy !== null}>
-          Check
-        </Button>
-        <input
-          ref={camera}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          hidden
-          onChange={(event) => {
-            const file = event.target.files?.[0];
-            event.target.value = '';
-            if (file) void send(file);
-          }}
-        />
-        <Button
-          tone={needsWorking ? 'primary' : 'soft'}
-          icon={<IconCamera size={16} />}
-          busy={busy === 'photo'}
-          disabled={busy !== null}
-          onClick={() => camera.current?.click()}
-        >
-          Photo of working
-        </Button>
+        {choice ? (
+          <div className="la-options" role="radiogroup" aria-label="Choose an answer">
+            {choice.options.map((option) => (
+              <button
+                key={option.key}
+                type="button"
+                role="radio"
+                aria-checked={picked === option.key}
+                className={cx('la-option', picked === option.key && 'on')}
+                onClick={() => setPicked(option.key)}
+              >
+                <b>{option.key}</b>
+                <Maths text={option.text} />
+              </button>
+            ))}
+          </div>
+        ) : (
+          <input
+            className="sj-input"
+            value={typed}
+            onChange={(event) => setTyped(event.target.value)}
+            placeholder={needsWorking ? 'Your final answer' : 'Your answer'}
+            aria-label={`Your answer to problem ${index + 1}`}
+            maxLength={200}
+          />
+        )}
+        <div className="la-actions">
+          <Button type="submit" tone="dark" busy={busy === 'typed'} disabled={!answer || busy !== null}>
+            Check
+          </Button>
+          <input
+            ref={camera}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            hidden
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              event.target.value = '';
+              if (file) void send(file);
+            }}
+          />
+          <Button
+            tone={needsWorking ? 'primary' : 'ghost'}
+            icon={<IconCamera size={16} />}
+            busy={busy === 'photo'}
+            disabled={busy !== null}
+            onClick={() => camera.current?.click()}
+          >
+            {needsWorking ? 'Send a photo of your working' : 'Photo of working'}
+          </Button>
+        </div>
       </form>
       {error ? <p className="la-error">{error}</p> : null}
       {tried ? (
-        <div className={cx('la-result', tried.correct === true && 'right', tried.correct === false && 'wrong')}>
+        <div className={cx('la-result', tried.correct === true && 'right', tried.correct === false && 'wrong')} role="status">
           <p className="la-verdict">
             {tried.correct === true ? <IconCheck size={16} /> : tried.correct === false ? <IconClose size={16} /> : null}
-            <Maths text={tried.feedback} />
+            <strong>{tried.correct === true ? 'Right' : tried.correct === false ? 'Not quite' : 'Marked'}</strong>
           </p>
-          <div className="la-working">
-            <span className="sj-eyebrow">The working</span>
-            <ol>
-              {tried.working.map((step, n) => (
-                <li key={n}>
-                  <Maths text={step} />
-                </li>
-              ))}
-            </ol>
+          <div className="la-feedback">
+            <Maths text={tried.feedback} />
           </div>
+          {tried.working.length ? (
+            <div className="la-working">
+              <span className="sj-eyebrow">The working</span>
+              <ol>
+                {tried.working.map((step, n) => (
+                  <li key={n}>
+                    <Maths text={step} />
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ) : null}
         </div>
       ) : null}
-    </li>
+    </section>
   );
 }
 
@@ -275,6 +319,7 @@ function Ask({
   const [waiting, setWaiting] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const end = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     end.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -301,6 +346,17 @@ function Ask({
     }
   };
 
+  if (!open && !page.conversation.length && !waiting) {
+    return (
+      <button type="button" className="la-coach-open" onClick={() => setOpen(true)}>
+        <IconSend size={16} />
+        <span>
+          <strong>Still unsure? Ask the coach</strong>
+          <small>Your questions and the answers are kept for when you come back.</small>
+        </span>
+      </button>
+    );
+  }
   return (
     <section className="sj-card la-card">
       <h2 className="la-title">Ask the coach</h2>

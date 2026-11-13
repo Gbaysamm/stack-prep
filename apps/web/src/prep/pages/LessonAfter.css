@@ -147,3 +147,160 @@
     flex: 1 1 auto;
   }
 }
+
+/* Redesign (founder, 13 Nov 2026): the problem first as real choices, the feedback under it,
+   the rating as one row, the coach one quiet row until opened. */
+.sj .la-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.sj .la-done {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--lime-400, #a3e635);
+  color: var(--purple-900, #1d1b3a);
+}
+.sj .la-h1 {
+  margin: 2px 0 0;
+  font-size: clamp(24px, 3vw, 32px);
+}
+.sj .la-try {
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+}
+.sj .la-try .la-ask {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.sj .la-answer {
+  display: grid;
+  gap: 12px;
+}
+.sj .la-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.sj .la-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--gray-200, #e5e7eb);
+  border-radius: 14px;
+  background: var(--white, #fff);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.sj .la-option b {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--gray-100, #f3f4f6);
+  font-size: 14px;
+}
+.sj .la-option:hover {
+  border-color: var(--purple-300, #c4b5fd);
+}
+.sj .la-option.on {
+  border-color: var(--purple-600, #7c3aed);
+  background: var(--purple-50, #f5f3ff);
+}
+.sj .la-option.on b {
+  background: var(--purple-600, #7c3aed);
+  color: #fff;
+}
+.sj .la-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.sj .la-feedback {
+  line-height: 1.55;
+}
+.sj .la-verdict strong {
+  font-size: 16px;
+}
+.sj .la-rate {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 2px;
+}
+.sj .la-rate h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.sj .la-seg {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--gray-100, #f3f4f6);
+}
+.sj .la-seg button {
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-600, #4b5563);
+  cursor: pointer;
+}
+.sj .la-seg button.on {
+  background: var(--white, #fff);
+  color: var(--purple-700, #6d28d9);
+  box-shadow: 0 1px 3px rgba(31, 0, 80, 0.12);
+}
+.sj .la-coach-open {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 18px;
+  border: 1.5px dashed var(--gray-200, #e5e7eb);
+  border-radius: 16px;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: var(--purple-700, #6d28d9);
+  cursor: pointer;
+}
+.sj .la-coach-open span {
+  display: grid;
+  gap: 2px;
+}
+.sj .la-coach-open strong {
+  color: var(--purple-900, #1d1b3a);
+}
+.sj .la-coach-open small {
+  color: var(--gray-600, #4b5563);
+}
+@media (max-width: 560px) {
+  .sj .la-options {
+    grid-template-columns: 1fr;
+  }
+  .sj .la-actions .sj-btn {
+    flex: 1 1 auto;
+  }
+  .sj .la-rate {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

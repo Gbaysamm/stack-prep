@@ -163,6 +163,9 @@ export function Lesson() {
               )
             }
             onDone={() => setStage("after")}
+            // Closed before the end: back to the roadmap, the lesson not taken (founder, 13
+            // Nov 2026: closing half way opened "after the lesson").
+            onClose={() => navigate("/roadmap")}
           />
         </Suspense>
       </div>
