@@ -417,6 +417,9 @@ class PaperLine(BaseModel):
     title: str
     exam_year: int | None
     own: bool
+    #: A set of AI-written questions (migration 048): badged, and the only place questions
+    #: are imported or written with AI.
+    ai_generated: bool = False
     questions: int
     approved: int
     needs_review: int
@@ -433,16 +436,20 @@ class NewPaper(BaseModel):
     #: A past paper's year, or none for a set of our own (which then needs a title).
     exam_year: int | None = Field(default=None, ge=1900, le=2200)
     title: str | None = Field(default=None, max_length=80)
+    #: A set of AI-written questions (own sets only).
+    ai_generated: bool = False
 
     @model_validator(mode="after")
     def _one_or_other(self) -> NewPaper:
         if self.exam_year is None and not (self.title or "").strip():
             raise ValueError("Give the paper's year, or a name for a set of your own.")
+        if self.ai_generated and self.exam_year is not None:
+            raise ValueError("An AI-generated set is one of our own sets, never a year.")
         return self
 
 
 PAPER_COUNTS = f"""
-    SELECT p.id AS paper_id, p.name AS title, p.exam_year, p.own,
+    SELECT p.id AS paper_id, p.name AS title, p.exam_year, p.own, p.ai_generated,
            count(q.id) AS questions,
            count(q.id) FILTER (WHERE v.review_status = 'approved') AS approved,
            count(q.id) FILTER (WHERE v.review_status <> 'approved') AS needs_review,
@@ -510,13 +517,13 @@ async def add_paper(
                 text(
                     """
                     INSERT INTO exam_papers (subject_id, paper_code, name, response_mode,
-                      options_per_question, exam_year, own, created_by)
-                    VALUES (:subject, :code, :name, 'objective', 4, :year, :own, :by)
+                      options_per_question, exam_year, own, ai_generated, created_by)
+                    VALUES (:subject, :code, :name, 'objective', 4, :year, :own, :ai, :by)
                     RETURNING id
                     """
                 ),
                 {"subject": subject_id, "code": code, "name": title, "year": body.exam_year,
-                 "own": own, "by": staff.student_id},
+                 "own": own, "ai": body.ai_generated, "by": staff.student_id},
             )
         ).scalar_one()
         await audit.record(conn, staff, "bank.paper.add", f"Added the paper {title}",
@@ -528,24 +535,87 @@ async def add_paper(
             raise HTTPException(status_code=409, detail=f"{title} is already here.") from error
         raise HTTPException(status_code=409, detail=_message(error)) from error
     return PaperLine(paper_id=paper_id, title=title, exam_year=body.exam_year, own=own,
-                     questions=0, approved=0, needs_review=0, flagged=0)
+                     ai_generated=body.ai_generated, questions=0, approved=0,
+                     needs_review=0, flagged=0)
 
 
-@router.delete("/papers/{paper_id}", status_code=204, summary="Remove an empty paper")
+class PaperChange(BaseModel):
+    #: A set of our own: its new name. A past paper: its corrected year.
+    title: str | None = Field(default=None, max_length=80)
+    exam_year: int | None = Field(default=None, ge=1900, le=2200)
+
+
+@router.patch("/papers/{paper_id}", response_model=PaperLine, summary="Rename a paper")
+async def change_paper(
+    paper_id: UUID,
+    body: PaperChange,
+    conn: Annotated[AsyncConnection, Depends(connection)],
+    staff: Annotated[Staff, Depends(reviewer_session)],
+) -> PaperLine:
+    """A set's name, or a past paper's year, put right (founder, 13 Nov 2026: a year could not
+    be renamed). A past paper's code and title follow its year."""
+    paper = await _one(
+        conn,
+        "SELECT id, subject_id, own, exam_year, name FROM exam_papers"
+        " WHERE id = :id AND status <> 'retired'",
+        "We couldn't find that paper.", id=paper_id,
+    )
+    exam, subject = await _subject(conn, paper["subject_id"])
+    try:
+        if paper["own"]:
+            title = " ".join((body.title or "").split())
+            if not title:
+                raise HTTPException(status_code=422, detail="Give the set a name.")
+            await conn.execute(text("UPDATE exam_papers SET name = :n WHERE id = :id"),
+                               {"n": title, "id": paper_id})
+        else:
+            if body.exam_year is None:
+                raise HTTPException(status_code=422, detail="Give the paper's year.")
+            title = f"{exam.short_name} {body.exam_year} {subject.name}"
+            await conn.execute(
+                text("UPDATE exam_papers SET exam_year = :y, name = :n, paper_code = :c"
+                     " WHERE id = :id"),
+                {"y": body.exam_year, "n": title, "id": paper_id,
+                 "c": f"{exam.short_name}-{body.exam_year}-{subject.code}"},
+            )
+        await audit.record(conn, staff, "bank.paper.rename",
+                           f"Renamed the paper {paper['name']} to {title}",
+                           target_kind="paper", target_id=str(paper_id))
+        await conn.commit()
+    except DBAPIError as error:
+        await conn.rollback()
+        if "exam_papers_one_year_idx" in str(error) or "exam_papers_own_name_idx" in str(error):
+            raise HTTPException(status_code=409, detail=f"{title} is already here.") from error
+        raise HTTPException(status_code=409, detail=_message(error)) from error
+    rows = await fetch_all(conn, f"{PAPER_COUNTS} WHERE p.id = :id GROUP BY p.id", id=paper_id)
+    return PaperLine(**rows[0])
+
+
+@router.delete("/papers/{paper_id}", status_code=204, summary="Remove a paper")
 async def remove_paper(
     paper_id: UUID,
     conn: Annotated[AsyncConnection, Depends(connection)],
     staff: Annotated[Staff, Depends(reviewer_session)],
+    with_questions: bool = False,
 ) -> Response:
+    """Retire a paper. With `with_questions`, its questions are retired with it (never deleted:
+    students' answers and scores that point at them stay whole), and stop being served."""
     paper = await _one(
         conn,
         f"{PAPER_COUNTS} WHERE p.id = :id AND p.status <> 'retired' GROUP BY p.id",
         "We couldn't find that paper.", id=paper_id,
     )
-    if paper["questions"]:
+    if paper["questions"] and not with_questions:
         raise HTTPException(
             status_code=409,
-            detail="Remove its questions first: a paper is only removed once it is empty.",
+            detail="This paper has questions. Remove it with its questions, or remove them first.",
+        )
+    if paper["questions"]:
+        await conn.execute(
+            text("UPDATE questions SET retired_at = now(), retired_reason = :reason,"
+                 " retired_by = :by WHERE exam_paper_id = :id AND retired_at IS NULL"),
+            {"id": paper_id, "by": staff.student_id,
+             "reason": f"Removed with its paper, {paper['title']}"},
         )
     await conn.execute(text("UPDATE exam_papers SET status = 'retired' WHERE id = :id"),
                        {"id": paper_id})

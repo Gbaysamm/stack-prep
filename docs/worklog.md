@@ -15,6 +15,26 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-13
 
+### AI-generated question sets and the JSON import (server side)
+- **What:** a subject's own sets can be marked AI-generated (migration 048), kept apart from
+  the past papers. `POST /v1/bank/papers/{id}/import` checks a batch of AI-written questions
+  (JSON) and, with `apply`, saves the ones that pass, into an AI set only (a past paper is
+  refused). Every question must name a subtopic code from the subject's syllabus (any other
+  is refused; nothing is ever created by an import); answer and options, steps, a reason for
+  each wrong option, an optional level, a drawn figure (SVG, checked for scripts) or a
+  "figure needed" note (held back). Saved questions are drafts with the answer, working and
+  level "model proposed", so the database lets none be approved or served until a reviewer
+  has checked it. `GET /v1/bank/subjects/{id}/subtopics` lists each subtopic's code, name,
+  syllabus line and question count for the outside AI's prompt. A paper can now be renamed
+  (a set's name, a past paper's year) and removed with its questions (retired, never deleted).
+  The format and a ready prompt: `docs/questions/ai-question-format.md`.
+- **Why:** founder, 13 Nov 2026: more questions per subtopic, written by an outside AI and
+  pasted in; never an invented subtopic; AI questions kept apart and labelled; papers
+  renamed and removed.
+- **Where:** `database/migrations/048_ai_sets.sql`, `apps/api/src/app/routers/bank_import.py`,
+  `bank.py`, `tests/test_bank_import.py`.
+- **Status:** done locally (migration applied to the local database). The screens follow.
+
 ### Bank review: Accounts, Biology and Physics 2018; the founder tracker
 - **What:** the bank's line-by-line review (`docs/questions/bank-review-brief.md`) ran for
   Accounts (9 files), Biology (9) and Physics 2018: answer checks removed, analogies and

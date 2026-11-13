@@ -70,8 +70,8 @@ Order of work (each shown at 1440 and 390 before the next):
 | Ask (founder) | Plan | Where | Status |
 |---|---|---|---|
 | More questions per subtopic (about 5,000 to give every subtopic 10; thin subjects: Biology, Chemistry, Physics, Economics, Government, Accounts, Commerce) | Generate outside Claude Code: an external AI pasting JSON, or the plan's monthly API credit ($100 on Max, claimed in claude.ai Billing → API credits, key in Admin → AI for questions, cap $100) | — | Open |
-| AI questions kept apart from the real bank, clearly labelled | An "AI-generated practice" set per subject in "Our own sets", badge everywhere; never a fake year | `routers/bank.py`, `review/BankPages.tsx` | Open (1) |
-| Upload questions by JSON; never an invented subtopic | Per-subject subtopic list (codes, syllabus line, counts) and a ready prompt; importer rejects unknown codes; check, preview, import as "To check"; figures as SVG or "figure needed" (held back) | new import route and panel | Open (1) |
+| AI questions kept apart from the real bank, clearly labelled | An "AI-generated practice" set per subject in "Our own sets", badge everywhere; never a fake year | migration 048, `routers/bank.py`, `review/BankPages.tsx` | In progress (server done-local; screens next) |
+| Upload questions by JSON; never an invented subtopic | Per-subject subtopic list (codes, syllabus line, counts) and a ready prompt; importer rejects unknown codes; check, preview, import as "To check"; figures as SVG or "figure needed" (held back) | `routers/bank_import.py`, `docs/questions/ai-question-format.md`; panel next | In progress (server done-local) |
 | "Add with AI" not on past papers | Only in AI sets | `BankPages.tsx` | Open (1) |
 | Subject page: can't rename or delete a year; design poor | Redesign; rename, retire a paper | `BankPages.tsx`, `bank.py` | Open (2) |
 | Question detail page: poor UI/UX | Redesign the question view and editing | `BankPages.tsx`, `ReviewPage.tsx` | Open (3) |
