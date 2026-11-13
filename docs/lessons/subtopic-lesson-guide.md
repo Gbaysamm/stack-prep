@@ -121,6 +121,14 @@ not repeat an earlier one: it may say "In the last lesson you met …" in one li
   inside its group, brought in with `{op: show, part: …, 'on': <word>}`. A scene's pieces pop
   into place rather than being drawn stroke by stroke; a caption names the whole picture
   ("three kinds of substance"), not a list of pieces still to come.
+- **The one test for every sentence** (13 Nov 2026): if a student hears this for the first
+  time, will they understand it using only what has been explained so far? If not, simplify
+  it or teach the missing piece first. A sentence can be correct and still be poor teaching
+  when it does not follow from the one before. Each line has its own job: do not explain the
+  same thing twice in a row (introduce, then explain the notation, then draw the conclusion);
+  a trap gives the general rule behind the mistake, not the worked example again; a recap
+  says exactly what was taught ("the small number counts the atoms of that element; no
+  number means one").
 - **No gaps, no rushing** (founder, 12 Nov 2026). The student is not new to school, but the
   lesson never leaves a step for them to fill in:
   - *Teach before you use.* No symbol, subscript, term, method or piece of notation is used

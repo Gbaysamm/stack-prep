@@ -16,6 +16,8 @@ os.environ["OPENAI_API_KEY"] = ""
 os.environ["PAYSTACK_SECRET_KEY"] = ""
 os.environ["INWORLD_API_KEY"] = ""
 os.environ["LESSON_PACKAGES_WARM"] = "false"
+# Reference data read afresh in every test (app/subject_cache.py).
+os.environ["SUBJECT_CACHE_SECONDS"] = "0"
 
 import pytest
 

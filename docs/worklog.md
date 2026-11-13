@@ -15,6 +15,31 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-13
 
+### A weak run always brings its lessons; pages several times faster; Elements reviewed
+- **What:**
+  - A weak run's lessons come even when the subtopic has no new questions left (Elements,
+    compounds and mixtures has three, all met in the check-up). Running out of questions
+    no longer counts as "moved past" for a lesson; only the run after it is left out
+    (`engine.needs_lesson`, `_syllabus_queue`, `_lessons_after_weak_runs`).
+  - Speed: a subject's syllabus tree, run questions and lesson counts come from memory for
+    five minutes (`app/subject_cache.py`); a student's new questions are counted from their
+    own history. The roadmap call went from about 1.3 s to 0.35 s, the overview from 0.46 s
+    to 0.14 s. In the app, the overview, roadmap, billing, support, announcements, settings
+    and features are fetched once and shared (`lib/shared.ts`); any change the student makes
+    clears them. Pages settle in 0.6 to 2.7 s (were 2 to 11 s); the overview is asked for once
+    a page, not four to six times.
+  - Elements reviewed line by line: no repeated "matter"; molecules, the small 2 and "still an
+    element" each said once; the worked example starts from what was taught; the trap gives
+    the general rule; the recap says exactly what the small number counts. The guide gains
+    "the one test for every sentence".
+- **Why:** founder, 13 Nov 2026: the lesson did not follow a weak run; every page slow; too
+  many requests for a server with many students; a review of the Elements script.
+- **Where:** `packages/engine/src/engine/roadmap.py`, `apps/api/src/app/{subject_cache,
+  routers/checkup,routers/roadmap}.py`, `apps/web/src/lib/shared.ts`, the API wrappers,
+  `chem_elements_compounds_mixtures_1.yaml`, the guide.
+- **Status:** done locally. Measured in development (Vite serves about 90 module files a page
+  there; a built app sends a handful).
+
 ### Every subtopic as short lessons; the bank's explanations taught without gaps
 - **What:**
   - The other nine subtopics are rebuilt as short lessons on the Elements, compounds and

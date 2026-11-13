@@ -382,6 +382,21 @@ def test_a_broad_subtopic_has_several_lessons_each_its_own_stop() -> None:
     assert [(i.kind, i.part) for i in chem[:3]] == [("lesson", 2), ("lesson", 3), ("run", None)]
 
 
+def test_a_weak_subtopic_out_of_questions_still_gets_its_lessons() -> None:
+    # Founder, 13 Nov: a weak run on a subtopic whose few questions were all met brought no
+    # lesson. The lessons come anyway; no run follows them, as there is nothing to run on.
+    from dataclasses import replace
+
+    from engine.roadmap import needs_lesson
+
+    base = units("chem", [0.3, None, None])
+    weak = (replace(base[0], runs=1, fresh=0, lesson_parts=2), *base[1:])
+    assert needs_lesson(weak[0])
+    plan = build(spec(subject_from(weak), target_total=None, minutes=60))
+    chem = [i for i in plan.items if i.subtopic_id == "chem-u0"]
+    assert [(i.kind, i.part) for i in chem] == [("lesson", 1), ("lesson", 2)]
+
+
 def test_a_finished_topic_gets_one_test() -> None:
     from dataclasses import replace
 

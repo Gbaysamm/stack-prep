@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { friendly, request } from "../lib/friendlyError.js";
 import { prefetchLesson } from "./lessonPackage.js";
 import { useLoad } from "./store.js";
+import { KEEP, shared } from "../lib/shared.js";
 
 export type ItemKind =
   "run" | "mixed" | "mock" | "checkup" | "lesson" | "topic_test";
@@ -82,7 +83,9 @@ export interface Roadmap {
 }
 
 export const roadmapApi = {
-  read: (studentId: string) => request<Roadmap>(`/v1/roadmap/${studentId}`),
+  // Shared: Home's card, the roadmap page and the path ask at once (lib/shared.ts).
+  read: (studentId: string) =>
+    shared(`roadmap:${studentId}`, KEEP.overview, () => request<Roadmap>(`/v1/roadmap/${studentId}`)),
   start: (studentId: string, itemId: string) =>
     request<{ kind: ItemKind; session_id: string | null; path: string }>(
       `/v1/roadmap/${studentId}/items/${itemId}/start`,

@@ -204,21 +204,35 @@ async def _inputs(
     return spec, snapshot
 
 
+async def _run_questions(conn: AsyncConnection, subject_id: UUID) -> dict[str, frozenset[str]]:
+    """The questions a run can serve in each of the subject's subtopics (the same for every
+    student, so from memory while fresh: subject_cache.py)."""
+    from app import subject_cache
+
+    async def read() -> dict[str, frozenset[str]]:
+        rows = await fetch_all(
+            conn,
+            """
+            SELECT skill.parent_id AS sub, dq.question_id
+            FROM deliverable_questions dq
+            JOIN questions q ON q.id = dq.question_id AND q.usage_pool <> :pool
+            JOIN curriculum_items skill ON skill.id = dq.primary_skill_id
+            WHERE dq.subject_id = :subject
+            """,
+            subject=subject_id,
+            pool=EXCLUDED_POOL,
+        )
+        found: dict[str, set[str]] = {}
+        for r in rows:
+            found.setdefault(str(r["sub"]), set()).add(str(r["question_id"]))
+        return {sub: frozenset(ids) for sub, ids in found.items()}
+
+    return await subject_cache.remembered(("run_questions", str(subject_id)), read)
+
+
 async def _teachable(conn: AsyncConnection, subject_id: UUID) -> set[str]:
     """The subject's subtopics with questions a run can serve."""
-    rows = await fetch_all(
-        conn,
-        """
-        SELECT DISTINCT skill.parent_id AS sub
-        FROM deliverable_questions dq
-        JOIN questions q ON q.id = dq.question_id AND q.usage_pool <> :pool
-        JOIN curriculum_items skill ON skill.id = dq.primary_skill_id
-        WHERE dq.subject_id = :subject
-        """,
-        subject=subject_id,
-        pool=EXCLUDED_POOL,
-    )
-    return {str(r["sub"]) for r in rows}
+    return set(await _run_questions(conn, subject_id))
 
 
 async def _standings(
@@ -276,18 +290,23 @@ async def _parts_taught_since_last_run(
 
 
 async def _lesson_parts(conn: AsyncConnection, subject_id: UUID) -> dict[str, int]:
-    """How many written lessons each of the subject's subtopics has."""
-    rows = await fetch_all(
-        conn,
-        """
-        SELECT c.subtopic_id AS sub, count(*) AS parts
-        FROM subtopic_lesson_content c
-        JOIN curriculum_items sub ON sub.id = c.subtopic_id AND sub.subject_id = :subject
-        GROUP BY c.subtopic_id
-        """,
-        subject=subject_id,
-    )
-    return {str(r["sub"]): int(r["parts"]) for r in rows}
+    """How many written lessons each of the subject's subtopics has (from memory while fresh)."""
+    from app import subject_cache
+
+    async def read() -> dict[str, int]:
+        rows = await fetch_all(
+            conn,
+            """
+            SELECT c.subtopic_id AS sub, count(*) AS parts
+            FROM subtopic_lesson_content c
+            JOIN curriculum_items sub ON sub.id = c.subtopic_id AND sub.subject_id = :subject
+            GROUP BY c.subtopic_id
+            """,
+            subject=subject_id,
+        )
+        return {str(r["sub"]): int(r["parts"]) for r in rows}
+
+    return await subject_cache.remembered(("lesson_parts", str(subject_id)), read)
 
 
 async def _tested_topics(conn: AsyncConnection, student_id: UUID, subject_id: UUID) -> set[str]:
@@ -310,26 +329,19 @@ async def _tested_topics(conn: AsyncConnection, student_id: UUID, subject_id: UU
 async def _fresh_by_subtopic(
     conn: AsyncConnection, student_id: UUID, subject_id: UUID
 ) -> dict[str, int]:
-    """Practice questions per subtopic this student has not met yet (what a run can serve)."""
-    rows = await fetch_all(
-        conn,
-        """
-        SELECT skill.parent_id AS sub, count(DISTINCT dq.question_id) AS fresh
-        FROM deliverable_questions dq
-        JOIN questions q ON q.id = dq.question_id AND q.usage_pool <> :pool
-        JOIN curriculum_items skill ON skill.id = dq.primary_skill_id
-        WHERE dq.subject_id = :subject
-          AND NOT EXISTS (
-            SELECT 1 FROM student_question_history h
-            WHERE h.student_id = :s AND h.question_id = dq.question_id
-          )
-        GROUP BY skill.parent_id
-        """,
-        s=student_id,
-        subject=subject_id,
-        pool=EXCLUDED_POOL,
-    )
-    return {str(r["sub"]): int(r["fresh"]) for r in rows}
+    """Practice questions per subtopic this student has not met yet (what a run can serve):
+    the subject's run questions (from memory) less the ones in the student's history."""
+    by_sub = await _run_questions(conn, subject_id)
+    met = {
+        str(r["question_id"])
+        for r in await fetch_all(
+            conn,
+            "SELECT DISTINCT question_id FROM student_question_history WHERE student_id = :s",
+            s=student_id,
+        )
+    }
+    left = {sub: len(ids - met) for sub, ids in by_sub.items()}
+    return {sub: n for sub, n in left.items() if n}
 
 
 async def _runs_by_subtopic(
@@ -641,7 +653,10 @@ async def _lessons_after_weak_runs(
         sub, at = row["subtopic_id"], row["position"]
         weak = standing[str(sub)]
         parts = list(range(weak.taught_parts + 1, weak.lesson_parts + 1)) or [1]
-        room = len(parts) + 1
+        # The run again only where there are questions left to run on (weak.fresh == 0: the
+        # lessons alone).
+        rerun = weak.fresh != 0
+        room = len(parts) + (1 if rerun else 0)
         again = next(
             (
                 o
@@ -694,7 +709,9 @@ async def _lessons_after_weak_runs(
                     "part": part,
                 },
             )
-        if again is not None:
+        if not rerun:
+            pass
+        elif again is not None:
             await conn.execute(
                 text("UPDATE roadmap_items SET position = :pos WHERE id = :id"),
                 {"pos": at + room, "id": again["id"]},

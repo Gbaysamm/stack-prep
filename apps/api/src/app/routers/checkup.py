@@ -287,6 +287,18 @@ MIN_PAST_QUESTIONS = 100
 
 
 async def _subtopics(conn: AsyncConnection, subject_id: UUID) -> tuple[list[UnitWeight], str]:
+    """`_read_subtopics`, from memory while fresh (subject_cache.py)."""
+    from app import subject_cache
+
+    units, source = await subject_cache.remembered(
+        ("subtopics", str(subject_id)), lambda: _read_subtopics(conn, subject_id)
+    )
+    return list(units), source
+
+
+async def _read_subtopics(
+    conn: AsyncConnection, subject_id: UUID
+) -> tuple[list[UnitWeight], str]:
     """Every examinable subtopic, with the share of the paper it carries.
 
     In order of what we trust most:

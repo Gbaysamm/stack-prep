@@ -9,6 +9,7 @@ import { failure, reach } from '../lib/friendlyError.js';
 
 import type { OptionFigure, QuestionFigure } from '../Figures.js';
 import type { BoardVoice } from './boardPrefs.js';
+import { KEEP, shared } from '../lib/shared.js';
 
 export interface SubjectOffer {
   subject_id: string;
@@ -870,7 +871,7 @@ export const api = {
   },
   /** What this deployment has switched on. Asked rather than assumed, so a client never
    *  draws a microphone the server would refuse. */
-  features: () => call<Features>('/features'),
+  features: () => shared('features', KEEP.settings, () => call<Features>('/features')),
   /** The worked solution as a lesson, for the board. */
   practiceLesson: (sessionId: string, questionVersionId: string) =>
     call<NarratedLesson>(`/practice/${sessionId}/lesson/${questionVersionId}`),

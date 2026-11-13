@@ -21,14 +21,14 @@ moments:
 
   # ---------------------------------------------------------------- introduction: the big picture, drawn
   - section: 'Introduction'
-    say: 'Everything around you is matter. The air, the water you drink and the salt in your food are all matter.'
+    say: 'Everything around you is matter. The air, the water you drink and the salt in your food are all examples of matter.'
     write: 'Matter: everything around you'
     doodle: {name: 'custom:sub_chem_elements_compounds_mixtures_m', id: mat, size: scene, caption: 'matter around you', 'on': matter}
     doodle_do:
       - {id: mat, op: show, part: air, 'on': air}
       - {id: mat, op: show, part: water, 'on': water}
       - {id: mat, op: show, part: salt, 'on': salt}
-  - say: 'All matter is made of very tiny particles called atoms. They are far too small to see, even with a hand lens.'
+  - say: 'All of these, and everything else, are made of very tiny particles called atoms. They are so small that they cannot be seen, even with a hand lens.'
     write: 'All matter is made of tiny particles called atoms'
     doodle_do:
       - {id: mat, op: stage, stage: 'custom:sub_chem_elements_compounds_mixtures_m2', 'on': atoms}
@@ -68,23 +68,25 @@ moments:
   - section: 'Symbols and formulae'
     say: 'Each element has a symbol of one or two letters. For example, the symbol for sodium is Na, for iron Fe, for copper Cu and for carbon C.'
     write: 'Symbols: sodium (Na), iron (Fe), copper (Cu), carbon (C)'
-  - say: 'In some elements, the atoms go about in small groups called molecules. A molecule is a small group of atoms joined together. In oxygen gas, each molecule is two oxygen atoms joined together.'
+  - say: 'Some elements exist as molecules, which are small groups of atoms joined together. For example, oxygen gas is made of molecules, and each one is two oxygen atoms joined together.'
     write: 'Molecule: a small group of atoms joined together'
-  - say: 'We write this as O₂. The small 2 at the bottom right of the symbol tells us how many atoms of that element are in one molecule. So O₂ means two oxygen atoms.'
+  - say: 'We write an oxygen molecule as O₂. The small 2, written below and to the right of the O, tells us that the molecule has two oxygen atoms.'
     write: 'Oxygen ($\ce{O2}$): the small 2 means two O atoms'
     point:
       - {line: 13, kind: underline, at: 'the small 2'}
-  - say: 'Both atoms are oxygen, so O₂ still has only one kind of atom, and oxygen is an element. A molecule of two atoms like this is called diatomic. Nitrogen, N₂, is diatomic too.'
+  - say: 'Since both atoms are oxygen, the molecule has only one kind of atom, so oxygen is still an element. A molecule made of two atoms is called a diatomic molecule. Nitrogen gas is also made of diatomic molecules, written N₂.'
     write: 'One kind of atom, so still an element (diatomic)'
     doodle_do:
       - {id: dia, op: circle, part: element-tag, 'on': kind}
-  - say: 'When a symbol has no small number, as in Fe, it stands for one atom.'
+  - say: 'When no small number is written after a symbol, it stands for one atom. For example, Fe stands for one iron atom.'
     write: 'No small number, as in Fe: one atom'
 
   # worked example: which are elements?
   - section: 'Worked example'
-    say: 'Now let us use this. We are given O₂, CO₂, Fe, NaCl and N₂, and we must find which of them are elements. For each one, we ask one question. Does it have only one kind of atom?'
+    say: 'Now that we know how symbols and formulae are written, let us use them to pick out elements. We are given O₂, CO₂, Fe, NaCl and N₂. Which of these are elements?'
     write: 'Which are elements? Oxygen ($\ce{O2}$), carbon(IV) oxide ($\ce{CO2}$), Fe, sodium chloride (NaCl), nitrogen ($\ce{N2}$)'
+  - say: 'To answer this, we look at the kinds of atom in each one. If it has only one kind, it is an element.'
+    write: 'Ask: only one kind of atom?'
   # One verdict said, then written; then the next (founder, 12 Nov 2026).
   - say: 'O₂ has only oxygen atoms. That is one kind of atom, so O₂ is an element.'
     write: '$\ce{O2}$: only O atoms, so an element ✓'
@@ -92,21 +94,21 @@ moments:
       - {id: dia, op: pulse, part: element-box, 'on': kind}
   - say: 'N₂ has only nitrogen atoms, so N₂ is an element too.'
     write: '$\ce{N2}$: only N atoms, so an element ✓'
-  - say: 'Fe has only iron atoms, so Fe is also an element.'
+  - say: 'Fe is iron, so it is also an element.'
     write: 'Fe: only Fe atoms, so an element ✓'
   - say: 'CO₂ has carbon atoms and oxygen atoms. That is two kinds of atom, so CO₂ is not an element.'
     write: '$\ce{CO2}$: C and O atoms, not an element ✗'
   - say: 'NaCl has sodium atoms and chlorine atoms, which is also two kinds, so NaCl is not an element either.'
     write: 'NaCl: Na and Cl atoms, not an element ✗'
-  - say: 'So the elements are O₂, Fe and N₂, because each has only one kind of atom.'
+  - say: 'So the elements are O₂, Fe and N₂. Each has only one kind of atom.'
     write: '∴ elements: $\ce{O2}$, Fe, $\ce{N2}$'
     point:
-      - {line: 22, kind: circle, at: 'elements'}
+      - {line: 23, kind: circle, at: 'elements'}
 
   # ---------------------------------------------------------------- trap
   - section: 'JAMB trap'
-    say: 'Here is a common trap. O₂ and N₂ have two atoms in each molecule, so some students call them compounds. But both atoms are of the same kind, so each is a diatomic element, not a compound.'
-    write: '$\ce{O2}$, $\ce{N2}$: two atoms, one kind, so elements'
+    say: 'Here is a common trap in the examination. Some students think that any substance with two or more atoms in it must be a compound. That is not so. What matters is the kind of atoms, not how many there are. If all the atoms are of the same element, it is still an element.'
+    write: 'Trap: more than one atom does not make a compound; the kind of atom decides'
     doodle_do:
       - {id: dia, op: circle, part: element-tag, 'on': element}
 
@@ -114,14 +116,16 @@ moments:
   - section: 'Check yourself'
     say: 'Now it is your turn. Which of these is an element? Is it sodium chloride, carbon(IV) oxide, copper or water? Pause the lesson and decide before I go on.'
     write: 'Which is an element? NaCl, $\ce{CO2}$, Cu, $\ce{H2O}$'
-  - say: 'Sodium chloride, carbon(IV) oxide and water each have two kinds of atom, so none of them is an element. Sodium chloride has sodium and chlorine, carbon(IV) oxide has carbon and oxygen, and water has hydrogen and oxygen.'
-    write: 'NaCl, $\ce{CO2}$, $\ce{H2O}$: two kinds of atom, not elements ✗'
+  - say: 'Sodium chloride has sodium and chlorine atoms. Carbon(IV) oxide has carbon and oxygen atoms, and water has hydrogen and oxygen atoms.'
+    write: 'NaCl: Na, Cl.  $\ce{CO2}$: C, O.  $\ce{H2O}$: H, O'
+  - say: 'Each of them has two different kinds of atom, so none of them is an element.'
+    write: 'Two kinds of atom each, so not elements ✗'
   - say: 'Copper has only copper atoms, so copper is the element.'
     write: 'Cu: one kind of atom = element ✓'
     doodle_do:
       - {id: dia, op: circle, part: element-tag, 'on': element}
     point:
-      - {line: 26, kind: circle, at: 'element'}
+      - {line: 28, kind: circle, at: 'element'}
 
   # ---------------------------------------------------------------- recap
   - section: 'Recap'
@@ -129,7 +133,7 @@ moments:
     write: '1. Element: one kind of atom; cannot be split by chemical means'
     doodle_do:
       - {id: dia, op: pulse, part: element-tag, 'on': element}
-  - say: 'Each element has a symbol, and the small number in a formula tells us how many atoms there are. In the next lesson, we look at compounds. Now try the problem.'
+  - say: 'Each element has a symbol. A small number written below and to the right of a symbol tells us how many atoms of that element there are, and no number means one. In the next lesson, we look at compounds. Now try the problem.'
     write: '2. Symbols (Na, Fe); the small number counts atoms, as in $\ce{O2}$'
 
 # ---------------------------------------------------------------- after the lesson: try it

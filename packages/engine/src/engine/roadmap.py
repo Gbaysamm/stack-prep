@@ -400,8 +400,17 @@ def _advice(spec: RoadmapInput, status: Status, target: float | None) -> str | N
 
 
 def needs_lesson(unit: UnitStanding) -> bool:
-    """Run on, still below the bar, and not taught since: its next stop is its lesson."""
-    return unit.runs >= 1 and not unit.taught and not moved_past(unit)
+    """Run on, still below the bar, and not taught since: its next stop is its lesson.
+
+    Running out of new questions does not take the lesson away (founder, 13 Nov 2026: a weak
+    run on Elements, compounds and mixtures, whose few questions were all met, brought no
+    lesson). A lesson needs no questions; only the run after it does."""
+    return (
+        unit.runs >= 1
+        and not unit.taught
+        and not secured(unit)
+        and unit.runs < STUCK_AFTER_RUNS
+    )
 
 
 def topics_to_test(units: Sequence[UnitStanding], tested: frozenset[str]) -> list[UnitStanding]:
@@ -462,6 +471,12 @@ def _syllabus_queue(
         width += 1
 
     queue: list[tuple[str, str, Reason, Value, PlannedUnit, int | None]] = []
+    # A weak subtopic with no new questions left still gets its lessons (no run can follow).
+    for unit in open_units(units, width):
+        if unit.fresh == 0 and needs_lesson(unit):
+            for part in range(unit.taught_parts + 1, unit.lesson_parts + 1):
+                if len(queue) < slots:
+                    queue.append(entry(unit, "reteach", part))
     # A finished topic's test comes first: it is the check that the topic is really done.
     for first in topics_to_test(units, tested):
         test = entry(first, "topic_test")

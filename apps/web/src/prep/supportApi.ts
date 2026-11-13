@@ -3,6 +3,7 @@
  * apps/api/src/app/routers/support.py, announcements.py and admin_system.py (public part).
  */
 import { failure, reach } from '../lib/friendlyError.js';
+import { KEEP, shared } from '../lib/shared.js';
 
 export type SupportTopic = 'account' | 'payment' | 'question' | 'app' | 'other';
 export type SupportStatus = 'open' | 'answered' | 'closed';
@@ -72,7 +73,8 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const supportApi = {
-  threads: (studentId: string) => call<ThreadLine[]>(`/v1/student/${studentId}/support`),
+  threads: (studentId: string) =>
+    shared(`support:${studentId}`, KEEP.account, () => call<ThreadLine[]>(`/v1/student/${studentId}/support`)),
   thread: (studentId: string, threadId: string) =>
     call<Thread>(`/v1/student/${studentId}/support/${threadId}`).then(changed),
   start: (studentId: string, body: { topic: SupportTopic; subject: string; body: string }) =>
@@ -82,10 +84,13 @@ export const supportApi = {
       method: 'POST',
       body: JSON.stringify({ body }),
     }).then(changed),
-  announcements: (studentId: string) => call<Announcement[]>(`/v1/student/${studentId}/announcements`),
+  announcements: (studentId: string) =>
+    shared(`announcements:${studentId}`, KEEP.account, () =>
+      call<Announcement[]>(`/v1/student/${studentId}/announcements`),
+    ),
   dismiss: (studentId: string, id: string) =>
     call<void>(`/v1/student/${studentId}/announcements/${id}/dismiss`, { method: 'POST' }),
-  settings: () => call<PublicSettings>('/v1/app/settings'),
+  settings: () => shared('settings', KEEP.settings, () => call<PublicSettings>('/v1/app/settings')),
   contact: (body: { name: string; email: string; topic: SupportTopic; subject: string; body: string; website: string }) =>
     call<{ status: 'sent' }>('/v1/contact', { method: 'POST', body: JSON.stringify(body) }),
 };

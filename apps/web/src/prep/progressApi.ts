@@ -1,5 +1,6 @@
 import { failure, reach } from '../lib/friendlyError.js';
 import type { SubjectScore } from '../student/api';
+import { KEEP, shared } from '../lib/shared.js';
 
 /**
  * The student's overview and run history: the calls the home dashboard and the progress page are
@@ -133,7 +134,8 @@ function visible(overview: Overview): Overview {
 }
 
 export const progressApi = {
-  overview: (studentId: string) => get<Overview>(`/student/${studentId}/overview`).then(visible),
+  overview: (studentId: string) =>
+    shared(`overview:${studentId}`, KEEP.overview, () => get<Overview>(`/student/${studentId}/overview`).then(visible)),
   runs: (studentId: string, limit = 20, before?: string) =>
     get<PracticeRunPage>(
       `/student/${studentId}/practice?limit=${limit}${before ? `&before=${encodeURIComponent(before)}` : ''}`,

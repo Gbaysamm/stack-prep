@@ -3,6 +3,7 @@
  * apps/api/src/app/routers/billing.py.
  */
 import { failure, reach } from '../lib/friendlyError.js';
+import { KEEP, shared } from '../lib/shared.js';
 
 export interface Length {
   id: string;
@@ -131,7 +132,8 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const billingApi = {
   plans: () => call<Catalogue>('/billing/plans'),
-  standing: (studentId: string) => call<Standing>(`/student/${studentId}/billing`),
+  standing: (studentId: string) =>
+    shared(`billing:${studentId}`, KEEP.account, () => call<Standing>(`/student/${studentId}/billing`)),
   quote: (studentId: string, planId: string, lengthId: string, code?: string) =>
     call<Quote>(`/student/${studentId}/billing/quote`, {
       method: 'POST',
