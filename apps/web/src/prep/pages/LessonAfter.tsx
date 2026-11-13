@@ -16,6 +16,7 @@ import { Button, PageHero, Skeleton, cx } from '../ui.js';
 import { PlainShell } from '../shell.js';
 import { useStudent } from '../store.js';
 import './LessonAfter.css';
+import { useLeaveWarning } from '../../lib/leaveWarning.js';
 
 interface Tried {
   correct: boolean | null;
@@ -66,6 +67,7 @@ export function LessonAfter({
   const q = `?part=${part}`;
   const [page, setPage] = useState<After | null>(null);
   const [error, setError] = useState<string | null>(null);
+  useLeaveWarning(page !== null && !page.problems.every((problem) => problem.tried !== null));
 
   useEffect(() => {
     request<After>(`${base}/after${q}`)
@@ -89,6 +91,8 @@ export function LessonAfter({
     setPage((now) =>
       now ? { ...now, problems: now.problems.map((p, n) => (n === index ? { ...p, tried: result } : p)) } : now,
     );
+  // The lesson is finished once each problem has been tried (founder, 13 Nov 2026).
+  const finished = page.problems.every((problem) => problem.tried !== null);
   const next = page.next_title
     ? `Next: ${page.next_title}`
     : `That was the last lesson${page.subtopic ? ` on ${page.subtopic}` : ''}. Next, a run to show you have it.`;
@@ -98,10 +102,10 @@ export function LessonAfter({
       <PageHero
         eyebrow={page.parts > 1 ? `Lesson ${page.part} of ${page.parts} · ${page.subject}` : `Lesson · ${page.subject}`}
         title={page.title}
-        sub={next}
+        sub={finished ? next : `Try the problem below to finish the lesson. ${next}`}
         actions={
           <>
-            <Button tone="lime" busy={continuing} icon={<IconCheck size={16} />} onClick={onContinue}>
+            <Button tone="lime" busy={continuing} disabled={!finished} icon={<IconCheck size={16} />} onClick={onContinue}>
               Continue
             </Button>
             <Button tone="soft" icon={<IconReplay size={16} />} onClick={onWatchAgain}>
@@ -174,7 +178,17 @@ export function LessonAfterPage() {
     }
   };
   return (
-    <PlainShell title="After the lesson" backTo="/roadmap" backLabel="Roadmap">
+    <PlainShell
+      title="After the lesson"
+      backTo="/roadmap"
+      backLabel="Roadmap"
+      confirmExit={{
+        title: 'Leave before finishing?',
+        body: "This lesson isn't finished yet. It stays next on your roadmap until you try the problem and press Continue.",
+        leave: 'Leave for now',
+        stay: 'Stay and finish',
+      }}
+    >
     <LessonAfter
       studentId={student.studentId}
       subtopicId={subtopicId}
@@ -410,28 +424,27 @@ function Ask({
           <div ref={end} />
         </div>
       ) : (
-        <p className="la-lede">Anything still unclear? Ask here. The coach answers in writing, and your questions are kept for when you come back.</p>
+        <p className="la-lede">Anything still unclear? The coach answers in writing.</p>
       )}
       {page.can_ask ? (
-        <form className="la-askbox" onSubmit={send}>
+        <form className="la-compose" onSubmit={send}>
           <input
-            className="sj-input"
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
-            placeholder="Ask about this lesson…"
+            placeholder="Type your question"
             aria-label="Ask the coach about this lesson"
             maxLength={600}
             disabled={waiting !== null}
           />
-          <Button type="submit" tone="primary" icon={<IconSend size={16} />} disabled={!draft.trim() || waiting !== null}>
-            Ask
-          </Button>
+          <button type="submit" className="la-send" aria-label="Send" disabled={!draft.trim() || waiting !== null}>
+            <IconSend size={16} />
+          </button>
         </form>
       ) : (
         <p className="la-lede">Asking the coach comes with a plan.</p>
       )}
       {error ? <p className="la-error">{error}</p> : null}
-      {page.can_ask ? <p className="la-left sj-small">{page.asks_left} questions left today</p> : null}
+      {page.can_ask ? <p className="la-left">Kept for when you come back · {page.asks_left} left today</p> : null}
     </section>
   );
 }

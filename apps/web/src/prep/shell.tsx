@@ -658,7 +658,21 @@ export function FocusShell({
  * has one thing to do and the menu would only distract (after a lesson). Same flat bar and
  * crumb as every main page; on the right, the way back.
  */
-export function PlainShell({ title, backTo, backLabel, children }: { title: string; backTo: string; backLabel: string; children: ReactNode }) {
+export function PlainShell({
+  title,
+  backTo,
+  backLabel,
+  confirmExit,
+  children,
+}: {
+  title: string;
+  backTo: string;
+  backLabel: string;
+  /** Ask before leaving (a lesson is not finished until its page is). */
+  confirmExit?: { title: string; body: string; leave: string; stay: string };
+  children: ReactNode;
+}) {
+  const [asking, setAsking] = useState(false);
   return (
     <div className="sj-shell sj-plain">
       <div className="sj-canvas" />
@@ -675,7 +689,16 @@ export function PlainShell({ title, backTo, backLabel, children }: { title: stri
               <strong>{title}</strong>
             </span>
             <div className="right">
-              <Link to={backTo} className="sj-btn ghost sm sj-plain-back">
+              <Link
+                to={backTo}
+                className="sj-btn ghost sm sj-plain-back"
+                onClick={(event) => {
+                  if (confirmExit) {
+                    event.preventDefault();
+                    setAsking(true);
+                  }
+                }}
+              >
                 <IconArrowLeft size={16} />
                 <span>{backLabel}</span>
               </Link>
@@ -684,6 +707,25 @@ export function PlainShell({ title, backTo, backLabel, children }: { title: stri
         </header>
         <main id="main">{children}</main>
       </div>
+      {confirmExit ? (
+        <Dialog
+          open={asking}
+          onClose={() => setAsking(false)}
+          title={confirmExit.title}
+          actions={
+            <>
+              <Button tone="ghost" onClick={() => setAsking(false)}>
+                {confirmExit.stay}
+              </Button>
+              <Button to={backTo} tone="dark">
+                {confirmExit.leave}
+              </Button>
+            </>
+          }
+        >
+          {confirmExit.body}
+        </Dialog>
+      ) : null}
     </div>
   );
 }

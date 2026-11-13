@@ -25,6 +25,7 @@ import { Badge, Button, Ring, Skeleton, Spinner, cx } from '../ui.js';
 import './CheckupRoom.css';
 import { friendly } from '../../lib/friendlyError.js';
 import { QuestionTools } from '../QuestionTools.js';
+import { useLeaveWarning } from '../../lib/leaveWarning.js';
 
 const clockOf = (seconds: number) =>
   `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
@@ -36,6 +37,7 @@ export function CheckupRoom() {
   const student = useStudent();
 
   const [state, setState] = useState<CheckupState | null>(null);
+  useLeaveWarning(state !== null && !state.finished);
   const [subjectName, setSubjectName] = useState<string>('');
   const [loadIssue, setLoadIssue] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);

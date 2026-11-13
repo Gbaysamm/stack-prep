@@ -15,6 +15,20 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-13
 
+### Nothing in progress is lost by a slip: leaving asks first
+- **What:** a lesson playing, a run, a check-up and the after-lesson page warn before the tab is
+  closed or reloaded (`lib/leaveWarning.ts`; the mock exam already did). Closing a lesson half
+  way asks "Leave the lesson?" (Keep watching / Leave for now); it stays next on the roadmap.
+  The after-lesson page's Roadmap button asks too, and Continue waits until the problem has
+  been tried ("Try the problem below to finish the lesson"). The coach box: one line, a slim
+  field with a small send button inside it, a quiet note under it. Checked at 1440 and 390.
+- **Why:** founder, 13 Nov 2026: the lesson isn't done until its page is; a closed tab should
+  not lose the student's place; the coach box's button too tall, its placeholder too big.
+- **Where:** `apps/web/src/lib/leaveWarning.ts`, `prep/pages/{Lesson,LessonAfter,PracticeRoom,
+  CheckupRoom}.tsx`, `prep/shell.tsx` (`PlainShell` confirm), `LessonAfter.css`.
+- **Status:** done locally. Open: a lesson does not yet remember where the student stopped
+  (it starts again from the beginning); runs and check-ups already resume.
+
 ### Lessons kept together on the path; closing a lesson early; the after-lesson page redesigned
 - **What:** a subtopic's lessons, and the run after them, now come one after another on the
   path (lesson 2 of 5 had landed four stops after lesson 1, between other subjects;

@@ -22,8 +22,9 @@ import {
 import { IconCheck, IconClose } from "../icons.js";
 import { FocusShell } from "../shell.js";
 import { useLoad, usePageTitle, useStudent } from "../store.js";
-import { Button, Skeleton, cx } from "../ui.js";
+import { Button, Dialog, Skeleton, cx } from "../ui.js";
 import "./Lesson.css";
+import { useLeaveWarning } from "../../lib/leaveWarning.js";
 
 /** The board is a large module and only a lesson needs it, so it loads when first opened. */
 const Board = lazy(() =>
@@ -63,8 +64,12 @@ export function Lesson() {
     search.get("after") === "1" ? "after" : "board",
   );
   const [watch] = useState(0);
+  // Leaving a lesson half way asks first, on the close button and on the tab (founder, 13 Nov
+  // 2026). It stays next on the roadmap.
+  const [leaving, setLeaving] = useState(false);
   // The written lesson, from the phone or downloaded whole; 'none': the bank has none yet.
   const [board, setBoard] = useState<LessonPackage | "none" | null>(null);
+  useLeaveWarning(stage === "board" && board !== null && board !== "none");
   const [progress, setProgress] = useState<number | null>(null);
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -158,9 +163,26 @@ export function Lesson() {
             onDone={() => setStage("after")}
             // Closed before the end: back to the roadmap, the lesson not taken (founder, 13
             // Nov 2026: closing half way opened "after the lesson").
-            onClose={() => navigate("/roadmap")}
+            onClose={() => setLeaving(true)}
           />
         </Suspense>
+        <Dialog
+          open={leaving}
+          onClose={() => setLeaving(false)}
+          title="Leave the lesson?"
+          actions={
+            <>
+              <Button tone="ghost" onClick={() => setLeaving(false)}>
+                Keep watching
+              </Button>
+              <Button to="/roadmap" tone="dark">
+                Leave for now
+              </Button>
+            </>
+          }
+        >
+          It isn't finished yet, so it stays next on your roadmap.
+        </Dialog>
       </div>
     );
   }

@@ -71,6 +71,7 @@ import "./PracticeRoom.css";
 import { friendly } from '../../lib/friendlyError.js';
 import { QuestionTools } from "../QuestionTools.js";
 import { VoiceLocked, usePremium } from "../premium.js";
+import { useLeaveWarning } from "../../lib/leaveWarning.js";
 
 type Confidence = "sure" | "unsure" | "guessed";
 
@@ -239,6 +240,7 @@ export function PracticeRoom() {
   const narrow = useNarrow();
 
   const [state, setState] = useState<PracticeState | null>(null);
+  useLeaveWarning(state !== null && state.stage !== "finished");
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [wrong, setWrong] = useState<string | null>(null);
