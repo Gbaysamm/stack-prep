@@ -27,6 +27,7 @@ from app.routers import (
     announcements,
     bank,
     bank_import,
+    bank_lessons,
     billing,
     checkup,
     curriculum,
@@ -102,6 +103,7 @@ def create_app() -> FastAPI:
     app.include_router(review.router)
     app.include_router(bank.router)
     app.include_router(bank_import.router)
+    app.include_router(bank_lessons.router)
     app.include_router(topics.router)
     app.include_router(publishing.router)
     app.include_router(checkup.router)

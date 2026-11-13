@@ -34,10 +34,38 @@ export interface PaperLine {
   title: string;
   exam_year: number | null;
   own: boolean;
+  /** A set of AI-written questions: badged, and the only place questions are imported. */
+  ai_generated?: boolean;
   questions: number;
   approved: number;
   needs_review: number;
   flagged: number;
+}
+
+/** A subtopic of a subject's syllabus, for the outside AI's prompt (routers/bank_import.py). */
+export interface SubtopicLine {
+  code: string;
+  name: string;
+  topic: string;
+  covers: string | null;
+  questions: number;
+}
+
+export interface ImportVerdict {
+  index: number;
+  ok: boolean;
+  problems: string[];
+  notes: string[];
+  subtopic: string | null;
+  stem: string | null;
+  question_id: string | null;
+}
+
+export interface ImportResult {
+  checked: number;
+  passed: number;
+  saved: number;
+  verdicts: ImportVerdict[];
 }
 
 export interface SubjectPage {
@@ -126,9 +154,15 @@ export const bank = {
   addSubject: (examId: string, body: { name: string; code?: string; copy_topics_from?: string | null }) =>
     post<SubjectCard>(`/exams/${examId}/subjects`, body),
   subject: (id: string) => request<SubjectPage>(`/subjects/${id}`),
-  addPaper: (subjectId: string, body: { exam_year?: number | null; title?: string | null }) =>
+  addPaper: (subjectId: string, body: { exam_year?: number | null; title?: string | null; ai_generated?: boolean }) =>
     post<PaperLine>(`/subjects/${subjectId}/papers`, body),
-  removePaper: (id: string) => request<void>(`/papers/${id}`, { method: 'DELETE' }).then(changed),
+  removePaper: (id: string, withQuestions = false) =>
+    request<void>(`/papers/${id}${withQuestions ? '?with_questions=true' : ''}`, { method: 'DELETE' }).then(changed),
+  renamePaper: (id: string, body: { title?: string; exam_year?: number }) =>
+    post<PaperLine>(`/papers/${id}`, body, 'PATCH').then(changed),
+  subtopics: (subjectId: string) => request<SubtopicLine[]>(`/subjects/${subjectId}/subtopics`),
+  importQuestions: (paperId: string, questions: unknown[], apply: boolean) =>
+    post<ImportResult>(`/papers/${paperId}/import`, { questions, apply }).then((r) => (apply ? changed(r) : r)),
   paper: (id: string) => request<PaperPage>(`/papers/${id}`),
   addQuestion: (paperId: string, body: QuestionIn) =>
     post<{ question_id: string }>(`/papers/${paperId}/questions`, body),
@@ -143,4 +177,65 @@ export const bank = {
     post<{ moved: number }>(`/topics/${id}/remove`, { move_to_skill_id: moveTo }),
   topicQuestions: (id: string) => request<FiledQuestion[]>(`/topics/${id}/questions`),
   removeQuestion: (id: string, reason: string) => post<void>(`/questions/${id}/remove`, { reason }),
+  lessons: (subjectId: string) => request<LessonsPage>(`/subjects/${subjectId}/lessons`),
+  lesson: (subtopicId: string, part: number) => request<LessonDetail>(`/lessons/${subtopicId}/${part}`),
+  editLesson: (subtopicId: string, part: number, moments: { index: number; say: string; write: string | null }[]) =>
+    post<LessonEditResult>(`/lessons/${subtopicId}/${part}`, { moments }, 'PUT'),
 };
+
+/* ------------------------------------------------------------------ lessons (routers/bank_lessons.py) */
+
+export interface LessonPart {
+  part: number;
+  title: string | null;
+  moments: number;
+  minutes: number;
+  problems: number;
+  edited_at: string | null;
+  edited_by: string | null;
+}
+
+export interface SubtopicLessons {
+  subtopic_id: string;
+  code: string;
+  name: string;
+  questions: number;
+  parts: LessonPart[];
+}
+
+export interface LessonsPage {
+  subject_id: string;
+  subject: string;
+  exam_id: string | null;
+  exam: string | null;
+  topics: { name: string; subtopics: SubtopicLessons[] }[];
+}
+
+export interface LessonMoment {
+  index: number;
+  section: string | null;
+  say: string;
+  write: string | null;
+  marks: string[];
+}
+
+export interface LessonDetail {
+  subtopic_id: string;
+  subtopic: string;
+  code: string;
+  part: number;
+  parts: number;
+  title: string | null;
+  source_file: string;
+  minutes: number;
+  edited_at: string | null;
+  edited_by: string | null;
+  moments: LessonMoment[];
+  problems: { ask: string; answer: string; working: string[] }[];
+}
+
+export interface LessonEditResult {
+  saved: boolean;
+  problems: string[];
+  lesson: LessonDetail;
+}

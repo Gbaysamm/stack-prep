@@ -63,6 +63,8 @@ class Option(BaseModel):
     #: The option's drawing, when the option is a picture; its `body` is then only a label.
     #: Served from this router, since a figure under review is not yet cleared for students.
     figure: OptionFigure | None = None
+    #: Why a student might pick this wrong option (its distractor note or misconception).
+    why: str | None = None
 
 
 class Report(BaseModel):
@@ -403,9 +405,12 @@ async def question_detail(
     options = await fetch_all(
         conn,
         """
-        SELECT id, option_key, body, is_correct, display_order
-        FROM question_options WHERE question_version_id = :version
-        ORDER BY display_order, option_key
+        SELECT o.id, o.option_key, o.body, o.is_correct, o.display_order,
+               CASE WHEN o.is_correct THEN NULL ELSE coalesce(o.distractor_note, m.description) END AS why
+        FROM question_options o
+        LEFT JOIN misconceptions m ON m.id = o.misconception_id
+        WHERE o.question_version_id = :version
+        ORDER BY o.display_order, o.option_key
         """,
         version=detail["question_version_id"],
     )

@@ -864,3 +864,335 @@
     grid-row: 1;
   }
 }
+
+/* ---------------------------------------------------------------- subject page (13 Nov 2026)
+   Papers as rows, not cards: name, questions, approval, what is left, and Rename / Remove. */
+.sj .bk-sections {
+  display: grid;
+  gap: 8px;
+}
+.sj .bk-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.sj .bk-section-head h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+.sj .bk-section-head > span {
+  color: var(--ink-500, #6b6880);
+  font-size: 13px;
+}
+.sj .bk-link {
+  border: 0;
+  background: none;
+  padding: 4px 2px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--purple-600, #7c3aed);
+  cursor: pointer;
+}
+.sj .bk-link:hover {
+  text-decoration: underline;
+}
+.sj .bk-ai {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7c3aed, #db2777);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.sj .bk-rows {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--line, #e7e4f0);
+  border-radius: 14px;
+  background: var(--white, #fff);
+  overflow: hidden;
+}
+.sj .bk-row {
+  display: flex;
+  align-items: center;
+  border-top: 1px solid var(--line, #e7e4f0);
+}
+.sj .bk-row:first-child {
+  border-top: 0;
+}
+.sj .bk-row-main {
+  display: grid;
+  grid-template-columns: minmax(120px, 1.2fr) auto 140px auto auto auto;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+  padding: 14px 18px;
+  color: inherit;
+  text-decoration: none;
+}
+.sj .bk-row-main:hover {
+  background: var(--lav-50, #f7f5fd);
+}
+.sj .bk-row-main strong {
+  overflow: hidden;
+  font-family: var(--f-display);
+  font-size: 16px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.sj .bk-row-count,
+.sj .bk-row-share {
+  color: var(--ink-500, #6b6880);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.sj .bk-row-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--lav-100, #ece8fb);
+  overflow: hidden;
+}
+.sj .bk-row-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #16a34a;
+}
+.sj .bk-row-todo {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #fff7ed;
+  color: #c2410c;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.sj .bk-row-actions {
+  display: flex;
+  gap: 4px;
+  padding-right: 12px;
+}
+.sj .bk-row-actions button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-600, #4b4860);
+  cursor: pointer;
+}
+.sj .bk-row-actions button:hover {
+  background: var(--lav-50, #f7f5fd);
+}
+.sj .bk-row-actions button.danger {
+  color: #be123c;
+}
+.sj .bk-row-actions button.danger:hover {
+  background: #fff1f2;
+}
+.sj .bk-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.sj .bk-kind {
+  flex-wrap: wrap;
+}
+/* Smaller buttons in the page heads of the reviewer side. */
+.sj .st-pagehead-actions .sj-btn {
+  min-height: 38px;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+/* On a phone each paper is its own card, two to a row; the icons sit in the card's corner. */
+@media (max-width: 760px) {
+  .sj .bk-rows {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    overflow: visible;
+  }
+  .sj .bk-row,
+  .sj .bk-row:first-child {
+    position: relative;
+    display: block;
+    border: 1px solid var(--line, #e7e4f0);
+    border-radius: 14px;
+    background: var(--white, #fff);
+  }
+  .sj .bk-row-main {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 14px 14px 12px;
+  }
+  .sj .bk-row-main > strong {
+    padding-right: 64px;
+  }
+  .sj .bk-row-bar {
+    align-self: stretch;
+  }
+  .sj .bk-row-actions {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    gap: 0;
+    padding: 0;
+  }
+  .sj .bk-row-actions button {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+/* ---------------------------------------------------------------- import panel (ImportJson.tsx) */
+.sj .bi {
+  display: grid;
+  gap: 14px;
+}
+.sj .bi-steps {
+  display: flex;
+}
+.sj .bi-steps button {
+  flex: 1;
+}
+.sj .bi-count {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.sj .bi-count input {
+  width: 64px;
+  padding: 6px 8px;
+  border: 1px solid var(--line, #e7e4f0);
+  border-radius: 8px;
+  font: inherit;
+}
+.sj .bi-subs {
+  display: grid;
+  max-height: 44vh;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid var(--line, #e7e4f0);
+  border-radius: 12px;
+}
+.sj .bi-subs li + li {
+  border-top: 1px solid var(--line, #e7e4f0);
+}
+.sj .bi-subs label {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.sj .bi-subs code {
+  font-size: 12px;
+  color: var(--purple-700, #6d28d9);
+}
+.sj .bi-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.sj .bi-n {
+  min-width: 26px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--lav-100, #ece8fb);
+  font-size: 12px;
+  text-align: center;
+}
+.sj .bi-n.thin {
+  background: #fff1f2;
+  color: #be123c;
+}
+.sj .bi-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.sj .bi-actions .st-muted {
+  margin-right: auto;
+}
+.sj .bi-paste {
+  min-height: 220px;
+  padding: 12px;
+  border: 1px solid var(--line, #e7e4f0);
+  border-radius: 12px;
+  font-family: var(--f-mono, ui-monospace, monospace);
+  font-size: 12.5px;
+  resize: vertical;
+}
+.sj .bi-sum {
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+.sj .bi-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .bi-list li {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f0fdf4;
+}
+.sj .bi-list li.bad {
+  background: #fff1f2;
+}
+.sj .bi-mark {
+  font-weight: 700;
+}
+.sj .bi-list strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+}
+.sj .bi-list small {
+  color: var(--ink-500, #6b6880);
+}
+.sj .bi-problem,
+.sj .bi-note {
+  margin: 4px 0 0;
+  font-size: 13px;
+}
+.sj .bi-problem {
+  color: #be123c;
+}
+.sj .bi-note {
+  color: #b45309;
+}

@@ -154,6 +154,11 @@ async def main() -> None:
     parser.add_argument(
         "--file", help="only this lesson file (a writer checking theirs while others write)"
     )
+    parser.add_argument(
+        "--overwrite-edits",
+        action="store_true",
+        help="also reload lessons a reviewer edited in the app (their edits are lost)",
+    )
     parser.add_argument("--database-url", default=os.environ.get("DATABASE_URL", ""))
     args = parser.parse_args()
     paths = [Path(args.file).resolve()] if args.file else sorted(BANK.glob("*/*.yaml"))
@@ -174,8 +179,28 @@ async def main() -> None:
     conn = await asyncpg.connect(dsn=dsn)
     try:
         await conn.execute("SET search_path = stackprep, public")
+        # Lessons edited in the app (migration 049) are left alone until the edit is in the file.
+        edited = {
+            (str(row["subtopic_id"]), row["part"]): row["edited_by"]
+            for row in await conn.fetch(
+                "SELECT subtopic_id, part, edited_by FROM subtopic_lesson_content"
+                " WHERE edited_at IS NOT NULL"
+            )
+        }
+        kept = 0
         async with conn.transaction():
             for lesson in lessons:
+                if (
+                    not args.overwrite_edits
+                    and (str(lesson["subtopic_id"]), lesson["part"]) in edited
+                ):
+                    who = edited[(str(lesson["subtopic_id"]), lesson["part"])] or "a reviewer"
+                    print(
+                        f"  kept {lesson['file']}: edited in the app by {who}; copy the edit "
+                        "into the file, then load with --overwrite-edits"
+                    )
+                    kept += 1
+                    continue
                 found = await conn.fetchval(
                     "SELECT 1 FROM curriculum_items WHERE id = $1 AND item_type = 'subtopic'",
                     lesson["subtopic_id"],
@@ -190,7 +215,8 @@ async def main() -> None:
                     ON CONFLICT (subtopic_id, part) DO UPDATE
                       SET moments = EXCLUDED.moments, doodles = EXCLUDED.doodles,
                           problems = EXCLUDED.problems, title = EXCLUDED.title,
-                          source_file = EXCLUDED.source_file, updated_at = now()
+                          source_file = EXCLUDED.source_file, updated_at = now(),
+                          edited_at = NULL, edited_by = NULL
                     """,
                     lesson["subtopic_id"],
                     json.dumps(lesson["moments"]),
@@ -208,7 +234,10 @@ async def main() -> None:
                         subtopic,
                         len(numbers),
                     )
-        print(f"{len(lessons)} subtopic lesson(s) loaded.")
+        print(
+            f"{len(lessons) - kept} subtopic lesson(s) loaded"
+            + (f", {kept} kept as edited in the app." if kept else ".")
+        )
     finally:
         await conn.close()
 

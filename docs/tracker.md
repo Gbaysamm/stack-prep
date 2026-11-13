@@ -16,9 +16,9 @@ Pushed (on `company/integration`, deploys to both servers) · Waiting (on the fo
 - **Last thing done:** the bank's line-by-line review (`docs/questions/bank-review-brief.md`)
   ran for Accounts (9 files), Biology (9) and Physics 2018, then was paused to save the weekly
   usage limit. Those 19 files are checked; to be loaded and committed with this tracker.
-- **Next (founder, 13 Nov 2026):** rebuild the reviewer side in this order: (1) AI-generated
-  sets and the JSON importer, (2) subject page with rename and retire, (3) question detail,
-  (4) a Lessons page, (5) lesson generation. See "Reviewer side" below.
+- **Next:** the founder's yes to the cost of writing lessons with AI (about $0.50 a lesson on
+  Opus 5.5), then that button on the Lessons page. The reviewer side (sets, import, question
+  view, Lessons page) is done-local.
 - **Paused:** the bank review for the remaining 83 files, one subject at a time when the
   founder says (Chemistry, Commerce, Economics, English, Government, Literature, Mathematics,
   Physics 2010–2017); then a timing audit of every moment, film a few lessons, commit.
@@ -70,12 +70,12 @@ Order of work (each shown at 1440 and 390 before the next):
 | Ask (founder) | Plan | Where | Status |
 |---|---|---|---|
 | More questions per subtopic (about 5,000 to give every subtopic 10; thin subjects: Biology, Chemistry, Physics, Economics, Government, Accounts, Commerce) | Generate outside Claude Code: an external AI pasting JSON, or the plan's monthly API credit ($100 on Max, claimed in claude.ai Billing → API credits, key in Admin → AI for questions, cap $100) | — | Open |
-| AI questions kept apart from the real bank, clearly labelled | An "AI-generated practice" set per subject in "Our own sets", badge everywhere; never a fake year | migration 048, `routers/bank.py`, `review/BankPages.tsx` | In progress (server done-local; screens next) |
-| Upload questions by JSON; never an invented subtopic | Per-subject subtopic list (codes, syllabus line, counts) and a ready prompt; importer rejects unknown codes; check, preview, import as "To check"; figures as SVG or "figure needed" (held back) | `routers/bank_import.py`, `docs/questions/ai-question-format.md`; panel next | In progress (server done-local) |
-| "Add with AI" not on past papers | Only in AI sets | `BankPages.tsx` | Open (1) |
-| Subject page: can't rename or delete a year; design poor | Redesign; rename, retire a paper | `BankPages.tsx`, `bank.py` | Open (2) |
-| Question detail page: poor UI/UX | Redesign the question view and editing | `BankPages.tsx`, `ReviewPage.tsx` | Open (3) |
-| Lessons managed from the reviewer side: status per topic, edit, generate | A Lessons page: subtopics, parts, missing, edit a lesson, generate one | new | Open (4, 5) |
+| AI questions kept apart from the real bank, clearly labelled | "AI-generated sets" section per subject with its badge; the set's page says "AI-generated set"; never a fake year | migration 048, `routers/bank.py`, `review/BankPages.tsx` | Done-local |
+| Upload questions by JSON; never an invented subtopic | Import JSON panel on AI sets: pick subtopics (thinnest first), copy the prompt, paste, Check (every fault listed), Import the ones that pass as "To check"; tested end to end | `routers/bank_import.py`, `review/ImportJson.tsx`, `docs/questions/ai-question-format.md` | Done-local |
+| "Add with AI" not on past papers | Gone; AI sets have "Import JSON" instead | `BankPages.tsx` | Done-local |
+| Subject page: can't rename or delete a year; design poor | Sections (past papers, own sets, AI sets); rename and remove as icons; cards two to a row on a phone; smaller header buttons | `BankPages.tsx`, `bank.css`, `bank.py` | Done-local |
+| Question detail page: poor UI/UX | Checks strip; question in its own box; each wrong option with its reason; "B is right" to confirm; numbered worked steps and a hint box (Edit to change); level and topic below | `ReviewPage.tsx`, `review.css`, `routers/review.py` (`why`) | Done-local |
+| Lessons managed from the reviewer side: status per topic, edit, generate | Lessons page: every topic and subtopic with its lessons (or "No lessons yet"); a lesson read as said and written; Edit the words with a check that keeps cues and marks; edits kept from the loader (migration 049) | `routers/bank_lessons.py`, `review/LessonsPages.tsx`, `049_lesson_edits.sql`, `load_subtopic_lessons.py` | Done-local (edit); generate waits on the founder's yes to the cost |
 | Review the uploaded questions one by one next week | Re-solve, check key, options, wording, fit, figure | — | Waiting (questions to be uploaded; weekly limit) |
 
 ## Voice

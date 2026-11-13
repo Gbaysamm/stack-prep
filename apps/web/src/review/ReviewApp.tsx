@@ -7,7 +7,7 @@
  */
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
-import { IconBook, IconBrain, IconFlag, IconLayers, IconUser } from '../prep/icons.js';
+import { IconBook, IconBrain, IconFlag, IconLayers, IconPlay, IconUser } from '../prep/icons.js';
 import { StaffPage } from '../admin/StaffPage.js';
 import { StaffGate, useStaff } from '../staff/StaffGate.js';
 import { StaffShell, type NavItem } from '../staff/StaffShell.js';
@@ -20,6 +20,7 @@ import {
   QuestionRedirect,
   SubjectPapers,
 } from './BankPages.js';
+import { LessonScript, LessonSubjects, SubjectLessons } from './LessonsPages.js';
 import { SubjectTopics, TopicSubjects } from './TopicsPages.js';
 import { BANK_CHANGED, bank, type ExamLine } from './bankApi.js';
 
@@ -65,6 +66,7 @@ function ReviewShell() {
     })),
     { to: '/new-exam', label: 'Add an exam', icon: <IconLayers />, section: exams?.length ? undefined : 'Exams' },
     { to: '/topics', label: 'Topics', icon: <IconBrain />, section: 'Manage' },
+    { to: '/lessons', label: 'Lessons', icon: <IconPlay /> },
     ...(isAdmin ? [{ to: '/reviewers', label: 'Reviewers', icon: <IconUser /> }] : []),
     { to: '/reported', label: 'Reported', icon: <IconFlag />, count: flagged, section: 'Needs attention' },
   ];
@@ -78,6 +80,9 @@ function ReviewShell() {
         <Route path="/question/:questionId" element={<QuestionRedirect />} />
         <Route path="/topics" element={<TopicSubjects />} />
         <Route path="/topics/:subjectId" element={<SubjectTopics />} />
+        <Route path="/lessons" element={<LessonSubjects />} />
+        <Route path="/lessons/:subjectId" element={<SubjectLessons />} />
+        <Route path="/lessons/:subjectId/:subtopicId/:part" element={<LessonScript />} />
         {isAdmin ? <Route path="/reviewers" element={<StaffPage />} /> : null}
         <Route path="/reported" element={<FlaggedQuestions />} />
         <Route path="/new-exam" element={<NewExam />} />

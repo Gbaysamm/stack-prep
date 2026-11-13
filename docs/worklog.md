@@ -15,6 +15,30 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-13
 
+### The reviewer side rebuilt: AI sets and the JSON import, the subject page, the question view, a Lessons page
+- **What:** a subject's papers are in three sections (past papers, our own sets, AI-generated
+  sets) with rename and remove as icons, and cards two to a row on a phone. An AI set has an
+  Import JSON panel: pick subtopics (thinnest first), copy a ready prompt for any outside AI,
+  paste its JSON, Check (each fault listed per question), then Import the ones that pass as
+  "To check". "Add with AI" is gone from past papers. The question view was redesigned: a
+  strip of checks, the question in its own box, every wrong option with the reason a student
+  picks it (the API now sends `why`), "B is right" to confirm the key, numbered worked steps and
+  a hint box, then level and topic. A new Lessons page shows every topic and subtopic with its
+  lessons or "No lessons yet", and each lesson as it is taught (what is said beside what is
+  written, marked words underlined, the problems after it). A reviewer can correct the words;
+  the server refuses an edit that drops a cue word or a marked phrase, or adds or empties a
+  board line. An edited lesson is marked (migration 049) and the loader keeps it until the
+  edit is copied into its file (`--overwrite-edits` to reload it).
+- **Why:** founder, 13 Nov 2026: the reviewer UI was weak (no rename or delete of a year, poor
+  question view, "Add with AI" on past papers); more questions per subtopic through a JSON
+  import with AI questions kept apart; lessons managed from the reviewer side.
+- **Where:** `routers/bank_lessons.py` (new), `routers/review.py`, `routers/bank_import.py`,
+  `database/migrations/049_lesson_edits.sql`, `database/load_subtopic_lessons.py`,
+  `review/{BankPages,ImportJson,LessonsPages,ReviewPage,ReviewApp}.tsx`, `bank.css`,
+  `review.css`, `lessons.css`; tests `test_bank_lessons.py`.
+- **Status:** done locally. Deploy runs migrations 048 and 049. Writing a new lesson with AI
+  waits on the founder's yes to its cost.
+
 ### The day planned in minutes; one round of lessons, then "Still needs work"
 - **What:** the roadmap plans each day in minutes: a run costs the student's run time, a lesson
   about five minutes, and a run that does not fit waits for the next day, so a weak student's

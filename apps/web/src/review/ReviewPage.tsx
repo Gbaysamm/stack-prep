@@ -380,36 +380,58 @@ interface PanelProps {
 export function QuestionPanel({ detail, subjectName, skills, busy, onAct, onReportClosed, onBack }: PanelProps) {
   const [solution, setSolution] = useState(detail.solution_steps.join('\n'));
   const [hint, setHint] = useState(detail.hints.join('\n'));
+  const [editingWork, setEditingWork] = useState(false);
 
   useEffect(() => {
     setSolution(detail.solution_steps.join('\n'));
     setHint(detail.hints.join('\n'));
+    setEditingWork(false);
   }, [detail.solution_steps, detail.hints]);
 
   const approved = detail.review_status === 'approved';
+  const locked = approved || busy;
+  const answerChecked = detail.answer_source === 'expert_verified' || detail.answer_source === 'official_key';
+  const levelChecked = detail.level_source === 'expert_verified' || detail.level_source === 'calibrated';
+  const skillChecked = detail.classification_status === 'approved';
+  const key = detail.options.find((option) => option.is_correct);
+  const checks = [
+    { label: 'Answer', done: answerChecked },
+    { label: 'Level', done: levelChecked },
+    { label: 'Topic', done: skillChecked },
+    { label: 'Working', done: detail.solution_steps.length > 0 },
+  ];
   const missing = [
-    detail.answer_source === 'expert_verified' || detail.answer_source === 'official_key' ? null : 'the answer checked',
-    detail.level_source === 'expert_verified' || detail.level_source === 'calibrated' ? null : 'the level checked',
-    detail.classification_status === 'approved' ? null : 'the skill approved',
-    detail.solution_steps.length > 0 ? null : 'a worked solution',
+    answerChecked ? null : 'the answer checked',
+    levelChecked ? null : 'the level checked',
+    skillChecked ? null : 'the topic approved',
+    detail.solution_steps.length > 0 ? null : 'worked steps',
     detail.hints.length > 0 ? null : 'a hint',
   ].filter(Boolean) as string[];
   const contentChanged = solution !== detail.solution_steps.join('\n') || hint !== detail.hints.join('\n');
+  const where = detail.exam_year ? `${detail.exam_year} paper` : 'Own set';
 
   return (
-    <section className="st-panel rv-detail" aria-label="Question">
+    <section className="st-panel rv-detail qv" aria-label="Question">
       <button type="button" className="rv-back" onClick={onBack}>
-        ← Back to the queue
+        ← Back to the list
       </button>
-      <header className="rv-detail-head">
+      <header className="qv-head">
         <div>
-          <span className="rv-eyebrow">{[subjectName, detail.paper_code].filter(Boolean).join(' · ') || 'Question'}</span>
-          <h2>
-            {detail.exam_year ?? '—'} · Question {detail.question_number ?? '?'}
-          </h2>
+          <span className="rv-eyebrow">{[subjectName, where].filter(Boolean).join(' · ')}</span>
+          <h2>Question {detail.question_number ?? ''}</h2>
         </div>
-        <span className={`st-pill ${approved ? 'good' : 'warn'}`}>{approved ? 'Approved' : 'Draft'}</span>
+        <span className={`st-pill ${approved ? 'good' : 'warn'}`}>{approved ? 'Approved' : 'To check'}</span>
       </header>
+      {!approved ? (
+        <ul className="qv-checks" aria-label="Checks">
+          {checks.map((check) => (
+            <li key={check.label} className={check.done ? 'done' : undefined}>
+              <span aria-hidden="true">{check.done ? '✓' : ''}</span>
+              {check.label}
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
       {detail.reports.length > 0 && (
         <div className="rv-reports">
@@ -428,128 +450,192 @@ export function QuestionPanel({ detail, subjectName, skills, busy, onAct, onRepo
         </details>
       )}
 
-      <div className="rv-question">
+      <div className="qv-stem">
         {detail.instructions && (
           <p className="rv-instruction">
             <Maths text={detail.instructions} />
           </p>
         )}
-        <p className="rv-stem sp-textbook">
+        <p className="sp-textbook">
           <Maths text={detail.stem} />
         </p>
       </div>
 
-      <div className="rv-block">
-        <h3>Answer</h3>
-        <ol className={`rv-options ${hasOptionPictures(detail.options) ? 'sp-pic-options' : ''}`}>
+      <section className="qv-block">
+        <div className="qv-block-head">
+          <h3>Options</h3>
+          <span className={answerChecked ? 'qv-ok' : 'qv-todo'}>{answerChecked ? 'Answer checked' : source(detail.answer_source)}</span>
+        </div>
+        <ol className={`qv-options ${hasOptionPictures(detail.options) ? 'sp-pic-options' : ''}`}>
           {detail.options.map((option) => (
-            <li key={option.id}>
+            <li key={option.id} className={option.is_correct ? 'key' : undefined}>
               <button
                 type="button"
-                disabled={approved || busy}
-                className={option.is_correct ? 'on' : undefined}
+                disabled={locked}
                 aria-pressed={option.is_correct}
+                title={option.is_correct ? 'The answer' : `Make ${option.option_key} the answer`}
                 onClick={() => void onAct(() => api.setAnswer(detail.question_id, option.option_key))}
               >
-                <span className="rv-key">{option.option_key}</span>
-                <span className="sp-textbook rv-option-body">
-                  <OptionBody body={option.body} figure={option.figure} />
+                <span className="qv-letter">{option.option_key}</span>
+                <span className="qv-option-text">
+                  <span className="sp-textbook">
+                    <OptionBody body={option.body} figure={option.figure} />
+                  </span>
+                  {option.is_correct ? (
+                    <span className="qv-why good">The answer</span>
+                  ) : option.why ? (
+                    <span className="qv-why">{option.why}</span>
+                  ) : null}
                 </span>
-                {option.is_correct && <span className="rv-chip good">Key</span>}
               </button>
             </li>
           ))}
         </ol>
-        <p className="rv-source">
-          {source(detail.answer_source)}
-          {detail.answer_confidence ? `, proposed with ${detail.answer_confidence} confidence` : ''}
-        </p>
-      </div>
-
-      <div className="rv-block">
-        <h3>Level</h3>
-        <div className="rv-levels" role="group" aria-label="Level">
-          {[1, 2, 3, 4, 5].map((level) => (
+        {!answerChecked && key && !approved ? (
+          <div className="qv-confirm">
+            <span>Solve it yourself. If {key.option_key} is right, confirm it; if not, tap the right option.</span>
             <button
-              key={level}
               type="button"
-              disabled={approved || busy}
-              className={detail.mastery_level_number === level ? 'on' : undefined}
-              aria-pressed={detail.mastery_level_number === level}
-              onClick={() => void onAct(() => api.setLevel(detail.question_id, level))}
+              className="sj-btn sm"
+              disabled={locked}
+              onClick={() => void onAct(() => api.setAnswer(detail.question_id, key.option_key))}
             >
-              L{level}
+              {key.option_key} is right
             </button>
-          ))}
-        </div>
-        <p className="rv-source">
-          {source(detail.level_source)}
-          {detail.level_confidence ? `, ${detail.level_confidence} confidence` : ''}
-        </p>
-      </div>
+          </div>
+        ) : null}
+      </section>
 
-      <div className="rv-block">
-        <h3>Skill</h3>
-        <div className="rv-skill">
-          <Select
-            className="rv-skill-pick"
-            aria-label="Skill"
-            value={detail.primary_skill_id ?? ''}
-            disabled={approved || busy}
-            placeholder="Choose a skill"
-            onChange={(value) => void onAct(() => api.decideSkill(detail.question_id, value))}
-            options={skills.map((skill) => ({
-              value: skill.id,
-              label: `${skill.code} — ${skill.name}`,
-              hint: skill.topic ?? undefined,
-            }))}
-          />
-          <button
-            type="button"
-            className="sj-btn ghost sm"
-            disabled={approved || busy || detail.classification_status === 'approved' || !detail.primary_skill_id}
-            onClick={() => void onAct(() => api.decideSkill(detail.question_id))}
-          >
-            {detail.classification_status === 'approved' ? 'Skill approved ✓' : 'Approve skill'}
-          </button>
+      <section className="qv-block">
+        <div className="qv-block-head">
+          <h3>Worked steps</h3>
+          {!approved && !editingWork ? (
+            <button type="button" className="qv-link" onClick={() => setEditingWork(true)}>
+              Edit
+            </button>
+          ) : null}
         </div>
-        {detail.classification_reason && <p className="rv-source">{detail.classification_reason}</p>}
-      </div>
+        {editingWork ? (
+          <div className="qv-edit">
+            <label className="st-field">
+              <span>One step a line</span>
+              <textarea value={solution} disabled={locked} rows={6} onChange={(event) => setSolution(event.target.value)} />
+            </label>
+            <label className="st-field">
+              <span>Hint: one a line</span>
+              <textarea value={hint} disabled={locked} rows={2} onChange={(event) => setHint(event.target.value)} />
+            </label>
+            <div className="st-row">
+              <button type="button" className="sj-btn ghost sm" onClick={() => setEditingWork(false)}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="sj-btn sm"
+                disabled={locked || !contentChanged}
+                onClick={() =>
+                  void onAct(() =>
+                    api.setContent(
+                      detail.question_id,
+                      solution.split('\n').filter((line) => line.trim()),
+                      hint.split('\n').filter((line) => line.trim()),
+                    ),
+                  )
+                }
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {detail.solution_steps.length ? (
+              <ol className="qv-steps">
+                {detail.solution_steps.map((step, index) => (
+                  <li key={index} className="sp-textbook">
+                    <Maths text={step} />
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="st-muted">No worked steps yet.</p>
+            )}
+            {detail.hints.length ? (
+              <div className="qv-hint">
+                <strong>Hint</strong>
+                {detail.hints.map((line, index) => (
+                  <p key={index}>
+                    <Maths text={line} />
+                  </p>
+                ))}
+              </div>
+            ) : null}
+          </>
+        )}
+      </section>
 
-      <div className="rv-block rv-content">
-        <label className="st-field">
-          <span>Worked solution: one step a line</span>
-          <textarea value={solution} disabled={approved || busy} rows={5} onChange={(event) => setSolution(event.target.value)} />
-        </label>
-        <label className="st-field">
-          <span>Hints: one a line</span>
-          <textarea value={hint} disabled={approved || busy} rows={2} onChange={(event) => setHint(event.target.value)} />
-        </label>
-        <div className="st-row">
-          <button
-            type="button"
-            className="sj-btn ghost sm"
-            disabled={approved || busy || !contentChanged}
-            onClick={() =>
-              void onAct(() =>
-                api.setContent(
-                  detail.question_id,
-                  solution.split('\n').filter((line) => line.trim()),
-                  hint.split('\n').filter((line) => line.trim()),
-                ),
-              )
-            }
-          >
-            Save the solution and hints
-          </button>
+      <section className="qv-block qv-two">
+        <div>
+          <div className="qv-block-head">
+            <h3>Level</h3>
+            <span className={levelChecked ? 'qv-ok' : 'qv-todo'}>{levelChecked ? 'Checked' : source(detail.level_source)}</span>
+          </div>
+          <div className="rv-levels" role="group" aria-label="Level">
+            {[1, 2, 3, 4, 5].map((level) => (
+              <button
+                key={level}
+                type="button"
+                disabled={locked}
+                className={detail.mastery_level_number === level ? 'on' : undefined}
+                aria-pressed={detail.mastery_level_number === level}
+                onClick={() => void onAct(() => api.setLevel(detail.question_id, level))}
+              >
+                L{level}
+              </button>
+            ))}
+          </div>
+          {!levelChecked && detail.mastery_level_number ? (
+            <p className="qv-note">Tap L{detail.mastery_level_number} to confirm it, or choose another.</p>
+          ) : null}
         </div>
-      </div>
+        <div>
+          <div className="qv-block-head">
+            <h3>Topic</h3>
+            <span className={skillChecked ? 'qv-ok' : 'qv-todo'}>{skillChecked ? 'Approved' : 'Not yet approved'}</span>
+          </div>
+          <div className="rv-skill">
+            <Select
+              className="rv-skill-pick"
+              aria-label="Topic"
+              value={detail.primary_skill_id ?? ''}
+              disabled={locked}
+              placeholder="Choose a topic"
+              onChange={(value) => void onAct(() => api.decideSkill(detail.question_id, value))}
+              options={skills.map((skill) => ({
+                value: skill.id,
+                label: `${skill.code} — ${skill.name}`,
+                hint: skill.topic ?? undefined,
+              }))}
+            />
+            {!skillChecked ? (
+              <button
+                type="button"
+                className="sj-btn ghost sm"
+                disabled={locked || !detail.primary_skill_id}
+                onClick={() => void onAct(() => api.decideSkill(detail.question_id))}
+              >
+                Approve
+              </button>
+            ) : null}
+          </div>
+        </div>
+      </section>
 
       <footer className="rv-approve">
         <button
           type="button"
           className="sj-btn"
-          disabled={approved || busy || missing.length > 0}
+          disabled={locked || missing.length > 0}
           onClick={() => void onAct(() => api.approve(detail.question_id))}
         >
           {approved ? 'Approved' : 'Approve the question'}
@@ -650,6 +736,8 @@ function source(value: string): string {
     calibrated: 'Calibrated from answers',
     ai_proposed: 'Proposed, not yet checked',
     proposed: 'Proposed, not yet checked',
+    model_proposed: 'Written by AI, not yet checked',
+    unverified: 'Not yet checked',
   };
   return words[value] ?? value.replace(/_/g, ' ');
 }

@@ -32,6 +32,8 @@ export interface Option {
   display_order: number;
   /** The option's drawing, when the option is a picture; `body` is then only its label. */
   figure?: OptionFigure | null;
+  /** Why a student might pick this wrong option. */
+  why?: string | null;
 }
 
 export interface Report {

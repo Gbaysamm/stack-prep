@@ -9,17 +9,19 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Maths } from '../Maths.js';
 import { friendly } from '../lib/friendlyError.js';
 import { Select } from '../lib/Select.js';
-import { IconArrowLeft, IconArrowRight, IconFlag, IconLayers, IconSparkles } from '../prep/icons.js';
+import { IconArrowLeft, IconArrowRight, IconFlag, IconLayers, IconPencil, IconSparkles, IconTrash } from '../prep/icons.js';
 import { StaffPageHead } from '../staff/StaffShell.js';
 import { REVIEW_CHANGED, api, type QuestionDetail, type Skill } from './api.js';
 import {
   bank,
   type ExamPage,
+  type PaperLine,
   type PaperPage,
   type QuestionIn,
   type QuestionLine,
   type SubjectPage,
 } from './bankApi.js';
+import { ImportJson } from './ImportJson.js';
 import { QuestionPanel } from './ReviewPage.js';
 import './bank.css';
 
@@ -306,24 +308,40 @@ function AddSubject({
 export function SubjectPapers() {
   const { subjectId = '' } = useParams();
   const { data, problem, reload } = useLoad<SubjectPage>(() => bank.subject(subjectId), [subjectId]);
-  const [adding, setAdding] = useState(false);
-  const past = (data?.papers ?? []).filter((p) => !p.own);
-  const own = (data?.papers ?? []).filter((p) => p.own);
+  const [adding, setAdding] = useState<PaperKind | null>(null);
+  const [renaming, setRenaming] = useState<PaperLine | null>(null);
+  const [removing, setRemoving] = useState<PaperLine | null>(null);
+  const papers = data?.papers ?? [];
+  const past = papers.filter((p) => !p.own).sort((a, b) => (b.exam_year ?? 0) - (a.exam_year ?? 0));
+  const own = papers.filter((p) => p.own && !p.ai_generated);
+  const ai = papers.filter((p) => p.ai_generated);
+  const rows = (list: PaperLine[]) => (
+    <ul className="bk-rows">
+      {list.map((paper) => (
+        <PaperRow key={paper.paper_id} paper={paper} onRename={() => setRenaming(paper)} onRemove={() => setRemoving(paper)} />
+      ))}
+    </ul>
+  );
 
   return (
     <>
-      {data && (
-        <Crumbs items={[{ to: `/exams/${data.exam.id}`, label: data.exam.short_name }, { label: data.subject.name }]} />
-      )}
+      {data && <Crumbs items={[{ to: `/exams/${data.exam.id}`, label: data.exam.short_name }, { label: data.subject.name }]} />}
       <StaffPageHead
         title={data ? data.subject.name : 'Papers'}
-        sub={data ? `${plural(data.subject.questions, 'question')} in ${plural(data.subject.papers, 'paper')} · ${data.subject.approved.toLocaleString('en-NG')} approved` : undefined}
+        sub={
+          data
+            ? `${plural(data.subject.questions, 'question')} · ${data.subject.approved.toLocaleString('en-NG')} approved`
+            : undefined
+        }
         actions={
           <>
             <Link to={`/topics/${subjectId}`} className="sj-btn ghost">
               Topics
             </Link>
-            <button type="button" className="sj-btn" onClick={() => setAdding(true)}>
+            <Link to={`/lessons/${subjectId}`} className="sj-btn ghost">
+              Lessons
+            </Link>
+            <button type="button" className="sj-btn" onClick={() => setAdding('past')}>
               Add a paper
             </button>
           </>
@@ -331,56 +349,69 @@ export function SubjectPapers() {
       />
       {problem && <p className="st-error">{problem}</p>}
       {data && (
-        <>
+        <div className="bk-sections">
           <section className="bk-section">
-            <h2>Past papers</h2>
-            {past.length === 0 ? (
-              <p className="st-muted">No past papers yet. Add a year to start.</p>
-            ) : (
-              <ul className="bk-years">
-                {past.map((paper) => (
-                  <li key={paper.paper_id}>
-                    <Link to={`/papers/${paper.paper_id}`} className="bk-year">
-                      <strong>{paper.exam_year}</strong>
-                      <span>{plural(paper.questions, 'question')}</span>
-                      <Progress approved={paper.approved} total={paper.questions} />
-                      {paper.flagged ? (
-                        <span className="bk-flag">
-                          <IconFlag size={13} /> {paper.flagged}
-                        </span>
-                      ) : null}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <header className="bk-section-head">
+              <h2>Past papers</h2>
+              <span>{plural(past.length, 'year')}</span>
+            </header>
+            {past.length ? rows(past) : <p className="st-muted">No past papers yet.</p>}
           </section>
           <section className="bk-section">
-            <h2>Our own sets</h2>
-            {own.length === 0 ? (
-              <p className="st-muted">Questions we write ourselves, outside any past paper. Add a set to start one.</p>
+            <header className="bk-section-head">
+              <h2>Our own sets</h2>
+              <button type="button" className="bk-link" onClick={() => setAdding('own')}>
+                New set
+              </button>
+            </header>
+            {own.length ? rows(own) : <p className="st-muted">Questions we write ourselves, outside any past paper.</p>}
+          </section>
+          <section className="bk-section ai">
+            <header className="bk-section-head">
+              <h2>
+                AI-generated sets <span className="bk-ai">AI</span>
+              </h2>
+              <button type="button" className="bk-link" onClick={() => setAdding('ai')}>
+                New AI set
+              </button>
+            </header>
+            {ai.length ? (
+              rows(ai)
             ) : (
-              <ul className="bk-years">
-                {own.map((paper) => (
-                  <li key={paper.paper_id}>
-                    <Link to={`/papers/${paper.paper_id}`} className="bk-year own">
-                      <strong>{paper.title}</strong>
-                      <span>{plural(paper.questions, 'question')}</span>
-                      <Progress approved={paper.approved} total={paper.questions} />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              <p className="st-muted">
+                Questions written by an AI and brought in as JSON. Each one is checked by a reviewer before any student sees it.
+              </p>
             )}
           </section>
-        </>
+        </div>
       )}
       {adding ? (
         <AddPaper
           subjectId={subjectId}
-          onClose={() => setAdding(false)}
+          start={adding}
+          onClose={() => setAdding(null)}
           onAdded={() => {
-            setAdding(false);
+            setAdding(null);
+            reload();
+          }}
+        />
+      ) : null}
+      {renaming ? (
+        <RenamePaper
+          paper={renaming}
+          onClose={() => setRenaming(null)}
+          onDone={() => {
+            setRenaming(null);
+            reload();
+          }}
+        />
+      ) : null}
+      {removing ? (
+        <RemovePaper
+          paper={removing}
+          onClose={() => setRemoving(null)}
+          onDone={() => {
+            setRemoving(null);
             reload();
           }}
         />
@@ -389,10 +420,56 @@ export function SubjectPapers() {
   );
 }
 
-function AddPaper({ subjectId, onClose, onAdded }: { subjectId: string; onClose: () => void; onAdded: () => void }) {
-  const [kind, setKind] = useState<'past' | 'own'>('past');
+const paperName = (paper: PaperLine) => (paper.own ? paper.title : String(paper.exam_year));
+
+/** One paper as a row: its name, its questions and how many are approved, and its two actions. */
+function PaperRow({ paper, onRename, onRemove }: { paper: PaperLine; onRename: () => void; onRemove: () => void }) {
+  const share = paper.questions ? Math.round((paper.approved / paper.questions) * 100) : 0;
+  return (
+    <li className="bk-row">
+      <Link to={`/papers/${paper.paper_id}`} className="bk-row-main">
+        <strong>{paperName(paper)}</strong>
+        <span className="bk-row-count">{plural(paper.questions, 'question')}</span>
+        <span className="bk-row-bar" aria-label={`${share}% approved`}>
+          <i style={{ width: `${share}%` }} />
+        </span>
+        <span className="bk-row-share">{paper.questions ? `${share}% approved` : 'Empty'}</span>
+        {paper.needs_review ? <span className="bk-row-todo">{paper.needs_review} to check</span> : null}
+        {paper.flagged ? (
+          <span className="bk-flag">
+            <IconFlag size={13} /> {paper.flagged}
+          </span>
+        ) : null}
+      </Link>
+      <div className="bk-row-actions">
+        <button type="button" onClick={onRename} title={paper.own ? 'Rename' : 'Change the year'} aria-label={`Rename ${paperName(paper)}`}>
+          <IconPencil size={16} />
+        </button>
+        <button type="button" className="danger" onClick={onRemove} title="Remove" aria-label={`Remove ${paperName(paper)}`}>
+          <IconTrash size={16} />
+        </button>
+      </div>
+    </li>
+  );
+}
+
+type PaperKind = 'past' | 'own' | 'ai';
+const KIND_WORD: Record<PaperKind, string> = { past: 'A past paper', own: 'A set of our own', ai: 'An AI-generated set' };
+
+function AddPaper({
+  subjectId,
+  start,
+  onClose,
+  onAdded,
+}: {
+  subjectId: string;
+  start: PaperKind;
+  onClose: () => void;
+  onAdded: () => void;
+}) {
+  const [kind, setKind] = useState<PaperKind>(start);
   const [year, setYear] = useState('');
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState(start === 'ai' ? 'AI-generated practice 1' : '');
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const ok = kind === 'past' ? /^\d{4}$/.test(year) : title.trim().length > 1;
@@ -400,7 +477,7 @@ function AddPaper({ subjectId, onClose, onAdded }: { subjectId: string; onClose:
     event.preventDefault();
     setBusy(true);
     bank
-      .addPaper(subjectId, kind === 'past' ? { exam_year: Number(year) } : { title })
+      .addPaper(subjectId, kind === 'past' ? { exam_year: Number(year) } : { title, ai_generated: kind === 'ai' })
       .then(onAdded)
       .catch((error) => setProblem(friendly(error)))
       .finally(() => setBusy(false));
@@ -409,16 +486,19 @@ function AddPaper({ subjectId, onClose, onAdded }: { subjectId: string; onClose:
     <Drawer title="Add a paper" onClose={onClose}>
       <form className="st-form" onSubmit={save}>
         <div className="st-seg bk-kind" role="radiogroup" aria-label="Kind of paper">
-          {(['past', 'own'] as const).map((value) => (
+          {(['past', 'own', 'ai'] as const).map((value) => (
             <button
               key={value}
               type="button"
               role="radio"
               aria-checked={kind === value}
               className={kind === value ? 'on' : undefined}
-              onClick={() => setKind(value)}
+              onClick={() => {
+                setKind(value);
+                if (value === 'ai' && !title) setTitle('AI-generated practice 1');
+              }}
             >
-              {value === 'past' ? 'A past paper' : 'A set of our own'}
+              {KIND_WORD[value]}
             </button>
           ))}
         </div>
@@ -433,11 +513,83 @@ function AddPaper({ subjectId, onClose, onAdded }: { subjectId: string; onClose:
             <input value={title} maxLength={80} placeholder="Stack Prep set 1" onChange={(e) => setTitle(e.target.value)} />
           </label>
         )}
+        {kind === 'ai' ? (
+          <p className="st-muted">
+            Its questions carry an AI badge, are never mixed with past papers, and wait for a reviewer before any student sees them.
+          </p>
+        ) : null}
         {problem && <p className="st-error">{problem}</p>}
         <button type="submit" className="sj-btn" disabled={busy || !ok}>
-          {busy ? 'Adding…' : 'Add the paper'}
+          {busy ? 'Adding…' : 'Add it'}
         </button>
       </form>
+    </Drawer>
+  );
+}
+
+function RenamePaper({ paper, onClose, onDone }: { paper: PaperLine; onClose: () => void; onDone: () => void }) {
+  const [value, setValue] = useState(paper.own ? paper.title : String(paper.exam_year ?? ''));
+  const [busy, setBusy] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
+  const ok = paper.own ? value.trim().length > 1 : /^\d{4}$/.test(value);
+  const save = (event: FormEvent) => {
+    event.preventDefault();
+    setBusy(true);
+    bank
+      .renamePaper(paper.paper_id, paper.own ? { title: value } : { exam_year: Number(value) })
+      .then(onDone)
+      .catch((error) => setProblem(friendly(error)))
+      .finally(() => setBusy(false));
+  };
+  return (
+    <Drawer title={paper.own ? 'Rename the set' : 'Change the year'} onClose={onClose}>
+      <form className="st-form" onSubmit={save}>
+        <label className="st-field">
+          <span>{paper.own ? 'Name of the set' : 'Year'}</span>
+          {paper.own ? (
+            <input value={value} maxLength={80} onChange={(e) => setValue(e.target.value)} autoFocus />
+          ) : (
+            <input inputMode="numeric" maxLength={4} value={value} onChange={(e) => setValue(e.target.value.replace(/\D/g, ''))} autoFocus />
+          )}
+        </label>
+        {problem && <p className="st-error">{problem}</p>}
+        <button type="submit" className="sj-btn" disabled={busy || !ok}>
+          {busy ? 'Saving…' : 'Save'}
+        </button>
+      </form>
+    </Drawer>
+  );
+}
+
+function RemovePaper({ paper, onClose, onDone }: { paper: PaperLine; onClose: () => void; onDone: () => void }) {
+  const [busy, setBusy] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
+  const remove = () => {
+    setBusy(true);
+    bank
+      .removePaper(paper.paper_id, paper.questions > 0)
+      .then(onDone)
+      .catch((error) => setProblem(friendly(error)))
+      .finally(() => setBusy(false));
+  };
+  return (
+    <Drawer title={`Remove ${paperName(paper)}?`} onClose={onClose}>
+      <div className="st-form">
+        <p>
+          {paper.questions
+            ? `Its ${plural(paper.questions, 'question')} stop being served to students at once. Nothing is deleted: answers students already gave, and their scores, stay as they are.`
+            : 'It has no questions.'}
+        </p>
+        {problem && <p className="st-error">{problem}</p>}
+        <div className="bk-confirm">
+          <button type="button" className="sj-btn ghost" onClick={onClose}>
+            Keep it
+          </button>
+          <button type="button" className="sj-btn danger" disabled={busy} onClick={remove}>
+            {busy ? 'Removing…' : paper.questions ? `Remove it and its ${plural(paper.questions, 'question')}` : 'Remove it'}
+          </button>
+        </div>
+      </div>
     </Drawer>
   );
 }
@@ -461,6 +613,7 @@ export function PaperQuestions() {
   const [actionProblem, setActionProblem] = useState<string | null>(null);
   const [editing, setEditing] = useState<'new' | QuestionDetail | null>(null);
   const [filter, setFilter] = useState<'all' | QuestionLine['state'] | 'flagged'>('all');
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     if (data?.syllabus_version_id) void api.skills(data.syllabus_version_id).then(setSkills).catch(() => undefined);
@@ -550,12 +703,18 @@ export function PaperQuestions() {
       )}
       <StaffPageHead
         title={data ? (data.paper.own ? data.paper.title : `${data.subject.name} ${data.paper.exam_year}`) : 'Paper'}
-        sub={data ? `${plural(data.paper.questions, 'question')} · ${data.paper.approved} approved · ${data.paper.needs_review} to check` : undefined}
+        sub={
+          data
+            ? `${data.paper.ai_generated ? 'AI-generated set · ' : ''}${plural(data.paper.questions, 'question')} · ${data.paper.approved} approved · ${data.paper.needs_review} to check`
+            : undefined
+        }
         actions={
           <>
-            <button type="button" className="sj-btn ghost" disabled title="Coming next: upload a paper or image, paste questions, or ask for new ones">
-              <IconSparkles size={16} /> Add with AI
-            </button>
+            {data?.paper.ai_generated ? (
+              <button type="button" className="sj-btn ghost" onClick={() => setImporting(true)}>
+                <IconSparkles size={16} /> Import JSON
+              </button>
+            ) : null}
             <button type="button" className="sj-btn" onClick={() => setEditing('new')}>
               Add a question
             </button>
@@ -674,6 +833,14 @@ export function PaperQuestions() {
           </div>
         </div>
       )}
+      {importing && data ? (
+        <ImportJson
+          paperId={paperId}
+          subjectId={data.subject.subject_id}
+          onClose={() => setImporting(false)}
+          onImported={reload}
+        />
+      ) : null}
       {editing && data ? (
         <QuestionEditor
           paper={data}

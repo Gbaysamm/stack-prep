@@ -454,3 +454,268 @@
     padding: 12px 16px;
   }
 }
+
+/* ---------------------------------------------------------------- one question, read and checked */
+.sj .qv {
+  gap: 18px;
+}
+.sj .qv-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.sj .qv-head h2 {
+  margin: 2px 0 0;
+  font-size: 22px;
+}
+.sj .qv-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .qv-checks li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 6px;
+  border: 1px solid var(--line, #e7e4f0);
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-500, #6b6880);
+}
+.sj .qv-checks li span {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  font-size: 10px;
+}
+.sj .qv-checks li.done {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #15803d;
+}
+.sj .qv-checks li.done span {
+  border-color: #16a34a;
+  background: #16a34a;
+  color: #fff;
+}
+.sj .qv-stem {
+  padding: 18px 20px;
+  border-radius: 14px;
+  background: var(--lav-50, #f7f5fd);
+  font-size: 17px;
+  line-height: 1.55;
+}
+.sj .qv-stem p {
+  margin: 0;
+}
+.sj .qv-stem .rv-instruction {
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+.sj .qv-block {
+  display: grid;
+  gap: 10px;
+}
+.sj .qv-block-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.sj .qv-block-head h3 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-500, #6b6880);
+}
+.sj .qv-ok,
+.sj .qv-todo {
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.sj .qv-ok {
+  color: #15803d;
+}
+.sj .qv-todo {
+  color: #b45309;
+}
+.sj .qv-options {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .qv-options button {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--line, #e7e4f0);
+  border-radius: 12px;
+  background: var(--white, #fff);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.sj .qv-options button:disabled {
+  cursor: default;
+}
+.sj .qv-options button:not(:disabled):hover {
+  border-color: var(--purple-300, #c4b5fd);
+}
+.sj .qv-options li.key button {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+.sj .qv-letter {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--lav-100, #ece8fb);
+  font-size: 13px;
+  font-weight: 700;
+}
+.sj .qv-options li.key .qv-letter {
+  background: #16a34a;
+  color: #fff;
+}
+.sj .qv-option-text {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding-top: 3px;
+}
+.sj .qv-why {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-500, #6b6880);
+}
+.sj .qv-why.good {
+  font-weight: 600;
+  color: #15803d;
+}
+.sj .qv-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fffbeb;
+  font-size: 13.5px;
+}
+.sj .qv-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--purple-600, #7c3aed);
+  cursor: pointer;
+}
+.sj .qv-steps {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+.sj .qv-steps li {
+  position: relative;
+  padding-left: 34px;
+  line-height: 1.55;
+  counter-increment: step;
+}
+.sj .qv-steps li::before {
+  content: counter(step);
+  position: absolute;
+  top: 1px;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--lav-100, #ece8fb);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--purple-700, #6d28d9);
+}
+.sj .qv-hint {
+  padding: 10px 14px;
+  border-left: 3px solid var(--purple-400, #a78bfa);
+  border-radius: 0 10px 10px 0;
+  background: var(--lav-50, #f7f5fd);
+  font-size: 14px;
+}
+.sj .qv-hint strong {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--purple-700, #6d28d9);
+}
+.sj .qv-hint p {
+  margin: 4px 0 0;
+}
+.sj .qv-edit {
+  display: grid;
+  gap: 10px;
+}
+.sj .qv-options button:disabled {
+  opacity: 1;
+}
+.sj .qv-two {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line, #e7e4f0);
+}
+.sj .qv-two > div {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+.sj .qv-note {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ink-500, #6b6880);
+}
+.sj .qv-two > div,
+.sj .qv .rv-skill .rv-skill-pick {
+  min-width: 0;
+}
+.sj .qv .rv-skill .rv-skill-pick {
+  flex-basis: 200px;
+  max-width: 100%;
+}
+.sj .qv-two > div {
+  grid-template-columns: minmax(0, 1fr);
+}
+.sj .qv .rv-skill {
+  min-width: 0;
+}
+.sj .qv .rv-skill .sx-value {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
