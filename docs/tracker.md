@@ -16,10 +16,12 @@ Pushed (on `company/integration`, deploys to both servers) · Waiting (on the fo
 - **Last thing done:** the bank's line-by-line review (`docs/questions/bank-review-brief.md`)
   ran for Accounts (9 files), Biology (9) and Physics 2018, then was paused to save the weekly
   usage limit. Those 19 files are checked; to be loaded and committed with this tracker.
-- **Next:** the bank review for the remaining 83 files, one subject at a time when the founder
-  says (Chemistry, Commerce, Economics, English, Government, Literature, Mathematics, Physics
-  2010–2017). Then a timing audit of every moment (lines and marks on their words), film a few
-  lessons at 1440 and 390, commit.
+- **Next (founder, 13 Nov 2026):** rebuild the reviewer side in this order: (1) AI-generated
+  sets and the JSON importer, (2) subject page with rename and retire, (3) question detail,
+  (4) a Lessons page, (5) lesson generation. See "Reviewer side" below.
+- **Paused:** the bank review for the remaining 83 files, one subject at a time when the
+  founder says (Chemistry, Commerce, Economics, English, Government, Literature, Mathematics,
+  Physics 2010–2017); then a timing audit of every moment, film a few lessons, commit.
 - **Not pushed:** nothing since `835bdc5`. Every commit after it is local only. A push needs
   the founder's yes; before it, sync with `company/integration` (it has diverged), and each
   server's `.env` needs `INWORLD_API_KEY`.
@@ -60,6 +62,21 @@ Pushed (on `company/integration`, deploys to both servers) · Waiting (on the fo
 | Go through the flags and fix where necessary | All 135 checked: 64 fixed, 78 not errors, no key wrong | `docs/content-review/bank-lessons-flags-2026-11-12.md` | Done-local |
 | Remove the answer checks; fewer analogies and doodles; the six standards; line and marks on their words | Accounts, Biology, Physics 2018 reviewed (19 files) | `bank-review-brief.md`, `check_lesson_edit.py --review` | In progress (83 files paused for usage) |
 | Elements, compounds and mixtures has only 3 questions (all check-up) | — | the bank | Open (thin subtopic; more questions needed) |
+
+## Reviewer side (`/review`) and new questions (founder, 13 Nov 2026)
+
+Order of work (each shown at 1440 and 390 before the next):
+
+| Ask (founder) | Plan | Where | Status |
+|---|---|---|---|
+| More questions per subtopic (about 5,000 to give every subtopic 10; thin subjects: Biology, Chemistry, Physics, Economics, Government, Accounts, Commerce) | Generate outside Claude Code: an external AI pasting JSON, or the plan's monthly API credit ($100 on Max, claimed in claude.ai Billing → API credits, key in Admin → AI for questions, cap $100) | — | Open |
+| AI questions kept apart from the real bank, clearly labelled | An "AI-generated practice" set per subject in "Our own sets", badge everywhere; never a fake year | `routers/bank.py`, `review/BankPages.tsx` | Open (1) |
+| Upload questions by JSON; never an invented subtopic | Per-subject subtopic list (codes, syllabus line, counts) and a ready prompt; importer rejects unknown codes; check, preview, import as "To check"; figures as SVG or "figure needed" (held back) | new import route and panel | Open (1) |
+| "Add with AI" not on past papers | Only in AI sets | `BankPages.tsx` | Open (1) |
+| Subject page: can't rename or delete a year; design poor | Redesign; rename, retire a paper | `BankPages.tsx`, `bank.py` | Open (2) |
+| Question detail page: poor UI/UX | Redesign the question view and editing | `BankPages.tsx`, `ReviewPage.tsx` | Open (3) |
+| Lessons managed from the reviewer side: status per topic, edit, generate | A Lessons page: subtopics, parts, missing, edit a lesson, generate one | new | Open (4, 5) |
+| Review the uploaded questions one by one next week | Re-solve, check key, options, wording, fit, figure | — | Waiting (questions to be uploaded; weekly limit) |
 
 ## Voice
 
