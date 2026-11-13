@@ -60,6 +60,11 @@ class Turn(BaseModel):
 class AfterOut(BaseModel):
     title: str
     subject: str
+    #: Which of the subtopic's lessons this was, how many it has, and the next one's title.
+    part: int = 1
+    parts: int = 1
+    next_title: str | None = None
+    subtopic: str | None = None
     problems: list[ProblemOut]
     rating: int | None
     conversation: list[Turn]
@@ -273,9 +278,21 @@ async def after(
         part=part,
     )
     can_ask, left = await _coach_left(conn, student_id, settings)
+    siblings = await fetch_all(
+        conn,
+        "SELECT c.part, c.title, sub.name AS subtopic FROM subtopic_lesson_content c"
+        " JOIN curriculum_items sub ON sub.id = c.subtopic_id"
+        " WHERE c.subtopic_id = :sub ORDER BY c.part",
+        sub=subtopic_id,
+    )
+    following = next((r for r in siblings if int(r["part"]) == part + 1), None)
     return AfterOut(
         title=lesson["title"],
         subject=lesson["subject"],
+        part=part,
+        parts=max(1, len(siblings)),
+        next_title=str(following["title"]) if following and following["title"] else None,
+        subtopic=str(siblings[0]["subtopic"]) if siblings else None,
         problems=problems,
         rating=int(rating[0]["rating"]) if rating else None,
         conversation=[Turn(asked=t["asked"], reply=t["reply"]) for t in turns],

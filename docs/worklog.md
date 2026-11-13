@@ -24,9 +24,14 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
   problem first, its options as tappable choices (or the answer box and a photo of the working
   when working is needed); the coach's written feedback under it (Right / Not quite, the
   explanation, the working), no video; the rating as one row; the coach one quiet row until
-  opened. Checked at 1440 and 390.
+  opened. Checked at 1440 and 390. Then, at the founder's word (the focus bar too round, the
+  page too blank): the page moved into the app's own frame (`/lesson/:id/after`, the sidebar
+  and top bar of every main page), a page hero ("Lesson 1 of 5 · Chemistry", the title, "Next:
+  Compounds", Continue and Watch again), the problem on the left and the rating and the coach
+  (always open) on the right; the API says the lesson's place and the next one's title.
 - **Why:** founder, 13 Nov 2026.
 - **Where:** `packages/engine/src/engine/roadmap.py`, `apps/web/src/student/Board.tsx`,
+  `routers/lesson_after.py`, `PrepApp.tsx`,
   `prep/pages/Lesson.tsx`, `prep/pages/LessonAfter.{tsx,css}`.
 - **Status:** done locally.
 

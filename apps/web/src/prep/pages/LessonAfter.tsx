@@ -7,12 +7,13 @@
  * API: apps/api/src/app/routers/lesson_after.py.
  */
 import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import { friendly, request } from '../../lib/friendlyError.js';
 import { Maths } from '../../Maths.js';
 import { IconCamera, IconCheck, IconClose, IconReplay, IconSend } from '../icons.js';
-import { FocusShell } from '../shell.js';
-import { Button, Skeleton, cx } from '../ui.js';
+import { Button, PageHero, Skeleton, cx } from '../ui.js';
+import { usePageTitle, useStudent } from '../store.js';
 import './LessonAfter.css';
 
 interface Tried {
@@ -27,6 +28,10 @@ interface Tried {
 interface After {
   title: string;
   subject: string;
+  part: number;
+  parts: number;
+  next_title: string | null;
+  subtopic: string | null;
   problems: { ask: string; needs_working: boolean; tried: Tried | null }[];
   rating: number | null;
   conversation: { asked: string; reply: string }[];
@@ -69,9 +74,9 @@ export function LessonAfter({
 
   if (!page) {
     return (
-      <FocusShell title="After the lesson" exitTo="/roadmap">
-        <main className="la-page">{error ? <p className="la-error">{error}</p> : <Skeleton height={360} radius={16} />}</main>
-      </FocusShell>
+      <div className="sj-page la-app">
+        {error ? <p className="la-error">{error}</p> : <Skeleton height={360} radius={16} />}
+      </div>
     );
   }
 
@@ -83,64 +88,100 @@ export function LessonAfter({
     setPage((now) =>
       now ? { ...now, problems: now.problems.map((p, n) => (n === index ? { ...p, tried: result } : p)) } : now,
     );
+  const next = page.next_title
+    ? `Next: ${page.next_title}`
+    : `That was the last lesson${page.subtopic ? ` on ${page.subtopic}` : ''}. Next, a run to show you have it.`;
 
   return (
-    <FocusShell title={page.title} exitTo="/roadmap">
-      <main className="la-page">
-        <header className="la-head">
-          <span className="la-done" aria-hidden="true">
-            <IconCheck size={18} />
-          </span>
-          <div>
-            <span className="sj-eyebrow">Lesson done · {page.subject}</span>
-            <h1 className="sj-display la-h1">{page.title}</h1>
-          </div>
-        </header>
+    <div className="sj-page la-app">
+      <PageHero
+        eyebrow={page.parts > 1 ? `Lesson ${page.part} of ${page.parts} · ${page.subject}` : `Lesson · ${page.subject}`}
+        title={page.title}
+        sub={next}
+        actions={
+          <>
+            <Button tone="lime" busy={continuing} icon={<IconCheck size={16} />} onClick={onContinue}>
+              Continue
+            </Button>
+            <Button tone="soft" icon={<IconReplay size={16} />} onClick={onWatchAgain}>
+              Watch again
+            </Button>
+          </>
+        }
+      />
 
-        {page.problems.map((problem, index) => (
-          <Problem
-            key={index}
-            base={base}
-            q={q}
-            index={index}
-            count={page.problems.length}
-            ask={problem.ask}
-            needsWorking={problem.needs_working}
-            tried={problem.tried}
-            onTried={(result) => tried(index, result)}
-          />
-        ))}
-
-        <section className="la-rate">
-          <h2>How well did you understand it?</h2>
-          <div className="la-seg" role="radiogroup" aria-label="How well did you understand it?">
-            {RATINGS.map((choice) => (
-              <button
-                key={choice.value}
-                type="button"
-                role="radio"
-                aria-checked={page.rating === choice.value}
-                className={cx(page.rating === choice.value && 'on')}
-                onClick={() => rate(choice.value)}
-              >
-                {choice.label}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <Ask base={base} q={q} page={page} onTurn={(turn, left) => setPage((now) => (now ? { ...now, conversation: [...now.conversation, turn], asks_left: left } : now))} />
-
-        <div className="la-foot">
-          <Button tone="ghost" icon={<IconReplay size={16} />} onClick={onWatchAgain}>
-            Watch again
-          </Button>
-          <Button tone="lime" size="lg" busy={continuing} icon={<IconCheck size={16} />} onClick={onContinue}>
-            Continue
-          </Button>
+      <div className="la-layout">
+        <div className="la-main">
+          {page.problems.map((problem, index) => (
+            <Problem
+              key={index}
+              base={base}
+              q={q}
+              index={index}
+              count={page.problems.length}
+              ask={problem.ask}
+              needsWorking={problem.needs_working}
+              tried={problem.tried}
+              onTried={(result) => tried(index, result)}
+            />
+          ))}
         </div>
-      </main>
-    </FocusShell>
+        <aside className="la-side">
+          <section className="sj-card la-card">
+            <h2 className="la-title">How well did you understand it?</h2>
+            <div className="la-seg" role="radiogroup" aria-label="How well did you understand it?">
+              {RATINGS.map((choice) => (
+                <button
+                  key={choice.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={page.rating === choice.value}
+                  className={cx(page.rating === choice.value && 'on')}
+                  onClick={() => rate(choice.value)}
+                >
+                  {choice.label}
+                </button>
+              ))}
+            </div>
+          </section>
+          <Ask base={base} q={q} page={page} onTurn={(turn, left) => setPage((now) => (now ? { ...now, conversation: [...now.conversation, turn], asks_left: left } : now))} />
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+/** The after-lesson page as its own page in the app (`/lesson/:subtopicId/after`). */
+export function LessonAfterPage() {
+  const { subtopicId = '' } = useParams();
+  const [search] = useSearchParams();
+  const navigate = useNavigate();
+  const student = useStudent();
+  const part = Number(search.get('part') ?? '1') || 1;
+  const item = search.get('item');
+  const [saving, setSaving] = useState(false);
+  usePageTitle('After the lesson');
+  const finish = async () => {
+    setSaving(true);
+    try {
+      await request<void>(`/v1/roadmap/${student.studentId}/lessons/${subtopicId}/done`, {
+        method: 'POST',
+        body: JSON.stringify({ item_id: item, part }),
+      });
+      navigate('/roadmap');
+    } finally {
+      setSaving(false);
+    }
+  };
+  return (
+    <LessonAfter
+      studentId={student.studentId}
+      subtopicId={subtopicId}
+      part={part}
+      continuing={saving}
+      onContinue={() => void finish()}
+      onWatchAgain={() => navigate(`/lesson/${subtopicId}?part=${part}${item ? `&item=${item}` : ''}`)}
+    />
   );
 }
 
@@ -319,7 +360,6 @@ function Ask({
   const [waiting, setWaiting] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const end = useRef<HTMLDivElement>(null);
-  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     end.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -346,17 +386,6 @@ function Ask({
     }
   };
 
-  if (!open && !page.conversation.length && !waiting) {
-    return (
-      <button type="button" className="la-coach-open" onClick={() => setOpen(true)}>
-        <IconSend size={16} />
-        <span>
-          <strong>Still unsure? Ask the coach</strong>
-          <small>Your questions and the answers are kept for when you come back.</small>
-        </span>
-      </button>
-    );
-  }
   return (
     <section className="sj-card la-card">
       <h2 className="la-title">Ask the coach</h2>
@@ -379,7 +408,7 @@ function Ask({
           <div ref={end} />
         </div>
       ) : (
-        <p className="la-lede">Anything in the lesson still unclear? Ask it here. Your questions and the answers are kept for when you come back.</p>
+        <p className="la-lede">Anything still unclear? Ask here. The coach answers in writing, and your questions are kept for when you come back.</p>
       )}
       {page.can_ask ? (
         <form className="la-askbox" onSubmit={send}>

@@ -9,7 +9,7 @@
  * missed instead. Either way, the subtopic's next run is their real attempt, on new questions.
  */
 import { Suspense, lazy, useEffect, useState } from "react";
-import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { request } from "../../lib/friendlyError.js";
 import { Maths } from "../../Maths.js";
@@ -23,7 +23,6 @@ import { IconCheck, IconClose } from "../icons.js";
 import { FocusShell } from "../shell.js";
 import { useLoad, usePageTitle, useStudent } from "../store.js";
 import { Button, Skeleton, cx } from "../ui.js";
-import { LessonAfter } from "./LessonAfter.js";
 import "./Lesson.css";
 
 /** The board is a large module and only a lesson needs it, so it loads when first opened. */
@@ -63,7 +62,7 @@ export function Lesson() {
   const [stage, setStage] = useState<"board" | "after">(
     search.get("after") === "1" ? "after" : "board",
   );
-  const [watch, setWatch] = useState(0);
+  const [watch] = useState(0);
   // The written lesson, from the phone or downloaded whole; 'none': the bank has none yet.
   const [board, setBoard] = useState<LessonPackage | "none" | null>(null);
   const [progress, setProgress] = useState<number | null>(null);
@@ -118,17 +117,11 @@ export function Lesson() {
   };
 
   if (stage === "after" && board !== "none") {
+    // After the lesson is a page of its own in the app (founder, 13 Nov 2026).
     return (
-      <LessonAfter
-        studentId={student.studentId}
-        subtopicId={subtopicId}
-        part={part}
-        continuing={saving}
-        onContinue={() => void finish()}
-        onWatchAgain={() => {
-          setWatch((n) => n + 1);
-          setStage("board");
-        }}
+      <Navigate
+        replace
+        to={`/lesson/${subtopicId}/after?part=${part}${item ? `&item=${item}` : ""}`}
       />
     );
   }

@@ -304,3 +304,32 @@
     align-items: flex-start;
   }
 }
+
+/* In the app's own frame (founder, 13 Nov 2026): the page hero, then the problem on the left
+   and the rating and the coach on the right; one column on a phone. */
+.sj .la-app {
+  display: grid;
+  gap: 24px;
+}
+.sj .la-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr);
+  align-items: start;
+  gap: 20px;
+}
+.sj .la-main,
+.sj .la-side {
+  display: grid;
+  gap: 16px;
+}
+.sj .la-side .la-seg {
+  display: flex;
+}
+.sj .la-side .la-seg button {
+  flex: 1;
+}
+@media (max-width: 960px) {
+  .sj .la-layout {
+    grid-template-columns: 1fr;
+  }
+}
