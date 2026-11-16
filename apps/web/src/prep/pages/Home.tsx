@@ -186,7 +186,11 @@ export function useStartPractice() {
       setError(`We couldn't start a run just now: ${friendly(failure)}`);
     }
   };
-  return { busy, error, exhausted, lastKey, planFirst, start };
+  const dismiss = () => {
+    setPlanFirst(false);
+    setError(null);
+  };
+  return { busy, error, exhausted, lastKey, planFirst, dismiss, start };
 }
 
 /** Said when a chosen topic has no fresh questions: plainly, with a general run one tap away. */

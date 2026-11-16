@@ -44,7 +44,7 @@ import {
   cx,
   useToast,
 } from "../ui.js";
-import { useStartPractice } from "./Home.js";
+import { Section, useStartPractice } from "./Home.js";
 import { DeleteRunDialog, IconTrash } from "./RunReport.js";
 import "./PracticeHub.css";
 import { friendly } from "../../lib/friendlyError.js";
@@ -127,14 +127,6 @@ export function PracticeHub() {
         <>
           {/* No banner (founder, 16 Nov 2026): each card starts a run and holds its history. */}
 
-          {starter.planFirst ? (
-            <div className="ph-planfirst" role="alert">
-              <p>{starter.error}</p>
-              <Button to="/roadmap" tone="dark" size="sm" trailing={<IconArrowRight size={16} />}>
-                Go to your roadmap
-              </Button>
-            </div>
-          ) : null}
           <section className="ph-cards sj-rise d2" aria-label="Your subjects">
             {subjects.map((subject) => (
               <SubjectCard
@@ -156,6 +148,33 @@ export function PracticeHub() {
           ) : null}
         </>
       )}
+
+      {starter.planFirst
+        ? createPortal(
+            <div className="sj">
+              <div className="sj-scrim" onMouseDown={(event) => event.target === event.currentTarget && starter.dismiss()}>
+                <div className="sj-dialog ph-plan-dialog" role="dialog" aria-modal="true" aria-labelledby="ph-plan-title">
+                  <span className="ph-plan-icon" aria-hidden="true">
+                    <IconSpark size={22} />
+                  </span>
+                  <h2 id="ph-plan-title" className="sj-display sj-h3">
+                    Today’s plan comes first
+                  </h2>
+                  <p>Finish today’s items on your roadmap first. Then you can start your own runs in any subject.</p>
+                  <div className="ph-plan-actions">
+                    <Button tone="ghost" onClick={starter.dismiss}>
+                      Not now
+                    </Button>
+                    <Button to="/roadmap" tone="primary" trailing={<IconArrowRight size={16} />}>
+                      Go to your roadmap
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
 
       {showRuns ? (
         <RunsPopup
@@ -188,10 +207,13 @@ function PracticeStats() {
   const before = pct(s.last_week_right, s.last_week_answered);
   const change = week !== null && before !== null ? week - before : null;
   return (
-    <section className="ph-stats-sec sj-rise d3" aria-labelledby="ph-stats-title">
-      <h2 id="ph-stats-title" className="sj-display sj-h3">
-        Your practice
-      </h2>
+    <Section
+      eyebrow="Your practice"
+      title="How it’s going"
+      id="ph-stats-title"
+      className="sj-rise d3 ph2-stats"
+      sub="Across all your subjects. Only answers right without a hint count."
+    >
       <div className="ph-stats-grid">
         <div className="ph-stat-tile">
           <span>Practice average</span>
@@ -224,7 +246,7 @@ function PracticeStats() {
           <small>{s.right} right without a hint</small>
         </div>
       </div>
-    </section>
+    </Section>
   );
 }
 
@@ -365,34 +387,33 @@ function TopicsToWork({ subjects }: { subjects: SubjectOverview[] }) {
   }
   if (weak.length === 0) return null;
   return (
-    <section className="ph-weak sj-rise d3" aria-labelledby="ph-weak-title">
-      <header className="ph-weak-head">
-        <h2 id="ph-weak-title" className="sj-display sj-h3">
-          Topics to work on
-        </h2>
-        <span className="ph-weak-key" aria-hidden="true">
-          <span>
-            <i className="very" /> very weak
-          </span>
-          <span>
-            <i /> weak
-          </span>
-        </span>
-      </header>
-      <ul className="ph-weak-list">
+    <Section
+      eyebrow="Topics to work on"
+      title="Where to practise next"
+      id="ph-weak-title"
+      className="sj-rise d3 ph2-weak"
+      sub="Your weakest topics with 3 or more answers. Red is under 25%, orange under 50%."
+    >
+      <ul className="ph2-weak-list">
         {weak.map(({ subject, topic }) => (
-          <li
-            key={topic.subtopic_id}
-            className={(topic.score ?? 0) < 25 ? "very" : undefined}
-            title={`${topic.name} (${subject.subject_name}): ${(topic.score ?? 0) < 25 ? "very weak" : "weak"}`}
-          >
+          <li key={topic.subtopic_id} className={(topic.score ?? 0) < 25 ? "very" : undefined}>
             <i aria-hidden="true" />
-            <b>{topic.name}</b>
-            <small>{subject.subject_name}</small>
+            <span className="ph2-weak-name">
+              <b>{topic.name}</b>
+              <small>{subject.subject_name}</small>
+            </span>
+            <span className="ph2-weak-score sj-num">{topic.score}%</span>
+            <Link
+              className="ph2-weak-go"
+              to={`/practice/new?subject=${subject.subject_id}&subtopic=${topic.subtopic_id}`}
+              aria-label={`Practise ${topic.name}`}
+            >
+              Practise <IconArrowRight size={14} />
+            </Link>
           </li>
         ))}
       </ul>
-    </section>
+    </Section>
   );
 }
 
