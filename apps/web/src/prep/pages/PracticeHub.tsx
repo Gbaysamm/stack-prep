@@ -23,6 +23,7 @@ import {
   type PracticeRun,
   type SubjectOverview,
 } from "../progressApi.js";
+import { itemLabel, roadmapApi, today as todayOf } from "../roadmapApi.js";
 import { runsApi } from "../runsApi.js";
 import { useLoad, usePageTitle, useStudent } from "../store.js";
 import {
@@ -79,7 +80,21 @@ export function PracticeHub() {
   const overview = useOverview(student.studentId);
   // null: closed; 'all': every run; a subject: that subject's runs.
   const [showRuns, setShowRuns] = useState<null | "all" | { id: string; name: string }>(null);
-  const starter = useStartPractice();
+  const started = useStartPractice();
+  // Today's roadmap, read up front: while it has items left, a run the student starts waits, and
+  // the button says so at once in a popup, with no wait on the server (founder, 16 Nov 2026).
+  const plan = useLoad(() => roadmapApi.read(student.studentId), [student.studentId]);
+  const planNext = plan.data ? todayOf(plan.data).next : null;
+  const [planPopup, setPlanPopup] = useState(false);
+  const starter = {
+    ...started,
+    start: (subjectId: string) => (planNext ? (setPlanPopup(true), Promise.resolve()) : started.start(subjectId)),
+    planFirst: started.planFirst || planPopup,
+    dismiss: () => {
+      setPlanPopup(false);
+      started.dismiss();
+    },
+  };
   const subjects = overview.data?.subjects ?? [];
 
   if (overview.error && !overview.data) {
@@ -161,6 +176,11 @@ export function PracticeHub() {
                     Today’s plan comes first
                   </h2>
                   <p>Finish today’s items on your roadmap first. Then you can start your own runs in any subject.</p>
+                  {planNext ? (
+                    <p className="ph-plan-next">
+                      Next on your plan: <b>{itemLabel(planNext)}</b>
+                    </p>
+                  ) : null}
                   <div className="ph-plan-actions">
                     <Button tone="ghost" onClick={starter.dismiss}>
                       Not now
@@ -261,7 +281,7 @@ function SubjectCard({
   onHistory,
 }: {
   subject: SubjectOverview;
-  starter: ReturnType<typeof useStartPractice>;
+  starter: Pick<ReturnType<typeof useStartPractice>, "busy" | "start">;
   tint: SubjectTint;
   /** A run left open in another subject: it is finished first (one run at a time). */
   openElsewhere: SubjectOverview | undefined;
