@@ -247,7 +247,7 @@ export function PublicTracker() {
       (show === 'all' || (show === 'finished' ? finished(i.status) : !finished(i.status))));
   // One list, not split by area: what is still to do, then what was finished, by the day it was.
   const activeList = all
-    .filter((i) => wanted(i) && !finished(i.status))
+    .filter((i) => wanted(i) && !finished(i.status) && !todayList.includes(i))
     .sort((x, y) => ROW_ORDER[x.status] - ROW_ORDER[y.status] || (x.planned_for ?? '9').localeCompare(y.planned_for ?? '9'));
   const doneDays = useMemo(() => {
     const byDay = new Map<string, Item[]>();
@@ -532,7 +532,7 @@ function TaskRow({
       <button type="button" className="tk-row-main" onClick={onOpen}>
         <span className="tk-row-title">{i.title}</span>
         <span className="tk-row-meta">
-          <span className={`tk-dot ${i.status}`}>{WORD[i.status]}</span>
+          <span className={`tk-stagetag ${i.status}`}>{WORD[i.status]}</span>
           <span>{i.area}</span>
           {carried ? <span className="tk-carried">from {dateText(i.planned_for!)}</span> : planned && !inToday ? <span className="tk-carried">Today</span> : null}
           {i.owner ? <span>{i.owner}</span> : null}
