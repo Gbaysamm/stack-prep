@@ -1010,13 +1010,6 @@ async def begin_run(
     locked = await checkup_lock(conn, student_id, subject_id)
     if locked is not None:
         raise HTTPException(status_code=423, detail=locked)
-    # One run at a time (founder, 16 Nov 2026): an unfinished run is finished, or deleted,
-    # before another starts, in any subject.
-    if await open_run(conn, student_id) is not None:
-        raise HTTPException(
-            status_code=409,
-            detail="Finish your open run first, or delete it from Your runs.",
-        )
     if not planned:
         # 428: follow the roadmap first. The app starts the plan's next item instead.
         waiting = await roadmap_lock(conn, student_id, filters)
@@ -1028,6 +1021,14 @@ async def begin_run(
         custom=filters is not None and not filters.bookmarked and not planned,
         bookmarked=filters is not None and filters.bookmarked,
     )
+    # One run at a time (founder, 16 Nov 2026): an unfinished run is finished, or deleted,
+    # before another starts, in any subject. After the plan check, so a student out of free
+    # questions is told that, not to finish a run they cannot.
+    if await open_run(conn, student_id) is not None:
+        raise HTTPException(
+            status_code=409,
+            detail="Finish your open run first, or delete it from Your runs.",
+        )
     if filters is not None and filters.bookmarked:
         available = await _bookmarks_available(conn, subject_id, student_id)
         if available == 0:

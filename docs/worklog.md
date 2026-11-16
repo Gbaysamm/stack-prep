@@ -33,6 +33,8 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
   `routers/{practice,progress,tracker}.py`, `staff/TrackerPage.tsx`, migration 050,
   `database/record_deploy.py`, both release scripts; test `test_topic_runs.py`.
 - **Status:** pushed. Set TRACKER_EDIT_KEY on each server for the edit link.
+- **Fix:** the one-run check now comes after the plan check, so a student out of free
+  questions is told to upgrade (402), not to finish a run they cannot (a CI test caught it).
 
 ## 2026-11-13
 
