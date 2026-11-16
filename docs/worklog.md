@@ -15,6 +15,16 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-16
 
+### The tracker: Today, a new-task popup, a wider stage menu
+- **What:** a Today section: any task can be planned for today (a Today button on each row, or
+  when it is added); unfinished ones carry over to the next day, marked "from <day>"; finished
+  ones stay listed that day. New task opens a popup (what, area or a new one, stage, who, notes,
+  plan for today). The stage menu is wider and opens past the card. Migration 051 adds the
+  planned day and moves five tasks that went out on 16 Nov to Deployed.
+- **Why:** founder, 16 Nov 2026.
+- **Where:** `staff/TrackerPage.tsx`, `tracker.css`, `routers/tracker.py`, migration 051.
+- **Status:** pushed.
+
 ### Practice and Check-up redesigned; one run at a time; the project tracker
 - **What:** Practice: a banner with Build your own (locked: a popup says why) and Your runs; one
   card per subject (its colour the same on every page): check-up score, practice average (right

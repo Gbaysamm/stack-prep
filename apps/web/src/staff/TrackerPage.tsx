@@ -27,6 +27,8 @@ interface Item {
   updated_at: string;
   done_at: string | null;
   updated_by: string | null;
+  /** The day it is planned for ("2026-11-16"): under Today from then until it is finished. */
+  planned_for: string | null;
   steps: number;
   steps_done: number;
 }
@@ -101,6 +103,17 @@ function useEditKey(): [string | null, () => void] {
       setKey(null);
     },
   ];
+}
+
+/** Today on this device, as the API writes a date: "2026-11-16". */
+function todayIso(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+/** "2026-11-14" as "Sat 14 Nov". */
+function dateText(iso: string): string {
+  const [y = 1970, m = 1, d = 1] = iso.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
 }
 
 function when(iso: string): string {
@@ -197,7 +210,29 @@ export function PublicTracker() {
         });
     });
 
+  const setPlan = (item: Item, planned: string | null) =>
+    asEditor(() => {
+      replace({ ...item, planned_for: planned });
+      send<Detail>(`/items/${item.id}`, 'PATCH', { planned_for: planned })
+        .then((d) => replace(d.item))
+        .catch((error) => {
+          setProblem(friendly(error));
+          load();
+        });
+    });
+
+  const today = todayIso();
   const all = items ?? [];
+  // Today: planned for today or before and not finished (it carries over), or finished today.
+  const todayList = all
+    .filter(
+      (i) =>
+        i.planned_for !== null &&
+        i.planned_for <= today &&
+        (!finished(i.status) || (i.done_at !== null && i.done_at.slice(0, 10) >= i.planned_for)),
+    )
+    .sort((x, y) => ROW_ORDER[x.status] - ROW_ORDER[y.status] || (x.planned_for ?? '').localeCompare(y.planned_for ?? ''));
+  const todayDone = todayList.filter((i) => finished(i.status)).length;
   const areas = useMemo(() => [...new Set(all.map((i) => i.area))].sort(), [all]);
   const count = (s: Status) => all.filter((i) => i.status === s).length;
   const doneCount = all.filter((i) => finished(i.status)).length;
@@ -327,24 +362,36 @@ export function PublicTracker() {
                   ) : null}
                 </div>
 
-                {adding ? (
-                  <NewTask
-                    areas={areas}
-                    defaultArea={area === 'all' ? null : area}
-                    onCancel={() => setAdding(false)}
-                    onAdd={(title, a) =>
-                      asEditor(() => {
-                        send<Detail>('/items', 'POST', { title, area: a })
-                          .then((d) => {
-                            setItems((now) => [d.item, ...(now ?? [])]);
-                            setKept((now) => new Set(now).add(d.item.id));
-                            setAdding(false);
-                          })
-                          .catch((error) => setProblem(friendly(error)));
-                      })
-                    }
-                  />
-                ) : null}
+                <section className="tk-today" aria-labelledby="tk-today-title">
+                  <h2 id="tk-today-title">
+                    Today
+                    <span>
+                      {dateText(today)}
+                      {todayList.length ? ` · ${todayDone} of ${todayList.length} done` : ''}
+                    </span>
+                  </h2>
+                  {todayList.length ? (
+                    <ul className="tk-list">
+                      {todayList.map((i) => (
+                        <TaskRow
+                          key={i.id}
+                          item={i}
+                          today={today}
+                          inToday
+                          canEdit={canEdit}
+                          onTick={() => setStatus(i, finished(i.status) ? 'todo' : 'done')}
+                          onStage={(st) => setStatus(i, st)}
+                          onOpen={() => setOpen(i.id)}
+                          onPlan={(day) => setPlan(i, day)}
+                        />
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="tk-muted tk-today-empty">
+                      Nothing planned for today.{canEdit ? ' Use “Today” on any task below, or plan a new one.' : ''}
+                    </p>
+                  )}
+                </section>
 
                 {groups.length === 0 ? <p className="tk-muted tk-none">Nothing here.</p> : null}
                 {groups.map((g) => (
@@ -357,41 +404,16 @@ export function PublicTracker() {
                     </h2>
                     <ul className="tk-list">
                       {g.list.map((i) => (
-                        <li key={i.id} className={`tk-row ${finished(i.status) ? 'finished' : ''}`}>
-                          <button
-                            type="button"
-                            className={`tk-tick ${finished(i.status) ? 'on' : ''}`}
-                            aria-label={finished(i.status) ? `Mark “${i.title}” not done` : `Mark “${i.title}” done`}
-                            aria-pressed={finished(i.status)}
-                            disabled={!canEdit}
-                            onClick={() => setStatus(i, finished(i.status) ? 'todo' : 'done')}
-                          />
-                          <button type="button" className="tk-row-main" onClick={() => setOpen(i.id)}>
-                            <span className="tk-row-title">{i.title}</span>
-                            {i.owner || i.steps ? (
-                              <span className="tk-row-meta">
-                                {i.owner ? <span>{i.owner}</span> : null}
-                                {i.steps ? (
-                                  <span>
-                                    {i.steps_done}/{i.steps} steps
-                                  </span>
-                                ) : null}
-                              </span>
-                            ) : null}
-                          </button>
-                          {canEdit ? (
-                            <Select
-                              aria-label={`Stage of “${i.title}”`}
-                              size="sm"
-                              className={`tk-status ${i.status}`}
-                              value={i.status}
-                              onChange={(s) => setStatus(i, s)}
-                              options={STATUS}
-                            />
-                          ) : (
-                            <span className={`tk-pill ${i.status}`}>{WORD[i.status]}</span>
-                          )}
-                        </li>
+                        <TaskRow
+                          key={i.id}
+                          item={i}
+                          today={today}
+                          canEdit={canEdit}
+                          onTick={() => setStatus(i, finished(i.status) ? 'todo' : 'done')}
+                          onStage={(st) => setStatus(i, st)}
+                          onOpen={() => setOpen(i.id)}
+                          onPlan={(day) => setPlan(i, day)}
+                        />
                       ))}
                     </ul>
                   </div>
@@ -424,6 +446,25 @@ export function PublicTracker() {
         />
       ) : null}
 
+      {adding ? (
+        <NewTaskDialog
+          areas={areas}
+          defaultArea={area === 'all' ? null : area}
+          onCancel={() => setAdding(false)}
+          onAdd={(body) =>
+            asEditor(() => {
+              send<Detail>('/items', 'POST', body)
+                .then((d) => {
+                  setItems((now) => [d.item, ...(now ?? [])]);
+                  setKept((now) => new Set(now).add(d.item.id));
+                  setAdding(false);
+                })
+                .catch((error) => setProblem(friendly(error)));
+            })
+          }
+        />
+      ) : null}
+
       {askName ? (
         <NameDialog
           current={name}
@@ -444,7 +485,95 @@ export function PublicTracker() {
 
 /* ------------------------------------------------------------------ adding a task */
 
-function NewTask({
+/** One task in a list: the tick, the title (opens it), Today, and its stage. */
+function TaskRow({
+  item: i,
+  today,
+  inToday = false,
+  canEdit,
+  onTick,
+  onStage,
+  onOpen,
+  onPlan,
+}: {
+  item: Item;
+  today: string;
+  inToday?: boolean;
+  canEdit: boolean;
+  onTick: () => void;
+  onStage: (status: Status) => void;
+  onOpen: () => void;
+  onPlan: (day: string | null) => void;
+}) {
+  const planned = i.planned_for !== null && i.planned_for <= today && !finished(i.status);
+  const carried = inToday && i.planned_for !== null && i.planned_for < today;
+  return (
+    <li className={`tk-row ${finished(i.status) ? 'finished' : ''}`}>
+      <button
+        type="button"
+        className={`tk-tick ${finished(i.status) ? 'on' : ''}`}
+        aria-label={finished(i.status) ? `Mark “${i.title}” not done` : `Mark “${i.title}” done`}
+        aria-pressed={finished(i.status)}
+        disabled={!canEdit}
+        onClick={onTick}
+      />
+      <button type="button" className="tk-row-main" onClick={onOpen}>
+        <span className="tk-row-title">{i.title}</span>
+        {i.owner || i.steps || carried || inToday ? (
+          <span className="tk-row-meta">
+            {inToday ? <span>{i.area}</span> : null}
+            {carried ? <span className="tk-carried">from {dateText(i.planned_for!)}</span> : null}
+            {i.owner ? <span>{i.owner}</span> : null}
+            {i.steps ? (
+              <span>
+                {i.steps_done}/{i.steps} steps
+              </span>
+            ) : null}
+          </span>
+        ) : null}
+      </button>
+      <span className="tk-row-end">
+        {canEdit && !finished(i.status) ? (
+          <button
+            type="button"
+            className={`tk-today-btn ${planned ? 'on' : ''}`}
+            aria-pressed={planned}
+            title={planned ? 'Take it off today' : 'Plan it for today'}
+            onClick={() => onPlan(planned ? null : today)}
+          >
+            {planned ? (inToday ? 'Remove' : 'Today ✓') : 'Today'}
+          </button>
+        ) : null}
+        {canEdit ? (
+          <Select
+            aria-label={`Stage of “${i.title}”`}
+            size="sm"
+            className={`tk-status ${i.status}`}
+            value={i.status}
+            onChange={onStage}
+            options={STATUS}
+          />
+        ) : (
+          <span className={`tk-pill ${i.status}`}>{WORD[i.status]}</span>
+        )}
+      </span>
+    </li>
+  );
+}
+
+/* ------------------------------------------------------------------ adding a task */
+
+interface NewTaskBody {
+  title: string;
+  area: string;
+  status: Status;
+  owner: string | null;
+  note: string | null;
+  planned_for: string | null;
+}
+
+/** A new task, in a popup: what it is, its area (or a new one), stage, who, notes, and today. */
+function NewTaskDialog({
   areas,
   defaultArea,
   onAdd,
@@ -452,37 +581,103 @@ function NewTask({
 }: {
   areas: string[];
   defaultArea: string | null;
-  onAdd: (title: string, area: string) => void;
+  onAdd: (body: NewTaskBody) => void;
   onCancel: () => void;
 }) {
   const [title, setTitle] = useState('');
   const [area, setArea] = useState(defaultArea ?? areas[0] ?? 'General');
+  const [newArea, setNewArea] = useState('');
+  const [status, setStatus] = useState<Status>('todo');
+  const [owner, setOwner] = useState('');
+  const [note, setNote] = useState('');
+  const [today, setToday] = useState(true);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && onCancel();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onCancel]);
+  const areaName = area === '__new' ? newArea.trim() : area;
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    if (title.trim()) onAdd(title.trim(), area);
+    if (!title.trim() || !areaName) return;
+    setBusy(true);
+    onAdd({
+      title: title.trim(),
+      area: areaName,
+      status,
+      owner: owner.trim() || null,
+      note: note.trim() || null,
+      planned_for: today && !finished(status) ? todayIso() : null,
+    });
   };
   return (
-    <form className="tk-newtask" onSubmit={submit}>
-      <input
-        id="tk-new"
-        autoFocus
-        value={title}
-        maxLength={200}
-        placeholder="What needs doing?"
-        onChange={(e) => setTitle(e.target.value)}
-        onKeyDown={(e) => e.key === 'Escape' && onCancel()}
-        aria-label="New task"
-      />
-      <Select aria-label="Area of the new task" size="sm" value={area} onChange={setArea} options={areas.map((a) => ({ value: a, label: a }))} />
-      <button type="button" className="sj-btn ghost sm" onClick={onCancel}>
-        Cancel
-      </button>
-      <button type="submit" className="sj-btn sm" disabled={!title.trim()}>
-        Add
-      </button>
-    </form>
+    <div className="tk-scrim center" onMouseDown={(event) => event.target === event.currentTarget && onCancel()}>
+      <form className="tk-modal" onSubmit={submit} aria-label="New task">
+        <h2>New task</h2>
+        <label className="tk-label">
+          <span>What needs doing?</span>
+          <textarea
+            id="tk-new-title"
+            autoFocus
+            rows={2}
+            value={title}
+            maxLength={200}
+            onChange={(e) => setTitle(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                submit(e as unknown as FormEvent);
+              }
+            }}
+          />
+        </label>
+        <div className="tk-two">
+          <label className="tk-label">
+            <span>Area</span>
+            <Select
+              aria-label="Area"
+              value={area}
+              onChange={setArea}
+              options={[...areas.map((a) => ({ value: a, label: a })), { value: '__new', label: 'A new area…' }]}
+            />
+          </label>
+          <label className="tk-label">
+            <span>Stage</span>
+            <Select aria-label="Stage" value={status} onChange={setStatus} options={STATUS} />
+          </label>
+        </div>
+        {area === '__new' ? (
+          <label className="tk-label">
+            <span>New area</span>
+            <input id="tk-new-area" value={newArea} maxLength={60} onChange={(e) => setNewArea(e.target.value)} />
+          </label>
+        ) : null}
+        <label className="tk-label">
+          <span>Who is on it (optional)</span>
+          <input id="tk-new-owner" value={owner} maxLength={80} onChange={(e) => setOwner(e.target.value)} />
+        </label>
+        <label className="tk-label">
+          <span>Notes (optional)</span>
+          <textarea id="tk-new-note" rows={3} value={note} maxLength={4000} onChange={(e) => setNote(e.target.value)} />
+        </label>
+        <label className="tk-check">
+          <input type="checkbox" checked={today && !finished(status)} disabled={finished(status)} onChange={(e) => setToday(e.target.checked)} />
+          <span>Plan it for today</span>
+        </label>
+        <div className="tk-save">
+          <button type="button" className="sj-btn ghost sm" onClick={onCancel}>
+            Cancel
+          </button>
+          <button type="submit" className="sj-btn sm" disabled={busy || !title.trim() || !areaName}>
+            {busy ? 'Adding…' : 'Add the task'}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }
+
 
 /* ------------------------------------------------------------------ one task */
 

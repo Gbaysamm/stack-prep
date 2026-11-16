@@ -11,7 +11,7 @@ change it. Deployments are written by the release script (database/record_deploy
 from __future__ import annotations
 
 import hmac
-from datetime import datetime
+from datetime import date, datetime
 from typing import Annotated, Any, Literal
 from uuid import UUID
 
@@ -86,6 +86,8 @@ class Item(BaseModel):
     updated_at: datetime
     done_at: datetime | None
     updated_by: str | None
+    #: The day it is planned for: under Today from then until it is finished.
+    planned_for: date | None
     steps: int
     steps_done: int
 
@@ -108,7 +110,7 @@ class TrackerPage(BaseModel):
 
 ITEMS = """
     SELECT i.id, i.title, i.area, i.status, i.owner, i.note, i.created_at, i.updated_at,
-           i.done_at, i.updated_by,
+           i.done_at, i.updated_by, i.planned_for,
            (SELECT count(*) FROM tracker_steps s WHERE s.item_id = i.id) AS steps,
            (SELECT count(*) FROM tracker_steps s WHERE s.item_id = i.id AND s.done) AS steps_done
     FROM tracker_items i
@@ -216,6 +218,7 @@ class ItemIn(BaseModel):
     status: Status = "todo"
     owner: str | None = Field(default=None, max_length=80)
     note: str | None = Field(default=None, max_length=4000)
+    planned_for: date | None = None
 
 
 @router.post("/items", response_model=ItemDetail, summary="Add a task")
@@ -227,8 +230,9 @@ async def add_item(
     rows = await fetch_all(
         conn,
         """
-        INSERT INTO tracker_items (title, area, status, owner, note, updated_by, done_at)
-        VALUES (:title, :area, :status, :owner, :note, :by,
+        INSERT INTO tracker_items (title, area, status, owner, note, planned_for, updated_by,
+                                   done_at)
+        VALUES (:title, :area, :status, :owner, :note, :planned_for, :by,
                 CASE WHEN :status IN ('done', 'committed', 'deployed') THEN now() END)
         RETURNING id
         """,
@@ -237,6 +241,7 @@ async def add_item(
         status=body.status,
         owner=_clean(body.owner),
         note=_clean(body.note, keep_lines=True),
+        planned_for=body.planned_for,
         by=who.name,
     )
     item_id = rows[0]["id"]
@@ -251,6 +256,8 @@ class ItemChange(BaseModel):
     status: Status | None = None
     owner: str | None = Field(default=None, max_length=80)
     note: str | None = Field(default=None, max_length=4000)
+    #: A day to plan it for, or null to take it off the plan.
+    planned_for: date | None = None
 
 
 @router.patch("/items/{item_id}", response_model=ItemDetail, summary="Change a task")
@@ -263,7 +270,11 @@ async def change_item(
     before = (await _detail(conn, item_id)).item
     fields: dict[str, Any] = {}
     for key, value in body.model_dump(exclude_unset=True).items():
-        fields[key] = value if key == "status" else _clean(value, keep_lines=key == "note")
+        fields[key] = (
+            _clean(value, keep_lines=key == "note")
+            if isinstance(value, str) and key != "status"
+            else value
+        )
     for required in ("title", "area", "status"):
         if required in fields and not fields[required]:
             raise HTTPException(status_code=422, detail=f"{required} cannot be empty")
@@ -290,6 +301,13 @@ async def change_item(
             await _log(conn, item_id, who, f"Moved to {STATUS_WORD[value]}")
         elif key == "note":
             await _log(conn, item_id, who, "Changed the notes")
+        elif key == "planned_for":
+            await _log(
+                conn,
+                item_id,
+                who,
+                f"Planned for {value:%a %d %b}" if value else "Taken off the day's plan",
+            )
         elif key == "owner":
             await _log(
                 conn, item_id, who, f"Gave it to {value}" if value else "Cleared who is on it"
