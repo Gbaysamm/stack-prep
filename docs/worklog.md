@@ -15,6 +15,15 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-16
 
+### Practice second pass; held runs in a popup; tracker brought up to date
+- **What:** Practice opens with How it's going (sticker tiles), then the subjects, then the weak
+  topics as tappable cards with a score badge; every sticker card has one 5px shadow, steady on
+  hover. Start a run and Practise on a topic read today's roadmap up front and say a held run
+  in a popup at once (`prep/RunGate.tsx`), on Practice, Progress and the subject page.
+  Migration 055 records this on the tracker and puts the check-up report page in progress.
+- **Why:** founder, 16 Nov 2026.
+- **Status:** pushed.
+
 ### Start a run never moves the student elsewhere
 - **What:** when the roadmap still has items today, Start a run used to start the roadmap's
   next item on its own (often a lesson). It now stays put and says so at the top of Practice:

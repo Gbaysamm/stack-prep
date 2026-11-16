@@ -100,7 +100,10 @@ Order of work (each shown at 1440 and 390 before the next):
 | No subtitle box; a timeline; dock on phone; buddy by the controls; no emphasis on Next | Board dock rebuilt | `Board.tsx`, `board.css` | Done-local |
 | Loading screen redesigned | Pen-on-board loader | `Lesson.tsx`, `Lesson.css` | Done-local |
 | Whiteboard and Emeka by default | Prefs v3 | `boardPrefs.ts` | Done-local |
-| Progress page redesigned (subject cards, runs, folding topics, no 100% from one answer) | Rebuilt | `Progress.tsx` | Done-local |
+| Practice second pass: figures first, sticker tiles, weak topics as cards, one shadow | Done | `PracticeHub.tsx` | Pushed |
+| A held run is said in a popup at once, never a page change | `RunGate.tsx` | Practice, Progress, subject page | Pushed |
+| Check-up report page redesign | Next | `CheckupReport.tsx` | In progress |
+| Progress page redesigned (subject cards, runs, folding topics, no 100% from one answer) | Rebuilt | `Progress.tsx` | Pushed |
 | Tracker: true finished dates; calmer rows on phone | Migration 053; rows with tick, title, one line | `TrackerPage.tsx` | Done-local |
 | Tracker: Today shows finished-today; one list by day, not by area | Today and day groups | `TrackerPage.tsx` | Done-local |
 | Mock page redesigned; scheduled (set for you) vs custom (set yourself); both locked until ready | Two sticker cards, server locks, admin scheduling, migration 052 | `MockHub.tsx`, `routers/mock.py` | Done-local |
