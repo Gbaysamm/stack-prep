@@ -118,6 +118,8 @@ export function PracticeHub() {
 
   return (
     <div className="sj-page ph">
+      {/* The overview first, then the subjects to act on (founder, 16 Nov 2026). */}
+      {!loading && subjects.length > 0 ? <PracticeStats /> : null}
       <div className="home-sechead page-intro">
         <div className="text">
           <span className="sj-eyebrow">Practice</span>
@@ -149,7 +151,6 @@ export function PracticeHub() {
               />
             ))}
           </section>
-          <PracticeStats />
           <TopicsToWork subjects={subjects} onPractise={gate.openTopic} />
           {starter.error && !starter.planFirst ? (
             <p className="ph-alert" role="alert">
