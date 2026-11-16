@@ -15,6 +15,16 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-16
 
+### Tracker: one task per page redesign; today's work on record; lighter rows
+- **What:** migration 054 replaces "Redesign the remaining pages" with one task per student
+  page (area Page redesigns), records today's finished work (Practice, Check-up, Mock exam,
+  two tracker fixes) and puts Progress in progress on Today. Titles are lighter; on a phone
+  the Active / Finished / All switch spans the width.
+- **Why:** founder, 16 Nov 2026: the day's work was missing, and a page list keeps each
+  redesign its own, not generic.
+- **Where:** `database/migrations/054_tracker_page_redesigns.sql`, `staff/tracker.css`.
+- **Status:** committed, not pushed.
+
 ### Tracker: true finished dates; calmer rows
 - **What:** migration 053 sets each finished task's date to the first time a person finished
   it in the tracker; work loaded when the tracker was set up has no date and shows under
