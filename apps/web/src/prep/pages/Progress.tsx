@@ -448,9 +448,15 @@ function SubjectCard({ subject, on, onPick }: { subject: SubjectOverview; on: bo
         {target !== null ? <em style={{ left: `${Math.min(100, target)}%` }} /> : null}
       </span>
       <small className="prog2-card-note">
-        <span>{target !== null ? `Target ${Math.round(target)}%` : "No target yet"}</span>
         <span>
-          Answered in {tried} of {total} topics
+          Target: <b>{target !== null ? `${Math.round(target)}%` : "not set"}</b>
+        </span>
+        <span>
+          Answered:{" "}
+          <b>
+            {tried}/{total}
+          </b>{" "}
+          topics
         </span>
       </small>
     </button>
