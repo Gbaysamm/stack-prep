@@ -404,24 +404,23 @@ function TopicsToWork({ subjects, onPractise }: { subjects: SubjectOverview[]; o
       title="Where to practise next"
       id="ph-weak-title"
       className="sj-rise d3 ph2-weak"
-      sub="Your weakest topics with 3 or more answers. Red is under 25%, orange under 50%."
+      sub="Your weakest topics with 3 or more answers. Tap one to practise it."
     >
       <ul className="ph2-weak-list">
         {weak.map(({ subject, topic }) => (
-          <li key={topic.subtopic_id} className={(topic.score ?? 0) < 25 ? "very" : undefined}>
-            <i aria-hidden="true" />
-            <span className="ph2-weak-name">
-              <b>{topic.name}</b>
-              <small>{subject.subject_name}</small>
-            </span>
-            <span className="ph2-weak-score sj-num">{topic.score}%</span>
+          <li key={topic.subtopic_id}>
             <button
               type="button"
-              className="ph2-weak-go"
+              className={cx("ph2-weak-row", (topic.score ?? 0) < 25 && "very")}
               onClick={() => onPractise(`/practice/new?subject=${subject.subject_id}&subtopic=${topic.subtopic_id}`)}
-              aria-label={`Practise ${topic.name}`}
+              aria-label={`Practise ${topic.name}, ${subject.subject_name}, ${topic.score}%`}
             >
-              Practise <IconArrowRight size={14} />
+              <span className="ph2-weak-badge sj-num">{topic.score}%</span>
+              <span className="ph2-weak-name">
+                <b>{topic.name}</b>
+                <small>{subject.subject_name} · tap to practise</small>
+              </span>
+              <IconArrowRight size={18} className="ph2-weak-arrow" />
             </button>
           </li>
         ))}
