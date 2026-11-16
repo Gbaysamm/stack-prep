@@ -2,10 +2,11 @@
  * Content and activity: Subjects & topics, the Question bank (and one question in depth),
  * Question quality, and every Mock and Check-up sat. apps/api routers/admin_content.py.
  */
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { Maths } from '../Maths.js';
 import { friendly, request } from '../lib/friendlyError.js';
+import { DatePicker } from '../lib/DatePicker.js';
 import { Select } from '../lib/Select.js';
 import { StaffPageHead } from '../staff/StaffShell.js';
 import { ago } from './StudentsPage.js';
@@ -660,6 +661,193 @@ function Pager({ page, total, onPage }: { page: number; total: number; onPage: (
   );
 }
 
+/* ------------------------------------------------------------------ scheduled mocks */
+// A mock Stack Prep sets for every student of an examination (routers/admin_content.py). Students
+// see it on their Mock exam page while it is open, and sit it once in JAMB's format.
+
+interface ScheduledMockRow {
+  id: string;
+  examination_id: string;
+  examination: string;
+  title: string;
+  opens_on: string;
+  closes_on: string;
+  sat: number;
+}
+interface ScheduledMocksData {
+  mocks: ScheduledMockRow[];
+  examinations: { id: string; short_name: string; name: string }[];
+}
+interface MockDraft {
+  examination_id: string;
+  title: string;
+  opens_on: string;
+  closes_on: string;
+}
+
+const dayWords = (day: string) =>
+  new Date(`${day}T00:00:00`).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+const todayIso = () => {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+};
+
+function ScheduledMocks() {
+  const [data, setData] = useState<ScheduledMocksData | null>(null);
+  const [problem, setProblem] = useState<string | null>(null);
+  const [draft, setDraft] = useState<MockDraft | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const load = useCallback(() => {
+    request<ScheduledMocksData>('/v1/admin/scheduled-mocks')
+      .then(setData)
+      .catch((error) => setProblem(friendly(error)));
+  }, []);
+  useEffect(load, [load]);
+
+  const set = <K extends keyof MockDraft>(key: K, value: MockDraft[K]) =>
+    setDraft((now) => (now ? { ...now, [key]: value } : now));
+  const fresh = () =>
+    setDraft({
+      examination_id: data?.examinations.find((e) => e.short_name === 'UTME')?.id ?? data?.examinations[0]?.id ?? '',
+      title: '',
+      opens_on: '',
+      closes_on: '',
+    });
+  const ready = Boolean(
+    draft && draft.examination_id && draft.title.trim() && draft.opens_on && draft.closes_on && draft.closes_on >= draft.opens_on,
+  );
+
+  const save = (event: FormEvent) => {
+    event.preventDefault();
+    if (!draft || !ready || busy) return;
+    setBusy(true);
+    setProblem(null);
+    request('/v1/admin/scheduled-mocks', { method: 'POST', body: JSON.stringify(draft) })
+      .then(() => {
+        setDraft(null);
+        load();
+      })
+      .catch((error) => setProblem(friendly(error)))
+      .finally(() => setBusy(false));
+  };
+  const cancel = (mock: ScheduledMockRow) => {
+    if (!window.confirm(`Cancel “${mock.title}”? Students stop seeing it; mocks already sat keep their results.`)) return;
+    request(`/v1/admin/scheduled-mocks/${mock.id}`, { method: 'DELETE' })
+      .then(load)
+      .catch((error) => setProblem(friendly(error)));
+  };
+
+  const today = todayIso();
+  return (
+    <section className="st-panel">
+      <div className="st-panel-head sm-head">
+        <div>
+          <h2>Scheduled mocks</h2>
+          <p className="st-muted">
+            Set a mock for every student of an exam. They see it on their Mock exam page between the two days and sit it once, in JAMB’s format.
+          </p>
+        </div>
+        <button type="button" className="sj-btn" onClick={fresh} disabled={!data}>
+          Schedule a mock
+        </button>
+      </div>
+      {problem && !draft && <p className="st-error">{problem}</p>}
+      {data && data.mocks.length === 0 && <p className="st-muted">Nothing scheduled yet.</p>}
+      {data && data.mocks.length > 0 && (
+        <div className="st-table-wrap">
+          <table className="st-table st-stack">
+            <thead>
+              <tr>
+                <th>Mock</th>
+                <th>Open</th>
+                <th style={{ textAlign: 'right' }}>Sat</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {data.mocks.map((mock) => (
+                <tr key={mock.id}>
+                  <td data-label="Mock">
+                    <span className="st-cell">
+                      {mock.title}
+                      <span className="st-muted">
+                        {mock.examination}
+                        {mock.closes_on < today ? ' · closed' : mock.opens_on <= today ? ' · open now' : ''}
+                      </span>
+                    </span>
+                  </td>
+                  <td data-label="Open" className="st-muted">
+                    {mock.opens_on === mock.closes_on ? dayWords(mock.opens_on) : `${dayWords(mock.opens_on)} – ${dayWords(mock.closes_on)}`}
+                  </td>
+                  <td data-label="Sat" style={{ textAlign: 'right' }}>
+                    {mock.sat}
+                  </td>
+                  <td>
+                    <button type="button" className="sj-btn ghost sm" onClick={() => cancel(mock)}>
+                      Cancel
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {draft && data && (
+        <div className="pp-drawer" role="dialog" aria-modal="true" aria-label="Schedule a mock">
+          <button type="button" className="pp-drawer-scrim" aria-label="Close" onClick={() => !busy && setDraft(null)} />
+          <aside className="pp-drawer-panel">
+            <header className="pp-drawer-head">
+              <h3>Schedule a mock</h3>
+              <button type="button" className="pp-drawer-close" aria-label="Close" onClick={() => setDraft(null)} disabled={busy}>
+                ×
+              </button>
+            </header>
+            <form className="st-form" onSubmit={save}>
+              <div className="st-field">
+                <span>Exam</span>
+                <Select
+                  aria-label="Exam"
+                  value={draft.examination_id}
+                  onChange={(v) => set('examination_id', v)}
+                  options={data.examinations.map((e) => ({ value: e.id, label: e.short_name, hint: e.name }))}
+                />
+              </div>
+              <label className="st-field">
+                <span>Name students see</span>
+                <input value={draft.title} maxLength={120} placeholder="December mock" onChange={(e) => set('title', e.target.value)} />
+              </label>
+              <div className="an-two">
+                <div className="st-field">
+                  <span>First day</span>
+                  <DatePicker aria-label="First day" value={draft.opens_on} min={today} onChange={(v) => set('opens_on', v)} />
+                </div>
+                <div className="st-field">
+                  <span>Last day</span>
+                  <DatePicker
+                    aria-label="Last day"
+                    value={draft.closes_on}
+                    min={draft.opens_on || today}
+                    onChange={(v) => set('closes_on', v)}
+                  />
+                </div>
+              </div>
+              {problem && <p className="st-error">{problem}</p>}
+              <div className="an-drawer-actions">
+                <button type="submit" className="sj-btn" disabled={busy || !ready}>
+                  {busy ? 'Saving…' : 'Schedule it'}
+                </button>
+              </div>
+            </form>
+          </aside>
+        </div>
+      )}
+    </section>
+  );
+}
+
 export function MocksPage() {
   const [flagged, setFlagged] = useState(false);
   const { data, problem, page, setPage, typed, setTyped } = usePaged<{
@@ -672,6 +860,7 @@ export function MocksPage() {
   return (
     <>
       <StaffPageHead title="Mock exams" sub="Every mock sat: who, which subjects, the score, and whether they left the test." />
+      <ScheduledMocks />
       <section className="st-panel st-filters st-filters-two">
         <label className="st-field st-search">
           <span>Student</span>
@@ -713,7 +902,7 @@ export function MocksPage() {
                       <span className="st-cell">
                         {mock.subjects || '—'}
                         <span className="st-muted">
-                          {mock.questions} questions{mock.preset === 'utme' ? ' · Real UTME' : ''}
+                          {mock.questions} questions{mock.preset === 'utme' ? ' · Scheduled' : ''}
                         </span>
                       </span>
                     </td>

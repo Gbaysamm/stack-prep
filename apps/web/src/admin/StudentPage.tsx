@@ -520,7 +520,7 @@ export function StudentPage() {
                     <strong>{mock.status === 'in_progress' ? 'Running now' : mock.subjects.map((s) => s.name).join(', ')}</strong>
                     <span className="st-muted">
                       {date(mock.started_at)}
-                      {mock.preset === 'utme' ? ' · Real UTME' : ''}
+                      {mock.preset === 'utme' ? ' · Scheduled' : ''}
                       {mock.integrity_flags > 0 ? ` · left the test ${mock.integrity_flags} ${mock.integrity_flags === 1 ? 'time' : 'times'}` : ''}
                     </span>
                   </span>

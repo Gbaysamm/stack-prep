@@ -28,7 +28,7 @@ from __future__ import annotations
 
 import math
 import secrets
-from datetime import datetime
+from datetime import UTC, date, datetime
 from typing import Annotated, Any, Literal
 from uuid import UUID
 
@@ -56,6 +56,11 @@ MAX_MINUTES = 300
 ANSWER_GRACE_SECONDS = 5
 #: Integrity events kept per mock, so a misbehaving page cannot fill the table.
 MAX_EVENTS_PER_MOCK = 2000
+
+#: A custom mock opens once this share of the topics in each of the student's subjects has been
+#: practised (founder, 16 Nov 2026): a mock tests what has been learnt. The Mock exam page
+#: shows the same rule.
+CUSTOM_UNLOCK = 0.7
 
 #: The Real UTME preset: English 60 questions, every other subject 40, two hours for all four.
 UTME_ENGLISH_QUESTIONS = 60
@@ -312,6 +317,8 @@ class StartMock(BaseModel):
     subjects: list[SubjectChoice] = Field(min_length=1, max_length=MAX_SUBJECTS)
     minutes: int = Field(ge=1, le=MAX_MINUTES)
     preset: Literal["utme", "custom"] = "custom"
+    #: A mock Stack Prep scheduled (scheduled_mocks): sat in JAMB's format, once.
+    scheduled_mock_id: UUID | None = None
 
 
 class PaperOption(BaseModel):
@@ -498,6 +505,21 @@ class MockSummary(BaseModel):
     subjects: list[SubjectResult]
     #: Times the student left full screen or switched away, for the history list.
     integrity_flags: int
+    #: The scheduled mock's name, when this was one Stack Prep set.
+    title: str | None = None
+
+
+class ScheduledMock(BaseModel):
+    """A mock set for the student: Stack Prep's (``stack``) or the roadmap's (``roadmap``)."""
+
+    #: The schedule's id; "roadmap" for the roadmap's own.
+    id: str
+    source: Literal["stack", "roadmap"]
+    title: str
+    opens_on: date
+    closes_on: date
+    #: Open from its first day to its last, in the student's calendar; upcoming before.
+    state: Literal["open", "upcoming"]
 
 
 # --------------------------------------------------------------------------- helpers
@@ -1139,11 +1161,21 @@ async def start(
             )
         papers.append((choice.subject_id, shuffled_paper(picked, rng)))
 
-    # The Real UTME gets JAMB's time for the questions actually set; a custom mock, the
+    # A scheduled mock: open today, for this examination, and not sat already. JAMB's format
+    # without a schedule is the roadmap's mock, on its day. A custom mock waits for practice.
+    preset = body.preset
+    if body.scheduled_mock_id is not None:
+        await _check_scheduled(conn, body.student_id, body.scheduled_mock_id, next(iter(exams)))
+        preset = "utme"
+    elif preset == "utme":
+        await _check_roadmap_mock(conn, body.student_id)
+    else:
+        await _check_custom_unlocked(conn, body.student_id)
+    # JAMB's format gets JAMB's time for the questions actually set; a custom mock, the
     # student's own.
     minutes = (
         utme_minutes(sum(len(order) for _, order in papers))
-        if body.preset == "utme"
+        if preset == "utme"
         else body.minutes
     )
     mock_id = (
@@ -1151,17 +1183,18 @@ async def start(
             text(
                 """
                 INSERT INTO mock_exams (student_id, examination_id, preset, duration_minutes,
-                  deadline_at)
+                  deadline_at, scheduled_mock_id)
                 VALUES (:student, :exam, :preset, :minutes,
-                  now() + make_interval(mins => :minutes))
+                  now() + make_interval(mins => :minutes), :scheduled)
                 RETURNING id
                 """
             ),
             {
                 "student": body.student_id,
                 "exam": next(iter(exams)),
-                "preset": body.preset,
+                "preset": preset,
                 "minutes": minutes,
+                "scheduled": body.scheduled_mock_id,
             },
         )
     ).scalar_one()
@@ -1372,9 +1405,10 @@ async def mock_history(conn: AsyncConnection, student_id: UUID) -> list[MockSumm
     mocks = await fetch_all(
         conn,
         """
-        SELECT * FROM mock_exams
-        WHERE student_id = :student AND hidden_at IS NULL
-        ORDER BY started_at DESC
+        SELECT m.*, sm.title AS scheduled_title
+        FROM mock_exams m LEFT JOIN scheduled_mocks sm ON sm.id = m.scheduled_mock_id
+        WHERE m.student_id = :student AND m.hidden_at IS NULL
+        ORDER BY m.started_at DESC
         LIMIT 200
         """,
         student=student_id,
@@ -1399,9 +1433,265 @@ async def mock_history(conn: AsyncConnection, student_id: UUID) -> list[MockSumm
                 overall=_overall(subjects) if mock["submitted_at"] is not None else None,
                 subjects=subjects if mock["submitted_at"] is not None else [],
                 integrity_flags=flags.fullscreen_exits + flags.tab_switches,
+                title=mock["scheduled_title"],
             )
         )
     return summaries
+
+
+@router.get(
+    "/scheduled/{student_id}", response_model=list[ScheduledMock], summary="Mocks set for you"
+)
+async def scheduled(
+    request: Request, conn: Annotated[AsyncConnection, Depends(connection)], student_id: UUID
+) -> list[ScheduledMock]:
+    """Stack Prep's mocks for the student's examinations that are still to sit, and the
+    roadmap's next mock. Soonest first."""
+    await require_student(request, conn, student_id)
+    days = await fetch_all(
+        conn,
+        "SELECT (now() AT TIME ZONE timezone)::date AS today, timezone FROM students WHERE id = :s",
+        s=student_id,
+    )
+    if not days:
+        raise HTTPException(status_code=404, detail="unknown student")
+    today, zone = days[0]["today"], days[0]["timezone"]
+    stack = await fetch_all(
+        conn,
+        """
+        SELECT sm.id, sm.title, sm.opens_on, sm.closes_on
+        FROM scheduled_mocks sm
+        WHERE sm.cancelled_at IS NULL AND sm.closes_on >= :today
+          AND sm.examination_id IN (
+            SELECT s.examination_id FROM student_exam_goals g JOIN subjects s ON s.id = g.subject_id
+            WHERE g.student_id = :s AND g.status = 'active')
+          AND NOT EXISTS (
+            SELECT 1 FROM mock_exams m
+            WHERE m.student_id = :s AND m.scheduled_mock_id = sm.id AND m.hidden_at IS NULL)
+        ORDER BY sm.opens_on, sm.title
+        """,
+        s=student_id,
+        today=today,
+    )
+    # The roadmap's next mock, unless a mock was already started that day.
+    roadmap = await fetch_all(
+        conn,
+        """
+        SELECT i.day FROM roadmap_items i
+        JOIN roadmaps r ON r.id = i.roadmap_id AND r.status = 'active'
+        WHERE i.student_id = :s AND i.kind = 'mock' AND i.session_id IS NULL AND i.day >= :today
+          AND NOT EXISTS (
+            SELECT 1 FROM mock_exams m
+            WHERE m.student_id = :s AND (m.started_at AT TIME ZONE :zone)::date = i.day)
+        ORDER BY i.day LIMIT 1
+        """,
+        s=student_id,
+        today=today,
+        zone=zone,
+    )
+    found = [
+        ScheduledMock(
+            id=str(row["id"]),
+            source="stack",
+            title=row["title"],
+            opens_on=row["opens_on"],
+            closes_on=row["closes_on"],
+            state="open" if row["opens_on"] <= today else "upcoming",
+        )
+        for row in stack
+    ] + [
+        ScheduledMock(
+            id="roadmap",
+            source="roadmap",
+            title="Your roadmap's mock",
+            opens_on=row["day"],
+            closes_on=row["day"],
+            state="open" if row["day"] <= today else "upcoming",
+        )
+        for row in roadmap
+    ]
+    return sorted(found, key=lambda mock: (mock.opens_on, mock.source))
+
+
+async def _check_roadmap_mock(conn: AsyncConnection, student_id: UUID) -> None:
+    """JAMB's format with no schedule is the roadmap's mock, sat on its own day."""
+    rows = await fetch_all(
+        conn,
+        """
+        SELECT 1 FROM roadmap_items i
+        JOIN roadmaps r ON r.id = i.roadmap_id AND r.status = 'active'
+        JOIN students st ON st.id = i.student_id
+        WHERE i.student_id = :s AND i.kind = 'mock'
+          AND i.day = (now() AT TIME ZONE st.timezone)::date
+        """,
+        s=student_id,
+    )
+    if not rows:
+        raise HTTPException(status_code=409, detail="Your scheduled mock isn't open today.")
+
+
+#: The topics the student has answered in practice runs (not check-ups or mocks).
+PRACTISED = """
+    SELECT sub.id::text AS unit_id, min(a.answered_at_client) AS first_at
+    FROM scoring_attempts a
+    JOIN study_sessions ss ON ss.id = a.session_id AND ss.session_type = 'guided'
+    JOIN question_versions v ON v.id = a.question_version_id
+    JOIN questions q ON q.id = v.question_id
+    JOIN question_classifications c
+      ON c.question_id = v.question_id AND c.classification_role = 'primary'
+     AND c.review_status = 'approved'
+    JOIN curriculum_items skill ON skill.id = c.curriculum_item_id
+    JOIN curriculum_items sub ON sub.id = skill.parent_id
+    WHERE a.student_id = :student AND q.subject_id = :subject AND a.is_correct IS NOT NULL
+    GROUP BY sub.id
+"""
+
+#: New topics a week assumed while the student has no recent pace of their own.
+STARTING_PACE = 5
+#: The window the student's own pace is measured over.
+PACE_DAYS = 14
+
+
+class SubjectReadiness(BaseModel):
+    name: str
+    #: Topics practised in runs, and how many the unlock needs.
+    practised: int
+    needed: int
+
+
+class Readiness(BaseModel):
+    #: True once a custom mock can be set up.
+    ready: bool
+    #: The subjects still to practise, by name.
+    short: list[str]
+    #: Every subject's progress towards the unlock.
+    subjects: list[SubjectReadiness] = []
+    #: Topics still to practise across the subjects.
+    to_go: int = 0
+    #: New topics practised a week, over the last PACE_DAYS days; STARTING_PACE when none.
+    pace_per_week: int = 0
+    #: True when the pace is the student's own.
+    measured: bool = False
+    #: The likely day it opens, at that pace.
+    ready_on: date | None = None
+
+
+async def custom_readiness(conn: AsyncConnection, student_id: UUID) -> Readiness:
+    """How far the student is from a custom mock: CUSTOM_UNLOCK of the topics in each of their
+    subjects practised in runs, and when that is likely at their pace.
+
+    Only practice runs count: a check-up samples many topics without teaching any of them.
+    """
+    import math
+    from datetime import timedelta
+
+    if CUSTOM_UNLOCK <= 0:
+        return Readiness(ready=True, short=[])  # the lock is off (tests)
+    from app.routers.checkup import _subtopics  # here, not at the top: checkup imports this
+
+    goals = await fetch_all(
+        conn,
+        """
+        SELECT s.id, s.name, (now() AT TIME ZONE st.timezone)::date AS today
+        FROM student_exam_goals g
+        JOIN subjects s ON s.id = g.subject_id
+        JOIN examinations e ON e.id = s.examination_id
+        JOIN students st ON st.id = g.student_id
+        WHERE g.student_id = :s AND g.status = 'active'
+          AND e.short_name <> 'SANDBOX' AND e.short_name NOT LIKE 'PR%'
+        ORDER BY s.name
+        """,
+        s=student_id,
+    )
+    if not goals:
+        return Readiness(ready=False, short=["your subjects"])
+    today = goals[0]["today"]
+    since = datetime.now(UTC) - timedelta(days=PACE_DAYS)
+    subjects: list[SubjectReadiness] = []
+    recent = 0
+    for goal in goals:
+        try:
+            units, _ = await _subtopics(conn, goal["id"])
+        except HTTPException:
+            continue  # a syllabus without its current version: nothing to hold the student to
+        known = {unit.unit_id for unit in units}
+        if not known:
+            continue
+        rows = [
+            row
+            for row in await fetch_all(conn, PRACTISED, student=student_id, subject=goal["id"])
+            if row["unit_id"] in known
+        ]
+        recent += sum(1 for row in rows if row["first_at"] and row["first_at"] >= since)
+        subjects.append(
+            SubjectReadiness(
+                name=goal["name"],
+                practised=len(rows),
+                needed=math.ceil(len(known) * CUSTOM_UNLOCK),
+            )
+        )
+    short = [subject.name for subject in subjects if subject.practised < subject.needed]
+    to_go = sum(max(0, subject.needed - subject.practised) for subject in subjects)
+    measured = recent > 0
+    pace = max(1, round(recent * 7 / PACE_DAYS)) if measured else STARTING_PACE
+    return Readiness(
+        ready=not short,
+        short=short,
+        subjects=subjects,
+        to_go=to_go,
+        pace_per_week=pace,
+        measured=measured,
+        ready_on=today + timedelta(days=math.ceil(to_go * 7 / pace)) if short else None,
+    )
+
+
+@router.get(
+    "/readiness/{student_id}", response_model=Readiness, summary="Whether a custom mock is open"
+)
+async def readiness(
+    request: Request, conn: Annotated[AsyncConnection, Depends(connection)], student_id: UUID
+) -> Readiness:
+    await require_student(request, conn, student_id)
+    return await custom_readiness(conn, student_id)
+
+
+async def _check_custom_unlocked(conn: AsyncConnection, student_id: UUID) -> None:
+    """A custom mock opens once most of the topics in every subject are practised."""
+    if not (await custom_readiness(conn, student_id)).ready:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "A custom mock opens once you have practised most of the topics in each subject."
+            ),
+        )
+
+
+async def _check_scheduled(
+    conn: AsyncConnection, student_id: UUID, scheduled_id: UUID, examination_id: UUID
+) -> None:
+    """A scheduled mock can be sat once, while it is open, for its own examination."""
+    rows = await fetch_all(
+        conn,
+        """
+        SELECT sm.examination_id, sm.opens_on, sm.closes_on,
+               (now() AT TIME ZONE st.timezone)::date AS today,
+               EXISTS (SELECT 1 FROM mock_exams m WHERE m.student_id = st.id
+                       AND m.scheduled_mock_id = sm.id AND m.hidden_at IS NULL) AS sat
+        FROM scheduled_mocks sm, students st
+        WHERE sm.id = :id AND sm.cancelled_at IS NULL AND st.id = :s
+        """,
+        id=scheduled_id,
+        s=student_id,
+    )
+    if not rows:
+        raise HTTPException(status_code=404, detail="That scheduled mock isn't available.")
+    row = rows[0]
+    if row["examination_id"] != examination_id:
+        raise HTTPException(status_code=422, detail="That mock is for another examination.")
+    if row["sat"]:
+        raise HTTPException(status_code=409, detail="You have already sat this mock.")
+    if not row["opens_on"] <= row["today"] <= row["closes_on"]:
+        raise HTTPException(status_code=409, detail="This mock isn't open today.")
 
 
 @router.delete(

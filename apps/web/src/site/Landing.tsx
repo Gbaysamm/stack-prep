@@ -70,7 +70,7 @@ export const TOUR = [
     eyebrow: 'Mock exams',
     title: 'Sit the real thing before the real thing',
     body: 'A JAMB-style computer-based test: Use of English and three subjects, 180 questions in two hours, full screen, with a question palette and a calculator when you need one.',
-    ticks: ['The Real UTME layout and pace, or a shorter mock you set up', 'Your score in each subject, as a percentage or out of 400', 'Every question afterwards, with the right answer and why'],
+    ticks: ['Scheduled mocks in JAMB’s layout and pace, or a mock you set up yourself', 'Your score in each subject, as a percentage or out of 400', 'Every question afterwards, with the right answer and why'],
     mock: (
       <AppShot
         src="/showcase/mock-exam-screen.jpg"

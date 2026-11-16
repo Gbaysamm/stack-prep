@@ -1080,3 +1080,463 @@
     display: none;
   }
 }
+
+/* ---------------------------------------------------------------- redesign, 16 Nov 2026 */
+/* A mock is set for the student (scheduled) or set by them (custom). Each card is locked until
+   it may be sat. Sticker cards throughout. */
+.sj .mk2 {
+  display: grid;
+  gap: 30px;
+}
+
+/* A mock in progress: one bar to resume it. */
+.sj .mk2-resume {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 18px;
+  background: #fffbea;
+  box-shadow: 8px 8px 0 #ffd84a;
+}
+.sj .mk2-resume-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #ffd84a;
+  color: var(--ink-900, #1f0050);
+}
+.sj .mk2-resume b {
+  display: block;
+  font-size: 16px;
+}
+.sj .mk2-resume small {
+  color: var(--ink-600, #4b4566);
+  font-size: 13px;
+}
+
+/* The two kinds, side by side. */
+.sj .mk2-choose {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 26px;
+  align-items: stretch;
+}
+.sj .mk2-utme,
+.sj .mk2-custom {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 28px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 22px;
+}
+.sj .mk2-utme {
+  color: #fff;
+  background:
+    radial-gradient(80% 90% at 100% 0%, rgba(107, 11, 255, 0.55), transparent 65%),
+    radial-gradient(60% 70% at 85% 120%, rgba(254, 118, 152, 0.28), transparent 70%),
+    var(--ink-900, #1f0050);
+  box-shadow: 8px 8px 0 var(--green-400, #85de4c);
+}
+.sj .mk2-utme.locked {
+  box-shadow: 8px 8px 0 var(--gray-300, #c9c6d6);
+}
+.sj .mk2-custom {
+  background: var(--white, #fff);
+  box-shadow: var(--st-purple, 8px 8px 0 #d7bdff);
+}
+.sj .mk2-tag {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--purple-050, #f3ebff);
+  color: var(--purple-700, #6500ff);
+  font-family: var(--f-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.sj .mk2-tag.dark {
+  background: var(--green-400, #85de4c);
+  color: var(--ink-900, #1f0050);
+}
+.sj .mk2-utme h2,
+.sj .mk2-custom h2 {
+  margin: 0;
+  font-size: clamp(28px, 3vw, 36px);
+  line-height: 1.05;
+}
+.sj .mk2-utme h2 {
+  color: #fff;
+}
+.sj .mk2-utme p,
+.sj .mk2-custom p {
+  max-width: 46ch;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+}
+.sj .mk2-utme p {
+  color: rgba(255, 255, 255, 0.78);
+}
+.sj .mk2-custom p {
+  color: var(--ink-600, #4b4566);
+}
+.sj .mk2-facts {
+  display: flex;
+  gap: 26px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 14px;
+}
+.sj .mk2-facts b {
+  display: block;
+  color: #fff;
+  font-family: var(--f-display);
+  font-size: 32px;
+  line-height: 1;
+}
+.sj .mk2-rules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .mk2-rules li {
+  padding: 5px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.sj .mk2-steps {
+  display: grid;
+  gap: 10px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14.5px;
+  font-weight: 500;
+}
+.sj .mk2-steps li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sj .mk2-steps span {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: var(--purple-050, #f3ebff);
+  color: var(--purple-700, #6500ff);
+  font-family: var(--f-mono);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* The way in sits at the foot of each card, level across the two. */
+.sj .mk2-utme > .sj-btn,
+.sj .mk2-custom > .sj-btn,
+.sj .mk2-locked {
+  margin-top: auto;
+}
+.sj .mk2-locked {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 18px;
+  border: 1px dashed rgba(255, 255, 255, 0.35);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  font-weight: 600;
+}
+.sj .mk2-locked.light {
+  border-color: var(--gray-300, #c9c6d6);
+  color: var(--gray-600, #6b6880);
+}
+
+/* The custom mock's lock: a bar per subject, straight on the card (no box inside the box). */
+.sj .mk2-gate {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+}
+.sj .mk2-gate-head {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.sj .mk2-gate-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 22px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .mk2-gate-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 8px;
+  font-size: 13px;
+}
+.sj .mk2-gate-name {
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sj .mk2-gate-pct {
+  color: var(--gray-600, #6b6880);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.sj .mk2-gate-list li.done .mk2-gate-pct {
+  color: #15803d;
+}
+.sj .mk2-gate-bar {
+  grid-column: 1 / -1;
+  position: relative;
+  height: 6px;
+  border-radius: 99px;
+  background: var(--purple-100, #e6d6ff);
+  overflow: hidden;
+}
+.sj .mk2-gate-bar i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 99px;
+  background: var(--purple-600, #7b2cff);
+}
+.sj .mk2-gate-list li.done .mk2-gate-bar i {
+  background: #16a34a;
+}
+.sj .mk2-gate-when {
+  color: var(--ink-600, #4b4566);
+  font-size: 13px;
+}
+
+/* Your mock exams. */
+.sj .mk2-history {
+  display: grid;
+  gap: 14px;
+}
+.sj .mk2-history h2,
+.sj .mk2-results h2 {
+  margin: 0;
+}
+.sj .mk2-empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 30px 24px;
+  border: 1.5px dashed var(--purple-200, #d7bdff);
+  border-radius: 20px;
+  background: #fbf9ff;
+  text-align: center;
+}
+.sj .mk2-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: var(--purple-050, #f3ebff);
+  color: var(--purple-700, #6500ff);
+}
+.sj .mk2-empty b {
+  font-family: var(--f-display);
+  font-size: 19px;
+}
+.sj .mk2-empty p {
+  max-width: 52ch;
+  margin: 0;
+  color: var(--ink-600, #4b4566);
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+
+/* Your results. */
+.sj .mk2-results {
+  display: grid;
+  gap: 14px;
+  padding: 22px 24px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 20px;
+  background: var(--white, #fff);
+  box-shadow: var(--st-purple, 8px 8px 0 #d7bdff);
+}
+.sj .mk2-results-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.sj .mk2-res {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--purple-050, #f3ebff);
+}
+.sj .mk2-res span {
+  color: var(--gray-600, #6b6880);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.sj .mk2-res b {
+  color: var(--ink-900, #1f0050);
+  font-family: var(--f-display);
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.05;
+}
+.sj .mk2-res b small {
+  margin-left: 2px;
+  color: var(--gray-600, #6b6880);
+  font-size: 15px;
+}
+.sj .mk2-res b.up {
+  color: #15803d;
+}
+.sj .mk2-res b.down {
+  color: #be123c;
+}
+.sj .mk2-res-note {
+  color: var(--gray-600, #6b6880);
+  font-size: 12.5px;
+}
+
+@media (max-width: 900px) {
+  .sj .mk2-choose {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sj .mk2-results-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .sj .mk2 {
+    gap: 24px;
+  }
+  .sj .mk2-utme,
+  .sj .mk2-custom {
+    padding: 22px 20px;
+  }
+  .sj .mk2-utme {
+    box-shadow: 5px 5px 0 var(--green-400, #85de4c);
+  }
+  .sj .mk2-utme.locked {
+    box-shadow: 5px 5px 0 var(--gray-300, #c9c6d6);
+  }
+  .sj .mk2-custom,
+  .sj .mk2-results {
+    box-shadow: 5px 5px 0 var(--purple-200, #d7bdff);
+  }
+  .sj .mk2-results {
+    padding: 18px;
+  }
+  .sj .mk2-resume {
+    grid-template-columns: auto minmax(0, 1fr);
+    box-shadow: 5px 5px 0 #ffd84a;
+  }
+  .sj .mk2-resume .sj-btn {
+    grid-column: 1 / -1;
+  }
+  .sj .mk2-facts {
+    gap: 18px;
+  }
+  .sj .mk2-facts b {
+    font-size: 28px;
+  }
+}
+
+/* The scheduled card: what it is, as a calm list with icons (founder's pick, 16 Nov 2026). */
+.sj .mk2-specs {
+  display: grid;
+  gap: 12px;
+  margin: 6px 0 8px;
+  padding: 0;
+  list-style: none;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 15px;
+}
+.sj .mk2-specs li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sj .mk2-specs span {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--green-400, #85de4c);
+}
+.sj .mk2-specs {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+  width: 100%;
+  font-size: 14px;
+  line-height: 1.35;
+}
+.sj .mk2-specs span {
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 9px;
+  background: var(--green-400, #85de4c);
+  box-shadow: 3px 3px 0 rgba(255, 255, 255, 0.85);
+  color: var(--ink-900, #1f0050);
+}
+@media (max-width: 480px) {
+  .sj .mk2-specs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* The unlock bars in the same sticker style: outlined, a small offset shadow, a bold fill. */
+.sj .mk2-gate-list {
+  gap: 14px 22px;
+}
+.sj .mk2-gate-bar {
+  height: 12px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  background: var(--white, #fff);
+  box-shadow: 2px 2px 0 var(--purple-200, #d7bdff);
+}
+.sj .mk2-gate-bar i {
+  border-radius: 0;
+  background: var(--purple-600, #7b2cff);
+}
+.sj .mk2-gate-list li.done .mk2-gate-bar i {
+  background: var(--green-400, #85de4c);
+}
+/* Green fill throughout, to match the icons (founder, 16 Nov 2026). */
+.sj .mk2-gate-bar {
+  box-shadow: 2px 2px 0 var(--green-400, #85de4c);
+}
+.sj .mk2-gate-bar i {
+  background: var(--green-400, #85de4c);
+}
+.sj .mk2-gate-list li.done .mk2-gate-bar i {
+  background: #16a34a;
+}

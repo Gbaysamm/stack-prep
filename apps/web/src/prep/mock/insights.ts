@@ -296,7 +296,7 @@ export function nextSteps(
     }
   }
   if (steps.length === 0) {
-    steps.push('A strong mock. Sit another under the full Real UTME conditions to check it holds up.');
+    steps.push('A strong mock. Sit your next scheduled mock, in JAMB’s format, to check it holds up.');
   }
   return steps.slice(0, 3);
 }

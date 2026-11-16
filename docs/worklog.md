@@ -15,6 +15,25 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-16
 
+### Mock exam redesigned: scheduled and custom, each locked until it may be sat
+- **What:** a mock is either **scheduled** (set for the student: the roadmap's weekly mock
+  before the exam, or one Stack Prep sets for every student of an exam) or **custom** (set by
+  the student). "Real UTME" is gone from the app. The /mock page shows the two side by side as
+  sticker cards: the scheduled card (icon list of what it is) is locked until one is open that
+  day, then starts it in JAMB's format with the student's own subjects, once; the custom card
+  is locked until 70% of the topics in each subject are practised in runs (check-ups do not
+  count), with one green bar per subject and the likely day at the student's pace. Below:
+  every mock sat, then Your results (best, latest, average, change since the first). Admin:
+  Mock exams has a Scheduled mocks panel (exam, name, first and last day; cancel).
+- **Server:** migration 052 (`scheduled_mocks`, `mock_exams.scheduled_mock_id`); new
+  `/v1/mock/scheduled/{id}`, `/v1/mock/readiness/{id}`, `/v1/admin/scheduled-mocks`; `/start`
+  refuses a custom mock before the unlock and JAMB's format outside a scheduled day.
+- **Why:** founder, 16 Nov 2026: both are mocks, the difference is who sets it; a student
+  should not sit a mock before they have learnt the work.
+- **Where:** `routers/{mock,admin_content,roadmap}.py`, `prep/pages/{MockHub,MockSetup}.tsx`,
+  `Mock.css`, `admin/ContentPages.tsx`, `tests/test_mock.py`.
+- **Status:** committed, not pushed. The deploy runs migration 052.
+
 ### Practice and Check-up, second pass: no banners, one colour, Your practice, sticker cards
 - **What:** both pages lose their banner (the cards carry each subject's actions). Check-up:
   History lists every check-up of a subject (date, score, change, each with its report); a

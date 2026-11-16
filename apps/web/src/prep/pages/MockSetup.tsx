@@ -1,5 +1,5 @@
 /**
- * /mock/new — set up a mock exam: the Real UTME (English 60, every other subject 40, two hours),
+ * /mock/new — set up a mock exam: a scheduled mock (English 60, every other subject 40, two hours),
  * or a custom one (up to four subjects, how many questions in each, how long). Every count is
  * capped by the questions there are; the server caps them again.
  *
@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { IconArrowRight, IconCheck, IconClock, IconLock } from '../icons.js';
 import { mockApi, minutesText, type MockExamOption, type MockOptions, type MockSubjectOption } from '../mockApi.js';
@@ -52,7 +52,14 @@ function TimePicker({
 }) {
   const low = 5;
   const each = total > 0 ? (minutes * 60) / total : 0;
-  const pace = each === 0 ? null : each < SECONDS_PER_QUESTION * 0.9 ? 'tight' : each > SECONDS_PER_QUESTION * 1.25 ? 'relaxed' : 'exam';
+  const pace =
+    each === 0
+      ? null
+      : each < SECONDS_PER_QUESTION * 0.9
+        ? 'tight'
+        : each > SECONDS_PER_QUESTION * 1.25
+          ? 'relaxed'
+          : 'exam';
   const paceWords = { tight: 'Tighter than the exam', exam: 'Exam pace', relaxed: 'More time than the exam' } as const;
   const at = (value: number) => `${(100 * (Math.min(max, Math.max(low, value)) - low)) / (max - low)}%`;
   return (
@@ -121,7 +128,11 @@ export function MockSetup() {
   const options = loaded.data;
 
   const [examId, setExamId] = useState<string | null>(null);
-  const [preset, setPreset] = useState<Preset>('utme');
+  // ?scheduled=<id> (or "roadmap") opens a scheduled mock: JAMB's format, the student's own
+  // subjects. Without it, the student sets up a custom mock.
+  const [params] = useSearchParams();
+  const scheduled = params.get('scheduled');
+  const preset: Preset = scheduled ? 'utme' : 'custom';
   const [chosen, setChosen] = useState<string[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [minutes, setMinutes] = useState(120);
@@ -142,13 +153,15 @@ export function MockSetup() {
   const countFor = (subject: MockSubjectOption) => {
     if (!options) return 0;
     if (preset === 'utme') return utmeCount(subject, options);
-    const wanted = counts[subject.subject_id] ?? (subject.compulsory ? options.utme.english_questions : options.utme.other_questions);
+    const wanted =
+      counts[subject.subject_id] ??
+      (subject.compulsory ? options.utme.english_questions : options.utme.other_questions);
     return clampInt(wanted, 1, Math.min(subject.available, options.max_questions_per_subject));
   };
 
   const picked = chosen.map((id) => byId.get(id)).filter((s): s is MockSubjectOption => !!s);
   const total = picked.reduce((sum, s) => sum + countFor(s), 0);
-  // Real UTME: JAMB's own pace for the questions set, so fewer subjects get less time.
+  // A scheduled mock: JAMB's own pace for the questions set, so fewer subjects get less time.
   const time = preset === 'utme' ? Math.max(1, Math.ceil((total * SECONDS_PER_QUESTION) / 60)) : minutes;
   const suggested = Math.max(5, Math.round((total * SECONDS_PER_QUESTION) / 60 / 5) * 5);
   const max = exam?.max_subjects ?? 4;
@@ -160,15 +173,6 @@ export function MockSetup() {
       if (current.length >= max) return current;
       return [...current, subject.subject_id];
     });
-  };
-
-  const choosePreset = (next: Preset) => {
-    setPreset(next);
-    if (next === 'utme' && exam) {
-      // The compulsory subject is always in a Real UTME.
-      const compulsory = exam.subjects.filter((s) => s.compulsory).map((s) => s.subject_id);
-      setChosen((current) => [...compulsory, ...current.filter((id) => !compulsory.includes(id))].slice(0, max));
-    }
   };
 
   const start = async () => {
@@ -189,6 +193,7 @@ export function MockSetup() {
         subjects: picked.map((s) => ({ subject_id: s.subject_id, questions: countFor(s) })),
         minutes: time,
         preset,
+        ...(scheduled && scheduled !== 'roadmap' ? { scheduled_mock_id: scheduled } : {}),
       });
       navigate(`/mock/${paper.mock_id}`);
     } catch (error) {
@@ -203,8 +208,12 @@ export function MockSetup() {
     <PageHero
       back={{ to: '/mock', label: 'Mock exams' }}
       eyebrow="Mock exam"
-      title="Set up your test"
-      sub="Choose your subjects, how many questions and how long. Once it starts, the clock doesn’t stop."
+      title={preset === 'utme' ? 'Scheduled mock' : 'Custom mock'}
+      sub={
+        preset === 'utme'
+          ? 'JAMB’s format with your own subjects. Check them, then start. Once it starts, the clock doesn’t stop.'
+          : 'Choose your subjects, how many questions and how long. Once it starts, the clock doesn’t stop.'
+      }
     />
   );
 
@@ -285,30 +294,6 @@ export function MockSetup() {
           ) : null}
 
           <section className="sj-card mk-block">
-            <h2 className="mk-block-title">Kind of test</h2>
-            <div className="mk-presets" role="radiogroup" aria-label="Kind of test">
-              <button type="button" role="radio" aria-checked={preset === 'utme'} className={cx('mk-preset', preset === 'utme' && 'on')} onClick={() => choosePreset('utme')}>
-                <span className="mk-preset-tick" aria-hidden="true">
-                  {preset === 'utme' ? <IconCheck size={14} /> : null}
-                </span>
-                <strong>Real UTME</strong>
-                <span>
-                  {options.utme.subjects} subjects. English {options.utme.english_questions} questions, the others{' '}
-                  {options.utme.other_questions} each, in JAMB's order. {minutesText(options.utme.minutes)} for four
-                  subjects, less for fewer.
-                </span>
-              </button>
-              <button type="button" role="radio" aria-checked={preset === 'custom'} className={cx('mk-preset', preset === 'custom' && 'on')} onClick={() => choosePreset('custom')}>
-                <span className="mk-preset-tick" aria-hidden="true">
-                  {preset === 'custom' ? <IconCheck size={14} /> : null}
-                </span>
-                <strong>Custom</strong>
-                <span>Pick the subjects, the number of questions and the time yourself.</span>
-              </button>
-            </div>
-          </section>
-
-          <section className="sj-card mk-block">
             <div className="mk-block-head">
               <h2 className="mk-block-title">Subjects</h2>
               <span className="mk-block-note">
@@ -321,7 +306,12 @@ export function MockSetup() {
                 const locked = preset === 'utme' && subject.compulsory;
                 const full = !on && chosen.length >= max;
                 const count = countFor(subject);
-                const wanted = preset === 'utme' ? (subject.compulsory ? options.utme.english_questions : options.utme.other_questions) : null;
+                const wanted =
+                  preset === 'utme'
+                    ? subject.compulsory
+                      ? options.utme.english_questions
+                      : options.utme.other_questions
+                    : null;
                 return (
                   <li key={subject.subject_id} className={cx('mk-subject', on && 'on')}>
                     <button
@@ -360,7 +350,9 @@ export function MockSetup() {
                             min={1}
                             max={Math.min(subject.available, options.max_questions_per_subject)}
                             value={count}
-                            onChange={(event) => setCounts((current) => ({ ...current, [subject.subject_id]: Number(event.target.value) }))}
+                            onChange={(event) =>
+                              setCounts((current) => ({ ...current, [subject.subject_id]: Number(event.target.value) }))
+                            }
                           />
                           <span>Qs</span>
                         </label>
@@ -376,7 +368,9 @@ export function MockSetup() {
             <section className="sj-card mk-block">
               <div className="mk-block-head">
                 <h2 className="mk-block-title">Time allowed</h2>
-                <span className="mk-block-note">For {total} question{total === 1 ? '' : 's'}</span>
+                <span className="mk-block-note">
+                  For {total} question{total === 1 ? '' : 's'}
+                </span>
               </div>
               <TimePicker
                 minutes={minutes}
@@ -416,7 +410,14 @@ export function MockSetup() {
               {issue}
             </p>
           ) : null}
-          <Button size="lg" block busy={starting} disabled={picked.length === 0} onClick={() => void start()} trailing={<IconArrowRight size={18} />}>
+          <Button
+            size="lg"
+            block
+            busy={starting}
+            disabled={picked.length === 0}
+            onClick={() => void start()}
+            trailing={<IconArrowRight size={18} />}
+          >
             Start the test
           </Button>
         </aside>

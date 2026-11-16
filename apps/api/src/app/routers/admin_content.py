@@ -8,15 +8,16 @@ where more students chose one wrong option than the keyed answer, which is often
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Annotated, Any, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app.auth import admin_session
+from app.auth import Staff, admin_session
 from app.db import connection, fetch_all
 
 router = APIRouter(prefix="/v1/admin", tags=["admin"], dependencies=[Depends(admin_session)])
@@ -652,3 +653,112 @@ async def checkups(
         finished=int(totals["finished"]),
         checkups=[CheckupRow(**row, percent=_pct(row["right"], row["answered"])) for row in rows],
     )
+
+
+# --------------------------------------------------------------------- scheduled mocks
+# A mock Stack Prep sets for every student of an examination (migration 052). Students see it
+# on their Mock exam page while it is open, and sit it in JAMB's format with their own subjects.
+
+
+class ExamChoice(BaseModel):
+    id: UUID
+    short_name: str
+    name: str
+
+
+class ScheduledMockRow(BaseModel):
+    id: UUID
+    examination_id: UUID
+    examination: str
+    title: str
+    opens_on: date
+    closes_on: date
+    #: Students who have started it.
+    sat: int
+
+
+class ScheduledMocksPage(BaseModel):
+    mocks: list[ScheduledMockRow]
+    examinations: list[ExamChoice]
+
+
+class NewScheduledMock(BaseModel):
+    examination_id: UUID
+    title: str = Field(min_length=1, max_length=120)
+    opens_on: date
+    closes_on: date
+
+
+@router.get("/scheduled-mocks", response_model=ScheduledMocksPage, summary="Scheduled mocks")
+async def scheduled_mocks(
+    conn: Annotated[AsyncConnection, Depends(connection)],
+) -> ScheduledMocksPage:
+    """Every mock not cancelled, latest first, and the examinations one can be set for."""
+    mocks = await fetch_all(
+        conn,
+        """
+        SELECT sm.id, sm.examination_id, e.short_name AS examination, sm.title, sm.opens_on,
+               sm.closes_on,
+               (SELECT count(*) FROM mock_exams m WHERE m.scheduled_mock_id = sm.id) AS sat
+        FROM scheduled_mocks sm JOIN examinations e ON e.id = sm.examination_id
+        WHERE sm.cancelled_at IS NULL
+        ORDER BY sm.opens_on DESC, sm.title
+        """,
+    )
+    exams = await fetch_all(
+        conn,
+        """
+        SELECT id, short_name, name FROM examinations
+        WHERE short_name <> 'SANDBOX' AND short_name NOT LIKE 'PR%'
+        ORDER BY short_name
+        """,
+    )
+    return ScheduledMocksPage(
+        mocks=[ScheduledMockRow(**row) for row in mocks],
+        examinations=[ExamChoice(**row) for row in exams],
+    )
+
+
+@router.post("/scheduled-mocks", response_model=ScheduledMockRow, summary="Schedule a mock")
+async def schedule_mock(
+    body: NewScheduledMock,
+    conn: Annotated[AsyncConnection, Depends(connection)],
+    staff: Annotated[Staff, Depends(admin_session)],
+) -> ScheduledMockRow:
+    if body.closes_on < body.opens_on:
+        raise HTTPException(status_code=422, detail="The last day can't be before the first.")
+    rows = await fetch_all(
+        conn,
+        """
+        INSERT INTO scheduled_mocks (examination_id, title, opens_on, closes_on, created_by)
+        SELECT e.id, :title, :opens, :closes, :by FROM examinations e WHERE e.id = :exam
+        RETURNING id, examination_id, title, opens_on, closes_on,
+          (SELECT short_name FROM examinations WHERE id = :exam) AS examination, 0 AS sat
+        """,
+        exam=body.examination_id,
+        title=body.title.strip(),
+        opens=body.opens_on,
+        closes=body.closes_on,
+        by=staff.display_name,
+    )
+    if not rows:
+        raise HTTPException(status_code=404, detail="unknown examination")
+    await conn.commit()
+    return ScheduledMockRow(**rows[0])
+
+
+@router.delete("/scheduled-mocks/{mock_id}", status_code=204, summary="Cancel a scheduled mock")
+async def cancel_scheduled_mock(
+    mock_id: UUID, conn: Annotated[AsyncConnection, Depends(connection)]
+) -> None:
+    """Students stop seeing it; mocks already sat keep their results."""
+    done = await conn.execute(
+        text(
+            "UPDATE scheduled_mocks SET cancelled_at = now() "
+            "WHERE id = :id AND cancelled_at IS NULL"
+        ),
+        {"id": mock_id},
+    )
+    if done.rowcount == 0:
+        raise HTTPException(status_code=404, detail="unknown scheduled mock")
+    await conn.commit()

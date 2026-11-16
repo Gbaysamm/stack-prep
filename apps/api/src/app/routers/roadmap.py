@@ -933,7 +933,7 @@ async def start_item(
         raise HTTPException(status_code=404, detail="That isn't on your roadmap.")
     item = rows[0]
     if item["kind"] == "mock":
-        return Started(kind="mock", session_id=None, path="/mock/new")
+        return Started(kind="mock", session_id=None, path="/mock/new?scheduled=roadmap")
     if item["kind"] == "lesson":
         return Started(
             kind="lesson",

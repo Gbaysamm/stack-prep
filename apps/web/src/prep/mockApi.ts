@@ -40,6 +40,34 @@ export interface StartMockIn {
   subjects: { subject_id: string; questions: number }[];
   minutes: number;
   preset: 'utme' | 'custom';
+  /** A mock Stack Prep scheduled: sat once, in JAMB's format. */
+  scheduled_mock_id?: string;
+}
+
+/** How far the student is from a custom mock, and when it is likely to open. */
+export interface Readiness {
+  ready: boolean;
+  /** The subjects still to practise, by name. */
+  short: string[];
+  /** Topics practised in runs, and how many the unlock needs. */
+  subjects: { name: string; practised: number; needed: number }[];
+  to_go: number;
+  /** New topics a week: the student's own over the last two weeks, or a starting pace. */
+  pace_per_week: number;
+  measured: boolean;
+  /** YYYY-MM-DD */
+  ready_on: string | null;
+}
+
+/** A mock set for the student: by Stack Prep (`stack`) or by their roadmap (`roadmap`). */
+export interface ScheduledMock {
+  /** The schedule's id; "roadmap" for the roadmap's own. */
+  id: string;
+  source: 'stack' | 'roadmap';
+  title: string;
+  opens_on: string;
+  closes_on: string;
+  state: 'open' | 'upcoming';
 }
 
 export interface PaperOption {
@@ -204,6 +232,8 @@ export interface MockSummary {
   overall: Tally | null;
   subjects: SubjectResult[];
   integrity_flags: number;
+  /** The scheduled mock's name, when Stack Prep set it. */
+  title?: string | null;
 }
 
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
@@ -234,6 +264,10 @@ export const mockApi = {
     call<MockReport>(`/${mockId}/submit`, { method: 'POST', body: JSON.stringify({ answers }) }),
   report: (mockId: string) => call<MockReport>(`/${mockId}/report`),
   history: (studentId: string) => call<MockSummary[]>(`/history/${studentId}`),
+  /** Whether a custom mock is open, and the subjects still to practise. */
+  readiness: (studentId: string) => call<Readiness>(`/readiness/${studentId}`),
+  /** Mocks set for the student, soonest first. */
+  scheduled: (studentId: string) => call<ScheduledMock[]>(`/scheduled/${studentId}`),
   remove: (mockId: string) => call<null>(`/${mockId}`, { method: 'DELETE' }),
 };
 

@@ -90,7 +90,7 @@ export function HowItWorksPage() {
           { big: '~15', small: 'questions in a check-up, no time limit' },
           { big: '7 days', small: 'between check-ups, to see your score move' },
           { big: '2 misses', small: 'and the coach teaches it on the board' },
-          { big: '180 in 2h', small: 'a Real UTME mock, like the exam' },
+          { big: '180 in 2h', small: 'a full mock, like the exam' },
         ].map((fact) => (
           <span key={fact.big}>
             <strong>{fact.big}</strong>

@@ -25,6 +25,14 @@ from app.db import dispose_engine
 
 
 @pytest.fixture(autouse=True)
+def _custom_mocks_open(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Tests start custom mocks freely; the lock has its own test in test_mock.py."""
+    from app.routers import mock
+
+    monkeypatch.setattr(mock, "CUSTOM_UNLOCK", 0.0)
+
+
+@pytest.fixture(autouse=True)
 async def _fresh_engine() -> AsyncIterator[None]:
     yield
     await dispose_engine()

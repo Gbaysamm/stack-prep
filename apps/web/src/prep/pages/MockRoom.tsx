@@ -509,7 +509,7 @@ function Exam({ paper }: { paper: MockPaper }) {
         <div className="mx-bar-who">
           <img src="/brand/mark-96.png" alt="" width={34} height={34} />
           <div>
-            <span className="mx-bar-eyebrow sj-mono">{paper.preset === 'utme' ? 'Real UTME mock' : 'Mock exam'}</span>
+            <span className="mx-bar-eyebrow sj-mono">{paper.preset === 'utme' ? 'Scheduled mock' : 'Custom mock'}</span>
             <strong>{student.displayName}</strong>
           </div>
         </div>

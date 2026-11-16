@@ -650,3 +650,92 @@ def test_real_utme_english_never_cuts_a_passage() -> None:
     # Still in JAMB's order.
     order = [part for part, *_ in UTME_ENGLISH_BLUEPRINT]
     assert parts == sorted(parts, key=order.index)
+
+
+async def test_a_scheduled_mock_is_listed_sat_once_and_named_in_history(
+    client: httpx.AsyncClient,  # noqa: F811
+    ids: dict[str, str],
+) -> None:
+    async with get_engine().begin() as conn:
+        scheduled = str(
+            (
+                await conn.execute(
+                    text(
+                        """
+                        INSERT INTO scheduled_mocks (examination_id, title, opens_on, closes_on)
+                        SELECT examination_id, 'Test mock', current_date - 1, current_date + 1
+                        FROM subjects WHERE id = CAST(:subject_id AS uuid)
+                        RETURNING id
+                        """
+                    ),
+                    ids,
+                )
+            ).scalar_one()
+        )
+    try:
+        listed = (await client.get(f"/v1/mock/scheduled/{ids['student']}")).json()
+        mine = [mock for mock in listed if mock["id"] == scheduled]
+        assert mine and mine[0]["state"] == "open" and mine[0]["source"] == "stack"
+
+        response = await client.post(
+            "/v1/mock/start",
+            json={
+                "student_id": ids["student"],
+                "subjects": [{"subject_id": ids["subject_id"], "questions": 3}],
+                "minutes": 30,
+                "scheduled_mock_id": scheduled,
+            },
+        )
+        assert response.status_code == 200, response.text
+        assert response.json()["preset"] == "utme"  # JAMB's format, whatever was asked
+
+        listed = (await client.get(f"/v1/mock/scheduled/{ids['student']}")).json()
+        assert all(mock["id"] != scheduled for mock in listed)
+        history = (await client.get(f"/v1/mock/history/{ids['student']}")).json()
+        assert history[0]["title"] == "Test mock"
+
+        mock_id = response.json()["mock_id"]
+        await client.post(f"/v1/mock/{mock_id}/submit")
+        again = await client.post(
+            "/v1/mock/start",
+            json={
+                "student_id": ids["student"],
+                "subjects": [{"subject_id": ids["subject_id"], "questions": 3}],
+                "minutes": 30,
+                "scheduled_mock_id": scheduled,
+            },
+        )
+        assert again.status_code == 409
+    finally:
+        async with get_engine().begin() as conn:
+            await conn.execute(text("SET LOCAL scorepilot.allow_erasure = 'on'"))
+            for statement in (
+                "DELETE FROM attempts WHERE student_id = CAST(:student AS uuid)",
+                "DELETE FROM study_sessions WHERE student_id = CAST(:student AS uuid)",
+                "DELETE FROM mock_exams WHERE student_id = CAST(:student AS uuid)",
+            ):
+                await conn.execute(text(statement), ids)
+            await conn.execute(
+                text("DELETE FROM scheduled_mocks WHERE id = CAST(:id AS uuid)"), {"id": scheduled}
+            )
+
+
+async def test_a_custom_mock_waits_for_practice_and_jambs_format_for_its_day(
+    client: httpx.AsyncClient,  # noqa: F811
+    ids: dict[str, str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from app.routers import mock
+
+    monkeypatch.setattr(mock, "CUSTOM_UNLOCK", 0.7)
+    body = {
+        "student_id": ids["student"],
+        "subjects": [{"subject_id": ids["subject_id"], "questions": 3}],
+        "minutes": 30,
+    }
+    custom = await client.post("/v1/mock/start", json=body)
+    assert custom.status_code == 409 and "practised most" in custom.text
+    ready = (await client.get(f"/v1/mock/readiness/{ids['student']}")).json()
+    assert ready["ready"] is False and ready["short"]
+    jamb = await client.post("/v1/mock/start", json={**body, "preset": "utme"})
+    assert jamb.status_code == 409 and "isn't open today" in jamb.text

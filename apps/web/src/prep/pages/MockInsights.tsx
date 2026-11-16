@@ -95,7 +95,7 @@ export function SummaryHero({
           Mock exams
         </Link>
         <div className="sj-hero-eyebrow">
-          {report.preset === 'utme' ? 'Real UTME' : 'Mock exam'} · {dateLabel(report.started_at)}
+          {report.preset === 'utme' ? 'Scheduled mock' : 'Custom mock'} · {dateLabel(report.started_at)}
         </div>
         {none ? (
           <div className="mi-hero-none">
