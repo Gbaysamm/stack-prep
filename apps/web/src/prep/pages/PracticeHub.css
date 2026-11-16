@@ -2711,3 +2711,19 @@
     box-shadow: none;
   }
 }
+
+/* One shadow for every sticker card (16 Nov 2026): 5px, pale purple, steady on hover. The
+   cards are not links (their buttons are), so they do not move. */
+.sj .ph-card,
+.sj .ph-card:hover,
+.sj .ph-card.marked {
+  transform: none;
+  box-shadow: 5px 5px 0 var(--purple-200, #d7bdff);
+}
+@media (max-width: 640px) {
+  .sj .ph-card,
+  .sj .ph-card:hover,
+  .sj .ph-card.marked {
+    box-shadow: 4px 4px 0 var(--purple-200, #d7bdff);
+  }
+}
