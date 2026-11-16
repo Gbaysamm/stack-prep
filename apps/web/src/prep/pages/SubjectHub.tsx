@@ -31,6 +31,7 @@ import {
   useStartCheckup,
   useStartPractice,
 } from './Home.js';
+import { useRunGate } from '../RunGate.js';
 import { TopicLegend, TopicStrengths, checkupDueWords } from './Progress.js';
 import './SubjectHub.css';
 
@@ -255,6 +256,7 @@ function Topics({ subject }: { subject: SubjectOverview }) {
   const topics = subject.scores?.topics ?? [];
   // Capped to the lowest topics (TopicStrengths picks them), until "Show all" opens every one.
   const more = useShowMore(topics, TOPICS_SHOWN);
+  const gate = useRunGate();
   if (!topics.some((topic) => topic.answered > 0)) return null;
   const latest = subject.latest_checkup;
   return (
@@ -275,7 +277,13 @@ function Topics({ subject }: { subject: SubjectOverview }) {
       <div className="sj-card hub-panel">
         <TopicLegend />
         <div id="hub-topic-list">
-          <TopicStrengths topics={topics} subjectId={subject.subject_id} limit={more.open ? undefined : TOPICS_SHOWN} />
+          <TopicStrengths
+            topics={topics}
+            subjectId={subject.subject_id}
+            limit={more.open ? undefined : TOPICS_SHOWN}
+            onPractise={gate.openTopic}
+          />
+          {gate.popup}
         </div>
         <ShowMore more={more} noun="topics" controls="hub-topic-list" className="hub-more" />
       </div>

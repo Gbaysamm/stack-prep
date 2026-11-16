@@ -17,6 +17,7 @@ import { useLoad, usePageTitle, useStudent } from "../store.js";
 import { Button, PageHero, Skeleton, cx } from "../ui.js";
 import { ALL, scoreLevel, useOverview, useSubjectChoice } from "../SubjectSwitcher.js";
 import { MasteryBar, Note, Section, runHref, shortDate } from "./Home.js";
+import { useRunGate } from "../RunGate.js";
 import { RunsPopup } from "./PracticeHub.js";
 import "./Progress.css";
 
@@ -92,6 +93,7 @@ export function TopicStrengths({
   limit,
   collapsible,
   tools,
+  onPractise,
 }: {
   topics: TopicScore[];
   subjectId: string;
@@ -100,6 +102,8 @@ export function TopicStrengths({
   collapsible?: boolean;
   /** Shown on the line with "Open all". */
   tools?: ReactNode;
+  /** When given, Practise asks this (a held run is said in a popup) instead of opening the page. */
+  onPractise?: (href: string) => void;
 }) {
   const sections = useMemo(() => {
     const keep =
@@ -236,15 +240,28 @@ export function TopicStrengths({
                         </span>
                       </span>
                       {/* Straight into the run builder with this topic alone chosen. */}
-                      <Link
-                        className="prog-trow-go"
-                        to={`/practice/new?subject=${subjectId}&subtopic=${topic.subtopic_id}`}
-                        aria-label={`Practise ${topic.name}`}
-                        title={`Practise ${topic.name}`}
-                      >
-                        <span className="lbl">Practise</span>
-                        <IconArrowRight size={14} />
-                      </Link>
+{onPractise ? (
+                        <button
+                          type="button"
+                          className="prog-trow-go"
+                          onClick={() => onPractise(`/practice/new?subject=${subjectId}&subtopic=${topic.subtopic_id}`)}
+                          aria-label={`Practise ${topic.name}`}
+                          title={`Practise ${topic.name}`}
+                        >
+                          <span className="lbl">Practise</span>
+                          <IconArrowRight size={14} />
+                        </button>
+                      ) : (
+                        <Link
+                          className="prog-trow-go"
+                          to={`/practice/new?subject=${subjectId}&subtopic=${topic.subtopic_id}`}
+                          aria-label={`Practise ${topic.name}`}
+                          title={`Practise ${topic.name}`}
+                        >
+                          <span className="lbl">Practise</span>
+                          <IconArrowRight size={14} />
+                        </Link>
+                      )}
                     </li>
                   );
                 })}
@@ -463,7 +480,7 @@ function SubjectCard({ subject, on, onPick }: { subject: SubjectOverview; on: bo
   );
 }
 
-function StrengthsCard({ subject }: { subject: SubjectOverview }) {
+function StrengthsCard({ subject, onPractise }: { subject: SubjectOverview; onPractise?: (href: string) => void }) {
   const topics = subject.scores?.topics ?? [];
   const tried = topics.some((topic) => topic.answered > 0);
   return (
@@ -488,6 +505,7 @@ function StrengthsCard({ subject }: { subject: SubjectOverview }) {
             topics={topics}
             subjectId={subject.subject_id}
             collapsible
+            onPractise={onPractise}
             tools={
               subject.latest_checkup ? (
                 <Link className="sj-link prog-tools-report" to={`/checkup/${subject.latest_checkup.session_id}/report`}>
@@ -513,6 +531,7 @@ export function Progress() {
   const overview = useOverview(student.studentId);
   const first = useLoad(() => progressApi.runs(student.studentId, PAGE), [student.studentId]);
   const [allRuns, setAllRuns] = useState(false);
+  const gate = useRunGate();
 
   const subjects = overview.data?.subjects ?? [];
   const runs = first.data?.runs ?? [];
@@ -699,10 +718,11 @@ export function Progress() {
             ) : null
           }
         >
-          <StrengthsCard key={focus.subject_id} subject={focus} />
+          <StrengthsCard key={focus.subject_id} subject={focus} onPractise={gate.openTopic} />
         </Section>
       ) : null}
 
+      {gate.popup}
       {allRuns ? (
         <RunsPopup
           subject={filterSubject ? { id: filterSubject.subject_id, name: filterSubject.subject_name } : null}

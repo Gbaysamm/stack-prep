@@ -23,7 +23,7 @@ import {
   type PracticeRun,
   type SubjectOverview,
 } from "../progressApi.js";
-import { itemLabel, roadmapApi, today as todayOf } from "../roadmapApi.js";
+import { useRunGate } from "../RunGate.js";
 import { runsApi } from "../runsApi.js";
 import { useLoad, usePageTitle, useStudent } from "../store.js";
 import {
@@ -81,18 +81,13 @@ export function PracticeHub() {
   // null: closed; 'all': every run; a subject: that subject's runs.
   const [showRuns, setShowRuns] = useState<null | "all" | { id: string; name: string }>(null);
   const started = useStartPractice();
-  // Today's roadmap, read up front: while it has items left, a run the student starts waits, and
-  // the button says so at once in a popup, with no wait on the server (founder, 16 Nov 2026).
-  const plan = useLoad(() => roadmapApi.read(student.studentId), [student.studentId]);
-  const planNext = plan.data ? todayOf(plan.data).next : null;
-  const [planPopup, setPlanPopup] = useState(false);
+  // Held runs are said in a popup, at once (RunGate.tsx); a refusal from the server shows too.
+  const gate = useRunGate();
   const starter = {
     ...started,
-    start: (subjectId: string) => (planNext ? (setPlanPopup(true), Promise.resolve()) : started.start(subjectId)),
-    planFirst: started.planFirst || planPopup,
-    dismiss: () => {
-      setPlanPopup(false);
-      started.dismiss();
+    start: (subjectId: string) => {
+      gate.startRun(() => void started.start(subjectId));
+      return Promise.resolve();
     },
   };
   const subjects = overview.data?.subjects ?? [];
@@ -155,7 +150,7 @@ export function PracticeHub() {
             ))}
           </section>
           <PracticeStats />
-          <TopicsToWork subjects={subjects} />
+          <TopicsToWork subjects={subjects} onPractise={gate.openTopic} />
           {starter.error && !starter.planFirst ? (
             <p className="ph-alert" role="alert">
               {starter.error}
@@ -164,6 +159,7 @@ export function PracticeHub() {
         </>
       )}
 
+      {gate.popup}
       {starter.planFirst
         ? createPortal(
             <div className="sj">
@@ -176,11 +172,6 @@ export function PracticeHub() {
                     Today’s plan comes first
                   </h2>
                   <p>Finish today’s items on your roadmap first. Then you can start your own runs in any subject.</p>
-                  {planNext ? (
-                    <p className="ph-plan-next">
-                      Next on your plan: <b>{itemLabel(planNext)}</b>
-                    </p>
-                  ) : null}
                   <div className="ph-plan-actions">
                     <Button tone="ghost" onClick={starter.dismiss}>
                       Not now
@@ -390,7 +381,7 @@ const MIN_ANSWERS = 3;
  * The topics the student is weak in, across every subject, as pills: the name in full and a dot
  * for how weak (red under 25%, orange under 50%). Nothing else (founder, 16 Nov 2026).
  */
-function TopicsToWork({ subjects }: { subjects: SubjectOverview[] }) {
+function TopicsToWork({ subjects, onPractise }: { subjects: SubjectOverview[]; onPractise: (href: string) => void }) {
   // Only topics with real evidence (MIN_ANSWERS or more answers), weakest first within each
   // subject, then taken a subject at a time so no one subject fills the list.
   const bySubject = subjects.map((subject) =>
@@ -423,13 +414,14 @@ function TopicsToWork({ subjects }: { subjects: SubjectOverview[] }) {
               <small>{subject.subject_name}</small>
             </span>
             <span className="ph2-weak-score sj-num">{topic.score}%</span>
-            <Link
+            <button
+              type="button"
               className="ph2-weak-go"
-              to={`/practice/new?subject=${subject.subject_id}&subtopic=${topic.subtopic_id}`}
+              onClick={() => onPractise(`/practice/new?subject=${subject.subject_id}&subtopic=${topic.subtopic_id}`)}
               aria-label={`Practise ${topic.name}`}
             >
               Practise <IconArrowRight size={14} />
-            </Link>
+            </button>
           </li>
         ))}
       </ul>
