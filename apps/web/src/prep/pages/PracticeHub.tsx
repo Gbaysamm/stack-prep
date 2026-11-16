@@ -413,7 +413,8 @@ function GetStarted() {
 /* ------------------------------------------------------------------ the runs, in a popup */
 
 /** The runs, newest first, a page at a time: every subject's, or one subject's. */
-function RunsPopup({
+/** Every run, a page at a time (also opened from Progress). */
+export function RunsPopup({
   subject,
   onClose,
   onChanged,

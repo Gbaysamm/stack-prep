@@ -1192,3 +1192,582 @@
     white-space: normal;
   }
 }
+
+/* Redesign, 16 Nov 2026: topic sections fold away to one line each. */
+.sj .prog-sections-tools {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+.sj .prog-sections-tools .sj-link {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.sj .prog-section.fold {
+  border-bottom: 1px solid var(--purple-100, #e6d6ff);
+}
+.sj .prog-section-toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 4px;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+.sj .prog-section-toggle:hover .prog-section-name {
+  color: var(--purple-700, #6500ff);
+}
+.sj .prog-section-text {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.sj .prog-section-toggle .prog-section-name {
+  font-family: var(--f-display);
+  font-size: 16px;
+  font-weight: 600;
+}
+.sj .prog-section-toggle .meta {
+  color: var(--gray-600, #6b6880);
+  font-size: 12px;
+}
+.sj .prog-sec-weak {
+  color: #be123c;
+  font-weight: 600;
+}
+.sj .prog-section-chev {
+  flex: none;
+  color: var(--gray-600, #6b6880);
+  transition: transform 0.15s ease;
+}
+.sj .prog-section.fold:not(.shut) .prog-section-chev {
+  transform: rotate(180deg);
+}
+.sj .prog-section.fold .prog-tlist {
+  padding-bottom: 10px;
+}
+
+/* ---------------------------------------------------------------- redesign 2, 16 Nov 2026 */
+/* Subject cards replace the pills and the table; every card is a sticker; nothing nested. */
+.sj .prog2 {
+  display: grid;
+  gap: 28px;
+}
+.sj .prog2-subjects {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+.sj .prog2-card {
+  display: grid;
+  gap: 10px;
+  padding: 18px 18px 16px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 18px;
+  background: var(--white, #fff);
+  box-shadow: 6px 6px 0 var(--purple-200, #d7bdff);
+  color: var(--ink-900, #1f0050);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.sj .prog2-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 var(--purple-200, #d7bdff);
+}
+.sj .prog2-card:active {
+  transform: translate(2px, 2px);
+  box-shadow: 3px 3px 0 var(--purple-200, #d7bdff);
+}
+.sj .prog2-card.on {
+  background: #f6fdf0;
+  box-shadow: 6px 6px 0 var(--green-400, #85de4c);
+}
+.sj .prog2-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.sj .prog2-card-name {
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sj .prog2-card-tick {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 7px;
+  background: var(--green-400, #85de4c);
+  font-size: 12px;
+  font-weight: 700;
+}
+.sj .prog2-card-score {
+  font-family: var(--f-display);
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1;
+}
+.sj .prog2-card-score.low { color: #be123c; }
+.sj .prog2-card-score.mid { color: #b45309; }
+.sj .prog2-card-score.good { color: #15803d; }
+.sj .prog2-card-bar {
+  position: relative;
+  height: 10px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 99px;
+  background: var(--white, #fff);
+}
+.sj .prog2-card-bar i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 99px;
+  background: var(--purple-600, #7b2cff);
+}
+.sj .prog2-card-bar em {
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  width: 3px;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  background: var(--gray-900, #160b2e);
+}
+.sj .prog2-card-note {
+  color: var(--gray-600, #6b6880);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+.sj .prog2-head {
+  display: grid;
+  gap: 4px;
+  margin-bottom: -12px;
+}
+.sj .prog2-head h2 {
+  margin: 0;
+}
+.sj .prog2-head p {
+  margin: 0;
+  color: var(--ink-600, #4b4566);
+  font-size: 14.5px;
+}
+
+/* Recent runs: each run its own card, not a card inside a card. */
+.sj .prog2 .prog2-runs .prog-panel {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+.sj .prog2 .prog2-runs .home-runs {
+  display: grid;
+  gap: 12px;
+}
+.sj .prog2 .prog2-runs .home-runs > li > * {
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 16px;
+  background: var(--white, #fff);
+  box-shadow: 4px 4px 0 var(--purple-200, #d7bdff);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.sj .prog2 .prog2-runs .home-runs > li > *:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--purple-200, #d7bdff);
+}
+
+/* Topics: one sticker card. */
+.sj .prog2 .prog2-topics .prog-panel {
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 20px;
+  box-shadow: 6px 6px 0 var(--purple-200, #d7bdff);
+}
+
+@media (max-width: 900px) {
+  .sj .prog2-subjects {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .sj .prog2 {
+    gap: 24px;
+  }
+  .sj .prog2-subjects {
+    gap: 14px;
+  }
+  .sj .prog2-card {
+    gap: 8px;
+    padding: 14px;
+    box-shadow: 4px 4px 0 var(--purple-200, #d7bdff);
+  }
+  .sj .prog2-card.on {
+    box-shadow: 4px 4px 0 var(--green-400, #85de4c);
+  }
+  .sj .prog2-card-score {
+    font-size: 28px;
+  }
+  .sj .prog2 .prog2-topics .prog-panel {
+    box-shadow: 4px 4px 0 var(--purple-200, #d7bdff);
+  }
+}
+
+/* Subject names in the display face, like every heading. */
+.sj .prog2-card-name {
+  font-family: var(--f-display);
+  font-size: 17px;
+}
+
+/* Topic sections: one tight row each, name and summary on the left, the section's bar right. */
+.sj .prog2-topics .prog-sections {
+  gap: 0;
+}
+.sj .prog2-topics .prog-section-toggle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 190px 20px;
+  align-items: center;
+  gap: 18px;
+  padding: 12px 4px;
+}
+.sj .prog2-topics .prog-section-toggle .meta {
+  margin-left: 0;
+  white-space: normal;
+}
+.sj .prog2-topics .prog-section-toggle .prog-section-name {
+  font-size: 15.5px;
+}
+.sj .prog-section-score {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px;
+  align-items: center;
+  gap: 10px;
+}
+.sj .prog-section-score b {
+  font-size: 14px;
+  text-align: right;
+}
+.sj .prog2-topics .prog-legend {
+  margin-bottom: 6px;
+}
+.sj .prog2-topics .prog-sections-tools {
+  margin: 0;
+}
+@media (max-width: 640px) {
+  .sj .prog2-topics .prog-section-toggle {
+    grid-template-columns: minmax(0, 1fr) 20px;
+    gap: 8px 12px;
+  }
+  .sj .prog2-topics .prog-section-score {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .sj .prog2-topics .prog-section-chev {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .sj .prog2-card-name {
+    font-size: 15px;
+  }
+}
+
+/* Section (JAMB topic) and its topics, told apart: the section is a tinted band; its topics sit
+   indented under it on a purple rail, a step smaller. */
+.sj .prog2-topics .prog-section.fold {
+  margin-bottom: 8px;
+  border-bottom: 0;
+}
+.sj .prog2-topics .prog-section-toggle {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--purple-050, #f3ebff);
+}
+.sj .prog2-topics .prog-section.fold:not(.shut) .prog-section-toggle {
+  border-radius: 12px 12px 0 0;
+}
+.sj .prog2-topics .prog-section.fold .prog-tlist {
+  margin: 0 0 6px 18px;
+  padding: 4px 0 4px 16px;
+  border-left: 2px solid var(--purple-200, #d7bdff);
+}
+.sj .prog2-topics .prog-trow .name strong {
+  font-size: 14px;
+  font-weight: 500;
+}
+@media (max-width: 640px) {
+  .sj .prog2-topics .prog-section.fold .prog-tlist {
+    margin-left: 8px;
+    padding-left: 12px;
+  }
+}
+
+/* No runs yet: one compact panel, not loose text. */
+.sj .prog2-empty {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 1.5px dashed var(--purple-200, #d7bdff);
+  border-radius: 16px;
+  background: #fbf9ff;
+}
+.sj .prog2-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 12px;
+  background: var(--green-400, #85de4c);
+  color: var(--ink-900, #1f0050);
+}
+.sj .prog2-empty b {
+  font-family: var(--f-display);
+  font-size: 17px;
+  font-weight: 600;
+}
+.sj .prog2-empty p {
+  margin: 2px 0 0;
+  color: var(--ink-600, #4b4566);
+  font-size: 14px;
+}
+@media (max-width: 640px) {
+  .sj .prog2-empty {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .sj .prog2-empty .sj-btn {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Quieter, tighter sections (16 Nov 2026). */
+.sj .prog2-topics .prog-section.fold {
+  margin-bottom: 6px;
+}
+.sj .prog2-topics .prog-section-toggle {
+  padding: 10px 14px;
+}
+.sj .prog-section-none {
+  justify-self: end;
+  color: var(--gray-500, #8a86a0);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+@media (max-width: 640px) {
+  .sj .prog2-topics .prog-section-none {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: start;
+  }
+}
+@media (max-width: 640px) {
+  .sj .prog2-topics .prog-section-none {
+    display: none;
+  }
+}
+
+/* Phone pass 2 (16 Nov 2026). */
+.sj .prog2-card-note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 6px;
+}
+.sj .prog2-card-note span + span::before {
+  content: "· ";
+}
+@media (max-width: 640px) {
+  .sj .prog2-card-note {
+    display: grid;
+    gap: 1px;
+  }
+  .sj .prog2-card-note span + span::before {
+    content: none;
+  }
+  .sj .prog2-empty {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 10px;
+    padding: 22px 18px;
+    text-align: center;
+  }
+  .sj .prog2-empty .sj-btn {
+    grid-column: auto;
+    justify-self: stretch;
+  }
+  .sj .prog2-topics .prog-legend {
+    display: none;
+  }
+  .sj .prog2-topics .home-sechead {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .sj .prog2-topics .home-sechead .action {
+    flex-basis: 100%;
+  }
+  .sj .prog2-topics .prog-sections-tools {
+    justify-content: flex-start;
+    margin-bottom: 4px;
+  }
+}
+
+/* Phone pass 3: the report link beside Open all; the section bar spans the row. */
+.sj .prog-tools-report {
+  display: none;
+}
+@media (max-width: 640px) {
+  .sj .prog2-topics .home-sechead .action {
+    display: none;
+  }
+  .sj .prog2-topics .prog-sections-tools {
+    justify-content: space-between;
+    align-items: center;
+  }
+  .sj .prog-tools-report {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+  .sj .prog2-topics .prog-section-score {
+    grid-column: 1 / -1;
+  }
+}
+.sj .prog2-topics .prog-section-chev {
+  justify-self: end;
+}
+
+/* A run as a card (16 Nov 2026): its own battery bar, what and when, the score. */
+.sj .prog2-runlist {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .prog2-run {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr) auto 18px;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 16px;
+  background: var(--white, #fff);
+  box-shadow: 4px 4px 0 var(--purple-200, #d7bdff);
+  color: var(--ink-900, #1f0050);
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.sj .prog2-run:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--purple-200, #d7bdff);
+}
+.sj .prog2-run:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--purple-200, #d7bdff);
+}
+.sj .prog2-run-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  height: 46px;
+  overflow: hidden;
+  border-radius: 4px;
+}
+.sj .prog2-run-bar .seg.r { background: var(--green-400); }
+.sj .prog2-run-bar .seg.t { background: var(--yellow-400); }
+.sj .prog2-run-bar .seg.x { background: var(--pink-500); }
+.sj .prog2-run-bar .seg.o {
+  background: repeating-linear-gradient(135deg, var(--gray-100) 0 4px, #fff 4px 8px);
+  box-shadow: inset 0 0 0 1px var(--gray-200);
+}
+.sj .prog2-run-main {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.sj .prog2-run-main b {
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sj .prog2-run-main .more {
+  color: var(--gray-600, #6b6880);
+  font-weight: 500;
+}
+.sj .prog2-run-main small {
+  color: var(--gray-600, #6b6880);
+  font-size: 13px;
+}
+.sj .prog2-run-score {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+}
+.sj .prog2-run-score b {
+  font-family: var(--f-display);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1;
+}
+.sj .prog2-run-score small {
+  color: var(--gray-600, #6b6880);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.sj .prog2-run.open .prog2-run-score small {
+  color: var(--purple-700, #6500ff);
+  font-weight: 600;
+}
+.sj .prog2-run-go {
+  color: var(--gray-500, #8a86a0);
+}
+
+/* Subject card note: target, then topics answered, always two lines. */
+.sj .prog2-card-note {
+  display: grid;
+  gap: 1px;
+}
+.sj .prog2-card-note span + span::before {
+  content: none;
+}
+
+@media (max-width: 640px) {
+  .sj .prog2-run {
+    grid-template-columns: 12px minmax(0, 1fr) auto;
+    gap: 12px;
+    padding: 12px 14px;
+    box-shadow: 3px 3px 0 var(--purple-200, #d7bdff);
+  }
+  .sj .prog2-run-go {
+    display: none;
+  }
+  .sj .prog2-run-main b {
+    white-space: normal;
+    font-size: 14.5px;
+  }
+}
+/* The run's bar spans the text beside it, one line or two. */
+.sj .prog2-run-bar {
+  align-self: stretch;
+  height: auto;
+  min-height: 38px;
+}

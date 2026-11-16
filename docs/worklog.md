@@ -15,6 +15,21 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-16
 
+### Progress page redesigned
+- **What:** no banner and no pills: one sticker card per subject (Your score coloured by level,
+  a bar with the target marked, target and topics answered); tapping one focuses the page on
+  it. Then the run strip (hidden when there are no runs), Recent runs as cards (each with its
+  own battery bar, topic, date and right first time; every run in a popup), and, for the
+  chosen subject, How each topic stands: sections fold away as tinted bands with their own
+  bar (the average of their topics with 3+ answers); topics sit indented under them. A topic
+  scores from 3 answers; before that it is too early to tell (also on the subject page).
+  Removed: How your lessons landed, the mock list (it is on the Mock exam page), the subjects
+  table and Your score section (the cards carry them), the second subject switcher.
+- **Why:** founder, 16 Nov 2026: too long, duplicate filters, 1 of 1 right shown as 100%,
+  flat cards, poor on a phone.
+- **Where:** `prep/pages/Progress.{tsx,css}`, `PracticeHub.tsx` (RunsPopup shared).
+- **Status:** committed, not pushed.
+
 ### Tracker: one task per page redesign; today's work on record; lighter rows
 - **What:** migration 054 replaces "Redesign the remaining pages" with one task per student
   page (area Page redesigns), records today's finished work (Practice, Check-up, Mock exam,
