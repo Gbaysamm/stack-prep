@@ -709,7 +709,10 @@ function TaskPanel({
         setOwner(d.item.owner ?? '');
         setNote(d.item.note ?? '');
       })
-      .catch((error) => onProblem(friendly(error)));
+      .catch((error) => {
+        onProblem(friendly(error));
+        onClose();
+      });
     return () => {
       live = false;
     };
