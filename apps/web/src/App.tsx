@@ -6,6 +6,7 @@
  *   /watch/:id    a lesson on the coach's board, for anyone: the public site plays it in a frame
  *   /review/...   the reviewer dashboard: reviewers and admins only
  *   /admin/...    the admin dashboard: admins only
+ *   /tracker      the project tracker, read-only, for anyone with the link
  *   /dev/checkup  the bare check-up screen the student flow grew out of, for trying a session id
  *
  * Each is loaded only when its address is opened, so a visitor to the home page never
@@ -26,6 +27,7 @@ const CheckupPage = later(() => import('./checkup/CheckupPage.js'), 'CheckupPage
 const PrepApp = later(() => import('./prep/PrepApp.js'), 'PrepApp');
 const ReviewApp = later(() => import('./review/ReviewApp.js'), 'ReviewApp');
 const WatchApp = later(() => import('./site/WatchApp.js'), 'WatchApp');
+const PublicTracker = later(() => import('./staff/TrackerPage.js'), 'PublicTracker');
 
 const under = (path: string, base: string) => path === base || path.startsWith(`${base}/`);
 
@@ -38,6 +40,7 @@ function Which() {
   if (under(pathname, '/watch')) return <WatchApp />;
   if (under(pathname, '/admin')) return <AdminApp />;
   if (under(pathname, '/review')) return <ReviewApp />;
+  if (under(pathname, '/tracker')) return <PublicTracker />;
   if (under(pathname, '/dev/checkup')) return <CheckupPage />;
   return <PrepApp />;
 }

@@ -1,0 +1,995 @@
+/* The project tracker at /tracker (TrackerPage.tsx), in the Stack Prep look. */
+.tk {
+  --ink: #1f0050;
+  --ink-2: #4b4566;
+  --muted: #6b6880;
+  --line: #ece6f7;
+  --page: #f7f4fd;
+  --card: #fff;
+  --purple: #6b0bff;
+  --purple-soft: #f1e8ff;
+  --lime: #85de4c;
+  --done: #16a34a;
+  --done-soft: #e6f7ea;
+  --doing: #6b0bff;
+  --waiting-soft: #fff4dc;
+  --todo-soft: #f1eff6;
+  min-height: 100vh;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--f-body, 'Poppins', system-ui, sans-serif);
+}
+.tk .tk-muted{
+  color: var(--muted);
+}
+
+/* Top bar. */
+.tk .tk-top{
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px max(16px, env(safe-area-inset-left, 0px));
+  background: var(--ink);
+  color: #fff;
+}
+.tk .tk-brand{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tk .tk-logo{
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #7a1fff, #fe7698);
+  font-family: var(--f-display, sans-serif);
+  font-weight: 700;
+}
+.tk .tk-brand b{
+  display: block;
+  font-family: var(--f-display, sans-serif);
+  font-size: 16px;
+  line-height: 1.1;
+}
+.tk .tk-brand small{
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+}
+.tk .tk-who{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px 12px;
+  font-size: 13px;
+}
+.tk .tk-mode{
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  font-weight: 600;
+}
+.tk .tk-mode.edit{
+  background: var(--lime);
+  color: var(--ink);
+}
+.tk .tk-link{
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  opacity: 0.85;
+}
+
+.tk .tk-main{
+  display: grid;
+  gap: 18px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px max(16px, env(safe-area-inset-left, 0px)) 64px;
+}
+.tk .tk-problem{
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fff1f2;
+  color: #9f1239;
+}
+
+/* Summary. */
+.tk .tk-summary{
+  display: grid;
+  grid-template-columns: 1.1fr 1.2fr 1fr;
+  gap: 14px;
+}
+.tk .tk-summary > div{
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card);
+}
+.tk .tk-eyebrow{
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.tk .tk-big{
+  margin: 0;
+  font-size: 16px;
+  color: var(--ink-2);
+}
+.tk .tk-big b{
+  margin-right: 4px;
+  font-family: var(--f-display, sans-serif);
+  font-size: 40px;
+  line-height: 1;
+  color: var(--ink);
+}
+.tk .tk-bar,
+.tk .tk-minibar{
+  display: block;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--purple-soft);
+  overflow: hidden;
+}
+.tk .tk-bar i,
+.tk .tk-minibar i{
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--purple), #a855f7);
+}
+.tk .tk-counts{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.tk .tk-counts li{
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+}
+.tk .tk-counts b{
+  font-weight: 700;
+}
+.tk .tk-counts .doing{
+  background: var(--purple-soft);
+  color: var(--doing);
+}
+.tk .tk-counts .waiting{
+  background: var(--waiting-soft);
+  color: #92400e;
+}
+.tk .tk-counts .todo{
+  background: var(--todo-soft);
+  color: var(--ink-2);
+}
+.tk .tk-areas ul,
+.tk .tk-recent ul{
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tk .tk-areas button{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 90px 44px;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font: inherit;
+  color: inherit;
+  font-size: 13.5px;
+  text-align: left;
+  cursor: pointer;
+}
+.tk .tk-areas button:hover,
+.tk .tk-areas button.on{
+  background: var(--purple-soft);
+}
+.tk .tk-area-name{
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.tk .tk-minibar{
+  height: 6px;
+}
+.tk .tk-area-count{
+  color: var(--muted);
+  font-size: 12.5px;
+  text-align: right;
+}
+.tk .tk-recent button{
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 5px 4px;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  font-size: 13.5px;
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Tabs. */
+.tk .tk-tabs{
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.tk .tk-tabs button{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: -1px;
+  padding: 10px 14px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+}
+.tk .tk-tabs button.on{
+  border-bottom-color: var(--purple);
+  color: var(--ink);
+}
+.tk .tk-tabs span{
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--purple-soft);
+  font-size: 12px;
+}
+
+/* Toolbar: add a task, and the filters. */
+.tk .tk-tasks{
+  display: grid;
+  gap: 16px;
+}
+.tk .tk-toolbar{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.tk .tk-add{
+  display: flex;
+  flex: 1 1 420px;
+  gap: 8px;
+  min-width: 0;
+}
+.tk .tk-add input{
+  flex: 1;
+  min-width: 0;
+  padding: 9px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  font: inherit;
+  font-size: 14px;
+}
+.tk .tk-add .sx{
+  width: 170px;
+  flex: none;
+}
+.tk .tk-filters{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.tk .tk-seg{
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 12px;
+  background: #ece8f6;
+}
+.tk .tk-seg button{
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.tk .tk-seg button.on{
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 1px 3px rgba(31, 0, 80, 0.12);
+}
+.tk .tk-areapick{
+  width: 180px;
+}
+.tk .tk-none{
+  margin: 0;
+  padding: 20px 4px;
+}
+
+/* The checklist, by area. */
+.tk .tk-group{
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card);
+  overflow: hidden;
+}
+.tk .tk-group h2{
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0;
+  padding: 14px 18px 10px;
+  font-family: var(--f-display, sans-serif);
+  font-size: 17px;
+}
+.tk .tk-group h2 span{
+  color: var(--muted);
+  font-family: var(--f-body, sans-serif);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.tk .tk-list{
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tk .tk-row{
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px;
+  border-top: 1px solid var(--line);
+}
+.tk .tk-row:hover{
+  background: #fbfaff;
+}
+.tk .tk-tick{
+  position: relative;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 2px solid #c9c2dc;
+  border-radius: 50%;
+  background: var(--card);
+  cursor: pointer;
+}
+.tk .tk-tick:disabled{
+  cursor: default;
+  opacity: 1;
+}
+.tk .tk-tick.on{
+  border-color: var(--done);
+  background: var(--done);
+}
+.tk .tk-tick.on::after{
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 6px;
+  height: 11px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.tk .tk-tick.small{
+  width: 18px;
+  height: 18px;
+}
+.tk .tk-tick.small.on::after{
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+}
+.tk .tk-row-main{
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.tk .tk-row-title{
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.tk .tk-row.done .tk-row-title{
+  color: var(--muted);
+  font-weight: 500;
+  text-decoration: line-through;
+  text-decoration-color: #c9c2dc;
+}
+.tk .tk-row-meta{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.tk .tk-status{
+  width: 140px;
+}
+.tk .tk-pill{
+  justify-self: start;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.tk .tk-pill.todo{
+  background: var(--todo-soft);
+  color: var(--ink-2);
+}
+.tk .tk-pill.doing{
+  background: var(--purple-soft);
+  color: var(--doing);
+}
+.tk .tk-pill.waiting{
+  background: var(--waiting-soft);
+  color: #92400e;
+}
+.tk .tk-pill.done{
+  background: var(--done-soft);
+  color: #15803d;
+}
+
+/* Deployments, as a timeline. */
+.tk .tk-deploys{
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tk .tk-deploys > li{
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+}
+.tk .tk-deploys summary{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  padding: 14px 18px;
+  cursor: pointer;
+}
+.tk .tk-dot{
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--done);
+}
+.tk .tk-target{
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--done-soft);
+  color: #15803d;
+  font-size: 12px;
+  font-weight: 600;
+}
+.tk .tk-deploys code{
+  color: var(--muted);
+  font-size: 12px;
+}
+.tk .tk-deploys ul{
+  margin: 0;
+  padding: 0 18px 14px 42px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* The task panel, from the right; a sheet from the bottom on a phone. */
+.tk .tk-scrim{
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(31, 0, 80, 0.32);
+}
+.tk .tk-scrim.center{
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.tk .tk-panel{
+  display: flex;
+  flex-direction: column;
+  width: min(520px, 100%);
+  height: 100%;
+  background: var(--card);
+  box-shadow: -12px 0 40px rgba(31, 0, 80, 0.18);
+  outline: none;
+  overflow-y: auto;
+}
+.tk .tk-panel-head{
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+  background: var(--card);
+}
+.tk .tk-close{
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--card);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.tk .tk-panel-body{
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+}
+.tk .tk-title{
+  margin: 0;
+  font-family: var(--f-display, sans-serif);
+  font-size: 22px;
+  line-height: 1.25;
+}
+.tk .tk-title-edit{
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-family: var(--f-display, sans-serif);
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink);
+  resize: none;
+}
+.tk .tk-title-edit:hover,
+.tk .tk-title-edit:focus{
+  border-color: var(--line);
+  outline: none;
+}
+.tk .tk-fields{
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+.tk .tk-field{
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+.tk .tk-field dt{
+  color: var(--muted);
+  font-size: 13px;
+}
+.tk .tk-field dd{
+  margin: 0;
+  min-width: 0;
+}
+.tk .tk-field input,
+.tk .tk-inline input,
+.tk .tk-note-edit,
+.tk .tk-name input{
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font: inherit;
+  font-size: 14px;
+}
+.tk .tk-sec{
+  display: grid;
+  gap: 10px;
+}
+.tk .tk-sec h3{
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.tk .tk-sec h3 span{
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.tk .tk-note{
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+.tk .tk-note-edit{
+  resize: vertical;
+  line-height: 1.5;
+}
+.tk .tk-save{
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.tk .tk-steps{
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tk .tk-steps li{
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+.tk .tk-steps li.done span{
+  color: var(--muted);
+  text-decoration: line-through;
+}
+.tk .tk-step-x{
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 18px;
+  cursor: pointer;
+}
+.tk .tk-inline{
+  display: flex;
+  gap: 8px;
+}
+.tk .tk-history{
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0 0 0 14px;
+  list-style: none;
+  border-left: 2px solid var(--line);
+}
+.tk .tk-history li{
+  display: grid;
+  gap: 2px;
+  font-size: 13.5px;
+}
+.tk .tk-history small{
+  color: var(--muted);
+  font-size: 12px;
+}
+.tk .tk-panel-foot{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+}
+.tk .tk-danger-link{
+  color: #be123c;
+}
+.sj .sj-btn.tk-danger {
+  --ledge: #9f1239;
+  background: #e11d48;
+}
+
+.tk .tk-name{
+  display: grid;
+  gap: 12px;
+  width: min(420px, 100%);
+  padding: 22px;
+  border-radius: 18px;
+  background: var(--card);
+}
+.tk .tk-name h2{
+  margin: 0;
+  font-family: var(--f-display, sans-serif);
+  font-size: 20px;
+}
+.tk .tk-name p{
+  margin: 0;
+  font-size: 14px;
+}
+
+@media (max-width: 980px) {
+  .tk .tk-summary {
+    grid-template-columns: 1fr 1fr;
+  }
+  .tk .tk-recent {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 640px) {
+  .tk .tk-summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tk .tk-row {
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: 10px 14px;
+  }
+  .tk .tk-row > .sx,
+  .tk .tk-row > .tk-pill {
+    grid-column: 2;
+    justify-self: start;
+  }
+  .tk .tk-add {
+    flex-wrap: wrap;
+  }
+  .tk .tk-add input {
+    flex-basis: 100%;
+  }
+  .tk .tk-scrim {
+    align-items: flex-end;
+  }
+  .tk .tk-panel {
+    width: 100%;
+    height: 88vh;
+    border-radius: 18px 18px 0 0;
+  }
+  .tk .tk-field {
+    grid-template-columns: 96px minmax(0, 1fr);
+  }
+}
+
+/* The summary cards keep their own height. */
+.tk .tk-summary {
+  align-items: start;
+}
+
+/* Recently done: a tick, the title, the day; thin lines between. */
+.tk .tk-recent ul {
+  gap: 0;
+}
+.tk .tk-recent li + li {
+  border-top: 1px solid var(--line);
+}
+.tk .tk-recent button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
+  padding: 9px 2px;
+}
+.tk .tk-recent .tk-tick {
+  margin-top: 1px;
+}
+.tk .tk-recent-title {
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+.tk .tk-recent-when {
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.tk .tk-recent button:hover .tk-recent-title {
+  color: var(--purple);
+}
+
+/* ---------------------------------------------------------------- calmer layout (16 Nov 2026) */
+.tk {
+  --committed: #2563eb;
+  --committed-soft: #e5eeff;
+  --deployed: #15803d;
+  --deployed-soft: #dcf5e3;
+  --done-c: #84cc16;
+  --done-c-soft: #f0f9db;
+  --waiting-c: #f59e0b;
+  --todo-c: #d4cfe0;
+}
+.tk .tk-main {
+  max-width: 900px;
+  gap: 22px;
+  padding-top: 36px;
+}
+.tk .tk-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px 16px;
+}
+.tk .tk-head h1 {
+  margin: 2px 0 0;
+  font-family: var(--f-display, sans-serif);
+  font-size: clamp(28px, 4vw, 36px);
+  line-height: 1.05;
+}
+.tk .tk-who {
+  color: var(--ink-2);
+}
+.tk .tk-mode {
+  background: #ece8f6;
+  color: var(--ink-2);
+}
+.tk .tk-mode.edit {
+  background: var(--done-soft);
+  color: #15803d;
+}
+
+/* One summary: the count, one bar by stage, the key. */
+.tk .tk-summary {
+  display: grid;
+  gap: 12px;
+  padding: 20px 22px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card);
+}
+.tk .tk-big b {
+  font-size: 34px;
+}
+.tk .tk-stack {
+  display: flex;
+  gap: 3px;
+  height: 14px;
+}
+.tk .tk-stack i {
+  min-width: 6px;
+  border-radius: 4px;
+}
+.tk .tk-stack i:first-child {
+  border-radius: 8px 4px 4px 8px;
+}
+.tk .tk-stack i:last-child {
+  border-radius: 4px 8px 8px 4px;
+}
+.tk .tk-stack .deployed,
+.tk .tk-legend .deployed { background: var(--deployed); }
+.tk .tk-stack .committed,
+.tk .tk-legend .committed { background: var(--committed); }
+.tk .tk-stack .done,
+.tk .tk-legend .done { background: var(--done-c); }
+.tk .tk-stack .doing,
+.tk .tk-legend .doing { background: var(--purple); }
+.tk .tk-stack .waiting,
+.tk .tk-legend .waiting { background: var(--waiting-c); }
+.tk .tk-stack .todo,
+.tk .tk-legend .todo { background: var(--todo-c); }
+.tk .tk-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--ink-2);
+  font-size: 13px;
+}
+.tk .tk-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.tk .tk-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+.tk .tk-legend b {
+  color: var(--ink);
+}
+
+/* One toolbar row. */
+.tk .tk-toolbar {
+  justify-content: flex-start;
+}
+.tk .tk-new {
+  margin-left: auto;
+}
+.tk .tk-newtask {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  border: 1px dashed var(--purple-soft);
+  border-radius: 14px;
+  background: var(--card);
+}
+.tk .tk-newtask input {
+  flex: 1 1 260px;
+  min-width: 0;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font: inherit;
+  font-size: 14px;
+}
+.tk .tk-newtask .sx {
+  width: 170px;
+}
+
+/* Rows: the tick, the title, the stage. */
+.tk .tk-row {
+  padding: 12px 18px;
+}
+.tk .tk-row.finished .tk-row-title {
+  color: var(--muted);
+  font-weight: 500;
+  text-decoration: line-through;
+  text-decoration-color: #c9c2dc;
+}
+.tk .tk-tick.on {
+  border-color: var(--deployed);
+  background: var(--deployed);
+}
+.tk .tk-status {
+  width: 136px;
+}
+.tk .tk-pill.done {
+  background: var(--done-c-soft);
+  color: #4d7c0f;
+}
+.tk .tk-pill.committed {
+  background: var(--committed-soft);
+  color: var(--committed);
+}
+.tk .tk-pill.deployed {
+  background: var(--deployed-soft);
+  color: var(--deployed);
+}
+.tk .tk-group h2 {
+  padding: 14px 18px 12px;
+}
+.tk .tk-summary {
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (max-width: 980px) {
+  .tk .tk-summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

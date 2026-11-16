@@ -4,6 +4,7 @@
  * Every page here calls /v1/admin/*, which refuses anyone but an admin (apps/api routers/admin.py);
  * the gate in front only keeps the screen honest about it.
  */
+import { useEffect } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import {
   IconBolt,
@@ -65,6 +66,7 @@ function AdminShell() {
   const waitingSupport = useWaitingSupport();
   const nav: NavItem[] = [
     { to: '/dashboard', label: 'Dashboard', icon: <IconHome />, section: 'Main' },
+    { to: '/tracker', label: 'Project tracker', icon: <IconCheck /> },
     { to: '/overview', label: 'Analytics', icon: <IconChart /> },
     { to: '/students', label: 'Students', icon: <IconUser />, section: 'People' },
     { to: '/staff', label: 'Staff', icon: <IconLock /> },
@@ -91,6 +93,7 @@ function AdminShell() {
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<HomePage />} />
+        <Route path="/tracker" element={<OpenTracker />} />
         <Route path="/overview" element={<OverviewPage />} />
         <Route path="/engagement" element={<EngagementPage />} />
         <Route path="/features" element={<FeaturesPage />} />
@@ -119,4 +122,12 @@ function AdminShell() {
       </Routes>
     </StaffShell>
   );
+}
+
+/** The project tracker lives at /tracker, outside the dashboard; the menu item opens it. */
+function OpenTracker() {
+  useEffect(() => {
+    window.location.assign('/tracker');
+  }, []);
+  return null;
 }

@@ -1378,3 +1378,974 @@
 .sj .ph-build-short .ph-build-title {
   grid-area: auto;
 }
+
+/* ---------------------------------------------------------------- redesign, 16 Nov 2026 */
+/* The subject tabs and the one build action on a single row. */
+.sj .ph-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.sj .ph-toolbar .ph-switch {
+  min-width: 0;
+}
+.sj .ph-build-locked {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border: 1px dashed var(--purple-200, #d7bdff);
+  border-radius: var(--r-btn, 12px);
+  color: var(--ink-600, #4b4566);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.sj .ph-build-locked:hover {
+  border-style: solid;
+  color: var(--purple-700, #6500ff);
+}
+/* The runs heading with the subject's three numbers on the same line. */
+.sj .ph-history-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 20px;
+}
+.sj .ph-history-head h2 {
+  margin: 0;
+}
+.sj .ph-stats {
+  display: flex;
+  gap: 20px;
+  margin: 0;
+}
+.sj .ph-stats div {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.sj .ph-stats dd {
+  margin: 0;
+  font-family: var(--f-display);
+  font-size: 20px;
+  font-weight: 600;
+}
+.sj .ph-stats dt {
+  color: var(--ink-600, #4b4566);
+  font-size: 13px;
+}
+.sj .ph-key {
+  font-size: 12.5px;
+  opacity: 0.85;
+}
+@media (max-width: 640px) {
+  .sj .ph-stats {
+    gap: 14px;
+  }
+  .sj .ph-stats dd {
+    font-size: 17px;
+  }
+}
+.sj .ph-history {
+  display: grid;
+  gap: 12px;
+}
+.sj .ph-history .ph-history-head {
+  margin-top: 6px;
+}
+
+/* ---------------------------------------------------------------- redesign 2, 16 Nov 2026 */
+/* The slim top row: the overall score on the left, your runs and building your own on the right. */
+.sj .ph-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 20px;
+  padding: 16px 20px;
+  border: 1px solid var(--line, #ece6f7);
+  border-radius: var(--r-xl, 18px);
+  background: var(--white, #fff);
+}
+.sj .ph-summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.sj .ph-summary-num {
+  font-family: var(--f-display);
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink-900, #1f0050);
+}
+.sj .ph-summary-of {
+  font-size: 20px;
+  color: var(--purple-300, #b789ff);
+}
+.sj .ph-summary-text {
+  display: grid;
+  line-height: 1.3;
+}
+.sj .ph-summary-text b {
+  font-size: 15px;
+}
+.sj .ph-summary-text small {
+  color: var(--gray-600, #6b6880);
+  font-size: 13px;
+}
+.sj .ph-top-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Every subject as a card, two to a row. */
+.sj .ph-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr));
+  gap: 16px;
+}
+.sj .ph-card {
+  display: grid;
+  gap: 16px;
+  padding: 20px 22px;
+  border: 1px solid var(--line, #ece6f7);
+  border-radius: var(--r-xl, 18px);
+  background: var(--white, #fff);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.sj .ph-card:hover {
+  border-color: var(--purple-200, #d7bdff);
+  box-shadow: 0 6px 18px rgba(31, 0, 80, 0.06);
+}
+.sj .ph-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.sj .ph-card-name {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.2;
+}
+.sj .ph-card-exam {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--gray-600, #6b6880);
+}
+.sj .ph-card-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--r-pill, 999px);
+  background: var(--purple-050, #f3ebff);
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.sj .ph-card-status i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green-500, #00aa0f);
+}
+.sj .ph-card-status.yellow i {
+  background: #f5b800;
+}
+.sj .ph-card-status.pink i {
+  background: #ec4899;
+}
+.sj .ph-card-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+.sj .ph-card-facts div {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: var(--r-md, 10px);
+  background: var(--purple-050, #f3ebff);
+}
+.sj .ph-card-facts dt {
+  color: var(--gray-600, #6b6880);
+  font-size: 12px;
+}
+.sj .ph-card-facts dd {
+  margin: 0;
+  font-family: var(--f-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink-900, #1f0050);
+}
+.sj .ph-card-facts small {
+  color: var(--gray-600, #6b6880);
+  font-size: 12px;
+}
+.sj .ph-card-topics {
+  min-height: 12px;
+}
+.sj .ph-card-topics .ph-tbar {
+  display: flex;
+  width: 100%;
+}
+.sj .ph-card-go {
+  display: flex;
+  justify-content: flex-end;
+}
+.sj .ph-tkey {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 0;
+  color: var(--gray-600, #6b6880);
+  font-size: 12.5px;
+}
+
+/* The runs, in a popup wide enough for the list. */
+.sj .ph-runs-dialog {
+  width: min(760px, calc(100vw - 32px));
+  max-width: none;
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+  display: grid;
+  gap: 14px;
+}
+.sj .ph-runs-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sj .ph-runs-head h2 {
+  margin: 0;
+}
+.sj .ph-runs-close {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line, #ece6f7);
+  border-radius: 50%;
+  background: var(--white, #fff);
+  cursor: pointer;
+}
+.sj .ph-norun {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+@media (max-width: 520px) {
+  .sj .ph-top {
+    padding: 14px 16px;
+  }
+  .sj .ph-card {
+    padding: 16px;
+  }
+  .sj .ph-card-facts {
+    gap: 8px;
+  }
+  .sj .ph-card-facts div {
+    padding: 8px 10px;
+  }
+  .sj .ph-card-facts dd {
+    font-size: 18px;
+  }
+}
+.sj .sj-page.ph {
+  display: grid;
+  gap: 18px;
+}
+.sj .ph-cards > *,
+.sj .ph-card,
+.sj .ph-card-topics {
+  min-width: 0;
+}
+.sj .ph-card-topics {
+  overflow: hidden;
+}
+.sj .ph-card-topics .ph-tbar i {
+  min-width: 0;
+}
+
+/* ---------------------------------------------------------------- redesign 3, 16 Nov 2026 */
+/* The locked build action, on the dark banner. */
+.sj .sj-hero .ph-build-locked {
+  border-color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.85);
+  padding: 11px 16px;
+}
+.sj .sj-hero .ph-build-locked:hover {
+  color: #fff;
+}
+/* The card: score ring, name, status; two plain numbers; topics; one button. */
+.sj .ph-card-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+}
+.sj .ph-card-title {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.sj .ph-card-sub {
+  color: var(--gray-600, #6b6880);
+  font-size: 13px;
+}
+.sj .ph-ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+}
+.sj .ph-ring svg {
+  position: absolute;
+  inset: 0;
+}
+.sj .ph-ring .track {
+  fill: none;
+  stroke: var(--purple-050, #f3ebff);
+  stroke-width: 6;
+}
+.sj .ph-ring .fill {
+  fill: none;
+  stroke: var(--purple-600, #6b0bff);
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+.sj .ph-ring-text {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  line-height: 1.05;
+}
+.sj .ph-ring-text b {
+  font-family: var(--f-display);
+  font-size: 15px;
+}
+.sj .ph-ring-text small {
+  color: var(--gray-600, #6b6880);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.sj .ph-card-facts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.sj .ph-card-facts div {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+}
+.sj .ph-card-facts dd small {
+  font-family: var(--f-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-600, #6b6880);
+}
+.sj .ph-card-facts dt {
+  font-size: 12.5px;
+}
+.sj .ph-card-topics {
+  display: grid;
+  gap: 6px;
+}
+.sj .ph-card-label {
+  color: var(--gray-600, #6b6880);
+  font-size: 12px;
+  font-weight: 600;
+}
+@media (max-width: 520px) {
+  .sj .ph-card-head {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .sj .ph-card-status {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+  .sj .sj-hero .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+}
+/* The shared banner hides non-button actions on phones; the locked build note must stay. */
+.sj .ph .sj-hero-actions > .ph-build-locked {
+  display: inline-flex;
+}
+.sj .sj-hero-actions .ph-build-locked {
+  white-space: normal;
+}
+.sj .ph-ring,
+.sj .ph-ring svg {
+  width: 66px;
+  height: 66px;
+}
+.sj .ph-ring-text b {
+  font-size: 16px;
+}
+.sj .ph-ring-text small {
+  font-size: 9px;
+}
+/* "1 of 3": the number box is a flex row, which drops plain spaces. */
+.sj .ph-stat-of,
+.sj .ph-card-facts dd small {
+  margin-left: 0.3em;
+}
+.sj .ph-stat-of,
+.sj .ph-card-facts dd small {
+  word-spacing: 0.3em;
+}
+.sj .ph .sj-hero-actions > .ph-build-locked {
+  max-width: 100%;
+  white-space: normal;
+}
+
+/* ---------------------------------------------------------------- redesign 4: from the references */
+/* Each subject its own colour: a tinted head with its letter tile, the ring and bar in that colour. */
+.sj .ph-card {
+  --tint: #6b0bff;
+  --tint-soft: #f3ebff;
+  gap: 18px;
+}
+.sj .ph-card.tint-purple { --tint: #6b0bff; --tint-soft: #f1e8ff; }
+.sj .ph-card.tint-green { --tint: #16a34a; --tint-soft: #e6f7ea; }
+.sj .ph-card.tint-blue { --tint: #2563eb; --tint-soft: #e5eeff; }
+.sj .ph-card.tint-orange { --tint: #ea580c; --tint-soft: #ffeedf; }
+.sj .ph-card.tint-pink { --tint: #db2777; --tint-soft: #fde7f1; }
+.sj .ph-card.tint-yellow { --tint: #ca8a04; --tint-soft: #fff5d6; }
+
+.sj .ph-card-head {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--tint-soft);
+}
+.sj .ph-card-letter {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--tint);
+  color: #fff;
+  font-family: var(--f-display);
+  font-size: 22px;
+  font-weight: 600;
+}
+.sj .ph-card-status {
+  background: rgba(255, 255, 255, 0.75);
+}
+.sj .ph-card-body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+}
+.sj .ph-ring .track {
+  stroke: var(--tint-soft);
+}
+.sj .ph-ring .fill {
+  stroke: var(--tint);
+}
+.sj .ph-card-numbers {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.sj .ph-card-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13.5px;
+  color: var(--gray-600, #6b6880);
+}
+.sj .ph-card-line b {
+  font-family: var(--f-display);
+  font-size: 17px;
+  color: var(--ink-900, #1f0050);
+  white-space: nowrap;
+}
+.sj .ph-card-practised {
+  font-size: 12.5px;
+  color: var(--gray-600, #6b6880);
+}
+/* The filled bar. */
+.sj .ph-progress {
+  display: block;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--tint-soft, #f3ebff);
+  overflow: hidden;
+}
+.sj .ph-progress i {
+  display: block;
+  height: 100%;
+  min-width: 0;
+  border-radius: inherit;
+  background: var(--tint, #6b0bff);
+  transition: width 0.6s ease;
+}
+.sj .ph-progress.light {
+  margin: 8px 0 6px;
+  background: rgba(255, 255, 255, 0.15);
+}
+.sj .ph-progress.light i {
+  background: var(--green-400, #85de4c);
+}
+@media (max-width: 520px) {
+  .sj .ph-card-head {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .sj .ph-card-body {
+    gap: 14px;
+  }
+}
+.sj .ph-card-line b {
+  word-spacing: 0.3em;
+}
+.sj .ph-stat .ph-progress {
+  width: 100%;
+  min-width: 140px;
+}
+
+/* ---------------------------------------------------------------- the banner, laid out again (16 Nov 2026) */
+/* Laptop: text and actions on the left, a compact progress card centred on the right. */
+.sj .ph .sj-hero {
+  align-items: center;
+  min-height: 0;
+  padding: 26px 30px;
+}
+.sj .ph .sj-hero-actions {
+  margin-top: 18px;
+  gap: 10px;
+}
+.sj .ph .sj-hero-actions > * {
+  height: 44px;
+}
+/* The locked build action: the same shape as the other button, soft and see-through. */
+.sj .ph .sj-hero .ph-build-locked {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--r-btn, 12px);
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.sj .ph .sj-hero .ph-build-locked:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+/* The progress card: label, the count, the bar, a small note; nothing floating apart. */
+.sj .ph .ph-stat {
+  width: 300px;
+  gap: 4px;
+  padding: 16px 18px;
+}
+.sj .ph .ph-stat-num {
+  font-size: 40px;
+  line-height: 1.05;
+}
+.sj .ph .ph-stat-of {
+  font-size: 20px;
+}
+.sj .ph .ph-progress.light {
+  width: 100%;
+  margin: 6px 0 4px;
+}
+
+/* Phone: buttons side by side at equal width; the progress card as one slim strip. */
+@media (max-width: 640px) {
+  .sj .ph .sj-hero {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding: 22px 18px 18px;
+  }
+  .sj .ph .sj-hero-title {
+    font-size: 30px;
+  }
+  .sj .ph .sj-hero-sub {
+    margin-top: 8px;
+    font-size: 14px;
+  }
+  .sj .ph .sj-hero-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    margin-top: 16px;
+  }
+  .sj .ph .sj-hero-actions > * {
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: 46px;
+    padding: 8px 10px;
+  }
+  .sj .ph .sj-hero .ph-build-locked {
+    white-space: normal;
+    text-align: center;
+    line-height: 1.25;
+    font-size: 13px;
+  }
+  .sj .ph .sj-hero-aside {
+    width: 100%;
+  }
+  .sj .ph .ph-stat {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "num label"
+      "num bar"
+      "num note";
+    align-items: center;
+    column-gap: 16px;
+    row-gap: 2px;
+    width: 100%;
+    padding: 12px 14px;
+  }
+  .sj .ph .ph-stat-num {
+    grid-area: num;
+    font-size: 32px;
+  }
+  .sj .ph .ph-stat-label {
+    grid-area: label;
+  }
+  .sj .ph .ph-progress.light {
+    grid-area: bar;
+    margin: 4px 0;
+  }
+  .sj .ph .ph-stat-note {
+    grid-area: note;
+  }
+}
+.sj .ph-lock-text small {
+  font-size: inherit;
+  font-weight: 500;
+  opacity: 0.8;
+}
+.sj .ph-lock-text small::before {
+  content: " · ";
+}
+@media (max-width: 640px) {
+  .sj .ph-lock-text {
+    display: grid;
+  }
+  .sj .ph-lock-text small {
+    font-size: 12px;
+  }
+  .sj .ph-lock-text small::before {
+    content: none;
+  }
+}
+
+/* ---------------------------------------------------------------- cards, simplified (16 Nov 2026) */
+/* Two to a row; each card: name and one score, two plain lines, a tag only when due, one button. */
+.sj .ph-cards {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.sj .ph-card {
+  gap: 14px;
+}
+.sj .ph-card-head {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+.sj .ph-card-score {
+  display: grid;
+  justify-items: end;
+  line-height: 1.1;
+}
+.sj .ph-card-score b {
+  font-family: var(--f-display);
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--tint);
+}
+.sj .ph-card-score small {
+  color: var(--gray-600, #6b6880);
+  font-size: 12px;
+}
+.sj .ph-card-lines {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0 4px;
+  list-style: none;
+  font-size: 14.5px;
+  color: var(--ink-900, #1f0050);
+}
+.sj .ph-card-go {
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.sj .ph-card-flag {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #fff4d6;
+  color: #92400e;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+@media (max-width: 760px) {
+  .sj .ph-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sj .ph-card-head {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+}
+@media (max-width: 640px) {
+  .sj .ph .sj-hero-actions .sj-btn {
+    white-space: normal;
+    line-height: 1.2;
+    text-align: center;
+  }
+}
+
+/* The card middle: two tiles in the subject colour. */
+.sj .ph-card-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.sj .ph-tile-stat {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--tint-soft);
+  border-radius: 12px;
+}
+.sj .ph-tile-label {
+  color: var(--gray-600, #6b6880);
+  font-size: 12px;
+  font-weight: 600;
+}
+.sj .ph-tile-stat b {
+  font-family: var(--f-display);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--ink-900, #1f0050);
+}
+.sj .ph-tile-stat small {
+  color: var(--gray-600, #6b6880);
+  font-size: 12.5px;
+}
+.sj .ph-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+.sj .ph-pill {
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.sj .ph-pill.pink { background: #fde7f1; color: #be185d; }
+.sj .ph-pill.yellow { background: #fff5d6; color: #92400e; }
+.sj .ph-pill.green { background: #e6f7ea; color: #15803d; }
+.sj .ph-run-num {
+  font-size: 13px;
+  color: var(--gray-600, #6b6880);
+  white-space: nowrap;
+}
+/* Both tiles: label, value, note, on the same lines. */
+.sj .ph-tile-stat {
+  grid-template-rows: auto 30px auto;
+  align-items: center;
+}
+.sj .ph-pills {
+  margin-top: 0;
+}
+.sj .ph-tile-stat b.ph-tile-topic {
+  overflow: hidden;
+  font-family: var(--f-body);
+  font-size: 15px;
+  line-height: 1.3;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Topics to work on: a section of its own, names in full. */
+.sj .ph-weak {
+  display: grid;
+  gap: 12px;
+  padding: 20px 22px;
+  border: 1px solid var(--line, #ece6f7);
+  border-radius: var(--r-xl, 18px);
+  background: var(--white, #fff);
+}
+.sj .ph-weak h2 {
+  margin: 0;
+}
+.sj .ph-weak-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .ph-weak-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line, #ece6f7);
+}
+.sj .ph-weak-list li:first-child {
+  border-top: 0;
+}
+.sj .ph-weak-name {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.sj .ph-weak-name b {
+  font-size: 15px;
+  font-weight: 600;
+}
+.sj .ph-weak-name small {
+  color: var(--gray-600, #6b6880);
+  font-size: 12.5px;
+}
+.sj .ph-weak-count {
+  color: var(--ink-900, #1f0050);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+@media (max-width: 520px) {
+  .sj .ph-weak {
+    padding: 16px;
+  }
+  .sj .ph-weak-list li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .sj .ph-weak-list li .sj-btn {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
+/* The card's footer: History on the left; a note and the one action on the right. */
+.sj .ph-card-go-right {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+/* The runs popup's pages. */
+.sj .ph-pages {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.sj .ph-pages span {
+  color: var(--gray-600, #6b6880);
+  font-size: 13px;
+}
+.sj .ph-weak-count {
+  font-family: var(--f-body);
+  word-spacing: normal;
+}
+
+/* Topics to work on, as pills: the name, a dot for how weak, the subject small. */
+.sj .ph-weak-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+.sj .ph-weak-key {
+  display: flex;
+  gap: 14px;
+  color: var(--gray-600, #6b6880);
+  font-size: 12.5px;
+}
+.sj .ph-weak-key span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.sj .ph-weak-key i,
+.sj .ph-weak-list li i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #f59e0b;
+  flex: none;
+}
+.sj .ph-weak-key i.very,
+.sj .ph-weak-list li.very i {
+  background: #e11d48;
+}
+.sj .ph-weak-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.sj .ph-weak-list li,
+.sj .ph-weak-list li:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: 9px 14px;
+  border: 1px solid #fde3c4;
+  border-radius: 999px;
+  background: #fff8ef;
+}
+.sj .ph-weak-list li.very {
+  border-color: #fecdd3;
+  background: #fff1f3;
+}
+.sj .ph-weak-list li b {
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+.sj .ph-weak-list li small {
+  color: var(--gray-600, #6b6880);
+  font-size: 12px;
+  white-space: nowrap;
+}
+@media (max-width: 520px) {
+  .sj .ph-weak-list li,
+  .sj .ph-weak-list li:first-child {
+    border-radius: 14px;
+  }
+}
+
+/* Banner buttons: the light one flat (no raised edge), as on Check-up. */
+.sj .ph .sj-hero-actions .sj-btn.soft,
+.sj .ph .sj-hero-actions .sj-btn.soft:hover,
+.sj .ph .sj-hero-actions .sj-btn.soft:active {
+  box-shadow: none;
+  transform: none;
+}

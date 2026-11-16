@@ -842,3 +842,14 @@ export function StatusCell({ subject, detail }: { subject: SubjectOverview; deta
     </span>
   );
 }
+
+/** The colours a subject can wear on its cards. */
+export const SUBJECT_TINTS = ['purple', 'green', 'blue', 'orange', 'pink', 'yellow'] as const;
+export type SubjectTint = (typeof SUBJECT_TINTS)[number];
+
+/** A subject's own colour, the same on every page: picked from the subject itself, not its place in a list. */
+export function subjectTint(subjectId: string): SubjectTint {
+  let sum = 0;
+  for (const ch of subjectId) sum = (sum * 31 + ch.charCodeAt(0)) >>> 0;
+  return SUBJECT_TINTS[sum % SUBJECT_TINTS.length]!;
+}

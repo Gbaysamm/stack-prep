@@ -187,6 +187,20 @@ if ! curl -fsS --max-time 8 http://127.0.0.1:8010/health > /dev/null || ! grep -
 fi
 echo "    built bundle in place"
 
+echo "==> Recording the deployment on the tracker"
+# The commit subjects since the last deployment here, for the team's Tracker page (migration 050).
+PREV=$(head -1 "$ROOT/.deployed" 2>/dev/null || true)
+if [ -n "$PREV" ] && git -C "$APP" cat-file -e "$PREV" 2>/dev/null; then
+  CHANGES=$(git -C "$APP" log --no-merges --format=%s "$PREV..$SHA" | head -80 || true)
+else
+  CHANGES=$(git -C "$APP" log --no-merges --format=%s -20 "$SHA" || true)
+fi
+CHANGES_B64=$(printf '%s' "$CHANGES" | base64 | tr -d '
+')
+if ! compose run --rm --no-deps -T -v "$APP:/repo:ro" -w /repo -e CHANGES_B64="$CHANGES_B64"     api python database/record_deploy.py --sha "$SHA" --target "Binaax" < /dev/null; then
+  echo "::warning::The deployment was not recorded on the tracker."
+fi
+
 { echo "$SHA"; date -Is; } > "$ROOT/.deployed"
 docker image prune -f > /dev/null
 echo "==> Done"

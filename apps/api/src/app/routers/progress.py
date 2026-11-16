@@ -534,8 +534,10 @@ async def practice_runs(
     student_id: UUID,
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
     before: datetime | None = None,
+    subject_id: UUID | None = None,
 ) -> PracticeRunPage:
-    """A page of this student's guided runs, and the topics each one touched.
+    """A page of this student's guided runs (one subject's, given `subject_id`), and the topics
+    each one touched.
 
     Paged by start time rather than by offset, so a run started while the student is reading
     the list does not push one they have already seen onto the next page twice.
@@ -548,6 +550,7 @@ async def practice_runs(
         WITH runs AS ({RUNS}
           AND ss.hidden_at IS NULL
           AND (CAST(:before AS timestamptz) IS NULL OR ss.started_at < CAST(:before AS timestamptz))
+          AND (CAST(:subject AS uuid) IS NULL OR ss.subject_id = CAST(:subject AS uuid))
           ORDER BY ss.started_at DESC
           LIMIT :limit
         )
@@ -580,6 +583,7 @@ async def practice_runs(
         default_length=DEFAULT_LENGTH,
         before=before,
         limit=limit,
+        subject=subject_id,
     )
     page = [
         PracticeRunDetail(

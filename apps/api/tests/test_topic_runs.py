@@ -33,6 +33,12 @@ async def test_a_subtopic_run_only_ever_serves_that_subtopic(
     assert general.status_code == 200, general.text
     assert general.json()["question"]["topic_name"] != "Algebra"
 
+    # One run at a time: the next starts only once this one is finished or deleted.
+    blocked = await start(client, fixture, length=10, subtopic_ids=[bank["Algebra"]["subtopic"]])
+    assert blocked.status_code == 409, blocked.text
+    deleted = await client.delete(f"/v1/practice/{general.json()['session_id']}")
+    assert deleted.status_code == 204, deleted.text
+
     response = await start(client, fixture, length=10, subtopic_ids=[bank["Algebra"]["subtopic"]])
     assert response.status_code == 200, response.text
     state = response.json()

@@ -93,6 +93,9 @@ class Settings(BaseSettings):
     ai_inworld: bool = True
     #: The "Basic (Base64)" key from the Inworld portal, as copied.
     inworld_api_key: str = ""
+    #: The key in the project tracker's edit link (/tracker?key=…). Empty: the tracker is
+    #: read-only for everyone. Set by the team on each server, never sent anywhere else.
+    tracker_edit_key: str = ""
     inworld_voice: str = "Emeka"
     inworld_model: str = "inworld-tts-2"
     #: Make every bank lesson's package in the free voice after start-up, behind any student

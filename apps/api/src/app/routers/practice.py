@@ -976,6 +976,23 @@ async def roadmap_lock(
     return None
 
 
+async def open_run(conn: AsyncConnection, student_id: UUID) -> UUID | None:
+    """The student's unfinished, not deleted run, in any subject, or None.
+
+    "Finished" is read exactly as the run list reads it (progress.RUNS), so the two agree.
+    """
+    from app.routers.progress import RUNS  # progress imports this module
+
+    rows = await fetch_all(
+        conn,
+        f"SELECT session_id FROM ({RUNS} AND ss.hidden_at IS NULL) runs"
+        " WHERE NOT finished ORDER BY started_at DESC LIMIT 1",
+        student=student_id,
+        default_length=DEFAULT_LENGTH,
+    )
+    return rows[0]["session_id"] if rows else None
+
+
 async def begin_run(
     conn: AsyncConnection,
     student_id: UUID,
@@ -993,6 +1010,13 @@ async def begin_run(
     locked = await checkup_lock(conn, student_id, subject_id)
     if locked is not None:
         raise HTTPException(status_code=423, detail=locked)
+    # One run at a time (founder, 16 Nov 2026): an unfinished run is finished, or deleted,
+    # before another starts, in any subject.
+    if await open_run(conn, student_id) is not None:
+        raise HTTPException(
+            status_code=409,
+            detail="Finish your open run first, or delete it from Your runs.",
+        )
     if not planned:
         # 428: follow the roadmap first. The app starts the plan's next item instead.
         waiting = await roadmap_lock(conn, student_id, filters)

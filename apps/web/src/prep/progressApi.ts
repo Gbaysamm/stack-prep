@@ -136,8 +136,10 @@ function visible(overview: Overview): Overview {
 export const progressApi = {
   overview: (studentId: string) =>
     shared(`overview:${studentId}`, KEEP.overview, () => get<Overview>(`/student/${studentId}/overview`).then(visible)),
-  runs: (studentId: string, limit = 20, before?: string) =>
+  runs: (studentId: string, limit = 20, before?: string, subjectId?: string) =>
     get<PracticeRunPage>(
-      `/student/${studentId}/practice?limit=${limit}${before ? `&before=${encodeURIComponent(before)}` : ''}`,
+      `/student/${studentId}/practice?limit=${limit}${before ? `&before=${encodeURIComponent(before)}` : ''}${
+        subjectId ? `&subject_id=${subjectId}` : ''
+      }`,
     ),
 };

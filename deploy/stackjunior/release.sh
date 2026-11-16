@@ -204,5 +204,20 @@ for attempt in $(seq 1 20); do
 done
 
 # What is deployed, recorded where a rollback can find it without the CI log.
+echo "==> Recording the deployment on the tracker"
+cd "$APP"
+# The commit subjects since the last deployment here, for the team's Tracker page (migration 050).
+PREV=$(head -1 "$ROOT/.deployed" 2>/dev/null || true)
+if [ -n "$PREV" ] && git cat-file -e "$PREV" 2>/dev/null; then
+  CHANGES=$(git log --no-merges --format=%s "$PREV..$SHA" | head -80 || true)
+else
+  CHANGES=$(git log --no-merges --format=%s -20 "$SHA" || true)
+fi
+CHANGES_B64=$(printf '%s' "$CHANGES" | base64 | tr -d '
+')
+if ! CHANGES_B64="$CHANGES_B64" DATABASE_URL="$DB_URL" uv run --frozen python database/record_deploy.py     --sha "$SHA" --target "Stack Junior" < /dev/null; then
+  echo "::warning::The deployment was not recorded on the tracker."
+fi
+
 { echo "$SHA"; date -Is; } > "$ROOT/.deployed"
 echo "==> Done"

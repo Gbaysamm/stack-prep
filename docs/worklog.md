@@ -13,6 +13,27 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ---
 
+## 2026-11-16
+
+### Practice and Check-up redesigned; one run at a time; the project tracker
+- **What:** Practice: a banner with Build your own (locked: a popup says why) and Your runs; one
+  card per subject (its colour the same on every page): check-up score, practice average (right
+  without a hint), questions practised, History (that subject's runs, paged) and one button;
+  topics to work on below, as pills with a dot for how weak, only after 3 answers. Check-up: the
+  same cards with last checked, target and points to go, weak topics as a list with how many
+  more, and Report. A new run starts only once the open one is finished or deleted, in any
+  subject (the server refuses with 409). The project tracker at /tracker: anyone with the link
+  reads it; a signed-in admin, or the edit link (TRACKER_EDIT_KEY), edits it. Tasks move To do,
+  In progress, Waiting, Done, Committed, Deployed; each has notes, steps and a history; every
+  deployment records itself with its changes and moves committed tasks to Deployed. Seeded with
+  71 tasks from docs/tracker.md and today's work.
+- **Why:** founder, 16 Nov 2026: pages too wordy and confusing; one run at a time; a tracker the
+  team shares.
+- **Where:** `prep/pages/{PracticeHub,CheckupHub}.tsx`, `SubjectSwitcher.tsx` (subjectTint),
+  `routers/{practice,progress,tracker}.py`, `staff/TrackerPage.tsx`, migration 050,
+  `database/record_deploy.py`, both release scripts; test `test_topic_runs.py`.
+- **Status:** pushed. Set TRACKER_EDIT_KEY on each server for the edit link.
+
 ## 2026-11-13
 
 ### The deploy loads the subtopic lessons

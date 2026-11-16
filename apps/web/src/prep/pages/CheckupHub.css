@@ -264,3 +264,293 @@
 .sj .ch-trend b.last {
   color: var(--green-600);
 }
+
+/* ---------------------------------------------------------------- redesign, 16 Nov 2026 */
+/* Every subject as a card, two to a row, in the same look as the Practice page. */
+.sj .ch-page {
+  display: grid;
+  gap: 18px;
+}
+.sj .ck-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.sj .ck-card {
+  --tint: #6b0bff;
+  --tint-soft: #f1e8ff;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  min-width: 0;
+  padding: 20px 22px;
+  border: 1px solid var(--line, #ece6f7);
+  border-radius: var(--r-xl, 18px);
+  background: var(--white, #fff);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.sj .ck-card:hover,
+.sj .ck-card.marked {
+  border-color: var(--purple-200, #d7bdff);
+  box-shadow: 0 6px 18px rgba(31, 0, 80, 0.06);
+}
+.sj .ck-card.tint-purple { --tint: #6b0bff; --tint-soft: #f1e8ff; }
+.sj .ck-card.tint-green { --tint: #16a34a; --tint-soft: #e6f7ea; }
+.sj .ck-card.tint-blue { --tint: #2563eb; --tint-soft: #e5eeff; }
+.sj .ck-card.tint-orange { --tint: #ea580c; --tint-soft: #ffeedf; }
+.sj .ck-card.tint-pink { --tint: #db2777; --tint-soft: #fde7f1; }
+.sj .ck-card.tint-yellow { --tint: #ca8a04; --tint-soft: #fff5d6; }
+
+.sj .ck-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--tint-soft);
+}
+.sj .ck-letter {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--tint);
+  color: #fff;
+  font-family: var(--f-display);
+  font-size: 22px;
+  font-weight: 600;
+}
+.sj .ck-title {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.sj .ck-name {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.2;
+}
+.sj .ck-name a {
+  color: inherit;
+  text-decoration: none;
+}
+.sj .ck-sub {
+  color: var(--gray-600, #6b6880);
+  font-size: 13px;
+}
+.sj .ck-score {
+  display: grid;
+  justify-items: end;
+  line-height: 1.1;
+}
+.sj .ck-score b {
+  font-family: var(--f-display);
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--tint);
+}
+.sj .ck-score small {
+  color: var(--gray-600, #6b6880);
+  font-size: 12px;
+}
+.sj .ck-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.sj .ck-tile {
+  display: grid;
+  grid-template-rows: auto 30px auto;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--tint-soft);
+  border-radius: 12px;
+}
+.sj .ck-label {
+  color: var(--gray-600, #6b6880);
+  font-size: 12px;
+  font-weight: 600;
+}
+.sj .ck-tile b {
+  font-family: var(--f-display);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--ink-900, #1f0050);
+}
+.sj .ck-tile small {
+  color: var(--gray-600, #6b6880);
+  font-size: 12.5px;
+}
+.sj .ck-tile small.due {
+  color: #b45309;
+  font-weight: 600;
+}
+/* Weak topics: pills with a dot for how weak, names in full. */
+.sj .ck-weak {
+  display: grid;
+  gap: 8px;
+}
+.sj .ck-weak ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .ck-weak li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+  padding: 6px 12px;
+  border: 1px solid #fde3c4;
+  border-radius: 999px;
+  background: #fff8ef;
+  font-size: 13px;
+  font-weight: 600;
+}
+.sj .ck-weak li i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f59e0b;
+  flex: none;
+}
+.sj .ck-weak li.very {
+  border-color: #fecdd3;
+  background: #fff1f3;
+}
+.sj .ck-weak li.very i {
+  background: #e11d48;
+}
+.sj .ck-go {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+@media (max-width: 760px) {
+  .sj .ck-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 520px) {
+  .sj .ck-card {
+    padding: 16px;
+  }
+  .sj .ck-weak li {
+    border-radius: 12px;
+  }
+}
+
+/* Equal cards in a row, the buttons pinned to the bottom; weak topics as a plain list. */
+.sj .ck-cards {
+  align-items: stretch;
+}
+.sj .ck-card {
+  display: flex;
+  flex-direction: column;
+}
+.sj .ck-weak {
+  flex: 1;
+  align-content: start;
+}
+.sj .ck-go {
+  margin-top: auto;
+  padding-top: 4px;
+}
+.sj .ck-weak ul {
+  display: grid;
+  gap: 0;
+}
+.sj .ck-weak li,
+.sj .ck-weak li.very {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 7px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line, #ece6f7);
+  border-radius: 0;
+  background: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+.sj .ck-weak li:last-child {
+  border-bottom: 0;
+}
+.sj .ck-weak li i {
+  position: relative;
+  top: -1px;
+}
+.sj .ck-none {
+  margin: 0;
+  color: var(--gray-600, #6b6880);
+  font-size: 14px;
+}
+.sj .ck-more {
+  color: var(--purple-700, #6500ff);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Banner buttons: the light one flat (no raised edge); on a phone, both on one line. */
+.sj .ch-page .sj-hero-actions .sj-btn.soft,
+.sj .ch-page .sj-hero-actions .sj-btn.soft:hover,
+.sj .ch-page .sj-hero-actions .sj-btn.soft:active {
+  box-shadow: none;
+  transform: none;
+}
+@media (max-width: 640px) {
+  .sj .ch-page .sj-hero-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+  }
+  .sj .ch-page .sj-hero-actions > * {
+    display: inline-flex;
+    width: 100%;
+    min-width: 0;
+    padding-left: 10px;
+    padding-right: 10px;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.2;
+  }
+}
+/* Phone banner: both buttons flat, one line each, the same height; "again" and the arrow drop. */
+.sj .ch-page .sj-hero-actions .sj-btn {
+  box-shadow: none;
+}
+@media (max-width: 640px) {
+  .sj .ch-page .sj-hero-actions > * {
+    height: 48px;
+    white-space: nowrap;
+  }
+  .sj .ch-page .sj-hero-actions .ck-wide,
+  .sj .ch-page .sj-hero-actions .sj-btn svg {
+    display: none;
+  }
+}
+/* One banner button: on a phone it takes its own width, not half the row. */
+@media (max-width: 640px) {
+  .sj .ch-page .sj-hero-actions {
+    display: flex;
+    width: auto;
+  }
+  .sj .ch-page .sj-hero-actions > * {
+    width: auto;
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+  .sj .ch-page .sj-hero-actions .ck-wide {
+    display: inline;
+  }
+}

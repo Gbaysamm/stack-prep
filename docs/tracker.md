@@ -11,7 +11,10 @@ Pushed (on `company/integration`, deploys to both servers) · Waiting (on the fo
 
 ---
 
-## Where we are (updated 13 Nov 2026)
+## Where we are (updated 16 Nov 2026)
+
+- **The live tracker is now /tracker** (stackprep.binaax.app/tracker): tasks, steps, history and
+  deployments, kept by the team. This file stays as the record of the founder's asks.
 
 - **Last thing done:** the bank's line-by-line review (`docs/questions/bank-review-brief.md`)
   ran for Accounts (9 files), Biology (9) and Physics 2018, then was paused to save the weekly
