@@ -554,3 +554,172 @@
     display: inline;
   }
 }
+
+/* A subject's check-ups, newest first. */
+.sj .ck-hist {
+  width: min(620px, calc(100vw - 32px));
+  max-width: none;
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+  display: grid;
+  gap: 14px;
+}
+.sj .ck-hist-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sj .ck-hist-head h2 {
+  margin: 0;
+}
+.sj .ck-hist-close {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line, #ece6f7);
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+}
+.sj .ck-hist-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--line, #ece6f7);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.sj .ck-hist-list li + li {
+  border-top: 1px solid var(--line, #ece6f7);
+}
+.sj .ck-hist-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 48px auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  color: inherit;
+  text-decoration: none;
+}
+.sj .ck-hist-row:hover {
+  background: #faf7ff;
+}
+.sj .ck-hist-when,
+.sj .ck-hist-score {
+  display: grid;
+  gap: 1px;
+}
+.sj .ck-hist-when small,
+.sj .ck-hist-score small {
+  color: var(--gray-600, #6b6880);
+  font-size: 12.5px;
+}
+.sj .ck-hist-score {
+  justify-items: end;
+}
+.sj .ck-hist-score b {
+  font-family: var(--f-display);
+  font-size: 20px;
+}
+.sj .ck-hist-change {
+  font-size: 13px;
+  font-weight: 700;
+  text-align: right;
+  color: var(--gray-600, #6b6880);
+}
+.sj .ck-hist-change.up {
+  color: #15803d;
+}
+.sj .ck-hist-change.down {
+  color: #be123c;
+}
+.sj .ck-hist-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--purple-700, #6500ff);
+  font-size: 13px;
+  font-weight: 600;
+}
+@media (max-width: 520px) {
+  .sj .ck-hist-row {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+  .sj .ck-hist-go {
+    display: none;
+  }
+}
+
+/* One calm look for every subject; colour only on the score, by what it means (16 Nov 2026). */
+.sj .ck-score b.low,
+.sj .ph-card-score b.low {
+  color: #be123c;
+}
+.sj .ck-score b.mid,
+.sj .ph-card-score b.mid {
+  color: #b45309;
+}
+.sj .ck-score b.good,
+.sj .ph-card-score b.good {
+  color: #15803d;
+}
+
+/* A subject never checked: one panel, not empty boxes. */
+.sj .ck-empty {
+  display: grid;
+  flex: 1;
+  align-content: center;
+  gap: 6px;
+  padding: 18px 20px;
+  border: 1px dashed var(--purple-200, #d7bdff);
+  border-radius: 14px;
+  background: #fbf9ff;
+}
+.sj .ck-empty b {
+  font-family: var(--f-display);
+  font-size: 18px;
+  font-weight: 600;
+}
+.sj .ck-empty p {
+  margin: 0;
+  color: var(--gray-600, #6b6880);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.sj .ck-empty small {
+  color: var(--ink-900, #1f0050);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* The app's sticker look on every subject card: a dark outline and a solid offset shadow. */
+.sj .ck-card,
+.sj .ck-card:hover,
+.sj .ck-card.marked {
+  border: 1.5px solid var(--gray-900, #160b2e);
+  box-shadow: var(--st-purple, 8px 8px 0 #d7bdff);
+}
+.sj .ck-card {
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.sj .ck-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 10px 10px 0 var(--purple-300, #b789ff);
+}
+@media (max-width: 640px) {
+  .sj .ck-card,
+  .sj .ck-card.marked {
+    box-shadow: 5px 5px 0 var(--purple-200, #d7bdff);
+  }
+  .sj .ck-card:hover {
+    transform: none;
+    box-shadow: 5px 5px 0 var(--purple-200, #d7bdff);
+  }
+}
+
+/* Room for the offset shadows between cards. */
+.sj .ck-cards {
+  gap: 22px;
+}

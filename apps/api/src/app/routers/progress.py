@@ -523,6 +523,56 @@ def _run(row: dict[str, Any]) -> PracticeRun:
     )
 
 
+class PracticeSummary(BaseModel):
+    """Practice across every subject: questions answered and right without a hint (or the
+    board), in all, in the last 7 days, and in the 7 days before. Deleted runs count: the work in
+    them still happened. Read as the run list reads a run (RUNS)."""
+
+    answered: int
+    right: int
+    week_answered: int
+    week_right: int
+    last_week_answered: int
+    last_week_right: int
+
+
+@router.get(
+    "/{student_id}/practice/summary",
+    response_model=PracticeSummary,
+    summary="Practice average across subjects, this week and last",
+)
+async def practice_summary(
+    request: Request,
+    conn: Annotated[AsyncConnection, Depends(connection)],
+    student_id: UUID,
+) -> PracticeSummary:
+    await require_student(request, conn, student_id)
+    await _student(conn, student_id)
+    rows = await fetch_all(
+        conn,
+        f"""
+        WITH runs AS ({RUNS})
+        SELECT
+          coalesce(sum(answered), 0) AS answered,
+          coalesce(sum(correct_unaided), 0) AS right,
+          coalesce(sum(answered) FILTER (WHERE started_at >= now() - interval '7 days'), 0)
+            AS week_answered,
+          coalesce(sum(correct_unaided) FILTER (WHERE started_at >= now() - interval '7 days'), 0)
+            AS week_right,
+          coalesce(sum(answered) FILTER (WHERE started_at >= now() - interval '14 days'
+                                           AND started_at < now() - interval '7 days'), 0)
+            AS last_week_answered,
+          coalesce(sum(correct_unaided) FILTER (WHERE started_at >= now() - interval '14 days'
+                                                  AND started_at < now() - interval '7 days'), 0)
+            AS last_week_right
+        FROM runs
+        """,
+        student=student_id,
+        default_length=DEFAULT_LENGTH,
+    )
+    return PracticeSummary(**{key: int(value) for key, value in rows[0].items()})
+
+
 @router.get(
     "/{student_id}/practice",
     response_model=PracticeRunPage,

@@ -11,13 +11,10 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 
-import { useRoadmap } from "../roadmapApi.js";
 import {
   IconArrowRight,
   IconChevronRight,
   IconClose,
-  IconLayers,
-  IconLock,
   IconReplay,
   IconSpark,
 } from "../icons.js";
@@ -33,7 +30,7 @@ import {
   isDemoSubject,
   practiceLock,
   subjectStatus,
-  subjectTint,
+  scoreLevel,
   useOverview,
   type SubjectTint,
 } from "../SubjectSwitcher.js";
@@ -41,14 +38,13 @@ import {
   Badge,
   Button,
   Card,
-  Dialog,
   PageHero,
   Skeleton,
   Steps,
   cx,
   useToast,
 } from "../ui.js";
-import { plural, useStartPractice } from "./Home.js";
+import { useStartPractice } from "./Home.js";
 import { DeleteRunDialog, IconTrash } from "./RunReport.js";
 import "./PracticeHub.css";
 import { friendly } from "../../lib/friendlyError.js";
@@ -122,18 +118,7 @@ export function PracticeHub() {
         <GetStarted />
       ) : (
         <>
-          <PageHero
-            title="Practice"
-            sub="Pick a subject and start a run, or build your own."
-            actions={
-              <>
-                <BuildButton />
-                <Button tone="soft" icon={<IconReplay size={16} />} onClick={() => setShowRuns("all")}>
-                  Your runs
-                </Button>
-              </>
-            }
-          />
+          {/* No banner (founder, 16 Nov 2026): each card starts a run and holds its history. */}
 
           <section className="ph-cards sj-rise d2" aria-label="Your subjects">
             {subjects.map((subject) => (
@@ -141,12 +126,13 @@ export function PracticeHub() {
                 key={subject.subject_id}
                 subject={subject}
                 starter={starter}
-                tint={subjectTint(subject.subject_id)}
+                tint="purple"
                 openElsewhere={subjects.find((s) => s.open_practice_session_id && s.subject_id !== subject.subject_id)}
                 onHistory={() => setShowRuns({ id: subject.subject_id, name: subject.subject_name })}
               />
             ))}
           </section>
+          <PracticeStats />
           <TopicsToWork subjects={subjects} />
           {starter.error ? (
             <p className="ph-alert" role="alert">
@@ -170,44 +156,60 @@ export function PracticeHub() {
 /* ------------------------------------------------------------------ the slim top row */
 
 
-/** Build your own run, once for the page; while planned runs come first, it says how many. */
-function BuildButton() {
+/* ------------------------------------------------------------------ the practice average */
+
+/**
+ * Your practice, below the cards: the average across every subject (right without a hint, as
+ * the scoring rule counts it), this week against the week before, and how much was practised.
+ */
+function PracticeStats() {
   const student = useStudent();
-  const plan = useRoadmap(student.studentId);
-  const waiting = plan.data?.record.own_runs_in ?? 0;
-  const [why, setWhy] = useState(false);
-  if (waiting > 0) {
-    return (
-      <>
-        <Button tone="soft" icon={<IconLock size={16} />} onClick={() => setWhy(true)}>
-          Build your own
-        </Button>
-        <Dialog
-          open={why}
-          onClose={() => setWhy(false)}
-          icon={<IconLock size={22} />}
-          title="Build your own run is locked"
-          actions={
-            <>
-              <Button tone="ghost" onClick={() => setWhy(false)}>
-                Close
-              </Button>
-              <Button to="/roadmap" trailing={<IconArrowRight size={16} />}>
-                Go to my roadmap
-              </Button>
-            </>
-          }
-        >
-          It opens after {plural(waiting, "more planned run")}. Your roadmap's runs come first, so you
-          practise what matters most before choosing your own.
-        </Dialog>
-      </>
-    );
-  }
+  const summary = useLoad(() => progressApi.practiceSummary(student.studentId), [student.studentId]);
+  const s = summary.data;
+  if (!s || s.answered === 0) return null;
+  const pct = (right: number, answered: number) => (answered ? Math.round((right / answered) * 100) : null);
+  const average = pct(s.right, s.answered)!;
+  const week = pct(s.week_right, s.week_answered);
+  const before = pct(s.last_week_right, s.last_week_answered);
+  const change = week !== null && before !== null ? week - before : null;
   return (
-    <Button to="/practice/new" tone="lime" icon={<IconLayers size={16} />}>
-      Build your own run
-    </Button>
+    <section className="ph-stats-sec sj-rise d3" aria-labelledby="ph-stats-title">
+      <h2 id="ph-stats-title" className="sj-display sj-h3">
+        Your practice
+      </h2>
+      <div className="ph-stats-grid">
+        <div className="ph-stat-tile">
+          <span>Practice average</span>
+          <b className={cx("sj-num", scoreLevel(average))}>{average}%</b>
+          <small>all subjects, right without a hint</small>
+        </div>
+        <div className="ph-stat-tile">
+          <span>This week</span>
+          <b className={cx("sj-num", scoreLevel(week))}>{week !== null ? `${week}%` : "—"}</b>
+          <small className={cx(change !== null && (change > 0 ? "up" : change < 0 ? "down" : ""))}>
+            {change !== null
+              ? change > 0
+                ? `↑ ${change} from last week`
+                : change < 0
+                  ? `↓ ${-change} from last week`
+                  : "Same as last week"
+              : week !== null
+                ? `${s.week_answered} questions`
+                : "No practice this week"}
+          </small>
+        </div>
+        <div className="ph-stat-tile">
+          <span>Last week</span>
+          <b className={cx("sj-num", scoreLevel(before))}>{before !== null ? `${before}%` : "—"}</b>
+          <small>{before !== null ? `${s.last_week_answered} questions` : "No practice"}</small>
+        </div>
+        <div className="ph-stat-tile">
+          <span>Questions practised</span>
+          <b className="sj-num">{s.answered}</b>
+          <small>{s.right} right without a hint</small>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -251,7 +253,9 @@ function SubjectCard({
           <span className="ph-card-sub">{subject.examination_short_name}</span>
         </div>
         <div className="ph-card-score">
-          <b className="sj-num">{st.predicted !== null ? `${st.predicted}%` : "—"}</b>
+          <b className={cx("sj-num", scoreLevel(st.predicted, subject.goal?.target_score ?? null))}>
+            {st.predicted !== null ? `${st.predicted}%` : "—"}
+          </b>
           <small>check-up score</small>
         </div>
       </header>

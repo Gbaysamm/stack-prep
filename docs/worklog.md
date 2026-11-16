@@ -15,6 +15,20 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-16
 
+### Practice and Check-up, second pass: no banners, one colour, Your practice, sticker cards
+- **What:** both pages lose their banner (the cards carry each subject's actions). Check-up:
+  History lists every check-up of a subject (date, score, change, each with its report); a
+  subject never checked shows one panel, not empty boxes. Every subject card is one purple,
+  with the app's sticker look (dark outline, offset shadow); only the score is coloured, by
+  level (red under 40%, amber on the way, green at the target). Practice: a Your practice
+  section below the cards (average across subjects, this week, last week, questions
+  practised; new endpoint /v1/student/{id}/practice/summary).
+- **Why:** founder, 16 Nov 2026: banners repeated the cards; colours meant nothing; two bars
+  stacked at the top.
+- **Where:** `prep/pages/{PracticeHub,CheckupHub}.{tsx,css}`, `SubjectSwitcher.tsx` (scoreLevel),
+  `progressApi.ts`, `routers/progress.py`.
+- **Status:** committed.
+
 ### The tracker: Today, a new-task popup, a wider stage menu
 - **What:** a Today section: any task can be planned for today (a Today button on each row, or
   when it is added); unfinished ones carry over to the next day, marked "from <day>"; finished

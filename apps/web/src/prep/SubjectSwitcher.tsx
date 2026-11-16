@@ -853,3 +853,13 @@ export function subjectTint(subjectId: string): SubjectTint {
   for (const ch of subjectId) sum = (sum * 31 + ch.charCodeAt(0)) >>> 0;
   return SUBJECT_TINTS[sum % SUBJECT_TINTS.length]!;
 }
+
+/**
+ * What a score's colour says: "low" under 40%, "mid" on the way, "good" at the target (or 70%
+ * where no target is set). Colour on the cards means only this (founder, 16 Nov 2026).
+ */
+export function scoreLevel(score: number | null, target: number | null = null): '' | 'low' | 'mid' | 'good' {
+  if (score === null) return '';
+  if (score >= (target ?? 70)) return 'good';
+  return score >= 40 ? 'mid' : 'low';
+}

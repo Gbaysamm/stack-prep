@@ -136,6 +136,8 @@ function visible(overview: Overview): Overview {
 export const progressApi = {
   overview: (studentId: string) =>
     shared(`overview:${studentId}`, KEEP.overview, () => get<Overview>(`/student/${studentId}/overview`).then(visible)),
+  /** Practice across subjects: right without a hint, in all, this week and the week before. */
+  practiceSummary: (studentId: string) => get<PracticeSummary>(`/student/${studentId}/practice/summary`),
   runs: (studentId: string, limit = 20, before?: string, subjectId?: string) =>
     get<PracticeRunPage>(
       `/student/${studentId}/practice?limit=${limit}${before ? `&before=${encodeURIComponent(before)}` : ''}${
@@ -143,3 +145,12 @@ export const progressApi = {
       }`,
     ),
 };
+
+export interface PracticeSummary {
+  answered: number;
+  right: number;
+  week_answered: number;
+  week_right: number;
+  last_week_answered: number;
+  last_week_right: number;
+}

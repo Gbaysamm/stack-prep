@@ -9,22 +9,23 @@
  */
 
 import { useEffect, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { api, type CheckupResult } from '../../student/api.js';
-import { IconArrowRight, IconReplay, IconTarget } from '../icons.js';
+import { IconArrowRight, IconClose, IconReplay, IconTarget } from '../icons.js';
 import type { SubjectOverview } from '../progressApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
 import {
   byUrgency,
   isDemoSubject,
   rememberSubject,
-  subjectTint,
+  scoreLevel,
   type SubjectTint,
   withDemoSubjects,
 } from '../SubjectSwitcher.js';
 import { progressApi } from '../progressApi.js';
-import { Button, PageHero, Pager, Skeleton, cx, usePaged } from '../ui.js';
+import { Button, Pager, Skeleton, cx, usePaged } from '../ui.js';
 import './CheckupHub.css';
 import { friendly } from '../../lib/friendlyError.js';
 
@@ -44,7 +45,10 @@ function whenLabel(iso: string): string {
 /** "2026-10-19" as a short local date, "19 Oct". */
 function dayText(iso: string): string {
   const [y = 1970, m = 1, d = 1] = iso.slice(0, 10).split('-').map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  return new Date(y, m - 1, d).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+  });
 }
 
 /** Each finished check-up's result, oldest first. */
@@ -53,7 +57,15 @@ function checkupsOf(subject: SubjectOverview): CheckupResult[] {
   if (history.length > 0) return history;
   const latest = subject.latest_checkup;
   return latest && latest.score !== null
-    ? [{ session_id: latest.session_id, finished_at: latest.finished_at, answered: latest.answered, right: latest.right, score: latest.score }]
+    ? [
+        {
+          session_id: latest.session_id,
+          finished_at: latest.finished_at,
+          answered: latest.answered,
+          right: latest.right,
+          score: latest.score,
+        },
+      ]
     : [];
 }
 
@@ -64,7 +76,17 @@ const WEAK_SHOWN = 3;
 const PAGE = 10;
 
 /** A left-aligned message card: icon and title on one line, the words and the button beneath. */
-function NoteCard({ icon, title, children, action }: { icon: ReactNode; title: ReactNode; children?: ReactNode; action?: ReactNode }) {
+function NoteCard({
+  icon,
+  title,
+  children,
+  action,
+}: {
+  icon: ReactNode;
+  title: ReactNode;
+  children?: ReactNode;
+  action?: ReactNode;
+}) {
   return (
     <div className="sj-card ch-note">
       <div className="ch-note-head">
@@ -85,11 +107,18 @@ export function CheckupHub() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const [starting, setStarting] = useState<string | null>(null);
-  const [startIssue, setStartIssue] = useState<{ subjectId: string; text: string } | null>(null);
+  const [startIssue, setStartIssue] = useState<{
+    subjectId: string;
+    text: string;
+  } | null>(null);
 
   const data = useLoad(
     () =>
-      Promise.all([progressApi.overview(student.studentId).then(withDemoSubjects), api.goals(student.studentId), api.catalogue()]),
+      Promise.all([
+        progressApi.overview(student.studentId).then(withDemoSubjects),
+        api.goals(student.studentId),
+        api.catalogue(),
+      ]),
     [student.studentId],
   );
 
@@ -110,7 +139,12 @@ export function CheckupHub() {
         latest_checkup: null,
         open_checkup_session_id: null,
         open_practice_session_id: null,
-        practice: { runs_finished: 0, questions_answered: 0, correct_unaided: 0, taught: 0 },
+        practice: {
+          runs_finished: 0,
+          questions_answered: 0,
+          correct_unaided: 0,
+          taught: 0,
+        },
       });
     }
     subjects = byUrgency(subjects);
@@ -134,57 +168,16 @@ export function CheckupHub() {
       const state = await api.start(student.studentId, subjectId);
       navigate(`/checkup/${state.session_id}`);
     } catch (error) {
-      setStartIssue({ subjectId, text: friendly(error) || 'The check-up could not start.' });
+      setStartIssue({
+        subjectId,
+        text: friendly(error) || 'The check-up could not start.',
+      });
       setStarting(null);
     }
   };
 
-  // The hero's button: the one thing to do next — a half-done check-up, else the first subject
-  // that has never been checked, else one that is due, else the one checked longest ago.
-  const openRow = subjects.find((s) => s.open_checkup_session_id);
-  const ready = subjects.filter((s) => !isDemoSubject(s.subject_id));
-  const readyRow =
-    ready.find((s) => !s.latest_checkup) ??
-    ready.find((s) => s.scores?.checkup_due) ??
-    [...ready].sort((a, b) => (a.latest_checkup!.finished_at < b.latest_checkup!.finished_at ? -1 : 1))[0];
-  let heroAction: ReactNode = null;
-  if (openRow) {
-    heroAction = (
-      <Button tone="lime" to={`/checkup/${openRow.open_checkup_session_id}`} trailing={<IconArrowRight size={18} />}>
-        Resume {openRow.subject_name}
-      </Button>
-    );
-  } else if (readyRow) {
-    const again = Boolean(readyRow.latest_checkup);
-    const id = readyRow.subject_id;
-    heroAction = (
-      <Button
-        tone="lime"
-        onClick={() => void start(id)}
-        busy={starting === id}
-        disabled={starting !== null && starting !== id}
-        trailing={starting === id ? undefined : <IconArrowRight size={18} />}
-      >
-        {starting === id ? (
-          'Starting…'
-        ) : (
-          <>
-            {again ? 'Check' : 'Start'} {readyRow.subject_name}
-            {again ? <span className="ck-wide"> again</span> : null}
-          </>
-        )}
-      </Button>
-    );
-  }
-
   return (
     <div className="sj-page ch-page">
-      <PageHero
-        title="Check-up"
-        sub="About 15 questions, no hints, like the real exam. One every 7 days."
-        actions={heroAction}
-      />
-
       <section className="ch-section" aria-label="Your subjects">
         {data.error && !data.data ? (
           <NoteCard
@@ -223,7 +216,7 @@ export function CheckupHub() {
                 <CheckCard
                   key={s.subject_id}
                   subject={s}
-                  tint={subjectTint(s.subject_id)}
+                  tint="purple"
                   marked={s.subject_id === asked}
                   busy={starting === s.subject_id}
                   disabled={(starting !== null && starting !== s.subject_id) || isDemoSubject(s.subject_id)}
@@ -263,8 +256,9 @@ function CheckCard({
   disabled: boolean;
   onStart: () => void;
 }) {
-  const history = checkupsOf(subject);
-  const latest = history[history.length - 1];
+  const [history, setHistory] = useState(false);
+  const results = checkupsOf(subject);
+  const latest = results[results.length - 1];
   const score = latest?.score ?? null;
   const checked = subject.latest_checkup;
   const due = subject.scores?.checkup_due ?? false;
@@ -290,70 +284,80 @@ function CheckCard({
           </h2>
           <span className="ck-sub">{subject.examination_short_name}</span>
         </div>
-        <div className="ck-score">
-          <b className="sj-num">{score !== null ? `${score}%` : '—'}</b>
-          <small>check-up score</small>
-        </div>
+        {score !== null ? (
+          <div className="ck-score">
+            <b className={cx('sj-num', scoreLevel(score, target))}>{score}%</b>
+            <small>check-up score</small>
+          </div>
+        ) : null}
       </header>
 
-      <div className="ck-tiles">
-        <div className="ck-tile">
-          <span className="ck-label">Last checked</span>
-          <b>{openId ? 'Half done' : checked ? capital(whenLabel(checked.finished_at)) : 'Not yet'}</b>
-          <small className={cx(due && !openId && 'due')}>
-            {openId
-              ? 'Your answers are saved'
-              : !checked
-                ? 'About 15 questions'
-                : due
-                  ? 'Next check-up due now'
-                  : next
-                    ? `Next on ${dayText(next)}`
-                    : ''}
-          </small>
+      {!checked && !openId ? (
+        <div className="ck-empty">
+          <b>Not checked yet</b>
+          <p>About 15 questions, no hints. You get a starting score and the topics to work on.</p>
+          {target !== null ? <small>Target {target}%</small> : null}
         </div>
-        <div className="ck-tile">
-          <span className="ck-label">Target</span>
-          <b>{target !== null ? `${target}%` : '—'}</b>
-          <small>
-            {target === null
-              ? 'No target set'
-              : gap === null
-                ? 'After a check-up'
-                : gap <= 0
-                  ? 'Reached'
-                  : `${gap} points to go`}
-          </small>
-        </div>
-      </div>
+      ) : (
+        <>
+          <div className="ck-tiles">
+            <div className="ck-tile">
+              <span className="ck-label">Last checked</span>
+              <b>{openId ? 'Half done' : checked ? capital(whenLabel(checked.finished_at)) : 'Not yet'}</b>
+              <small className={cx(due && !openId && 'due')}>
+                {openId
+                  ? 'Your answers are saved'
+                  : !checked
+                    ? 'About 15 questions'
+                    : due
+                      ? 'Next check-up due now'
+                      : next
+                        ? `Next on ${dayText(next)}`
+                        : ''}
+              </small>
+            </div>
+            <div className="ck-tile">
+              <span className="ck-label">Target</span>
+              <b>{target !== null ? `${target}%` : '—'}</b>
+              <small>
+                {target === null
+                  ? 'No target set'
+                  : gap === null
+                    ? 'After a check-up'
+                    : gap <= 0
+                      ? 'Reached'
+                      : `${gap} points to go`}
+              </small>
+            </div>
+          </div>
 
-      <div className="ck-weak">
-        <span className="ck-label">
-          Weak topics{weakAll.length ? ` · ${weakAll.length}` : ''}
-        </span>
-        {weak.length ? (
-          <ul>
-            {weak.map((w) => (
-              <li key={w.subtopic_id} className={(w.score ?? 0) < 25 ? 'very' : undefined}>
-                <i aria-hidden="true" />
-                <span>{w.name}</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="ck-none">{checked ? 'None so far' : 'After your first check-up'}</p>
-        )}
-        {weakAll.length > weak.length && checked ? (
-          <Link className="ck-more" to={`/checkup/${checked.session_id}/report`}>
-            {weakAll.length - weak.length} more in the report
-          </Link>
-        ) : null}
-      </div>
+          <div className="ck-weak">
+            <span className="ck-label">Weak topics{weakAll.length ? ` · ${weakAll.length}` : ''}</span>
+            {weak.length ? (
+              <ul>
+                {weak.map((w) => (
+                  <li key={w.subtopic_id} className={(w.score ?? 0) < 25 ? 'very' : undefined}>
+                    <i aria-hidden="true" />
+                    <span>{w.name}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="ck-none">{checked ? 'None so far' : 'After your first check-up'}</p>
+            )}
+            {weakAll.length > weak.length && checked ? (
+              <Link className="ck-more" to={`/checkup/${checked.session_id}/report`}>
+                {weakAll.length - weak.length} more in the report
+              </Link>
+            ) : null}
+          </div>
+        </>
+      )}
 
       <footer className="ck-go">
         {checked ? (
-          <Button size="sm" tone="ghost" to={`/checkup/${checked.session_id}/report`}>
-            Report
+          <Button size="sm" tone="ghost" icon={<IconReplay size={15} />} onClick={() => setHistory(true)}>
+            History
           </Button>
         ) : (
           <span />
@@ -375,7 +379,88 @@ function CheckCard({
           </Button>
         )}
       </footer>
+      {history ? (
+        <CheckupHistory subject={subject} list={checkupsOf(subject)} onClose={() => setHistory(false)} />
+      ) : null}
     </article>
+  );
+}
+
+/** Every check-up of one subject, newest first, each opening its report. */
+function CheckupHistory({
+  subject,
+  list,
+  onClose,
+}: {
+  subject: SubjectOverview;
+  list: CheckupResult[];
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  const newest = [...list].reverse();
+  return createPortal(
+    <div className="sj">
+      <div className="sj-scrim" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+        <div className="sj-dialog ck-hist" role="dialog" aria-modal="true" aria-labelledby="ck-hist-title">
+          <header className="ck-hist-head">
+            <h2 id="ck-hist-title" className="sj-display sj-h3">
+              {subject.subject_name} check-ups
+            </h2>
+            <button type="button" className="ck-hist-close" onClick={onClose} aria-label="Close">
+              <IconClose size={18} />
+            </button>
+          </header>
+          {newest.length === 0 ? (
+            <p className="sj-muted">No check-ups yet.</p>
+          ) : (
+            <ol className="ck-hist-list">
+              {newest.map((c, n) => {
+                const before = newest[n + 1];
+                const change = before && before.score !== null && c.score !== null ? c.score - before.score : null;
+                return (
+                  <li key={c.session_id}>
+                    <Link to={`/checkup/${c.session_id}/report`} className="ck-hist-row">
+                      <span className="ck-hist-when">
+                        <b>
+                          {new Date(c.finished_at).toLocaleDateString('en-GB', {
+                            weekday: 'short',
+                            day: 'numeric',
+                            month: 'short',
+                          })}
+                        </b>
+                        <small>{n === 0 ? 'Latest' : `Check-up ${newest.length - n}`}</small>
+                      </span>
+                      <span className="ck-hist-score">
+                        <b className="sj-num">{c.score !== null ? `${c.score}%` : '—'}</b>
+                        <small>
+                          {c.right} of {c.answered} right
+                        </small>
+                      </span>
+                      <span
+                        className={cx(
+                          'ck-hist-change',
+                          change !== null && (change > 0 ? 'up' : change < 0 ? 'down' : ''),
+                        )}
+                      >
+                        {change === null ? '' : change > 0 ? `+${change}` : change < 0 ? `${change}` : '±0'}
+                      </span>
+                      <span className="ck-hist-go">
+                        Report <IconArrowRight size={14} />
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ol>
+          )}
+        </div>
+      </div>
+    </div>,
+    document.body,
   );
 }
 

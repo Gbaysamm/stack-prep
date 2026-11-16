@@ -2349,3 +2349,169 @@
   box-shadow: none;
   transform: none;
 }
+
+/* One calm look for every subject; colour only on the score, by what it means (16 Nov 2026). */
+.sj .ck-score b.low,
+.sj .ph-card-score b.low {
+  color: #be123c;
+}
+.sj .ck-score b.mid,
+.sj .ph-card-score b.mid {
+  color: #b45309;
+}
+.sj .ck-score b.good,
+.sj .ph-card-score b.good {
+  color: #15803d;
+}
+
+/* The practice average: one slim line above the cards. */
+.sj .ph-strip-sum {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 16px;
+  padding: 14px 20px;
+  border: 1px solid var(--line, #ece6f7);
+  border-radius: var(--r-xl, 18px);
+  background: var(--white, #fff);
+}
+.sj .ph-strip-label {
+  color: var(--gray-600, #6b6880);
+  font-size: 13px;
+  font-weight: 600;
+}
+.sj .ph-strip-num {
+  font-family: var(--f-display);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1;
+}
+.sj .ph-strip-num.low { color: #be123c; }
+.sj .ph-strip-num.mid { color: #b45309; }
+.sj .ph-strip-num.good { color: #15803d; }
+.sj .ph-strip-detail,
+.sj .ph-strip-none {
+  color: var(--ink-600, #4b4566);
+  font-size: 14px;
+}
+.sj .ph-strip-trend {
+  margin-left: auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #f1eff6;
+  color: var(--ink-600, #4b4566);
+  font-size: 13px;
+  font-weight: 600;
+}
+.sj .ph-strip-trend.up {
+  background: #e6f7ea;
+  color: #15803d;
+}
+.sj .ph-strip-trend.down {
+  background: #fff1f2;
+  color: #be123c;
+}
+@media (max-width: 520px) {
+  .sj .ph-strip-trend {
+    margin-left: 0;
+  }
+}
+
+/* The app's sticker look on every subject card: a dark outline and a solid offset shadow. */
+.sj .ph-card,
+.sj .ph-card:hover,
+.sj .ph-card.marked {
+  border: 1.5px solid var(--gray-900, #160b2e);
+  box-shadow: var(--st-purple, 8px 8px 0 #d7bdff);
+}
+.sj .ph-card {
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.sj .ph-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 10px 10px 0 var(--purple-300, #b789ff);
+}
+@media (max-width: 640px) {
+  .sj .ph-card,
+  .sj .ph-card.marked {
+    box-shadow: 5px 5px 0 var(--purple-200, #d7bdff);
+  }
+  .sj .ph-card:hover {
+    transform: none;
+    box-shadow: 5px 5px 0 var(--purple-200, #d7bdff);
+  }
+}
+
+/* Room for the offset shadows between cards. */
+.sj .ph-cards {
+  gap: 22px;
+}
+
+/* Your practice: a section below the cards, in the same sticker look. */
+.sj .ph-stats-sec {
+  display: grid;
+  gap: 14px;
+  padding: 20px 22px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: var(--r-xl, 18px);
+  background: var(--white, #fff);
+  box-shadow: var(--st-purple, 8px 8px 0 #d7bdff);
+}
+.sj .ph-stats-sec h2 {
+  margin: 0;
+}
+.sj .ph-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.sj .ph-stat-tile {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--purple-050, #f3ebff);
+}
+.sj .ph-stat-tile span {
+  color: var(--gray-600, #6b6880);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.sj .ph-stat-tile b {
+  font-family: var(--f-display);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--ink-900, #1f0050);
+}
+.sj .ph-stat-tile b.low { color: #be123c; }
+.sj .ph-stat-tile b.mid { color: #b45309; }
+.sj .ph-stat-tile b.good { color: #15803d; }
+.sj .ph-stat-tile small {
+  color: var(--gray-600, #6b6880);
+  font-size: 12.5px;
+}
+.sj .ph-stat-tile small.up { color: #15803d; font-weight: 600; }
+.sj .ph-stat-tile small.down { color: #be123c; font-weight: 600; }
+@media (max-width: 860px) {
+  .sj .ph-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .sj .ph-stats-sec {
+    padding: 16px;
+    box-shadow: 5px 5px 0 var(--purple-200, #d7bdff);
+  }
+}
+
+/* Topics to work on: the same sticker look. */
+.sj .ph-weak {
+  border: 1.5px solid var(--gray-900, #160b2e);
+  box-shadow: var(--st-purple, 8px 8px 0 #d7bdff);
+}
+@media (max-width: 640px) {
+  .sj .ph-weak {
+    box-shadow: 5px 5px 0 var(--purple-200, #d7bdff);
+  }
+}
