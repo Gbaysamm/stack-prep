@@ -178,6 +178,13 @@ export function CheckupHub() {
 
   return (
     <div className="sj-page ch-page">
+      <div className="home-sechead page-intro">
+        <div className="text">
+          <span className="sj-eyebrow">Check-up</span>
+          <h2 className="sj-display sj-h2">Your subjects</h2>
+        </div>
+      </div>
+      <p className="home-secsub page-intro-sub">About 15 questions, no hints. Each check-up gives the subject its score and the topics to work on.</p>
       <section className="ch-section" aria-label="Your subjects">
         {data.error && !data.data ? (
           <NoteCard

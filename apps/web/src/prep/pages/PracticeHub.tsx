@@ -108,6 +108,13 @@ export function PracticeHub() {
 
   return (
     <div className="sj-page ph">
+      <div className="home-sechead page-intro">
+        <div className="text">
+          <span className="sj-eyebrow">Practice</span>
+          <h2 className="sj-display sj-h2">Your subjects</h2>
+        </div>
+      </div>
+      <p className="home-secsub page-intro-sub">Start a run in any subject, or open History to see how each one went.</p>
       {loading ? (
         <div className="ph-cards" aria-busy="true">
           {[0, 1, 2, 3].map((n) => (
