@@ -15,6 +15,18 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-16
 
+### Tracker: true finished dates; calmer rows
+- **What:** migration 053 sets each finished task's date to the first time a person finished
+  it in the tracker; work loaded when the tracker was set up has no date and shows under
+  Finished earlier (it had been stamped with the day the tracker was installed, so everything
+  read as done today). Rows are now a square tick, the title and one quiet line (stage with a
+  coloured dot, area, plan); the stage and Today moved into the task panel.
+- **Why:** founder, 16 Nov 2026: Today showed 54 of 56 done; the rows were cluttered on a
+  phone and the tick looked poor.
+- **Where:** `database/migrations/053_tracker_true_done_dates.sql`, `staff/TrackerPage.tsx`,
+  `staff/tracker.css`.
+- **Status:** committed, not pushed. The deploy runs migration 053.
+
 ### Tracker: Today shows what was finished today; one list, by day, not by area
 - **What:** Today lists what is planned and unfinished (carrying over) and everything finished
   today, planned or not. Below it, one list: Still to finish, then Finished today, Finished

@@ -1153,3 +1153,66 @@
 .tk .sx-pop [role="option"] {
   white-space: nowrap;
 }
+
+/* Rows, 16 Nov 2026: a square tick, the title, one quiet line; changes happen in the panel. */
+.tk .tk-row {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 14px 18px;
+}
+.tk .tk-tick {
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid #1f1640;
+  border-radius: 7px;
+  background: #fff;
+  box-shadow: 2px 2px 0 #d7bdff;
+}
+.tk .tk-tick.on {
+  border-color: #1f1640;
+  background: #85de4c;
+  box-shadow: 2px 2px 0 #1f1640;
+}
+.tk .tk-tick.on::after {
+  left: 7px;
+  top: 3px;
+  border-color: #1f1640;
+}
+.tk .tk-row-title {
+  font-size: 15px;
+}
+.tk .tk-row-meta {
+  align-items: center;
+  margin-top: 2px;
+}
+.tk .tk-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-2);
+  font-weight: 600;
+}
+.tk .tk-dot::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #a19db3;
+}
+.tk .tk-dot.doing::before { background: #7b2cff; }
+.tk .tk-dot.waiting::before { background: #f59e0b; }
+.tk .tk-dot.done::before { background: #85de4c; }
+.tk .tk-dot.committed::before { background: #0ea5e9; }
+.tk .tk-dot.deployed::before { background: #16a34a; }
+.tk .tk-row-go {
+  color: #a19db3;
+}
+.tk .tk-row:hover .tk-row-go {
+  color: var(--purple);
+}
+@media (max-width: 640px) {
+  .tk .tk-row {
+    gap: 12px;
+    padding: 14px;
+  }
+}

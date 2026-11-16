@@ -12,6 +12,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type
 
 import { friendly, request } from '../lib/friendlyError.js';
 import { Select } from '../lib/Select.js';
+import { IconChevronRight } from '../prep/icons.js';
 import '../prep/prep.css';
 import './tracker.css';
 
@@ -225,17 +226,6 @@ export function PublicTracker() {
         });
     });
 
-  const setPlan = (item: Item, planned: string | null) =>
-    asEditor(() => {
-      replace({ ...item, planned_for: planned });
-      send<Detail>(`/items/${item.id}`, 'PATCH', { planned_for: planned })
-        .then((d) => replace(d.item))
-        .catch((error) => {
-          setProblem(friendly(error));
-          load();
-        });
-    });
-
   const today = todayIso();
   const all = items ?? [];
   // Today: planned for today or before and not finished (it carries over), and whatever was
@@ -282,9 +272,7 @@ export function PublicTracker() {
       today={today}
       canEdit={canEdit}
       onTick={() => setStatus(i, finished(i.status) ? 'todo' : 'done')}
-      onStage={(st) => setStatus(i, st)}
       onOpen={() => setOpen(i.id)}
-      onPlan={(day) => setPlan(i, day)}
     />
   );
 
@@ -416,10 +404,8 @@ export function PublicTracker() {
                           inToday
                           canEdit={canEdit}
                           onTick={() => setStatus(i, finished(i.status) ? 'todo' : 'done')}
-                          onStage={(st) => setStatus(i, st)}
-                          onOpen={() => setOpen(i.id)}
-                          onPlan={(day) => setPlan(i, day)}
-                        />
+                                          onOpen={() => setOpen(i.id)}
+                                            />
                       ))}
                     </ul>
                   ) : (
@@ -522,18 +508,14 @@ function TaskRow({
   inToday = false,
   canEdit,
   onTick,
-  onStage,
   onOpen,
-  onPlan,
 }: {
   item: Item;
   today: string;
   inToday?: boolean;
   canEdit: boolean;
   onTick: () => void;
-  onStage: (status: Status) => void;
   onOpen: () => void;
-  onPlan: (day: string | null) => void;
 }) {
   const planned = i.planned_for !== null && i.planned_for <= today && !finished(i.status);
   const carried = inToday && i.planned_for !== null && i.planned_for < today;
@@ -549,44 +531,19 @@ function TaskRow({
       />
       <button type="button" className="tk-row-main" onClick={onOpen}>
         <span className="tk-row-title">{i.title}</span>
-        {i.owner || i.steps || carried || inToday ? (
-          <span className="tk-row-meta">
-            {inToday ? <span>{i.area}</span> : null}
-            {carried ? <span className="tk-carried">from {dateText(i.planned_for!)}</span> : null}
-            {i.owner ? <span>{i.owner}</span> : null}
-            {i.steps ? (
-              <span>
-                {i.steps_done}/{i.steps} steps
-              </span>
-            ) : null}
-          </span>
-        ) : null}
+        <span className="tk-row-meta">
+          <span className={`tk-dot ${i.status}`}>{WORD[i.status]}</span>
+          <span>{i.area}</span>
+          {carried ? <span className="tk-carried">from {dateText(i.planned_for!)}</span> : planned && !inToday ? <span className="tk-carried">Today</span> : null}
+          {i.owner ? <span>{i.owner}</span> : null}
+          {i.steps ? (
+            <span>
+              {i.steps_done}/{i.steps} steps
+            </span>
+          ) : null}
+        </span>
       </button>
-      <span className="tk-row-end">
-        {canEdit && !finished(i.status) ? (
-          <button
-            type="button"
-            className={`tk-today-btn ${planned ? 'on' : ''}`}
-            aria-pressed={planned}
-            title={planned ? 'Take it off today' : 'Plan it for today'}
-            onClick={() => onPlan(planned ? null : today)}
-          >
-            {planned ? (inToday ? 'Remove' : 'Today ✓') : 'Today'}
-          </button>
-        ) : null}
-        {canEdit ? (
-          <Select
-            aria-label={`Stage of “${i.title}”`}
-            size="sm"
-            className={`tk-status ${i.status}`}
-            value={i.status}
-            onChange={onStage}
-            options={STATUS}
-          />
-        ) : (
-          <span className={`tk-pill ${i.status}`}>{WORD[i.status]}</span>
-        )}
-      </span>
+      <IconChevronRight size={16} className="tk-row-go" aria-hidden="true" />
     </li>
   );
 }
@@ -802,6 +759,25 @@ function TaskPanel({
                   <Select aria-label="Status" size="sm" value={item.status} onChange={(s) => apply(`/items/${id}`, 'PATCH', { status: s })} options={STATUS} />
                 ) : (
                   WORD[item.status]
+                )}
+              </Field>
+              <Field label="Today">
+                {canEdit && !finished(item.status) ? (
+                  <button
+                    type="button"
+                    className={`tk-today-btn ${item.planned_for && item.planned_for <= todayIso() ? 'on' : ''}`}
+                    onClick={() =>
+                      apply(`/items/${id}`, 'PATCH', {
+                        planned_for: item.planned_for && item.planned_for <= todayIso() ? null : todayIso(),
+                      })
+                    }
+                  >
+                    {item.planned_for && item.planned_for <= todayIso() ? 'On today’s list · take it off' : 'Plan it for today'}
+                  </button>
+                ) : item.planned_for ? (
+                  dateText(item.planned_for)
+                ) : (
+                  '—'
                 )}
               </Field>
               <Field label="Area">
