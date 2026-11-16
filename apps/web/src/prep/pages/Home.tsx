@@ -39,7 +39,7 @@ import {
   type SubjectColumn,
 } from '../SubjectSwitcher.js';
 import { Journey, type Stop } from '../Journey.js';
-import { itemLabel, roadmapApi, today as todayOf, useRoadmap, useStartItem, type Roadmap } from '../roadmapApi.js';
+import { itemLabel, today as todayOf, useRoadmap, useStartItem, type Roadmap } from '../roadmapApi.js';
 import { usePageTitle, useStudent } from '../store.js';
 import { Badge, Button, CountUp, PageHero, ShowMore, Skeleton, Track, cx, greeting, useShowMore, useToast } from '../ui.js';
 import { HOW_PATH, MetricTip, type MetricId } from './HowItsWorkedOut.js';
@@ -136,6 +136,8 @@ export function useStartPractice() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [exhausted, setExhausted] = useState<NothingFresh | null>(null);
+  // True when the refusal was the roadmap's: today's plan comes first.
+  const [planFirst, setPlanFirst] = useState(false);
   // Which button last asked, so a page with many can show a failure beside the one that failed.
   const [lastKey, setLastKey] = useState<string | null>(null);
   const start = async (subjectId: string, focus: PracticeFocus = {}, key: string = subjectId) => {
@@ -143,6 +145,7 @@ export function useStartPractice() {
     setLastKey(key);
     setError(null);
     setExhausted(null);
+    setPlanFirst(false);
     try {
       const run = await runsApi.start({
         student_id: student.studentId,
@@ -157,23 +160,10 @@ export function useStartPractice() {
       navigate(`/practice/${run.session_id}`);
     } catch (failure) {
       setBusy(null);
-      // 428: the roadmap picks the runs for now. Do its next item instead, and say so.
+      // 428: the roadmap picks the runs for now. Say so where the student is; never move them
+      // somewhere else (founder, 16 Nov 2026).
       if (failure instanceof Refused && failure.status === 428) {
-        try {
-          const plan = await roadmapApi.read(student.studentId);
-          const next =
-            todayOf(plan).next ??
-            plan.items.find((item) => item.state === 'to_do' && item.subject_id === subjectId) ??
-            plan.items.find((item) => item.state === 'to_do');
-          if (next) {
-            const started = await roadmapApi.start(student.studentId, next.id);
-            toast(`Your roadmap: ${itemLabel(next)}`);
-            navigate(started.path);
-            return;
-          }
-        } catch {
-          /* fall through to the plain message */
-        }
+        setPlanFirst(true);
         setError(friendly(failure));
         return;
       }
@@ -196,7 +186,7 @@ export function useStartPractice() {
       setError(`We couldn't start a run just now: ${friendly(failure)}`);
     }
   };
-  return { busy, error, exhausted, lastKey, start };
+  return { busy, error, exhausted, lastKey, planFirst, start };
 }
 
 /** Said when a chosen topic has no fresh questions: plainly, with a general run one tap away. */

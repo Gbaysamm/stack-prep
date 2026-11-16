@@ -15,6 +15,16 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-16
 
+### Start a run never moves the student elsewhere
+- **What:** when the roadmap still has items today, Start a run used to start the roadmap's
+  next item on its own (often a lesson). It now stays put and says so at the top of Practice:
+  "Today's plan comes first. Finish today's items on your roadmap, then you can start your own
+  runs.", with Go to your roadmap. Practice and Check-up also open with a label, a title and
+  what to do, like Progress.
+- **Why:** founder, 16 Nov 2026.
+- **Where:** `prep/pages/{Home,PracticeHub}.tsx`, `routers/practice.py`.
+- **Status:** committed, not pushed.
+
 ### Progress page redesigned
 - **What:** no banner and no pills: one sticker card per subject (Your score coloured by level,
   a bar with the target marked, target and topics answered); tapping one focuses the page on

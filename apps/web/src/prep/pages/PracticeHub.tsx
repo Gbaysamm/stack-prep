@@ -127,6 +127,14 @@ export function PracticeHub() {
         <>
           {/* No banner (founder, 16 Nov 2026): each card starts a run and holds its history. */}
 
+          {starter.planFirst ? (
+            <div className="ph-planfirst" role="alert">
+              <p>{starter.error}</p>
+              <Button to="/roadmap" tone="dark" size="sm" trailing={<IconArrowRight size={16} />}>
+                Go to your roadmap
+              </Button>
+            </div>
+          ) : null}
           <section className="ph-cards sj-rise d2" aria-label="Your subjects">
             {subjects.map((subject) => (
               <SubjectCard
@@ -141,7 +149,7 @@ export function PracticeHub() {
           </section>
           <PracticeStats />
           <TopicsToWork subjects={subjects} />
-          {starter.error ? (
+          {starter.error && !starter.planFirst ? (
             <p className="ph-alert" role="alert">
               {starter.error}
             </p>

@@ -972,7 +972,10 @@ async def roadmap_lock(
             f"{left} more planned {'run' if left == 1 else 'runs'}."
         )
     if filters is None and row["left_today"] > 0:
-        return "Today's plan comes first."
+        return (
+            "Today's plan comes first. Finish today's items on your roadmap, "
+            "then you can start your own runs."
+        )
     return None
 
 
@@ -1011,7 +1014,7 @@ async def begin_run(
     if locked is not None:
         raise HTTPException(status_code=423, detail=locked)
     if not planned:
-        # 428: follow the roadmap first. The app starts the plan's next item instead.
+        # 428: follow the roadmap first. The app says so and points to the roadmap.
         waiting = await roadmap_lock(conn, student_id, filters)
         if waiting is not None:
             raise HTTPException(status_code=428, detail=waiting)
