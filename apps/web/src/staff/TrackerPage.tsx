@@ -2,7 +2,8 @@
  * /tracker: the project tracker (routers/tracker.py), with no sign-in.
  *
  * One calm column: the title, one bar of progress by stage (To do, In progress, Waiting, Done,
- * Committed, Deployed), then Tasks or Deployments. Tasks are a checklist grouped by area: tick a
+ * Committed, Deployed), then Tasks or Deployments. Tasks are one checklist, not split by area
+ * (founder, 16 Nov 2026): what is still to finish, then what was finished, by day. Tick a
  * task done (it stays in view, ticked), change its stage, or open it for its notes, steps and
  * history. Anyone with the link reads it; a signed-in admin, or the edit link (?key=…), changes it.
  * Committed tasks become Deployed by themselves when a deployment is recorded.
@@ -116,6 +117,20 @@ function dateText(iso: string): string {
   return new Date(y, m - 1, d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
 }
 
+/** The day a moment fell on, on this device: "2026-11-16". */
+function localDay(iso: string): string {
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+/** A finished day's heading: Today, Yesterday, else "Sat 14 Nov". */
+function finishedHeading(dayIso: string, today: string): string {
+  if (dayIso === today) return 'Finished today';
+  const y = new Date();
+  y.setDate(y.getDate() - 1);
+  if (dayIso === localDay(y.toISOString())) return 'Finished yesterday';
+  return `Finished ${dateText(dayIso)}`;
+}
+
 function when(iso: string): string {
   return new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
@@ -223,13 +238,13 @@ export function PublicTracker() {
 
   const today = todayIso();
   const all = items ?? [];
-  // Today: planned for today or before and not finished (it carries over), or finished today.
+  // Today: planned for today or before and not finished (it carries over), and whatever was
+  // finished today, planned or not.
   const todayList = all
-    .filter(
-      (i) =>
-        i.planned_for !== null &&
-        i.planned_for <= today &&
-        (!finished(i.status) || (i.done_at !== null && i.done_at.slice(0, 10) >= i.planned_for)),
+    .filter((i) =>
+      finished(i.status)
+        ? i.done_at !== null && localDay(i.done_at) === today
+        : i.planned_for !== null && i.planned_for <= today,
     )
     .sort((x, y) => ROW_ORDER[x.status] - ROW_ORDER[y.status] || (x.planned_for ?? '').localeCompare(y.planned_for ?? ''));
   const todayDone = todayList.filter((i) => finished(i.status)).length;
@@ -240,17 +255,38 @@ export function PublicTracker() {
     kept.has(i.id) ||
     ((area === 'all' || i.area === area) &&
       (show === 'all' || (show === 'finished' ? finished(i.status) : !finished(i.status))));
-  const groups = areas
-    .map((a) => {
-      const inArea = all.filter((i) => i.area === a);
-      return {
-        area: a,
-        total: inArea.length,
-        done: inArea.filter((i) => finished(i.status)).length,
-        list: inArea.filter(wanted).sort((x, y) => ROW_ORDER[x.status] - ROW_ORDER[y.status]),
-      };
-    })
-    .filter((g) => g.list.length > 0);
+  // One list, not split by area: what is still to do, then what was finished, by the day it was.
+  const activeList = all
+    .filter((i) => wanted(i) && !finished(i.status))
+    .sort((x, y) => ROW_ORDER[x.status] - ROW_ORDER[y.status] || (x.planned_for ?? '9').localeCompare(y.planned_for ?? '9'));
+  const doneDays = useMemo(() => {
+    const byDay = new Map<string, Item[]>();
+    for (const i of all) {
+      if (!wanted(i) || !finished(i.status)) continue;
+      const dayIso = i.done_at ? localDay(i.done_at) : '';
+      byDay.set(dayIso, [...(byDay.get(dayIso) ?? []), i]);
+    }
+    return [...byDay.entries()]
+      .sort(([x], [y]) => y.localeCompare(x))
+      .map(([dayIso, list]) => ({
+        day: dayIso,
+        title: dayIso ? finishedHeading(dayIso, today) : 'Finished earlier',
+        list: list.sort((x, y) => (y.done_at ?? '').localeCompare(x.done_at ?? '')),
+      }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [all, show, area, kept, today]);
+  const rowFor = (i: Item) => (
+    <TaskRow
+      key={i.id}
+      item={i}
+      today={today}
+      canEdit={canEdit}
+      onTick={() => setStatus(i, finished(i.status) ? 'todo' : 'done')}
+      onStage={(st) => setStatus(i, st)}
+      onOpen={() => setOpen(i.id)}
+      onPlan={(day) => setPlan(i, day)}
+    />
+  );
 
   return (
     <div className="sj tk">
@@ -393,29 +429,23 @@ export function PublicTracker() {
                   )}
                 </section>
 
-                {groups.length === 0 ? <p className="tk-muted tk-none">Nothing here.</p> : null}
-                {groups.map((g) => (
-                  <div key={g.area} className="tk-group">
+                {activeList.length === 0 && doneDays.length === 0 ? <p className="tk-muted tk-none">Nothing here.</p> : null}
+                {activeList.length ? (
+                  <div className="tk-group">
                     <h2>
-                      {g.area}
-                      <span>
-                        {g.done} of {g.total} finished
-                      </span>
+                      Still to finish
+                      <span>{activeList.length}</span>
                     </h2>
-                    <ul className="tk-list">
-                      {g.list.map((i) => (
-                        <TaskRow
-                          key={i.id}
-                          item={i}
-                          today={today}
-                          canEdit={canEdit}
-                          onTick={() => setStatus(i, finished(i.status) ? 'todo' : 'done')}
-                          onStage={(st) => setStatus(i, st)}
-                          onOpen={() => setOpen(i.id)}
-                          onPlan={(day) => setPlan(i, day)}
-                        />
-                      ))}
-                    </ul>
+                    <ul className="tk-list">{activeList.map(rowFor)}</ul>
+                  </div>
+                ) : null}
+                {doneDays.map((g) => (
+                  <div key={g.day || 'earlier'} className="tk-group">
+                    <h2>
+                      {g.title}
+                      <span>{g.list.length}</span>
+                    </h2>
+                    <ul className="tk-list">{g.list.map(rowFor)}</ul>
                   </div>
                 ))}
               </section>

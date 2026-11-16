@@ -15,6 +15,15 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-16
 
+### Tracker: Today shows what was finished today; one list, by day, not by area
+- **What:** Today lists what is planned and unfinished (carrying over) and everything finished
+  today, planned or not. Below it, one list: Still to finish, then Finished today, Finished
+  yesterday, Finished Sat 14 Nov, and so on. The area split is gone (the area filter stays).
+- **Why:** founder, 16 Nov 2026: Today said "Nothing planned" though work was finished, and
+  finished work should read by date, not by category.
+- **Where:** `apps/web/src/staff/TrackerPage.tsx`.
+- **Status:** committed, not pushed.
+
 ### Mock exam redesigned: scheduled and custom, each locked until it may be sat
 - **What:** a mock is either **scheduled** (set for the student: the roadmap's weekly mock
   before the exam, or one Stack Prep sets for every student of an exam) or **custom** (set by

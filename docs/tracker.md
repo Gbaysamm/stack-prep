@@ -100,6 +100,7 @@ Order of work (each shown at 1440 and 390 before the next):
 | No subtitle box; a timeline; dock on phone; buddy by the controls; no emphasis on Next | Board dock rebuilt | `Board.tsx`, `board.css` | Done-local |
 | Loading screen redesigned | Pen-on-board loader | `Lesson.tsx`, `Lesson.css` | Done-local |
 | Whiteboard and Emeka by default | Prefs v3 | `boardPrefs.ts` | Done-local |
+| Tracker: Today shows finished-today; one list by day, not by area | Today and day groups | `TrackerPage.tsx` | Done-local |
 | Mock page redesigned; scheduled (set for you) vs custom (set yourself); both locked until ready | Two sticker cards, server locks, admin scheduling, migration 052 | `MockHub.tsx`, `routers/mock.py` | Done-local |
 
 ## Roadmap
