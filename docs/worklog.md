@@ -15,6 +15,15 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Polish pass on the redesigned pages against the standard
+- **What:** a style audit (no screenshots; the PC was too loaded) of Home, Roadmap, Practice,
+  Progress, Check-up, Check-up report, Mock, Subjects, Exams, Profile and the subject page:
+  the last 14px corners set to 10px (10), the Home run rows and the check-up report's
+  "not finished" notice take the sticker. Everything else already met the standard through
+  the shared card. The design standard now builds on the Stackjunior Design System
+  (`docs/design-system/`); shadows may take any solid brand accent, only the shadow coloured.
+- **Status:** committed, not pushed.
+
 ### One card style everywhere: every card a sticker
 - **What:** the shared card (`.sj-card`) is now a sticker by default: dark 1.5px outline, 5px
   pale purple shadow (4px on a phone), steady on hover; a card inside a card stays flat; a
