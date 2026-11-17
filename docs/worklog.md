@@ -15,6 +15,14 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Exams and Subjects redrawn like the Roadmap (third pass)
+- **What:** the colour per subject is gone (off-brand). Both pages are drawn like the Roadmap:
+  the dark hero (Exams: the exam and the days to it in lime; Subjects: the score now out of
+  the total, in lime), then one white list card with the sticker shadow, raised purple tiles,
+  purple bars with the target mark. Swap and add as before.
+- **Why:** founder, 17 Nov 2026: "colour riot", lost identity; use our shadow.
+- **Status:** committed, not pushed.
+
 ### Exams and Subjects: two pages, in colour; UTME subjects are swapped, never removed
 - **What:** the sidebar has **Subjects** (new, /subjects) and **Exams** (was "Exams & subjects").
   Subjects: each subject a card in its own colour (`prep/subjectTone.ts`): score now, bar to
