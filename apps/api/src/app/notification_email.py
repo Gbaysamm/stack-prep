@@ -1,11 +1,13 @@
 """Notifications by email, and the weekly report (founder, 17 Nov 2026; migration 062).
 
 After each hourly run the worker calls `send_due`: every notification of the last day that goes
-by email, to a student with an email address who has not turned that kind off in Settings. Each
-is sent once (`emailed_at`). What goes by email:
+by email, to every student with an email address. None of it can be turned off (founder, 17 Nov
+2026: a student who could switch them off would not be serious). Each is sent once
+(`emailed_at`). What goes by email:
 
 - reminders (`nudge`, `plan`): streak, missed days, away, the exam countdown, mocks, the roadmap.
-  A nudge is at most one a day already, so at most one reminder email a day from those.
+  One reminder email a day at most: what is due goes in one email, later ones stay in the app.
+  Away reminders stop after two weeks, so nobody is emailed for ever.
 - account (plans starting and ending, password and login changes).
 - the weekly report (`report`).
 
@@ -33,60 +35,35 @@ from app.config import get_settings
 
 log = logging.getLogger(__name__)
 
-ACCOUNT_KINDS = ("plan_started", "plan_ending", "plan_ended", "password_changed",
-                 "password_reset", "login_changed")
-#: How many emails one run sends at most, so a backlog never floods the mail server.
+ACCOUNT_KINDS = (
+    "plan_started",
+    "plan_ending",
+    "plan_ended",
+    "password_changed",
+    "password_reset",
+    "login_changed",
+)
+#: How many notifications one run emails at most, so a backlog never floods the mail server.
 PER_RUN = 300
-
-#: Which preference covers a notification, and the words for turning it off.
-PREF_WORDS = {
-    "reminders": "reminder emails",
-    "reports": "the weekly report",
-    "account": "account and plan emails",
-}
 
 DUE = """
     SELECT n.id, n.student_id, n.kind, n.category, n.title, n.body, n.link_url,
            s.email, s.display_name,
-           CASE WHEN n.category = 'report' THEN 'reports'
-                WHEN n.kind = ANY (CAST(:account AS text[])) THEN 'account'
-                ELSE 'reminders' END AS pref,
-           p.unsubscribe_token
+           CASE WHEN n.category IN ('nudge', 'plan') THEN 'reminders' ELSE n.kind END AS batch
     FROM notifications n
     JOIN students s ON s.id = n.student_id
-    LEFT JOIN notification_prefs p ON p.student_id = n.student_id
     WHERE n.emailed_at IS NULL AND n.dismissed_at IS NULL
       AND n.created_at > now() - interval '1 day'
       AND s.email IS NOT NULL AND s.status NOT IN ('suspended', 'archived')
       AND (n.category IN ('nudge', 'plan', 'report') OR n.kind = ANY (CAST(:account AS text[])))
-      AND CASE WHEN n.category = 'report' THEN coalesce(p.email_reports, true)
-               WHEN n.kind = ANY (CAST(:account AS text[])) THEN coalesce(p.email_account, true)
-               ELSE coalesce(p.email_reminders, true) END
     ORDER BY n.created_at
     LIMIT :n
 """
 
 
-async def token_for(conn: AsyncConnection, student_id: UUID) -> UUID:
-    """The student's unsubscribe token, made the first time it is needed."""
-    token = await conn.scalar(
-        text(
-            """
-            INSERT INTO notification_prefs (student_id) VALUES (:s)
-            ON CONFLICT (student_id) DO UPDATE SET student_id = EXCLUDED.student_id
-            RETURNING unsubscribe_token
-            """
-        ),
-        {"s": student_id},
-    )
-    assert token is not None
-    return UUID(str(token))
-
-
-def email_text(rows: list[dict[str, Any]], base: str, token: UUID) -> str:
-    """The plain email: one notification or several of one kind, links, how to stop this kind."""
+def email_text(rows: list[dict[str, Any]], base: str) -> str:
+    """The plain email: one notification, or the day's reminders together, with their links."""
     first = (rows[0]["display_name"] or "there").split()[0]
-    pref = rows[0]["pref"]
     lines = [f"Hi {first},"]
     for row in rows:
         lines += ["", row["title"]]
@@ -94,15 +71,7 @@ def email_text(rows: list[dict[str, Any]], base: str, token: UUID) -> str:
             lines.append(row["body"])
         if row["link_url"]:
             lines.append(f"Open it: {base}{row['link_url']}")
-    lines += [
-        "",
-        "Stack Prep",
-        "",
-        "--",
-        f"You get this because {PREF_WORDS[pref]} are on for your account.",
-        f"Turn them off: {base}/unsubscribe/{token}?what={pref}",
-        f"Or choose what you get in Settings: {base}/settings#set-notifications",
-    ]
+    lines += ["", "Stack Prep", "", "--", "These emails come with your Stack Prep account."]
     return "\n".join(lines)
 
 
@@ -112,10 +81,10 @@ def subject_for(rows: list[dict[str, Any]]) -> str:
 
 
 async def send_due(conn: AsyncConnection) -> int:
-    """Email what is due, one email per student and kind; returns how many emails were sent.
+    """Email what is due; returns how many emails were sent.
 
     Reminders are one email a day at most: everything due in a run goes in one email, and once
-    one has gone, later reminders that day stay in the app. Account emails always go.
+    one has gone, later reminders that day stay in the app. Reports and account emails always go.
     """
     settings = get_settings()
     # The student app's address: PUBLIC_URL, else the first address the API lets in.
@@ -128,29 +97,33 @@ async def send_due(conn: AsyncConnection) -> int:
     ]
     groups: dict[tuple[UUID, str], list[dict[str, Any]]] = {}
     for row in rows:
-        groups.setdefault((row["student_id"], row["pref"]), []).append(row)
+        key = (row["student_id"], row["batch"] if row["batch"] == "reminders" else str(row["id"]))
+        groups.setdefault(key, []).append(row)
     sent = 0
-    for (student_id, pref), group in groups.items():
-        quiet = pref == "reminders" and bool(
+    for (student_id, batch), group in groups.items():
+        reminders = batch == "reminders"
+        quiet = reminders and bool(
             await conn.scalar(
                 text(
-                    "SELECT 1 FROM notification_prefs WHERE student_id = :s"
+                    "SELECT 1 FROM notification_email_state WHERE student_id = :s"
                     " AND last_reminder_email_at > now() - interval '20 hours'"
                 ),
                 {"s": student_id},
             )
         )
         if not quiet:
-            token = group[0]["unsubscribe_token"] or await token_for(conn, student_id)
             ok = await mailer.send_email(
-                group[0]["email"], subject_for(group), email_text(group, base, token)
+                group[0]["email"], subject_for(group), email_text(group, base)
             )
             sent += int(ok)
-            if ok and pref == "reminders":
+            if ok and reminders:
                 await conn.execute(
                     text(
-                        "UPDATE notification_prefs SET last_reminder_email_at = now()"
-                        " WHERE student_id = :s"
+                        """
+                        INSERT INTO notification_email_state (student_id, last_reminder_email_at)
+                        VALUES (:s, now())
+                        ON CONFLICT (student_id) DO UPDATE SET last_reminder_email_at = now()
+                        """
                     ),
                     {"s": student_id},
                 )
@@ -158,8 +131,7 @@ async def send_due(conn: AsyncConnection) -> int:
         # send a stale reminder; a reminder held back stays in the app.
         await conn.execute(
             text(
-                "UPDATE notifications SET emailed_at = now()"
-                " WHERE id = ANY (CAST(:ids AS uuid[]))"
+                "UPDATE notifications SET emailed_at = now() WHERE id = ANY (CAST(:ids AS uuid[]))"
             ),
             {"ids": [str(r["id"]) for r in group]},
         )

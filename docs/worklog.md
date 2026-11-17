@@ -16,15 +16,15 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 ## 2026-11-17
 
 ### Notifications by email, and the weekly report
-- **What:** migration 062 (`notification_prefs`: reminders, reports, account, an unsubscribe
-  token, the last reminder email; `notifications.emailed_at`). `notification_email.py`: after
-  each hourly run the worker emails what is due, one email per student and kind, reminders one
-  a day at most (later ones stay in the app); rewards, the welcome and replies (support emails
-  those) are not emailed. The weekly report is written on Sunday from 6 pm their time: days,
-  time, questions, accuracy against the week before, topics practised most, next week's focus;
-  it is a notification too, linking to Progress. Settings has a Notifications section with three
-  switches (saved at once); every email ends with a link to `/unsubscribe/<token>`, a page that
-  asks for one tap. Tests: `tests/test_notification_email.py`.
+- **What:** migration 062 (`notification_email_state` for the last reminder email;
+  `notifications.emailed_at`). `notification_email.py`: after each hourly run the worker emails
+  what is due. Reminders are one email a day at most (what is due goes in one email, later ones
+  stay in the app); reports and account emails always go; rewards, the welcome and replies
+  (support emails those) are not emailed. None of it can be turned off: no switches, no
+  unsubscribe link (founder: a student who could would not be serious). The weekly report is
+  written on Sunday from 6 pm their time: days, time, questions, accuracy against the week
+  before, topics practised most, next week's focus; it is a notification too, linking to
+  Progress. Tests: `tests/test_notification_email.py`.
 - **Why:** founder, 17 Nov 2026.
 - **Status:** committed, not pushed. Emails only go out where SMTP is set on the server.
 
