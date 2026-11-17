@@ -2564,3 +2564,30 @@
     height: 150px;
   }
 }
+
+/* Skeletons on a dark header: light shimmer that shows, the same on every page. */
+.sj .sj-skel.on-dark {
+  display: block;
+  border-radius: 6px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.26) 45%, rgba(255, 255, 255, 0.14) 90%);
+  background-size: 300% 100%;
+}
+.sj .sj-hero-skel {
+  display: grid;
+  align-content: end;
+  gap: 14px;
+  min-height: 188px;
+  margin-bottom: 22px;
+  padding: 28px 30px;
+  border-radius: var(--r-xl);
+  background: var(--ink-900, #1f0050);
+}
+@media (max-width: 640px) {
+  .sj .sj-hero-skel {
+    min-height: 150px;
+    padding: 22px 18px;
+  }
+}
+.sj .sj-page-skel .sj-skel-hero {
+  display: none;
+}

@@ -29,7 +29,7 @@ import {
 } from '../mockApi.js';
 import { NotFound, Refused } from '../runsApi.js';
 import { usePageTitle, useStudent } from '../store.js';
-import { Button, Dialog, Spinner, cx } from '../ui.js';
+import { Button, Dialog, Spinner, cx, Skeleton } from '../ui.js';
 import './MockRoom.css';
 import { friendly } from '../../lib/friendlyError.js';
 import { QuestionTools } from '../QuestionTools.js';
@@ -118,9 +118,13 @@ export function MockRoom() {
   }
   if (!paper) {
     return (
-      <div className="mx-room mx-centre" aria-busy="true">
-        <Spinner size={28} />
-        <p className="sj-muted">Loading your paper…</p>
+      <div className="mx-room mx-skel" aria-busy="true" aria-label="Loading your paper">
+        <Skeleton height={56} radius={10} />
+        <Skeleton height={14} width={180} />
+        <Skeleton height={90} radius={10} />
+        {[0, 1, 2, 3].map((key) => (
+          <Skeleton key={key} height={54} radius={8} />
+        ))}
       </div>
     );
   }

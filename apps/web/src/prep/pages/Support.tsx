@@ -18,7 +18,7 @@ import {
   type SupportTopic,
   type Thread,
 } from '../supportApi.js';
-import { Button, PageHero } from '../ui.js';
+import { Button, PageHero, Skeleton } from '../ui.js';
 import './Support.css';
 
 const STATUS_WORD = { open: 'Waiting for us', answered: 'Replied', closed: 'Closed' } as const;
@@ -134,10 +134,14 @@ export function SupportBox() {
 
         <div className="sj-card su-list">
           <h3 className="sj-display su-list-title">Your conversations</h3>
-          {list.length === 0 ? (
-            <p className="su-empty">
-              {threads.loading ? 'Loading…' : 'Nothing yet. When you write to us, the conversation stays here with our replies.'}
-            </p>
+          {list.length === 0 && threads.loading ? (
+            <div className="su-skel" aria-busy="true">
+              {[0, 1, 2].map((key) => (
+                <Skeleton key={key} height={58} radius={8} />
+              ))}
+            </div>
+          ) : list.length === 0 ? (
+            <p className="su-empty">Nothing yet. When you write to us, the conversation stays here with our replies.</p>
           ) : (
             <ul>
               {list.map((thread) => (
@@ -280,7 +284,11 @@ export function SupportThread() {
           </Link>
         </div>
       ) : (
-        <p className="su-empty">Loading…</p>
+        <div className="su-skel" aria-busy="true" aria-label="Loading the conversation">
+          <Skeleton height={28} width="50%" />
+          <Skeleton height={80} width="75%" radius={10} />
+          <Skeleton height={64} width="65%" radius={10} />
+        </div>
       )}
     </div>
   );

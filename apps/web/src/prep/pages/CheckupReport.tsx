@@ -21,7 +21,7 @@ import { useRunGate } from '../RunGate.js';
 import type { ReviewItem } from '../runsApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
 import { scoreLevel } from '../SubjectSwitcher.js';
-import { Button, PageHero, Ring, ShowMore, Skeleton, cx, useShowMore, PageSkeleton } from '../ui.js';
+import { Button, PageHero, Ring, ShowMore, Skeleton, cx, useShowMore } from '../ui.js';
 import { HOW_PATH } from './HowItsWorkedOut.js';
 import { NothingFreshNote, Section, useStartPractice } from './Home.js';
 import { QuestionCard } from './RunReport.js';
@@ -605,6 +605,18 @@ function Answers({ items, error, reload }: { items: ReviewItem[] | null; error: 
 /* ------------------------------------------------------------------ loading */
 
 function ReportSkeleton() {
-  // The one loading shape for a page (founder, 17 Nov 2026: each page had its own).
-  return <PageSkeleton />;
+  return (
+    <div className="sj-page cp-page cp3" aria-busy="true" aria-label="Loading your report">
+      <div className="cp3-skel">
+        <Skeleton width={260} height={12} />
+        <Skeleton width="45%" height={34} />
+      </div>
+      <Skeleton height={230} radius={10} />
+      <div className="cp3-skel">
+        <Skeleton width={180} height={12} />
+        <Skeleton width="35%" height={28} />
+      </div>
+      <Skeleton height={260} radius={10} />
+    </div>
+  );
 }

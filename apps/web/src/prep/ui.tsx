@@ -428,18 +428,28 @@ export function Skeleton({ height = 20, width = '100%', radius }: { height?: num
 }
 
 /**
- * The one loading shape for a whole page: the hero, then two cards. Shown while a page's code or
- * its data comes, so loading always looks the same (founder, 17 Nov 2026: a spinner on some
- * pages, a skeleton on others).
+ * Loading (founder, 17 Nov 2026): a page's skeleton follows that page's own layout, and every
+ * piece looks the same. The dark header is drawn by HeroSkeleton (dark, with light shimmer
+ * lines), never as a pale block; a page without one shows none.
  */
+export function HeroSkeleton() {
+  return (
+    <div className="sj-hero-skel" aria-hidden="true">
+      <span className="sj-skel on-dark" style={{ width: 160, height: 12 }} />
+      <span className="sj-skel on-dark" style={{ width: '45%', height: 36 }} />
+      <span className="sj-skel on-dark" style={{ width: '60%', height: 14 }} />
+    </div>
+  );
+}
+
+/** While a page's code arrives and its shape is not known yet: a title and two cards. */
 export function PageSkeleton() {
   return (
     <div className="sj-page sj-page-skel" aria-busy="true" aria-label="Loading">
-      <div className="sj-skel sj-skel-hero" />
-      <Skeleton height={14} width={160} />
-      <Skeleton height={26} width="40%" />
-      <Skeleton height={180} radius={10} />
-      <Skeleton height={140} radius={10} />
+      <Skeleton height={12} width={140} />
+      <Skeleton height={30} width="40%" />
+      <Skeleton height={200} radius={10} />
+      <Skeleton height={160} radius={10} />
     </div>
   );
 }

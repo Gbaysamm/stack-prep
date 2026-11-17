@@ -15,7 +15,7 @@ import { IconArrowRight, IconBolt, IconBook, IconClock, IconTarget, IconTrophy }
 import { progressApi, type SubjectOverview } from '../progressApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
 import { PRACTICE_LOCK_WORDS, practiceLock, rememberSubject, scoreNote, useOverview } from '../SubjectSwitcher.js';
-import { Button, CountUp, PageHero, Pager, Skeleton, Track, cx, usePaged, PageSkeleton } from '../ui.js';
+import { Button, CountUp, PageHero, Pager, Skeleton, Track, cx, usePaged, HeroSkeleton } from '../ui.js';
 import { MetricTip } from './HowItsWorkedOut.js';
 import {
   Alert,
@@ -288,8 +288,16 @@ function Topics({ subject }: { subject: SubjectOverview }) {
 }
 
 function HubSkeleton() {
-  // The one loading shape for a page (founder, 17 Nov 2026: each page had its own).
-  return <PageSkeleton />;
+  return (
+    <div className="hub-skel-page" aria-busy="true" aria-label="Loading this subject">
+      <HeroSkeleton />
+      <Skeleton height={250} radius={10} />
+      <div className="hub-skel-duo">
+        <Skeleton height={300} radius={10} />
+        <Skeleton height={300} radius={10} />
+      </div>
+    </div>
+  );
 }
 
 /** The hero's one action for this subject, and a quieter second one. */

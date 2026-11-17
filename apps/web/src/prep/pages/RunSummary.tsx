@@ -25,17 +25,7 @@ import {
 import { progressApi } from "../progressApi.js";
 import type { RunFilters } from "../runsApi.js";
 import { useLoad, usePageTitle, useStudent } from "../store.js";
-import {
-  Badge,
-  Button,
-  Card,
-  CountUp,
-  PageHero,
-  Ring,
-  Skeleton,
-  cx,
-  useNarrow,
-} from "../ui.js";
+import { Badge, Button, Card, CountUp, PageHero, Ring, Skeleton, cx, useNarrow } from "../ui.js";
 import { Alert, MasteryBar, NothingFreshNote, signed, useStartPractice } from "./Home.js";
 import { RunStrip, whenLabel } from "./PracticeHub.js";
 import "./RunSummary.css";
@@ -451,7 +441,7 @@ export function RunSummary() {
                 ? narrowed
                   ? `Up to ${run.length} more questions on the same choice as this run.`
                   : `${run.length} more ${run.subject_name} questions, aimed at what’s still weak.`
-                : "Loading…"}
+                : <Skeleton height={14} width={220} />}
             </span>
             <span className="rs-next-go">
               Start

@@ -15,7 +15,7 @@ import { IconArrowRight, IconBolt, IconBookmark, IconChevronRight } from '../ico
 import type { ReviewItem } from '../runsApi.js';
 import { BOOKMARKS_CHANGED, savedApi, type Bookmark } from '../savedApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
-import { Button, PageHero, PageSkeleton, Pager, Skeleton, usePaged, useToast } from '../ui.js';
+import { Button, HeroSkeleton, PageHero, Pager, Skeleton, usePaged, useToast } from '../ui.js';
 import { NothingFreshNote, Note, Section, useStartPractice } from './Home.js';
 import { IconTrash, QuestionCard } from './RunReport.js';
 import './Bookmarks.css';
@@ -230,7 +230,16 @@ export function BookmarksSubject() {
   };
 
   const back = { to: '/bookmarks', label: 'Saved questions' };
-  if (!marks && !load.error) return <PageSkeleton />;
+  if (!marks && !load.error) {
+    return (
+      <div className="sj-page bm2" aria-busy="true">
+        <HeroSkeleton />
+        {[0, 1, 2].map((key) => (
+          <Skeleton key={key} height={76} radius={10} />
+        ))}
+      </div>
+    );
+  }
   if (!marks) {
     return (
       <div className="sj-page bm2">
@@ -239,9 +248,7 @@ export function BookmarksSubject() {
             <PageHero back={back} eyebrow="Saved questions" title="We couldn't load these" />
             <p className="bm-error">{friendly(load.error)}</p>
           </>
-        ) : (
-          <PageSkeleton />
-        )}
+        ) : null}
       </div>
     );
   }

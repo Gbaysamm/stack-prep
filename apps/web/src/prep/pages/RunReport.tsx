@@ -16,7 +16,7 @@ import { OptionBody, hasOptionPictures } from '../../OptionBody.js';
 import { IconArrowRight, IconBulb, IconCheck, IconChevronDown, IconLayers, IconPlay, IconReplay, IconSpark } from '../icons.js';
 import { orGone, runsApi, type Outcome, type ReviewItem, type RunReview } from '../runsApi.js';
 import { useLoad, usePageTitle } from '../store.js';
-import { Button, Dialog, PageHero, Ring, cx, useToast, PageSkeleton } from '../ui.js';
+import { Button, Dialog, PageHero, Ring, cx, useToast, HeroSkeleton, Skeleton } from '../ui.js';
 import './RunReport.css';
 import { friendly } from '../../lib/friendlyError.js';
 import { QuestionTools } from '../QuestionTools.js';
@@ -755,6 +755,30 @@ function Passage({ title, body }: { title: string | null; body: string }) {
 /* ------------------------------------------------------------------ loading */
 
 function ReportSkeleton() {
-  // The one loading shape for a page (founder, 17 Nov 2026: each page had its own).
-  return <PageSkeleton />;
+  return (
+    <div className="sj-page rr" aria-busy="true">
+      <HeroSkeleton />
+      <div className="rr-layout">
+        <aside className="rr-nav">
+          <div className="rr-nav-in">
+            <Skeleton width={140} height={12} />
+            <div className="rr-grid skel">
+              {Array.from({ length: 10 }, (_, index) => (
+                <Skeleton key={index} height={40} radius={8} />
+              ))}
+            </div>
+          </div>
+        </aside>
+        <div className="rr-list">
+          <Skeleton width={160} height={12} />
+          <Skeleton width={320} height={28} />
+          <div className="rr-qs">
+            {[0, 1, 2, 3].map((index) => (
+              <Skeleton key={index} height={index === 0 ? 320 : 76} radius={10} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

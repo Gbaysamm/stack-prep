@@ -36,7 +36,7 @@ import {
 import { progressApi, type Overview } from '../progressApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
 import { Celebrate } from '../Celebrate.js';
-import { Button, CountUp, cx, daysUntil, useToast, PageSkeleton } from '../ui.js';
+import { Button, CountUp, cx, daysUntil, useToast, Skeleton } from '../ui.js';
 import { examTitle, isHiddenExam } from './Exams.js';
 import { CountdownTip } from '../countdown.js';
 import { Journey } from '../Journey.js';
@@ -1515,6 +1515,21 @@ function Finish({
 /* ------------------------------------------------------------------ loading */
 
 function OnboardingSkeleton() {
-  // The one loading shape for a page (founder, 17 Nov 2026: each page had its own).
-  return <PageSkeleton />;
+  return (
+    <div className="onb-main" aria-busy="true" aria-label="Loading your setup">
+      <div className="onb-rail onb-rail-skel">
+        <span className="sj-skel on-dark" style={{ width: 120, height: 12 }} />
+        <span className="sj-skel on-dark" style={{ width: '60%', height: 28 }} />
+        {[0, 1, 2, 3].map((key) => (
+          <span key={key} className="sj-skel on-dark" style={{ height: 52 }} />
+        ))}
+      </div>
+      <div className="onb-stage">
+        <Skeleton height={12} width={90} />
+        <Skeleton height={34} width="60%" radius={8} />
+        <Skeleton height={16} width="80%" />
+        <Skeleton height={180} radius={10} />
+      </div>
+    </div>
+  );
 }

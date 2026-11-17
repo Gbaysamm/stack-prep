@@ -15,6 +15,16 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Skeletons follow each page's own layout, on every page
+- **What:** each page's loading skeleton is its own shape again (a dark header block on a page
+  without one is wrong). Pages with a dark header draw it with `HeroSkeleton` (dark, light
+  shimmer lines that show; the run report's had been faded near-invisible); pages without one
+  (check-up report, Progress) show none; while a page's code arrives, a neutral title and two
+  cards. Pages that had no skeleton now do: the mock room (was a spinner), a message
+  conversation and the conversation list (were "Loading…"), the run summary's next-run line.
+- **Why:** founder, 17 Nov 2026.
+- **Status:** committed, not pushed.
+
 ### Loading looks the same everywhere, and less waiting
 - **What:** one page skeleton (`PageSkeleton`: the hero as a dark block, then cards) replaces
   the spinner shown while a page's code loads and the seven page skeletons each page drew its
