@@ -25,11 +25,15 @@ async def ping(ctx: dict[str, Any]) -> str:
 
 
 async def notify(ctx: dict[str, Any]) -> int:
-    """Every hour: decide and store what each student is told (app/notifications.py)."""
-    from app import notifications
+    """Every hour: decide and store what each student is told, the Sunday report, then email
+    what goes by email (app/notifications.py, app/notification_email.py)."""
+    from app import notification_email, notifications
 
     async with get_engine().connect() as conn:
-        return await notifications.run_hourly(conn)
+        added = await notifications.run_hourly(conn)
+        added += await notification_email.weekly_reports(conn)
+        await notification_email.send_due(conn)
+        return added
 
 
 class WorkerSettings:

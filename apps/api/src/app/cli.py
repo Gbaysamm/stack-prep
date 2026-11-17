@@ -97,13 +97,15 @@ def _openapi() -> int:
 
 def _notify() -> int:
     """Run the hourly notifications job once now (the worker runs it every hour)."""
-    from app import notifications
+    from app import notification_email, notifications
     from app.db import get_engine
 
     async def run() -> int:
         async with get_engine().connect() as conn:
             added = await notifications.run_hourly(conn)
-        print(f"{added} notifications added.")
+            added += await notification_email.weekly_reports(conn)
+            sent = await notification_email.send_due(conn)
+        print(f"{added} notifications added, {sent} emailed.")
         return 0
 
     return asyncio.run(run())
