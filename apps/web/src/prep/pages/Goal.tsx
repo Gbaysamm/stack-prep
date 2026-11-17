@@ -192,7 +192,6 @@ export function Goal() {
       subjectId={subjectId}
       subjectName={subject.name}
       examLabel={exam.short_name.toUpperCase() === 'SANDBOX' ? 'Practice set' : exam.short_name}
-      examId={exam.examination_id}
       exam={exam}
       goals={load.data[1]}
       onChanged={load.reload}
@@ -207,7 +206,6 @@ function GoalStepper({
   subjectId,
   subjectName,
   examLabel,
-  examId,
   exam,
   goals,
   onChanged,
@@ -218,7 +216,6 @@ function GoalStepper({
   subjectId: string;
   subjectName: string;
   examLabel: string;
-  examId: string;
   exam: ExaminationOffer;
   goals: GoalRow[];
   onChanged: () => void;

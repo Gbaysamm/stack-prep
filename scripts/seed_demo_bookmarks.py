@@ -1,3 +1,4 @@
+# ruff: noqa: E501  (long SQL lines read better whole)
 """Seed saved questions (bookmarks) for a student, so the Bookmarks page has something to show.
 
 For a LOCAL database only (founder, 17 Nov 2026). Three questions from each of the student's
@@ -14,9 +15,9 @@ import sys
 
 import asyncpg
 
-DSN = os.environ.get("DATABASE_URL", "postgresql://scorepilot:scorepilot@127.0.0.1:55440/scorepilot_int").replace(
-    "postgresql+asyncpg://", "postgresql://"
-)
+DSN = os.environ.get(
+    "DATABASE_URL", "postgresql://scorepilot:scorepilot@127.0.0.1:55440/scorepilot_int"
+).replace("postgresql+asyncpg://", "postgresql://")
 PER_SUBJECT = 3
 
 
@@ -24,7 +25,9 @@ async def main(login: str) -> None:
     conn = await asyncpg.connect(DSN)
     try:
         await conn.execute("SET search_path = stackprep, public")
-        student = await conn.fetchval("SELECT id FROM students WHERE lower(email) = lower($1) OR phone = $1", login)
+        student = await conn.fetchval(
+            "SELECT id FROM students WHERE lower(email) = lower($1) OR phone = $1", login
+        )
         if student is None:
             raise SystemExit(f"no student signs in as {login}")
         added = await conn.fetchval(

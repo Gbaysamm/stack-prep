@@ -9,7 +9,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { friendly } from '../../lib/friendlyError.js';
 import { api, type ExaminationOffer, type Goal, type SubjectOffer } from '../../student/api.js';
-import { IconArrowRight, IconBook, IconClose, IconReplay } from '../icons.js';
+import { IconBook, IconClose, IconReplay } from '../icons.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
 import { initials } from '../subjectTone.js';
 import { Button, Dialog, PageHero, Skeleton, daysUntil, useToast } from '../ui.js';

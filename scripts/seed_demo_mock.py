@@ -1,3 +1,4 @@
+# ruff: noqa: E501  (long SQL lines read better whole)
 """Seed one finished demo mock for a student, so the mock report always has something to show.
 
 For a LOCAL database and API only (founder, 17 Nov 2026: a fresh account has no mock to look
@@ -19,9 +20,9 @@ import sys
 import asyncpg
 import httpx
 
-DSN = os.environ.get("DATABASE_URL", "postgresql://scorepilot:scorepilot@127.0.0.1:55440/scorepilot_int").replace(
-    "postgresql+asyncpg://", "postgresql://"
-)
+DSN = os.environ.get(
+    "DATABASE_URL", "postgresql://scorepilot:scorepilot@127.0.0.1:55440/scorepilot_int"
+).replace("postgresql+asyncpg://", "postgresql://")
 API = os.environ.get("API_URL", "http://127.0.0.1:8020")
 PER_SUBJECT = 10
 # For each question in turn: right, wrong or left blank.
@@ -32,7 +33,9 @@ async def main(login: str, password: str) -> None:
     conn = await asyncpg.connect(DSN)
     try:
         await conn.execute("SET search_path = stackprep, public")
-        student = await conn.fetchval("SELECT id FROM students WHERE lower(email) = lower($1) OR phone = $1", login)
+        student = await conn.fetchval(
+            "SELECT id FROM students WHERE lower(email) = lower($1) OR phone = $1", login
+        )
         if student is None:
             raise SystemExit(f"no student signs in as {login}")
         subjects = await conn.fetch(
@@ -89,8 +92,14 @@ async def main(login: str, password: str) -> None:
                     len(questions),
                     mock,
                 )
-                for position, (question, how) in enumerate(zip(questions, PATTERN), 1):
-                    chosen = None if how == "blank" else question["right_key"] if how == "right" else question["wrong_key"]
+                for position, (question, how) in enumerate(zip(questions, PATTERN, strict=False), 1):
+                    chosen = (
+                        None
+                        if how == "blank"
+                        else question["right_key"]
+                        if how == "right"
+                        else question["wrong_key"]
+                    )
                     await conn.execute(
                         """
                         INSERT INTO mock_exam_items (mock_exam_id, session_id, position, question_version_id,
@@ -108,7 +117,9 @@ async def main(login: str, password: str) -> None:
 
     # Submitted through the API, so the report is scored as a real mock is.
     with httpx.Client(base_url=API, timeout=120) as client:
-        client.post("/v1/auth/login", json={"login": login, "password": password}).raise_for_status()
+        client.post(
+            "/v1/auth/login", json={"login": login, "password": password}
+        ).raise_for_status()
         client.post(f"/v1/mock/{mock}/submit", json={"answers": []}).raise_for_status()
     print(f"Seeded mock {mock}")
     print(f"Open: http://localhost:5173/mock/{mock}/report")

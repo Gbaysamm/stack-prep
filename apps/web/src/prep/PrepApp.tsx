@@ -44,7 +44,7 @@ function usePreloadPages() {
     const idle = (go: () => void) =>
       'requestIdleCallback' in window
         ? (window as Window & { requestIdleCallback: (cb: () => void) => number }).requestIdleCallback(go)
-        : window.setTimeout(go, 200);
+        : globalThis.setTimeout(go, 200);
     const next = (index: number) => {
       if (stopped || index >= LOADERS.length) return;
       idle(() => void LOADERS[index]!().catch(() => undefined).finally(() => next(index + 1)));

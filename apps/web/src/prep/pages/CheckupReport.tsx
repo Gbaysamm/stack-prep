@@ -29,12 +29,6 @@ import './CheckupReport.css';
 
 /* ------------------------------------------------------------------ words and numbers */
 
-/** A change in points: "+10", "−3", or a muted "0". */
-function Signed({ value }: { value: number }) {
-  if (value === 0) return <span className="cp-delta zero">0</span>;
-  return <span className={cx('cp-delta', value > 0 ? 'up' : 'down')}>{value > 0 ? `+${value}` : `−${Math.abs(value)}`}</span>;
-}
-
 /** "2026-10-19" as a local date, "19 October". */
 function dayText(iso: string): string {
   const [y = 1970, m = 1, d = 1] = iso.slice(0, 10).split('-').map(Number);

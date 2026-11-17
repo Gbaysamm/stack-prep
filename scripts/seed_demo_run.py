@@ -1,3 +1,4 @@
+# ruff: noqa: E501  (long SQL lines read better whole)
 """Seed one demo practice run for a student, so the run report always has something to show.
 
 For a LOCAL database only (founder, 17 Nov 2026: the roadmap gates runs, so a fresh account
@@ -16,13 +17,13 @@ import asyncio
 import json
 import os
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import asyncpg
 
-DSN = os.environ.get("DATABASE_URL", "postgresql://scorepilot:scorepilot@127.0.0.1:55440/scorepilot_int").replace(
-    "postgresql+asyncpg://", "postgresql://"
-)
+DSN = os.environ.get(
+    "DATABASE_URL", "postgresql://scorepilot:scorepilot@127.0.0.1:55440/scorepilot_int"
+).replace("postgresql+asyncpg://", "postgresql://")
 
 # (outcome, tries): each try is (correct?, hint used?, confidence)
 PLAN = [
@@ -85,7 +86,7 @@ async def main(login: str) -> None:
         if len(questions) < len(PLAN):
             raise SystemExit(f"only {len(questions)} questions to use in this subject")
 
-        start = datetime.now(timezone.utc) - timedelta(minutes=40)
+        start = datetime.now(UTC) - timedelta(minutes=40)
         async with conn.transaction():
             session = await conn.fetchval(
                 """
@@ -99,10 +100,12 @@ async def main(login: str) -> None:
                 start,
                 start + timedelta(minutes=35),
                 len(PLAN),
-                json.dumps({"topic_ids": [], "bookmarked": False, "exam_years": [], "subtopic_ids": []}),
+                json.dumps(
+                    {"topic_ids": [], "bookmarked": False, "exam_years": [], "subtopic_ids": []}
+                ),
             )
             at = start
-            for question, (_, tries) in zip(questions, PLAN):
+            for question, (_, tries) in zip(questions, PLAN, strict=False):
                 for correct, hint, confidence in tries:
                     at += timedelta(seconds=70)
                     await conn.execute(
