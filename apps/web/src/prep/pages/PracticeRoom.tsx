@@ -975,9 +975,10 @@ function Asking({
 
       <article className="pr-qcard">
         <header className="pr-qhead">
+          {/* One tag, the topic (founder, 17 Nov 2026: section and topic said twice); Bookmark and
+              Report at the right end of the same line. */}
           <div className="pr-tags">
-            <Badge tone="ghost">{question.topic_name}</Badge>
-            <Badge>{question.subtopic_name}</Badge>
+            <Badge>{question.subtopic_name ?? question.topic_name}</Badge>
             {question.comeback ? (
               <span title="You missed or guessed this one before. Get it right now and your score goes up.">
                 <Badge tone="yellow" dot>
@@ -985,7 +986,9 @@ function Asking({
                 </Badge>
               </span>
             ) : null}
-            <QuestionTools versionId={question.question_version_id} where="practice" sessionId={state.session_id} />
+            <span className="pr-tools">
+              <QuestionTools versionId={question.question_version_id} where="practice" sessionId={state.session_id} />
+            </span>
           </div>
         </header>
 

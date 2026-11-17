@@ -15,6 +15,14 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Question screen: one tag, tools at the right, a flat Check answer
+- **What:** a practice run's question shows one tag, its topic (the section tag that repeated it
+  is gone); Bookmark and Report sit at the right end of that line (also in the check-up
+  sitting); Check answer has no shadow under it. The screen is otherwise kept as it is.
+- **Why:** founder, 17 Nov 2026.
+- **Where:** `PracticeRoom.tsx`/`.css`, `CheckupRoom.tsx`/`.css`.
+- **Status:** committed, not pushed.
+
 ### "Practise this topic" starts the run where the student is
 - **What:** every Practise on a topic (Practice's weak topics, Progress, the subject page, the
   mock report) now starts a run on that topic at once, instead of opening the run builder first.

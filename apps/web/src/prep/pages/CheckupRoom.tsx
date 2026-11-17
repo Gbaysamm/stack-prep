@@ -368,11 +368,10 @@ export function CheckupRoom() {
               aria-labelledby="cr-stem"
             >
               <header className="cr-qhead">
-                <span className="qt-group">
-                  {/* JAMB's topic when the server names it; older servers only send the section. */}
-                  <Badge className="cr-topic">
-                    {question.subtopic_name ?? question.topic_name}
-                  </Badge>
+                {/* JAMB's topic when the server names it; older servers only send the section.
+                    Bookmark and Report at the right end of the line, as in a practice run. */}
+                <Badge className="cr-topic">{question.subtopic_name ?? question.topic_name}</Badge>
+                <span className="pr-tools">
                   <QuestionTools versionId={question.question_version_id} where="checkup" sessionId={sessionId} />
                 </span>
               </header>
