@@ -43,6 +43,7 @@ const MockReport = later(() => import('./pages/MockReport.js'), 'MockReport');
 const MockRoom = later(() => import('./pages/MockRoom.js'), 'MockRoom');
 const MockSetup = later(() => import('./pages/MockSetup.js'), 'MockSetup');
 const SupportThread = later(() => import('./pages/Support.js'), 'SupportThread');
+const Messages = later(() => import('./pages/Support.js'), 'Messages');
 const Onboarding = later(() => import('./pages/Onboarding.js'), 'Onboarding');
 const PracticeHub = later(() => import('./pages/PracticeHub.js'), 'PracticeHub');
 const PracticeRoom = later(() => import('./pages/PracticeRoom.js'), 'PracticeRoom');
@@ -121,6 +122,8 @@ export function PrepApp() {
                   <Route path="/help" element={<Help />} />
                   <Route path="/help/numbers" element={<HelpNumbers />} />
                   <Route path="/help/messages/:threadId" element={<SupportThread />} />
+                  <Route path="/messages" element={<Messages />} />
+                  <Route path="/messages/:threadId" element={<SupportThread />} />
                   <Route path="/how-its-worked-out" element={<HowItsWorkedOutRedirect />} />
                   <Route path="*" element={<NotFound />} />
                 </Route>

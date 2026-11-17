@@ -15,6 +15,18 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Messages: their own page, and a help button on every page
+- **What:** writing to the team and the conversations moved off Help & guides to /messages
+  ("Talk to a person"), in the sidebar as Messages; replies open at /messages/:id (the old
+  /help/messages/:id still works). Help & guides is the guide only, ending in a "Still stuck?"
+  card to Messages. A round purple help button sits bottom right on every page (above the tab
+  bar on a phone); it opens a popup to write in at once and links to the conversations. The
+  form is one component (`WriteForm`) in both places.
+- **Why:** founder, 17 Nov 2026: help and messages should not be one page; contact should be
+  one tap away from anywhere.
+- **Where:** `Support.tsx`, `HelpFab.tsx`/`.css`, `Help.tsx`, `shell.tsx`, `PrepApp.tsx`.
+- **Status:** committed, not pushed.
+
 ### Sidebar: brand pinned to the top, account to the foot
 - **What:** only the list between them scrolls (`.sj-sidebar-scroll`), so the Stack Prep brand
   and the student's name and sign-out stay in place on a short screen.

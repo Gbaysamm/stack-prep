@@ -1,0 +1,58 @@
+/* The floating help button (HelpFab.tsx). */
+.sj .hf-btn {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 50%;
+  background: var(--purple-600, #6b0bff);
+  color: #fff;
+  box-shadow: 4px 4px 0 var(--purple-200, #d7bdff);
+  cursor: pointer;
+  transition: transform 140ms ease;
+}
+.sj .hf-btn:hover {
+  transform: translate(-1px, -1px);
+}
+.sj .hf-lede {
+  margin: 0 0 12px;
+  color: var(--ink-600, #4b4566);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.sj .su-form.compact {
+  display: grid;
+  gap: 12px;
+}
+.sj .hf-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 0;
+  color: var(--purple-700, #6500ff);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+/* On a phone it sits above the tab bar. */
+@media (max-width: 860px) {
+  .sj .hf-btn {
+    right: 16px;
+    bottom: 92px;
+    width: 50px;
+    height: 50px;
+  }
+}
+.sj .su-form.compact {
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: none;
+}

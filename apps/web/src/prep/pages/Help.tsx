@@ -44,7 +44,6 @@ import {
 import { usePageTitle } from '../store.js';
 import { Button, PageHero } from '../ui.js';
 import { Disclosure } from './Disclosure.js';
-import { SupportBox } from './Support.js';
 import { HOW_PATH, METRIC_GROUPS, METRICS } from './HowItsWorkedOut.js';
 import './Help.css';
 
@@ -482,7 +481,16 @@ export function Help() {
         </section>
       ) : null}
 
-      <SupportBox />
+      {/* Messages have their own page now (founder, 17 Nov 2026); the guide only points to it. */}
+      <Link to="/messages" className="sj-card hp-msgs-link">
+        <span>
+          <b className="sj-display">Still stuck?</b>
+          <small>Write to a person at Stack Prep. Replies usually come within a day.</small>
+        </span>
+        <span className="hp-msgs-go">
+          Open Messages <IconArrowRight size={16} />
+        </span>
+      </Link>
     </div>
   );
 }

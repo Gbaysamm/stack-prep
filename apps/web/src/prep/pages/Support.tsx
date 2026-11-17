@@ -18,17 +18,18 @@ import {
   type SupportTopic,
   type Thread,
 } from '../supportApi.js';
-import { Button } from '../ui.js';
+import { Button, PageHero } from '../ui.js';
 import './Support.css';
 
 const STATUS_WORD = { open: 'Waiting for us', answered: 'Replied', closed: 'Closed' } as const;
 
-export function SupportBox() {
+/**
+ * Write to us: what it is about, a title, the message. On the Messages page and in the floating
+ * help popup (founder, 17 Nov 2026). `onSent` hears where the new conversation lives.
+ */
+export function WriteForm({ onSent, compact = false }: { onSent: (threadId: string) => void; compact?: boolean }) {
   const { studentId } = useStudent();
-  const navigate = useNavigate();
   const ids = useId();
-  const threads = useLoad(() => supportApi.threads(studentId), [studentId]);
-  const settings = useLoad(() => supportApi.settings(), []);
   const [topic, setTopic] = useState<SupportTopic | ''>('');
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
@@ -43,80 +44,93 @@ export function SupportBox() {
     setError(null);
     supportApi
       .start(studentId, { topic, subject: subject.trim(), body: body.trim() })
-      .then((thread) => navigate(`/help/messages/${thread.id}`))
+      .then((thread) => onSent(thread.id))
       .catch((failure) => {
         setError(friendly(failure));
         setBusy(false);
       });
   };
 
+  return (
+    <form className={compact ? 'su-form compact' : 'sj-card su-form'} onSubmit={send} noValidate>
+      {compact ? null : (
+        <div className="su-head">
+          <span className="su-icon" aria-hidden="true">
+            <IconMail size={22} />
+          </span>
+          <div>
+            <h2 id="su-title" className="sj-display sj-h3">
+              Write to us
+            </h2>
+            <p>A person at Stack Prep reads every message and replies here, usually within a day.</p>
+          </div>
+        </div>
+      )}
+      <div className="sj-field">
+        <label htmlFor={`${ids}-topic`}>What is it about?</label>
+        <Select
+          id={`${ids}-topic`}
+          value={topic}
+          onChange={(value) => {
+            setTopic(value as SupportTopic);
+            setError(null);
+          }}
+          placeholder="Choose one"
+          options={SUPPORT_TOPICS}
+        />
+      </div>
+      <div className="sj-field">
+        <label htmlFor={`${ids}-subject`}>Title</label>
+        <input
+          id={`${ids}-subject`}
+          className="sj-input"
+          maxLength={120}
+          value={subject}
+          placeholder="For example: my plan didn’t start"
+          onChange={(event) => {
+            setSubject(event.target.value);
+            setError(null);
+          }}
+        />
+      </div>
+      <div className="sj-field">
+        <label htmlFor={`${ids}-body`}>Your message</label>
+        <textarea
+          id={`${ids}-body`}
+          className="sj-input su-text"
+          rows={compact ? 4 : 5}
+          maxLength={4000}
+          value={body}
+          placeholder="Tell us what happened, and what you expected."
+          onChange={(event) => {
+            setBody(event.target.value);
+            setError(null);
+          }}
+        />
+      </div>
+      {error ? (
+        <p className="su-error" role="alert">
+          {error}
+        </p>
+      ) : null}
+      <Button type="submit" busy={busy} icon={<IconSend size={18} />}>
+        Send
+      </Button>
+    </form>
+  );
+}
+
+export function SupportBox() {
+  const { studentId } = useStudent();
+  const navigate = useNavigate();
+  const threads = useLoad(() => supportApi.threads(studentId), [studentId]);
+  const settings = useLoad(() => supportApi.settings(), []);
+
   const list = threads.data ?? [];
   return (
     <section className="hp-sec su-sec" aria-labelledby="su-title">
       <div className="su-grid">
-        <form className="sj-card su-form" onSubmit={send} noValidate>
-          <div className="su-head">
-            <span className="su-icon" aria-hidden="true">
-              <IconMail size={22} />
-            </span>
-            <div>
-              <h2 id="su-title" className="sj-display sj-h3">
-                Write to us
-              </h2>
-              <p>A person at Stack Prep reads every message and replies here, usually within a day.</p>
-            </div>
-          </div>
-          <div className="sj-field">
-            <label htmlFor={`${ids}-topic`}>What is it about?</label>
-            <Select
-              id={`${ids}-topic`}
-              value={topic}
-              onChange={(value) => {
-                setTopic(value as SupportTopic);
-                setError(null);
-              }}
-              placeholder="Choose one"
-              options={SUPPORT_TOPICS}
-            />
-          </div>
-          <div className="sj-field">
-            <label htmlFor={`${ids}-subject`}>Title</label>
-            <input
-              id={`${ids}-subject`}
-              className="sj-input"
-              maxLength={120}
-              value={subject}
-              placeholder="For example: my plan didn’t start"
-              onChange={(event) => {
-                setSubject(event.target.value);
-                setError(null);
-              }}
-            />
-          </div>
-          <div className="sj-field">
-            <label htmlFor={`${ids}-body`}>Your message</label>
-            <textarea
-              id={`${ids}-body`}
-              className="sj-input su-text"
-              rows={5}
-              maxLength={4000}
-              value={body}
-              placeholder="Tell us what happened, and what you expected."
-              onChange={(event) => {
-                setBody(event.target.value);
-                setError(null);
-              }}
-            />
-          </div>
-          {error ? (
-            <p className="su-error" role="alert">
-              {error}
-            </p>
-          ) : null}
-          <Button type="submit" busy={busy} icon={<IconSend size={18} />}>
-            Send
-          </Button>
-        </form>
+        <WriteForm onSent={(id) => navigate(`/messages/${id}`)} />
 
         <div className="sj-card su-list">
           <h3 className="sj-display su-list-title">Your conversations</h3>
@@ -128,7 +142,7 @@ export function SupportBox() {
             <ul>
               {list.map((thread) => (
                 <li key={thread.id}>
-                  <Link to={`/help/messages/${thread.id}`} className={`su-line ${thread.unread ? 'unread' : ''}`}>
+                  <Link to={`/messages/${thread.id}`} className={`su-line ${thread.unread ? 'unread' : ''}`}>
                     <span className="su-line-top">
                       <strong>{thread.subject}</strong>
                       <span className={`su-status ${thread.status}`}>
@@ -212,8 +226,8 @@ export function SupportThread() {
 
   return (
     <div className="sj-page su-page">
-      <Link to="/help" className="su-back">
-        <IconArrowLeft size={16} /> Help & guides
+      <Link to="/messages" className="su-back">
+        <IconArrowLeft size={16} /> Messages
       </Link>
       {thread ? (
         <>
@@ -261,13 +275,28 @@ export function SupportThread() {
       ) : problem ? (
         <div className="sj-card su-missing">
           <p>{problem}</p>
-          <Link to="/help" className="su-back">
-            Back to Help & guides <IconArrowRight size={14} />
+          <Link to="/messages" className="su-back">
+            Back to Messages <IconArrowRight size={14} />
           </Link>
         </div>
       ) : (
         <p className="su-empty">Loading…</p>
       )}
+    </div>
+  );
+}
+
+/** /messages: the student's own page for writing to the team and reading the replies. */
+export function Messages() {
+  usePageTitle('Messages');
+  return (
+    <div className="sj-page su-msgs">
+      <PageHero
+        eyebrow="Messages"
+        title="Talk to a person"
+        sub="Anything not working, a question about your plan, or a payment: write to us here and the reply comes back here."
+      />
+      <SupportBox />
     </div>
   );
 }

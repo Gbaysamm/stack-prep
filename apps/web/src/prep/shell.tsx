@@ -16,6 +16,7 @@ import {
 } from "react-router-dom";
 
 import { Notices } from "./Notices.js";
+import { HelpFab } from "./HelpFab.js";
 import { ClaimDialog } from "./AuthForms.js";
 import {
   IconArrowLeft,
@@ -32,6 +33,7 @@ import {
   IconHelp,
   IconHome,
   IconLock,
+  IconMail,
   IconLogout,
   IconMenu,
   IconTarget,
@@ -70,6 +72,7 @@ const MORE = [
   { to: "/plans", label: "Plans", icon: IconSparkles },
   { to: "/exams", label: "Exams", icon: IconBook },
   { to: "/settings", label: "Settings", icon: IconSettings },
+  { to: "/messages", label: "Messages", icon: IconMail },
   { to: "/help", label: "Help & guides", icon: IconHelp },
 ] as const;
 
@@ -474,6 +477,7 @@ export function AppShell() {
           </header>
           {sandbox ? <SandboxBanner onCreate={() => setClaiming(true)} /> : null}
           <Notices />
+          <HelpFab />
           <main id="main">
             {/* A page opened for the first time loads here, inside the frame. */}
             <Suspense
