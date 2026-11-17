@@ -15,6 +15,17 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### After the lesson: clear buttons, working only where it counts, and a reward at the end
+- **What:** Continue is locked with a lock and "Try it first" until the problem is tried, then
+  lime; buttons on the page sit flat (no shadow); on a phone Continue and Watch again share one
+  row. Photo of working shows only in subjects with calculations (maths, physics, chemistry,
+  accounts, economics) or where the problem asks for working. Finishing the lesson plays a short
+  reward (`prep/Celebrate.tsx`): brand-colour confetti, a lime tick popping in, "Lesson done!",
+  what is next; it goes on to the roadmap by itself after ~2.6 s or on a tap. With reduced
+  motion, the card shows still.
+- **Why:** founder, 17 Nov 2026 ("a nice animation that adds to the dopamine", as Brilliant does).
+- **Status:** committed, not pushed.
+
 ### Question screen: one tag, tools at the right, a flat Check answer
 - **What:** a practice run's question shows one tag, its topic (the section tag that repeated it
   is gone); Bookmark and Report sit at the right end of that line (also in the check-up

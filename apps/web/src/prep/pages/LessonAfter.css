@@ -385,3 +385,29 @@
 .sj .la-left {
   font-size: 12px;
 }
+
+/* Buttons sit flat on this page, no shadow under them; Continue and Watch again share one row
+   on a phone (founder, 17 Nov 2026). */
+.sj .la-app .sj-btn,
+.sj .la-app .sj-btn:hover,
+.sj .la-app .sj-btn:active,
+.sj .la-app .sj-btn:disabled {
+  box-shadow: none;
+}
+.sj .la-app .la-locked:disabled {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.78);
+}
+@media (max-width: 640px) {
+  .sj .la-app .sj-hero-actions {
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+  .sj .la-app .sj-hero-actions .sj-btn {
+    flex: 1;
+    min-width: 0;
+    padding-inline: 10px;
+    white-space: nowrap;
+  }
+}

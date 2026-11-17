@@ -11,7 +11,8 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import { friendly, request } from '../../lib/friendlyError.js';
 import { Maths } from '../../Maths.js';
-import { IconCamera, IconCheck, IconClose, IconReplay, IconSend } from '../icons.js';
+import { Celebrate } from '../Celebrate.js';
+import { IconCamera, IconCheck, IconClose, IconLock, IconReplay, IconSend } from '../icons.js';
 import { Button, PageHero, Skeleton, cx } from '../ui.js';
 import { PlainShell } from '../shell.js';
 import { useStudent } from '../store.js';
@@ -60,7 +61,8 @@ export function LessonAfter({
   /** Which of the subtopic's lessons this follows. */
   part?: number;
   onWatchAgain: () => void;
-  onContinue: () => void;
+  /** Finishing: the lesson's title and what comes next, for the reward that follows. */
+  onContinue: (done: { title: string; next: string | null }) => void;
   continuing: boolean;
 }) {
   const base = `/v1/roadmap/${studentId}/lessons/${subtopicId}`;
@@ -105,9 +107,22 @@ export function LessonAfter({
         sub={finished ? next : `Try the problem below to finish the lesson. ${next}`}
         actions={
           <>
-            <Button tone="lime" busy={continuing} disabled={!finished} icon={<IconCheck size={16} />} onClick={onContinue}>
-              Continue
-            </Button>
+            {/* Locked until the problem is tried, and saying so (founder, 17 Nov 2026: a greyed lime
+                button read as broken). */}
+            {finished ? (
+              <Button
+                tone="lime"
+                busy={continuing}
+                icon={<IconCheck size={16} />}
+                onClick={() => onContinue({ title: page.title, next: page.next_title ?? null })}
+              >
+                Continue
+              </Button>
+            ) : (
+              <Button tone="soft" disabled icon={<IconLock size={16} />} className="la-locked">
+                Try it first
+              </Button>
+            )}
             <Button tone="soft" icon={<IconReplay size={16} />} onClick={onWatchAgain}>
               Watch again
             </Button>
@@ -126,6 +141,7 @@ export function LessonAfter({
               count={page.problems.length}
               ask={problem.ask}
               needsWorking={problem.needs_working}
+              subject={page.subject}
               tried={problem.tried}
               onTried={(result) => tried(index, result)}
             />
@@ -165,14 +181,16 @@ export function LessonAfterPage() {
   const part = Number(search.get('part') ?? '1') || 1;
   const item = search.get('item');
   const [saving, setSaving] = useState(false);
-  const finish = async () => {
+  const [done, setDone] = useState<{ title: string; next: string | null } | null>(null);
+  const finish = async (what: { title: string; next: string | null }) => {
     setSaving(true);
     try {
       await request<void>(`/v1/roadmap/${student.studentId}/lessons/${subtopicId}/done`, {
         method: 'POST',
         body: JSON.stringify({ item_id: item, part }),
       });
-      navigate('/roadmap');
+      // The reward first, then the roadmap (it goes on by itself, or on a tap).
+      setDone(what);
     } finally {
       setSaving(false);
     }
@@ -194,9 +212,22 @@ export function LessonAfterPage() {
       subtopicId={subtopicId}
       part={part}
       continuing={saving}
-      onContinue={() => void finish()}
+      onContinue={(what) => void finish(what)}
       onWatchAgain={() => navigate(`/lesson/${subtopicId}?part=${part}${item ? `&item=${item}` : ''}`)}
     />
+    {done ? (
+      <Celebrate
+        title="Lesson done!"
+        sub={
+          <>
+            <b>{done.title}</b> is ticked off your roadmap.
+            {done.next ? ` Next up: ${done.next}.` : ''}
+          </>
+        }
+        next="Back to your roadmap"
+        onDone={() => navigate('/roadmap')}
+      />
+    ) : null}
     </PlainShell>
   );
 }
@@ -221,6 +252,7 @@ function Problem({
   count,
   ask,
   needsWorking,
+  subject,
   tried,
   onTried,
 }: {
@@ -230,6 +262,7 @@ function Problem({
   count: number;
   ask: string;
   needsWorking: boolean;
+  subject: string;
   tried: Tried | null;
   onTried: (result: Tried) => void;
 }) {
@@ -240,6 +273,9 @@ function Problem({
   const [error, setError] = useState<string | null>(null);
   const camera = useRef<HTMLInputElement>(null);
   const answer = choice ? picked : typed.trim();
+  // A photo of working only where there is working to show: calculations (founder, 17 Nov 2026:
+  // English, for one, has none).
+  const workingSubject = needsWorking || /math|physics|chemistry|account|economics/i.test(subject);
 
   const check = async (event: FormEvent) => {
     event.preventDefault();
@@ -322,15 +358,17 @@ function Problem({
               if (file) void send(file);
             }}
           />
-          <Button
-            tone={needsWorking ? 'primary' : 'ghost'}
-            icon={<IconCamera size={16} />}
-            busy={busy === 'photo'}
-            disabled={busy !== null}
-            onClick={() => camera.current?.click()}
-          >
-            {needsWorking ? 'Send a photo of your working' : 'Photo of working'}
-          </Button>
+          {workingSubject ? (
+            <Button
+              tone={needsWorking ? 'primary' : 'ghost'}
+              icon={<IconCamera size={16} />}
+              busy={busy === 'photo'}
+              disabled={busy !== null}
+              onClick={() => camera.current?.click()}
+            >
+              {needsWorking ? 'Send a photo of your working' : 'Photo of working'}
+            </Button>
+          ) : null}
         </div>
       </form>
       {error ? <p className="la-error">{error}</p> : null}

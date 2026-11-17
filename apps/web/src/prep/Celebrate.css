@@ -1,0 +1,108 @@
+/* The reward moment (Celebrate.tsx). Prefix cb-. */
+.sj .cb-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  overflow: hidden;
+  background: rgba(31, 0, 80, 0.55);
+  animation: cb-fade 0.2s ease both;
+}
+.sj .cb-confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.sj .cb-confetti i {
+  position: absolute;
+  top: -20px;
+  left: var(--x);
+  width: 9px;
+  height: 14px;
+  border-radius: 2px;
+  opacity: 0;
+  animation: cb-fall var(--t) cubic-bezier(0.25, 0.6, 0.4, 1) var(--d) forwards;
+}
+.sj .cb-confetti i.round {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.sj .cb-card {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  width: min(360px, 100%);
+  padding: 30px 26px 24px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 12px;
+  background: var(--white, #fff);
+  box-shadow: 5px 5px 0 var(--green-400, #85de4c);
+  text-align: center;
+  animation: cb-pop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) 0.05s both;
+}
+.sj .cb-tick {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 4px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 50%;
+  background: var(--green-400, #85de4c);
+  color: var(--ink-900, #1f0050);
+  animation: cb-tick 0.5s cubic-bezier(0.2, 1.6, 0.4, 1) 0.25s both;
+}
+.sj .cb-card > b {
+  font-size: 26px;
+  line-height: 1.1;
+  color: var(--ink-900, #1f0050);
+}
+.sj .cb-sub {
+  color: var(--ink-600, #4b4566);
+  font-size: 14.5px;
+  line-height: 1.45;
+}
+.sj .cb-next {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--purple-600, #6b0bff);
+  color: #fff;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@keyframes cb-fade {
+  from { opacity: 0; }
+}
+@keyframes cb-pop {
+  from { opacity: 0; transform: scale(0.7) translateY(16px); }
+}
+@keyframes cb-tick {
+  from { transform: scale(0) rotate(-30deg); }
+}
+@keyframes cb-fall {
+  0% { opacity: 1; transform: translate(0, 0) rotate(0deg); }
+  100% { opacity: 0.9; transform: translate(var(--drift), 105vh) rotate(calc(var(--r) + 540deg)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sj .cb-confetti {
+    display: none;
+  }
+  .sj .cb-scrim,
+  .sj .cb-card,
+  .sj .cb-tick {
+    animation: none;
+  }
+}
