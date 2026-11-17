@@ -27,8 +27,9 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
   hourly job sends the rest and anything missed. Emails are claimed before sending, so the two
   senders never send one twice. Admin suspend and restore now notify and email the student.
   `notifications.data` keeps the weekly report's figures. "Delete my account" is on the
-  tracker: the app has no deletion yet. Review page with every email:
-  https://claude.ai/artifact/KeMjHHJGis3RoV2F1sJfAT (private).
+  tracker: the app has no deletion yet. To look at every email:
+  `python -m app.cli email-previews` writes them (HTML and plain text, with sample data) and an
+  index.html to `email-previews/` (not committed) to open in a browser.
 - **Why:** founder, 17 Nov 2026: see the templates; emails on sign-up, account changes and the
   like, signed in or not; one file per template.
 - **Status:** committed, not pushed.
