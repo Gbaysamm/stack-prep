@@ -168,3 +168,10 @@ Order of work (each shown at 1440 and 390 before the next):
 24 open items became 7: related pieces are one item with a checklist (More subject lessons,
 More questions, three Notifications items). Removed as not ours to track: the OpenAI credit,
 the lawyer, the Lagos and Ibadan pronunciation, the Mock exam room (migration 059).
+
+## The tracker page (founder, 17 Nov 2026)
+
+| Ask (founder) | Done | Where | Status |
+|---|---|---|---|
+| Rearrange tasks by priority or what I am working on | Drag a task; or Move to the top, up, down from its box | `TrackerPage.tsx`, `POST /v1/public/tracker/order`, migration 060 | Committed |
+| The box should not mark a task done at once | A menu: Mark done, stage, Today, Move, Open, Delete (confirmed) | `TrackerPage.tsx` | Committed |

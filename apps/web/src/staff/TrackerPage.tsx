@@ -4,8 +4,10 @@
  * One calm column: the title, one bar of progress by stage (To do, In progress, Waiting, Done,
  * Committed, Deployed), then Tasks or Deployments. Tasks are one checklist, not split by area
  * (founder, 16 Nov 2026): what is still to finish, then what was finished, by day. Tick a
- * task done (it stays in view, ticked), change its stage, or open it for its notes, steps and
- * history. Anyone with the link reads it; a signed-in admin, or the edit link (?key=…), changes it.
+ * task's box for a small menu (founder, 17 Nov 2026: a tick alone never marks it done): mark it
+ * done or another stage, plan it for today, move it, or delete it. Tasks keep the order the
+ * admin drags them into (by priority, or what is being worked on). Open one for its notes, steps
+ * and history. Anyone with the link reads it; a signed-in admin, or the edit link (?key=…), changes it.
  * Committed tasks become Deployed by themselves when a deployment is recorded.
  */
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
@@ -31,6 +33,8 @@ interface Item {
   updated_by: string | null;
   /** The day it is planned for ("2026-11-16"): under Today from then until it is finished. */
   planned_for: string | null;
+  /** The admin's order, smallest first. */
+  position: number;
   steps: number;
   steps_done: number;
 }
@@ -61,8 +65,9 @@ const FINISHED: Status[] = ['done', 'committed', 'deployed'];
 const finished = (s: Status) => FINISHED.includes(s);
 /** The bar's order: what is out first, what is still to start last. */
 const BAR: Status[] = ['deployed', 'committed', 'done', 'doing', 'waiting', 'todo'];
-/** Within an area: what is moving first, what is out last. */
-const ROW_ORDER: Record<Status, number> = { doing: 0, waiting: 1, todo: 2, done: 3, committed: 4, deployed: 5 };
+/** The admin's order (dragged, or moved from the box's menu). */
+const byPosition = (x: Item, y: Item) => x.position - y.position;
+type Move = 'top' | 'up' | 'down';
 const BASE = '/v1/public/tracker';
 
 /* ------------------------------------------------------------------ the edit key and name */
@@ -226,6 +231,52 @@ export function PublicTracker() {
         });
     });
 
+  /** Today on or off, from the box's menu. */
+  const change = (item: Item, body: Partial<Pick<Item, 'planned_for'>>) =>
+    asEditor(() => {
+      setKept((now) => new Set(now).add(item.id));
+      replace({ ...item, ...body });
+      send<Detail>(`/items/${item.id}`, 'PATCH', body)
+        .then((d) => replace(d.item))
+        .catch((error) => {
+          setProblem(friendly(error));
+          load();
+        });
+    });
+
+  const remove = (item: Item) =>
+    asEditor(() => {
+      setItems((now) => now?.filter((i) => i.id !== item.id) ?? now);
+      send<void>(`/items/${item.id}`, 'DELETE').catch((error) => {
+        setProblem(friendly(error));
+        load();
+      });
+    });
+
+  /** A list in a new order: its tasks swap the places they held, so other tasks keep theirs. */
+  const reorder = (list: Item[], from: number, to: number) => {
+    if (from === to || from < 0 || to < 0 || to >= list.length) return;
+    const next = [...list];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved!);
+    const slots = list.map((i) => i.position).sort((x, y) => x - y);
+    const placed = new Map(next.map((i, n) => [i.id, slots[n]!]));
+    asEditor(() => {
+      setItems((now) => now?.map((i) => (placed.has(i.id) ? { ...i, position: placed.get(i.id)! } : i)) ?? now);
+      send<void>('/order', 'POST', { ids: next.map((i) => i.id) }).catch((error) => {
+        setProblem(friendly(error));
+        load();
+      });
+    });
+  };
+  const move = (list: Item[], item: Item, where: Move) => {
+    const at = list.findIndex((i) => i.id === item.id);
+    reorder(list, at, where === 'top' ? 0 : where === 'up' ? at - 1 : at + 1);
+  };
+
+  // Dragging a task within its list: which one is held, and where it would land.
+  const [drag, setDrag] = useState<{ id: string; over: string | null } | null>(null);
+
   const today = todayIso();
   const all = items ?? [];
   // Today: planned for today or before and not finished (it carries over), and whatever was
@@ -236,7 +287,7 @@ export function PublicTracker() {
         ? i.done_at !== null && localDay(i.done_at) === today
         : i.planned_for !== null && i.planned_for <= today,
     )
-    .sort((x, y) => ROW_ORDER[x.status] - ROW_ORDER[y.status] || (x.planned_for ?? '').localeCompare(y.planned_for ?? ''));
+    .sort((x, y) => Number(finished(x.status)) - Number(finished(y.status)) || byPosition(x, y));
   const todayDone = todayList.filter((i) => finished(i.status)).length;
   const areas = useMemo(() => [...new Set(all.map((i) => i.area))].sort(), [all]);
   const count = (s: Status) => all.filter((i) => i.status === s).length;
@@ -248,7 +299,7 @@ export function PublicTracker() {
   // One list, not split by area: what is still to do, then what was finished, by the day it was.
   const activeList = all
     .filter((i) => wanted(i) && !finished(i.status) && !todayList.includes(i))
-    .sort((x, y) => ROW_ORDER[x.status] - ROW_ORDER[y.status] || (x.planned_for ?? '9').localeCompare(y.planned_for ?? '9'));
+    .sort(byPosition);
   const doneDays = useMemo(() => {
     const byDay = new Map<string, Item[]>();
     for (const i of all) {
@@ -265,16 +316,42 @@ export function PublicTracker() {
       }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [all, show, area, kept, today]);
-  const rowFor = (i: Item) => (
-    <TaskRow
-      key={i.id}
-      item={i}
-      today={today}
-      canEdit={canEdit}
-      onTick={() => setStatus(i, finished(i.status) ? 'todo' : 'done')}
-      onOpen={() => setOpen(i.id)}
-    />
-  );
+  /** A task's row; `list` is the list it can be moved within (none for finished days). */
+  const rowFor = (i: Item, list?: Item[], inToday = false) => {
+    const at = list ? list.findIndex((x) => x.id === i.id) : -1;
+    const movable = canEdit && list !== undefined && !finished(i.status);
+    return (
+      <TaskRow
+        key={i.id}
+        item={i}
+        today={today}
+        inToday={inToday}
+        canEdit={canEdit}
+        onStatus={(status) => setStatus(i, status)}
+        onPlan={(day) => change(i, { planned_for: day })}
+        onMove={movable ? (where) => move(list, i, where) : undefined}
+        canUp={at > 0}
+        canDown={list !== undefined && at < list.length - 1 && !finished(list[at + 1]!.status)}
+        onDelete={() => remove(i)}
+        onOpen={() => setOpen(i.id)}
+        drag={
+          movable
+            ? {
+                held: drag?.id === i.id,
+                over: drag?.over === i.id && drag.id !== i.id,
+                start: () => setDrag({ id: i.id, over: null }),
+                enter: () => setDrag((now) => (now && list.some((x) => x.id === now.id) ? { ...now, over: i.id } : now)),
+                drop: () => {
+                  if (drag) reorder(list, list.findIndex((x) => x.id === drag.id), at);
+                  setDrag(null);
+                },
+                end: () => setDrag(null),
+              }
+            : undefined
+        }
+      />
+    );
+  };
 
   return (
     <div className="sj tk">
@@ -396,17 +473,7 @@ export function PublicTracker() {
                   </h2>
                   {todayList.length ? (
                     <ul className="tk-list">
-                      {todayList.map((i) => (
-                        <TaskRow
-                          key={i.id}
-                          item={i}
-                          today={today}
-                          inToday
-                          canEdit={canEdit}
-                          onTick={() => setStatus(i, finished(i.status) ? 'todo' : 'done')}
-                                          onOpen={() => setOpen(i.id)}
-                                            />
-                      ))}
+                      {todayList.map((i) => rowFor(i, todayList, true))}
                     </ul>
                   ) : (
                     <p className="tk-muted tk-today-empty">
@@ -422,7 +489,7 @@ export function PublicTracker() {
                       Still to finish
                       <span>{activeList.length}</span>
                     </h2>
-                    <ul className="tk-list">{activeList.map(rowFor)}</ul>
+                    <ul className="tk-list">{activeList.map((i) => rowFor(i, activeList))}</ul>
                   </div>
                 ) : null}
                 {doneDays.map((g) => (
@@ -431,7 +498,7 @@ export function PublicTracker() {
                       {g.title}
                       <span>{g.list.length}</span>
                     </h2>
-                    <ul className="tk-list">{g.list.map(rowFor)}</ul>
+                    <ul className="tk-list">{g.list.map((i) => rowFor(i))}</ul>
                   </div>
                 ))}
               </section>
@@ -501,33 +568,77 @@ export function PublicTracker() {
 
 /* ------------------------------------------------------------------ adding a task */
 
-/** One task in a list: the tick, the title (opens it), Today, and its stage. */
+/** One task in a list: its box (a menu, never a tick on its own), the title (opens it), its stage. */
 function TaskRow({
   item: i,
   today,
   inToday = false,
   canEdit,
-  onTick,
+  onStatus,
+  onPlan,
+  onMove,
+  canUp,
+  canDown,
+  onDelete,
   onOpen,
+  drag,
 }: {
   item: Item;
   today: string;
   inToday?: boolean;
   canEdit: boolean;
-  onTick: () => void;
+  onStatus: (status: Status) => void;
+  onPlan: (day: string | null) => void;
+  onMove?: (where: Move) => void;
+  canUp: boolean;
+  canDown: boolean;
+  onDelete: () => void;
   onOpen: () => void;
+  drag?: { held: boolean; over: boolean; start: () => void; enter: () => void; drop: () => void; end: () => void };
 }) {
+  const [menu, setMenu] = useState(false);
+  const close = useCallback(() => setMenu(false), []);
   const planned = i.planned_for !== null && i.planned_for <= today && !finished(i.status);
   const carried = inToday && i.planned_for !== null && i.planned_for < today;
+  const classes = ['tk-row', finished(i.status) && 'finished', drag?.held && 'held', drag?.over && 'over', menu && 'menu-open']
+    .filter(Boolean)
+    .join(' ');
   return (
-    <li className={`tk-row ${finished(i.status) ? 'finished' : ''}`}>
+    <li
+      className={classes}
+      draggable={drag !== undefined && !menu}
+      onDragStart={(event) => {
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', i.id);
+        drag?.start();
+      }}
+      onDragEnter={drag?.enter}
+      onDragOver={drag ? (event) => event.preventDefault() : undefined}
+      onDrop={
+        drag
+          ? (event) => {
+              event.preventDefault();
+              drag.drop();
+            }
+          : undefined
+      }
+      onDragEnd={drag?.end}
+    >
+      {drag ? (
+        <span className="tk-grip" aria-hidden="true" title="Drag to move">
+          <i />
+          <i />
+          <i />
+        </span>
+      ) : null}
       <button
         type="button"
         className={`tk-tick ${finished(i.status) ? 'on' : ''}`}
-        aria-label={finished(i.status) ? `Mark “${i.title}” not done` : `Mark “${i.title}” done`}
-        aria-pressed={finished(i.status)}
+        aria-label={`Change “${i.title}”`}
+        aria-haspopup="menu"
+        aria-expanded={menu}
         disabled={!canEdit}
-        onClick={onTick}
+        onClick={() => setMenu((now) => !now)}
       />
       <button type="button" className="tk-row-main" onClick={onOpen}>
         <span className="tk-row-title">{i.title}</span>
@@ -544,7 +655,148 @@ function TaskRow({
         </span>
       </button>
       <IconChevronRight size={16} className="tk-row-go" aria-hidden="true" />
+      {menu ? (
+        <TaskMenu
+          item={i}
+          today={today}
+          planned={planned}
+          onClose={close}
+          onStatus={onStatus}
+          onPlan={onPlan}
+          onMove={onMove}
+          canUp={canUp}
+          canDown={canDown}
+          onDelete={onDelete}
+          onOpen={onOpen}
+        />
+      ) : null}
     </li>
+  );
+}
+
+/** The box's menu: what to do with the task. Nothing changes until one is chosen. */
+function TaskMenu({
+  item: i,
+  today,
+  planned,
+  onClose,
+  onStatus,
+  onPlan,
+  onMove,
+  canUp,
+  canDown,
+  onDelete,
+  onOpen,
+}: {
+  item: Item;
+  today: string;
+  planned: boolean;
+  onClose: () => void;
+  onStatus: (status: Status) => void;
+  onPlan: (day: string | null) => void;
+  onMove?: (where: Move) => void;
+  canUp: boolean;
+  canDown: boolean;
+  onDelete: () => void;
+  onOpen: () => void;
+}) {
+  const box = useRef<HTMLDivElement>(null);
+  const [confirming, setConfirming] = useState(false);
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    const onDown = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!box.current?.contains(target) && !target.closest('.tk-row.menu-open .tk-tick')) onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('mousedown', onDown);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('mousedown', onDown);
+    };
+  }, [onClose]);
+  const pick = (run: () => void) => () => {
+    run();
+    onClose();
+  };
+  const done = finished(i.status);
+
+  if (confirming) {
+    return (
+      <div ref={box} className="tk-menu" role="dialog" aria-label="Delete the task">
+        <p className="tk-menu-ask">
+          <b>Delete this task?</b> Its steps and history go with it.
+        </p>
+        <div className="tk-menu-pair">
+          <button type="button" className="tk-menu-btn" onClick={() => setConfirming(false)}>
+            Keep it
+          </button>
+          <button type="button" className="tk-menu-btn danger" onClick={pick(onDelete)}>
+            Delete
+          </button>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div ref={box} className="tk-menu" role="menu" aria-label={`Change “${i.title}”`}>
+      <button
+        type="button"
+        role="menuitem"
+        className="tk-menu-btn main"
+        autoFocus
+        onClick={pick(() => onStatus(done ? 'todo' : 'done'))}
+      >
+        {done ? 'Mark not done' : 'Mark done'}
+      </button>
+      <span className="tk-menu-label">Stage</span>
+      <div className="tk-menu-seg">
+        {(['todo', 'doing', 'waiting'] as const).map((s) => (
+          <button
+            key={s}
+            type="button"
+            role="menuitemradio"
+            aria-checked={i.status === s}
+            className={i.status === s ? 'on' : undefined}
+            onClick={pick(() => {
+              if (i.status !== s) onStatus(s);
+            })}
+          >
+            {WORD[s]}
+          </button>
+        ))}
+      </div>
+      {onMove ? (
+        <>
+          <span className="tk-menu-label">Move</span>
+          <div className="tk-menu-seg">
+            <button type="button" role="menuitem" disabled={!canUp} onClick={pick(() => onMove('top'))}>
+              To the top
+            </button>
+            <button type="button" role="menuitem" disabled={!canUp} onClick={pick(() => onMove('up'))}>
+              Up
+            </button>
+            <button type="button" role="menuitem" disabled={!canDown} onClick={pick(() => onMove('down'))}>
+              Down
+            </button>
+          </div>
+        </>
+      ) : null}
+      <hr />
+      {!done ? (
+        <button type="button" role="menuitem" className="tk-menu-item" onClick={pick(() => onPlan(planned ? null : today))}>
+          {planned ? 'Take off today' : 'Plan for today'}
+        </button>
+      ) : null}
+      <button type="button" role="menuitem" className="tk-menu-item" onClick={pick(onOpen)}>
+        Open the task
+      </button>
+      <button type="button" role="menuitem" className="tk-menu-item danger" onClick={() => setConfirming(true)}>
+        Delete…
+      </button>
+    </div>
   );
 }
 

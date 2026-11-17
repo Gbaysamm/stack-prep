@@ -1242,3 +1242,150 @@
     flex: 1 1 auto;
   }
 }
+
+/* Order and the box's menu (founder, 17 Nov 2026). Rows are dragged by the grip at the left;
+   the box opens a menu under it, and nothing changes until a choice is made. */
+.tk .tk-row{
+  position: relative;
+}
+.tk .tk-row[draggable='true']{
+  cursor: grab;
+}
+.tk .tk-grip{
+  position: absolute;
+  left: 4px;
+  top: 50%;
+  display: grid;
+  grid-template-columns: repeat(2, 3px);
+  gap: 3px;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.tk .tk-grip i{
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--gray-500);
+  box-shadow: 6px 0 0 var(--gray-500);
+}
+.tk .tk-grip i{ grid-column: 1; }
+.tk .tk-row:hover .tk-grip{
+  opacity: 1;
+}
+.tk .tk-row.held{
+  opacity: 0.45;
+}
+.tk .tk-row.over{
+  box-shadow: inset 0 3px 0 var(--purple-600);
+}
+.tk .tk-row.menu-open{
+  z-index: 5;
+  background: #fbfaff;
+}
+.tk .tk-menu{
+  position: absolute;
+  top: calc(100% - 8px);
+  left: 10px;
+  z-index: 20;
+  display: grid;
+  gap: 6px;
+  width: min(300px, calc(100vw - 48px));
+  padding: 10px;
+  border: 1.5px solid var(--ink-900);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 5px 5px 0 var(--purple-100);
+  cursor: default;
+}
+.tk .tk-menu-label{
+  margin: 4px 2px 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.tk .tk-menu-btn,
+.tk .tk-menu-item,
+.tk .tk-menu-seg button{
+  border: 0;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.tk .tk-menu-btn{
+  height: 38px;
+  padding: 0 12px;
+  background: var(--gray-100);
+  color: var(--gray-900);
+  font-weight: 600;
+}
+.tk .tk-menu-btn.main{
+  background: var(--done);
+  color: #fff;
+}
+.tk .tk-menu-btn.danger{
+  background: var(--danger);
+  color: #fff;
+}
+.tk .tk-menu-seg{
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--gray-100);
+}
+.tk .tk-menu-seg button{
+  height: 32px;
+  padding: 0 6px;
+  background: none;
+  color: var(--gray-700);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.tk .tk-menu-seg button:hover:not(:disabled){
+  background: #fff;
+}
+.tk .tk-menu-seg button.on{
+  background: #fff;
+  color: var(--ink-900);
+  box-shadow: inset 0 0 0 1.5px var(--ink-900);
+}
+.tk .tk-menu-seg button:disabled{
+  color: var(--gray-300);
+  cursor: default;
+}
+.tk .tk-menu hr{
+  width: 100%;
+  margin: 4px 0 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+.tk .tk-menu-item{
+  height: 36px;
+  padding: 0 10px;
+  background: none;
+  color: var(--gray-900);
+  font-weight: 500;
+  text-align: left;
+}
+.tk .tk-menu-item:hover{
+  background: var(--gray-100);
+}
+.tk .tk-menu-item.danger{
+  color: var(--danger);
+}
+.tk .tk-menu-ask{
+  margin: 2px 2px 4px;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.tk .tk-menu-pair{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}

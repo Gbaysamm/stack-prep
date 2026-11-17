@@ -15,6 +15,14 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### The tracker: your own order, and a menu on the box
+- **What:** migration 060 gives each task a position (today's order to start); `POST
+  /v1/public/tracker/order` puts a list in a new order (its tasks swap the places they held).
+  The page drags tasks within Today or Still to finish, and the box opens a menu: Mark done,
+  stage, Plan for today, Move (to the top, up, down), Open, Delete with a confirm.
+- **Why:** founder, 17 Nov 2026: arrange by priority; a tap on the box should not mark it done.
+- **Status:** committed, not pushed.
+
 ### The tracker combined
 - **What:** migration 059: 24 open items down to 7; small pieces became checklist steps
   (lessons, more questions, notifications); four items removed (OpenAI credit, lawyer, Lagos

@@ -88,6 +88,8 @@ class Item(BaseModel):
     updated_by: str | None
     #: The day it is planned for: under Today from then until it is finished.
     planned_for: date | None
+    #: The admin's order, smallest first (migration 060).
+    position: float
     steps: int
     steps_done: int
 
@@ -110,7 +112,7 @@ class TrackerPage(BaseModel):
 
 ITEMS = """
     SELECT i.id, i.title, i.area, i.status, i.owner, i.note, i.created_at, i.updated_at,
-           i.done_at, i.updated_by, i.planned_for,
+           i.done_at, i.updated_by, i.planned_for, i.position,
            (SELECT count(*) FROM tracker_steps s WHERE s.item_id = i.id) AS steps,
            (SELECT count(*) FROM tracker_steps s WHERE s.item_id = i.id AND s.done) AS steps_done
     FROM tracker_items i
@@ -124,7 +126,7 @@ async def tracker(
     x_tracker_key: Annotated[str | None, Header()] = None,
 ) -> TrackerPage:
     admin = await _signed_in_admin(request, conn)
-    items = await fetch_all(conn, ITEMS + " ORDER BY i.area, i.updated_at DESC")
+    items = await fetch_all(conn, ITEMS + " ORDER BY i.position")
     deploys = await fetch_all(
         conn,
         "SELECT id, sha, target, deployed_at, changes FROM deployments"
@@ -316,6 +318,39 @@ async def change_item(
             await _log(conn, item_id, who, f"Changed the {key} to “{value}”")
     await conn.commit()
     return await _detail(conn, item_id)
+
+
+class Order(BaseModel):
+    #: Tasks in their new order. They take the places they already held between them, so
+    #: tasks not in the list (another area, finished) keep theirs.
+    ids: list[UUID] = Field(min_length=1, max_length=500)
+
+
+@router.post("/order", status_code=204, summary="Put tasks in a new order")
+async def reorder(
+    body: Order,
+    conn: Annotated[AsyncConnection, Depends(connection)],
+    who: Annotated[Editor, Depends(editor)],
+) -> None:
+    del who  # the key is what matters; an order is not a change worth a history line
+    ids = list(dict.fromkeys(body.ids))
+    await fetch_all(
+        conn,
+        """
+        WITH wanted AS (
+          SELECT id, n FROM unnest(CAST(:ids AS uuid[])) WITH ORDINALITY AS w(id, n)
+        ), slots AS (
+          SELECT position, row_number() OVER (ORDER BY position) AS n
+          FROM tracker_items WHERE id = ANY (CAST(:ids AS uuid[]))
+        )
+        UPDATE tracker_items i SET position = slots.position
+          FROM wanted JOIN slots USING (n)
+         WHERE i.id = wanted.id
+        RETURNING i.id
+        """,
+        ids=[str(i) for i in ids],
+    )
+    await conn.commit()
 
 
 @router.delete("/items/{item_id}", status_code=204, summary="Remove a task")
