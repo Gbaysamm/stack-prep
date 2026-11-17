@@ -317,30 +317,22 @@ export function CheckupReport() {
           }
         >
           <ul className="cp3-next-list">
-            {weakest.map((t, index) => (
+            {weakest.map((t) => (
               <li key={t.subtopic_id}>
                 <button
                   type="button"
-                  className="cp3-next-card v2"
+                  className="cp3-nx"
                   onClick={() => practise([t], 'next')}
                   aria-label={`Practise ${t.name}`}
                 >
-                  <span className={cx('cp3-next-top', scoreLevel(t.score))}>
-                    <span className="cp3-next-rank sj-mono">{String(index + 1).padStart(2, '0')}</span>
-                    <span className="cp3-next-score">
-                      <b className="sj-num">{t.score !== null ? `${t.score}%` : '—'}</b>
-                      <small>
-                        {t.right} of {t.answered} right
-                      </small>
-                    </span>
+                  <span className={cx('cp3-nx-badge sj-num', scoreLevel(t.score))}>
+                    {t.score !== null ? `${t.score}%` : '—'}
                   </span>
-                  <span className="cp3-next-body">
+                  <span className="cp3-nx-text">
                     <b>{t.name}</b>
                     {t.section_name ? <small>{t.section_name}</small> : null}
                   </span>
-                  <span className="cp3-next-go">
-                    Practise this topic <IconArrowRight size={16} />
-                  </span>
+                  <IconArrowRight size={18} className="cp3-nx-go" />
                 </button>
               </li>
             ))}
