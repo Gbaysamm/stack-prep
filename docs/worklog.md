@@ -15,6 +15,15 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Notifications and reports: planned, on the tracker
+- **What:** migration 058 adds a Notifications area: the plan (in progress today) and its parts
+  in build order: the engine and hourly job, in-app inbox, email reminders, weekly report,
+  rewards and plan notes, parents, settings, push. Found in place: `mailer.py` (only password
+  reset so far), the `guardians` tables (sms, whatsapp, email, in_app), announcements and the
+  green notes; no scheduled job yet.
+- **Why:** founder, 17 Nov 2026.
+- **Status:** committed, not pushed.
+
 ### Skeletons follow each page's own layout, on every page
 - **What:** each page's loading skeleton is its own shape again (a dark header block on a page
   without one is wrong). Pages with a dark header draw it with `HeroSkeleton` (dark, light

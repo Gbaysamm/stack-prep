@@ -151,3 +151,14 @@ Order of work (each shown at 1440 and 390 before the next):
 - Worklog entry with each fix; this tracker updated with each change and pushed with each push.
 - Check every UI state at 1440 and 390.
 - Updates every 2 minutes during long runs; watch the usage limits.
+
+## Notifications and reports (founder, 17 Nov 2026)
+
+| Ask (founder) | Plan | Where | Status |
+|---|---|---|---|
+| Notify students at different stages (missed day, streak at risk, rewards, motivation), like Duolingo | One engine, an hourly job, a cap per day per channel | `notifications` (to build) | In progress (plan) |
+| In-app notifications | A bell and an inbox | app shell | To do |
+| Email reminders the day after a missed day | At their usual time; gentler on days 3 and 7; weekly after; stop after two weeks | mailer + job | To do |
+| Weekly (or daily) report by email, with gains and insights | Links to Progress; Progress is the report page | mailer + job | To do |
+| Parents told after a student defaults; parent reports | Email first; WhatsApp or SMS later (paid); with consent | `guardians` (exists) | To do |
+| Push notifications | Web push with permission | service worker | To do |
