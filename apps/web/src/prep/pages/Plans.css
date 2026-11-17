@@ -250,3 +250,78 @@
   font-size: 12px;
   font-weight: 700;
 }
+
+/* ================================================================== 17 Nov 2026
+   Lined up, one plan standing out (a green shadow means "the one to look at"), "Your plan" as a
+   tag, flat buttons, and on a phone each plan's first four lines until "See everything". */
+.sj .pl-plan-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.sj .pl-tag {
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: var(--green-400, #85de4c);
+  color: var(--ink-900, #1f0050);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.sj .pl-tag.mine {
+  background: var(--purple-050, #f3ebff);
+  color: var(--purple-700, #6500ff);
+}
+.sj .pl-badge {
+  display: none;
+}
+.sj .pl-blurb {
+  min-height: 2.9em;
+}
+.sj .pl-plan.featured {
+  box-shadow: 5px 5px 0 var(--green-400, #85de4c);
+}
+.sj .pl-plan.current {
+  box-shadow: 5px 5px 0 var(--purple-300, #b789ff);
+}
+.sj .pl-page .sj-btn,
+.sj .pl-page .sj-btn:hover,
+.sj .pl-page .sj-btn:active {
+  box-shadow: none;
+}
+.sj .pl-soon:disabled {
+  opacity: 1;
+  color: var(--gray-500, #8a86a0);
+}
+.sj .pl-more {
+  display: none;
+  align-self: flex-start;
+  padding: 0;
+  color: var(--purple-700, #6500ff);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+@media (max-width: 640px) {
+  .sj .pl-features:not(.whole) li.later {
+    display: none;
+  }
+  .sj .pl-more {
+    display: inline-flex;
+  }
+  .sj .pl-blurb {
+    min-height: 0;
+  }
+  .sj .pl-plan.featured {
+    box-shadow: 4px 4px 0 var(--green-400, #85de4c);
+  }
+}
+/* Every title line one height, with or without a tag, so prices line up. */
+.sj .pl-plan-top {
+  min-height: 28px;
+}
+.sj .pl-plan-top h3 {
+  margin: 0;
+}

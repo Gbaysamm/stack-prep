@@ -33,7 +33,7 @@ const longDate = (iso: string) =>
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 /** What the hero says: the plan they're on, or what's left of the free allowance. */
-function heroWords(standing: Standing | null): { title: string; sub: string } {
+function heroWords(standing: Standing | null, open = true): { title: string; sub: string } {
   if (standing?.premium && standing.plan_name) {
     return {
       title: `You're on ${standing.plan_name}`,
@@ -42,7 +42,9 @@ function heroWords(standing: Standing | null): { title: string; sub: string } {
         : 'Everything in your plan is open to you.',
     };
   }
-  const intro = 'Pay once for the time you want. Nothing renews by itself; pay by card, bank transfer or USSD.';
+  const intro = open
+    ? 'Pay once for the time you want. Nothing renews by itself; pay by card, bank transfer or USSD.'
+    : 'Payments open soon. Until then, see what each plan gives; nothing renews by itself when they do.';
   if (!standing || !standing.limits_on || standing.premium) return { title: 'Choose your plan', sub: intro };
   const allowance = standing.allowance;
   const parts: string[] = [];
@@ -62,6 +64,7 @@ function heroWords(standing: Standing | null): { title: string; sub: string } {
 
 function PlanCard({
   plan,
+  featured,
   length,
   current,
   open,
@@ -69,6 +72,7 @@ function PlanCard({
   onChoose,
 }: {
   plan: Plan;
+  featured: boolean;
   length: Length | null;
   current: boolean;
   open: boolean;
@@ -79,11 +83,16 @@ function PlanCard({
   const listed = length ? plan.prices[length.id] : undefined;
   const price = listed !== undefined && offer ? (offer === 100 ? 0 : Math.max(10000, Math.floor((listed * (100 - offer)) / 100))) : listed;
   const perMonth = price !== undefined && length && length.days >= 60 ? Math.round((price * 30) / length.days / 100) * 100 : null;
+  const [whole, setWhole] = useState(false);
+  const lines = featureLines(plan.features);
   return (
-    <li className={`sj-card pl-plan ${plan.featured ? 'featured' : ''} ${current ? 'current' : ''}`}>
-      {plan.featured ? <span className="pl-badge">Most popular</span> : null}
-      <h3 className="sj-display sj-h3">{plan.name}</h3>
-      {plan.blurb ? <p className="pl-blurb">{plan.blurb}</p> : null}
+    <li className={`sj-card pl-plan ${featured ? 'featured' : ''} ${current ? 'current' : ''}`}>
+      <div className="pl-plan-top">
+        <h3 className="sj-display sj-h3">{plan.name}</h3>
+        {current ? <span className="pl-tag mine">Your plan</span> : featured ? <span className="pl-tag">Most chosen</span> : null}
+      </div>
+      {/* Every plan says what it is for, so prices and lists line up across the row. */}
+      <p className="pl-blurb">{plan.blurb || (plan.kind === 'free' ? 'Start here. No card needed.' : '')}</p>
       <p className="pl-price">
         {plan.kind === 'free' ? (
           <>
@@ -106,14 +115,19 @@ function PlanCard({
           <span className="pl-per">Not sold for {length?.label.toLowerCase() ?? 'this length'}</span>
         )}
       </p>
-      <ul className="pl-features">
-        {featureLines(plan.features).map((line) => (
-          <li key={line.text} className={line.on ? undefined : 'off'}>
+      <ul className={`pl-features ${whole ? 'whole' : ''}`}>
+        {lines.map((line, index) => (
+          <li key={line.text} className={`${line.on ? '' : 'off'} ${index >= LINES_SHOWN ? 'later' : ''}`}>
             {line.on ? <IconCheck size={16} /> : <IconClose size={16} />}
             <span>{line.text}</span>
           </li>
         ))}
       </ul>
+      {lines.length > LINES_SHOWN && !whole ? (
+        <button type="button" className="pl-more" onClick={() => setWhole(true)}>
+          See everything in {plan.name}
+        </button>
+      ) : null}
       <div className="pl-plan-foot">
         {current ? (
           <Button block tone="soft" disabled>
@@ -124,15 +138,21 @@ function PlanCard({
             Included for everyone
           </Button>
         ) : (
-          <Button
-            block
-            tone={plan.featured ? 'primary' : 'soft'}
-            disabled={!open || price === undefined}
-            onClick={() => onChoose(plan)}
-            trailing={<IconArrowRight size={18} />}
-          >
-            Choose {plan.name}
-          </Button>
+          open ? (
+            <Button
+              block
+              tone={featured ? 'primary' : 'soft'}
+              disabled={price === undefined}
+              onClick={() => onChoose(plan)}
+              trailing={<IconArrowRight size={18} />}
+            >
+              Choose {plan.name}
+            </Button>
+          ) : (
+            <Button block tone="ghost" disabled className="pl-soon">
+              Coming soon
+            </Button>
+          )
         )}
       </div>
     </li>
@@ -302,6 +322,17 @@ function CheckoutDialog({
   );
 }
 
+/** The middle paid plan by price at this length: the one most students need. */
+function middlePaid(plans: Plan[], length: Length | null): string | undefined {
+  const paid = plans
+    .filter((p) => p.kind !== 'free')
+    .sort((a, b) => (length ? (a.prices[length.id] ?? 0) - (b.prices[length.id] ?? 0) : 0));
+  return paid[Math.floor((paid.length - 1) / 2)]?.id;
+}
+
+/** What a plan card shows on a phone before "See everything". */
+const LINES_SHOWN = 4;
+
 export function Plans() {
   usePageTitle('Plans');
   const student = useStudent();
@@ -321,7 +352,7 @@ export function Plans() {
     () => lengths.find((item) => item.id === lengthId) ?? lengths[0] ?? null,
     [lengths, lengthId],
   );
-  const hero = heroWords(standing.data ?? null);
+  const hero = heroWords(standing.data ?? null, catalogue.data?.checkout_open ?? true);
   const loading = !catalogue.data || !standing.data;
   const failed = catalogue.error || standing.error;
   const plans = catalogue.data?.plans ?? [];
@@ -401,14 +432,12 @@ export function Plans() {
               ) : null
             }
           >
-            {!catalogue.data!.checkout_open ? (
-              <p className="pl-quiet pl-closed">Payments aren't open yet. Check back soon.</p>
-            ) : null}
             <ul className="pl-grid" style={{ ['--plans' as string]: Math.min(plans.length, 4) }}>
               {plans.map((plan) => (
                 <PlanCard
                   key={plan.id}
                   plan={plan}
+                  featured={plan.featured || (!plans.some((p) => p.featured) && plan.id === middlePaid(plans, length))}
                   length={length}
                   current={
                     plan.kind === 'free'

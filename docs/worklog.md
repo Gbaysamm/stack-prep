@@ -15,6 +15,15 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Plans: lined up, one plan standing out, honest about payments
+- **What:** every plan has a line under its name (Free: "Start here. No card needed."), so prices
+  and lists line up. The plan most students need (the marked one, else the middle paid plan)
+  carries a green shadow and "Most chosen"; the student's own plan says "Your plan". While
+  payments are closed the hero says "Payments open soon" and the buttons read "Coming soon",
+  flat. On a phone each plan shows four lines until "See everything in …".
+- **Why:** founder, 17 Nov 2026.
+- **Status:** committed, not pushed.
+
 ### Onboarding: flat buttons and a reward when the plan is saved
 - **What:** every onboarding button sits flat (the lime "Save and continue" and "Go to my
   dashboard" had a dark shadow the purple ones did not). Saving the plan plays the reward
