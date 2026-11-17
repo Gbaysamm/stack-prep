@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useMemo, type ReactNode } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { api } from '../../student/api.js';
 import { IconArrowRight, IconBolt, IconBook, IconClock, IconTarget, IconTrophy } from '../icons.js';
@@ -21,7 +21,6 @@ import {
   Alert,
   HeroStats,
   Note,
-  RunRow,
   Section,
   Standing,
   WeakList,
@@ -32,7 +31,7 @@ import {
   useStartPractice,
 } from './Home.js';
 import { useRunGate } from '../RunGate.js';
-import { TopicLegend, TopicStrengths, checkupDueWords } from './Progress.js';
+import { RunCard, TopicLegend, TopicStrengths, checkupDueWords } from './Progress.js';
 import './SubjectHub.css';
 
 const WEEK = [
@@ -255,11 +254,14 @@ function Topics({ subject }: { subject: SubjectOverview }) {
   if (!topics.some((topic) => topic.answered > 0)) return null;
   const latest = subject.latest_checkup;
   // Drawn as on Progress (founder, 17 Nov 2026): each section a band that folds open.
+  // The Progress page's classes (prog2, prog2-topics), so its banded sections look the same here.
   return (
+    <div className="prog2 hub-prog2">
     <Section
       eyebrow="Topic by topic"
       title="How each topic stands"
       id="hub-topics"
+      className="prog2-topics"
       sub="Each topic's score is the questions you got right out of those you answered there."
       tip={<MetricTip id="status" />}
     >
@@ -281,6 +283,7 @@ function Topics({ subject }: { subject: SubjectOverview }) {
         {gate.popup}
       </div>
     </Section>
+    </div>
   );
 }
 
@@ -362,6 +365,8 @@ function HubBody({
   switcher?: ReactNode;
 }) {
   const starter = useStartPractice();
+  // A run started from here stays here: held runs are said in a popup (RunGate.tsx).
+  const runGate = useRunGate();
   const hasGoal = !!subject.goal && subject.goal.target_score !== null;
   const hero = useHeroActions(subject, hasGoal);
   const subjectRuns = useMemo(
@@ -491,7 +496,7 @@ function HubBody({
           ) : null
         }
       >
-        <div className="sj-card hub-panel">
+        <div className="prog2 hub-prog2">
           {runs.error && !runs.data ? (
             <Note
               icon={<IconBolt size={18} />}
@@ -506,23 +511,39 @@ function HubBody({
           ) : !runs.data ? (
             <div className="hub-skel">
               {[0, 1, 2].map((i) => (
-                <Skeleton key={i} height={60} radius={10} />
+                <Skeleton key={i} height={72} radius={10} />
               ))}
             </div>
           ) : subjectRuns.length > 0 ? (
             <>
-              <ul className="home-runs" id="hub-run-list">
+              {/* The Progress page's run cards (founder, 17 Nov 2026). */}
+              <ul className="prog2-runlist" id="hub-run-list">
                 {runPage.items.map((run) => (
-                  <RunRow key={run.session_id} run={run} showSubject={false} />
+                  <RunCard key={run.session_id} run={run} showSubject={false} />
                 ))}
               </ul>
               <Pager paged={runPage} noun="runs" label={`Pages of your ${subject.subject_name} runs`} anchorId="hub-runs" />
             </>
           ) : (
-            <Note icon={<IconBolt size={18} />} tone="lime" title={`No ${subject.subject_name} runs yet`}>
-              Your first run shows up here the moment you start it, with how it went.
-            </Note>
+            <div className="prog2-empty">
+              <span className="prog2-empty-icon" aria-hidden="true">
+                <IconBolt size={20} />
+              </span>
+              <div>
+                <b>No {subject.subject_name} runs yet</b>
+                <p>Each run you do shows here, with how it went.</p>
+              </div>
+              <Button
+                size="sm"
+                busy={starter.busy !== null}
+                onClick={() => runGate.startRun(() => void starter.start(subject.subject_id))}
+                trailing={<IconArrowRight size={16} />}
+              >
+                Start a {subject.subject_name} run
+              </Button>
+            </div>
           )}
+          {runGate.popup}
         </div>
       </Section>
     </>
@@ -533,11 +554,30 @@ function useRuns(studentId: string) {
   return useLoad(() => progressApi.runs(studentId, 50), [studentId]);
 }
 
+/** "Use of English" → "use-of-english". */
+export function subjectSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export function SubjectHub() {
-  const { subjectId = '' } = useParams();
+  const { subjectId: param = '' } = useParams();
   const student = useStudent();
   const overview = useOverview(student.studentId);
   const catalogue = useLoad(() => api.catalogue(), []);
+  const navigate = useNavigate();
+  // The address is the subject's name; its id still works (old links), and the student's own
+  // subjects are matched first, so "biology" is the Biology they sit.
+  const bySlug = !UUID.test(param);
+  const subjectId = bySlug
+    ? (overview.data?.subjects.find((s) => subjectSlug(s.subject_name) === param)?.subject_id ??
+      catalogue.data?.flatMap((e) => e.subjects).find((s) => subjectSlug(s.name) === param)?.subject_id ??
+      '')
+    : param;
   useEffect(() => {
     if (subjectId) rememberSubject(subjectId);
   }, [subjectId]);
@@ -564,6 +604,11 @@ export function SubjectHub() {
       : undefined);
 
   usePageTitle(subject?.subject_name ?? 'Subject');
+  // An id in the address is swapped for the name, without a new history entry.
+  const slug = subject ? subjectSlug(subject.subject_name) : null;
+  useEffect(() => {
+    if (slug && !bySlug) navigate(`/subjects/${slug}${window.location.hash}`, { replace: true });
+  }, [slug, bySlug, navigate]);
 
   if (overview.error && !overview.data) {
     return (

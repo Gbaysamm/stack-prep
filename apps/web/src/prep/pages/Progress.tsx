@@ -401,7 +401,7 @@ function RunStrip({ runs }: { runs: Run[] }) {
  * One run: its own little battery bar (right first time, taught, missed, not answered yet, as
  * in the strip), what it covered and when, and how much was right first time.
  */
-function RunCard({ run, showSubject }: { run: Run; showSubject: boolean }) {
+export function RunCard({ run, showSubject }: { run: Run; showSubject: boolean }) {
   const missed = Math.max(0, run.answered - run.correct_unaided - run.taught);
   const open = Math.max(0, run.length - run.answered);
   const topics = run.subtopics ?? run.topics ?? [];

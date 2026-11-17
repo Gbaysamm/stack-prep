@@ -15,6 +15,17 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Subject page matches Progress; its address is its name; tighter corners everywhere
+- **What:** "How each topic stands" now carries the Progress page's classes, so its tinted
+  section bands, bars and card look exactly the same. The subject's runs are the Progress run
+  cards; with none yet, "Start a Use of English run" starts one there (a held run is a popup),
+  not a trip to Practice. The address is /subjects/use-of-english; an old id link still works
+  and is rewritten to the name. Corners app-wide: the shared radii (md 8, lg 10, xl 12) and 24
+  hard-coded larger corners set to 12px.
+- **Why:** founder, 17 Nov 2026.
+- **Where:** `SubjectHub.tsx`, `Progress.tsx` (RunCard exported), `prep.css`, page CSS files.
+- **Status:** committed, not pushed.
+
 ### Subject page: no other subjects' tabs; topics fold as on Progress; matching buttons
 - **What:** a subject's page no longer shows tabs for the other subjects. "How each topic stands"
   uses the Progress page's sections that fold open, every topic, the check-up report link on the
