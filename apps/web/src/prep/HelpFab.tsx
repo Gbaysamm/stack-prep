@@ -5,6 +5,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { IconArrowRight, IconClose, IconMail } from './icons.js';
@@ -41,10 +42,15 @@ export function HelpFab() {
 
   if (pathname.startsWith('/messages') || pathname.startsWith('/help/messages')) return null;
 
-  return (
-    <>
+  // Drawn at the top of the document, never inside the page's layout, so opening it can never
+  // widen or shift the page (founder, 17 Nov 2026).
+  return createPortal(
+    <div className="sj hf-root">
+      {/* On a phone the page dims behind the sheet; a tap on it closes the sheet. */}
+      {open ? <div className="hf-scrim" aria-hidden="true" onClick={() => setOpen(false)} /> : null}
       {open ? (
         <div ref={panel} className="hf-panel" role="dialog" aria-modal="false" aria-labelledby="hf-title">
+          <span className="hf-handle" aria-hidden="true" />
           <div className="hf-head">
             <span className="hf-icon" aria-hidden="true">
               <IconMail size={18} />
@@ -89,6 +95,7 @@ export function HelpFab() {
       >
         {open ? <IconClose size={22} /> : <IconMail size={22} />}
       </button>
-    </>
+    </div>,
+    document.body,
   );
 }

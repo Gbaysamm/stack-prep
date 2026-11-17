@@ -15,6 +15,16 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Phone pages were wider than the screen; help panel as a bottom sheet
+- **What:** a hidden screen-reader label in the subject chips (`.ss-sr`) had no position, so it
+  sat at the far end of the chip row, past the edge of a phone, and made Home (and every page
+  with the chips) 482 px wide on a 390 px screen; the phone shrank the whole page to fit, which
+  read as the layout shifting. It is pinned now; Home, Progress and Practice measure 390 px. The
+  help panel renders at the top of the document (a portal), and on a phone opens as a bottom
+  sheet over a dimmed page. Send is a small, flat button.
+- **Why:** founder, 17 Nov 2026.
+- **Status:** committed, not pushed.
+
 ### Messages: their own page, and a help button on every page
 - **What:** writing to the team and the conversations moved off Help & guides to /messages
   ("Talk to a person"), in the sidebar as Messages; replies open at /messages/:id (the old

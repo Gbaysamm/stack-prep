@@ -113,7 +113,7 @@ export function WriteForm({ onSent, compact = false }: { onSent: (threadId: stri
           {error}
         </p>
       ) : null}
-      <Button type="submit" busy={busy} icon={<IconSend size={18} />}>
+      <Button type="submit" size="sm" busy={busy} icon={<IconSend size={16} />} className="su-send">
         Send
       </Button>
     </form>
