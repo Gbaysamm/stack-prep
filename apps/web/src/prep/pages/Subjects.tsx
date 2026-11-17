@@ -2,14 +2,16 @@
  * /subjects — the student's subjects, one tap from each one's page (founder, 17 Nov 2026).
  * Each subject is an exam ticket (moved here from Profile, which the founder liked): the
  * target on a torn-off stub, then the subject, its exam day and study time, its score now and
- * the days to go. The ticket opens the subject; Edit opens its goal.
+ * the days to go. The ticket opens the subject; Edit opens its goal; Swap (not on the
+ * compulsory subject, which comes first) puts another subject in its place.
  */
 
 import { Link } from 'react-router-dom';
 
-import type { Goal } from '../../student/api.js';
+import type { ExaminationOffer, Goal } from '../../student/api.js';
 import { api } from '../../student/api.js';
 import { IconArrowRight, IconCalendar, IconChart, IconChevronRight, IconClock, IconReplay, IconTarget } from '../icons.js';
+import { useSwap } from '../swap.js';
 import { progressApi, type Overview } from '../progressApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
 import { Button, PageHero, Skeleton, cx, daysUntil } from '../ui.js';
@@ -38,16 +40,19 @@ function longDate(iso: string): string {
   return Number.isNaN(date.getTime()) ? iso : date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-/** A plus, drawn in the icon family's style (the shared set has none). */
-function IconPlus() {
-  return (
-    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" aria-hidden="true">
-      <path d="M12 5v14M5 12h14" />
-    </svg>
-  );
-}
-
-function SubjectTicket({ goal, exam, score }: { goal: Goal; exam?: string; score: number | null }) {
+function SubjectTicket({
+  goal,
+  exam,
+  score,
+  compulsory,
+  onSwap,
+}: {
+  goal: Goal;
+  exam?: string;
+  score: number | null;
+  compulsory: boolean;
+  onSwap: () => void;
+}) {
   const days = daysUntil(goal.exam_date);
   const pace = rhythm(goal);
   const target = goal.target_score != null ? Math.round(goal.target_score) : null;
@@ -64,10 +69,20 @@ function SubjectTicket({ goal, exam, score }: { goal: Goal; exam?: string; score
         <span className="pro-ticket-body">
           <span className="top">
             <span className="sj-eyebrow">{exam ?? 'Exam'}</span>
-            <Link to={`/subjects/${goal.subject_id}/goal`} className="edit sb3-edit" aria-label={`Edit your ${goal.subject_name} goal`}>
-              Edit
-              <IconChevronRight size={16} />
-            </Link>
+            <span className="sb3-acts">
+              {compulsory ? (
+                <span className="sb3-compulsory">Compulsory</span>
+              ) : (
+                <button type="button" className="edit sb3-edit" onClick={onSwap}>
+                  <IconReplay size={14} />
+                  Swap
+                </button>
+              )}
+              <Link to={`/subjects/${goal.subject_id}/goal`} className="edit sb3-edit" aria-label={`Edit your ${goal.subject_name} goal`}>
+                Edit
+                <IconChevronRight size={16} />
+              </Link>
+            </span>
           </span>
           <strong className="sj-display">{goal.subject_name}</strong>
           <span className="pro-ticket-meta">
@@ -108,11 +123,23 @@ export function Subjects() {
       Promise.all([
         api.goals(student.studentId),
         progressApi.overview(student.studentId).catch(() => null as Overview | null),
+        api.catalogue().catch(() => [] as ExaminationOffer[]),
       ]),
     [student.studentId],
   );
-  const goals = (load.data?.[0] ?? []).filter((goal) => goal.target_score != null || goal.exam_date);
+  const catalogue = load.data?.[2] ?? [];
+  const isCompulsory = (id: string) =>
+    catalogue.some((e) => e.subjects.some((s) => s.subject_id === id && s.compulsory));
+  // The compulsory subject first (Use of English), then the rest by name.
+  const goals = (load.data?.[0] ?? [])
+    .filter((goal) => goal.target_score != null || goal.exam_date)
+    .sort(
+      (a, b) =>
+        Number(isCompulsory(b.subject_id)) - Number(isCompulsory(a.subject_id)) ||
+        a.subject_name.localeCompare(b.subject_name),
+    );
   const overview = load.data?.[1] ?? null;
+  const swapper = useSwap(catalogue, load.data?.[0] ?? [], load.reload);
   const subjectOf = (id: string) => overview?.subjects.find((s) => s.subject_id === id);
   const exam = goals[0]?.examination_short_name ?? '';
   const scores = goals.map((g) => subjectOf(g.subject_id)?.scores?.score ?? null);
@@ -125,7 +152,7 @@ export function Subjects() {
       <PageHero
         eyebrow="Your subjects"
         title={goals.length > 0 ? `${goals.length} ${goals.length === 1 ? 'subject' : 'subjects'}${exam ? ` for ${exam}` : ''}` : 'Your subjects'}
-        sub="Tap a subject for its topics, lessons and runs. Edit changes its target and study time."
+        sub="Tap a subject for its topics, lessons and runs. Swap puts another subject in its place; Edit changes its target and study time."
         aside={
           allScored ? (
             <HeroStats
@@ -186,22 +213,14 @@ export function Subjects() {
                 goal={goal}
                 exam={subjectOf(goal.subject_id)?.examination_short_name}
                 score={scores[i] ?? null}
+                compulsory={isCompulsory(goal.subject_id)}
+                onSwap={() => swapper.start(goal.subject_id)}
               />
             ))}
-            <li>
-              <Link to="/exams" className="pro-ticket-add">
-                <span className="home-iconrow">
-                  <span className="home-icontile" aria-hidden="true">
-                    <IconPlus />
-                  </span>
-                  <strong className="sj-display sj-h3">Change your subjects</strong>
-                </span>
-                <span className="txt">Add or swap a subject on the Exams page.</span>
-              </Link>
-            </li>
           </ul>
         )}
       </Section>
+      {swapper.dialog}
     </div>
   );
 }

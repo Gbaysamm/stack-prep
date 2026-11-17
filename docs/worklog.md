@@ -15,6 +15,13 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Subjects: swap from the ticket; the compulsory subject first
+- **What:** each subject ticket has Swap beside Edit (a popup of the subjects that can take its
+  place, `prep/swap.tsx`); the compulsory subject (Use of English) comes first and says
+  "Compulsory" instead. The "Change your subjects" card is gone.
+- **Why:** founder, 17 Nov 2026.
+- **Status:** committed, not pushed.
+
 ### The app stalled when Inworld could not be reached
 - **What:** opening the Roadmap fetches the next lessons' packages; each made its voice line by
   line from Inworld while holding a database connection. With Inworld unreachable, every line
