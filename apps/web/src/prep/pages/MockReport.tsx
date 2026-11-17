@@ -19,7 +19,7 @@ import { nextSteps, previousOf, timeStats, trendOf, weakTopics } from '../mock/i
 import { clock, mockApi, type EventKind, type MockReport as Report, type SubjectResult } from '../mockApi.js';
 import { orGone } from '../runsApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
-import { Button, Dialog, Empty, Skeleton, cx, useToast } from '../ui.js';
+import { Button, Dialog, Empty, cx, useToast, PageSkeleton } from '../ui.js';
 import { NextSteps, Section, SummaryHero, TimeInsights, TopicBreakdown, Trend, WeakAreas } from './MockInsights.js';
 import './Mock.css';
 import './MockInsights.css';
@@ -394,12 +394,7 @@ export function MockReport() {
   const report = loaded.data;
 
   if (loaded.loading && report === undefined) {
-    return (
-      <div className="sj-page mk-page">
-        <Skeleton height={220} />
-        <Skeleton height={200} />
-      </div>
-    );
+    return <PageSkeleton />;
   }
   if (loaded.error) {
     return (

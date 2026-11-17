@@ -14,7 +14,7 @@ import type { CheckupResult, SubjectScore, TopicScore, TopicStatus } from "../..
 import { IconArrowRight, IconBolt, IconChart, IconChevronDown, IconChevronRight, IconTarget } from "../icons.js";
 import { progressApi, type PracticeRunPage, type SubjectOverview } from "../progressApi.js";
 import { useLoad, usePageTitle, useStudent } from "../store.js";
-import { Button, PageHero, Skeleton, cx } from "../ui.js";
+import { Button, PageHero, Skeleton, cx, PageSkeleton } from "../ui.js";
 import { ALL, scoreLevel, useOverview, useSubjectChoice } from "../SubjectSwitcher.js";
 import { MasteryBar, Note, Section, runHref, shortDate } from "./Home.js";
 import { useRunGate } from "../RunGate.js";
@@ -572,19 +572,7 @@ export function Progress() {
   }
 
   if (!overview.data) {
-    return (
-      <div className="sj-page prog" aria-busy="true">
-        <div className="prog-skel-sec">
-          <Skeleton width={120} height={12} />
-          <Skeleton width="min(300px, 70%)" height={28} radius={8} />
-          <Skeleton height={260} radius={14} />
-        </div>
-        <div className="prog-skel-duo">
-          <Skeleton height={320} radius={14} />
-          <Skeleton height={320} radius={14} />
-        </div>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   if (subjects.length === 0 && runs.length === 0 && !first.loading) {

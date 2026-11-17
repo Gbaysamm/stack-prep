@@ -6,7 +6,7 @@
  * board and the mock exam room are focus pages that have none.
  */
 
-import { lazy, Suspense, type ComponentType } from 'react';
+import { lazy, Suspense, useEffect, type ComponentType } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useSearchParams } from 'react-router-dom';
 
 import './prep.css';
@@ -22,8 +22,39 @@ import { IdentityProvider, RequireStudent, useIdentity } from './store.js';
 import { ToastProvider } from './ui.js';
 
 /** Pages behind sign-in, each loaded the first time it is opened (shell.tsx shows a spinner). */
+/** Every page's code loader, so the app can fetch them all in the background once it is up. */
+const LOADERS: (() => Promise<unknown>)[] = [];
+
 function later<T extends string>(load: () => Promise<Record<T, ComponentType>>, name: T) {
+  LOADERS.push(load);
   return lazy(() => load().then((module) => ({ default: module[name] })));
+}
+
+/**
+ * Fetch every page's code quietly after the app has started (founder, 17 Nov 2026: a page
+ * opened for the first time waited on its code, with a spinner, before its own skeleton).
+ * Done while the browser is idle, one after another, so it never competes with the page.
+ */
+function usePreloadPages() {
+  useEffect(() => {
+    // Only on the built site: in development each page is hundreds of separate files, and
+    // fetching them all slows the machine the app is being tested on.
+    if (!import.meta.env.PROD) return;
+    let stopped = false;
+    const idle = (go: () => void) =>
+      'requestIdleCallback' in window
+        ? (window as Window & { requestIdleCallback: (cb: () => void) => number }).requestIdleCallback(go)
+        : window.setTimeout(go, 200);
+    const next = (index: number) => {
+      if (stopped || index >= LOADERS.length) return;
+      idle(() => void LOADERS[index]!().catch(() => undefined).finally(() => next(index + 1)));
+    };
+    const start = window.setTimeout(() => next(0), 1500);
+    return () => {
+      stopped = true;
+      window.clearTimeout(start);
+    };
+  }, []);
 }
 const CheckIns = later(() => import('./pages/CheckIns.js'), 'CheckIns');
 const Lesson = later(() => import('./pages/Lesson.js'), 'Lesson');
@@ -72,6 +103,7 @@ function Start() {
 }
 
 export function PrepApp() {
+  usePreloadPages();
   return (
     <BrowserRouter>
       <IdentityProvider>

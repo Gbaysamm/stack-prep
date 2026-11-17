@@ -21,7 +21,7 @@ import {
   IconTarget,
 } from '../icons.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
-import { Button, CountUp, Dialog, PageHero, Skeleton, Steps, cx, daysUntil, useToast } from '../ui.js';
+import { Button, CountUp, Dialog, PageHero, Steps, cx, daysUntil, useToast, PageSkeleton } from '../ui.js';
 import { DatePicker } from '../../lib/DatePicker.js';
 import { StudyMinutes } from '../StudyMinutes.js';
 import { leastTime, type LeastTime } from '../studyTime.js';
@@ -1036,30 +1036,6 @@ function FullExam({
 /* ------------------------------------------------------------------ loading */
 
 function GoalSkeleton() {
-  return (
-    <div className="sj-page goal-page" aria-busy="true" aria-label="Loading your goal">
-      <div className="goal-skelhero">
-        <Skeleton height={12} width={160} />
-        <Skeleton height={40} width="45%" />
-        <Skeleton height={16} width="60%" />
-      </div>
-      <div className="goal-layout">
-        <div className="goal-rail sj-card">
-          <Skeleton height={12} width={90} />
-          <div className="goal-skelsteps">
-            {[0, 1, 2, 3].map((key) => (
-              <Skeleton key={key} height={56} radius={10} />
-            ))}
-          </div>
-        </div>
-        <div className="goal-stage">
-          <Skeleton height={12} width={90} />
-          <Skeleton height={34} width="60%" radius={8} />
-          <Skeleton height={120} width={260} radius={14} />
-          <Skeleton height={10} radius={8} />
-          <Skeleton height={42} width="70%" radius={8} />
-        </div>
-      </div>
-    </div>
-  );
+  // The one loading shape for a page (founder, 17 Nov 2026: each page had its own).
+  return <PageSkeleton />;
 }

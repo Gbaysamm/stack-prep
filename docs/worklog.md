@@ -15,6 +15,18 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Loading looks the same everywhere, and less waiting
+- **What:** one page skeleton (`PageSkeleton`: the hero as a dark block, then cards) replaces
+  the spinner shown while a page's code loads and the seven page skeletons each page drew its
+  own way (the run report's was faded to near-transparent); Roadmap, Progress and the mock
+  report use it too. On the built site every page's code is fetched quietly after start, so a
+  first visit rarely waits on it. The practice summary is shared like the overview.
+- **Timings (local, dev server):** most pages settle in 1.5-5 s here, inflated by the dev
+  server's unbundled files; the real costs are the roadmap (0.5-2 s) and the lesson packages
+  Home warms in the background (up to ~20 s each while their voice is made).
+- **Why:** founder, 17 Nov 2026.
+- **Status:** committed, not pushed.
+
 ### Phone pages were wider than the screen; help panel as a bottom sheet
 - **What:** a hidden screen-reader label in the subject chips (`.ss-sr`) had no position, so it
   sat at the far end of the chip row, past the edge of a phone, and made Home (and every page

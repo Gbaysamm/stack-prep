@@ -427,6 +427,23 @@ export function Skeleton({ height = 20, width = '100%', radius }: { height?: num
   return <div className="sj-skel" style={{ height, width, borderRadius: radius }} aria-hidden="true" />;
 }
 
+/**
+ * The one loading shape for a whole page: the hero, then two cards. Shown while a page's code or
+ * its data comes, so loading always looks the same (founder, 17 Nov 2026: a spinner on some
+ * pages, a skeleton on others).
+ */
+export function PageSkeleton() {
+  return (
+    <div className="sj-page sj-page-skel" aria-busy="true" aria-label="Loading">
+      <div className="sj-skel sj-skel-hero" />
+      <Skeleton height={14} width={160} />
+      <Skeleton height={26} width="40%" />
+      <Skeleton height={180} radius={10} />
+      <Skeleton height={140} radius={10} />
+    </div>
+  );
+}
+
 export function Empty({
   icon,
   title,

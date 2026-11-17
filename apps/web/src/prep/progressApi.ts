@@ -137,7 +137,8 @@ export const progressApi = {
   overview: (studentId: string) =>
     shared(`overview:${studentId}`, KEEP.overview, () => get<Overview>(`/student/${studentId}/overview`).then(visible)),
   /** Practice across subjects: right without a hint, in all, this week and the week before. */
-  practiceSummary: (studentId: string) => get<PracticeSummary>(`/student/${studentId}/practice/summary`),
+  practiceSummary: (studentId: string) =>
+    shared(`practice-summary:${studentId}`, KEEP.overview, () => get<PracticeSummary>(`/student/${studentId}/practice/summary`)),
   runs: (studentId: string, limit = 20, before?: string, subjectId?: string) =>
     get<PracticeRunPage>(
       `/student/${studentId}/practice?limit=${limit}${before ? `&before=${encodeURIComponent(before)}` : ''}${

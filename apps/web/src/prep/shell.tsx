@@ -53,7 +53,7 @@ import {
 import { progressApi, type Overview } from "./progressApi.js";
 import { StreakChip } from "./Streak.js";
 import { TitleProvider, useIdentity, useLoad, useStudent } from "./store.js";
-import { Dialog, Button, IconButton, Spinner, initials } from "./ui.js";
+import { Dialog, Button, IconButton, PageSkeleton, initials } from "./ui.js";
 
 const NAV = [
   { to: "/home", label: "Home", icon: IconHome },
@@ -482,9 +482,7 @@ export function AppShell() {
             {/* A page opened for the first time loads here, inside the frame. */}
             <Suspense
               fallback={
-                <div className="sj-page-loading" aria-label="Loading">
-                  <Spinner size={26} />
-                </div>
+                <PageSkeleton />
               }
             >
               <Outlet />

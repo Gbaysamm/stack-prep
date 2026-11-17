@@ -17,7 +17,7 @@ import {
   type RoadmapSubject,
 } from '../roadmapApi.js';
 import { usePageTitle, useStudent } from '../store.js';
-import { Button, CountUp, PageHero, Skeleton } from '../ui.js';
+import { Button, CountUp, PageHero, PageSkeleton } from '../ui.js';
 import { FIRST_PATH, HeroStats, Section } from './Home.js';
 import './Roadmap.css';
 
@@ -70,10 +70,7 @@ export function Roadmap() {
             </Button>
           </>
         ) : (
-          <>
-            <Skeleton height={180} radius={18} />
-            <Skeleton height={320} radius={18} />
-          </>
+          <PageSkeleton />
         )}
       </div>
     );

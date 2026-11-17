@@ -41,7 +41,7 @@ import {
 import { Journey, type Stop } from '../Journey.js';
 import { itemLabel, today as todayOf, useRoadmap, useStartItem, type Roadmap } from '../roadmapApi.js';
 import { usePageTitle, useStudent } from '../store.js';
-import { Badge, Button, CountUp, PageHero, ShowMore, Skeleton, Track, cx, greeting, useShowMore, useToast } from '../ui.js';
+import { Badge, Button, CountUp, PageHero, ShowMore, Track, cx, greeting, useShowMore, useToast, PageSkeleton } from '../ui.js';
 import { HOW_PATH, MetricTip, type MetricId } from './HowItsWorkedOut.js';
 import { pathStops } from './Roadmap.js';
 import './Home.css';
@@ -1035,20 +1035,8 @@ function FirstRun({ overview }: { overview: Overview }) {
 }
 
 function HomeSkeleton() {
-  return (
-    <div aria-busy="true" aria-label="Loading your dashboard">
-      <Skeleton height={236} radius={18} />
-      <div className="home-skel-sec">
-        <Skeleton width={120} height={12} />
-        <Skeleton width="min(300px, 70%)" height={28} radius={8} />
-        <Skeleton height={250} radius={14} />
-      </div>
-      <div className="home-duo">
-        <Skeleton height={320} radius={14} />
-        <Skeleton height={320} radius={14} />
-      </div>
-    </div>
-  );
+  // The one loading shape for a page (founder, 17 Nov 2026: each page had its own).
+  return <PageSkeleton />;
 }
 
 /** Starts a check-up or a run from a row, remembering which row is busy. */

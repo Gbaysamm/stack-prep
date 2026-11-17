@@ -36,7 +36,7 @@ import {
 import { progressApi, type Overview } from '../progressApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
 import { Celebrate } from '../Celebrate.js';
-import { Button, CountUp, Skeleton, cx, daysUntil, useToast } from '../ui.js';
+import { Button, CountUp, cx, daysUntil, useToast, PageSkeleton } from '../ui.js';
 import { examTitle, isHiddenExam } from './Exams.js';
 import { CountdownTip } from '../countdown.js';
 import { Journey } from '../Journey.js';
@@ -1515,21 +1515,6 @@ function Finish({
 /* ------------------------------------------------------------------ loading */
 
 function OnboardingSkeleton() {
-  return (
-    <div className="onb-main" aria-busy="true" aria-label="Loading your setup">
-      <div className="onb-rail onb-rail-skel">
-        <Skeleton height={12} width={120} />
-        <Skeleton height={28} width="60%" />
-        {[0, 1, 2, 3].map((key) => (
-          <Skeleton key={key} height={52} radius={10} />
-        ))}
-      </div>
-      <div className="onb-stage">
-        <Skeleton height={12} width={90} />
-        <Skeleton height={34} width="60%" radius={8} />
-        <Skeleton height={16} width="80%" />
-        <Skeleton height={180} radius={14} />
-      </div>
-    </div>
-  );
+  // The one loading shape for a page (founder, 17 Nov 2026: each page had its own).
+  return <PageSkeleton />;
 }
