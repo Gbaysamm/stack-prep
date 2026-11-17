@@ -1,0 +1,38 @@
+/* ── Stackjunior type scale ────────────────────────────────────────
+   Sizes are the exact values seen in the source comps. Display uses
+   Clash Display (Nohemi sub); body uses Switzer (PP Neue Montreal sub).
+   Headings run at line-height 100% (tight) — a Stackjunior signature. */
+
+:root {
+  /* Display (Nohemi Black 900 in source) */
+  --fs-display-xxl: 96px;  /* hero + section titles */
+  --fs-display-xl: 64px;   /* proof headline / large */
+  --fs-display-lg: 40px;
+
+  /* Body / UI (PP Neue Montreal 400/700) */
+  --fs-body-xl: 40px;      /* section subheads */
+  --fs-body-lg: 24px;      /* lead paragraph / nav wordmark */
+  --fs-body-md: 20px;      /* body copy, button label */
+  --fs-body-sm: 16px;
+  --fs-label: 20.23px;     /* pill CTA label (source value) */
+
+  --lh-tight: 1;           /* @kind font */ /* 100% — display + most UI text */
+  --lh-snug: 1.15;         /* @kind font */
+  --lh-normal: 1.4;        /* @kind font */ /* long-form paragraphs */
+
+  --fw-regular: 400;       /* @kind font */
+  --fw-medium: 500;        /* @kind font */
+  --fw-bold: 700;          /* @kind font */
+  --fw-black: 700;         /* @kind font */ /* Clash Display tops out at 700 (≈ Nohemi Black) */
+
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0em;
+}
+
+/* Optional utility classes (components mostly set type inline via vars) */
+.sj-display { font-family: var(--font-display); font-weight: var(--fw-black); line-height: var(--lh-tight); }
+.sj-title   { font-family: var(--font-display); font-weight: var(--fw-black); font-size: var(--fs-display-xxl); line-height: var(--lh-tight); }
+.sj-subhead { font-family: var(--font-body); font-weight: var(--fw-regular); font-size: var(--fs-body-xl); line-height: var(--lh-tight); }
+.sj-lead    { font-family: var(--font-body); font-weight: var(--fw-regular); font-size: var(--fs-body-lg); line-height: var(--lh-normal); }
+.sj-body    { font-family: var(--font-body); font-weight: var(--fw-regular); font-size: var(--fs-body-md); line-height: var(--lh-normal); }
+.sj-mono    { font-family: var(--font-mono); font-weight: var(--fw-regular); }

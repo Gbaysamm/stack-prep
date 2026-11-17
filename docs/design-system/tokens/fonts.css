@@ -1,0 +1,21 @@
+/* ── Stackjunior webfonts ──────────────────────────────────────────
+   The source .fig uses two COMMERCIAL fonts we cannot ship:
+     • Nohemi            (display / headings)  → substituted with Clash Display (Fontshare)
+     • PP Neue Montreal  (body / UI)           → substituted with Switzer      (Fontshare)
+   Manrope, Space Mono and Danfo are open (Google Fonts) and used as-is.
+   ⚠️  If you own Nohemi / PP Neue Montreal, drop the .woff2 files in
+   assets/fonts/ and swap the @font-face src below. See readme.md. */
+
+@import url("https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=switzer@300,400,500,600,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@300..800&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Danfo&display=swap");
+
+:root {
+  /* Display — chunky geometric headings (Nohemi substitute) */
+  --font-display: "Clash Display", "Nohemi", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  /* Body / UI grotesque (PP Neue Montreal substitute) */
+  --font-body: "Switzer", "PP Neue Montreal", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  /* Support families straight from the source */
+  --font-manrope: "Manrope", var(--font-body);
+  --font-mono: "Space Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-danfo: "Danfo", var(--font-display);
+}
