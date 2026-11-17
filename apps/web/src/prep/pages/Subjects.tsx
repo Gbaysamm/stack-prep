@@ -2,7 +2,7 @@
  * /subjects — the student's subjects, one tap from each one's page (founder, 17 Nov 2026).
  * Each subject is an exam ticket (moved here from Profile, which the founder liked): the
  * target on a torn-off stub, then the subject, its exam day and study time, its score now and
- * the days to go. The ticket opens the subject; Edit opens its goal; Swap (not on the
+ * the days to go. The ticket opens the subject; Swap (not on the
  * compulsory subject, which comes first) puts another subject in its place.
  */
 
@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 
 import type { ExaminationOffer, Goal } from '../../student/api.js';
 import { api } from '../../student/api.js';
-import { IconArrowRight, IconCalendar, IconChart, IconChevronRight, IconClock, IconReplay, IconTarget } from '../icons.js';
+import { IconArrowRight, IconCalendar, IconChart, IconClock, IconReplay, IconTarget } from '../icons.js';
 import { useSwap } from '../swap.js';
 import { progressApi, type Overview } from '../progressApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
@@ -59,7 +59,7 @@ function SubjectTicket({
   return (
     <li>
       <div className="pro-ticket sb3-ticket">
-        {/* The whole ticket opens the subject; Edit sits above it and opens the goal. */}
+        {/* The whole ticket opens the subject; Swap sits above it. */}
         <Link to={`/subjects/${goal.subject_id}`} className="sb3-cover" aria-label={`Open ${goal.subject_name}`} />
         <span className="pro-ticket-stub">
           <span className="label sj-mono">Target</span>
@@ -71,17 +71,16 @@ function SubjectTicket({
             <span className="sj-eyebrow">{exam ?? 'Exam'}</span>
             <span className="sb3-acts">
               {compulsory ? (
-                <span className="sb3-compulsory">Compulsory</span>
+                <span className="sb3-chip tag">Compulsory</span>
               ) : (
-                <button type="button" className="edit sb3-edit" onClick={onSwap}>
+                <button type="button" className="sb3-chip" onClick={onSwap} aria-label={`Swap ${goal.subject_name} for another subject`}>
                   <IconReplay size={14} />
                   Swap
                 </button>
               )}
-              <Link to={`/subjects/${goal.subject_id}/goal`} className="edit sb3-edit" aria-label={`Edit your ${goal.subject_name} goal`}>
-                Edit
-                <IconChevronRight size={16} />
-              </Link>
+              <span className="sb3-open" aria-hidden="true">
+                <IconArrowRight size={16} />
+              </span>
             </span>
           </span>
           <strong className="sj-display">{goal.subject_name}</strong>
@@ -152,7 +151,7 @@ export function Subjects() {
       <PageHero
         eyebrow="Your subjects"
         title={goals.length > 0 ? `${goals.length} ${goals.length === 1 ? 'subject' : 'subjects'}${exam ? ` for ${exam}` : ''}` : 'Your subjects'}
-        sub="Tap a subject for its topics, lessons and runs. Swap puts another subject in its place; Edit changes its target and study time."
+        sub="Tap a subject for its topics, lessons and runs. Swap puts another subject in its place."
         aside={
           allScored ? (
             <HeroStats
