@@ -1822,3 +1822,75 @@
   margin-top: 2px;
   font-size: 13px;
 }
+
+/* Desktop (founder, 17 Nov 2026): the phone's order, laid across. The ring and its count side
+   by side, the score beside them past a rule; the answers across the full width; the bar to
+   the target with the button at its end. */
+@media (min-width: 901px) {
+  .sj .cp3-hero {
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'disc note lead lead'
+      'disc note moved moved'
+      'marks marks marks marks'
+      'journey journey journey go';
+    column-gap: 22px;
+    row-gap: 6px;
+    align-items: center;
+    padding: 28px 32px;
+  }
+  .sj .cp3-dial,
+  .sj .cp3-hero-main {
+    display: contents;
+  }
+  .sj .cp3-disc {
+    grid-area: disc;
+  }
+  .sj .cp3-dial-note {
+    grid-area: note;
+    justify-items: start;
+    text-align: left;
+    padding-right: 28px;
+    border-right: 1.5px solid var(--purple-100, #e6d6ff);
+    align-self: stretch;
+    align-content: center;
+  }
+  .sj .cp3-dial-note .cp3-chip {
+    justify-self: start;
+  }
+  .sj .cp3-dial-note b {
+    font-size: 18px;
+  }
+  .sj .cp3-dial-note small {
+    font-size: 14px;
+  }
+  .sj .cp3-lead {
+    grid-area: lead;
+    align-self: end;
+    padding-left: 6px;
+  }
+  .sj .cp3-hero-main > .cp3-chip {
+    grid-area: moved;
+    align-self: start;
+    margin-top: 0;
+    padding-left: 6px;
+  }
+  .sj .cp3-marks {
+    grid-area: marks;
+    margin-top: 22px;
+    padding-top: 22px;
+    border-top: 1.5px solid var(--purple-100, #e6d6ff);
+  }
+  .sj .cp3-journey {
+    grid-area: journey;
+    margin-top: 16px;
+  }
+  .sj .cp3-hero-foot {
+    grid-area: go;
+    align-self: end;
+    margin-left: 12px;
+  }
+}
+.sj .cp3-dial-note {
+  border-radius: 0;
+}

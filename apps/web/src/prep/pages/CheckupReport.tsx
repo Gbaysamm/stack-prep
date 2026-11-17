@@ -221,9 +221,7 @@ export function CheckupReport() {
               <small>in this check-up</small>
               {data.previous_score !== null && score !== null ? (
                 <Moved by={score - data.previous_score} words="since your last check-up" />
-              ) : (
-                <span className="cp3-chip first">Your first check-up</span>
-              )}
+              ) : null}
             </span>
           </div>
 
