@@ -11,8 +11,10 @@ by email, to every student with an email address. None of it can be turned off (
 - account (plans starting and ending, password and login changes).
 - the weekly report (`report`).
 
-Not by email: rewards (in the app, where they are earned), the welcome, and replies to their
-messages (support emails those itself).
+Not by email: rewards (in the app, where they are earned) and replies to their messages
+(support emails those itself). The welcome, security changes, a plan starting and an account
+suspended or restored go within seconds (`send_soon`), signed in or not; the rest at the hourly
+run. How each email looks is app/emails/, one file per email.
 
 `weekly_reports` writes the report on Sunday from 6 pm their time: days studied, time, questions,
 accuracy against the week before, the topics practised most, and the weakest one as next
@@ -22,6 +24,8 @@ Progress, which is the report page.
 
 from __future__ import annotations
 
+import asyncio
+import json
 import logging
 from datetime import datetime
 from typing import Any
@@ -30,115 +34,148 @@ from uuid import UUID
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import mailer
+from app import emails, mailer
 from app.config import get_settings
 
 log = logging.getLogger(__name__)
 
 ACCOUNT_KINDS = (
+    "welcome",
     "plan_started",
     "plan_ending",
     "plan_ended",
     "password_changed",
     "password_reset",
     "login_changed",
+    "account_suspended",
+    "account_restored",
+)
+#: Sent within seconds of happening, not at the next hourly run (`send_soon`).
+INSTANT_KINDS = (
+    "welcome",
+    "plan_started",
+    "password_changed",
+    "password_reset",
+    "login_changed",
+    "account_suspended",
+    "account_restored",
 )
 #: How many notifications one run emails at most, so a backlog never floods the mail server.
 PER_RUN = 300
 
-DUE = """
-    SELECT n.id, n.student_id, n.kind, n.category, n.title, n.body, n.link_url,
-           s.email, s.display_name,
-           CASE WHEN n.category IN ('nudge', 'plan') THEN 'reminders' ELSE n.kind END AS batch
-    FROM notifications n
-    JOIN students s ON s.id = n.student_id
-    WHERE n.emailed_at IS NULL AND n.dismissed_at IS NULL
-      AND n.created_at > now() - interval '1 day'
-      AND s.email IS NOT NULL AND s.status NOT IN ('suspended', 'archived')
-      AND (n.category IN ('nudge', 'plan', 'report') OR n.kind = ANY (CAST(:account AS text[])))
-    ORDER BY n.created_at
-    LIMIT :n
+#: What is due, claimed in the same statement (`emailed_at` set), so two senders running at
+#: once (the hourly job and an instant send) never send the same email twice.
+CLAIM = """
+    WITH due AS (
+      SELECT n.id
+      FROM notifications n
+      JOIN students s ON s.id = n.student_id
+      WHERE n.emailed_at IS NULL AND n.dismissed_at IS NULL
+        AND n.created_at > now() - interval '1 day'
+        AND s.email IS NOT NULL
+        AND (CAST(:student AS uuid) IS NULL OR n.student_id = CAST(:student AS uuid))
+        AND (n.kind = ANY (CAST(:kinds AS text[]))
+             OR (n.category IN ('nudge', 'plan', 'report')
+                 AND s.status NOT IN ('suspended', 'archived')))
+      ORDER BY n.created_at
+      LIMIT :n
+      FOR UPDATE OF n SKIP LOCKED
+    )
+    UPDATE notifications n SET emailed_at = now()
+      FROM due, students s
+     WHERE n.id = due.id AND s.id = n.student_id
+    RETURNING n.id, n.student_id, n.kind, n.category, n.title, n.body, n.link_url, n.data,
+              n.created_at, s.email, s.display_name,
+              CASE WHEN n.category IN ('nudge', 'plan') THEN 'reminders'
+                   ELSE n.id::text END AS batch
 """
 
 
-def email_text(rows: list[dict[str, Any]], base: str) -> str:
-    """The plain email: one notification, or the day's reminders together, with their links."""
-    first = (rows[0]["display_name"] or "there").split()[0]
-    lines = [f"Hi {first},"]
-    for row in rows:
-        lines += ["", row["title"]]
-        if row["body"]:
-            lines.append(row["body"])
-        if row["link_url"]:
-            lines.append(f"Open it: {base}{row['link_url']}")
-    lines += ["", "Stack Prep", "", "--", "These emails come with your Stack Prep account."]
-    return "\n".join(lines)
+def app_address() -> str:
+    """The student app's address: PUBLIC_URL, else the first address the API lets in."""
+    settings = get_settings()
+    return (settings.public_url or next(iter(settings.cors_origin_list), "")).rstrip("/")
 
 
-def subject_for(rows: list[dict[str, Any]]) -> str:
-    title = str(rows[0]["title"])
-    return title if len(rows) == 1 else f"{title} (and {len(rows) - 1} more)"
-
-
-async def send_due(conn: AsyncConnection) -> int:
-    """Email what is due; returns how many emails were sent.
+async def send_due(conn: AsyncConnection, student_id: UUID | None = None) -> int:
+    """Email what is due (for everyone, or one student); returns how many emails were sent.
 
     Reminders are one email a day at most: everything due in a run goes in one email, and once
     one has gone, later reminders that day stay in the app. Reports and account emails always go.
     """
-    settings = get_settings()
-    # The student app's address: PUBLIC_URL, else the first address the API lets in.
-    base = (settings.public_url or next(iter(settings.cors_origin_list), "")).rstrip("/")
+    base = app_address()
+    kinds = list(ACCOUNT_KINDS)
     rows = [
         dict(r)
         for r in (
-            await conn.execute(text(DUE), {"account": list(ACCOUNT_KINDS), "n": PER_RUN})
+            await conn.execute(
+                text(CLAIM),
+                {"kinds": kinds, "n": PER_RUN, "student": str(student_id) if student_id else None},
+            )
         ).mappings()
     ]
+    # Claimed: from here a failure is logged by the mailer and not retried, since a retry next
+    # hour would send a stale reminder.
+    await conn.commit()
+    rows.sort(key=lambda r: r["created_at"])
     groups: dict[tuple[UUID, str], list[dict[str, Any]]] = {}
     for row in rows:
-        key = (row["student_id"], row["batch"] if row["batch"] == "reminders" else str(row["id"]))
-        groups.setdefault(key, []).append(row)
+        groups.setdefault((row["student_id"], row["batch"]), []).append(row)
     sent = 0
-    for (student_id, batch), group in groups.items():
+    for (student, batch), group in groups.items():
         reminders = batch == "reminders"
-        quiet = reminders and bool(
-            await conn.scalar(
-                text(
-                    "SELECT 1 FROM notification_email_state WHERE student_id = :s"
-                    " AND last_reminder_email_at > now() - interval '20 hours'"
-                ),
-                {"s": student_id},
-            )
-        )
-        if not quiet:
-            ok = await mailer.send_email(
-                group[0]["email"], subject_for(group), email_text(group, base)
-            )
-            sent += int(ok)
-            if ok and reminders:
-                await conn.execute(
-                    text(
-                        """
-                        INSERT INTO notification_email_state (student_id, last_reminder_email_at)
-                        VALUES (:s, now())
-                        ON CONFLICT (student_id) DO UPDATE SET last_reminder_email_at = now()
-                        """
-                    ),
-                    {"s": student_id},
-                )
-        # Marked either way: a failure is logged by the mailer, and a retry next hour would
-        # send a stale reminder; a reminder held back stays in the app.
-        await conn.execute(
+        if reminders and await conn.scalar(
             text(
-                "UPDATE notifications SET emailed_at = now() WHERE id = ANY (CAST(:ids AS uuid[]))"
+                "SELECT 1 FROM notification_email_state WHERE student_id = :s"
+                " AND last_reminder_email_at > now() - interval '20 hours'"
             ),
-            {"ids": [str(r["id"]) for r in group]},
-        )
-        await conn.commit()
-    if groups:
+            {"s": student},
+        ):
+            continue  # one reminder email a day: these stay in the app
+        email = emails.render(group, base)
+        ok = await mailer.send_email(group[0]["email"], email.subject, email.text, email.html)
+        sent += int(ok)
+        if ok and reminders:
+            await conn.execute(
+                text(
+                    """
+                    INSERT INTO notification_email_state (student_id, last_reminder_email_at)
+                    VALUES (:s, now())
+                    ON CONFLICT (student_id) DO UPDATE SET last_reminder_email_at = now()
+                    """
+                ),
+                {"s": student},
+            )
+            await conn.commit()
+    if rows:
         log.info("notification emails: %s sent for %s due", sent, len(rows))
     return sent
+
+
+_pending: set[asyncio.Task[None]] = set()
+
+
+def send_soon(student_id: UUID) -> None:
+    """Email this student's instant notifications in a few seconds, after the caller commits.
+
+    Only where email is set up; elsewhere the hourly job finds them (and logs them locally).
+    """
+    if not get_settings().smtp_host:
+        return
+
+    async def run() -> None:
+        from app.db import get_engine
+
+        await asyncio.sleep(3)
+        try:
+            async with get_engine().connect() as conn:
+                await send_due(conn, student_id)
+        except Exception:  # never let an email break the request that caused it
+            log.exception("sending instant notification emails failed")
+
+    task = asyncio.get_running_loop().create_task(run())
+    _pending.add(task)
+    task.add_done_callback(_pending.discard)
 
 
 # ------------------------------------------------------------------ the weekly report
@@ -234,6 +271,36 @@ def report_words(week: dict[str, Any], topics: list[dict[str, Any]]) -> tuple[st
     return title, " ".join(parts)[:600]
 
 
+def report_data(week: dict[str, Any], topics: list[dict[str, Any]]) -> dict[str, Any]:
+    """The report's figures, for the email's four tiles and its lines."""
+    answered = int(week["answered"])
+    accuracy = round(100 * int(week["correct"]) / answered) if answered else 0
+    data: dict[str, Any] = {
+        "days": int(week["days"]),
+        "time": _time(int(week["ms"])),
+        "answered": answered,
+        "accuracy": accuracy,
+    }
+    before = int(week["answered_before"])
+    if before and answered:
+        was = round(100 * int(week["correct_before"]) / before)
+        data["change"] = (
+            f"Up from {was}%"
+            if accuracy > was
+            else f"Down from {was}%"
+            if accuracy < was
+            else "The same"
+        )
+    if topics:
+        data["most"] = [t["topic"] for t in topics[:2]]
+        weak = [t for t in topics if int(t["answered"]) >= 3]
+        if weak:
+            focus = min(weak, key=lambda t: float(t["accuracy"]))
+            if float(focus["accuracy"]) < 0.7:
+                data["focus"] = focus["topic"]
+    return data
+
+
 async def weekly_reports(conn: AsyncConnection, now: datetime | None = None) -> int:
     """Write this week's report for every student due one; returns how many were written."""
     due = [dict(r) for r in (await conn.execute(text(REPORT_DUE), {"now": now})).mappings()]
@@ -244,17 +311,25 @@ async def weekly_reports(conn: AsyncConnection, now: datetime | None = None) -> 
         week = dict((await conn.execute(text(WEEK), params)).mappings().one())
         topics = [dict(r) for r in (await conn.execute(text(TOPICS), params)).mappings()]
         title, body = report_words(week, topics)
+        data = report_data(week, topics)
         added = await conn.scalar(
             text(
                 """
                 INSERT INTO notifications (student_id, kind, category, title, body, link_url,
-                                           dedupe_key)
-                VALUES (:s, 'weekly_report', 'report', :title, :body, '/progress', :key)
+                                           dedupe_key, data)
+                VALUES (:s, 'weekly_report', 'report', :title, :body, '/progress', :key,
+                        CAST(:data AS jsonb))
                 ON CONFLICT (student_id, dedupe_key) DO NOTHING
                 RETURNING 1
                 """
             ),
-            {"s": student["id"], "title": title, "body": body, "key": f"week-{today}"},
+            {
+                "s": student["id"],
+                "title": title,
+                "body": body,
+                "key": f"week-{today}",
+                "data": json.dumps(data),
+            },
         )
         written += int(added is not None)
     await conn.commit()

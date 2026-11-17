@@ -209,7 +209,10 @@ async def notify(
     link_url: str | None,
     key: str,
 ) -> None:
-    """Tell a student something that just happened. Once per `key`; the caller commits."""
+    """Tell a student something that just happened. Once per `key`; the caller commits.
+
+    Welcome, security, plan-start and account emails go within seconds (after the commit).
+    """
     await conn.execute(
         text(
             """
@@ -229,6 +232,10 @@ async def notify(
             "key": key[:120],
         },
     )
+    from app import notification_email
+
+    if kind in notification_email.INSTANT_KINDS:
+        notification_email.send_soon(student_id)
 
 
 #: Each student's wall clock, kept only while it is daytime there (8 am to 9 pm).

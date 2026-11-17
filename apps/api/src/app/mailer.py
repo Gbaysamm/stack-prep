@@ -1,4 +1,4 @@
-"""Sending email: today only the password-reset code.
+"""Sending email: the password-reset code, support replies, and notifications (with HTML).
 
 SMTP settings come from the environment (`SMTP_*`, `MAIL_FROM`). With no host set nothing is
 sent; outside production the message is written to the log instead, so the flow can be used
@@ -35,8 +35,9 @@ def _send_now(message: EmailMessage) -> None:
         server.send_message(message)
 
 
-async def send_email(to: str, subject: str, body: str) -> bool:
-    """Send a plain-text email; False when it could not be sent (the reason is logged)."""
+async def send_email(to: str, subject: str, body: str, html: str | None = None) -> bool:
+    """Send an email (plain text, and HTML beside it when given); False when it could not be
+    sent (the reason is logged)."""
     settings = get_settings()
     if not settings.smtp_host:
         if settings.app_env == "production":
@@ -49,6 +50,8 @@ async def send_email(to: str, subject: str, body: str) -> bool:
     message["To"] = to
     message["Subject"] = subject
     message.set_content(body)
+    if html:
+        message.add_alternative(html, subtype="html")
     try:
         await asyncio.to_thread(_send_now, message)
     except (OSError, smtplib.SMTPException):

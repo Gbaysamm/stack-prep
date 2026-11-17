@@ -685,7 +685,7 @@ async def reset_password(
         kind="password_reset",
         category="system",
         title="Your password was reset",
-        body="If this wasn't you, reset your password now and write to us in Messages.",
+        body="Your Stack Prep password was reset with a code sent to this email.",
         link_url="/settings",
         key=f"password_reset-{secrets.token_hex(6)}",
     )
@@ -786,7 +786,7 @@ async def change_password(
         kind="password_changed",
         category="system",
         title="Your password was changed",
-        body="If this wasn't you, reset your password now and write to us in Messages.",
+        body="Your Stack Prep password was changed just now, and other devices were signed out.",
         link_url="/settings",
         key=f"password_changed-{secrets.token_hex(6)}",
     )
@@ -858,7 +858,7 @@ async def change_login_details(
             kind="login_changed",
             category="system",
             title="Your login details were changed",
-            body="If this wasn't you, reset your password now and write to us in Messages.",
+            body="The email or phone you sign in with was changed just now.",
             link_url="/settings",
             key=f"login_changed-{secrets.token_hex(6)}",
         )

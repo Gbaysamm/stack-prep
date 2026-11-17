@@ -24,7 +24,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import audit
+from app import audit, notifications
 from app.auth import Staff, admin_session, hash_password
 from app.db import connection, fetch_all
 from app.routers.billing import Standing, _standing
@@ -477,9 +477,7 @@ async def temporary_password(
         )
     if student_id == staff.student_id:
         raise HTTPException(status_code=409, detail="Change your own password in Account settings.")
-    password = "-".join(
-        "".join(secrets.choice(_READABLE) for _ in range(4)) for _ in range(3)
-    )
+    password = "-".join("".join(secrets.choice(_READABLE) for _ in range(4)) for _ in range(3))
     hashed = await hash_password(password)
     await conn.execute(
         text(
@@ -494,9 +492,12 @@ async def temporary_password(
     )
     await conn.execute(text("DELETE FROM auth_sessions WHERE student_id = :s"), {"s": student_id})
     await audit.record(
-        conn, staff, "student.password",
+        conn,
+        staff,
+        "student.password",
         f"Set a temporary password for {account.display_name}",
-        target_kind="student", target_id=student_id,
+        target_kind="student",
+        target_id=student_id,
     )
     await conn.commit()
     return TemporaryPassword(password=password)
@@ -525,11 +526,31 @@ async def change_status(
         await conn.execute(
             text("DELETE FROM auth_sessions WHERE student_id = :s"), {"s": student_id}
         )
+    suspended = body.status == "suspended"
+    await notifications.notify(
+        conn,
+        student_id,
+        kind="account_suspended" if suspended else "account_restored",
+        category="system",
+        title="Your Stack Prep account is paused" if suspended else "Your account is open again",
+        body=(
+            "You can't sign in for now. If you think this is a mistake, write to us through "
+            "the Contact page on our website."
+            if suspended
+            else "You can sign in again and carry on where you stopped. Everything is as you "
+            "left it."
+        ),
+        link_url=None if suspended else "/home",
+        key=f"account-{body.status}-{secrets.token_hex(6)}",
+    )
     await audit.record(
-        conn, staff, f"student.{'suspend' if body.status == 'suspended' else 'restore'}",
+        conn,
+        staff,
+        f"student.{'suspend' if body.status == 'suspended' else 'restore'}",
         f"{'Suspended' if body.status == 'suspended' else 'Restored'} "
         f"{await audit.name_of(conn, student_id)}",
-        target_kind="student", target_id=student_id,
+        target_kind="student",
+        target_id=student_id,
     )
     await conn.commit()
     return await _account(conn, student_id)
@@ -568,9 +589,12 @@ async def change_role(
             {"s": student_id, "role": body.role, "by": staff.student_id},
         )
     await audit.record(
-        conn, staff, "student.role",
+        conn,
+        staff,
+        "student.role",
         f"Made {await audit.name_of(conn, student_id)} a {body.role}",
-        target_kind="student", target_id=student_id,
+        target_kind="student",
+        target_id=student_id,
     )
     await conn.commit()
     return await _account(conn, student_id)

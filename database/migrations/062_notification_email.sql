@@ -11,11 +11,18 @@ CREATE TABLE notification_email_state (
 );
 
 ALTER TABLE notifications ADD COLUMN emailed_at timestamptz;
+-- What an email needs beyond the words, such as the weekly report's figures.
+ALTER TABLE notifications ADD COLUMN data jsonb;
 CREATE INDEX notifications_to_email ON notifications (created_at) WHERE emailed_at IS NULL;
 
 UPDATE tracker_items
    SET status = 'doing', planned_for = (now() AT TIME ZONE 'Africa/Lagos')::date,
        updated_at = now(), updated_by = 'Stack Prep'
  WHERE title = 'Weekly reports by email, to students and parents';
+
+INSERT INTO tracker_items (area, status, title, note, updated_by) VALUES
+  ('Notifications', 'todo', 'Delete my account',
+   'Students cannot delete their account yet (admins can only suspend). Needs its own page, '
+   || 'a goodbye email, and what happens to their data.', 'Stack Prep');
 
 COMMIT;

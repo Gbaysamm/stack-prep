@@ -15,6 +15,24 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Email templates, one file each; instant emails; account emails
+- **What:** `app/emails/`: `layout.py` (the frame: mark, label, title, card, purple button,
+  footer; tables and inline styles for Gmail, Outlook and phones) and one file per email
+  (welcome with three first steps, weekly report with four figures, the day's reminders
+  together, one reminder, plan started, ending, ended, password changed, password reset, login
+  changed with a "Wasn't you?" box, account paused, account open again, and a plain notice for
+  anything else); `__init__.render` picks the file by kind. HTML with a plain-text copy beside
+  it (`mailer.send_email(..., html=)`). The welcome, security, plan-start and account emails go
+  within seconds (`send_soon`, after the commit, only where SMTP is set), signed in or not; the
+  hourly job sends the rest and anything missed. Emails are claimed before sending, so the two
+  senders never send one twice. Admin suspend and restore now notify and email the student.
+  `notifications.data` keeps the weekly report's figures. "Delete my account" is on the
+  tracker: the app has no deletion yet. Review page with every email:
+  https://claude.ai/artifact/KeMjHHJGis3RoV2F1sJfAT (private).
+- **Why:** founder, 17 Nov 2026: see the templates; emails on sign-up, account changes and the
+  like, signed in or not; one file per template.
+- **Status:** committed, not pushed.
+
 ### Notifications by email, and the weekly report
 - **What:** migration 062 (`notification_email_state` for the last reminder email;
   `notifications.emailed_at`). `notification_email.py`: after each hourly run the worker emails
