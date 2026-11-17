@@ -49,6 +49,7 @@ const PracticeRoom = later(() => import('./pages/PracticeRoom.js'), 'PracticeRoo
 const Profile = later(() => import('./pages/Profile.js'), 'Profile');
 const Settings = later(() => import('./pages/Settings.js'), 'Settings');
 const Bookmarks = later(() => import('./pages/Bookmarks.js'), 'Bookmarks');
+const BookmarksSubject = later(() => import('./pages/Bookmarks.js'), 'BookmarksSubject');
 const Progress = later(() => import('./pages/Progress.js'), 'Progress');
 const RunBuilder = later(() => import('./pages/RunBuilder.js'), 'RunBuilder');
 const RunReport = later(() => import('./pages/RunReport.js'), 'RunReport');
@@ -114,6 +115,7 @@ export function PrepApp() {
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/bookmarks" element={<Bookmarks />} />
+                  <Route path="/bookmarks/:subject" element={<BookmarksSubject />} />
                   <Route path="/plans" element={<Plans />} />
                   <Route path="/plans/paid" element={<PlanPaid />} />
                   <Route path="/help" element={<Help />} />

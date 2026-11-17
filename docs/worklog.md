@@ -15,6 +15,16 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Saved questions: a page of subjects, then a page per subject
+- **What:** /bookmarks shows four figures (saved in all, this week, ready to revise, subjects)
+  and a card per subject (how many, the topics most come from, when last saved, "Revise N in a
+  run", "See all"). /bookmarks/:subject (by name, e.g. use-of-english) lists that subject's
+  saved questions as the one-line question cards, ten a page. The empty state is calmer: the
+  tile, a title, one line, one button. The sidebar link reads "Saved questions".
+- **Why:** founder, 17 Nov 2026: a hundred saved questions in one subject must not make one
+  long page.
+- **Status:** committed, not pushed.
+
 ### Saved questions rebuilt
 - **What:** /bookmarks (now titled Saved questions) lists each subject's saved questions as the
   check-up report's one-line question cards: "Kept 16 Nov", year and number, the start of the

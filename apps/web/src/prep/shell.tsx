@@ -66,7 +66,7 @@ const NAV = [
 
 /** Places a student goes less often than every day: under the main list, and in the phone menu. */
 const MORE = [
-  { to: "/bookmarks", label: "Bookmarks", icon: IconBookmark },
+  { to: "/bookmarks", label: "Saved questions", icon: IconBookmark },
   { to: "/plans", label: "Plans", icon: IconSparkles },
   { to: "/exams", label: "Exams", icon: IconBook },
   { to: "/help", label: "Help & guides", icon: IconHelp },
