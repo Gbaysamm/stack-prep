@@ -109,7 +109,8 @@ async def synthesize(said: str, settings: Settings) -> Clip | None:
         "Content-Type": "application/json",
     }
     try:
-        async with httpx.AsyncClient(timeout=httpx.Timeout(TIMEOUT_SECONDS, connect=CONNECT_SECONDS)) as client:
+        timeout = httpx.Timeout(TIMEOUT_SECONDS, connect=CONNECT_SECONDS)
+        async with httpx.AsyncClient(timeout=timeout) as client:
             response = await client.post(URL, json=body, headers=headers)
         if response.status_code != 200:
             _log.warning("inworld refused: %s %s", response.status_code, response.text[:200])

@@ -42,4 +42,30 @@ INSERT INTO tracker_items (area, status, title, note, done_at, updated_by) VALUE
    'Inworld fails fast and is left alone for two minutes, so lesson downloads cannot hold '
    || 'every connection.', now(), 'Stack Prep');
 
+-- The rest of the day's pages (founder, 17 Nov 2026).
+UPDATE tracker_items
+   SET status = 'committed', done_at = coalesce(done_at, now()), planned_for = NULL,
+       updated_at = now(), updated_by = 'Stack Prep', note = v.note
+  FROM (VALUES
+    ('Run report', 'Kept as it is (the founder''s call); the question card head tidied.'),
+    ('Mock report', 'Kept as it is, the best page on the platform; Practise starts a run in place.'),
+    ('Practice run (the question screen)', 'One topic tag, Bookmark and Report at the right, a flat Check answer.'),
+    ('Check-up sitting', 'Shares the question screen; tools at the right end of the line.'),
+    ('After the lesson', 'A clear locked Continue, working photo only where there is working, a reward when the lesson is done.'),
+    ('Saved questions', 'A page of subjects with figures, a page per subject; each question opens to its answer and working.'),
+    ('Mock set-up', 'Only your subjects, no question counts.'),
+    ('Onboarding', 'Flat buttons and a reward when the plan is saved.'),
+    ('Plans and payment', 'Lined up, the plan most students need stands out, honest Coming soon.'),
+    ('Settings', 'In the sidebar; the scores section as two plain rows.'),
+    ('Help and messages', 'Messages on their own page and a help button on every page; Help is the guide only.')
+  ) AS v(title, note)
+ WHERE tracker_items.area = 'Page redesigns' AND tracker_items.title = v.title;
+
+INSERT INTO tracker_items (area, status, title, note, done_at, updated_by) VALUES
+  ('Page redesigns', 'committed', 'Phones: pages no longer wider than the screen',
+   'A stray hidden label stretched every page with the subject chips to 482 px on a 390 px phone.',
+   now(), 'Stack Prep'),
+  ('Page redesigns', 'committed', 'Done roadmap items open again',
+   'A check-up or run opens its report, a lesson plays again.', now(), 'Stack Prep');
+
 COMMIT;
