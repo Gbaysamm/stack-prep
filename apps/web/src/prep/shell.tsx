@@ -69,6 +69,7 @@ const MORE = [
   { to: "/bookmarks", label: "Saved questions", icon: IconBookmark },
   { to: "/plans", label: "Plans", icon: IconSparkles },
   { to: "/exams", label: "Exams", icon: IconBook },
+  { to: "/settings", label: "Settings", icon: IconSettings },
   { to: "/help", label: "Help & guides", icon: IconHelp },
 ] as const;
 
@@ -298,7 +299,7 @@ function ProfileMenu({
           </Link>
           <Link to="/bookmarks" role="menuitem" className="sj-account-item">
             <IconBookmark size={18} />
-            Bookmarks
+            Saved questions
           </Link>
           <Link to="/plans" role="menuitem" className="sj-account-item">
             <IconSparkles size={18} />
@@ -306,7 +307,7 @@ function ProfileMenu({
           </Link>
           <Link to="/exams" role="menuitem" className="sj-account-item">
             <IconBook size={18} />
-            Exams &amp; subjects
+            Exams
           </Link>
           <Link to="/help" role="menuitem" className="sj-account-item">
             <IconHelp size={18} />

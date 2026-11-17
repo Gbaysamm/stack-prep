@@ -8,6 +8,7 @@ import { api, type ScoreDisplay, type StudentProfile } from '../../student/api.j
 import { friendly } from '../../lib/friendlyError.js';
 import { useLoad } from '../store.js';
 import { Button, Skeleton, cx, useToast } from '../ui.js';
+import './Profile.css';
 
 const CHOICES: { value: ScoreDisplay; label: string }[] = [
   { value: 'percentage', label: 'Percentage' },

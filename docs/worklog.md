@@ -15,6 +15,13 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Settings: the scores section styled, and easy to find
+- **What:** "How your scores are shown" (ResultSettings) used Profile's styles without loading
+  them, so opened directly it was unstyled; it now loads them. Settings is in the sidebar under
+  More; the account menu reads "Saved questions" and "Exams" to match. Buttons on Settings sit flat.
+- **Why:** founder, 17 Nov 2026: could not find Settings.
+- **Status:** committed, not pushed.
+
 ### Plans: lined up, one plan standing out, honest about payments
 - **What:** every plan has a line under its name (Free: "Start here. No card needed."), so prices
   and lists line up. The plan most students need (the marked one, else the middle paid plan)
