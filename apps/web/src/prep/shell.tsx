@@ -21,6 +21,7 @@ import {
   IconArrowLeft,
   IconBolt,
   IconBook,
+  IconLayers,
   IconBookmark,
   IconChart,
   IconCheck,
@@ -59,6 +60,7 @@ const NAV = [
   { to: "/checkup", label: "Check-up", icon: IconTarget },
   { to: "/mock", label: "Mock exam", icon: IconClock },
   { to: "/progress", label: "Progress", icon: IconChart },
+  { to: "/subjects", label: "Subjects", icon: IconLayers },
   { to: "/profile", label: "Profile", icon: IconUser },
 ] as const;
 
@@ -66,7 +68,7 @@ const NAV = [
 const MORE = [
   { to: "/bookmarks", label: "Bookmarks", icon: IconBookmark },
   { to: "/plans", label: "Plans", icon: IconSparkles },
-  { to: "/exams", label: "Exams & subjects", icon: IconBook },
+  { to: "/exams", label: "Exams", icon: IconBook },
   { to: "/help", label: "Help & guides", icon: IconHelp },
 ] as const;
 
@@ -515,7 +517,7 @@ export function AppShell() {
         <nav className="sj-bottomnav sj-glass dark" aria-label="Main">
           {/* Five tabs fit a phone. Profile is the avatar in the top bar there, so the mock exam
               gets its own tab: a candidate should never have to hunt for it. */}
-          {NAV.filter(({ to }) => to !== "/profile").map(({ to, label, icon: Icon }) => (
+          {NAV.filter(({ to }) => to !== "/profile" && to !== "/subjects").map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}

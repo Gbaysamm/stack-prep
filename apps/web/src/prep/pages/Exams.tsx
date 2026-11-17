@@ -4,14 +4,15 @@
  * of sight.
  */
 
-import { useState, type ReactNode } from 'react';
+import { useState, type CSSProperties, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { friendly } from '../../lib/friendlyError.js';
 import { api, type ExaminationOffer, type Goal, type SubjectOffer } from '../../student/api.js';
 import { IconArrowRight, IconBook, IconClose, IconReplay } from '../icons.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
-import { Button, Dialog, Skeleton, cx, useToast } from '../ui.js';
+import { initials, toneStyle } from '../subjectTone.js';
+import { Button, Dialog, Skeleton, cx, daysUntil, useToast } from '../ui.js';
 import { Section } from './Home.js';
 import './Exams.css';
 
@@ -70,7 +71,7 @@ function bodyShort(body: string): string {
  * subjects the student is sitting are shown; no question counts, no wall of every subject.
  */
 export function Exams() {
-  usePageTitle('Exams & subjects');
+  usePageTitle('Exams');
   const student = useStudent();
   const load = useLoad(
     () => Promise.all([api.catalogue(), api.goals(student.studentId).catch(() => [] as Goal[])]),
@@ -87,11 +88,11 @@ export function Exams() {
   return (
     <div className="sj-page ex2">
       <Section
-        eyebrow="Exams & subjects"
-        title="Your exam and subjects"
+        eyebrow="Exams"
+        title="Your exam"
         id="ex2-title"
         className="ex2-first"
-        sub="The subjects you are sitting. Each one gets its own target, check-up and roadmap."
+        sub="The exam you are sitting and the subjects you sit in it."
       >
         {load.error && !load.data ? (
           <ExNote
@@ -142,7 +143,12 @@ export function Exams() {
   );
 }
 
-/** One exam: who sets it, how many places are filled, and the student's subjects in it. */
+/**
+ * One exam (second pass, 17 Nov 2026): a coloured card with the exam and its countdown, three
+ * facts about how it is sat, then the student's subjects, each in its own colour. An exam with
+ * a fixed number of subjects (UTME: four) never drops below it: a subject is swapped, not
+ * removed. Use of English, which everyone sits, is neither.
+ */
 function ExamPanel({ exam, goals, onChanged }: { exam: ExaminationOffer; goals: Goal[]; onChanged: () => void }) {
   const student = useStudent();
   const navigate = useNavigate();
@@ -153,32 +159,58 @@ function ExamPanel({ exam, goals, onChanged }: { exam: ExaminationOffer; goals: 
     .sort((a, b) => Number(b.compulsory) - Number(a.compulsory) || a.name.localeCompare(b.name));
   const canAdd = exam.subjects.filter((s) => s.ready && !goalOf(s.subject_id));
   const max = exam.max_subjects;
-  const full = max !== null && mine.length >= max;
-  const [picking, setPicking] = useState(false);
+  const fixed = max !== null;
+  const compulsory = exam.subjects.filter((s) => s.compulsory).map((s) => s.name);
+  // Picking: a subject to add (swapOut null) or one to put in place of `swapOut`.
+  const [picking, setPicking] = useState<{ swapOut: SubjectOffer | null } | null>(null);
   const [removing, setRemoving] = useState<SubjectOffer | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
-  // A subject added here takes the date, target and study time the student already set for
-  // this exam; with none set yet, its goal page asks for them.
-  const sibling = mine.map((s) => goalOf(s.subject_id)).find((g) => g?.exam_date && g.target_score != null);
-  const add = async (subject: SubjectOffer) => {
-    if (!sibling || !sibling.exam_date || sibling.target_score == null) {
+  const withDate = mine.map((s) => goalOf(s.subject_id)).find((g) => g?.exam_date);
+  const days = daysUntil(withDate?.exam_date);
+  const dateText = withDate?.exam_date
+    ? new Date(`${withDate.exam_date.slice(0, 10)}T00:00:00`).toLocaleDateString('en-GB', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
+    : null;
+
+  /** The settings a new subject takes: the one it replaces, else any set for this exam. */
+  const settingsFrom = (from: Goal | undefined) => {
+    const source = from?.exam_date && from.target_score != null ? from : mine.map((s) => goalOf(s.subject_id)).find((g) => g?.exam_date && g.target_score != null);
+    if (!source || !source.exam_date || source.target_score == null) return null;
+    return {
+      target_score: source.target_score,
+      exam_date: source.exam_date,
+      minutes_per_day: source.minutes_per_day ?? 30,
+      study_days: source.study_days ?? [1, 2, 3, 4, 5],
+    };
+  };
+
+  const choose = async (subject: SubjectOffer) => {
+    const swapOut = picking?.swapOut ?? null;
+    const settings = settingsFrom(swapOut ? goalOf(swapOut.subject_id) : undefined);
+    if (!settings) {
       navigate(`/subjects/${subject.subject_id}/goal`);
       return;
     }
     setBusy(subject.subject_id);
     try {
-      await api.setGoal(student.studentId, subject.subject_id, {
-        target_score: sibling.target_score,
-        exam_date: sibling.exam_date,
-        minutes_per_day: sibling.minutes_per_day ?? 30,
-        study_days: sibling.study_days ?? [1, 2, 3, 4, 5],
-      });
-      setPicking(false);
-      toast(`${subject.name} added`);
+      if (swapOut) await api.removeGoal(student.studentId, swapOut.subject_id);
+      try {
+        await api.setGoal(student.studentId, subject.subject_id, settings);
+      } catch (error) {
+        // Put the old one back, so a failed swap never leaves the student a subject short.
+        if (swapOut) await api.setGoal(student.studentId, swapOut.subject_id, settings).catch(() => undefined);
+        throw error;
+      }
+      setPicking(null);
+      toast(swapOut ? `${swapOut.name} swapped for ${subject.name}` : `${subject.name} added`);
       onChanged();
     } catch (error) {
-      toast(friendly(error as Error) || 'Couldn’t add it. Try again.');
+      toast(friendly(error as Error) || 'That didn’t work. Try again.');
     } finally {
       setBusy(null);
     }
@@ -197,94 +229,145 @@ function ExamPanel({ exam, goals, onChanged }: { exam: ExaminationOffer; goals: 
     }
   };
 
+  const facts = [
+    fixed ? { tone: 'blue', big: String(max), small: `subjects in ${exam.short_name}` } : null,
+    compulsory.length > 0
+      ? { tone: 'yellow', big: compulsory.join(' and '), small: compulsory.length === 1 ? 'everyone sits it' : 'everyone sits them' }
+      : null,
+    exam.sits_together
+      ? { tone: 'green', big: 'One day', small: 'all papers sat together' }
+      : { tone: 'green', big: 'Paper by paper', small: 'each subject has its own day' },
+  ].filter(Boolean) as { tone: string; big: string; small: string }[];
+
   return (
-    <div className="ex2-card">
-      <div className="ex2-head">
-        <div className="ex2-id">
-          <span className="ex2-body">Set by {bodyShort(exam.exam_body)}</span>
-          <h3 className="sj-display ex2-short">{exam.short_name}</h3>
-          <span className="ex2-name">{examTitle(exam)}</span>
+    <div className="ex3">
+      <div className="ex3-hero">
+        <div className="ex3-id">
+          <span className="ex3-body">Set by {bodyShort(exam.exam_body)}</span>
+          <h3 className="sj-display ex3-short">{exam.short_name}</h3>
+          <span className="ex3-name">{examTitle(exam)}</span>
+          {fixed ? (
+            <span className="ex3-places">
+              <span className="ex3-cells" aria-hidden="true">
+                {Array.from({ length: max }, (_, i) => (
+                  <i key={i} className={cx(i < mine.length && 'on')} />
+                ))}
+              </span>
+              <b className="sj-num">{mine.length}</b> of {max} subjects chosen
+            </span>
+          ) : null}
         </div>
-        {max !== null ? (
-          <div className="ex2-places">
-            <span>
-              <b className="sj-num">{mine.length}</b> of {max} subjects
-            </span>
-            <span className="ex2-cells" aria-hidden="true">
-              {Array.from({ length: max }, (_, i) => (
-                <i key={i} className={cx(i < mine.length && 'on')} />
-              ))}
-            </span>
+        {days !== null && days >= 0 ? (
+          <div className="ex3-count">
+            <b className="sj-num">{days}</b>
+            <span>{days === 1 ? 'day to go' : 'days to go'}</span>
+            {dateText ? <small>{dateText}</small> : null}
           </div>
         ) : null}
       </div>
 
+      <ul className="ex3-facts">
+        {facts.map((fact) => (
+          <li key={fact.small} className={fact.tone}>
+            <b>{fact.big}</b>
+            <span>{fact.small}</span>
+          </li>
+        ))}
+      </ul>
+
+      <div className="ex3-subhead">
+        <h4 className="sj-display">Your subjects</h4>
+        {fixed && mine.length >= max ? <span>Swap one to change it. You always keep {max}.</span> : null}
+      </div>
+
       {mine.length === 0 ? (
-        <div className="ex2-empty">
-          <p>You haven’t chosen any {exam.short_name} subjects yet.</p>
-          <Button onClick={() => setPicking(true)} trailing={<IconArrowRight size={18} />}>
+        <div className="ex3-empty">
+          <p>You haven’t chosen your {exam.short_name} subjects yet.</p>
+          <Button onClick={() => setPicking({ swapOut: null })} trailing={<IconArrowRight size={18} />}>
             Choose subjects
           </Button>
         </div>
       ) : (
-        <ul className="ex2-subjects">
+        <ul className="ex3-subjects">
           {mine.map((subject) => {
             const goal = goalOf(subject.subject_id);
             return (
-              <li key={subject.subject_id} className="ex2-subject">
-                <Link to={`/subjects/${subject.subject_id}`} className="ex2-subject-link">
-                  <b>{subject.name}</b>
-                  <small>
-                    {subject.compulsory ? 'Compulsory · ' : ''}
-                    {goal?.target_score != null ? `Target ${Math.round(goal.target_score)}%` : 'No target yet'}
-                  </small>
+              <li key={subject.subject_id} className="ex3-subject" style={toneStyle(subject.name) as CSSProperties}>
+                <Link to={`/subjects/${subject.subject_id}`} className="ex3-subject-main">
+                  <span className="ex3-tile sj-display" aria-hidden="true">
+                    {initials(subject.name)}
+                  </span>
+                  <span className="ex3-subject-text">
+                    <b className="sj-display">{subject.name}</b>
+                    <small>{goal?.target_score != null ? `Target ${Math.round(goal.target_score)}%` : 'No target yet'}</small>
+                  </span>
                 </Link>
-                {subject.compulsory ? null : (
-                  <button
-                    type="button"
-                    className="ex2-remove"
-                    onClick={() => setRemoving(subject)}
-                    aria-label={`Remove ${subject.name}`}
-                    title={`Remove ${subject.name}`}
-                  >
-                    <IconClose size={14} />
-                  </button>
-                )}
+                <span className="ex3-subject-foot">
+                  {subject.compulsory ? (
+                    <span className="ex3-tag">Compulsory</span>
+                  ) : fixed ? (
+                    <button type="button" className="ex3-act" onClick={() => setPicking({ swapOut: subject })}>
+                      <IconReplay size={14} /> Swap
+                    </button>
+                  ) : (
+                    <button type="button" className="ex3-act" onClick={() => setRemoving(subject)}>
+                      <IconClose size={14} /> Remove
+                    </button>
+                  )}
+                  <Link to={`/subjects/${subject.subject_id}`} className="ex3-open" aria-label={`Open ${subject.name}`}>
+                    <IconArrowRight size={16} />
+                  </Link>
+                </span>
               </li>
             );
           })}
-          {!full && canAdd.length > 0 ? (
+          {(!fixed || mine.length < max) && canAdd.length > 0 ? (
             <li>
-              <button type="button" className="ex2-add" onClick={() => setPicking(true)}>
-                <span className="ex2-plus" aria-hidden="true">
+              <button type="button" className="ex3-add" onClick={() => setPicking({ swapOut: null })}>
+                <span className="ex3-plus" aria-hidden="true">
                   +
                 </span>
-                Add a subject
+                {fixed ? `Add your ${['', 'first', 'second', 'third', 'fourth', 'fifth'][mine.length + 1] ?? 'next'} subject` : 'Add a subject'}
               </button>
             </li>
           ) : null}
         </ul>
       )}
-      {full ? (
-        <p className="ex2-note">
-          {exam.short_name} is {max} subjects. To swap one, remove it with × and add another.
-        </p>
-      ) : null}
 
-      <Dialog open={picking} onClose={() => busy === null && setPicking(false)} title="Add a subject">
+      <Dialog
+        open={picking !== null}
+        onClose={() => busy === null && setPicking(null)}
+        title={picking?.swapOut ? `Swap ${picking.swapOut.name} for…` : 'Add a subject'}
+      >
         {canAdd.length === 0 ? (
           <p className="ex2-dialog-text">Every subject open in {exam.short_name} is already on your list.</p>
         ) : (
-          <ul className="ex2-pick">
-            {canAdd.map((subject) => (
-              <li key={subject.subject_id}>
-                <span>{subject.name}</span>
-                <Button size="sm" tone="soft" busy={busy === subject.subject_id} disabled={busy !== null} onClick={() => void add(subject)}>
-                  Add
-                </Button>
-              </li>
-            ))}
-          </ul>
+          <>
+            {picking?.swapOut ? (
+              <p className="ex2-dialog-text">
+                Your answers in {picking.swapOut.name} are kept, and count again if you swap it back.
+              </p>
+            ) : null}
+            <ul className="ex3-pick">
+              {canAdd.map((subject) => (
+                <li key={subject.subject_id} style={toneStyle(subject.name) as CSSProperties}>
+                  <span className="ex3-tile sm sj-display" aria-hidden="true">
+                    {initials(subject.name)}
+                  </span>
+                  <span className="ex3-pick-name">{subject.name}</span>
+                  <Button
+                    size="sm"
+                    tone="soft"
+                    busy={busy === subject.subject_id}
+                    disabled={busy !== null}
+                    onClick={() => void choose(subject)}
+                  >
+                    {picking?.swapOut ? 'Swap in' : 'Add'}
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </>
         )}
       </Dialog>
 

@@ -552,3 +552,363 @@
     min-height: 64px;
   }
 }
+
+/* ================================================================== Exams, second pass, 17 Nov 2026
+   Colour, not white: the exam on a yellow card with its countdown, three tinted facts, and
+   each subject in its own colour (subjectTone.ts). Dark ink shadows; 8px corners. */
+.sj .ex3 {
+  display: grid;
+  gap: 22px;
+}
+.sj .ex3-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px 28px;
+  padding: 26px 28px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 8px;
+  background:
+    radial-gradient(90% 140% at 100% 0%, #ffe98a 0%, rgba(255, 233, 138, 0) 60%),
+    #fff7d1;
+  box-shadow: 5px 5px 0 var(--gray-900, #160b2e);
+}
+.sj .ex3-id {
+  display: grid;
+  gap: 4px;
+}
+.sj .ex3-body {
+  color: #6b5300;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.sj .ex3-short {
+  margin: 0;
+  font-size: 44px;
+  line-height: 1;
+  color: var(--ink-900, #1f0050);
+}
+.sj .ex3-name {
+  color: #4a3b00;
+  font-size: 15px;
+}
+.sj .ex3-places {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  color: #4a3b00;
+  font-size: 14px;
+}
+.sj .ex3-places b {
+  color: var(--ink-900, #1f0050);
+}
+.sj .ex3-cells {
+  display: flex;
+  gap: 5px;
+}
+.sj .ex3-cells i {
+  width: 24px;
+  height: 10px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 3px;
+  background: var(--white, #fff);
+}
+.sj .ex3-cells i.on {
+  background: #8fe36b;
+}
+.sj .ex3-count {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 150px;
+  padding: 16px 22px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 8px;
+  background: var(--white, #fff);
+  box-shadow: 4px 4px 0 var(--gray-900, #160b2e);
+  text-align: center;
+}
+.sj .ex3-count b {
+  font-family: var(--f-display);
+  font-size: 46px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--purple-700, #6500ff);
+}
+.sj .ex3-count span {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-900, #1f0050);
+}
+.sj .ex3-count small {
+  color: var(--gray-600, #6b6880);
+  font-size: 12.5px;
+}
+
+.sj .ex3-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .ex3-facts li {
+  display: grid;
+  gap: 2px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 8px;
+}
+.sj .ex3-facts li.blue {
+  background: #e8f1ff;
+}
+.sj .ex3-facts li.yellow {
+  background: #fff7d1;
+}
+.sj .ex3-facts li.green {
+  background: #ecfbe3;
+}
+.sj .ex3-facts b {
+  font-family: var(--f-display);
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--ink-900, #1f0050);
+}
+.sj .ex3-facts span {
+  color: var(--ink-600, #4b4566);
+  font-size: 13px;
+}
+
+.sj .ex3-subhead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 16px;
+  margin-top: 10px;
+}
+.sj .ex3-subhead h4 {
+  margin: 0;
+  font-size: 22px;
+}
+.sj .ex3-subhead span {
+  color: var(--gray-600, #6b6880);
+  font-size: 13.5px;
+}
+.sj .ex3-subjects {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .ex3-subjects > li {
+  display: grid;
+}
+.sj .ex3-subject {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  overflow: hidden;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 8px;
+  background: var(--white, #fff);
+  box-shadow: 4px 4px 0 var(--c);
+}
+.sj .ex3-subject-main {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  padding: 18px 16px 16px;
+  background: var(--c-soft);
+  text-decoration: none;
+  color: inherit;
+}
+.sj .ex3-tile {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 8px;
+  background: var(--c);
+  color: var(--gray-900, #160b2e);
+  font-size: 17px;
+  font-weight: 700;
+}
+.sj .ex3-tile.sm {
+  width: 34px;
+  height: 34px;
+  font-size: 14px;
+}
+.sj .ex3-subject-text {
+  display: grid;
+  gap: 3px;
+}
+.sj .ex3-subject-text b {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink-900, #1f0050);
+}
+.sj .ex3-subject-text small {
+  color: var(--c-ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+.sj .ex3-subject-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px 10px 16px;
+  border-top: 1.5px solid var(--gray-900, #160b2e);
+}
+.sj .ex3-tag {
+  color: var(--gray-600, #6b6880);
+  font-size: 13px;
+  font-weight: 600;
+}
+.sj .ex3-act {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 6px;
+  background: var(--white, #fff);
+  color: var(--ink-900, #1f0050);
+  font-size: 13px;
+  font-weight: 600;
+}
+.sj .ex3-act:hover {
+  background: var(--c-soft);
+}
+.sj .ex3-open {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  color: var(--ink-900, #1f0050);
+}
+.sj .ex3-open:hover {
+  background: var(--c-soft);
+}
+.sj .ex3-add {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  min-height: 150px;
+  border: 1.5px dashed var(--gray-900, #160b2e);
+  border-radius: 8px;
+  background: var(--white, #fff);
+  color: var(--ink-900, #1f0050);
+  font-size: 15px;
+  font-weight: 600;
+}
+.sj .ex3-add:hover {
+  background: #fff7d1;
+}
+.sj .ex3-plus {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 8px;
+  background: #ffd84a;
+  font-size: 22px;
+  line-height: 1;
+}
+.sj .ex3-empty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  padding: 20px;
+  border: 1.5px dashed var(--gray-900, #160b2e);
+  border-radius: 8px;
+}
+.sj .ex3-empty p {
+  margin: 0;
+}
+.sj .ex3-pick {
+  display: grid;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .ex3-pick li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--gray-100, #efedf5);
+}
+.sj .ex3-pick li:first-child {
+  border-top: 0;
+}
+.sj .ex3-pick-name {
+  font-weight: 600;
+}
+@media (max-width: 1100px) {
+  .sj .ex3-subjects {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .sj .ex3-hero {
+    padding: 20px 18px;
+    box-shadow: 4px 4px 0 var(--gray-900, #160b2e);
+  }
+  .sj .ex3-short {
+    font-size: 36px;
+  }
+  .sj .ex3-count {
+    grid-auto-flow: column;
+    align-items: baseline;
+    justify-content: start;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 16px;
+    box-shadow: 3px 3px 0 var(--gray-900, #160b2e);
+  }
+  .sj .ex3-count b {
+    font-size: 34px;
+  }
+  .sj .ex3-facts {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .sj .ex3-subjects {
+    gap: 12px;
+  }
+  .sj .ex3-subject-text b {
+    font-size: 16px;
+  }
+  .sj .ex3-add {
+    min-height: 130px;
+  }
+}
+/* On a phone each fact is one compact line. */
+@media (max-width: 640px) {
+  .sj .ex3-facts {
+    gap: 8px;
+  }
+  .sj .ex3-facts li {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 10px 14px;
+  }
+  .sj .ex3-facts b {
+    font-size: 16px;
+  }
+}

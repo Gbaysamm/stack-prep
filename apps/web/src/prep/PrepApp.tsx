@@ -33,6 +33,7 @@ const CheckupReport = later(() => import('./pages/CheckupReport.js'), 'CheckupRe
 const CheckupRoom = later(() => import('./pages/CheckupRoom.js'), 'CheckupRoom');
 const Exams = later(() => import('./pages/Exams.js'), 'Exams');
 const ExamSubjects = later(() => import('./pages/ExamSubjects.js'), 'ExamSubjects');
+const Subjects = later(() => import('./pages/Subjects.js'), 'Subjects');
 const Goal = later(() => import('./pages/Goal.js'), 'Goal');
 const Home = later(() => import('./pages/Home.js'), 'Home');
 const Roadmap = later(() => import('./pages/Roadmap.js'), 'Roadmap');
@@ -96,6 +97,7 @@ export function PrepApp() {
                   <Route path="/roadmap" element={<Roadmap />} />
                   <Route path="/exams" element={<Exams />} />
                   <Route path="/exams/:examId" element={<ExamSubjects />} />
+                  <Route path="/subjects" element={<Subjects />} />
                   <Route path="/subjects/:subjectId" element={<SubjectHub />} />
                   <Route path="/subjects/:subjectId/goal" element={<Goal />} />
                   <Route path="/practice" element={<PracticeHub />} />

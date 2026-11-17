@@ -15,6 +15,19 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Exams and Subjects: two pages, in colour; UTME subjects are swapped, never removed
+- **What:** the sidebar has **Subjects** (new, /subjects) and **Exams** (was "Exams & subjects").
+  Subjects: each subject a card in its own colour (`prep/subjectTone.ts`): score now, bar to
+  the target, next check-up, runs, one tap to its page. Exams: the exam on a yellow card with
+  its countdown, three tinted facts (how many subjects, the compulsory one, one exam day), and
+  the subjects in their colours. An exam with a fixed number (UTME: four) never drops below it:
+  each subject has **Swap** (pick its replacement in a popup), not remove; the compulsory one
+  has neither. A swap that fails puts the old subject back.
+- **Why:** founder, 17 Nov 2026: too plain and white, half the page empty, UTME must keep four,
+  subjects too far from the sidebar.
+- **Where:** `Exams.tsx`/`.css`, `Subjects.tsx`/`.css`, `subjectTone.ts`, `shell.tsx`, `PrepApp.tsx`.
+- **Status:** committed, not pushed.
+
 ### Exams & subjects: one page, add and remove in place
 - **What:** /exams shows the student's exam and only the subjects they sit, as small sticker
   cards (name, target). Each has × to remove it (not the compulsory one, confirmed in a popup;
