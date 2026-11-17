@@ -178,6 +178,15 @@ const PATH_STOPS = 14;
  * one stop). Only the next few days are shown; the path fades out after them, as it goes on to
  * exam day.
  */
+/** Where a done item opens again (founder, 17 Nov 2026: done items could not be revisited). */
+function doneHref(item: RoadmapItem): string | undefined {
+  if (item.state !== 'done') return undefined;
+  if (item.kind === 'checkup') return item.session_id ? `/checkup/${item.session_id}/report` : undefined;
+  if (item.kind === 'lesson') return item.subtopic_id ? `/lesson/${item.subtopic_id}?part=${item.part ?? 1}` : undefined;
+  if (item.kind === 'mock') return undefined;
+  return item.session_id ? `/practice/${item.session_id}/report` : undefined;
+}
+
 export function pathStops(roadmap: RoadmapData, next: RoadmapItem | null): Stop[] {
   const upcoming = roadmap.items.filter((item) => item.day >= roadmap.today && item.state !== 'missed');
   const days = [...new Set(upcoming.map((item) => item.day))].sort().slice(0, PATH_DAYS);
@@ -195,6 +204,7 @@ export function pathStops(roadmap: RoadmapData, next: RoadmapItem | null): Stop[
         icon: kindIcon(item.kind),
         state: item.state === 'done' ? 'done' : 'locked',
         level: item.kind === 'run' ? (item.level ?? undefined) : undefined,
+        href: doneHref(item),
       });
     }
   }
@@ -240,6 +250,8 @@ export function pathStops(roadmap: RoadmapData, next: RoadmapItem | null): Stop[
         icon: kindIcon(item.kind),
         state: done ? 'done' : holdsNext ? 'current' : 'locked',
         level: item.kind === 'run' ? level : undefined,
+        // A group of runs on one topic opens the last one done.
+        href: done ? doneHref(items[items.length - 1]!) : undefined,
       });
     }
   }

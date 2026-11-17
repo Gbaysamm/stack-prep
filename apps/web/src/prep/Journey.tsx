@@ -5,8 +5,10 @@
  */
 import type { ReactNode } from 'react';
 
-import { IconCheck, IconLock } from './icons.js';
+import { IconCheck, IconChevronRight, IconLock } from './icons.js';
 import { cx } from './ui.js';
+import { Link } from 'react-router-dom';
+
 import './Journey.css';
 
 export type StopState = 'done' | 'current' | 'locked';
@@ -24,6 +26,8 @@ export interface Stop {
   level?: number;
   /** A label between stops ("Today", "Tomorrow"), not a stop itself. */
   heading?: boolean;
+  /** A done stop opens what was done: the lesson again, the run's or the check-up's report. */
+  href?: string;
 }
 
 export const LEVEL_NAMES = ['Not started', 'Weak', 'Developing', 'Exam-ready', 'Strong', 'Mastered'];
@@ -59,8 +63,15 @@ export function Journey({ stops, action, continues }: { stops: Stop[]; action?: 
         return (
           <li
             key={stop.key}
-            className={cx('jr-step', stop.state, stop.finish && 'finish', next && next.state !== 'locked' && 'walked')}
+            className={cx(
+              'jr-step',
+              stop.state,
+              stop.finish && 'finish',
+              next && next.state !== 'locked' && 'walked',
+              stop.href && 'opens',
+            )}
           >
+            {stop.href ? <Link to={stop.href} className="jr-cover" aria-label={`Open ${stop.title}`} /> : null}
             <span className="jr-tile" aria-hidden="true">
               {stop.state === 'done' ? <IconCheck size={20} /> : stop.icon}
             </span>
@@ -79,6 +90,8 @@ export function Journey({ stops, action, continues }: { stops: Stop[]; action?: 
               {stop.level ? <Pips level={stop.level} className="at-end" /> : null}
               {stop.state === 'current' && action ? (
                 action
+              ) : stop.href ? (
+                <IconChevronRight size={18} className="jr-open" />
               ) : stop.state === 'locked' && !stop.finish ? (
                 <IconLock size={16} className="jr-lock" />
               ) : null}

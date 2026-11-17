@@ -15,6 +15,14 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Done roadmap items open again; Home no longer flashes its older layout
+- **What:** a done item on the path (Roadmap and Home) is a link: a check-up opens its report,
+  a run its run report, a lesson plays again; an arrow shows it opens. Home now waits for the
+  roadmap before drawing, so the roadmap-less layout no longer shows for a moment.
+- **Why:** founder, 17 Nov 2026.
+- **Where:** `Journey.tsx`/`.css`, `Roadmap.tsx` (`doneHref`), `Home.tsx`.
+- **Status:** committed, not pushed.
+
 ### Polish pass on the redesigned pages against the standard
 - **What:** a style audit (no screenshots; the PC was too loaded) of Home, Roadmap, Practice,
   Progress, Check-up, Check-up report, Mock, Subjects, Exams, Profile and the subject page:
