@@ -1,15 +1,18 @@
 /**
- * Choose an exam. Each card says what it is, who sets it, which subjects it has and how many are
- * ready to study today. Test examinations and the old sandbox stay out of sight.
+ * Exams & subjects: the student's exam and the subjects they are sitting, with a way to add or
+ * remove one in place (redesigned 17 Nov 2026). Test examinations and the old sandbox stay out
+ * of sight.
  */
 
-import type { ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, type ReactNode } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
-import { api, type ExaminationOffer, type Goal } from '../../student/api.js';
-import { IconArrowRight, IconBook, IconCheck, IconReplay } from '../icons.js';
+import { friendly } from '../../lib/friendlyError.js';
+import { api, type ExaminationOffer, type Goal, type SubjectOffer } from '../../student/api.js';
+import { IconArrowRight, IconBook, IconClose, IconReplay } from '../icons.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
-import { Button, PageHero, Skeleton, Steps, cx } from '../ui.js';
+import { Button, Dialog, Skeleton, cx, useToast } from '../ui.js';
+import { Section } from './Home.js';
 import './Exams.css';
 
 /** The sandbox: a demo set from the early days. Kept out of the student app. */
@@ -26,108 +29,6 @@ export function orderExams(exams: ExaminationOffer[]): ExaminationOffer[] {
 /** "Unified Tertiary Matriculation Examination (UTME)" reads better without the repeat. */
 export const examTitle = (exam: ExaminationOffer) =>
   exam.name.replace(new RegExp(`\\s*\\(${exam.short_name}\\)\\s*$`, 'i'), '').trim() || exam.name;
-
-/** How many chips a card shows before "+N more": enough to recognise the exam, never a wall. */
-const CHIPS = 6;
-
-/**
- * One exam. Top: who sets it, its name, and the one way in. Bottom: the student's own subjects
- * against the exam's limit ("2 of 4 subjects chosen", one cell per place), then the subjects
- * themselves, chosen ones first.
- */
-function ExamCard({
-  exam,
-  chosen,
-  index,
-  solo,
-  featured,
-}: {
-  exam: ExaminationOffer;
-  chosen: Set<string>;
-  index: number;
-  solo: boolean;
-  featured: boolean;
-}) {
-  const mine = exam.subjects.filter((subject) => chosen.has(subject.subject_id));
-  const others = exam.subjects.filter((subject) => !chosen.has(subject.subject_id));
-  const ready = exam.subjects.filter((subject) => subject.ready).length;
-  const max = exam.max_subjects;
-  const compulsory = exam.subjects.filter((subject) => subject.compulsory).map((subject) => subject.name);
-  const shown = [...mine, ...others].slice(0, Math.max(CHIPS, mine.length));
-  const hidden = exam.subjects.length - shown.length;
-
-  const count =
-    max !== null ? (
-      <>
-        <b className="sj-num">{mine.length}</b> of {max} subjects chosen
-      </>
-    ) : (
-      <>
-        <b className="sj-num">{mine.length}</b> {mine.length === 1 ? 'subject' : 'subjects'} chosen
-      </>
-    );
-  const rule = [
-    max !== null ? `You sit up to ${max}` : `${exam.subjects.length} on offer`,
-    compulsory.length > 0 ? `${compulsory.join(' and ')} ${compulsory.length === 1 ? 'is' : 'are'} compulsory` : null,
-    ready < exam.subjects.length ? `${ready} of ${exam.subjects.length} ready to study` : null,
-  ]
-    .filter(Boolean)
-    .join(' · ');
-
-  return (
-    <Link
-      to={`/exams/${exam.examination_id}`}
-      className={cx('ex-card sj-rise', `d${Math.min(index + 1, 4)}`, solo && 'solo', featured && 'featured')}
-      aria-label={`${exam.short_name}: ${examTitle(exam)}. ${mine.length}${max !== null ? ` of ${max}` : ''} subjects chosen.`}
-    >
-      <div className="ex-id">
-        <p className="ex-body">Set by {bodyShort(exam.exam_body)}</p>
-        <h3 className="sj-display ex-short">{exam.short_name}</h3>
-        <p className="ex-name">{examTitle(exam)}</p>
-      </div>
-      <span className={cx('sj-btn ex-cta', mine.length > 0 ? 'soft' : 'primary')}>
-        {mine.length > 0 ? 'Change subjects' : ready > 0 ? 'Choose subjects' : 'See subjects'}
-        <span className="arrow">
-          <IconArrowRight size={18} />
-        </span>
-      </span>
-
-      <div className="ex-foot">
-        <div className="ex-count">
-          <span className="ex-count-line">{count}</span>
-          {max !== null ? (
-            <span className="ex-places" aria-hidden="true">
-              {Array.from({ length: max }, (_, i) => (
-                <i key={i} className={cx(i < mine.length && 'on')} />
-              ))}
-            </span>
-          ) : null}
-        </div>
-        {rule ? <p className="ex-rule">{rule}</p> : null}
-        {shown.length > 0 ? (
-          <ul className="ex-subjects" aria-label="Subjects">
-            {shown.map((subject) => (
-              <li
-                key={subject.subject_id}
-                className={cx(chosen.has(subject.subject_id) && 'mine', !subject.ready && 'off')}
-              >
-                {chosen.has(subject.subject_id) ? <IconCheck size={13} /> : null}
-                {subject.name}
-              </li>
-            ))}
-            {hidden > 0 ? <li className="more">+{hidden} more</li> : null}
-          </ul>
-        ) : null}
-      </div>
-    </Link>
-  );
-}
-
-const HOW = [
-  { title: 'Choose your exam', body: 'The exam you are sitting. Its subjects come next.' },
-  { title: 'Set a goal per subject', body: 'A target score, your exam day and the time you can give each week.' },
-  { title: 'Take a check-up', body: 'About 15 questions give a predicted score and a plan of what to practise.' },
-];
 
 /** A left-aligned message card: icon and title on one line, the words and the button beneath. */
 export function ExNote({
@@ -161,8 +62,15 @@ function bodyShort(body: string): string {
   return acronym ? acronym[1]! : body;
 }
 
+/* ------------------------------------------------------------------ the page (redesigned 17 Nov 2026) */
+
+/**
+ * One page for the exam and its subjects (founder, 17 Nov 2026): the student's own subjects,
+ * each with a way to remove it, and a card to add another, chosen in a popup. Only the
+ * subjects the student is sitting are shown; no question counts, no wall of every subject.
+ */
 export function Exams() {
-  usePageTitle('Exams');
+  usePageTitle('Exams & subjects');
   const student = useStudent();
   const load = useLoad(
     () => Promise.all([api.catalogue(), api.goals(student.studentId).catch(() => [] as Goal[])]),
@@ -171,43 +79,24 @@ export function Exams() {
   const exams = load.data ? orderExams(load.data[0]) : [];
   const goals = load.data?.[1] ?? [];
   const goalIds = new Set(goals.map((goal) => goal.subject_id));
-  const goalsIn = (exam: ExaminationOffer) => exam.subjects.filter((subject) => goalIds.has(subject.subject_id)).length;
-  // One sticker on the page: the exam the student is working towards, or else the first one.
-  const featured = (exams.find((exam) => goalsIn(exam) > 0) ?? exams[0])?.examination_id;
-  const solo = exams.length === 1;
+  const chosenIn = (exam: ExaminationOffer) => exam.subjects.filter((s) => goalIds.has(s.subject_id)).length;
+  // The exam the student is working towards first, then the rest.
+  const ordered = [...exams].sort((a, b) => chosenIn(b) - chosenIn(a));
+  const [mainExam, ...otherExams] = ordered;
 
   return (
-    <div className="sj-page ex-page">
-      <PageHero
+    <div className="sj-page ex2">
+      <Section
         eyebrow="Exams & subjects"
-        title="Choose your exam"
-        sub="Pick the exam you are sitting. You choose your subjects next, and each one gets its own goal and check-up."
-        aside={
-          goals.length > 0 ? (
-            <div className="ex-stat">
-              <span className="ex-stat-label">Your goals</span>
-              <span className="ex-stat-num">
-                <span className="sj-num">{goals.length}</span>
-                <span className="unit">{goals.length === 1 ? 'subject' : 'subjects'}</span>
-              </span>
-              <span className="ex-stat-note">{goals.map((goal) => goal.subject_name).join(', ')}</span>
-            </div>
-          ) : undefined
-        }
-      />
-
-      <section className="ex-section" aria-labelledby="ex-title">
-        <div className="ex-sechead">
-          <div className="sj-eyebrow">Open now</div>
-          <h2 id="ex-title" className="sj-display sj-h2">
-            What are you preparing for?
-          </h2>
-        </div>
-
+        title="Your exam and subjects"
+        id="ex2-title"
+        className="ex2-first"
+        sub="The subjects you are sitting. Each one gets its own target, check-up and roadmap."
+      >
         {load.error && !load.data ? (
           <ExNote
             icon={<IconReplay size={18} />}
-            title="We could not load the exams"
+            title="We could not load your exam"
             action={
               <Button tone="soft" onClick={load.reload}>
                 Try again
@@ -217,48 +106,207 @@ export function Exams() {
             {load.error}
           </ExNote>
         ) : !load.data ? (
-          <div className="ex-grid solo" aria-busy="true" aria-label="Loading exams">
-            <div className="ex-card solo ex-skel">
-              <div className="ex-id">
+          <div className="ex2-card" aria-busy="true" aria-label="Loading your exam">
+            <div className="ex2-head">
+              <div className="ex2-id">
                 <Skeleton height={12} width={90} />
-                <Skeleton height={34} width="30%" />
-                <Skeleton height={16} width="60%" />
-              </div>
-              <div className="ex-foot">
-                <Skeleton height={20} width="40%" />
-                <Skeleton height={28} width="70%" />
+                <Skeleton height={30} width={120} />
+                <Skeleton height={14} width={260} />
               </div>
             </div>
+            <div className="ex2-subjects">
+              {[0, 1, 2, 3].map((i) => (
+                <Skeleton key={i} height={76} radius={8} />
+              ))}
+            </div>
           </div>
-        ) : exams.length === 0 ? (
+        ) : !mainExam ? (
           <ExNote icon={<IconBook size={18} />} title="No exams are open yet">
             Exams appear here as soon as their questions have been checked. Look again soon.
           </ExNote>
         ) : (
-          <div className={cx('ex-grid', solo && 'solo')}>
-            {exams.map((exam, index) => (
-              <ExamCard
-                key={exam.examination_id}
-                exam={exam}
-                chosen={goalIds}
-                index={index}
-                solo={solo}
-                featured={exam.examination_id === featured}
-              />
+          <ExamPanel exam={mainExam} goals={goals} onChanged={load.reload} />
+        )}
+      </Section>
+
+      {otherExams.length > 0 ? (
+        <Section eyebrow="Other exams" title="Also open" id="ex2-others" className="ex2-others">
+          <div className="ex2-other-list">
+            {otherExams.map((exam) => (
+              <ExamPanel key={exam.examination_id} exam={exam} goals={goals} onChanged={load.reload} />
             ))}
           </div>
-        )}
-      </section>
+        </Section>
+      ) : null}
+    </div>
+  );
+}
 
-      <section className="ex-section" aria-labelledby="ex-how-title">
-        <div className="ex-sechead">
-          <div className="sj-eyebrow">How it works</div>
-          <h2 id="ex-how-title" className="sj-display sj-h2">
-            From exam to plan
-          </h2>
+/** One exam: who sets it, how many places are filled, and the student's subjects in it. */
+function ExamPanel({ exam, goals, onChanged }: { exam: ExaminationOffer; goals: Goal[]; onChanged: () => void }) {
+  const student = useStudent();
+  const navigate = useNavigate();
+  const toast = useToast();
+  const goalOf = (subjectId: string) => goals.find((goal) => goal.subject_id === subjectId);
+  const mine = exam.subjects
+    .filter((s) => goalOf(s.subject_id))
+    .sort((a, b) => Number(b.compulsory) - Number(a.compulsory) || a.name.localeCompare(b.name));
+  const canAdd = exam.subjects.filter((s) => s.ready && !goalOf(s.subject_id));
+  const max = exam.max_subjects;
+  const full = max !== null && mine.length >= max;
+  const [picking, setPicking] = useState(false);
+  const [removing, setRemoving] = useState<SubjectOffer | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  // A subject added here takes the date, target and study time the student already set for
+  // this exam; with none set yet, its goal page asks for them.
+  const sibling = mine.map((s) => goalOf(s.subject_id)).find((g) => g?.exam_date && g.target_score != null);
+  const add = async (subject: SubjectOffer) => {
+    if (!sibling || !sibling.exam_date || sibling.target_score == null) {
+      navigate(`/subjects/${subject.subject_id}/goal`);
+      return;
+    }
+    setBusy(subject.subject_id);
+    try {
+      await api.setGoal(student.studentId, subject.subject_id, {
+        target_score: sibling.target_score,
+        exam_date: sibling.exam_date,
+        minutes_per_day: sibling.minutes_per_day ?? 30,
+        study_days: sibling.study_days ?? [1, 2, 3, 4, 5],
+      });
+      setPicking(false);
+      toast(`${subject.name} added`);
+      onChanged();
+    } catch (error) {
+      toast(friendly(error as Error) || 'Couldn’t add it. Try again.');
+    } finally {
+      setBusy(null);
+    }
+  };
+  const remove = async (subject: SubjectOffer) => {
+    setBusy(subject.subject_id);
+    try {
+      await api.removeGoal(student.studentId, subject.subject_id);
+      setRemoving(null);
+      toast(`${subject.name} removed`);
+      onChanged();
+    } catch (error) {
+      toast(friendly(error as Error) || 'Couldn’t remove it. Try again.');
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <div className="ex2-card">
+      <div className="ex2-head">
+        <div className="ex2-id">
+          <span className="ex2-body">Set by {bodyShort(exam.exam_body)}</span>
+          <h3 className="sj-display ex2-short">{exam.short_name}</h3>
+          <span className="ex2-name">{examTitle(exam)}</span>
         </div>
-        <Steps steps={HOW} current={goals.length > 0 ? undefined : 0} />
-      </section>
+        {max !== null ? (
+          <div className="ex2-places">
+            <span>
+              <b className="sj-num">{mine.length}</b> of {max} subjects
+            </span>
+            <span className="ex2-cells" aria-hidden="true">
+              {Array.from({ length: max }, (_, i) => (
+                <i key={i} className={cx(i < mine.length && 'on')} />
+              ))}
+            </span>
+          </div>
+        ) : null}
+      </div>
+
+      {mine.length === 0 ? (
+        <div className="ex2-empty">
+          <p>You haven’t chosen any {exam.short_name} subjects yet.</p>
+          <Button onClick={() => setPicking(true)} trailing={<IconArrowRight size={18} />}>
+            Choose subjects
+          </Button>
+        </div>
+      ) : (
+        <ul className="ex2-subjects">
+          {mine.map((subject) => {
+            const goal = goalOf(subject.subject_id);
+            return (
+              <li key={subject.subject_id} className="ex2-subject">
+                <Link to={`/subjects/${subject.subject_id}`} className="ex2-subject-link">
+                  <b>{subject.name}</b>
+                  <small>
+                    {subject.compulsory ? 'Compulsory · ' : ''}
+                    {goal?.target_score != null ? `Target ${Math.round(goal.target_score)}%` : 'No target yet'}
+                  </small>
+                </Link>
+                {subject.compulsory ? null : (
+                  <button
+                    type="button"
+                    className="ex2-remove"
+                    onClick={() => setRemoving(subject)}
+                    aria-label={`Remove ${subject.name}`}
+                    title={`Remove ${subject.name}`}
+                  >
+                    <IconClose size={14} />
+                  </button>
+                )}
+              </li>
+            );
+          })}
+          {!full && canAdd.length > 0 ? (
+            <li>
+              <button type="button" className="ex2-add" onClick={() => setPicking(true)}>
+                <span className="ex2-plus" aria-hidden="true">
+                  +
+                </span>
+                Add a subject
+              </button>
+            </li>
+          ) : null}
+        </ul>
+      )}
+      {full ? (
+        <p className="ex2-note">
+          {exam.short_name} is {max} subjects. To swap one, remove it with × and add another.
+        </p>
+      ) : null}
+
+      <Dialog open={picking} onClose={() => busy === null && setPicking(false)} title="Add a subject">
+        {canAdd.length === 0 ? (
+          <p className="ex2-dialog-text">Every subject open in {exam.short_name} is already on your list.</p>
+        ) : (
+          <ul className="ex2-pick">
+            {canAdd.map((subject) => (
+              <li key={subject.subject_id}>
+                <span>{subject.name}</span>
+                <Button size="sm" tone="soft" busy={busy === subject.subject_id} disabled={busy !== null} onClick={() => void add(subject)}>
+                  Add
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Dialog>
+
+      <Dialog
+        open={removing !== null}
+        onClose={() => busy === null && setRemoving(null)}
+        title={removing ? `Remove ${removing.name}?` : 'Remove'}
+        actions={
+          <>
+            <Button tone="ghost" onClick={() => setRemoving(null)}>
+              Keep it
+            </Button>
+            <Button tone="danger" busy={removing !== null && busy === removing.subject_id} onClick={() => removing && void remove(removing)}>
+              Remove
+            </Button>
+          </>
+        }
+      >
+        <p className="ex2-dialog-text">
+          It leaves your list and your roadmap. Your answers in it are kept, and count again if you add it back.
+        </p>
+      </Dialog>
     </div>
   );
 }

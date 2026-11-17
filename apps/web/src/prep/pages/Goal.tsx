@@ -384,7 +384,7 @@ function GoalStepper({
     ) : null,
     null,
   ];
-  const back = hadGoal ? { to: `/subjects/${subjectId}`, label: subjectName } : { to: `/exams/${examId}`, label: 'Subjects' };
+  const back = hadGoal ? { to: `/subjects/${subjectId}`, label: subjectName } : { to: '/exams', label: 'Exams & subjects' };
 
   /* -------------------------------------------------------------- saved: the next step */
   if (saved) {

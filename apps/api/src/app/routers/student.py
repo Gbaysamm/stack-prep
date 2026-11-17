@@ -18,6 +18,7 @@ here needs rewriting.
 
 from __future__ import annotations
 
+import time
 from datetime import date
 from typing import Annotated, Any, Literal
 from uuid import UUID
@@ -124,11 +125,29 @@ async def catalogue(
 ) -> list[ExaminationOffer]:
     """Every active examination and its subjects, each saying whether it is ready.
 
+    The same for every student and slow to count (every deliverable question), so the answer is
+    kept for a few minutes (founder, 17 Nov 2026: the exams page loaded slowly).
+
     "Ready" is not a flag somebody set — it is counted from `deliverable_questions`, the view
     that already decides what a student may be shown. A subject with an approved syllabus and
     no approved questions appears here, greyed out, with the reason: hiding it would make the
     catalogue look complete when it is not.
     """
+    kept = _CATALOGUE.get("value")
+    if kept is not None and time.monotonic() - _CATALOGUE["at"] < CATALOGUE_KEEP_SECONDS:
+        return kept
+    value = await _build_catalogue(conn)
+    _CATALOGUE["value"] = value
+    _CATALOGUE["at"] = time.monotonic()
+    return value
+
+
+#: How long the catalogue is kept before it is counted again.
+CATALOGUE_KEEP_SECONDS = 300
+_CATALOGUE: dict[str, Any] = {}
+
+
+async def _build_catalogue(conn: AsyncConnection) -> list[ExaminationOffer]:
     rows = await fetch_all(
         conn,
         """

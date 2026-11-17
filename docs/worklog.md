@@ -15,6 +15,19 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Exams & subjects: one page, add and remove in place
+- **What:** /exams shows the student's exam and only the subjects they sit, as small sticker
+  cards (name, target). Each has × to remove it (not the compulsory one, confirmed in a popup;
+  answers are kept). "Add a subject" opens a popup of the open subjects; a new one takes the
+  exam date, target and study time already set, so it is added in one tap (with none set yet,
+  its goal page asks). No question counts, no wall of every subject, no how-it-works steps.
+  /exams/:id now lands on /exams. The catalogue is kept 5 minutes on the server and for the
+  session in the app (it took 1 to 3 s to count).
+- **Why:** founder, 17 Nov 2026.
+- **Where:** `prep/pages/Exams.tsx`/`.css`, `ExamSubjects.tsx` (a redirect), `Goal.tsx` (back
+  link), `routers/student.py` (catalogue kept), `student/api.ts`, `tests/conftest.py`.
+- **Status:** committed, not pushed.
+
 ### Question cards: one clean head
 - **What:** a question card's head is one row on one centre line: the number badge (as tall as
   the two lines beside it), the outcome tag with year and number, and the start of the

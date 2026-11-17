@@ -844,7 +844,7 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(displayName ? { display_name: displayName } : {}),
     }),
-  catalogue: () => call<ExaminationOffer[]>('/student/catalogue'),
+  catalogue: () => shared('catalogue', KEEP.settings, () => call<ExaminationOffer[]>('/student/catalogue')),
   profile: (studentId: string) => call<StudentProfile>(`/student/${studentId}/profile`),
   updateProfile: (studentId: string, change: Partial<Omit<StudentProfile, 'email' | 'phone'>>) =>
     call<StudentProfile>(`/student/${studentId}/profile`, {

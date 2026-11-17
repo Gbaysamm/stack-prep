@@ -337,3 +337,218 @@
     margin-top: 20px;
   }
 }
+
+/* ================================================================== Exams & subjects, 17 Nov 2026
+   One sticker card per exam: the exam on top, the student's subjects beneath as small cards,
+   each with a remove button, and a dashed card to add one. 8px corners. */
+.sj .ex2 {
+  display: grid;
+  gap: 40px;
+}
+.sj .ex2-card {
+  display: grid;
+  gap: 20px;
+  padding: 24px 26px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 8px;
+  background: var(--white, #fff);
+  box-shadow: 5px 5px 0 var(--purple-200, #d7bdff);
+}
+.sj .ex2-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 24px;
+  padding-bottom: 20px;
+  border-bottom: 1.5px solid var(--purple-100, #e6d6ff);
+}
+.sj .ex2-id {
+  display: grid;
+  gap: 4px;
+}
+.sj .ex2-body {
+  color: var(--gray-500, #8a86a0);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.sj .ex2-short {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1;
+  color: var(--ink-900, #1f0050);
+}
+.sj .ex2-name {
+  color: var(--ink-600, #4b4566);
+  font-size: 14.5px;
+}
+.sj .ex2-places {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+  color: var(--ink-600, #4b4566);
+  font-size: 14px;
+}
+.sj .ex2-places b {
+  color: var(--ink-900, #1f0050);
+  font-size: 18px;
+}
+.sj .ex2-cells {
+  display: flex;
+  gap: 5px;
+}
+.sj .ex2-cells i {
+  width: 26px;
+  height: 10px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 3px;
+  background: var(--white, #fff);
+}
+.sj .ex2-cells i.on {
+  background: #8fe36b;
+}
+
+.sj .ex2-subjects {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .ex2-subjects > li {
+  display: grid;
+}
+.sj .ex2-subject {
+  position: relative;
+}
+.sj .ex2-subject-link {
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  min-height: 76px;
+  padding: 14px 44px 14px 16px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 8px;
+  background: var(--white, #fff);
+  box-shadow: 3px 3px 0 var(--purple-200, #d7bdff);
+  text-decoration: none;
+  transition: transform 140ms ease;
+}
+.sj .ex2-subject-link:hover {
+  transform: translate(-1px, -1px);
+}
+.sj .ex2-subject-link b {
+  font-family: var(--f-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink-900, #1f0050);
+}
+.sj .ex2-subject-link small {
+  color: var(--gray-600, #6b6880);
+  font-size: 13px;
+}
+.sj .ex2-remove {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  color: var(--gray-500, #8a86a0);
+}
+.sj .ex2-remove:hover {
+  background: #ffe4ea;
+  color: #be123c;
+}
+.sj .ex2-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 76px;
+  border: 1.5px dashed var(--purple-300, #b98aff);
+  border-radius: 8px;
+  background: var(--purple-050, #f3ebff);
+  color: var(--purple-700, #6500ff);
+  font-size: 15px;
+  font-weight: 600;
+}
+.sj .ex2-add:hover {
+  border-style: solid;
+}
+.sj .ex2-plus {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1.5px solid currentColor;
+  border-radius: 6px;
+  font-size: 18px;
+  line-height: 1;
+}
+.sj .ex2-note {
+  margin: 0;
+  color: var(--gray-600, #6b6880);
+  font-size: 13.5px;
+}
+.sj .ex2-empty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+}
+.sj .ex2-empty p {
+  margin: 0;
+  color: var(--ink-600, #4b4566);
+}
+.sj .ex2-other-list {
+  display: grid;
+  gap: 20px;
+}
+.sj .ex2-dialog-text {
+  margin: 0;
+  color: var(--ink-600, #4b4566);
+  line-height: 1.55;
+}
+.sj .ex2-pick {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sj .ex2-pick li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--purple-100, #e6d6ff);
+  font-weight: 600;
+}
+.sj .ex2-pick li:first-child {
+  border-top: 0;
+}
+@media (max-width: 640px) {
+  .sj .ex2 {
+    gap: 32px;
+  }
+  .sj .ex2-card {
+    padding: 18px 16px;
+    box-shadow: 4px 4px 0 var(--purple-200, #d7bdff);
+  }
+  .sj .ex2-places {
+    justify-items: start;
+  }
+  .sj .ex2-subjects {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .sj .ex2-subject-link,
+  .sj .ex2-add {
+    min-height: 64px;
+  }
+}

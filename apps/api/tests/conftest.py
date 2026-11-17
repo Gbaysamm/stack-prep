@@ -33,6 +33,14 @@ def _custom_mocks_open(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.fixture(autouse=True)
+def _catalogue_fresh(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Each test counts the catalogue afresh; what one test approves the next must see."""
+    from app.routers import student
+
+    monkeypatch.setattr(student, "CATALOGUE_KEEP_SECONDS", 0)
+
+
+@pytest.fixture(autouse=True)
 async def _fresh_engine() -> AsyncIterator[None]:
     yield
     await dispose_engine()
