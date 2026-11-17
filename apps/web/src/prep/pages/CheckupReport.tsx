@@ -1,28 +1,30 @@
 /**
- * /checkup/:sessionId/report — what one check-up found, in the plain numbers of
- * docs/student-scoring.md (redesigned 16 Nov 2026).
+ * /checkup/:sessionId/report — what one check-up found (redesigned 17 Nov 2026).
  *
- * The result first, in one sticker card: the score (now the predicted score), the bar to the
- * target, the last check-up and the subject's score now, and one way to practise. Then each
- * topic, in two plain lists (got wrong, got right); then the weakest topics to start with, as
- * cards; then one line on how it is worked out.
+ * 1. The result band: this sitting's score on a ring, the answers as a row of marks, the
+ *    subject score now on its way to the target, one way to practise.
+ * 2. Each section on one row: its marks, then its topics, right in green, wrong in red.
+ * 3. The questions themselves, folded: what was chosen, the answer, how to get it.
+ * 4. The weakest topics now, as three cards side by side.
  *
  * JAMB's words throughout: a TOPIC (the API's `subtopics`) is the unit scored; a SECTION (the
  * API's `topics`) is only the heading that groups them.
  */
 
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
-import { api, type CheckupReport as Report, type SubtopicReport } from '../../student/api.js';
+import { api, type CheckupReport as Report } from '../../student/api.js';
 import { IconArrowRight, IconCheck, IconClose, IconHelp, IconReplay } from '../icons.js';
 import { progressApi } from '../progressApi.js';
 import { useRunGate } from '../RunGate.js';
+import type { ReviewItem } from '../runsApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
 import { scoreLevel } from '../SubjectSwitcher.js';
-import { Button, PageHero, ShowMore, Skeleton, cx, useShowMore } from '../ui.js';
+import { Button, PageHero, Ring, ShowMore, Skeleton, cx, useShowMore } from '../ui.js';
 import { HOW_PATH } from './HowItsWorkedOut.js';
 import { NothingFreshNote, Section, useStartPractice } from './Home.js';
+import { QuestionCard } from './RunReport.js';
 import './CheckupReport.css';
 
 /* ------------------------------------------------------------------ words and numbers */
@@ -41,23 +43,36 @@ function dayText(iso: string): string {
 
 /** How many topics "What next" names. */
 const NEXT_COUNT = 3;
-/** Topic rows before "Show all". */
-const TOUCHED_SHOWN = 10;
+/** Questions before "Show all". */
+const ANSWERS_SHOWN = 6;
+
+interface Weak {
+  subtopic_id: string;
+  name: string;
+  section_name: string | null;
+  score: number | null;
+}
 
 /** The topics to practise next: the lowest topic scores in the subject, the bigger topic first on a tie. */
-function weakestTopics(report: Report): { subtopic_id: string; name: string; score: number | null }[] {
+function weakestTopics(report: Report): Weak[] {
   const standing = report.standing;
   if (standing) {
     return standing.topics
       .filter((t) => t.answered > 0 && t.score !== null)
       .sort((a, b) => a.score! - b.score! || b.share - a.share)
-      .slice(0, NEXT_COUNT);
+      .slice(0, NEXT_COUNT)
+      .map((t) => ({ subtopic_id: t.subtopic_id, name: t.name, section_name: t.section_name, score: t.score }));
   }
   return report.subtopics
     .filter((s) => s.answered > 0 && s.mastery !== null)
     .sort((a, b) => a.mastery! - b.mastery!)
     .slice(0, NEXT_COUNT)
-    .map((s) => ({ subtopic_id: s.subtopic_id, name: s.name, score: Math.round(s.mastery! * 100) }));
+    .map((s) => ({
+      subtopic_id: s.subtopic_id,
+      name: s.name,
+      section_name: s.section_name ?? null,
+      score: Math.round(s.mastery! * 100),
+    }));
 }
 
 /** A notice: icon and title on one line, the words and any button beneath, all from the left. */
@@ -99,6 +114,11 @@ export function CheckupReport() {
   const student = useStudent();
 
   const report = useLoad(() => api.report(sessionId), [sessionId]);
+  // The questions come after the report, so the result never waits on them.
+  const answers = useLoad(
+    () => (report.data ? api.answers(sessionId) : new Promise<never>(() => undefined)),
+    [sessionId, Boolean(report.data)],
+  );
   const overview = useLoad(() => progressApi.overview(student.studentId), [student.studentId]);
 
   const subject = report.data
@@ -171,73 +191,75 @@ export function CheckupReport() {
   const exam = subject?.examination_short_name;
   const target = subject?.goal?.target_score ?? null;
   const score = data.score;
-  // The subject's score after this check-up (all answers since the first check-up): the one the
-  // target is measured against. The big number is this sitting alone.
+  // The subject's score after this check-up (every counted answer): the one the target measures.
   const now = standing?.score ?? null;
   const towards = now ?? score;
   const eyebrow = ['Check-up report', [exam, subjectName].filter(Boolean).join(' '), dateText].filter(Boolean).join(' · ');
+  const items = answers.data?.items ?? null;
 
   return (
-    <div className="sj-page cp-page cp2">
+    <div className="sj-page cp-page cp3">
       <Section
         eyebrow={eyebrow}
         title={data.answered === 0 ? 'No answers yet' : 'How your check-up went'}
-        id="cp2-result-title"
-        className="cp2-first"
+        id="cp3-title"
+        className="cp3-first"
       >
-        <div className="cp2-result">
-          <div className="cp2-result-score">
-            <b className={cx('sj-num', scoreLevel(score, target))}>{score !== null ? `${score}%` : '—'}</b>
-            <span>
-              {data.right} of {data.answered} right in this check-up
+        <div className="cp3-hero">
+          <div className="cp3-dial">
+            <Ring value={(score ?? 0) / 100} size={132} stroke={13} color={ringColour(scoreLevel(score, target))}>
+              <span className="cp3-dial-in">
+                <b className="sj-num">{score !== null ? `${score}%` : '—'}</b>
+                <small>this check-up</small>
+              </span>
+            </Ring>
+            <span className="cp3-dial-note">
+              <b>{data.right}</b> of {data.answered} right
             </span>
           </div>
-          <div className="cp2-result-text">
-            <p className="cp2-result-lead">
-              {data.answered === 0
-                ? 'Answer a few questions and your result shows here.'
-                : !data.finished
-                  ? `From the ${data.answered} answers so far. Finish the check-up to update your score.`
-                  : now !== null
-                    ? <>Your {subjectName || 'subject'} score is now <b className="sj-num">{now}%</b>, counting this check-up and your practice.</>
-                    : 'This check-up sets your score.'}
+
+          <div className="cp3-hero-main">
+            <p className="cp3-lead">
+              {data.answered === 0 ? (
+                'Answer a few questions and your result shows here.'
+              ) : !data.finished ? (
+                `From the ${data.answered} answers so far. Finish the check-up to update your score.`
+              ) : now !== null ? (
+                <>
+                  Your {subjectName || 'subject'} score is now <b className="sj-num">{now}%</b>
+                </>
+              ) : (
+                'This check-up sets your score.'
+              )}
             </p>
+
+            {data.answered > 0 ? <Marks items={items} report={data} /> : null}
+
             {towards !== null ? (
-              <div className="cp2-target" aria-hidden="true">
-                <i style={{ width: `${towards}%` }} />
-                {target !== null ? <em style={{ left: `${Math.min(100, target)}%` }} /> : null}
-              </div>
+              <Journey now={towards} target={target} previous={data.previous_score} subjectId={data.subject_id} />
             ) : null}
-            <ul className="cp2-facts">
-              {target !== null && towards !== null ? (
-                <li>
-                  Target: <b>{target}%</b>
-                  {target - towards > 0 ? ` · ${target - towards} to go` : ' · reached'}
-                </li>
-              ) : (
-                <li>
-                  <Link to={`/subjects/${data.subject_id}/goal`}>Set a target</Link>
-                </li>
-              )}
-              {data.previous_score !== null && score !== null ? (
-                <li>
-                  Last check-up: <b>{data.previous_score}%</b> (<Signed value={score - data.previous_score} />)
-                </li>
-              ) : (
-                <li>Your first check-up</li>
-              )}
-            </ul>
+
+            <div className="cp3-hero-foot">
+              {weakest.length > 0 ? (
+                <Button
+                  onClick={() => practise(weakest, 'hero')}
+                  busy={starting}
+                  trailing={starting ? undefined : <IconArrowRight size={18} />}
+                >
+                  {starting ? 'Starting…' : weakest.length > 1 ? `Practise ${weakest.length} weakest topics` : 'Practise weakest topic'}
+                </Button>
+              ) : null}
+              <span className="cp3-hero-aside">
+                {data.previous_score !== null && score !== null ? (
+                  <>
+                    Last check-up <b>{data.previous_score}%</b> <Signed value={score - data.previous_score} />
+                  </>
+                ) : (
+                  'Your first check-up in this subject'
+                )}
+              </span>
+            </div>
           </div>
-          {weakest.length > 0 ? (
-            <Button
-              className="cp2-result-go"
-              onClick={() => practise(weakest, 'hero')}
-              busy={starting}
-              trailing={starting ? undefined : <IconArrowRight size={18} />}
-            >
-              {starting ? 'Starting…' : weakest.length > 1 ? `Practise ${weakest.length} weakest topics` : 'Practise weakest topic'}
-            </Button>
-          ) : null}
         </div>
       </Section>
 
@@ -260,18 +282,20 @@ export function CheckupReport() {
             </Button>
           }
         >
-          What’s below comes from the {data.answered} answers so far. Finish it to set your predicted score.
+          What’s below comes from the {data.answered} answers so far. Finish it to set your score.
         </Notice>
       ) : null}
 
-      <Touched report={data} />
+      <Sections report={data} />
+
+      <Answers items={items} error={answers.error} reload={answers.reload} />
 
       {weakest.length > 0 ? (
         <Section
           eyebrow="What next"
           title="Start with these"
           id="next"
-          className="cp2-next"
+          className="cp3-next"
           sub={
             standing && (standing.checkup_due || standing.next_checkup_due)
               ? standing.checkup_due || !standing.next_checkup_due
@@ -280,21 +304,26 @@ export function CheckupReport() {
               : 'Your weakest topics now. Tap one to practise it.'
           }
         >
-          <ul className="ph2-weak-list">
-            {weakest.map((t) => (
+          <ul className="cp3-next-list">
+            {weakest.map((t, index) => (
               <li key={t.subtopic_id}>
                 <button
                   type="button"
-                  className={cx('ph2-weak-row', (t.score ?? 0) < 25 && 'very')}
+                  className="cp3-next-card"
                   onClick={() => practise([t], 'next')}
                   aria-label={`Practise ${t.name}`}
                 >
-                  <span className="ph2-weak-badge sj-num">{t.score !== null ? `${t.score}%` : '—'}</span>
-                  <span className="ph2-weak-name">
-                    <b>{t.name}</b>
-                    <small>Tap to practise</small>
+                  <span className="cp3-next-top">
+                    <span className={cx('cp3-next-badge sj-num', scoreLevel(t.score))}>
+                      {t.score !== null ? `${t.score}%` : '—'}
+                    </span>
+                    <span className="cp3-next-rank sj-mono">{index + 1}</span>
                   </span>
-                  <IconArrowRight size={18} className="ph2-weak-arrow" />
+                  <b>{t.name}</b>
+                  {t.section_name ? <small>{t.section_name}</small> : null}
+                  <span className="cp3-next-go">
+                    Practise <IconArrowRight size={16} />
+                  </span>
                 </button>
               </li>
             ))}
@@ -315,60 +344,245 @@ export function CheckupReport() {
   );
 }
 
-/* ------------------------------------------------------------------ topics this check-up touched */
+function ringColour(level: string): string {
+  return level === 'good' ? 'var(--green-500)' : level === 'mid' ? '#f59e0b' : '#e11d48';
+}
 
-/** One group (got wrong, or got right): a plain list, a few at a time. */
-function TopicGroup({ title, tone, rows }: { title: string; tone: 'wrong' | 'right'; rows: SubtopicReport[] }) {
-  const more = useShowMore(rows, TOUCHED_SHOWN);
-  if (rows.length === 0) return null;
-  const listId = `cp2-${tone}-list`;
+/* ------------------------------------------------------------------ the answers as marks */
+
+/** One mark per question, in the order they came: a tap opens that question below. */
+function Marks({ items, report }: { items: ReviewItem[] | null; report: Report }) {
+  const marks: { right: boolean; position: number | null }[] = items
+    ? items.map((item) => ({ right: item.attempts.some((a) => a.is_correct), position: item.position }))
+    : Array.from({ length: report.answered }, (_, i) => ({ right: i < report.right, position: null }));
   return (
-    <div className={cx('cp2-group', tone)}>
-      <h3>
-        <span className="cp2-group-mark" aria-hidden="true">
-          {tone === 'right' ? <IconCheck size={14} /> : <IconClose size={14} />}
-        </span>
-        {title}
-        <span className="cp2-group-n">{rows.length}</span>
-      </h3>
-      <ul className="cp2-rows" id={listId}>
-        {more.items.map((sub) => (
-          <li key={sub.subtopic_id}>
-            <span className="cp2-row-name">
-              <b>{sub.name}</b>
-              {sub.section_name ? <small>{sub.section_name}</small> : null}
-            </span>
-            {sub.answered > 1 ? (
-              <span className="cp2-row-count sj-mono">
-                {sub.correct} of {sub.answered}
-              </span>
-            ) : null}
-          </li>
-        ))}
-      </ul>
-      <ShowMore more={more} noun="topics" controls={listId} className="cp-submore" />
+    <ol className="cp3-marks" aria-label="Your answers in order">
+      {marks.map((mark, i) => (
+        <li key={i}>
+          <button
+            type="button"
+            className={cx('cp3-mark', mark.right ? 'right' : 'wrong')}
+            disabled={mark.position === null}
+            onClick={() => mark.position !== null && openQuestion(mark.position)}
+            aria-label={`Question ${i + 1}: ${mark.right ? 'right' : 'wrong'}`}
+            title={`Question ${i + 1}: ${mark.right ? 'right' : 'wrong'}`}
+          >
+            {mark.right ? <IconCheck size={13} /> : <IconClose size={12} />}
+          </button>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/** Ask the answers list to open and show one question. */
+function openQuestion(position: number) {
+  window.dispatchEvent(new CustomEvent('cp3-open', { detail: position }));
+}
+
+/** The subject score on its way to the target, with the last check-up marked. */
+function Journey({
+  now,
+  target,
+  previous,
+  subjectId,
+}: {
+  now: number;
+  target: number | null;
+  previous: number | null;
+  subjectId: string;
+}) {
+  const at = (value: number) => `${Math.max(0, Math.min(100, value))}%`;
+  return (
+    <div className="cp3-journey">
+      <div className="cp3-track" aria-hidden="true">
+        <i className="cp3-fill" style={{ width: at(now) }} />
+        {previous !== null ? <em className="cp3-pin last" style={{ left: at(previous) }} /> : null}
+        {target !== null ? <em className="cp3-pin goal" style={{ left: at(target) }} /> : null}
+      </div>
+      <p className="cp3-journey-say">
+        {target === null ? (
+          <Link to={`/subjects/${subjectId}/goal`}>Set a target</Link>
+        ) : target - now > 0 ? (
+          <>
+            Target <b>{target}%</b> · <b>{target - now}</b> points to go
+          </>
+        ) : (
+          <>
+            Target <b>{target}%</b> · reached
+          </>
+        )}
+      </p>
     </div>
   );
 }
 
-function Touched({ report }: { report: Report }) {
-  const asked = report.subtopics.filter((s) => s.answered > 0);
+/* ------------------------------------------------------------------ each section */
+
+/** Topic tiles before "Show all". */
+const TILES_SHOWN = 9;
+
+/** Every topic the check-up asked about, as a tile: red if any question in it was wrong. */
+function Sections({ report }: { report: Report }) {
+  const asked = useMemo(
+    () =>
+      report.subtopics
+        .filter((t) => t.answered > 0)
+        .sort((a, b) => a.correct / a.answered - b.correct / b.answered || b.answered - a.answered),
+    [report.subtopics],
+  );
+  const more = useShowMore(asked, TILES_SHOWN);
   if (asked.length === 0) return null;
-  // Got wrong: any question in the topic missed. Got right: every one right.
-  const wrong = asked.filter((s) => s.correct < s.answered);
-  const right = asked.filter((s) => s.correct === s.answered);
+  const wrong = asked.filter((t) => t.correct < t.answered).length;
   return (
     <Section
       eyebrow={`${asked.length} ${asked.length === 1 ? 'topic' : 'topics'} in this check-up`}
       title="How each topic went"
       id="topics"
-      className="cp2-topics"
-      sub="Questions you got wrong come back in your practice runs until you get them."
+      className="cp3-sections"
+      sub={
+        wrong > 0
+          ? `${wrong} to work on. The questions you got wrong come back in your practice runs until you get them.`
+          : 'Every topic right. Well done.'
+      }
     >
-      <div className="cp2-groups">
-        <TopicGroup title="Got wrong" tone="wrong" rows={wrong} />
-        <TopicGroup title="Got right" tone="right" rows={right} />
-      </div>
+      <ul className="cp3-tiles" id="cp3-tiles">
+        {more.items.map((t) => {
+          const allRight = t.correct === t.answered;
+          return (
+            <li key={t.subtopic_id} className={allRight ? 'right' : 'wrong'}>
+              <span className="cp3-tile-mark" aria-label={allRight ? 'Right' : 'Wrong'}>
+                {allRight ? <IconCheck size={14} /> : <IconClose size={13} />}
+              </span>
+              <span className="cp3-tile-text">
+                <b>{t.name}</b>
+                {t.section_name ? <small>{t.section_name}</small> : null}
+              </span>
+              {t.answered > 1 ? (
+                <span className="cp3-tile-n sj-mono">
+                  {t.correct}/{t.answered}
+                </span>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+      <ShowMore more={more} noun="topics" controls="cp3-tiles" className="cp-submore" />
+    </Section>
+  );
+}
+
+/* ------------------------------------------------------------------ the questions */
+
+type Show = 'all' | 'wrong' | 'right';
+
+function Answers({ items, error, reload }: { items: ReviewItem[] | null; error: string | null; reload: () => void }) {
+  const [show, setShow] = useState<Show>('all');
+  const [open, setOpen] = useState<Set<number>>(new Set());
+  const [active, setActive] = useState<number | null>(null);
+  const cards = useRef(new Map<number, HTMLElement>());
+  const all = items ?? [];
+  const isRight = (item: ReviewItem) => item.attempts.some((a) => a.is_correct);
+  const shown = all.filter((item) => show === 'all' || (show === 'right') === isRight(item));
+  const more = useShowMore(shown, ANSWERS_SHOWN);
+  const wrongCount = all.filter((item) => !isRight(item)).length;
+
+  // A mark in the result band opens its question here.
+  const moreRef = useRef(more);
+  moreRef.current = more;
+  useEffect(() => {
+    const onOpen = (event: Event) => {
+      const position = (event as CustomEvent<number>).detail;
+      setShow('all');
+      if (!moreRef.current.open && position > ANSWERS_SHOWN) moreRef.current.toggle();
+      setOpen((current) => new Set(current).add(position));
+      setActive(position);
+      window.setTimeout(() => setActive(null), 1400);
+      window.setTimeout(() => {
+        cards.current.get(position)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 80);
+    };
+    window.addEventListener('cp3-open', onOpen);
+    return () => window.removeEventListener('cp3-open', onOpen);
+  }, []);
+
+  if (error && !items) {
+    return (
+      <Section eyebrow="Question by question" title="Your answers" id="answers" className="cp3-answers">
+        <p className="cp-issue" role="alert">
+          Your answers didn’t load.{' '}
+          <button type="button" className="cp3-link" onClick={reload}>
+            Try again
+          </button>
+        </p>
+      </Section>
+    );
+  }
+  if (items && items.length === 0) return null;
+
+  const filters: { id: Show; label: string; n: number }[] = [
+    { id: 'all', label: 'All', n: all.length },
+    { id: 'wrong', label: 'Wrong', n: wrongCount },
+    { id: 'right', label: 'Right', n: all.length - wrongCount },
+  ];
+
+  return (
+    <Section
+      eyebrow="Question by question"
+      title="Your answers"
+      id="answers"
+      className="cp3-answers"
+      sub="Open any question to see the right answer and how to get it."
+    >
+      {items ? (
+        <>
+          <div className="cp3-seg" role="group" aria-label="Show">
+            {filters
+              .filter((f) => f.id === 'all' || f.n > 0)
+              .map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  className={cx(show === f.id && 'on')}
+                  aria-pressed={show === f.id}
+                  onClick={() => setShow(f.id)}
+                >
+                  {f.label} <span className="sj-mono">{f.n}</span>
+                </button>
+              ))}
+          </div>
+          <ol className="rr-qs cp3-qs" id="cp3-qs">
+            {more.items.map((item) => (
+              <QuestionCard
+                key={item.position}
+                item={item}
+                checkup
+                open={open.has(item.position)}
+                active={active === item.position}
+                onToggle={() =>
+                  setOpen((current) => {
+                    const next = new Set(current);
+                    if (next.has(item.position)) next.delete(item.position);
+                    else next.add(item.position);
+                    return next;
+                  })
+                }
+                refCard={(node) => {
+                  if (node) cards.current.set(item.position, node);
+                  else cards.current.delete(item.position);
+                }}
+              />
+            ))}
+          </ol>
+          <ShowMore more={more} noun="questions" controls="cp3-qs" className="cp-submore" />
+        </>
+      ) : (
+        <div className="cp3-qs-skel">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} height={76} radius={16} />
+          ))}
+        </div>
+      )}
     </Section>
   );
 }
@@ -377,20 +591,17 @@ function Touched({ report }: { report: Report }) {
 
 function ReportSkeleton() {
   return (
-    <div className="sj-page cp-page" aria-busy="true" aria-label="Loading your report">
-      <div className="cp-skelhero">
-        <Skeleton width={200} height={12} />
-        <Skeleton width="50%" height={40} />
-        <Skeleton width="65%" height={16} />
-        <Skeleton width={220} height={48} radius={12} />
+    <div className="sj-page cp-page cp3" aria-busy="true" aria-label="Loading your report">
+      <div className="cp3-skel">
+        <Skeleton width={260} height={12} />
+        <Skeleton width="45%" height={34} />
       </div>
-      <Skeleton width={140} height={12} />
-      <div style={{ height: 8 }} />
-      <Skeleton width="40%" height={28} />
-      <div style={{ height: 14 }} />
-      <Skeleton height={180} radius={14} />
-      <div style={{ height: 28 }} />
-      <Skeleton height={280} radius={14} />
+      <Skeleton height={230} radius={22} />
+      <div className="cp3-skel">
+        <Skeleton width={180} height={12} />
+        <Skeleton width="35%" height={28} />
+      </div>
+      <Skeleton height={260} radius={20} />
     </div>
   );
 }

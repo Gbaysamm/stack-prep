@@ -521,20 +521,28 @@ function Questions({ data }: { data: RunReview }) {
 
 /* ------------------------------------------------------------------ one question */
 
-function QuestionCard({
+/** One question, folded: what was asked, what was chosen, the answer and how to get it. A
+ *  check-up has one try and no hint, so it is only right or wrong (`checkup`). */
+export function QuestionCard({
   item,
   open,
   active,
   onToggle,
   refCard,
+  checkup = false,
 }: {
   item: ReviewItem;
   open: boolean;
   active: boolean;
   onToggle: () => void;
   refCard: (node: HTMLElement | null) => void;
+  checkup?: boolean;
 }) {
-  const meta = OUTCOME[item.outcome];
+  const meta = checkup
+    ? item.attempts.some((attempt) => attempt.is_correct)
+      ? { label: 'Right', short: 'Right', tone: 'lime' }
+      : { label: 'Wrong', short: 'Wrong', tone: 'pink' }
+    : OUTCOME[item.outcome];
   const bodyId = `rr-q-${item.position}`;
   const first = item.attempts[0];
   const second = item.attempts[1];
@@ -563,13 +571,15 @@ function QuestionCard({
         <IconChevronDown size={20} className="rr-chev" />
       </button>
 
+      {/* Bookmark and Report sit in the head, beside the arrow, once the question is open. */}
+      {open ? (
+        <div className="rr-qtools top">
+          <QuestionTools versionId={item.question_version_id} where="review" />
+        </div>
+      ) : null}
+
       <div className="rr-qbody" id={bodyId} role="region" aria-label={`Question ${item.position}`}>
         <div className="rr-qbody-in">
-          {open ? (
-            <div className="rr-qtools">
-              <QuestionTools versionId={item.question_version_id} where="review" />
-            </div>
-          ) : null}
           {item.passage_body ? <Passage title={item.passage_title} body={item.passage_body} /> : null}
           {item.instructions ? (
             <p className="rr-instructions">
@@ -619,7 +629,7 @@ function QuestionCard({
             })}
           </ul>
 
-          <FactsRow item={item} hintUsed={hintUsed} />
+          <FactsRow item={item} hintUsed={hintUsed} checkup={checkup} />
 
           {item.solution_steps.length > 0 || item.hint ? (
             <div className="rr-how">
@@ -658,10 +668,13 @@ function QuestionCard({
 }
 
 /** What the student told us about this question: how sure, the hint, the lesson. */
-function FactsRow({ item, hintUsed }: { item: ReviewItem; hintUsed: boolean }) {
+function FactsRow({ item, hintUsed, checkup }: { item: ReviewItem; hintUsed: boolean; checkup: boolean }) {
   const first = item.attempts[0];
   const facts: { label: string; text: string }[] = [];
   if (first?.confidence) facts.push({ label: 'How sure', text: `You said: ${CONFIDENCE[first.confidence]}` });
+  if (checkup) {
+    return facts.length > 0 ? <p className="rr-factline">{facts[0]!.text}</p> : null;
+  }
   if (item.attempts.length > 0) facts.push({ label: 'Hint', text: hintUsed ? 'You used the hint' : 'No hint needed' });
   if (item.lesson_feedback) {
     const said = UNDERSTOOD[item.lesson_feedback.understood];

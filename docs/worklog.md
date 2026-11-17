@@ -15,6 +15,20 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Check-up report rebuilt: result band, topic tiles, your answers
+- **What:** a tinted result band leads: this check-up's score on a ring, every answer as a
+  tappable mark (it opens that question), the subject score on a bar to the target, one button.
+  Each topic is a tile, red or green, three across. New: **Your answers**, every question in the
+  check-up, folded, with your answer, the right one and the working (the run report's question
+  card, shared). What next is three cards side by side. Bookmark and Report sit beside the
+  arrow in an open question, on both report pages.
+- **API:** `GET /v1/checkup/{id}/answers` (the run review's question list, now `review_items`,
+  shared by both).
+- **Why:** founder, 17 Nov 2026: the page was flat and one-dimensional; the questions themselves
+  could not be seen.
+- **Where:** `CheckupReport.tsx`/`.css`, `RunReport.tsx`/`.css`, `routers/runs.py`, `student/api.ts`.
+- **Status:** committed, not pushed.
+
 ### Check-up report: faster, one score story, no back link
 - **What:** the report is fetched once (it was fetched twice) and the roadmap read waits until
   the report is in, so the page's own data no longer races it (report 2.3 s to 0.7 s in local

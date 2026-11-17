@@ -1143,3 +1143,28 @@
     print-color-adjust: exact;
   }
 }
+
+/* Bookmark and Report in the open card's head, on the tag row beside the arrow (founder,
+   17 Nov 2026). Only that short row makes room; the topic line keeps its full width. */
+.sj .rr-qtools.top {
+  position: absolute;
+  top: 12px;
+  right: 54px;
+  z-index: 1;
+}
+.sj .rr-q.open .rr-qtop {
+  min-height: 34px;
+  padding-right: 230px;
+}
+@media (max-width: 860px) {
+  .sj .rr-qtools.top {
+    top: 12px;
+    right: 44px;
+  }
+  .sj .rr-qtools.top .qt-btn span {
+    display: none;
+  }
+  .sj .rr-q.open .rr-qtop {
+    padding-right: 84px;
+  }
+}

@@ -928,6 +928,11 @@ export const api = {
     }),
   /** Where an already-open sitting is, for a client that has just reloaded. */
   current: (sessionId: string) => call<CheckupState>(`/checkup/${sessionId}`),
+  /** Every question in the check-up: what was chosen, the answer and the working. */
+  answers: (sessionId: string) =>
+    shared(`checkup-answers:${sessionId}`, KEEP.overview, () =>
+      call<{ items: import('../prep/runsApi.js').ReviewItem[] }>(`/checkup/${sessionId}/answers`),
+    ),
   report: (sessionId: string) =>
     shared(`checkup-report:${sessionId}`, KEEP.overview, () => call<CheckupReport>(`/checkup/${sessionId}/report`)),
   startPractice: (studentId: string, subjectId: string, length = 10) =>

@@ -256,31 +256,8 @@ def outcome_of(attempts: list[dict[str, Any]]) -> Outcome:
     return "unanswered"
 
 
-@router.get(
-    "/v1/practice/{session_id}/review",
-    response_model=RunReview,
-    summary="Every question in a run, what was chosen, and the working",
-)
-async def review_run(
-    request: Request, conn: Annotated[AsyncConnection, Depends(connection)], session_id: UUID
-) -> RunReview:
-    await require_session_owner(request, conn, session_id)
-    session = await _session(conn, session_id)
-    summary = (
-        (
-            await conn.execute(
-                text(RUNS + " AND ss.id = :session"),
-                {
-                    "student": session["student_id"],
-                    "session": session_id,
-                    "default_length": DEFAULT_LENGTH,
-                },
-            )
-        )
-        .mappings()
-        .one()
-    )
-
+async def review_items(conn: AsyncConnection, session_id: UUID) -> list[ReviewItem]:
+    """Every question a session asked, in order: what was chosen, the answer and the working."""
     attempts = await fetch_all(
         conn,
         """
@@ -382,6 +359,36 @@ async def review_run(
             )
         )
 
+    return items
+
+
+@router.get(
+    "/v1/practice/{session_id}/review",
+    response_model=RunReview,
+    summary="Every question in a run, what was chosen, and the working",
+)
+async def review_run(
+    request: Request, conn: Annotated[AsyncConnection, Depends(connection)], session_id: UUID
+) -> RunReview:
+    await require_session_owner(request, conn, session_id)
+    session = await _session(conn, session_id)
+    summary = (
+        (
+            await conn.execute(
+                text(RUNS + " AND ss.id = :session"),
+                {
+                    "student": session["student_id"],
+                    "session": session_id,
+                    "default_length": DEFAULT_LENGTH,
+                },
+            )
+        )
+        .mappings()
+        .one()
+    )
+
+    items = await review_items(conn, session_id)
+
     return RunReview(
         session_id=session_id,
         subject_id=summary["subject_id"],
@@ -430,3 +437,26 @@ async def delete_run(
         raise HTTPException(status_code=404, detail="unknown practice session")
     await conn.commit()
     return Response(status_code=204)
+
+
+class CheckupAnswers(BaseModel):
+    items: list[ReviewItem]
+
+
+@router.get(
+    "/v1/checkup/{session_id}/answers",
+    response_model=CheckupAnswers,
+    summary="Every question in a check-up, what was chosen, and the working",
+)
+async def checkup_answers(
+    request: Request, conn: Annotated[AsyncConnection, Depends(connection)], session_id: UUID
+) -> CheckupAnswers:
+    await require_session_owner(request, conn, session_id)
+    kind = (
+        await conn.execute(
+            text("SELECT session_type FROM study_sessions WHERE id = :id"), {"id": session_id}
+        )
+    ).scalar()
+    if kind != "checkup":
+        raise HTTPException(status_code=404, detail="unknown check-up")
+    return CheckupAnswers(items=await review_items(conn, session_id))
