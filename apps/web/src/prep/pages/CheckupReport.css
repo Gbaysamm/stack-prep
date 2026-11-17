@@ -1727,3 +1727,98 @@
     font-size: 13.5px;
   }
 }
+
+/* The ring in a sticker disc (founder, 17 Nov 2026), and the chips that say how a score moved. */
+.sj .cp3-disc {
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 50%;
+  background: var(--white, #fff);
+  box-shadow: 4px 4px 0 var(--purple-200, #d7bdff);
+}
+.sj .cp3-dial-note {
+  gap: 4px;
+}
+.sj .cp3-dial-note .cp3-chip {
+  margin-top: 6px;
+}
+.sj .cp3-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  justify-self: start;
+  width: fit-content;
+  padding: 4px 10px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 99px;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.sj .cp3-chip.up {
+  background: #e7f9dc;
+  color: #15653a;
+}
+.sj .cp3-chip.down {
+  background: #ffe4ea;
+  color: #b0123b;
+}
+.sj .cp3-chip.same,
+.sj .cp3-chip.first {
+  background: var(--purple-050, #f3ebff);
+  color: var(--ink-700, #3b2a66);
+}
+.sj .cp3-hero-main > .cp3-chip {
+  margin-top: -8px;
+}
+@media (min-width: 641px) {
+  .sj .cp3-dial-note {
+    justify-items: center;
+    text-align: center;
+  }
+  .sj .cp3-dial-note .cp3-chip {
+    justify-self: center;
+  }
+}
+@media (max-width: 640px) {
+  .sj .cp3-disc {
+    padding: 6px;
+    box-shadow: 3px 3px 0 var(--purple-200, #d7bdff);
+  }
+  .sj .cp3-dial {
+    gap: 18px;
+  }
+}
+/* No pills (founder, 17 Nov 2026): how a score moved is a plain coloured line. */
+.sj .cp3-chip,
+.sj .cp3-chip.up,
+.sj .cp3-chip.down,
+.sj .cp3-chip.same,
+.sj .cp3-chip.first {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+.sj .cp3-chip.up {
+  color: #15803d;
+}
+.sj .cp3-chip.down {
+  color: #be123c;
+}
+.sj .cp3-chip.same,
+.sj .cp3-chip.first {
+  color: var(--gray-600, #6b6880);
+  font-weight: 500;
+}
+.sj .cp3-hero-main > .cp3-chip {
+  margin-top: -10px;
+}
+.sj .cp3-dial-note .cp3-chip {
+  margin-top: 2px;
+  font-size: 13px;
+}

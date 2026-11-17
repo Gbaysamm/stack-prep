@@ -207,16 +207,23 @@ export function CheckupReport() {
       >
         <div className="cp3-hero">
           <div className="cp3-dial">
+            <span className="cp3-disc">
             <Ring value={(score ?? 0) / 100} size={132} stroke={13} color={ringColour(scoreLevel(score, target))}>
               <span className="cp3-dial-in">
                 <b className="sj-num">{score !== null ? `${score}%` : '—'}</b>
               </span>
             </Ring>
+            </span>
             <span className="cp3-dial-note">
               <b>
                 {data.right} of {data.answered} right
               </b>
               <small>in this check-up</small>
+              {data.previous_score !== null && score !== null ? (
+                <Moved by={score - data.previous_score} words="since your last check-up" />
+              ) : (
+                <span className="cp3-chip first">Your first check-up</span>
+              )}
             </span>
           </div>
 
@@ -234,6 +241,9 @@ export function CheckupReport() {
                 'This check-up sets your score.'
               )}
             </p>
+            {data.finished && now !== null && standing?.change != null ? (
+              <Moved by={standing.change} words="since your first check-up" />
+            ) : null}
 
             {data.answered > 0 ? <Marks items={items} report={data} /> : null}
 
@@ -251,15 +261,6 @@ export function CheckupReport() {
                   {starting ? 'Starting…' : weakest.length > 1 ? `Practise ${weakest.length} weakest topics` : 'Practise weakest topic'}
                 </Button>
               ) : null}
-              <span className="cp3-hero-aside">
-                {data.previous_score !== null && score !== null ? (
-                  <>
-                    Last check-up <b>{data.previous_score}%</b> <Signed value={score - data.previous_score} />
-                  </>
-                ) : (
-                  'Your first check-up in this subject'
-                )}
-              </span>
             </div>
           </div>
         </div>
@@ -343,6 +344,18 @@ export function CheckupReport() {
 
       {gate.popup}
     </div>
+  );
+}
+
+/** How far a score moved, as a chip: up in green, down in red, the same in grey. */
+function Moved({ by, words }: { by: number; words: string }) {
+  const tone = by > 0 ? 'up' : by < 0 ? 'down' : 'same';
+  const size = Math.abs(by);
+  return (
+    <span className={cx('cp3-chip', tone)}>
+      {by > 0 ? '▲' : by < 0 ? '▼' : '='}{' '}
+      {by === 0 ? `No change ${words}` : `${by > 0 ? 'Up' : 'Down'} ${size} ${size === 1 ? 'point' : 'points'} ${words}`}
+    </span>
   );
 }
 
