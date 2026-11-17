@@ -15,6 +15,13 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### The tracker combined
+- **What:** migration 059: 24 open items down to 7; small pieces became checklist steps
+  (lessons, more questions, notifications); four items removed (OpenAI credit, lawyer, Lagos
+  and Ibadan pronunciation, Mock exam room).
+- **Why:** founder, 17 Nov 2026: too many, too broken up.
+- **Status:** committed, not pushed.
+
 ### Notifications and reports: planned, on the tracker
 - **What:** migration 058 adds a Notifications area: the plan (in progress today) and its parts
   in build order: the engine and hourly job, in-app inbox, email reminders, weekly report,

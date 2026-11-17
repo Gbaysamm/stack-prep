@@ -162,3 +162,9 @@ Order of work (each shown at 1440 and 390 before the next):
 | Weekly (or daily) report by email, with gains and insights | Links to Progress; Progress is the report page | mailer + job | To do |
 | Parents told after a student defaults; parent reports | Email first; WhatsApp or SMS later (paid); with consent | `guardians` (exists) | To do |
 | Push notifications | Web push with permission | service worker | To do |
+
+## The tracker combined (founder, 17 Nov 2026)
+
+24 open items became 7: related pieces are one item with a checklist (More subject lessons,
+More questions, three Notifications items). Removed as not ours to track: the OpenAI credit,
+the lawyer, the Lagos and Ibadan pronunciation, the Mock exam room (migration 059).
