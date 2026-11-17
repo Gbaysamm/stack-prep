@@ -38,8 +38,8 @@ export function useRunGate() {
   /** A run the student starts: held while today's plan has items left. */
   const startRun = (go: () => void) => (next ? setWhy(todayFirst) : go());
 
-  /** A run on a topic the student picked (the run builder at `href`). */
-  const openTopic = (href: string) => {
+  /** A run on topics the student picked: held until enough planned runs are done, then by today's plan. */
+  const startOwn = (go: () => void) => {
     if (ownLeft > 0) {
       setWhy({
         title: 'Your roadmap picks your runs for now',
@@ -48,9 +48,12 @@ export function useRunGate() {
     } else if (next) {
       setWhy(todayFirst);
     } else {
-      navigate(href);
+      go();
     }
   };
+
+  /** A run on a topic the student picked (the run builder at `href`). */
+  const openTopic = (href: string) => startOwn(() => navigate(href));
 
   const popup: ReactNode = why
     ? createPortal(
@@ -84,5 +87,5 @@ export function useRunGate() {
       )
     : null;
 
-  return { startRun, openTopic, popup, show: (w: Why) => setWhy(w), todayFirst };
+  return { startRun, startOwn, openTopic, popup, show: (w: Why) => setWhy(w), todayFirst };
 }

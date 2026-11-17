@@ -1,11 +1,11 @@
 /**
  * /checkup/:sessionId/report — what one check-up found, in the plain numbers of
- * docs/student-scoring.md.
+ * docs/student-scoring.md (redesigned 16 Nov 2026).
  *
- * Ordered the way a student reads it: the result first (in the page hero), which is now the
- * predicted score; then the subject's score from every answer; then the topics this sitting
- * touched, weakest first; then what to do next and when the next check-up is due; then how the
- * numbers are worked out. Every number is right ÷ answered, shown with its count.
+ * The result first, in one sticker card: the score (now the predicted score), the bar to the
+ * target, the last check-up and the subject's score now, and one way to practise. Then each
+ * topic, in two plain lists (got wrong, got right); then the weakest topics to start with, as
+ * cards; then one line on how it is worked out.
  *
  * JAMB's words throughout: a TOPIC (the API's `subtopics`) is the unit scored; a SECTION (the
  * API's `topics`) is only the heading that groups them.
@@ -14,31 +14,18 @@
 import { useEffect, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
-import {
-  api,
-  type CheckupReport as Report,
-  type SubjectScore,
-  type SubtopicReport,
-  type TopicScore,
-  type TopicStatus,
-} from '../../student/api.js';
-import { IconArrowRight, IconBolt, IconCalendar, IconCheck, IconHelp, IconReplay } from '../icons.js';
+import { api, type CheckupReport as Report, type SubtopicReport } from '../../student/api.js';
+import { IconArrowLeft, IconArrowRight, IconCheck, IconClose, IconHelp, IconReplay } from '../icons.js';
 import { progressApi } from '../progressApi.js';
+import { useRunGate } from '../RunGate.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
-import { Button, CountUp, Eyebrow, PageHero, ShowMore, Skeleton, cx, useShowMore } from '../ui.js';
+import { scoreLevel } from '../SubjectSwitcher.js';
+import { Button, PageHero, ShowMore, Skeleton, cx, useShowMore } from '../ui.js';
 import { HOW_PATH } from './HowItsWorkedOut.js';
-import { NothingFreshNote, useStartPractice } from './Home.js';
+import { NothingFreshNote, Section, useStartPractice } from './Home.js';
 import './CheckupReport.css';
 
 /* ------------------------------------------------------------------ words and numbers */
-
-const STATUS_LABEL: Record<TopicStatus, string> = {
-  not_tried: 'Not tried yet',
-  just_started: 'Just started',
-  needs_work: 'Needs work',
-  getting_there: 'Getting there',
-  strong: 'Strong',
-};
 
 /** A change in points: "+10", "−3", or a muted "0". */
 function Signed({ value }: { value: number }) {
@@ -130,22 +117,25 @@ export function CheckupReport() {
     return () => window.clearTimeout(id);
   }, [ready]);
 
-  // "Practise" means the weakest topics named under What next, never a general run.
+  // "Practise" means the weakest topics named under What next, never a general run. A run the
+  // roadmap holds back is said in a popup at once (RunGate.tsx).
   const starter = useStartPractice();
+  const gate = useRunGate();
   const starting = starter.busy !== null;
-  const startIssue = starter.error;
   const weakest = report.data ? weakestTopics(report.data) : [];
-  const practise = (where: 'hero' | 'cta') => {
-    if (!report.data || starting) return;
-    void starter.start(
-      report.data.subject_id,
-      weakest.length > 0
-        ? {
-            subtopicIds: weakest.map((t) => t.subtopic_id),
-            label: weakest.length === 1 ? weakest[0]!.name : `your ${weakest.length} weakest topics`,
-          }
-        : {},
-      where,
+  const practise = (topics: { subtopic_id: string; name: string }[], where: string) => {
+    if (!report.data || starting || topics.length === 0) return;
+    const subjectId = report.data.subject_id;
+    gate.startOwn(
+      () =>
+        void starter.start(
+          subjectId,
+          {
+            subtopicIds: topics.map((t) => t.subtopic_id),
+            label: topics.length === 1 ? topics[0]!.name : `your ${topics.length} weakest topics`,
+          },
+          where,
+        ),
     );
   };
 
@@ -179,100 +169,92 @@ export function CheckupReport() {
     ? new Date(finishedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })
     : null;
   const exam = subject?.examination_short_name;
-  const goalPath = `/subjects/${data.subject_id}/goal`;
   const target = subject?.goal?.target_score ?? null;
   const score = data.score;
-  const sittingTopics = data.subtopics.filter((line) => line.answered > 0).length;
-  const practiseLabel = weakest.length > 1 ? `Practise ${weakest.length} weakest topics` : 'Practise weakest topic';
+  const eyebrow = ['Check-up report', [exam, subjectName].filter(Boolean).join(' '), dateText].filter(Boolean).join(' · ');
 
   return (
-    <div className="sj-page cp-page">
-      <PageHero
-        back={{ to: '/checkup', label: 'All check-ups' }}
-        eyebrow={`Check-up report${exam || subjectName ? ` · ${[exam, subjectName].filter(Boolean).join(' ')}` : ''}`}
-        title={
-          data.answered > 0 && score !== null
-            ? (
-              <>
-                Your <span className="cp-nowrap">check-up</span> result is {score}%
-              </>
-            )
-            : 'No answers in this check-up yet'
-        }
-        sub={
-          data.answered === 0
-            ? 'Answer a few questions and your result shows here.'
-            : data.finished
-              ? `${dateText ? `On ${dateText}. ` : ''}This result is now your predicted score: the closest thing to sitting the exam today.`
-              : `From the ${data.answered} answer${data.answered === 1 ? '' : 's'} so far. Finish the check-up and the result becomes your predicted score.`
-        }
-        actions={
-          weakest.length > 0 ? (
-            <Button
-              tone="lime"
-              onClick={() => practise('hero')}
-              busy={starting}
-              icon={starting ? undefined : <IconBolt size={18} />}
-            >
-              {starting ? 'Starting…' : practiseLabel}
-            </Button>
-          ) : null
-        }
-        aside={
-          score !== null ? (
-            <div className="cp-stat">
-              <span className="cp-stat-label">{data.finished ? 'Predicted score' : 'So far'}</span>
-              <span className="cp-stat-num">
-                <span className="sj-num">
-                  <CountUp value={score} duration={1100} />
-                </span>
-                <span className="unit sj-mono">%</span>
-              </span>
-              <span className="cp-stat-note">
-                The average of your {sittingTopics} topic score{sittingTopics === 1 ? '' : 's'} here ({data.right} of{' '}
-                {data.answered} questions right).
-              </span>
-              <span className="cp-stat-chips">
-                {data.previous_score !== null ? (
-                  <span>
-                    Last check-up {data.previous_score}% → now {score}% (<Signed value={score - data.previous_score} />)
-                  </span>
-                ) : (
-                  <span>
-                    <IconCheck size={14} />
-                    Your first check-up
-                  </span>
-                )}
-                {target !== null && data.finished ? (
-                  <span>{target - score > 0 ? `${target - score} to go to your target of ${target}` : `At your target of ${target}`}</span>
-                ) : null}
-              </span>
-            </div>
-          ) : (
-            <div className="cp-stat">
-              <span className="cp-stat-label">This check-up</span>
-              <span className="cp-stat-num">
-                <span className="sj-num">0</span>
-                <span className="unit sj-mono">answered</span>
-              </span>
-              <span className="cp-stat-note">Your result appears after your first answer.</span>
-            </div>
-          )
-        }
-      />
+    <div className="sj-page cp-page cp2">
+      <Link className="cp2-back" to="/checkup">
+        <IconArrowLeft size={16} /> All check-ups
+      </Link>
 
-      {startIssue ? (
+      <Section
+        eyebrow={eyebrow}
+        title={data.answered === 0 ? 'No answers yet' : 'How your check-up went'}
+        id="cp2-result-title"
+        className="cp2-first"
+      >
+        <div className="cp2-result">
+          <div className="cp2-result-score">
+            <b className={cx('sj-num', scoreLevel(score, target))}>{score !== null ? `${score}%` : '—'}</b>
+            <span>
+              {data.right} of {data.answered} right
+            </span>
+          </div>
+          <div className="cp2-result-text">
+            <p className="cp2-result-lead">
+              {data.answered === 0
+                ? 'Answer a few questions and your result shows here.'
+                : data.finished
+                  ? 'This is now your predicted score: the closest thing to sitting the exam today.'
+                  : `From the ${data.answered} answers so far. Finish the check-up and it becomes your predicted score.`}
+            </p>
+            {score !== null ? (
+              <div className="cp2-target" aria-hidden="true">
+                <i style={{ width: `${score}%` }} />
+                {target !== null ? <em style={{ left: `${Math.min(100, target)}%` }} /> : null}
+              </div>
+            ) : null}
+            <ul className="cp2-facts">
+              {target !== null && score !== null ? (
+                <li>
+                  Target: <b>{target}%</b>
+                  {target - score > 0 ? ` · ${target - score} to go` : ' · reached'}
+                </li>
+              ) : (
+                <li>
+                  <Link to={`/subjects/${data.subject_id}/goal`}>Set a target</Link>
+                </li>
+              )}
+              {data.previous_score !== null && score !== null ? (
+                <li>
+                  Last check-up: <b>{data.previous_score}%</b> (<Signed value={score - data.previous_score} />)
+                </li>
+              ) : (
+                <li>Your first check-up</li>
+              )}
+              {standing?.score != null ? (
+                <li>
+                  {subjectName || 'Subject'} score now: <b>{standing.score}%</b>
+                </li>
+              ) : null}
+            </ul>
+          </div>
+          {weakest.length > 0 ? (
+            <Button
+              className="cp2-result-go"
+              onClick={() => practise(weakest, 'hero')}
+              busy={starting}
+              trailing={starting ? undefined : <IconArrowRight size={18} />}
+            >
+              {starting ? 'Starting…' : weakest.length > 1 ? `Practise ${weakest.length} weakest topics` : 'Practise weakest topic'}
+            </Button>
+          ) : null}
+        </div>
+      </Section>
+
+      {starter.error && !starter.planFirst ? (
         <p className="cp-issue" role="alert">
-          {startIssue}
+          {starter.error}
         </p>
       ) : null}
-      {starter.exhausted?.key === 'hero' ? <NothingFreshNote starter={starter} /> : null}
+      {starter.exhausted ? <NothingFreshNote starter={starter} /> : null}
 
       {!data.finished ? (
         <Notice
           tone="warn"
           role="status"
-          className="sj-rise"
           icon={<IconHelp size={18} />}
           title="This check-up isn’t finished"
           action={
@@ -285,272 +267,112 @@ export function CheckupReport() {
         </Notice>
       ) : null}
 
-      {standing ? <YourScore standing={standing} subjectName={subjectName} target={target} goalPath={goalPath} /> : null}
-
       <Touched report={data} />
 
-      <section className="cp-cta sj-rise" id="next" aria-labelledby="cp-cta-title">
-        <Eyebrow>What next</Eyebrow>
-        <h2 id="cp-cta-title" className="sj-display sj-h2">
-          {weakest.length > 1
-            ? `Practise your ${weakest.length} weakest topics`
-            : weakest.length === 1
-              ? 'Practise your weakest topic'
-              : 'Start practising'}
-        </h2>
-        {weakest.length > 0 ? (
-          <div className="cp-next-wrap">
-            <span className="cp-next-label">Start with these</span>
-            <ol className="cp-next">
-              {weakest.map((t) => (
-                <li key={t.subtopic_id}>
-                  <span className="name">{t.name}</span>
-                  <b className="sj-mono">{t.score !== null ? `${t.score}%` : '—'}</b>
-                </li>
-              ))}
-            </ol>
-          </div>
-        ) : null}
-        <p>
-          Questions you got wrong or guessed come back in practice until you get them. Get a hint or a worked lesson
-          whenever you’re stuck.
-        </p>
-        {standing && (standing.checkup_due || standing.next_checkup_due) ? (
-          <span className="cp-due">
-            <IconCalendar size={16} />
-            {standing.checkup_due || !standing.next_checkup_due
-              ? 'Your next check-up is due now'
-              : `Next check-up due ${dayText(standing.next_checkup_due)}`}
-          </span>
-        ) : null}
-        {startIssue ? <p className="cp-issue dark">{startIssue}</p> : null}
-        {starter.exhausted?.key === 'cta' ? <NothingFreshNote starter={starter} /> : null}
-        <div className="cp-cta-actions">
-          <Button
-            tone="lime"
-            size="lg"
-            onClick={() => practise('cta')}
-            busy={starting}
-            trailing={starting ? undefined : <IconArrowRight size={18} />}
-          >
-            {starting ? 'Starting…' : 'Start practising'}
-          </Button>
-          <Button tone="ghost" size="lg" to={`/subjects/${data.subject_id}`}>
-            Back to subject
-          </Button>
-        </div>
-      </section>
+      {weakest.length > 0 ? (
+        <Section
+          eyebrow="What next"
+          title="Start with these"
+          id="next"
+          className="cp2-next"
+          sub={
+            standing && (standing.checkup_due || standing.next_checkup_due)
+              ? standing.checkup_due || !standing.next_checkup_due
+                ? 'Your weakest topics now. Your next check-up is due now.'
+                : `Your weakest topics now. Your next check-up is due ${dayText(standing.next_checkup_due)}.`
+              : 'Your weakest topics now. Tap one to practise it.'
+          }
+        >
+          <ul className="ph2-weak-list">
+            {weakest.map((t) => (
+              <li key={t.subtopic_id}>
+                <button
+                  type="button"
+                  className={cx('ph2-weak-row', (t.score ?? 0) < 25 && 'very')}
+                  onClick={() => practise([t], 'next')}
+                  aria-label={`Practise ${t.name}`}
+                >
+                  <span className="ph2-weak-badge sj-num">{t.score !== null ? `${t.score}%` : '—'}</span>
+                  <span className="ph2-weak-name">
+                    <b>{t.name}</b>
+                    <small>Tap to practise</small>
+                  </span>
+                  <IconArrowRight size={18} className="ph2-weak-arrow" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      ) : null}
 
-      <HowWorkedOut />
+      <p className="cp2-how">
+        <IconHelp size={16} />
+        <span>
+          Every score is questions right ÷ questions answered, counting your latest answer to each question.{' '}
+          <Link to={HOW_PATH}>Every number, explained</Link>
+        </span>
+      </p>
+
+      {gate.popup}
     </div>
-  );
-}
-
-/* ------------------------------------------------------------------ your score */
-
-function YourScore({
-  standing,
-  subjectName,
-  target,
-  goalPath,
-}: {
-  standing: SubjectScore;
-  subjectName: string;
-  target: number | null;
-  goalPath: string;
-}) {
-  const s = standing;
-  const trend = s.checkups.filter((c) => c.score !== null);
-  return (
-    <section className="cp-section first" aria-labelledby="cp-score-title">
-      <div className="cp-sechead">
-        <div className="text">
-          <Eyebrow>{subjectName ? `${subjectName} now` : 'The subject now'}</Eyebrow>
-          <h2 id="cp-score-title" className="sj-display sj-h2">
-            Your score
-          </h2>
-          <p>
-            It counts every answer you’ve given in {subjectName || 'this subject'}, practice and check-ups, with only
-            your latest try at each question.
-          </p>
-        </div>
-      </div>
-
-      <div className="cp-scorecard sj-rise d1">
-        <div className="cp-stats">
-          <div className="cp-statcell">
-            <span className="sj-eyebrow">Your score</span>
-            <span className="sj-num">{s.score !== null ? `${s.score}%` : '—'}</span>
-            <span className="cp-statcell-foot">
-              {s.topics_tried > 0
-                ? `Average of ${s.topics_tried} topic${s.topics_tried === 1 ? '' : 's'} tried`
-                : 'No answers yet'}
-            </span>
-          </div>
-          <div className="cp-statcell">
-            <span className="sj-eyebrow">Started at</span>
-            <span className="sj-num">{s.started_score !== null ? `${s.started_score}%` : '—'}</span>
-            <span className="cp-statcell-foot">
-              {s.change !== null ? (
-                <>
-                  <Signed value={s.change} /> since your first check-up
-                </>
-              ) : (
-                'Your first check-up'
-              )}
-            </span>
-          </div>
-          <div className="cp-statcell">
-            <span className="cp-statcell-head">
-              <span className="sj-eyebrow">Predicted score</span>
-              <Link to={goalPath} className="cp-change">
-                {target !== null ? 'Change target' : 'Set a target'}
-              </Link>
-            </span>
-            <span className="sj-num green">{s.predicted !== null ? `${s.predicted}%` : '—'}</span>
-            <span className="cp-statcell-foot">
-              {s.predicted === null
-                ? 'Your latest check-up result, once you finish one.'
-                : target === null
-                  ? 'Your latest check-up result.'
-                  : target - s.predicted > 0
-                    ? `${target - s.predicted} to go to your target of ${target}.`
-                    : `At or past your target of ${target}.`}
-            </span>
-          </div>
-        </div>
-        {trend.length > 1 ? (
-          <div className="cp-trend">
-            <span className="sj-eyebrow">Check-ups so far</span>
-            <span className="cp-trend-line sj-mono">
-              {trend.map((c, i) => (
-                <span key={c.session_id}>
-                  {i > 0 ? <span className="arrow" aria-hidden="true">→</span> : null}
-                  <b className={cx(i === trend.length - 1 && 'last')}>{c.score}%</b>
-                </span>
-              ))}
-            </span>
-          </div>
-        ) : null}
-      </div>
-    </section>
   );
 }
 
 /* ------------------------------------------------------------------ topics this check-up touched */
 
-interface TouchedRow {
-  sub: SubtopicReport;
-  topic: TopicScore | undefined;
-}
-
-function Touched({ report }: { report: Report }) {
-  const byId = new Map((report.standing?.topics ?? []).map((t) => [t.subtopic_id, t]));
-  const rows: TouchedRow[] = report.subtopics
-    .filter((s) => s.answered > 0)
-    .map((sub) => ({ sub, topic: byId.get(sub.subtopic_id) }))
-    // Weakest first, by the topic score now; this sitting breaks a tie.
-    .sort(
-      (a, b) =>
-        (a.topic?.score ?? Math.round((a.sub.mastery ?? 0) * 100)) - (b.topic?.score ?? Math.round((b.sub.mastery ?? 0) * 100)) ||
-        (a.sub.mastery ?? 0) - (b.sub.mastery ?? 0),
-    );
+/** One group (got wrong, or got right): a plain list, a few at a time. */
+function TopicGroup({ title, tone, rows }: { title: string; tone: 'wrong' | 'right'; rows: SubtopicReport[] }) {
   const more = useShowMore(rows, TOUCHED_SHOWN);
   if (rows.length === 0) return null;
-
+  const listId = `cp2-${tone}-list`;
   return (
-    <section className="cp-section" id="topics" aria-labelledby="cp-topics-title">
-      <div className="cp-sechead">
-        <div className="text">
-          <Eyebrow>
-            {rows.length} {rows.length === 1 ? 'topic' : 'topics'} in this check-up
-          </Eyebrow>
-          <h2 id="cp-topics-title" className="sj-display sj-h2">
-            Topic by topic, weakest first
-          </h2>
-          <p>What you got right in this check-up, and each topic’s score now from all your answers.</p>
-        </div>
-      </div>
-
-      <div className="sj-card cp-touched">
-        <ul className="cp-subs" id="cp-touched-list">
-          {more.items.map(({ sub, topic }) => {
-            const status: TopicStatus = topic?.status ?? 'not_tried';
-            const value = topic?.score ?? null;
-            return (
-              <li key={sub.subtopic_id} className={cx('cp-sub', status)}>
-                <div className="cp-sub-row">
-                  <span className="name">
-                    {sub.name}
-                    {sub.section_name ? <small>{sub.section_name}</small> : null}
-                  </span>
-                  <span className="val sj-mono">
-                    {sub.correct} of {sub.answered} right
-                  </span>
-                </div>
-                {topic ? (
-                  <>
-                    <div
-                      className={cx('cp-bar', status)}
-                      role="meter"
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-valuenow={value ?? undefined}
-                      aria-valuetext={value !== null ? `Topic score ${value}%, ${STATUS_LABEL[status].toLowerCase()}` : 'not tried yet'}
-                    >
-                      <span style={{ width: value !== null ? `${value}%` : '100%' }} />
-                    </div>
-                    <span className="cp-sub-meta">
-                      <span className={cx('tag', status)}>{STATUS_LABEL[status]}</span>
-                      {value !== null ? `Topic score ${value}% (${topic.right} of ${topic.answered})` : null}
-                    </span>
-                  </>
-                ) : null}
-              </li>
-            );
-          })}
-        </ul>
-        <ShowMore more={more} noun="topics" controls="cp-touched-list" className="cp-submore" />
-      </div>
-    </section>
+    <div className={cx('cp2-group', tone)}>
+      <h3>
+        <span className="cp2-group-mark" aria-hidden="true">
+          {tone === 'right' ? <IconCheck size={14} /> : <IconClose size={14} />}
+        </span>
+        {title}
+        <span className="cp2-group-n">{rows.length}</span>
+      </h3>
+      <ul className="cp2-rows" id={listId}>
+        {more.items.map((sub) => (
+          <li key={sub.subtopic_id}>
+            <span className="cp2-row-name">
+              <b>{sub.name}</b>
+              {sub.section_name ? <small>{sub.section_name}</small> : null}
+            </span>
+            {sub.answered > 1 ? (
+              <span className="cp2-row-count sj-mono">
+                {sub.correct} of {sub.answered}
+              </span>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+      <ShowMore more={more} noun="topics" controls={listId} className="cp-submore" />
+    </div>
   );
 }
 
-/* ------------------------------------------------------------------ how it is worked out */
-
-const HOW_STEPS = [
-  { title: 'Right ÷ answered', body: 'Every score is the questions you got right, divided by the questions you answered.' },
-  { title: 'Your latest answer counts', body: 'Get a question wrong, then right later, and it now counts as right.' },
-  { title: 'Mistakes come back', body: 'Questions you got wrong or guessed come back in practice until you get them.' },
-  { title: 'A check-up every 7 days', body: 'Your latest check-up result is your predicted score.' },
-];
-
-function HowWorkedOut() {
+function Touched({ report }: { report: Report }) {
+  const asked = report.subtopics.filter((s) => s.answered > 0);
+  if (asked.length === 0) return null;
+  // Got wrong: any question in the topic missed. Got right: every one right.
+  const wrong = asked.filter((s) => s.correct < s.answered);
+  const right = asked.filter((s) => s.correct === s.answered);
   return (
-    <details className="cp-how sj-rise d3" open>
-      <summary>
-        <span className="cp-ico" aria-hidden="true">
-          <IconHelp size={18} />
-        </span>
-        <strong className="cp-how-title">How this is worked out</strong>
-      </summary>
-      <div className="cp-how-body">
-        <ol className="cp-how-steps">
-          {HOW_STEPS.map((step, i) => (
-            <li key={step.title}>
-              <span className="cp-how-head">
-                <span className="n sj-mono">{i + 1}</span>
-                <b>{step.title}</b>
-              </span>
-              <p>{step.body}</p>
-            </li>
-          ))}
-        </ol>
-        <Link className="sj-link cp-how-more" to={HOW_PATH}>
-          Every number, explained <IconArrowRight size={14} />
-        </Link>
+    <Section
+      eyebrow={`${asked.length} ${asked.length === 1 ? 'topic' : 'topics'} in this check-up`}
+      title="How each topic went"
+      id="topics"
+      className="cp2-topics"
+      sub="Questions you got wrong come back in your practice runs until you get them."
+    >
+      <div className="cp2-groups">
+        <TopicGroup title="Got wrong" tone="wrong" rows={wrong} />
+        <TopicGroup title="Got right" tone="right" rows={right} />
       </div>
-    </details>
+    </Section>
   );
 }
 

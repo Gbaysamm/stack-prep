@@ -13,6 +13,21 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ---
 
+## 2026-11-17
+
+### Check-up report redesigned; today's design plan on the tracker
+- **What:** the check-up report drops the dark hero, the dark What next block and the four
+  how-it-works boxes. It is now one sticker result card (score, "x of y right", a bar to the
+  target, target / last check-up / subject score, one Practise button), then Got wrong and
+  Got right lists, then the weakest topics as tappable cards, then one line linking to how
+  scores are worked out. Practise uses `RunGate.startOwn`, so a held run is a popup.
+  Migration 056 marks the check-up report committed, records the founder's Home, Roadmap and
+  Lesson edits on both servers, and plans today's nine pages.
+- **Why:** founder, 16 and 17 Nov 2026.
+- **Where:** `prep/pages/CheckupReport.tsx`, `CheckupReport.css`, `prep/RunGate.tsx`,
+  `database/migrations/056_tracker_today_17_nov.sql`.
+- **Status:** committed, not pushed.
+
 ## 2026-11-16
 
 ### Practice second pass; held runs in a popup; tracker brought up to date

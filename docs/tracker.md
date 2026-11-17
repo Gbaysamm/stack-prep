@@ -102,7 +102,9 @@ Order of work (each shown at 1440 and 390 before the next):
 | Whiteboard and Emeka by default | Prefs v3 | `boardPrefs.ts` | Done-local |
 | Practice second pass: figures first, sticker tiles, weak topics as cards, one shadow | Done | `PracticeHub.tsx` | Pushed |
 | A held run is said in a popup at once, never a page change | `RunGate.tsx` | Practice, Progress, subject page | Pushed |
-| Check-up report page redesign | Next | `CheckupReport.tsx` | In progress |
+| Check-up report page redesign | Result card, got wrong / got right, weakest topics as cards | `CheckupReport.tsx` | Done-local |
+| Today, 17 Nov: run report, mock report, question screen, check-up sitting, subject page, after the lesson, saved questions, mock set-up | Planned (migration 056) | Page redesigns | In progress |
+| Mock exam room: no redesign of its own; takes the new question screen | Founder, 17 Nov | — | Agreed |
 | Progress page redesigned (subject cards, runs, folding topics, no 100% from one answer) | Rebuilt | `Progress.tsx` | Pushed |
 | Tracker: true finished dates; calmer rows on phone | Migration 053; rows with tick, title, one line | `TrackerPage.tsx` | Done-local |
 | Tracker: Today shows finished-today; one list by day, not by area | Today and day groups | `TrackerPage.tsx` | Done-local |
