@@ -15,6 +15,14 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Subject page: no other subjects' tabs; topics fold as on Progress; matching buttons
+- **What:** a subject's page no longer shows tabs for the other subjects. "How each topic stands"
+  uses the Progress page's sections that fold open, every topic, the check-up report link on the
+  Open all line. The check-up card's two buttons are the same tone and smaller.
+- **Why:** founder, 17 Nov 2026.
+- **Where:** `prep/pages/SubjectHub.tsx`.
+- **Status:** committed, not pushed.
+
 ### Subjects: swap from the ticket; the compulsory subject first
 - **What:** each subject ticket has Swap beside Edit (a popup of the subjects that can take its
   place, `prep/swap.tsx`); the compulsory subject (Use of English) comes first and says

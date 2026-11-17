@@ -8,14 +8,14 @@
  */
 
 import { useEffect, useMemo, type ReactNode } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 import { api } from '../../student/api.js';
 import { IconArrowRight, IconBolt, IconBook, IconClock, IconTarget, IconTrophy } from '../icons.js';
 import { progressApi, type SubjectOverview } from '../progressApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
-import { PRACTICE_LOCK_WORDS, SubjectSwitcher, practiceLock, rememberSubject, scoreNote, useOverview } from '../SubjectSwitcher.js';
-import { Button, CountUp, PageHero, Pager, ShowMore, Skeleton, Track, cx, usePaged, useShowMore } from '../ui.js';
+import { PRACTICE_LOCK_WORDS, practiceLock, rememberSubject, scoreNote, useOverview } from '../SubjectSwitcher.js';
+import { Button, CountUp, PageHero, Pager, Skeleton, Track, cx, usePaged } from '../ui.js';
 import { MetricTip } from './HowItsWorkedOut.js';
 import {
   Alert,
@@ -214,7 +214,7 @@ function ActionCards({ subject, openRun }: { subject: SubjectOverview; openRun?:
                 Resume check-up
               </Button>
               {latest ? (
-                <Button to={`/checkup/${latest.session_id}/report`} tone="ghost">
+                <Button to={`/checkup/${latest.session_id}/report`} tone="soft" size="sm">
                   View last report
                 </Button>
               ) : null}
@@ -224,16 +224,16 @@ function ActionCards({ subject, openRun }: { subject: SubjectOverview; openRun?:
               <Button busy={checkup.busy} onClick={() => checkup.start(subject.subject_id)} trailing={<IconArrowRight size={18} />}>
                 Take your check-up
               </Button>
-              <Button to={`/checkup/${latest.session_id}/report`} tone="ghost">
+              <Button to={`/checkup/${latest.session_id}/report`} tone="soft" size="sm">
                 View last report
               </Button>
             </>
           ) : latest ? (
             <>
-              <Button to={`/checkup/${latest.session_id}/report`} tone="soft" trailing={<IconArrowRight size={18} />}>
+              <Button to={`/checkup/${latest.session_id}/report`} tone="soft" size="sm" trailing={<IconArrowRight size={16} />}>
                 View last report
               </Button>
-              <Button tone="ghost" busy={checkup.busy} onClick={() => checkup.start(subject.subject_id)}>
+              <Button tone="soft" size="sm" busy={checkup.busy} onClick={() => checkup.start(subject.subject_id)}>
                 Take one early
               </Button>
             </>
@@ -249,43 +249,36 @@ function ActionCards({ subject, openRun }: { subject: SubjectOverview; openRun?:
   );
 }
 
-/** How many JAMB topics show before "Show all": the lowest, under their section headings. */
-const TOPICS_SHOWN = 8;
-
 function Topics({ subject }: { subject: SubjectOverview }) {
   const topics = subject.scores?.topics ?? [];
-  // Capped to the lowest topics (TopicStrengths picks them), until "Show all" opens every one.
-  const more = useShowMore(topics, TOPICS_SHOWN);
   const gate = useRunGate();
   if (!topics.some((topic) => topic.answered > 0)) return null;
   const latest = subject.latest_checkup;
+  // Drawn as on Progress (founder, 17 Nov 2026): each section a band that folds open.
   return (
     <Section
       eyebrow="Topic by topic"
       title="How each topic stands"
       id="hub-topics"
-      sub="Each topic's score is the questions you got right out of those you answered there. Lowest first; show all for every topic. Striped means not tried yet."
+      sub="Each topic's score is the questions you got right out of those you answered there."
       tip={<MetricTip id="status" />}
-      action={
-        latest ? (
-          <Link className="sj-link" to={`/checkup/${latest.session_id}/report`}>
-            Last check-up report <IconArrowRight size={14} />
-          </Link>
-        ) : null
-      }
     >
-      <div className="sj-card hub-panel">
+      <div className="sj-card prog-panel">
         <TopicLegend />
-        <div id="hub-topic-list">
-          <TopicStrengths
-            topics={topics}
-            subjectId={subject.subject_id}
-            limit={more.open ? undefined : TOPICS_SHOWN}
-            onPractise={gate.openTopic}
-          />
-          {gate.popup}
-        </div>
-        <ShowMore more={more} noun="topics" controls="hub-topic-list" className="hub-more" />
+        <TopicStrengths
+          topics={topics}
+          subjectId={subject.subject_id}
+          collapsible
+          onPractise={gate.openTopic}
+          tools={
+            latest ? (
+              <Link className="sj-link prog-tools-report" to={`/checkup/${latest.session_id}/report`}>
+                Check-up report <IconArrowRight size={14} />
+              </Link>
+            ) : null
+          }
+        />
+        {gate.popup}
       </div>
     </Section>
   );
@@ -545,7 +538,6 @@ export function SubjectHub() {
   const student = useStudent();
   const overview = useOverview(student.studentId);
   const catalogue = useLoad(() => api.catalogue(), []);
-  const navigate = useNavigate();
   useEffect(() => {
     if (subjectId) rememberSubject(subjectId);
   }, [subjectId]);
@@ -628,16 +620,6 @@ export function SubjectHub() {
         subject={subject}
         exam={exam}
         runs={runs}
-        switcher={
-          fromOverview && overview.data.subjects.length > 1 ? (
-            <SubjectSwitcher
-              subjects={overview.data.subjects}
-              value={subject.subject_id}
-              onChange={(id) => navigate(`/subjects/${id}`, { replace: true })}
-              label="Subject"
-            />
-          ) : undefined
-        }
       />
     </div>
   );
