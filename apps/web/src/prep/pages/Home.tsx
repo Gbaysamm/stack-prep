@@ -1227,6 +1227,16 @@ export function Home() {
     );
   }
 
+  // Wait for the roadmap too: drawn without it, Home showed its older, roadmap-less layout for a
+  // moment and then jumped (founder, 17 Nov 2026). If the roadmap fails, Home shows without it.
+  if (!roadmap.data && !roadmap.error) {
+    return (
+      <div className="sj-page home">
+        <HomeSkeleton />
+      </div>
+    );
+  }
+
   const focus = focusSubject(subjects);
   const step = decideNext(data, focus, roadmap.data);
 
