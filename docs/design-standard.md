@@ -19,9 +19,10 @@ An app a student lives in daily is smaller in scale than the marketing site the 
 ## Cards
 - **Every card carries the sticker:** 1.5px dark outline and the hard shadow. The shared
   `.sj-card` does this by default. A shadow on some cards and not others reads as a mistake.
-- **Shadow colour, as the system says, changes per element:** pale purple (lilac) by default;
-  a card may take another accent (green, yellow, pink) **only when that colour is already on
-  the page** (the card's own fill, the page's lit item). Never a new hue for decoration.
+- **Shadow colour may vary, as in the system:** any of its solid accents (purple, green,
+  orange, pink, yellow). Purple is the default. **Only the shadow carries the colour:** the card
+  itself stays white, so colour never ranks one card above another and no card is tinted
+  (founder, 17 Nov 2026).
 - **Nothing inside a card has a shadow:** rows, tiles, chips, options, a card within a card stay flat.
 - **The one exception:** the path card (Journey, `.jr.continues`) on Home and Roadmap: an open,
   fading bottom and no shadow, because the road runs on past it.
@@ -36,6 +37,13 @@ An app a student lives in daily is smaller in scale than the marketing site the 
 - A badge and the text beside it share one height; buttons on a row share one centre line.
 - The Roadmap page is the reference for an app page.
 - Check every page at 1440 and 390 wide.
+
+## Where the app stays different from the system (founder, 17 Nov 2026)
+- Cards keep the 1.5px dark outline (the system's cards have none).
+- Buttons keep rounded corners, not the system's full pills: pills do not fit every place a
+  button sits in the app.
+- Poppins for body text (the system: Switzer), the soft lavender page background (the system:
+  #F0F0F0), the app's smaller type and corner scale. Not everything can match a marketing page.
 
 ## Behaviour
 - A refused action is said in a popup on the same page, never by moving the student elsewhere.
