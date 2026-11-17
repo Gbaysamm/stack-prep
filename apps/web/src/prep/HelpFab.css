@@ -56,3 +56,88 @@
   box-shadow: none;
   background: none;
 }
+
+/* The panel opens just above the button, like a chat window (founder, 17 Nov 2026). */
+.sj .hf-panel {
+  position: fixed;
+  right: 22px;
+  bottom: 90px;
+  z-index: 41;
+  display: grid;
+  gap: 12px;
+  width: min(380px, calc(100vw - 32px));
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding: 18px 18px 16px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 12px;
+  background: var(--white, #fff);
+  box-shadow: 5px 5px 0 var(--purple-200, #d7bdff);
+  transform-origin: bottom right;
+  animation: hf-in 160ms ease-out both;
+}
+@keyframes hf-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}
+.sj .hf-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+.sj .hf-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--purple-600, #6b0bff);
+  color: #fff;
+}
+.sj .hf-titles {
+  display: grid;
+  gap: 2px;
+}
+.sj .hf-titles b {
+  font-size: 17px;
+  color: var(--ink-900, #1f0050);
+}
+.sj .hf-titles small {
+  color: var(--gray-600, #6b6880);
+  font-size: 13px;
+}
+.sj .hf-close {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--gray-600, #6b6880);
+  cursor: pointer;
+}
+.sj .hf-close:hover {
+  background: var(--gray-100, #efedf5);
+}
+.sj .hf-panel .hf-all {
+  margin-top: 0;
+}
+.sj .hf-btn.on {
+  background: var(--ink-900, #1f0050);
+}
+@media (max-width: 860px) {
+  .sj .hf-panel {
+    right: 16px;
+    left: 16px;
+    bottom: 152px;
+    width: auto;
+    max-height: calc(100vh - 220px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sj .hf-panel {
+    animation: none;
+  }
+}
