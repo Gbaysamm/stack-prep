@@ -8,22 +8,39 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { IconBell, IconCalendar, IconChart, IconClose, IconFlame, IconTrash, IconTrophy } from './icons.js';
+import {
+  IconBell,
+  IconCalendar,
+  IconChart,
+  IconClose,
+  IconFlame,
+  IconLock,
+  IconMail,
+  IconSparkles,
+  IconTrash,
+  IconTrophy,
+} from './icons.js';
 import { ago, notes, useInbox, type Notification } from './notificationsApi.js';
 import './Bell.css';
 
 /** How many the bell shows before "See all notifications". */
 const IN_BELL = 5;
 
-export function NoteGlyph({ note, size = 34 }: { note: Pick<Notification, 'category'>; size?: number }) {
+export function NoteGlyph({ note, size = 34 }: { note: Pick<Notification, 'category' | 'kind'>; size?: number }) {
   const Icon =
-    note.category === 'reward'
-      ? IconTrophy
-      : note.category === 'plan'
-        ? IconCalendar
-        : note.category === 'report'
-          ? IconChart
-          : IconFlame;
+    note.kind === 'support_reply'
+      ? IconMail
+      : note.kind.startsWith('password') || note.kind === 'login_changed'
+        ? IconLock
+        : note.kind === 'welcome' || note.kind.startsWith('plan_')
+          ? IconSparkles
+          : note.category === 'reward'
+            ? IconTrophy
+            : note.category === 'plan'
+              ? IconCalendar
+              : note.category === 'report'
+                ? IconChart
+                : IconFlame;
   return (
     <span className={`bl-glyph ${note.category}`} style={{ width: size, height: size }} aria-hidden="true">
       <Icon size={Math.round(size / 2)} />

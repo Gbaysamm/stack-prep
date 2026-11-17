@@ -53,7 +53,10 @@ INSERT INTO tracker_items (area, status, title, note, done_at, updated_by) VALUE
   ('Notifications', 'committed', 'The notifications engine, the hourly job and the bell',
    'Streak at risk (7 pm), missed a day (their usual hour), away 3/7/14 days, streak milestones; '
    || 'one nudge a day, none 9 pm to 8 am. A bell in the top bar shows the latest five; a '
-   || 'Notifications page shows them all: open one for more, mark read or unread, delete.', now(), 'Stack Prep');
+   || 'Notifications page shows them all: open one for more, mark read or unread, delete.'
+   || ' Also told: a reply to their message, a plan starting, ending soon or ended, a check-up '
+   || 'or mock marked, a password or login change, the welcome, the exam countdown (30, 14, 7, '
+   || '1 days), a scheduled mock opening or closing tomorrow, today''s roadmap check-up or mock.', now(), 'Stack Prep');
 
 -- Next after notifications (founder, 17 Nov 2026).
 INSERT INTO tracker_items (area, status, title, note, updated_by) VALUES

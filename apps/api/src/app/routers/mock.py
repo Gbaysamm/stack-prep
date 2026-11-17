@@ -37,7 +37,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import premium
+from app import notifications, premium
 from app.auth import require_student
 from app.db import connection, fetch_all
 from app.figures import DISPLAYABLE, OptionFigure, QuestionFigure, option_figure
@@ -649,6 +649,20 @@ async def _finalize(conn: AsyncConnection, mock_id: UUID, *, auto: bool) -> None
         ),
         {"id": mock_id},
     )
+    student_id = await conn.scalar(
+        text("SELECT student_id FROM mock_exams WHERE id = :id"), {"id": mock_id}
+    )
+    if student_id is not None:
+        await notifications.notify(
+            conn,
+            student_id,
+            kind="mock_marked",
+            category="reward",
+            title="Your mock exam is marked",
+            body="Your score out of 400, subject by subject, and what to practise next.",
+            link_url=f"/mock/{mock_id}/report",
+            key=f"mock-{mock_id}",
+        )
     await conn.commit()
 
 

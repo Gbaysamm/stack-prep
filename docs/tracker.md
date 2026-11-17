@@ -186,3 +186,4 @@ the lawyer, the Lagos and Ibadan pronunciation, the Mock exam room (migration 05
 | No hero on the Notifications page; one container or boxes? | Plain title; one container (a feed of short, alike items) | `pages/Notifications.tsx` | Committed |
 | Skeletons and the help button on the tracker | Added, with faster pages and the pinned sidebar | migration 061 | Committed |
 | Gamification next | On the tracker as the next item | migration 061 | To do |
+| Every notification the app needs (founder: "anything that needs the user's attention") | Told when it happens: reply to their message, plan started, check-up or mock marked, password or login changed, welcome. Told by the hourly job: exam countdown 30/14/7/1, scheduled mock open and closing tomorrow, today's roadmap check-up or mock, plan ending in 3 days, plan ended | `notifications.notify`, `PLAN_RULES`, the routers | Committed |

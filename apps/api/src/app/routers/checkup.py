@@ -25,7 +25,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import scoring
+from app import notifications, scoring
 from app.auth import require_session_owner, require_student
 from app.db import connection, fetch_all
 from app.figures import OptionFigure, QuestionFigure, figures_for, option_figures_for
@@ -742,6 +742,19 @@ async def answer(
         await conn.execute(
             text("UPDATE study_sessions SET ended_at = now() WHERE id = :id AND ended_at IS NULL"),
             {"id": session_id},
+        )
+        subject = await conn.scalar(
+            text("SELECT name FROM subjects WHERE id = :id"), {"id": session["subject_id"]}
+        )
+        await notifications.notify(
+            conn,
+            session["student_id"],
+            kind="checkup_marked",
+            category="reward",
+            title=f"Your {subject or 'check-up'} report is ready",
+            body="Your score, the topics to work on next, and every answer with its working.",
+            link_url=f"/checkup/{session_id}/report",
+            key=f"checkup-{session_id}",
         )
         await conn.commit()
     return state

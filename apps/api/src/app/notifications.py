@@ -11,7 +11,14 @@ says anything twice. Like Duolingo, a little and at the right moment:
 - Streak milestones (a reward): 3, 7, 14, 30, 50 and 100 days, on the day it is reached.
 
 Nudges (the first three) come at most once a day and never between 9 pm and 8 am, their time.
-Email and push will later send from the same rows.
+
+The same job also tells them what their calendar holds (`PLAN_RULES`, 8 am to 9 pm only): the
+exam countdown (30, 14, 7 days, the day before), a scheduled mock opening and closing tomorrow,
+today's check-up or mock on the roadmap, a plan ending within three days and a plan just ended.
+
+What happens in the app is told when it happens, through `notify` (the caller commits): a reply
+to their message, a plan starting, a check-up or mock marked, a password or login change, and
+the welcome. Email and push will later send from the same rows.
 """
 
 from __future__ import annotations
@@ -191,6 +198,162 @@ async def save(conn: AsyncConnection, student_id: UUID, note: Note, now_local: d
     return row is not None
 
 
+async def notify(
+    conn: AsyncConnection,
+    student_id: UUID,
+    *,
+    kind: str,
+    category: str,
+    title: str,
+    body: str | None,
+    link_url: str | None,
+    key: str,
+) -> None:
+    """Tell a student something that just happened. Once per `key`; the caller commits."""
+    await conn.execute(
+        text(
+            """
+            INSERT INTO notifications (student_id, kind, category, title, body, link_url,
+                                       dedupe_key)
+            VALUES (:s, :kind, :category, :title, :body, :link_url, :key)
+            ON CONFLICT (student_id, dedupe_key) DO NOTHING
+            """
+        ),
+        {
+            "s": student_id,
+            "kind": kind,
+            "category": category,
+            "title": title[:120],
+            "body": body[:600] if body else None,
+            "link_url": link_url,
+            "key": key[:120],
+        },
+    )
+
+
+#: Each student's wall clock, kept only while it is daytime there (8 am to 9 pm).
+_LOCAL = """
+    WITH st AS (
+      SELECT s.id, (coalesce(CAST(:now AS timestamptz), now()) AT TIME ZONE s.timezone) AS lt
+      FROM students s WHERE s.status NOT IN ('suspended', 'archived')
+    ), day AS (
+      SELECT id, lt, lt::date AS today FROM st
+      WHERE extract(hour FROM lt) >= 8 AND extract(hour FROM lt) < 21
+    )
+"""
+_INSERT = """
+    INSERT INTO notifications (student_id, kind, category, title, body, link_url, dedupe_key)
+"""
+_DONE = " ON CONFLICT (student_id, dedupe_key) DO NOTHING RETURNING 1"
+#: Mocks scheduled for an examination the student is preparing for, not yet sat.
+_THEIR_MOCK = """
+    sm.cancelled_at IS NULL
+    AND sm.examination_id IN (
+      SELECT sj.examination_id FROM student_exam_goals g JOIN subjects sj ON sj.id = g.subject_id
+      WHERE g.student_id = day.id AND g.status = 'active')
+    AND NOT EXISTS (SELECT 1 FROM mock_exams m WHERE m.student_id = day.id
+                    AND m.scheduled_mock_id = sm.id AND m.hidden_at IS NULL)
+"""
+#: A paid plan with no later paid plan after it.
+_LAST_PAID = """
+    NOT EXISTS (SELECT 1 FROM premium_periods later
+                JOIN premium_plans lp ON lp.id = later.plan_id AND lp.kind = 'paid'
+                WHERE later.student_id = day.id AND later.ends_at > p.ends_at)
+"""
+
+PLAN_RULES: dict[str, str] = {
+    "exam_countdown": _LOCAL
+    + _INSERT
+    + """
+        SELECT day.id, 'exam_countdown', 'plan',
+               CASE WHEN d.left_days = 1 THEN 'Your exam is tomorrow'
+                    ELSE d.left_days || ' days to your exam' END,
+               CASE d.left_days
+                 WHEN 30 THEN 'A month to go. Keep to your roadmap and sit a mock each week.'
+                 WHEN 14 THEN 'Two weeks left. A mock now shows exactly what to fix.'
+                 WHEN 7 THEN 'One week left. Revise your weakest topics rather than new ones.'
+                 ELSE 'Rest well tonight. You have prepared for this.' END,
+               '/roadmap', 'exam-' || d.exam_date || '-' || d.left_days
+        FROM day
+        JOIN LATERAL (
+          SELECT g.exam_date, g.exam_date - day.today AS left_days
+          FROM student_exam_goals g
+          WHERE g.student_id = day.id AND g.status = 'active' AND g.exam_date IS NOT NULL
+          GROUP BY g.exam_date
+        ) d ON d.left_days IN (30, 14, 7, 1)
+    """
+    + _DONE,
+    "mock_open": _LOCAL
+    + _INSERT
+    + """
+        SELECT day.id, 'mock_open', 'plan', sm.title || ' is open',
+               'Sit it by ' || to_char(sm.closes_on, 'FMDay FMDD Mon')
+               || '. It is timed and marked like the real exam.',
+               '/mock', 'smock-open-' || sm.id
+        FROM day JOIN scheduled_mocks sm
+          ON sm.opens_on <= day.today AND sm.closes_on > day.today AND
+    """
+    + _THEIR_MOCK
+    + _DONE,
+    "mock_closing": _LOCAL
+    + _INSERT
+    + """
+        SELECT day.id, 'mock_closing', 'plan', sm.title || ' closes tomorrow',
+               'You have not sat it yet. It takes about two hours.',
+               '/mock', 'smock-close-' || sm.id
+        FROM day JOIN scheduled_mocks sm ON sm.closes_on = day.today + 1 AND
+    """
+    + _THEIR_MOCK
+    + _DONE,
+    "roadmap_today": _LOCAL
+    + _INSERT
+    + """
+        SELECT day.id, 'roadmap_' || ri.kind, 'plan',
+               CASE ri.kind WHEN 'mock' THEN 'Your weekly mock is today'
+                    ELSE 'A ' || sj.name || ' check-up is on today''s plan' END,
+               CASE ri.kind WHEN 'mock' THEN 'It shows your score out of 400 and what to fix.'
+                    ELSE 'It takes about ten minutes and updates your roadmap.' END,
+               '/roadmap', 'roadmap-' || ri.id
+        FROM day
+        JOIN roadmaps r ON r.student_id = day.id AND r.status = 'active'
+        JOIN roadmap_items ri ON ri.roadmap_id = r.id AND ri.day = day.today
+                             AND ri.kind IN ('checkup', 'mock')
+                             AND ri.session_id IS NULL AND ri.started_at IS NULL
+        LEFT JOIN subjects sj ON sj.id = ri.subject_id
+    """
+    + _DONE,
+    "plan_ending": _LOCAL
+    + _INSERT
+    + """
+        SELECT day.id, 'plan_ending', 'system', 'Your ' || pl.name || ' plan ends soon',
+               'It ends on ' || to_char(p.ends_at AT TIME ZONE 'Africa/Lagos', 'FMDay FMDD Mon')
+               || '. Renew to keep everything open.',
+               '/plans', 'plan-end-' || p.id
+        FROM day
+        JOIN premium_periods p ON p.student_id = day.id
+             AND p.ends_at > now() AND p.ends_at <= now() + interval '3 days'
+        JOIN premium_plans pl ON pl.id = p.plan_id AND pl.kind = 'paid'
+        WHERE
+    """
+    + _LAST_PAID
+    + _DONE,
+    "plan_ended": _LOCAL
+    + _INSERT
+    + """
+        SELECT day.id, 'plan_ended', 'system', 'Your ' || pl.name || ' plan has ended',
+               'You are on the Free plan now. Your progress is all kept.',
+               '/plans', 'plan-ended-' || p.id
+        FROM day
+        JOIN premium_periods p ON p.student_id = day.id
+             AND p.ends_at <= now() AND p.ends_at > now() - interval '2 days'
+        JOIN premium_plans pl ON pl.id = p.plan_id AND pl.kind = 'paid'
+        WHERE
+    """
+    + _LAST_PAID
+    + _DONE,
+}
+
+
 async def run_hourly(conn: AsyncConnection, now: datetime | None = None) -> int:
     """Decide and store what is due for every student; returns how many were added.
 
@@ -215,6 +378,11 @@ async def run_hourly(conn: AsyncConnection, now: datetime | None = None) -> int:
         for note in decide(facts, local):
             if await save(conn, facts.student_id, note, local.date()):
                 added += 1
+    for name, sql in PLAN_RULES.items():
+        rows_added = len((await conn.execute(text(sql), {"now": now})).all())
+        if rows_added:
+            log.info("notifications: %s %s", rows_added, name)
+        added += rows_added
     await conn.commit()
     log.info("notifications: %s added for %s students", added, len(rows))
     return added

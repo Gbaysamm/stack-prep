@@ -15,6 +15,18 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Notifications: everything that needs the student's attention
+- **What:** `notifications.notify` (the caller commits) for what happens in the app: a reply to
+  their message (support), a plan starting (`add_plan_time`, so payments and admin grants), a
+  check-up and a mock marked, password changed or reset, login details changed, the welcome at
+  sign-up. `PLAN_RULES` in the hourly job, 8 am to 9 pm their time: exam countdown (30, 14, 7, 1
+  days), a scheduled mock open and closing tomorrow (not yet sat), today's roadmap check-up or
+  mock (not started), a paid plan ending within 3 days and one just ended. Icons and button
+  words per kind; the bell checks again every two minutes while in view. The support test now
+  checks the welcome and reply notifications, read, delete, read all and another's 403.
+- **Why:** founder, 17 Nov 2026: notifications fully used.
+- **Status:** committed, not pushed.
+
 ### Notifications, part one: the engine, the bell, the page
 - **What:** migration 061 (`notifications`, with `dismissed_at` so a deleted one is never sent
   again). `app/notifications.py` decides per student, on their own clock (Postgres does the time

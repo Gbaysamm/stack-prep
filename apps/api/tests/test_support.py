@@ -69,6 +69,26 @@ async def test_a_student_writes_and_reads_the_reply(client: httpx.AsyncClient) -
             assert any(entry["action"] == "support.reply" for entry in log["entries"])
 
         await sign_in(client, student)
+        # The reply is also a notification, beside the welcome (routers/notifications.py).
+        notes_url = f"/v1/student/{student.student_id}/notifications"
+        inbox = (await client.get(notes_url)).json()
+        kinds = [n["kind"] for n in inbox["items"]]
+        assert kinds[0] == "support_reply" and "welcome" in kinds
+        assert inbox["unread"] == len(kinds) == inbox["total"]
+        reply_note = inbox["items"][0]
+        assert reply_note["link_url"] == f"/messages/{thread['id']}"
+        read = await client.post(f"{notes_url}/{reply_note['id']}/read", json={"read": True})
+        assert read.status_code == 204
+        assert (await client.get(notes_url)).json()["unread"] == len(kinds) - 1
+        assert (await client.delete(f"{notes_url}/{reply_note['id']}")).status_code == 204
+        left = (await client.get(notes_url)).json()["items"]
+        assert reply_note["id"] not in [n["id"] for n in left]
+        assert (await client.post(f"{notes_url}/read")).status_code == 204
+        assert (await client.get(notes_url)).json()["unread"] == 0
+        # Someone else's notifications are not theirs to read.
+        other_url = f"/v1/student/{other.student_id}/notifications"
+        assert (await client.get(other_url)).status_code == 403
+
         mine = (await client.get(base)).json()
         assert mine[0]["id"] == thread["id"] and mine[0]["unread"] is True
         opened = (await client.get(f"{base}/{thread['id']}")).json()

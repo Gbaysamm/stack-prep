@@ -99,16 +99,27 @@ export function useInbox(studentId: string, refreshKey?: unknown): Inbox | null 
   useEffect(() => {
     void refreshInbox(studentId);
   }, [studentId, refreshKey]);
+  // A quiet check every two minutes while the page is in view, so a reply arrives on its own.
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') void refreshInbox(studentId, true);
+    }, 120_000);
+    return () => window.clearInterval(timer);
+  }, [studentId]);
   return inbox;
 }
 
 /** Where a notification's button goes, in words. */
 export function actionWord(link: string | null): string | null {
   if (!link) return null;
+  if (link.startsWith('/messages')) return 'Read the reply';
+  if (link.startsWith('/settings')) return 'Open your settings';
+  if (link.startsWith('/plans')) return 'See your plan';
+  if (/^\/(checkup|mock)\/[^/]+\/report/.test(link)) return 'See the report';
   if (link.startsWith('/progress')) return 'See your progress';
   if (link.startsWith('/roadmap')) return 'Open your roadmap';
   if (link.startsWith('/checkup')) return 'Start the check-up';
-  if (link.startsWith('/mock')) return 'Go to your mock exam';
+  if (link.startsWith('/mock')) return 'Go to mock exams';
   return "Go to today's plan";
 }
 

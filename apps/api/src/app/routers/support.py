@@ -11,6 +11,7 @@ new message from the student opens it again.
 
 from __future__ import annotations
 
+import secrets
 from datetime import datetime
 from typing import Annotated, Any, Literal
 from uuid import UUID
@@ -20,7 +21,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import audit, mailer
+from app import audit, mailer, notifications
 from app.auth import Staff, admin_session, require_student
 from app.config import get_settings
 from app.db import connection, fetch_all
@@ -447,6 +448,17 @@ async def admin_reply(
         conn, staff, "support.reply", f"Replied to “{thread.subject}” from {thread.who}",
         target_kind="support", target_id=str(thread_id),
     )
+    if thread.student_id is not None:
+        await notifications.notify(
+            conn,
+            thread.student_id,
+            kind="support_reply",
+            category="system",
+            title="We replied to your message",
+            body=f"“{thread.subject}”: {words[:200]}",
+            link_url=f"/messages/{thread_id}",
+            key=f"support-{thread_id}-{secrets.token_hex(6)}",
+        )
     await conn.commit()
     email_to: str | None = (
         await conn.execute(

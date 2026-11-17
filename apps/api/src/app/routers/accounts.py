@@ -28,7 +28,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import app_settings
+from app import app_settings, notifications
 from app.auth import (
     SESSION_COOKIE,
     SESSION_LIFETIME,
@@ -215,6 +215,17 @@ async def signup(
                 """
             ),
             {"student": student_id, "hash": password_hash},
+        )
+        await notifications.notify(
+            conn,
+            student_id,
+            kind="welcome",
+            category="system",
+            title=f"Welcome to Stack Prep, {name.split()[0]}",
+            body="Start with your roadmap: a short check-up in each subject shows where you "
+            "stand, and your plan builds from there.",
+            link_url="/roadmap",
+            key="welcome",
         )
         token = await open_session(conn, student_id)
         await conn.commit()
@@ -668,6 +679,16 @@ async def reset_password(
         text("INSERT INTO auth_attempts (login, succeeded) VALUES (:login, true)"),
         {"login": email},
     )
+    await notifications.notify(
+        conn,
+        student_id,
+        kind="password_reset",
+        category="system",
+        title="Your password was reset",
+        body="If this wasn't you, reset your password now and write to us in Messages.",
+        link_url="/settings",
+        key=f"password_reset-{secrets.token_hex(6)}",
+    )
     token = await open_session(conn, student_id)
     await conn.commit()
     set_session_cookie(response, request, token)
@@ -759,6 +780,16 @@ async def change_password(
         text("DELETE FROM auth_sessions WHERE student_id = :student AND token_hash <> :keep"),
         {"student": me, "keep": hash_token(request.cookies.get(SESSION_COOKIE, ""))},
     )
+    await notifications.notify(
+        conn,
+        me,
+        kind="password_changed",
+        category="system",
+        title="Your password was changed",
+        body="If this wasn't you, reset your password now and write to us in Messages.",
+        link_url="/settings",
+        key=f"password_changed-{secrets.token_hex(6)}",
+    )
     await conn.commit()
     return Response(status_code=204)
 
@@ -820,6 +851,16 @@ async def change_login_details(
                 """
             ),
             {"id": me, "email": email, "phone": phone},
+        )
+        await notifications.notify(
+            conn,
+            me,
+            kind="login_changed",
+            category="system",
+            title="Your login details were changed",
+            body="If this wasn't you, reset your password now and write to us in Messages.",
+            link_url="/settings",
+            key=f"login_changed-{secrets.token_hex(6)}",
         )
         await conn.commit()
     except IntegrityError as error:

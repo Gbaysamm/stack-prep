@@ -28,7 +28,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import paystack, premium
+from app import notifications, paystack, premium
 from app.auth import require_student
 from app.config import get_settings
 from app.db import connection, fetch_all
@@ -474,6 +474,31 @@ async def add_plan_time(
             "note": note,
         },
     )
+    plan = (
+        (
+            await conn.execute(
+                text(
+                    "SELECT pl.name, max(p.ends_at) AS ends_at FROM premium_plans pl"
+                    " JOIN premium_periods p ON p.plan_id = pl.id AND p.student_id = :s"
+                    " WHERE pl.id = :p GROUP BY pl.name"
+                ),
+                {"s": student_id, "p": plan_id},
+            )
+        )
+        .mappings()
+        .first()
+    )
+    if plan is not None:
+        await notifications.notify(
+            conn,
+            student_id,
+            kind="plan_started",
+            category="system",
+            title=f"Your {plan['name']} plan is active",
+            body=f"It runs until {plan['ends_at']:%A %d %B %Y}. Everything in it is open to you.",
+            link_url="/plans",
+            key=f"plan-start-{payment_id or plan['ends_at'].isoformat()}",
+        )
 
 
 @router.post(
