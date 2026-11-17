@@ -11,7 +11,7 @@ What follows is **only what the app changes or adds**, agreed with the founder (
 An app a student lives in daily is smaller in scale than the marketing site the system came from.
 
 ## Scale (app, not marketing)
-- **Corners:** cards 10–12px (`--r-lg` 10, `--r-xl` 12), small squares 5–8px. The system's 20px
+- **Corners:** cards 10–12px (`--r-lg` 10, `--r-xl` 12), buttons 8px (`--r-btn`), small squares 5–8px. The system's 20px
   cards and 16px wells were too round for the app (founder, 17 Nov).
 - **Sticker shadow:** 5px offset on cards (4px on a phone), not the system's 12–16px. Still
   solid, never blurred, and steady on hover.
@@ -36,6 +36,7 @@ An app a student lives in daily is smaller in scale than the marketing site the 
 - No boxes inside boxes; no two similar bars stacked.
 - A badge and the text beside it share one height; buttons on a row share one centre line.
 - The Roadmap page is the reference for an app page.
+- On a phone the side gap is 16px on every page.
 - Check every page at 1440 and 390 wide.
 
 ## Where the app stays different from the system (founder, 17 Nov 2026)

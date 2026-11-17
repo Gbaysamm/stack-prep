@@ -15,6 +15,14 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Phone margins on lesson pages; button corners 8px app-wide
+- **What:** on a phone the plain frame (lesson, after the lesson) no longer adds its own 16px
+  on top of the page's, so the side gap is 16px like every page (it was 32px). After the lesson:
+  Continue and Watch again are two equal halves of one row on a phone. Every button's corners
+  are now 8px (`--r-btn`, was 12px).
+- **Why:** founder, 17 Nov 2026.
+- **Status:** committed, not pushed.
+
 ### After the lesson: clear buttons, working only where it counts, and a reward at the end
 - **What:** Continue is locked with a lock and "Try it first" until the problem is tried, then
   lime; buttons on the page sit flat (no shadow); on a phone Continue and Watch again share one
