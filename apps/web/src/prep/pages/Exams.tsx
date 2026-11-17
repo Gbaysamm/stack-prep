@@ -12,7 +12,7 @@ import { api, type ExaminationOffer, type Goal, type SubjectOffer } from '../../
 import { IconArrowRight, IconBook, IconClose, IconReplay } from '../icons.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
 import { initials } from '../subjectTone.js';
-import { Button, Dialog, PageHero, Skeleton, cx, daysUntil, useToast } from '../ui.js';
+import { Button, Dialog, PageHero, Skeleton, daysUntil, useToast } from '../ui.js';
 import { HeroStats, Section } from './Home.js';
 import './Subjects.css';
 import './Exams.css';
@@ -240,13 +240,6 @@ function ExamPanel({
       id={`ex4-${exam.examination_id}`}
       sub={rule.charAt(0).toUpperCase() + rule.slice(1) + '.'}
     >
-      {fixed ? (
-        <span className="ex4-cells" aria-hidden="true">
-          {Array.from({ length: max }, (_, i) => (
-            <i key={i} className={cx(i < mine.length && 'on')} />
-          ))}
-        </span>
-      ) : null}
       <ul className="ex4-list">
         {mine.map((subject) => {
           const goal = goalOf(subject.subject_id);
