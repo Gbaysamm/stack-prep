@@ -15,6 +15,13 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Mock set-up: only your subjects, no counts
+- **What:** a custom mock lists only the student's own subjects ("Your subjects"; every subject
+  only for a student who has not chosen theirs), without question counts or "Your subject"
+  labels; Use of English says "Compulsory". The "4 of up to 4" note is gone.
+- **Why:** founder, 17 Nov 2026.
+- **Status:** committed, not pushed.
+
 ### Saved questions: a page of subjects, then a page per subject
 - **What:** /bookmarks shows four figures (saved in all, this week, ready to revise, subjects)
   and a card per subject (how many, the topics most come from, when last saved, "Revise N in a

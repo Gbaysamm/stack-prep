@@ -295,13 +295,15 @@ export function MockSetup() {
 
           <section className="sj-card mk-block">
             <div className="mk-block-head">
-              <h2 className="mk-block-title">Subjects</h2>
-              <span className="mk-block-note">
-                {picked.length} of up to {max}
-              </span>
+              <h2 className="mk-block-title">Your subjects</h2>
             </div>
             <ul className="mk-subjects">
-              {exam.subjects.map((subject) => {
+              {/* Only the student's own subjects (founder, 17 Nov 2026); every subject only for a
+                  student who has not chosen theirs yet. */}
+              {(exam.subjects.some((s) => s.mine || s.compulsory)
+                ? exam.subjects.filter((s) => s.mine || s.compulsory)
+                : exam.subjects
+              ).map((subject) => {
                 const on = chosen.includes(subject.subject_id);
                 const locked = preset === 'utme' && subject.compulsory;
                 const full = !on && chosen.length >= max;
@@ -328,11 +330,8 @@ export function MockSetup() {
                       </span>
                       <span className="mk-subject-name">
                         {subject.name}
-                        <small>
-                          {subject.compulsory ? 'Compulsory · ' : subject.mine ? 'Your subject · ' : ''}
-                          {subject.available} questions
-                          {subject.unseen < subject.available ? `, ${subject.unseen} new to you` : ''}
-                        </small>
+                        {/* No question counts (founder, 17 Nov 2026); only what is worth saying. */}
+                        {subject.compulsory ? <small>Compulsory</small> : null}
                       </span>
                     </button>
                     {on ? (
