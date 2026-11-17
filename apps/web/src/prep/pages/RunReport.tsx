@@ -7,7 +7,7 @@
  * and the hint. A run can be taken out of the history from here; its answers keep counting.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { Figures } from '../../Figures.js';
@@ -530,6 +530,9 @@ export function QuestionCard({
   onToggle,
   refCard,
   checkup = false,
+  tag,
+  tools,
+  dom,
 }: {
   item: ReviewItem;
   open: boolean;
@@ -537,13 +540,21 @@ export function QuestionCard({
   onToggle: () => void;
   refCard: (node: HTMLElement | null) => void;
   checkup?: boolean;
+  /** The tag in place of the outcome (a saved question: "Kept 16 Nov"). */
+  tag?: { label: string; tone: string };
+  /** In place of Bookmark and Report (a saved question: its trash button). */
+  tools?: ReactNode;
+  /** A unique id stem when one page lists questions from several places. */
+  dom?: string;
 }) {
-  const meta = checkup
+  const meta = tag
+    ? { ...tag, short: tag.label }
+    : checkup
     ? item.attempts.some((attempt) => attempt.is_correct)
       ? { label: 'Right', short: 'Right', tone: 'lime' }
       : { label: 'Wrong', short: 'Wrong', tone: 'pink' }
     : OUTCOME[item.outcome];
-  const bodyId = `rr-q-${item.position}`;
+  const bodyId = `rr-q-${dom ?? ''}${item.position}`;
   const first = item.attempts[0];
   const second = item.attempts[1];
   const hintUsed = item.attempts.some((attempt) => attempt.hint_used) || item.outcome === 'right_after_hint';
@@ -570,12 +581,20 @@ export function QuestionCard({
               {source ? <span className="rr-qsource sj-mono">{source}</span> : null}
             </span>
             {/* Closed, the start of the question says which one it is; open, the question is below. */}
-            {open ? null : <span className="rr-qpeek">{peek(item.stem)}</span>}
+            {open ? null : (
+              <span className="rr-qpeek">
+                {/* A gap in a passage ("Gap 16") says nothing alone: name its passage. */}
+                {item.passage_title && peek(item.stem).length < 24
+                  ? `${item.passage_title} · ${peek(item.stem)}`
+                  : peek(item.stem)}
+              </span>
+            )}
           </span>
         </button>
-        {open ? (
+        {/* Bookmark and Report once open; a page's own tools (a trash button) always. */}
+        {open || tools ? (
           <div className="rr-qtools">
-            <QuestionTools versionId={item.question_version_id} where="review" />
+            {tools ?? <QuestionTools versionId={item.question_version_id} where="review" />}
           </div>
         ) : null}
         <button type="button" className="rr-chevbtn" tabIndex={-1} aria-hidden="true" onClick={onToggle}>

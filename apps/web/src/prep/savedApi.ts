@@ -47,6 +47,9 @@ const changed = <T,>(value: T): T => {
 
 export const savedApi = {
   bookmarks: (studentId: string) => call<Bookmark[]>(`/${studentId}/bookmarks`),
+  /** Each saved question in full (passage, options, answer, working), newest first. */
+  full: (studentId: string) =>
+    call<{ items: import('./runsApi.js').ReviewItem[] }>(`/${studentId}/bookmarks-full`).then((got) => got.items),
   isBookmarked: (studentId: string, versionId: string) =>
     call<{ bookmarked: boolean }>(`/${studentId}/bookmarks/${versionId}`).then((state) => state.bookmarked),
   bookmark: (studentId: string, versionId: string) =>

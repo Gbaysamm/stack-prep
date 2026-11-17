@@ -15,6 +15,18 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Saved questions rebuilt
+- **What:** /bookmarks (now titled Saved questions) lists each subject's saved questions as the
+  check-up report's one-line question cards: "Kept 16 Nov", year and number, the start of the
+  question (a passage gap names its passage: "Passage IV (cloze) · Gap 25"), a trash icon.
+  Opening one shows its passage, the options with the answer marked, the hint and the working.
+  Five per subject, then Show all; "Revise N in a run" per subject as before. A new empty state:
+  a yellow-shadowed card saying what saving is for and where the Bookmark button is.
+- **API:** `GET /v1/student/{id}/bookmarks-full` (each saved question in full, `question_items`
+  in routers/runs.py). `scripts/seed_demo_bookmarks.py` saves 3 per subject for a local student.
+- **Why:** founder, 17 Nov 2026.
+- **Status:** committed, not pushed.
+
 ### Phone margins on lesson pages; button corners 8px app-wide
 - **What:** on a phone the plain frame (lesson, after the lesson) no longer adds its own 16px
   on top of the page's, so the side gap is 16px like every page (it was 32px). After the lesson:

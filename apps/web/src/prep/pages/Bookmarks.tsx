@@ -1,48 +1,64 @@
 /**
- * /bookmarks — the questions a student kept, by subject, newest first. Each subject's can be
- * revised as a practice run (oldest bookmark first), and any one removed.
+ * /bookmarks — the questions a student kept (redesigned 17 Nov 2026). By subject, newest first,
+ * each a one-line question card like the check-up report's: the topic and the start of the
+ * question (a passage gap names its passage), opening onto the question with its passage, the
+ * answer and how to get it. A trash icon removes one; each subject revises as a run.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 
-import { Maths } from '../../Maths.js';
 import { friendly } from '../../lib/friendlyError.js';
-import { IconArrowRight, IconBookmark, IconBolt } from '../icons.js';
+import { IconArrowRight, IconBolt, IconBookmark } from '../icons.js';
+import type { ReviewItem } from '../runsApi.js';
 import { BOOKMARKS_CHANGED, savedApi, type Bookmark } from '../savedApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
-import { Button, PageHero, Skeleton, useToast } from '../ui.js';
+import { Button, PageHero, ShowMore, Skeleton, useShowMore, useToast } from '../ui.js';
 import { NothingFreshNote, Note, Section, useStartPractice } from './Home.js';
+import { IconTrash, QuestionCard } from './RunReport.js';
 import './Bookmarks.css';
 
 /** A run revises at most this many at a time; the rest wait for the next. */
 const RUN_MOST = 20;
+/** Saved questions a subject shows before "Show all". */
+const SHOWN = 5;
 
 function addedOn(iso: string): string {
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
 
+interface Saved {
+  mark: Bookmark;
+  item: ReviewItem | undefined;
+}
+
 export function Bookmarks() {
-  usePageTitle('Bookmarks');
+  usePageTitle('Saved questions');
   const student = useStudent();
   const toast = useToast();
   const starter = useStartPractice();
-  const load = useLoad(() => savedApi.bookmarks(student.studentId), [student.studentId]);
-  const [items, setItems] = useState<Bookmark[] | null>(null);
+  const load = useLoad(
+    () => Promise.all([savedApi.bookmarks(student.studentId), savedApi.full(student.studentId).catch(() => [])]),
+    [student.studentId],
+  );
+  const [marks, setMarks] = useState<Bookmark[] | null>(null);
   const [removing, setRemoving] = useState<string | null>(null);
 
   useEffect(() => {
-    if (load.data) setItems(load.data);
+    if (load.data) setMarks(load.data[0]);
   }, [load.data]);
   useEffect(() => {
     window.addEventListener(BOOKMARKS_CHANGED, load.reload);
     return () => window.removeEventListener(BOOKMARKS_CHANGED, load.reload);
   }, [load.reload]);
 
-  const remove = async (item: Bookmark) => {
-    setRemoving(item.question_id);
+  const full = useMemo(() => new Map((load.data?.[1] ?? []).map((item) => [item.question_version_id, item])), [load.data]);
+
+  const remove = async (mark: Bookmark) => {
+    setRemoving(mark.question_id);
     try {
-      await savedApi.unbookmark(student.studentId, item.question_version_id);
-      setItems((current) => current?.filter((other) => other.question_id !== item.question_id) ?? null);
-      toast('Removed from your bookmarks');
+      await savedApi.unbookmark(student.studentId, mark.question_version_id);
+      setMarks((current) => current?.filter((other) => other.question_id !== mark.question_id) ?? null);
+      toast('Removed from your saved questions');
     } catch (error) {
       toast(friendly(error));
     } finally {
@@ -50,31 +66,31 @@ export function Bookmarks() {
     }
   };
 
-  // By subject, in the order a subject was last bookmarked in.
-  const groups: { subjectId: string | null; name: string; items: Bookmark[] }[] = [];
-  for (const item of items ?? []) {
-    let group = groups.find((g) => g.subjectId === item.subject_id);
+  // By subject, in the order a subject was last saved in.
+  const groups: { subjectId: string | null; name: string; saved: Saved[] }[] = [];
+  for (const mark of marks ?? []) {
+    let group = groups.find((g) => g.subjectId === mark.subject_id);
     if (!group) {
-      group = { subjectId: item.subject_id, name: item.subject_name ?? 'Other', items: [] };
+      group = { subjectId: mark.subject_id, name: mark.subject_name ?? 'Other', saved: [] };
       groups.push(group);
     }
-    group.items.push(item);
+    group.saved.push({ mark, item: full.get(mark.question_version_id) });
   }
 
   return (
-    <div className="sj-page pro-page bm-page">
+    <div className="sj-page bm2">
       <PageHero
-        eyebrow="Bookmarks"
+        eyebrow="Saved questions"
         title="Questions you kept"
-        sub="Bookmark any question while you practise, sit a check-up or a mock, or look back over one. Revise them here as a run."
+        sub="Open any one to see the answer and how to get it, or revise a subject's as a run."
       />
 
-      {load.error && !items ? (
+      {load.error && !marks ? (
         <Note
           card
           icon={<IconBookmark size={18} />}
           tone="pink"
-          title="We couldn't load your bookmarks"
+          title="We couldn't load your saved questions"
           action={
             <Button tone="soft" onClick={load.reload}>
               Try again
@@ -83,50 +99,33 @@ export function Bookmarks() {
         >
           {friendly(load.error)}
         </Note>
-      ) : !items ? (
-        <div className="bm-list">
+      ) : !marks ? (
+        <div className="bm2-skel">
           {[0, 1, 2].map((key) => (
-            <Skeleton key={key} height={96} radius={14} />
+            <Skeleton key={key} height={76} radius={10} />
           ))}
         </div>
-      ) : items.length === 0 ? (
-        <Note
-          card
-          icon={<IconBookmark size={18} />}
-          tone="yellow"
-          title="No bookmarks yet"
-          action={
-            <Button to="/practice" trailing={<IconArrowRight size={18} />}>
-              Go to practice
-            </Button>
-          }
-        >
-          Tap <b>Bookmark</b> above any question to keep it. Questions you found hard, or want to see again before the
-          exam, come back here.
-        </Note>
+      ) : marks.length === 0 ? (
+        <Empty />
       ) : (
-        groups.map((group, index) => {
-          const ready = group.items.filter((item) => item.practisable).length;
+        groups.map((group) => {
+          const ready = group.saved.filter((s) => s.mark.practisable).length;
           const runOf = Math.min(ready, RUN_MOST);
+          const key = `bm:${group.subjectId}`;
           return (
             <Section
               key={group.subjectId ?? 'other'}
-              eyebrow={`${group.items.length} ${group.items.length === 1 ? 'question' : 'questions'}`}
+              eyebrow={`${group.saved.length} saved`}
               title={group.name}
               id={`bm-${group.subjectId ?? 'other'}`}
-              className={`sj-rise d${Math.min(index + 1, 4)}`}
               action={
                 group.subjectId && ready > 0 ? (
                   <Button
                     size="sm"
                     icon={<IconBolt size={16} />}
-                    busy={starter.busy === `bm:${group.subjectId}`}
+                    busy={starter.busy === key}
                     onClick={() =>
-                      void starter.start(
-                        group.subjectId!,
-                        { bookmarked: true, length: runOf, label: 'your bookmarks' },
-                        `bm:${group.subjectId}`,
-                      )
+                      void starter.start(group.subjectId!, { bookmarked: true, length: runOf, label: 'your saved questions' }, key)
                     }
                   >
                     Revise {runOf === 1 ? 'it' : runOf} in a run
@@ -134,44 +133,116 @@ export function Bookmarks() {
                 ) : null
               }
             >
-              {starter.error && starter.lastKey === `bm:${group.subjectId}` ? (
+              {starter.error && starter.lastKey === key ? (
                 <p className="bm-error" role="alert">
                   {starter.error}
                 </p>
               ) : null}
-              {starter.exhausted?.key === `bm:${group.subjectId}` ? <NothingFreshNote starter={starter} /> : null}
-              <ul className="bm-list">
-                {group.items.map((item) => (
-                  <li key={item.question_id} className="sj-card bm-item">
-                    <div className="bm-meta">
-                      <span>{[item.topic_name, item.exam_year ? `UTME ${item.exam_year}` : null].filter(Boolean).join(' · ')}</span>
-                      <span className="bm-added">Kept {addedOn(item.created_at)}</span>
-                    </div>
-                    <div className="bm-stem sj-question">
-                      <Maths text={item.stem} />
-                    </div>
-                    <div className="bm-foot">
-                      {item.practisable ? (
-                        <span />
-                      ) : (
-                        <span className="bm-gone">This question is being checked, so it is not in runs for now.</span>
-                      )}
-                      <Button
-                        tone="ghost"
-                        size="sm"
-                        busy={removing === item.question_id}
-                        onClick={() => void remove(item)}
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              {starter.exhausted?.key === key ? <NothingFreshNote starter={starter} /> : null}
+              <SubjectSaved saved={group.saved} groupKey={group.subjectId ?? 'other'} removing={removing} onRemove={remove} />
             </Section>
           );
         })
       )}
     </div>
+  );
+}
+
+function SubjectSaved({
+  saved,
+  groupKey,
+  removing,
+  onRemove,
+}: {
+  saved: Saved[];
+  groupKey: string;
+  removing: string | null;
+  onRemove: (mark: Bookmark) => void;
+}) {
+  const [open, setOpen] = useState<Set<string>>(new Set());
+  const more = useShowMore(saved, SHOWN);
+  const listId = `bm2-${groupKey}`;
+  return (
+    <>
+      <ol className="rr-qs bm2-qs" id={listId}>
+        {more.items.map(({ mark, item }, index) => {
+          const tools = (
+            <button
+              type="button"
+              className="bm2-trash"
+              onClick={() => onRemove(mark)}
+              disabled={removing === mark.question_id}
+              aria-label="Remove from saved questions"
+              title="Remove from saved questions"
+            >
+              <IconTrash size={17} />
+            </button>
+          );
+          const tag = { label: mark.practisable ? `Kept ${addedOn(mark.created_at)}` : 'Being checked', tone: 'grey' };
+          if (!item) {
+            // The full question did not come: the line alone, still removable.
+            return (
+              <li key={mark.question_id} className="rr-q bm2-plain">
+                <div className="rr-qrow">
+                  <span className="bm2-plain-text">{mark.topic_name ? `${mark.topic_name} · ` : ''}{mark.stem}</span>
+                  <div className="rr-qtools">{tools}</div>
+                </div>
+              </li>
+            );
+          }
+          const shown = { ...item, position: index + 1 };
+          return (
+            <QuestionCard
+              key={mark.question_id}
+              item={shown}
+              dom={`${groupKey}-`}
+              tag={tag}
+              tools={tools}
+              checkup
+              open={open.has(mark.question_id)}
+              active={false}
+              onToggle={() =>
+                setOpen((now) => {
+                  const next = new Set(now);
+                  if (next.has(mark.question_id)) next.delete(mark.question_id);
+                  else next.add(mark.question_id);
+                  return next;
+                })
+              }
+              refCard={() => undefined}
+            />
+          );
+        })}
+      </ol>
+      <ShowMore more={more} noun="saved questions" controls={listId} className="bm2-more" />
+    </>
+  );
+}
+
+/** Nothing saved yet: what a saved question is for, and where the button is. */
+function Empty() {
+  return (
+    <section className="bm2-empty">
+      <span className="bm2-empty-tile" aria-hidden="true">
+        <IconBookmark size={28} />
+      </span>
+      <div className="bm2-empty-text">
+        <b className="sj-display">Nothing saved yet</b>
+        <p>
+          Save a question you found hard, or one to see again before the exam. It waits here with its answer and how to
+          get it, ready to revise as a run.
+        </p>
+        <p className="bm2-empty-how">
+          Look for
+          <span className="bm2-chip" aria-hidden="true">
+            <IconBookmark size={14} /> Bookmark
+          </span>
+          above any question in a run, a check-up or a mock.
+        </p>
+      </div>
+      <Link to="/practice" className="sj-btn bm2-empty-go">
+        Go to Practice <IconArrowRight size={16} />
+      </Link>
+    </section>
   );
 }

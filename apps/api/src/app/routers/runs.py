@@ -460,3 +460,90 @@ async def checkup_answers(
     if kind != "checkup":
         raise HTTPException(status_code=404, detail="unknown check-up")
     return CheckupAnswers(items=await review_items(conn, session_id))
+
+
+async def question_items(conn: AsyncConnection, versions: list[UUID]) -> list[ReviewItem]:
+    """Questions on their own, not as a session asked them (the student's saved questions):
+    each with its passage, options, answer and working, and no attempts."""
+    if not versions:
+        return []
+    details = {
+        row["question_version_id"]: row
+        for row in await fetch_all(
+            conn,
+            """
+            SELECT v.id AS question_version_id, v.stem, v.instructions, v.solution_steps,
+                   v.hints, q.exam_year, q.question_number,
+                   pg.title AS passage_title, pg.body AS passage_body,
+                   topic.name AS topic_name, sub.name AS subtopic_name,
+                   (SELECT o.option_key FROM question_options o
+                     WHERE o.question_version_id = v.id AND o.is_correct
+                     ORDER BY o.display_order LIMIT 1) AS correct_option_key
+            FROM question_versions v
+            JOIN questions q ON q.id = v.question_id
+            LEFT JOIN passages pg ON pg.id = v.passage_id
+            LEFT JOIN question_classifications c
+              ON c.question_id = v.question_id AND c.classification_role = 'primary'
+            LEFT JOIN curriculum_items skill ON skill.id = c.curriculum_item_id
+            LEFT JOIN curriculum_items sub ON sub.id = skill.parent_id
+            LEFT JOIN curriculum_items topic ON topic.id = sub.parent_id
+            WHERE v.id = ANY(CAST(:versions AS uuid[]))
+            """,
+            versions=[str(version) for version in versions],
+        )
+    }
+    items: list[ReviewItem] = []
+    for position, version_id in enumerate(versions, 1):
+        row = details.get(version_id)
+        if row is None:
+            continue
+        hints = row["hints"] or []
+        items.append(
+            ReviewItem(
+                position=position,
+                question_version_id=version_id,
+                exam_year=row["exam_year"],
+                question_number=row["question_number"],
+                topic_name=row["topic_name"],
+                subtopic_name=row["subtopic_name"],
+                section_name=row["topic_name"],
+                passage_title=row["passage_title"],
+                passage_body=row["passage_body"],
+                instructions=row["instructions"],
+                stem=str(row["stem"]),
+                options=await _options(conn, version_id),
+                figures=await figures_for(conn, version_id),
+                correct_option_key=str(row["correct_option_key"] or ""),
+                attempts=[],
+                outcome="unanswered",
+                solution_steps=[str(step) for step in (row["solution_steps"] or [])],
+                hint=str(hints[0]) if hints and hints[0] else None,
+                lesson_feedback=None,
+            )
+        )
+    return items
+
+
+class SavedQuestions(BaseModel):
+    items: list[ReviewItem]
+
+
+@router.get(
+    "/v1/student/{student_id}/bookmarks-full",
+    response_model=SavedQuestions,
+    summary="Each saved question in full: passage, options, answer, working",
+)
+async def saved_questions(
+    request: Request, conn: Annotated[AsyncConnection, Depends(connection)], student_id: UUID
+) -> SavedQuestions:
+    await require_student(request, conn, student_id)
+    rows = await fetch_all(
+        conn,
+        """
+        SELECT question_version_id FROM question_bookmarks
+        WHERE student_id = :student ORDER BY created_at DESC
+        """,
+        student=student_id,
+    )
+    versions = [row["question_version_id"] for row in rows]
+    return SavedQuestions(items=await question_items(conn, versions))
