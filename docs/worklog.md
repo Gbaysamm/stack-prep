@@ -15,6 +15,18 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### One card style everywhere: every card a sticker
+- **What:** the shared card (`.sj-card`) is now a sticker by default: dark 1.5px outline, 5px
+  pale purple shadow (4px on a phone), steady on hover; a card inside a card stays flat; a
+  coloured card keeps its own shadow colour. Every 6px and 8px sticker shadow is now 5px (34).
+  Panels drawn outside the shared card took the sticker too: Roadmap (path list, subjects),
+  Mock review, the mock room's question card and side, the practice room's question card and
+  recap, the empty "no runs yet" card. The path card fades out under a white wash instead of a
+  mask, so its shadow shows.
+- **Why:** founder, 17 Nov 2026: a shadow on some cards and not others reads as inconsistent.
+- **Where:** `prep.css`, `Journey.css`, page CSS files.
+- **Status:** committed, not pushed.
+
 ### Subject page matches Progress; its address is its name; tighter corners everywhere
 - **What:** "How each topic stands" now carries the Progress page's classes, so its tinted
   section bands, bars and card look exactly the same. The subject's runs are the Progress run
