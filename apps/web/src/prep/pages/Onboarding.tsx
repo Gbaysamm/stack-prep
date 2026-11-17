@@ -35,6 +35,7 @@ import {
 } from '../icons.js';
 import { progressApi, type Overview } from '../progressApi.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
+import { Celebrate } from '../Celebrate.js';
 import { Button, CountUp, Skeleton, cx, daysUntil, useToast } from '../ui.js';
 import { examTitle, isHiddenExam } from './Exams.js';
 import { CountdownTip } from '../countdown.js';
@@ -309,6 +310,8 @@ function Flow({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState<Record<string, GoalRow>>({});
   const [done, setDone] = useState(hasDev && devStep > REVIEW);
+  // The reward when the plan is saved (founder, 17 Nov 2026); it then leaves the finish card.
+  const [celebrating, setCelebrating] = useState(false);
   // A new student is greeted on a page of its own before the first step.
   const [welcomed, setWelcomed] = useState(returning || hasDev);
   // School, class and aim, asked in their own step; all optional, saved with the goals.
@@ -471,6 +474,7 @@ function Flow({
     }
     toast(chosen.length > 1 ? `Your goals for ${chosen.length} subjects are saved.` : 'Your goal is saved.');
     setDone(true);
+    setCelebrating(true);
     onFinished();
   };
 
@@ -530,6 +534,14 @@ function Flow({
 
   return (
     <div className="onb-main">
+      {celebrating ? (
+        <Celebrate
+          title="You're set up!"
+          sub={`Your plan for ${chosen.length} ${chosen.length === 1 ? 'subject' : 'subjects'} is ready, counting down to exam day.`}
+          next="See my plan"
+          onDone={() => setCelebrating(false)}
+        />
+      ) : null}
       <Rail rail={rail} step={step} reached={reached} done={done} firstName={firstName} onGo={go} />
 
       {done ? (

@@ -15,6 +15,13 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Onboarding: flat buttons and a reward when the plan is saved
+- **What:** every onboarding button sits flat (the lime "Save and continue" and "Go to my
+  dashboard" had a dark shadow the purple ones did not). Saving the plan plays the reward
+  (`Celebrate`): "You're set up!", then the finish card. The steps are otherwise kept.
+- **Why:** founder, 17 Nov 2026.
+- **Status:** committed, not pushed.
+
 ### Mock set-up: only your subjects, no counts
 - **What:** a custom mock lists only the student's own subjects ("Your subjects"; every subject
   only for a student who has not chosen theirs), without question counts or "Your subject"
