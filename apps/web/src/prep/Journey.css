@@ -180,21 +180,15 @@
   top: 50%;
 }
 
-/* The path goes on: the last stops fade out under a white wash. A wash, not a mask, so the
-   card keeps its sticker shadow like every other card (founder, 17 Nov 2026). */
+/* The path goes on: the last stops fade out and the line runs out of the open bottom of the
+   card. The one card with no sticker shadow, on purpose: a shadow needs a closed card, and
+   this one stays open to say the road continues (founder, 17 Nov 2026). */
 .sj .jr.continues {
   padding-bottom: 0;
-}
-.sj .jr.continues::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 150px;
-  border-radius: 0 0 var(--r-lg) var(--r-lg);
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff 85%);
-  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 150px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 150px), transparent);
+  border-bottom-color: transparent;
+  box-shadow: none;
 }
 .sj .jr.continues .jr-step:last-child::after {
   content: '';
