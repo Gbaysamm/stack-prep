@@ -1144,27 +1144,78 @@
   }
 }
 
-/* Bookmark and Report in the open card's head, on the tag row beside the arrow (founder,
-   17 Nov 2026). Only that short row makes room; the topic line keeps its full width. */
-.sj .rr-qtools.top {
-  position: absolute;
-  top: 12px;
-  right: 54px;
-  z-index: 1;
+/* The head is one row on one centre line (founder, 17 Nov 2026): the number badge, as tall as
+   the two lines beside it (the tag, then the start of the question); then, once open,
+   Bookmark and Report; then the arrow. The topic is inside the open card, above the question. */
+.sj .rr-qrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-right: 14px;
 }
-.sj .rr-q.open .rr-qtop {
-  min-height: 34px;
-  padding-right: 230px;
+.sj .rr-qrow .rr-qhead {
+  flex: 1;
+  min-width: 0;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: stretch;
+  min-height: 0;
+  padding-right: 4px;
+}
+.sj .rr-qrow .rr-qnum {
+  width: 44px;
+  height: auto;
+  min-height: 40px;
+  align-self: stretch;
+}
+.sj .rr-qrow .rr-qmain {
+  justify-content: center;
+  gap: 5px;
+}
+.sj .rr-qpeek {
+  overflow: hidden;
+  color: var(--gray-900);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.35;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.sj .rr-qtopic {
+  margin: 0;
+  color: var(--gray-500);
+  font-size: 13px;
+  font-weight: 600;
+}
+.sj .rr-qtools {
+  flex: none;
+}
+.sj .rr-chevbtn {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+}
+.sj .rr-qrow:hover .rr-chev {
+  color: var(--purple-600);
 }
 @media (max-width: 860px) {
-  .sj .rr-qtools.top {
-    top: 12px;
-    right: 44px;
+  .sj .rr-qrow {
+    gap: 6px;
+    padding-right: 10px;
   }
-  .sj .rr-qtools.top .qt-btn span {
+  .sj .rr-qrow .rr-qhead {
+    grid-template-columns: 40px minmax(0, 1fr);
+    padding-right: 2px;
+  }
+  .sj .rr-qrow .rr-qnum {
+    width: 40px;
+  }
+  .sj .rr-qtools .qt-btn span {
     display: none;
   }
-  .sj .rr-q.open .rr-qtop {
-    padding-right: 84px;
+  .sj .rr-qpeek {
+    font-size: 14px;
   }
 }

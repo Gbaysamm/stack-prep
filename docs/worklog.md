@@ -15,6 +15,15 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Question cards: one clean head
+- **What:** a question card's head is one row on one centre line: the number badge (as tall as
+  the two lines beside it), the outcome tag with year and number, and the start of the
+  question; once open, Bookmark and Report sit beside the arrow. The topic moved inside the open
+  card, above the question. Same card on the run report and the check-up report.
+- **Why:** founder, 17 Nov 2026: tools floated above the line, badge and text misaligned, topic
+  crowded on a phone.
+- **Status:** committed, not pushed.
+
 ### Check-up report rebuilt: result band, topic tiles, your answers
 - **What:** a tinted result band leads: this check-up's score on a ring, every answer as a
   tappable mark (it opens that question), the subject score on a bar to the target, one button.

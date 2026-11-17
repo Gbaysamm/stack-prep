@@ -559,27 +559,33 @@ export function QuestionCard({
       className={cx('rr-q', `t-${meta.tone}`, open && 'open', active && 'active')}
       data-pos={item.position}
     >
-      <button type="button" className="rr-qhead" aria-expanded={open} aria-controls={bodyId} onClick={onToggle}>
-        <span className={cx('rr-qnum sj-mono', meta.tone)}>{pad(item.position)}</span>
-        <span className="rr-qmain">
-          <span className="rr-qtop">
-            <span className={cx('rr-tag', meta.tone)}>{meta.label}</span>
-            {source ? <span className="rr-qsource sj-mono">{source}</span> : null}
+      {/* One row, one centre line: the question, then (once open) Bookmark and Report, then the
+          arrow. The arrow is a second way to fold the card, kept out of the tab order. */}
+      <div className="rr-qrow">
+        <button type="button" className="rr-qhead" aria-expanded={open} aria-controls={bodyId} onClick={onToggle}>
+          <span className={cx('rr-qnum sj-mono', meta.tone)}>{pad(item.position)}</span>
+          <span className="rr-qmain">
+            <span className="rr-qtop">
+              <span className={cx('rr-tag', meta.tone)}>{meta.label}</span>
+              {source ? <span className="rr-qsource sj-mono">{source}</span> : null}
+            </span>
+            {/* Closed, the start of the question says which one it is; open, the question is below. */}
+            {open ? null : <span className="rr-qpeek">{peek(item.stem)}</span>}
           </span>
-          <span className="rr-qwhere">{where || 'Question'}</span>
-        </span>
-        <IconChevronDown size={20} className="rr-chev" />
-      </button>
-
-      {/* Bookmark and Report sit in the head, beside the arrow, once the question is open. */}
-      {open ? (
-        <div className="rr-qtools top">
-          <QuestionTools versionId={item.question_version_id} where="review" />
-        </div>
-      ) : null}
+        </button>
+        {open ? (
+          <div className="rr-qtools">
+            <QuestionTools versionId={item.question_version_id} where="review" />
+          </div>
+        ) : null}
+        <button type="button" className="rr-chevbtn" tabIndex={-1} aria-hidden="true" onClick={onToggle}>
+          <IconChevronDown size={20} className="rr-chev" />
+        </button>
+      </div>
 
       <div className="rr-qbody" id={bodyId} role="region" aria-label={`Question ${item.position}`}>
         <div className="rr-qbody-in">
+          {where ? <p className="rr-qtopic">{where}</p> : null}
           {item.passage_body ? <Passage title={item.passage_title} body={item.passage_body} /> : null}
           {item.instructions ? (
             <p className="rr-instructions">
@@ -693,6 +699,17 @@ function FactsRow({ item, hintUsed, checkup }: { item: ReviewItem; hintUsed: boo
       ))}
     </dl>
   );
+}
+
+/** A question's opening as plain text, for a one-line glimpse: maths marks and markup taken out. */
+function peek(stem: string): string {
+  return stem
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/\\(text|mathrm|mathbf)\{([^}]*)\}/g, '$2')
+    .replace(/\\[a-zA-Z]+/g, ' ')
+    .replace(/[$*_^{}#>`]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 const LONG_PASSAGE = 520;
