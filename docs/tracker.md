@@ -175,3 +175,14 @@ the lawyer, the Lagos and Ibadan pronunciation, the Mock exam room (migration 05
 |---|---|---|---|
 | Rearrange tasks by priority or what I am working on | Drag a task; or Move to the top, up, down from its box | `TrackerPage.tsx`, `POST /v1/public/tracker/order`, migration 060 | Committed |
 | The box should not mark a task done at once | A menu: Mark done, stage, Today, Move, Open, Delete (confirmed) | `TrackerPage.tsx` | Committed |
+
+## Notifications, part one (founder, 17 Nov 2026)
+
+| Ask (founder) | Done | Where | Status |
+|---|---|---|---|
+| Notify at different stages, like Duolingo; cron jobs | Hourly job on the worker: streak at risk, missed a day, away 3/7/14, streak milestones; one nudge a day, quiet 9 pm to 8 am | `app/notifications.py`, `worker.py`, migration 061 | Committed |
+| In-app notifications | A bell with the latest five and a count; Mark all read | `Bell.tsx` | Committed |
+| Each one dismissible; tap for more; a page past five; optimistic | A bin on each; a Notifications page (All, Unread), each opens in place with its button; read or unread; every change shows at once | `pages/Notifications.tsx`, `notificationsApi.ts` | Committed |
+| No hero on the Notifications page; one container or boxes? | Plain title; one container (a feed of short, alike items) | `pages/Notifications.tsx` | Committed |
+| Skeletons and the help button on the tracker | Added, with faster pages and the pinned sidebar | migration 061 | Committed |
+| Gamification next | On the tracker as the next item | migration 061 | To do |

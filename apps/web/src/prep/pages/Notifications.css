@@ -1,0 +1,211 @@
+/* The Notifications page (Notifications.tsx): a toolbar, then one sticker card of rows. */
+.sj .nf {
+  display: grid;
+  gap: 18px;
+}
+.sj .nf-title {
+  margin: 4px 0 0;
+  color: var(--ink-900);
+  font-size: 30px;
+  line-height: 1.15;
+}
+.sj .nf-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.sj .nf-seg {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--gray-100);
+}
+.sj .nf-seg button {
+  height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--gray-700);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.sj .nf-seg button.on {
+  background: #fff;
+  color: var(--ink-900);
+  box-shadow: inset 0 0 0 1.5px var(--ink-900);
+}
+.sj .nf-textbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--purple-700);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.sj .nf-textbtn:hover {
+  background: var(--purple-050);
+}
+.sj .nf-list {
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+}
+.sj .nf-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  border-radius: 10px;
+}
+.sj .nf-item + .nf-item {
+  margin-top: 2px;
+}
+.sj .nf-item:hover {
+  background: var(--gray-100);
+}
+.sj .nf-item.new {
+  background: var(--purple-050);
+}
+.sj .nf-item.open {
+  background: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--ink-900);
+}
+.sj .nf-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 6px 14px 14px;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.sj .nf-text {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.sj .nf-text b {
+  font-size: 15px;
+  line-height: 1.4;
+}
+.sj .nf-short {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  color: var(--gray-700);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.sj .nf-text small {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gray-500);
+  font-size: 12.5px;
+}
+.sj .nf-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--purple-600);
+}
+.sj .nf-tools {
+  display: flex;
+  gap: 2px;
+  padding: 12px 10px 0 0;
+}
+.sj .nf-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--gray-500);
+  cursor: pointer;
+}
+.sj .nf-icon:hover {
+  background: #fff;
+  color: var(--ink-900);
+}
+.sj .nf-icon.bin:hover {
+  color: var(--danger);
+}
+.sj .nf-more {
+  grid-column: 1 / -1;
+  padding: 0 16px 16px 66px;
+}
+.sj .nf-more p {
+  margin: 0 0 14px;
+  color: var(--gray-700);
+  font-size: 15px;
+  line-height: 1.6;
+}
+.sj .nf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.sj .nf-empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 40px 24px;
+  text-align: center;
+}
+.sj .nf-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--purple-050);
+  color: var(--purple-700);
+}
+.sj .nf-empty b {
+  margin-top: 4px;
+  font-size: 19px;
+}
+.sj .nf-empty p {
+  max-width: 380px;
+  margin: 0 0 8px;
+  color: var(--gray-600);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+@media (max-width: 640px) {
+  .sj .nf-title {
+    font-size: 25px;
+  }
+  .sj .nf-head {
+    gap: 12px;
+    padding: 12px 2px 12px 12px;
+  }
+  .sj .nf-tools {
+    padding: 10px 6px 0 0;
+  }
+  .sj .nf-more {
+    padding: 0 12px 14px 12px;
+  }
+}

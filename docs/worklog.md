@@ -15,6 +15,20 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Notifications, part one: the engine, the bell, the page
+- **What:** migration 061 (`notifications`, with `dismissed_at` so a deleted one is never sent
+  again). `app/notifications.py` decides per student, on their own clock (Postgres does the time
+  zone): streak at risk from 7 pm, missed a day at their usual hour, away on days 3, 7 and 14,
+  streak milestones; at most one nudge a day, none 9 pm to 8 am; `dedupe_key` makes it safe to
+  run twice. The worker runs it at five past each hour (`python -m app.cli notify` runs it once).
+  `routers/notifications.py`: list, read one or all, unread, delete. Web: `Bell.tsx` (latest
+  five, count, bin, Mark all read, See all past five) and `pages/Notifications.tsx` (no hero,
+  one container, All/Unread, open in place, read/unread, delete), sharing one optimistic store
+  (`notificationsApi.ts`). Tests: `tests/test_notifications.py`. The tracker also gets the help
+  button, skeletons, faster pages, pinned sidebar, and Gamification as next.
+- **Why:** founder, 17 Nov 2026.
+- **Status:** committed, not pushed. Email, parents, reports and push are the next parts.
+
 ### The tracker: your own order, and a menu on the box
 - **What:** migration 060 gives each task a position (today's order to start); `POST
   /v1/public/tracker/order` puts a list in a new order (its tasks swap the places they held).

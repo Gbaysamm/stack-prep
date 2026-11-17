@@ -222,6 +222,12 @@ export const IconMail = make(
     <path d="m4 7 8 6 8-6" />
   </>,
 );
+export const IconBell = make(
+  <>
+    <path d="M6 9a6 6 0 0 1 12 0c0 5 2 6.5 2 6.5H4S6 14 6 9Z" />
+    <path d="M10 19a2 2 0 0 0 4 0" />
+  </>,
+);
 export const IconMegaphone = make(
   <>
     <path d="M4 10v4a1 1 0 0 0 1 1h3l8 4V5L8 9H5a1 1 0 0 0-1 1Z" />

@@ -16,6 +16,7 @@ import {
 } from "react-router-dom";
 
 import { Notices } from "./Notices.js";
+import { Bell } from "./Bell.js";
 import { HelpFab } from "./HelpFab.js";
 import { ClaimDialog } from "./AuthForms.js";
 import {
@@ -456,6 +457,7 @@ export function AppShell() {
                 {check.data ? (
                   <StreakChip overview={check.data} studentId={student.studentId} />
                 ) : null}
+                {sandbox ? null : <Bell studentId={student.studentId} />}
                 <ProfileMenu
                   name={student.displayName}
                   account={

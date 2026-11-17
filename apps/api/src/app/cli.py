@@ -95,6 +95,20 @@ def _openapi() -> int:
     return 0
 
 
+def _notify() -> int:
+    """Run the hourly notifications job once now (the worker runs it every hour)."""
+    from app import notifications
+    from app.db import get_engine
+
+    async def run() -> int:
+        async with get_engine().connect() as conn:
+            added = await notifications.run_hourly(conn)
+        print(f"{added} notifications added.")
+        return 0
+
+    return asyncio.run(run())
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="app.cli")
     commands = {
@@ -102,6 +116,7 @@ def main(argv: list[str] | None = None) -> int:
         "baseline": _baseline,
         "openapi": _openapi,
         "voice-lessons": _voice_lessons,
+        "notify": _notify,
     }
     parser.add_argument("command", choices=list(commands))
     args = parser.parse_args(argv)

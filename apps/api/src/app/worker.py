@@ -12,10 +12,11 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Any, ClassVar
 
+from arq import cron
 from arq.connections import RedisSettings
 
 from app.config import get_settings
-from app.db import database_is_reachable
+from app.db import database_is_reachable, get_engine
 
 
 async def ping(ctx: dict[str, Any]) -> str:
@@ -23,9 +24,18 @@ async def ping(ctx: dict[str, Any]) -> str:
     return "ok" if await database_is_reachable() else "database unreachable"
 
 
+async def notify(ctx: dict[str, Any]) -> int:
+    """Every hour: decide and store what each student is told (app/notifications.py)."""
+    from app import notifications
+
+    async with get_engine().connect() as conn:
+        return await notifications.run_hourly(conn)
+
+
 class WorkerSettings:
-    functions: ClassVar[list[Callable[..., Any]]] = [ping]
-    cron_jobs: ClassVar[list[Any]] = []
+    functions: ClassVar[list[Callable[..., Any]]] = [ping, notify]
+    # Five past each hour, so a nudge "at 7 pm" is there by 7:05 their time.
+    cron_jobs: ClassVar[list[Any]] = [cron(notify, minute=5, run_at_startup=False)]
 
     #: arq reads this as a value, not as something to call: it passes whatever is
     #: here straight to ``create_pool``, which then asks it for ``.host``. Declaring
