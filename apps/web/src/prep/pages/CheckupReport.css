@@ -1914,3 +1914,131 @@
 .sj .cp3 .sj-showmore.cp-submore:hover {
   background: var(--purple-050, #f3ebff);
 }
+/* The button centred on the bar and its line of words. */
+@media (min-width: 901px) {
+  .sj .cp3-hero-foot {
+    align-self: center;
+    margin-top: 16px;
+  }
+}
+
+/* What next, second pass (founder, 17 Nov 2026): each card opens on a tinted band (its rank,
+   its score and the count behind it), then the topic, then a full-width Practise bar. */
+.sj .cp3-next-card.v2 {
+  grid-template-rows: auto 1fr auto;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+.sj .cp3-next-card.v2 .cp3-next-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0;
+  padding: 16px 20px;
+  border-bottom: 1.5px solid var(--gray-900, #160b2e);
+  background: #ffe4ea;
+}
+.sj .cp3-next-card.v2 .cp3-next-top.mid {
+  background: #fff1d6;
+}
+.sj .cp3-next-card.v2 .cp3-next-top.good {
+  background: #e7f9dc;
+}
+.sj .cp3-next-card.v2 .cp3-next-rank {
+  display: block;
+  width: auto;
+  height: auto;
+  background: none;
+  font-family: var(--f-display);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ink-900, #1f0050);
+  opacity: 0.85;
+}
+.sj .cp3-next-score {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+}
+.sj .cp3-next-score b {
+  font-family: var(--f-display);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  color: #be123c;
+}
+.sj .cp3-next-top.mid .cp3-next-score b {
+  color: #b45309;
+}
+.sj .cp3-next-top.good .cp3-next-score b {
+  color: #15803d;
+}
+.sj .cp3-next-score small {
+  color: var(--ink-700, #3b2a66);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.sj .cp3-next-body {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  padding: 16px 20px 18px;
+}
+.sj .cp3-next-body b {
+  font-family: var(--f-display);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink-900, #1f0050);
+}
+.sj .cp3-next-body small {
+  color: var(--gray-600, #6b6880);
+  font-size: 13px;
+}
+.sj .cp3-next-card.v2 .cp3-next-go {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0;
+  padding: 13px 20px;
+  border-top: 1px solid var(--purple-100, #e6d6ff);
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--purple-700, #6500ff);
+}
+.sj .cp3-next-card.v2:hover .cp3-next-go {
+  background: var(--purple-050, #f3ebff);
+}
+@media (max-width: 900px) {
+  .sj .cp3-next-card.v2 {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+  }
+  .sj .cp3-next-card.v2 .cp3-next-top,
+  .sj .cp3-next-card.v2 .cp3-next-body,
+  .sj .cp3-next-card.v2 .cp3-next-go {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .sj .cp3-next-card.v2 .cp3-next-top {
+    padding: 12px 16px;
+  }
+  .sj .cp3-next-card.v2 .cp3-next-rank {
+    display: block;
+    font-size: 24px;
+  }
+  .sj .cp3-next-card.v2 .cp3-next-body {
+    padding: 12px 16px 14px;
+  }
+  .sj .cp3-next-card.v2 .cp3-next-go {
+    padding: 11px 16px;
+    font-size: 14px;
+  }
+  .sj .cp3-next-card.v2 .cp3-next-go svg {
+    width: 16px;
+    height: 16px;
+  }
+}

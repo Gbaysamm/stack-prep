@@ -51,6 +51,8 @@ interface Weak {
   name: string;
   section_name: string | null;
   score: number | null;
+  right: number;
+  answered: number;
 }
 
 /** The topics to practise next: the lowest topic scores in the subject, the bigger topic first on a tie. */
@@ -61,7 +63,14 @@ function weakestTopics(report: Report): Weak[] {
       .filter((t) => t.answered > 0 && t.score !== null)
       .sort((a, b) => a.score! - b.score! || b.share - a.share)
       .slice(0, NEXT_COUNT)
-      .map((t) => ({ subtopic_id: t.subtopic_id, name: t.name, section_name: t.section_name, score: t.score }));
+      .map((t) => ({
+        subtopic_id: t.subtopic_id,
+        name: t.name,
+        section_name: t.section_name,
+        score: t.score,
+        right: t.right,
+        answered: t.answered,
+      }));
   }
   return report.subtopics
     .filter((s) => s.answered > 0 && s.mastery !== null)
@@ -72,6 +81,8 @@ function weakestTopics(report: Report): Weak[] {
       name: s.name,
       section_name: s.section_name ?? null,
       score: Math.round(s.mastery! * 100),
+      right: s.correct,
+      answered: s.answered,
     }));
 }
 
@@ -310,20 +321,25 @@ export function CheckupReport() {
               <li key={t.subtopic_id}>
                 <button
                   type="button"
-                  className="cp3-next-card"
+                  className="cp3-next-card v2"
                   onClick={() => practise([t], 'next')}
                   aria-label={`Practise ${t.name}`}
                 >
-                  <span className="cp3-next-top">
-                    <span className={cx('cp3-next-badge sj-num', scoreLevel(t.score))}>
-                      {t.score !== null ? `${t.score}%` : '—'}
+                  <span className={cx('cp3-next-top', scoreLevel(t.score))}>
+                    <span className="cp3-next-rank sj-mono">{String(index + 1).padStart(2, '0')}</span>
+                    <span className="cp3-next-score">
+                      <b className="sj-num">{t.score !== null ? `${t.score}%` : '—'}</b>
+                      <small>
+                        {t.right} of {t.answered} right
+                      </small>
                     </span>
-                    <span className="cp3-next-rank sj-mono">{index + 1}</span>
                   </span>
-                  <b>{t.name}</b>
-                  {t.section_name ? <small>{t.section_name}</small> : null}
+                  <span className="cp3-next-body">
+                    <b>{t.name}</b>
+                    {t.section_name ? <small>{t.section_name}</small> : null}
+                  </span>
                   <span className="cp3-next-go">
-                    Practise <IconArrowRight size={16} />
+                    Practise this topic <IconArrowRight size={16} />
                   </span>
                 </button>
               </li>
