@@ -210,11 +210,13 @@ export function CheckupReport() {
             <Ring value={(score ?? 0) / 100} size={132} stroke={13} color={ringColour(scoreLevel(score, target))}>
               <span className="cp3-dial-in">
                 <b className="sj-num">{score !== null ? `${score}%` : '—'}</b>
-                <small>this check-up</small>
               </span>
             </Ring>
             <span className="cp3-dial-note">
-              <b>{data.right}</b> of {data.answered} right
+              <b>
+                {data.right} of {data.answered} right
+              </b>
+              <small>in this check-up</small>
             </span>
           </div>
 

@@ -1683,3 +1683,47 @@
   padding-top: 3px;
   color: #8a6a00;
 }
+/* The hint's label sits above its words, not beside them (founder, 17 Nov 2026). */
+.sj .cp3-qs .rr-hint {
+  flex-direction: column;
+  gap: 4px;
+}
+.sj .cp3-qs .rr-hint .sj-eyebrow {
+  padding-top: 0;
+}
+
+/* The ring: a visible track, the number alone inside; the count beneath it as plain words
+   (no pill), beside it on a phone. */
+.sj .cp3-dial .sj-ring circle.rail {
+  stroke: #e7dcfb !important;
+  opacity: 1;
+}
+.sj .cp3-dial-note {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.sj .cp3-dial-note b {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink-900, #1f0050);
+}
+.sj .cp3-dial-note small {
+  color: var(--gray-600, #6b6880);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+@media (max-width: 640px) {
+  .sj .cp3-dial-note {
+    justify-items: start;
+  }
+  .sj .cp3-dial-note b {
+    font-size: 17px;
+  }
+  .sj .cp3-dial-note small {
+    font-size: 13.5px;
+  }
+}
