@@ -15,6 +15,18 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Check-up report: faster, one score story, no back link
+- **What:** the report is fetched once (it was fetched twice) and the roadmap read waits until
+  the report is in, so the page's own data no longer races it (report 2.3 s to 0.7 s in local
+  timing). The big number says it is this check-up; the line beside it gives the subject score
+  now, and the target bar measures that. The "Chemistry score now" fact is gone. Got wrong and Got
+  right are full width with rows in two columns, so a short list leaves no empty half. The back
+  link is gone.
+- **Why:** founder, 17 Nov 2026: slow to load, cluttered top, two scores side by side.
+- **Where:** `CheckupReport.tsx`, `CheckupReport.css`, `RunGate.tsx` (`useRunGate(ready)`),
+  `student/api.ts` (`report` through `shared`).
+- **Status:** committed, not pushed.
+
 ### Check-up report redesigned; today's design plan on the tracker
 - **What:** the check-up report drops the dark hero, the dark What next block and the four
   how-it-works boxes. It is now one sticker result card (score, "x of y right", a bar to the

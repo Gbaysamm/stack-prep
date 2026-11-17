@@ -928,7 +928,8 @@ export const api = {
     }),
   /** Where an already-open sitting is, for a client that has just reloaded. */
   current: (sessionId: string) => call<CheckupState>(`/checkup/${sessionId}`),
-  report: (sessionId: string) => call<CheckupReport>(`/checkup/${sessionId}/report`),
+  report: (sessionId: string) =>
+    shared(`checkup-report:${sessionId}`, KEEP.overview, () => call<CheckupReport>(`/checkup/${sessionId}/report`)),
   startPractice: (studentId: string, subjectId: string, length = 10) =>
     call<PracticeState>('/practice/start', {
       method: 'POST',

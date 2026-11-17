@@ -22,10 +22,17 @@ interface Why {
   body: string;
 }
 
-export function useRunGate() {
+/**
+ * `ready`: false holds the roadmap read back until the page's own data is in, so the two do not
+ * race for the server on a page that waits for its own (the check-up report).
+ */
+export function useRunGate(ready = true) {
   const student = useStudent();
   const navigate = useNavigate();
-  const plan = useLoad(() => roadmapApi.read(student.studentId), [student.studentId]);
+  const plan = useLoad(
+    () => (ready ? roadmapApi.read(student.studentId) : new Promise<never>(() => undefined)),
+    [student.studentId, ready],
+  );
   const [why, setWhy] = useState<Why | null>(null);
   const next = plan.data ? todayOf(plan.data).next : null;
   const ownLeft = plan.data?.record.own_runs_in ?? 0;

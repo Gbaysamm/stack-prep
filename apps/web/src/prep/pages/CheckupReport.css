@@ -797,18 +797,6 @@
   display: grid;
   gap: 30px;
 }
-.sj .cp2-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  justify-self: start;
-  margin-bottom: -18px;
-  color: var(--purple-700, #6500ff);
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-}
-
 /* The result: one sticker card. */
 .sj .cp2-result {
   display: grid;
@@ -1030,5 +1018,35 @@
   .sj .cp2-group {
     padding: 16px 16px 10px;
     box-shadow: 4px 4px 0 var(--purple-200, #d7bdff);
+  }
+}
+
+/* 17 Nov 2026: the two lists are full width, rows in two columns, so a long list and a short
+   one leave no empty half. The big number says it is this sitting. */
+/* The note under the big number: two short lines on a laptop. */
+.sj .cp2-result-score span {
+  max-width: 120px;
+  text-align: center;
+  line-height: 1.35;
+}
+.sj .cp2-result-lead b {
+  color: var(--purple-700, #6500ff);
+}
+.sj .cp2-groups {
+  grid-template-columns: minmax(0, 1fr);
+}
+.sj .cp2-group .cp2-rows {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 32px;
+}
+@media (max-width: 760px) {
+  .sj .cp2-group .cp2-rows {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .sj .cp2-result-score span {
+    max-width: none;
+    text-align: left;
   }
 }

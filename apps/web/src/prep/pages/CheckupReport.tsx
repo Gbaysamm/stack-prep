@@ -15,7 +15,7 @@ import { useEffect, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import { api, type CheckupReport as Report, type SubtopicReport } from '../../student/api.js';
-import { IconArrowLeft, IconArrowRight, IconCheck, IconClose, IconHelp, IconReplay } from '../icons.js';
+import { IconArrowRight, IconCheck, IconClose, IconHelp, IconReplay } from '../icons.js';
 import { progressApi } from '../progressApi.js';
 import { useRunGate } from '../RunGate.js';
 import { useLoad, usePageTitle, useStudent } from '../store.js';
@@ -42,7 +42,7 @@ function dayText(iso: string): string {
 /** How many topics "What next" names. */
 const NEXT_COUNT = 3;
 /** Topic rows before "Show all". */
-const TOUCHED_SHOWN = 8;
+const TOUCHED_SHOWN = 10;
 
 /** The topics to practise next: the lowest topic scores in the subject, the bigger topic first on a tie. */
 function weakestTopics(report: Report): { subtopic_id: string; name: string; score: number | null }[] {
@@ -120,7 +120,7 @@ export function CheckupReport() {
   // "Practise" means the weakest topics named under What next, never a general run. A run the
   // roadmap holds back is said in a popup at once (RunGate.tsx).
   const starter = useStartPractice();
-  const gate = useRunGate();
+  const gate = useRunGate(Boolean(report.data));
   const starting = starter.busy !== null;
   const weakest = report.data ? weakestTopics(report.data) : [];
   const practise = (topics: { subtopic_id: string; name: string }[], where: string) => {
@@ -171,14 +171,14 @@ export function CheckupReport() {
   const exam = subject?.examination_short_name;
   const target = subject?.goal?.target_score ?? null;
   const score = data.score;
+  // The subject's score after this check-up (all answers since the first check-up): the one the
+  // target is measured against. The big number is this sitting alone.
+  const now = standing?.score ?? null;
+  const towards = now ?? score;
   const eyebrow = ['Check-up report', [exam, subjectName].filter(Boolean).join(' '), dateText].filter(Boolean).join(' · ');
 
   return (
     <div className="sj-page cp-page cp2">
-      <Link className="cp2-back" to="/checkup">
-        <IconArrowLeft size={16} /> All check-ups
-      </Link>
-
       <Section
         eyebrow={eyebrow}
         title={data.answered === 0 ? 'No answers yet' : 'How your check-up went'}
@@ -189,28 +189,30 @@ export function CheckupReport() {
           <div className="cp2-result-score">
             <b className={cx('sj-num', scoreLevel(score, target))}>{score !== null ? `${score}%` : '—'}</b>
             <span>
-              {data.right} of {data.answered} right
+              {data.right} of {data.answered} right in this check-up
             </span>
           </div>
           <div className="cp2-result-text">
             <p className="cp2-result-lead">
               {data.answered === 0
                 ? 'Answer a few questions and your result shows here.'
-                : data.finished
-                  ? 'This is now your predicted score: the closest thing to sitting the exam today.'
-                  : `From the ${data.answered} answers so far. Finish the check-up and it becomes your predicted score.`}
+                : !data.finished
+                  ? `From the ${data.answered} answers so far. Finish the check-up to update your score.`
+                  : now !== null
+                    ? <>Your {subjectName || 'subject'} score is now <b className="sj-num">{now}%</b>, counting this check-up and your practice.</>
+                    : 'This check-up sets your score.'}
             </p>
-            {score !== null ? (
+            {towards !== null ? (
               <div className="cp2-target" aria-hidden="true">
-                <i style={{ width: `${score}%` }} />
+                <i style={{ width: `${towards}%` }} />
                 {target !== null ? <em style={{ left: `${Math.min(100, target)}%` }} /> : null}
               </div>
             ) : null}
             <ul className="cp2-facts">
-              {target !== null && score !== null ? (
+              {target !== null && towards !== null ? (
                 <li>
                   Target: <b>{target}%</b>
-                  {target - score > 0 ? ` · ${target - score} to go` : ' · reached'}
+                  {target - towards > 0 ? ` · ${target - towards} to go` : ' · reached'}
                 </li>
               ) : (
                 <li>
@@ -224,11 +226,6 @@ export function CheckupReport() {
               ) : (
                 <li>Your first check-up</li>
               )}
-              {standing?.score != null ? (
-                <li>
-                  {subjectName || 'Subject'} score now: <b>{standing.score}%</b>
-                </li>
-              ) : null}
             </ul>
           </div>
           {weakest.length > 0 ? (
