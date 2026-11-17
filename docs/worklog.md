@@ -15,6 +15,13 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Settings: "How your scores are shown" as two plain rows
+- **What:** a bold name and one short line per setting, the control on the right (below on a
+  phone): the purple switch for Percentage / Out of 400, a target box with "/ 400" inside it,
+  and Save only once the number has changed.
+- **Why:** founder, 17 Nov 2026: "this design is so bad".
+- **Status:** committed, not pushed.
+
 ### Settings: the scores section styled, and easy to find
 - **What:** "How your scores are shown" (ResultSettings) used Profile's styles without loading
   them, so opened directly it was unstyled; it now loads them. Settings is in the sidebar under

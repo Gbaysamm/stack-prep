@@ -57,3 +57,106 @@
 .sj .set-page .sj-btn:active {
   box-shadow: none;
 }
+
+/* How your scores are shown (ResultSettings), 17 Nov 2026: two plain rows. */
+.sj .rs {
+  display: grid;
+  padding: 6px 22px;
+}
+.sj .rs-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 24px;
+  padding: 16px 0;
+}
+.sj .rs-row + .rs-row {
+  border-top: 1px solid var(--gray-100, #efedf5);
+}
+.sj .rs-words {
+  display: grid;
+  gap: 3px;
+}
+.sj .rs-words b {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--ink-900, #1f0050);
+}
+.sj .rs-words small {
+  color: var(--gray-600, #6b6880);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.sj .rs-seg {
+  display: inline-flex;
+  padding: 3px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 8px;
+  background: var(--white, #fff);
+}
+.sj .rs-seg button {
+  padding: 8px 14px;
+  border-radius: 6px;
+  color: var(--ink-700, #3b2a66);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.sj .rs-seg button.on {
+  background: var(--purple-600, #6b0bff);
+  color: #fff;
+}
+.sj .rs-target {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sj .rs-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 42px;
+  padding: 0 12px;
+  border: 1.5px solid var(--gray-900, #160b2e);
+  border-radius: 8px;
+  background: var(--white, #fff);
+}
+.sj .rs-box:focus-within {
+  outline: 3px solid var(--purple-200, #d7bdff);
+}
+.sj .rs-box input {
+  width: 3.2ch;
+  border: 0;
+  outline: 0;
+  background: none;
+  color: var(--ink-900, #1f0050);
+  font-size: 17px;
+  font-weight: 700;
+  text-align: right;
+}
+.sj .rs-box span {
+  color: var(--gray-500, #8a86a0);
+  font-size: 14px;
+  font-weight: 600;
+}
+.sj .rs-error {
+  grid-column: 1 / -1;
+  color: #be123c;
+  font-size: 13px;
+}
+@media (max-width: 640px) {
+  .sj .rs {
+    padding: 4px 16px;
+  }
+  .sj .rs-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sj .rs-seg {
+    display: flex;
+  }
+  .sj .rs-seg button {
+    flex: 1;
+  }
+}

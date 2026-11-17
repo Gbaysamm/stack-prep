@@ -63,79 +63,76 @@ export function ResultSettings({ studentId }: { studentId: string }) {
     );
   }
 
+  // Two plain rows (founder, 17 Nov 2026): a bold name and one line, the control on the right;
+  // our purple switch; "/ 400" inside the box; Save only once the number has changed.
   return (
-    <div className="sj-card pro-account">
-      <dl className="pro-facts pro-settings">
-        <div>
-          <dt>
-            Show my mock results as
-            <small>
-              Out of 400 is how UTME reports your score: four subjects, each out of 100. However many
-              subjects a mock has, it is scaled to 400, and the percentage is shown beside it.
-            </small>
-          </dt>
-          <dd>
-            <div className="pro-seg" role="radiogroup" aria-label="Show my mock results as">
-              {CHOICES.map((choice) => (
-                <button
-                  key={choice.value}
-                  type="button"
-                  role="radio"
-                  aria-checked={profile.score_display === choice.value}
-                  className={cx('pro-seg-btn', profile.score_display === choice.value && 'on')}
-                  disabled={saving}
-                  onClick={() =>
-                    profile.score_display !== choice.value &&
-                    void save({ score_display: choice.value }, `Mock results now shown as ${choice.label.toLowerCase()}`)
-                  }
-                >
-                  {choice.label}
-                </button>
-              ))}
-            </div>
-          </dd>
+    <div className="sj-card rs">
+      <div className="rs-row">
+        <div className="rs-words">
+          <b>Mock results</b>
+          <small>Shown as a percentage, or out of 400 as UTME reports it.</small>
         </div>
-        <div>
-          <dt>
-            <label htmlFor="pro-target">My UTME target</label>
-            <small>The overall score you're aiming for, out of 400. Your mock results show how close you are.</small>
-          </dt>
-          <dd>
-            <form
-              className="pro-target"
-              onSubmit={(event) => {
-                event.preventDefault();
-                if (targetValid && targetChanged) {
-                  void save({ target_aggregate: typed }, typed === null ? 'UTME target cleared' : `UTME target set to ${typed}`);
-                }
-              }}
+        <div className="rs-seg" role="radiogroup" aria-label="Show my mock results as">
+          {CHOICES.map((choice) => (
+            <button
+              key={choice.value}
+              type="button"
+              role="radio"
+              aria-checked={profile.score_display === choice.value}
+              className={cx(profile.score_display === choice.value && 'on')}
+              disabled={saving}
+              onClick={() =>
+                profile.score_display !== choice.value &&
+                void save({ score_display: choice.value }, `Mock results now shown as ${choice.label.toLowerCase()}`)
+              }
             >
-              <span className="pro-target-box">
-                <input
-                  id="pro-target"
-                  className="sj-input sj-num"
-                  inputMode="numeric"
-                  placeholder="280"
-                  value={target}
-                  maxLength={3}
-                  aria-invalid={!targetValid}
-                  aria-describedby={targetValid ? undefined : 'pro-target-error'}
-                  onChange={(event) => setTarget(event.target.value.replace(/[^0-9]/g, ''))}
-                />
-                <span aria-hidden="true">/400</span>
-              </span>
-              <Button size="sm" type="submit" disabled={saving || !targetValid || !targetChanged}>
-                Save
-              </Button>
-            </form>
-            {targetValid ? null : (
-              <small className="pro-target-error" id="pro-target-error">
-                Enter a score from 0 to 400.
-              </small>
-            )}
-          </dd>
+              {choice.label}
+            </button>
+          ))}
         </div>
-      </dl>
+      </div>
+      <div className="rs-row">
+        <div className="rs-words">
+          <label htmlFor="pro-target">
+            <b>UTME target</b>
+          </label>
+          <small>The total you are aiming for. Your mocks show how close you are.</small>
+        </div>
+        <form
+          className="rs-target"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (targetValid && targetChanged) {
+              void save({ target_aggregate: typed }, typed === null ? 'UTME target cleared' : `UTME target set to ${typed}`);
+            }
+          }}
+        >
+          <span className="rs-box">
+            <input
+              id="pro-target"
+              className="sj-num"
+              inputMode="numeric"
+              placeholder="280"
+              value={target}
+              maxLength={3}
+              aria-invalid={!targetValid}
+              aria-describedby={targetValid ? undefined : 'pro-target-error'}
+              onChange={(event) => setTarget(event.target.value.replace(/[^0-9]/g, ''))}
+            />
+            <span aria-hidden="true">/ 400</span>
+          </span>
+          {targetChanged && targetValid ? (
+            <Button size="sm" type="submit" busy={saving}>
+              Save
+            </Button>
+          ) : null}
+        </form>
+        {targetValid ? null : (
+          <small className="rs-error" id="pro-target-error">
+            Enter a score from 0 to 400.
+          </small>
+        )}
+      </div>
     </div>
   );
 }
