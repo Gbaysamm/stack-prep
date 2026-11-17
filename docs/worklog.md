@@ -15,6 +15,15 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### Goals move from Profile to Subjects; Profile trimmed
+- **What:** the Subjects page lists each subject as the exam ticket the founder liked on
+  Profile (target stub, exam day, study time), now with its score now; the ticket opens the
+  subject, Edit opens its goal. Profile keeps who you are, your record and the account; the
+  goals, the "App" row, the "Coach voice" row and the Help row (the sidebar has it) are gone,
+  and its two cards take the sticker outline and shadow.
+- **Why:** founder, 17 Nov 2026: goals have nothing to do with the profile.
+- **Status:** committed, not pushed.
+
 ### Exams and Subjects redrawn like the Roadmap (third pass)
 - **What:** the colour per subject is gone (off-brand). Both pages are drawn like the Roadmap:
   the dark hero (Exams: the exam and the days to it in lime; Subjects: the score now out of
