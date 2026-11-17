@@ -28,6 +28,12 @@ URL = "https://api.inworld.ai/tts/v1/voice"
 #: Bumped when how a clip is asked for changes, so a kept clip is never one made another way.
 RECIPE = "mp3-24k-48kbps|words"
 TIMEOUT_SECONDS = 30.0
+#: How long to wait to reach Inworld at all. Unreachable, every line would wait the full
+#: timeout in turn while holding a database connection (17 Nov 2026: the Roadmap's lesson
+#: downloads held them all and the whole app stalled).
+CONNECT_SECONDS = 5.0
+#: How long an unreachable Inworld is left alone before it is tried again.
+UNREACHABLE_SECONDS = 120.0
 #: How long an account refusal (no credit left, a wrong key) is believed before asking again.
 REFUSAL_SECONDS = 300.0
 #: An account refusal answers 401, 402 or 403 for every line, not just one.
@@ -103,7 +109,7 @@ async def synthesize(said: str, settings: Settings) -> Clip | None:
         "Content-Type": "application/json",
     }
     try:
-        async with httpx.AsyncClient(timeout=TIMEOUT_SECONDS) as client:
+        async with httpx.AsyncClient(timeout=httpx.Timeout(TIMEOUT_SECONDS, connect=CONNECT_SECONDS)) as client:
             response = await client.post(URL, json=body, headers=headers)
         if response.status_code != 200:
             _log.warning("inworld refused: %s %s", response.status_code, response.text[:200])
@@ -113,6 +119,11 @@ async def synthesize(said: str, settings: Settings) -> Clip | None:
         audio = base64.b64decode(reply["audioContent"])
     except Exception as failed:
         _log.warning("inworld failed: %s: %s", type(failed).__name__, failed)
+        if isinstance(failed, (httpx.ConnectError, httpx.ConnectTimeout, httpx.PoolTimeout)):
+            # Not reachable: the next lines go to the studio voice for a while, not one by one
+            # into the same wait.
+            global _refused_until
+            _refused_until = time.monotonic() + UNREACHABLE_SECONDS
         return None
     alignment = (reply.get("timestampInfo") or {}).get("wordAlignment") or {}
     words = words_from(alignment)

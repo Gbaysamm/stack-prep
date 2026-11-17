@@ -15,6 +15,20 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### The app stalled when Inworld could not be reached
+- **What:** opening the Roadmap fetches the next lessons' packages; each made its voice line by
+  line from Inworld while holding a database connection. With Inworld unreachable, every line
+  waited out its 30 s timeout, the connections ran out, and every page (even login) hung for
+  minutes. Inworld is now given 5 s to connect, and after one failed connection it is left alone
+  for 2 minutes (the studio voice answers meanwhile), as a refused account already was.
+  Locally the Roadmap went from about 90 s to settle to about 13 s.
+- **Also:** loading skeletons are darker, so a loading page no longer looks blank; the subject
+  tickets carry the sticker outline and shadow at rest; `scripts/seed_demo_run.py` seeds a
+  12-question demo run (every outcome) for a local student, to check the run report against.
+- **Why:** founder, 17 Nov 2026: the roadmap was blank and slow; no run report to look at.
+- **Where:** `inworld_voice.py`, `prep.css`, `Subjects.css`, `scripts/seed_demo_run.py`.
+- **Status:** committed, not pushed. The live servers have the same weakness until pushed.
+
 ### Goals move from Profile to Subjects; Profile trimmed
 - **What:** the Subjects page lists each subject as the exam ticket the founder liked on
   Profile (target stub, exam day, study time), now with its score now; the ticket opens the
