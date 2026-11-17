@@ -7,7 +7,7 @@
  * - A run on a topic they choose waits until enough planned runs are done (own_runs_in).
  */
 
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,6 +15,7 @@ import { IconArrowRight, IconSpark } from './icons.js';
 import { itemLabel, roadmapApi, today as todayOf } from './roadmapApi.js';
 import { useLoad, useStudent } from './store.js';
 import { Button } from './ui.js';
+import { useStartPractice } from './pages/Home.js';
 import './pages/PracticeHub.css';
 
 interface Why {
@@ -59,8 +60,29 @@ export function useRunGate(ready = true) {
     }
   };
 
-  /** A run on a topic the student picked (the run builder at `href`). */
-  const openTopic = (href: string) => startOwn(() => navigate(href));
+  // A topic's Practise starts the run at once, here (founder, 17 Nov 2026: a quick action never
+  // takes the student to another page first). Anything that stops it is said in the popup.
+  const starter = useStartPractice();
+  useEffect(() => {
+    if (starter.planFirst) setWhy(todayFirst);
+    else if (starter.exhausted)
+      setWhy({
+        title: 'Nothing new in this topic',
+        body: 'You have met every question we have on it. Practise another topic, or come back after its lesson.',
+      });
+    else if (starter.error) setWhy({ title: 'That run didn’t start', body: starter.error });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [starter.planFirst, starter.exhausted, starter.error]);
+
+  /** Practise one topic: `href` is its run-builder link (subject and subtopic in the query). */
+  const openTopic = (href: string) =>
+    startOwn(() => {
+      const query = new URL(href, window.location.origin).searchParams;
+      const subject = query.get('subject');
+      const subtopic = query.get('subtopic');
+      if (subject && subtopic) void starter.start(subject, { subtopicIds: [subtopic] }, subtopic);
+      else navigate(href);
+    });
 
   const popup: ReactNode = why
     ? createPortal(
@@ -94,5 +116,5 @@ export function useRunGate(ready = true) {
       )
     : null;
 
-  return { startRun, startOwn, openTopic, popup, show: (w: Why) => setWhy(w), todayFirst };
+  return { startRun, startOwn, openTopic, popup, show: (w: Why) => setWhy(w), todayFirst, busy: starter.busy };
 }

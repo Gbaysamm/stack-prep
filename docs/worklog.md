@@ -15,6 +15,16 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-17
 
+### "Practise this topic" starts the run where the student is
+- **What:** every Practise on a topic (Practice's weak topics, Progress, the subject page, the
+  mock report) now starts a run on that topic at once, instead of opening the run builder first.
+  A held run, a topic with nothing fresh, or an error is said in the popup on the same page
+  (`RunGate.openTopic`). The Run, Check-up and Mock reports stay as they are (the founder rates
+  the Mock report the best page on the platform). `scripts/seed_demo_mock.py` seeds a finished
+  demo mock for a local student.
+- **Why:** founder, 17 Nov 2026: a quick action must not take the student to another page.
+- **Status:** committed, not pushed.
+
 ### Done roadmap items open again; Home no longer flashes its older layout
 - **What:** a done item on the path (Roadmap and Home) is a link: a check-up opens its report,
   a run its run report, a lesson plays again; an arrow shows it opens. Home now waits for the

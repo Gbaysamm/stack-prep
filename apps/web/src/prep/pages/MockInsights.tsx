@@ -23,6 +23,7 @@ import {
 import { clock, type MockReport as Report, type MockSummary, type SubjectResult, type Tally } from '../mockApi.js';
 import { useResultSettings } from '../scoreDisplay.js';
 import { useStudent } from '../store.js';
+import { useRunGate } from '../RunGate.js';
 import { cx } from '../ui.js';
 import { dateLabel } from './MockHub.js';
 
@@ -269,7 +270,10 @@ function Dots({ right, wrong, skipped }: { right: number; wrong: number; skipped
 }
 
 export function WeakAreas({ weak, many }: { weak: WeakTopic[]; many: boolean }) {
+  // Practise starts the run here, at once; a held run is a popup (RunGate.tsx).
+  const gate = useRunGate();
   return (
+    <>
     <ul className="mi-weak">
       {weak.map(({ topic, subject, answered }) => (
         <li key={`${subject.subject_id}-${topic.subtopic_id}`} className="sj-card mi-weak-item">
@@ -285,17 +289,21 @@ export function WeakAreas({ weak, many }: { weak: WeakTopic[]; many: boolean }) 
           </div>
           <div className="mi-weak-bottom">
             <Dots right={topic.correct} wrong={topic.wrong} skipped={topic.unanswered} />
-            <Link
+            <button
+              type="button"
               className="mi-go"
-              to={`/practice/new?subject=${subject.subject_id}&subtopic=${topic.subtopic_id}`}
+              disabled={gate.busy !== null}
+              onClick={() => gate.openTopic(`/practice/new?subject=${subject.subject_id}&subtopic=${topic.subtopic_id}`)}
               aria-label={`Practise ${topic.name}`}
             >
-              Practise this topic <IconArrowRight size={14} />
-            </Link>
+              {gate.busy === topic.subtopic_id ? 'Starting…' : 'Practise this topic'} <IconArrowRight size={14} />
+            </button>
           </div>
         </li>
       ))}
     </ul>
+    {gate.popup}
+    </>
   );
 }
 
