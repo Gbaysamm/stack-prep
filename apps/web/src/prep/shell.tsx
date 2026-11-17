@@ -413,9 +413,13 @@ export function AppShell() {
         <div className="sj-canvas" />
         <aside className="sj-sidebar sj-glass dark" aria-label="Main">
           <Brand />
-          <NavList />
-          <div className="spacer" />
-          <Countdown />
+          {/* Only the middle scrolls: the brand stays at the top and the account at the foot
+              (founder, 17 Nov 2026). */}
+          <div className="sj-sidebar-scroll">
+            <NavList />
+            <div className="spacer" />
+            <Countdown />
+          </div>
           <SidebarAccount name={student.displayName} onSignOut={leave} />
         </aside>
 

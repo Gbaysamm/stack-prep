@@ -2523,3 +2523,26 @@
     width: 100%;
   }
 }
+
+/* The sidebar's brand and account stay put; only the list between them scrolls. */
+.sj-sidebar {
+  overflow: hidden;
+}
+.sj-sidebar > .sj-brand,
+.sj-sidebar > .sj-sideacct {
+  flex: none;
+}
+.sj-sidebar-scroll {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+  margin: 0 -6px;
+  padding: 0 6px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.sj-sidebar-scroll::-webkit-scrollbar {
+  display: none;
+}
