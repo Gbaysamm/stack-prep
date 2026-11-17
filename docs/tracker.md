@@ -105,6 +105,11 @@ Order of work (each shown at 1440 and 390 before the next):
 | Check-up report page redesign | Result band (ring, answer marks, bar to target), topic tiles, your answers with working, three next cards | `CheckupReport.tsx`, `/v1/checkup/{id}/answers` | Done-local |
 | Today, 17 Nov: run report, mock report, question screen, check-up sitting, subject page, after the lesson, saved questions, mock set-up | Planned (migration 056) | Page redesigns | In progress |
 | Exams & subjects: one page; remove with ×, add from a popup; no counts; faster | Rebuilt | `Exams.tsx`, `/student/catalogue` kept 5 min | Done-local |
+| Subjects page (new): goal tickets with score now, Swap on each, compulsory first | Rebuilt | `Subjects.tsx` | Done-local |
+| Subject page: no tabs; topics and runs as on Progress; address by name | Rebuilt | `SubjectHub.tsx` | Done-local |
+| Profile: goals moved to Subjects; filler rows gone | Trimmed | `Profile.tsx` | Done-local |
+| One design standard (stickers everywhere, tighter corners, built on the design system) | `docs/design-standard.md` | app-wide | Done-local |
+| App stalled when Inworld was unreachable | Fail fast, back off 2 min | `inworld_voice.py` | Done-local |
 | Mock exam room: no redesign of its own; takes the new question screen | Founder, 17 Nov | — | Agreed |
 | Progress page redesigned (subject cards, runs, folding topics, no 100% from one answer) | Rebuilt | `Progress.tsx` | Pushed |
 | Tracker: true finished dates; calmer rows on phone | Migration 053; rows with tick, title, one line | `TrackerPage.tsx` | Done-local |
