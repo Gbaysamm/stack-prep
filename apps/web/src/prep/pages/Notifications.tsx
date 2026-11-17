@@ -38,7 +38,6 @@ export function Notifications() {
   if (!inbox) {
     return (
       <div className="sj-page nf" aria-busy="true" aria-label="Loading your notifications">
-        <Skeleton height={32} width={220} radius={8} />
         <Skeleton height={40} width={200} radius={10} />
         <Skeleton height={360} radius={10} />
       </div>
@@ -51,8 +50,8 @@ export function Notifications() {
 
   return (
     <div className="sj-page nf">
-      {/* No dark header (founder, 17 Nov 2026): the counts are on the tabs. */}
-      <h1 className="nf-title sj-display">Notifications</h1>
+      {/* No header and no title (founder, 17 Nov 2026): the top bar names the page, and the
+          counts are on the tabs. */}
 
       <div className="nf-bar">
         <div className="nf-seg" role="tablist" aria-label="Which notifications">
