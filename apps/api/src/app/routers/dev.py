@@ -26,7 +26,7 @@ from datetime import UTC, datetime
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
@@ -304,3 +304,35 @@ async def clear_students(
     ).rowcount
     await conn.commit()
     return {"removed": removed, "at": datetime.now(UTC).isoformat()}
+
+
+class EmailPreview(BaseModel):
+    name: str
+    when: str
+    subject: str
+    html: str
+    text: str
+
+
+@router.get("/emails", response_model=list[EmailPreview], summary="Every email, with sample data")
+async def email_previews(
+    settings: Annotated[Settings, Depends(get_settings)],
+    base: Annotated[str | None, Query(max_length=200)] = None,
+) -> list[EmailPreview]:
+    """For the /dev/emails page: each email as it is sent, rendered from app/emails."""
+    from app.emails import render
+    from app.emails.previews import SAMPLES
+    from app.notification_email import app_address
+
+    _require_dev(settings)
+    # The page passes its own address, so the logo and links open where it is viewed.
+    base = (base or app_address() or "http://localhost:5173").rstrip("/")
+    out = []
+    for name, when, notes in SAMPLES:
+        email = render(notes, base)
+        out.append(
+            EmailPreview(
+                name=name, when=when, subject=email.subject, html=email.html, text=email.text
+            )
+        )
+    return out

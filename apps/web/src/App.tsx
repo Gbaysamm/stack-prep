@@ -28,6 +28,7 @@ const PrepApp = later(() => import('./prep/PrepApp.js'), 'PrepApp');
 const ReviewApp = later(() => import('./review/ReviewApp.js'), 'ReviewApp');
 const WatchApp = later(() => import('./site/WatchApp.js'), 'WatchApp');
 const PublicTracker = later(() => import('./staff/TrackerPage.js'), 'PublicTracker');
+const EmailPreviews = later(() => import('./dev/EmailPreviews.js'), 'EmailPreviews');
 
 const under = (path: string, base: string) => path === base || path.startsWith(`${base}/`);
 
@@ -42,6 +43,7 @@ function Which() {
   if (under(pathname, '/review')) return <ReviewApp />;
   if (under(pathname, '/tracker')) return <PublicTracker />;
   if (under(pathname, '/dev/checkup')) return <CheckupPage />;
+  if (under(pathname, '/dev/emails')) return <EmailPreviews />;
   return <PrepApp />;
 }
 

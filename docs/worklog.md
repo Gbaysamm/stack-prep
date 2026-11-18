@@ -15,6 +15,12 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-18
 
+### Lessons and questions expansion on today's plan
+- **What:** migration 064: More subject lessons and More questions planned for today, after
+  the notifications and gamification.
+- **Why:** founder, 18 Nov 2026.
+- **Status:** committed, not pushed.
+
 ### Today's plan on the tracker
 - **What:** migration 062: finish the notifications, then gamification; both planned for
   today and at the top of the tracker (notifications, weekly reports, push and settings,
@@ -23,6 +29,19 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 - **Status:** pushed.
 
 ## 2026-11-17
+
+### The emails redesigned; a review page in the app
+- **What:** `app/emails/layout.py` redone in the app's look: Clash Display titles, Poppins
+  text, Space Mono labels and figures (loaded from Google Fonts and Fontshare as the app does;
+  Gmail falls back to Poppins or Arial); one sticker card (1.5px ink, pale purple shadow, 12px
+  corners) opening on the app's dark hero band with the lime label; figures two to a row in
+  large type; reminders as lilac rows; steps in purple squares; a hidden preview line. Every
+  email file updated. Review page: `/dev/emails` in the web app (`src/dev/EmailPreviews.tsx`,
+  `GET /v1/dev/emails`, local and test only): the list, each email at laptop or phone width,
+  or the plain text. No hosted pages.
+- **Why:** founder, 17 Nov 2026: the first design did not use our fonts and looked poor; review
+  pages live in the repo, never as Claude artifacts.
+- **Status:** committed, not pushed.
 
 ### Email templates, one file each; instant emails; account emails
 - **What:** `app/emails/`: `layout.py` (the frame: mark, label, title, card, purple button,
@@ -37,8 +56,7 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
   senders never send one twice. Admin suspend and restore now notify and email the student.
   `notifications.data` keeps the weekly report's figures. "Delete my account" is on the
   tracker: the app has no deletion yet. To look at every email:
-  `python -m app.cli email-previews` writes them (HTML and plain text, with sample data) and an
-  index.html to `email-previews/` (not committed) to open in a browser.
+  open `/dev/emails` in the app (local and test setups only).
 - **Why:** founder, 17 Nov 2026: see the templates; emails on sign-up, account changes and the
   like, signed in or not; one file per template.
 - **Status:** committed, not pushed.

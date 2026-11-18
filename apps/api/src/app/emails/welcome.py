@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from app.emails.layout import Email, Note, button, first_name, link, page, para, steps, text
+from app.emails.layout import Email, Note, button, first_name, greeting, link, page, steps, text
 
 FIRST_STEPS = [
     ("Take a short check-up", "About ten minutes per subject. It shows where you stand today."),
@@ -13,7 +13,7 @@ FIRST_STEPS = [
 
 def build(note: Note, base: str) -> Email:
     name = first_name(note)
-    body = para(f"Hi {name}, your account is ready. Here is how to start.", top=12)
+    body = greeting(name, "your account is ready. Here is how to start.")
     body += steps(FIRST_STEPS)
     body += button("Start your first check-up", link(base, "/roadmap"))
     words = [f"Hi {name},", "", "Your Stack Prep account is ready. Here is how to start:", ""]
@@ -22,5 +22,11 @@ def build(note: Note, base: str) -> Email:
     return Email(
         subject=note["title"],
         text=text(words),
-        html=page(label="Welcome", title=note["title"], body=body, base=base),
+        html=page(
+            eyebrow="Welcome",
+            title=note["title"],
+            body=body,
+            base=base,
+            preheader="Three steps to start: a check-up, your roadmap, a little every day.",
+        ),
     )

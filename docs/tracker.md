@@ -188,10 +188,11 @@ the lawyer, the Lagos and Ibadan pronunciation, the Mock exam room (migration 05
 | Gamification next | On the tracker as the next item | migration 061 | To do |
 | Every notification the app needs (founder: "anything that needs the user's attention") | Told when it happens: reply to their message, plan started, check-up or mock marked, password or login changed, welcome. Told by the hourly job: exam countdown 30/14/7/1, scheduled mock open and closing tomorrow, today's roadmap check-up or mock, plan ending in 3 days, plan ended | `notifications.notify`, `PLAN_RULES`, the routers | Committed |
 | Email reports and reminders, so students come back | Reminders by email (one email a day at most, everything due in it), account and plan emails, the weekly report on Sunday evening (in the bell too, links to Progress); none of it can be turned off (founder: a student who could would not be serious) | `notification_email.py`, migration 063 | Committed |
-| See the email templates; emails on sign-up, account start, deletion and the like, signed in or not; one file per template | Branded HTML emails in `app/emails/` (one file each); welcome, security, plan and account emails within seconds; account paused and open again; `python -m app.cli email-previews` writes all 17 to open in a browser | `app/emails/`, `notification_email.send_soon` | Committed (deletion: the app has none yet, on the tracker) |
+| See the email templates; emails on sign-up, account start, deletion and the like, signed in or not; one file per template | Branded HTML emails in `app/emails/` (one file each); welcome, security, plan and account emails within seconds; account paused and open again; a review page at `/dev/emails` (local only) shows all 17 | `app/emails/`, `notification_email.send_soon` | Committed (deletion: the app has none yet, on the tracker) |
 
 ## 18 Nov 2026
 
 | Ask (founder) | Done | Where | Status |
 |---|---|---|---|
 | Today: complete the notification engine and gamification first; put it on the tracker and deploy it | Both planned for today, at the top, notifications first | migration 062 | Pushed |
+| Add the lesson and question expansion to the tracker | More subject lessons and More questions on today's plan, after gamification | migration 064 | Committed |

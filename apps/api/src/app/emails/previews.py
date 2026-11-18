@@ -1,16 +1,11 @@
-"""Every email with sample data, for looking at them (`python -m app.cli email-previews`).
+"""Every email with sample data, for the review page at /dev/emails (local and test only).
 
-Writes one HTML file per email and an index.html listing them, into a folder on this computer,
-to open in a browser. Nothing is sent and nothing is published anywhere.
+GET /v1/dev/emails renders these with the real templates; nothing is sent.
 """
 
 from __future__ import annotations
 
-import html
-from pathlib import Path
 from typing import Any
-
-from app.emails import render
 
 
 def note(
@@ -281,28 +276,3 @@ SAMPLES: list[tuple[str, str, list[dict[str, Any]]]] = [
         ],
     ),
 ]
-
-
-def write_previews(folder: Path, base: str) -> Path:
-    """Write each email and an index; returns the index file."""
-    folder.mkdir(parents=True, exist_ok=True)
-    rows = []
-    for number, (name, when, notes) in enumerate(SAMPLES, start=1):
-        email = render(notes, base)
-        file = f"{number:02d}-{name.lower().replace(' ', '-').replace(',', '')}.html"
-        (folder / file).write_text(email.html, encoding="utf-8")
-        (folder / file.replace(".html", ".txt")).write_text(email.text, encoding="utf-8")
-        rows.append(
-            f'<li><a href="{file}">{html.escape(name)}</a> '
-            f"<small>{html.escape(when)}<br>Subject: {html.escape(email.subject)}</small></li>"
-        )
-    index = folder / "index.html"
-    index.write_text(
-        "<!doctype html><meta charset=utf-8><title>Stack Prep emails</title>"
-        "<style>body{font:15px/1.6 Segoe UI,Arial,sans-serif;margin:32px;color:#1f0050}"
-        "li{margin:10px 0}small{color:#5e5a6b}</style>"
-        "<h1>Stack Prep emails</h1><p>Each opens as it is sent; the .txt beside it is the "
-        "plain-text copy.</p><ol>" + "".join(rows) + "</ol>",
-        encoding="utf-8",
-    )
-    return index

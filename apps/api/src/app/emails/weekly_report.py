@@ -2,14 +2,26 @@
 
 from __future__ import annotations
 
-from app.emails.layout import Email, Note, button, first_name, lines, link, page, para, text, tiles
+from app.emails.layout import (
+    Email,
+    Note,
+    button,
+    figures,
+    first_name,
+    greeting,
+    lines,
+    link,
+    page,
+    para,
+    text,
+)
 
 
 def build(note: Note, base: str) -> Email:
     name = first_name(note)
     data = note.get("data") or {}
-    figures = [
-        ("Days", str(data.get("days", 0))),
+    numbers = [
+        ("Days studied", str(data.get("days", 0))),
         ("Time", str(data.get("time", "0 min"))),
         ("Questions", str(data.get("answered", 0))),
         ("Accuracy", f"{data.get('accuracy', 0)}%"),
@@ -23,20 +35,25 @@ def build(note: Note, base: str) -> Email:
         pairs.append(("Next week's focus", str(data["focus"])))
     if not data.get("answered"):
         # A quiet week: no figures to show, only the nudge back.
-        body = para(f"Hi {name},", top=12) + para(note.get("body") or "")
+        body = greeting(name) + (para(note["body"]) if note.get("body") else "")
     else:
-        body = para(f"Hi {name}, here is your week in practice.", top=12)
-        body += tiles(figures) + lines(pairs)
+        body = greeting(name, "here is your week in practice.")
+        body += figures(numbers) + lines(pairs)
     body += button("See your progress", link(base, "/progress"))
     words = [f"Hi {name},", "", note["title"], ""]
-    words += (
-        [f"{k}: {v}" for k, v in figures + pairs]
-        if data.get("answered")
-        else [note.get("body") or ""]
-    )
+    if data.get("answered"):
+        words += [f"{k}: {v}" for k, v in numbers + pairs]
+    else:
+        words.append(note.get("body") or "")
     words += ["", f"See your progress: {link(base, '/progress')}"]
     return Email(
         subject=note["title"],
         text=text(words),
-        html=page(label="Your week", title=note["title"], body=body, base=base),
+        html=page(
+            eyebrow="Your week",
+            title=note["title"],
+            body=body,
+            base=base,
+            preheader=note.get("body") or "",
+        ),
     )

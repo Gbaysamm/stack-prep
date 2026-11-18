@@ -1,0 +1,159 @@
+/* /dev/emails (EmailPreviews.tsx): the list at the left, the chosen email at the right. */
+.sj.ep {
+  min-height: 100vh;
+  padding: 28px 24px 48px;
+  background: var(--bg, #f6f3fb);
+  color: var(--gray-700);
+}
+.sj .ep-head {
+  max-width: 1240px;
+  margin: 0 auto 20px;
+}
+.sj .ep-eyebrow {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--purple-600);
+}
+.sj .ep-head h1 {
+  margin: 6px 0 4px;
+  color: var(--ink-900);
+  font-size: 30px;
+}
+.sj .ep-head p {
+  margin: 0;
+}
+.sj .ep-main {
+  display: grid;
+  grid-template-columns: 290px minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+.sj .ep-list {
+  position: sticky;
+  top: 16px;
+  display: grid;
+  gap: 2px;
+  padding: 6px;
+  border: 1.5px solid var(--ink-900);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 5px 5px 0 var(--purple-200);
+}
+.sj .ep-list button {
+  display: grid;
+  gap: 2px;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.sj .ep-list button b {
+  color: var(--ink-900);
+  font-size: 14px;
+}
+.sj .ep-list button small {
+  color: var(--gray-500);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.sj .ep-list button:hover {
+  background: var(--gray-100);
+}
+.sj .ep-list button.on {
+  background: var(--purple-050);
+}
+.sj .ep-view {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+.sj .ep-meta {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px 16px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #fff;
+}
+.sj .ep-meta span {
+  color: var(--gray-500);
+  font-size: 12px;
+}
+.sj .ep-meta b {
+  color: var(--ink-900);
+}
+.sj .ep-meta em {
+  font-style: normal;
+}
+.sj .ep-seg {
+  display: inline-flex;
+  justify-self: start;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--gray-100);
+}
+.sj .ep-seg button {
+  height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--gray-600);
+  cursor: pointer;
+}
+.sj .ep-seg button[aria-pressed='true'] {
+  background: #fff;
+  color: var(--ink-900);
+  box-shadow: inset 0 0 0 1.5px var(--ink-900);
+}
+.sj .ep-stage {
+  display: grid;
+  justify-items: center;
+  padding: 20px 12px;
+  border-radius: 12px;
+  background: #ebe5f5;
+  overflow-x: auto;
+}
+.sj .ep-frame {
+  display: block;
+  width: 680px;
+  max-width: 100%;
+  min-height: 400px;
+  border: 0;
+}
+.sj .ep-frame.phone {
+  width: 390px;
+}
+.sj .ep-text {
+  width: 100%;
+  max-width: 640px;
+  margin: 0;
+  padding: 18px;
+  border-radius: 10px;
+  background: #fff;
+  font: 13px/1.6 var(--f-mono);
+  white-space: pre-wrap;
+}
+.ep-problem {
+  padding: 40px;
+  font-family: sans-serif;
+}
+@media (max-width: 800px) {
+  .sj .ep-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sj .ep-list {
+    position: static;
+  }
+}

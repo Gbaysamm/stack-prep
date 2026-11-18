@@ -2,16 +2,15 @@
 
 from __future__ import annotations
 
-from app.emails.layout import Email, Note, button, first_name, link, page, para, text
+from app.emails.layout import Email, Note, button, first_name, greeting, link, page, para, text
 from app.emails.words import button_words
 
 
 def build(note: Note, base: str) -> Email:
     name = first_name(note)
-    body = para(f"Hi {name},", top=12)
+    body = greeting(name) + (para(note["body"]) if note.get("body") else "")
     words = [f"Hi {name},", "", note["title"]]
     if note.get("body"):
-        body += para(note["body"])
         words += ["", note["body"]]
 
     if note.get("link_url"):
@@ -20,5 +19,11 @@ def build(note: Note, base: str) -> Email:
     return Email(
         subject=note["title"],
         text=text(words),
-        html=page(label="Reminder", title=note["title"], body=body, base=base),
+        html=page(
+            eyebrow="Reminder",
+            title=note["title"],
+            body=body,
+            base=base,
+            preheader=note.get("body") or "",
+        ),
     )

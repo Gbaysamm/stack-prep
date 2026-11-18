@@ -111,19 +111,6 @@ def _notify() -> int:
     return asyncio.run(run())
 
 
-def _email_previews() -> int:
-    """Write every email, with sample data, as HTML files to open in a browser."""
-    from pathlib import Path
-
-    from app.emails.previews import write_previews
-    from app.notification_email import app_address
-
-    folder = Path(sys.argv[2] if len(sys.argv) > 2 else "email-previews").resolve()
-    index = write_previews(folder, app_address() or "http://localhost:5173")
-    print(f"Open in your browser: {index}")
-    return 0
-
-
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="app.cli")
     commands = {
@@ -132,10 +119,8 @@ def main(argv: list[str] | None = None) -> int:
         "openapi": _openapi,
         "voice-lessons": _voice_lessons,
         "notify": _notify,
-        "email-previews": _email_previews,
     }
     parser.add_argument("command", choices=list(commands))
-    parser.add_argument("folder", nargs="?", help="email-previews: where to write them")
     args = parser.parse_args(argv)
     return commands[args.command]()
 
