@@ -24,7 +24,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import premium, scoring, voice_store
+from app import premium, scoring, voice_store, xp
 from app.auth import require_student
 from app.config import Settings, get_settings
 from app.db import connection, fetch_all
@@ -1113,6 +1113,19 @@ async def lesson_done(
             ),
             {"i": body.item_id, "s": student_id},
         )
+    # XP once per lesson part a day (app/xp.py), and the day's plan when this finished it.
+    day = await conn.scalar(
+        text("SELECT (now() AT TIME ZONE timezone)::date FROM students WHERE id = :s"),
+        {"s": student_id},
+    )
+    await xp.award(
+        conn,
+        student_id,
+        reason="lesson",
+        amount=xp.LESSON,
+        key=f"lesson-{subtopic_id}-{body.part}-{day}",
+    )
+    await xp.check_daily_goal(conn, student_id)
     await conn.commit()
 
 

@@ -48,7 +48,7 @@ import json
 import secrets
 import time
 from collections.abc import AsyncIterator
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Annotated, Any, Literal, get_args
 from uuid import UUID, uuid4
@@ -68,7 +68,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import inworld_voice, kokoro_voice, premium, scoring, tutor, voice_store
+from app import inworld_voice, kokoro_voice, premium, scoring, tutor, voice_store, xp
 from app.auth import require_session_owner, require_student
 from app.config import Settings, get_settings
 from app.db import connection, fetch_all
@@ -296,6 +296,15 @@ class PracticeState(BaseModel):
     filters: RunFilters | None = None
     #: Once the run is finished: the score before and after it, and each topic it touched.
     score_change: scoring.ScoreChange | None = None
+    #: XP for the answer just given (app/xp.py), and the combo bonus when it made one.
+    xp_gained: int = 0
+    xp_combo: int = 0
+    #: Answers in a row right without help, ending with this one.
+    xp_run: int = 0
+    #: Once the run is finished: all the XP it earned, and the day's bonus if it finished
+    #: today's plan.
+    xp_session: int | None = None
+    xp_daily_goal: int = 0
 
 
 def session_filters(session: dict[str, Any]) -> RunFilters | None:
@@ -1286,7 +1295,9 @@ async def answer(
     await conn.commit()
 
     if correct:
-        return await _close_when_finished(conn, session, await _state(conn, session))
+        gained, combo, run = await _award_answer(conn, session, submission, already)
+        state = await _close_when_finished(conn, session, await _state(conn, session))
+        return await _with_xp(conn, session_id, state, gained, combo, run)
 
     # First miss: a hint, and the same question again.
     if already == 0:
@@ -1314,7 +1325,67 @@ async def taught(
     """
     await require_session_owner(request, conn, session_id)
     session = await _session(conn, session_id)
-    return await _close_when_finished(conn, session, await _state(conn, session))
+    state = await _close_when_finished(conn, session, await _state(conn, session))
+    return await _with_xp(conn, session_id, state, 0, 0, 0)
+
+
+async def _award_answer(
+    conn: AsyncConnection, session: dict[str, Any], submission: AnswerIn, hints_before: int
+) -> tuple[int, int, int]:
+    """XP for a right answer, and the combo bonus every third in a row without help.
+
+    Once per question per day, so answering the same question again earns nothing.
+    """
+    guessed = submission.confidence == "guessed"
+    amount = xp.for_answer(correct=True, hints_before=hints_before, guessed=guessed)
+    today = datetime.now(UTC).date().isoformat()
+    gained = await xp.award(
+        conn,
+        session["student_id"],
+        reason="answer",
+        amount=amount,
+        key=f"answer-{submission.question_version_id}-{today}",
+        session_id=session["id"],
+    )
+    run = await xp.unaided_run(conn, session["id"])
+    combo = 0
+    if gained and hints_before == 0 and not guessed and run and run % xp.COMBO_EVERY == 0:
+        combo = await xp.award(
+            conn,
+            session["student_id"],
+            reason="combo",
+            amount=xp.COMBO_BONUS,
+            key=f"combo-{session['id']}-{run}",
+            session_id=session["id"],
+        )
+    await conn.commit()
+    return gained, combo, run
+
+
+async def _with_xp(
+    conn: AsyncConnection,
+    session_id: UUID,
+    state: PracticeState,
+    gained: int,
+    combo: int,
+    run: int,
+) -> PracticeState:
+    """The state with this answer's XP, and the run's total once it is finished."""
+    finished = state.stage == "finished"
+    daily = 0
+    if finished:
+        session = await _session(conn, session_id)
+        daily = await xp.check_daily_goal(conn, session["student_id"])
+        await conn.commit()
+    return state.model_copy(
+        update={
+            "xp_gained": gained,
+            "xp_combo": combo,
+            "xp_run": run,
+            "xp_session": await xp.for_session(conn, session_id) if finished else None,
+            "xp_daily_goal": daily,
+        }
+    )
 
 
 async def _asks_used_today(conn: AsyncConnection, student_id: UUID) -> int:

@@ -1562,3 +1562,28 @@ async def test_a_bookmark_run_revises_the_kept_questions_oldest_first(
     assert state["question"]["question_version_id"] == kept[1]
     state = await answer(client, state["session_id"], state, "A")
     assert state["stage"] == "finished"
+
+
+async def test_xp_for_each_answer_and_the_combo(
+    client: httpx.AsyncClient, fixture: dict[str, str]
+) -> None:
+    """XP is for learning (app/xp.py): 10 right without help, 5 after a hint, 3 for a lucky
+    guess, and a combo bonus every third right without help in a row."""
+    state = await start(client, fixture)
+    session = state["session_id"]
+    state = await answer(client, session, state, "A", confidence="sure")
+    assert (state["xp_gained"], state["xp_combo"], state["xp_run"]) == (10, 0, 1)
+    state = await answer(client, session, state, "A", confidence="sure")
+    assert (state["xp_gained"], state["xp_run"]) == (10, 2)
+    state = await answer(client, session, state, "A", confidence="sure")
+    assert (state["xp_gained"], state["xp_combo"], state["xp_run"]) == (10, 5, 3)
+    if state["stage"] == "finished":
+        return
+    state = await answer(client, session, state, "A", confidence="guessed")
+    assert (state["xp_gained"], state["xp_run"]) == (3, 0)
+    if state["stage"] == "finished":
+        return
+    state = await answer(client, session, state, "B")
+    assert state["stage"] == "hint" and state["xp_gained"] == 0
+    state = await answer(client, session, state, "A")
+    assert state["xp_gained"] == 5

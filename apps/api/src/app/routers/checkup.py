@@ -25,7 +25,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import notifications, scoring
+from app import notifications, scoring, xp
 from app.auth import require_session_owner, require_student
 from app.db import connection, fetch_all
 from app.figures import OptionFigure, QuestionFigure, figures_for, option_figures_for
@@ -756,6 +756,15 @@ async def answer(
             link_url=f"/checkup/{session_id}/report",
             key=f"checkup-{session_id}",
         )
+        await xp.award(
+            conn,
+            session["student_id"],
+            reason="checkup",
+            amount=xp.CHECKUP,
+            key=f"checkup-{session_id}",
+            session_id=session_id,
+        )
+        await xp.check_daily_goal(conn, session["student_id"])
         await conn.commit()
     return state
 

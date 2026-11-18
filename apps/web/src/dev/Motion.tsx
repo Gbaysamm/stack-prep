@@ -6,6 +6,8 @@
 import { useEffect, useState, type ReactNode } from 'react';
 
 import { Celebrate } from '../prep/Celebrate.js';
+import { IconCheck, IconFlame } from '../prep/icons.js';
+import '../prep/pages/PracticeRoom.css';
 import '../prep/prep.css';
 import './Motion.css';
 
@@ -16,7 +18,44 @@ interface Moment {
   play: (done: () => void) => ReactNode;
 }
 
+/** The right-answer counter from a practice run, with the XP rising out of it. */
+function AnswerDemo({ right, xp, combo, done }: { right: number; xp: number; combo?: number; done: () => void }) {
+  useEffect(() => {
+    const timer = window.setTimeout(done, 2200);
+    return () => window.clearTimeout(timer);
+  }, [done]);
+  return (
+    <div className="mo-answer">
+      <div className="mo-big">
+      <span className="pr-score bump">
+        <IconCheck size={15} />
+        <b className="sj-mono">{right}</b>
+        <span className="pr-score-word">right</span>
+        <span className="pr-xp">+{xp} XP</span>
+        {combo ? (
+          <span className="pr-combo">
+            <IconFlame size={13} /> {combo} in a row
+          </span>
+        ) : null}
+      </span>
+      </div>
+    </div>
+  );
+}
+
 const MOMENTS: Moment[] = [
+  {
+    name: 'answer',
+    label: 'Right answer',
+    where: 'In a run, right first time without help: +10 XP rises from the counter.',
+    play: (done) => <AnswerDemo right={4} xp={10} done={done} />,
+  },
+  {
+    name: 'combo',
+    label: 'Three in a row',
+    where: 'Every third right answer in a row without help: +5 more and the combo badge.',
+    play: (done) => <AnswerDemo right={6} xp={15} combo={3} done={done} />,
+  },
   {
     name: 'run',
     label: 'Run finished',

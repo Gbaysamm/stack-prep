@@ -263,6 +263,13 @@ export interface PracticeState {
   closing_note: string | null;
   /** Once finished: the score before and after the run, and each topic it touched. */
   score_change?: ScoreChange | null;
+  /** XP for the answer just given and its combo bonus; answers in a row right without help. */
+  xp_gained?: number;
+  xp_combo?: number;
+  xp_run?: number;
+  /** Once finished: the run's XP, and the day's bonus when it finished today's plan. */
+  xp_session?: number | null;
+  xp_daily_goal?: number;
 }
 
 /** One beat of a taught lesson: what goes up on the board, and what is said meanwhile. */

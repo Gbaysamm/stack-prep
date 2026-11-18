@@ -202,3 +202,5 @@ the lawyer, the Lagos and Ibadan pronunciation, the Mock exam room (migration 05
 | The bell is too long; four check-up notifications at once | One line per message, tighter rows; today's check-ups as one notification | `Bell.css`, `notifications.PLAN_RULES` | Committed |
 | Note what is pending for notifications (credentials, settings) | `docs/notifications-pending.md`; a waiting item on the tracker | migration 067 | Committed |
 | Gamification: a plan first, with animations and feedback loops that make sense | `docs/gamification-plan.md`, decisions open | docs | In progress |
+| The reward animation is flat, not like Brilliant or Duolingo | Rebuilt as a sequence: spring, badge pop, drawn tick, confetti burst, gains counting up, the day's ring; recorded with scripts/record-motion.mjs | `Celebrate.tsx`, `/dev/motion` | Committed |
+| Gamification step 1: XP and the answer loop | XP ledger and rules, +XP and combo on right answers, the reward with real figures after runs and lessons, the daily goal bonus | `app/xp.py`, `routers/game.py`, migration 068 | Committed |

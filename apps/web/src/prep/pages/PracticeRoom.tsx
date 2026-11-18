@@ -44,6 +44,7 @@ import {
   IconBook,
   IconBulb,
   IconCheck,
+  IconFlame,
   IconHelp,
   IconReplay,
   IconSpark,
@@ -55,6 +56,8 @@ import {
   type Understood,
 } from "../lessonFeedbackApi.js";
 import { progressApi } from "../progressApi.js";
+import { Celebrate } from "../Celebrate.js";
+import { dayRing, loadGame, streakGain, type Game } from "../gameApi.js";
 import { FocusShell } from "../shell.js";
 import { useLoad, usePageTitle, useStudent } from "../store.js";
 import {
@@ -242,6 +245,14 @@ export function PracticeRoom() {
   const [state, setState] = useState<PracticeState | null>(null);
   useLeaveWarning(state !== null && state.stage !== "finished");
   const [outcome, setOutcome] = useState<Outcome | null>(null);
+  // The reward at the end of a run (Celebrate): today's progress before the run and after it.
+  const gameBefore = useRef<Game | null>(null);
+  const [reward, setReward] = useState<{ next: PracticeState; after: Game | null } | null>(null);
+  useEffect(() => {
+    void loadGame(student.studentId).then((game) => {
+      gameBefore.current = game;
+    });
+  }, [student.studentId]);
   const [selected, setSelected] = useState<string | null>(null);
   const [wrong, setWrong] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -452,14 +463,26 @@ export function PracticeRoom() {
     [selected, sessionId, state, toast, wrong],
   );
 
+  const moveOn = useCallback(
+    (next: PracticeState) => {
+      keepResult(sessionId, null, next);
+      setOutcome(null);
+      setState(next);
+      askedAt.current = Date.now();
+    },
+    [sessionId],
+  );
+
   const pressOn = useCallback(() => {
     if (!outcome) return;
     const next = outcome.next;
-    keepResult(sessionId, null, next);
-    setOutcome(null);
-    setState(next);
-    askedAt.current = Date.now();
-  }, [outcome, sessionId]);
+    // The last answer: the reward first (XP, accuracy, streak, the day), then the summary.
+    if (next.stage === "finished") {
+      void loadGame(student.studentId).then((after) => setReward({ next, after }));
+      return;
+    }
+    moveOn(next);
+  }, [outcome, moveOn, student.studentId]);
 
   const openBoard = () => {
     tapped.current = true;
@@ -592,6 +615,7 @@ export function PracticeRoom() {
   const total = counts?.length ?? 0;
 
   const frame = (children: JSX.Element) => (
+    <>
     <FocusShell
       eyebrow={
         total ? `Question ${position.number} of ${total}` : "Practice run"
@@ -617,12 +641,60 @@ export function PracticeRoom() {
             <IconCheck size={15} />
             <b className="sj-mono">{counts.correct_unaided}</b>
             <span className="pr-score-word">right</span>
+            {/* XP for this answer rises from the counter; a combo every third in a row. */}
+            {outcome?.next.xp_gained ? (
+              <span key={`xp-${outcome.question.question_version_id}`} className="pr-xp" aria-live="polite">
+                +{(outcome.next.xp_gained ?? 0) + (outcome.next.xp_combo ?? 0)} XP
+              </span>
+            ) : null}
+            {outcome?.next.xp_combo ? (
+              <span key={`combo-${outcome.next.xp_run}`} className="pr-combo">
+                <IconFlame size={13} /> {outcome.next.xp_run} in a row
+              </span>
+            ) : null}
           </span>
         ) : undefined
       }
     >
       <main className="pr-main">{children}</main>
     </FocusShell>
+    {reward ? (
+      <Celebrate
+        title="Run complete"
+        sub={`${reward.next.answered} questions`}
+        next="See your summary"
+        onDone={() => {
+          const next = reward.next;
+          setReward(null);
+          moveOn(next);
+        }}
+        gains={[
+          ...((reward.next.xp_session ?? 0) + (reward.next.xp_daily_goal ?? 0) > 0
+            ? [
+                {
+                  kind: "xp" as const,
+                  label: "XP",
+                  value: (reward.next.xp_session ?? 0) + (reward.next.xp_daily_goal ?? 0),
+                  prefix: "+",
+                },
+              ]
+            : []),
+          ...(reward.next.answered
+            ? [
+                {
+                  kind: "accuracy" as const,
+                  label: "Right first time",
+                  value: Math.round((100 * reward.next.correct_unaided) / reward.next.answered),
+                  suffix: "%",
+                },
+              ]
+            : []),
+          ...streakGain(reward.after),
+        ]}
+        ring={dayRing(gameBefore.current, reward.after)}
+      />
+    ) : null}
+    </>
   );
 
   /* ---------------------------------------------------------------- states */

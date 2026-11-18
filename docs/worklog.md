@@ -15,6 +15,21 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-18
 
+### Gamification step 1: XP and the answer loop
+- **What:** migration 068 (`xp_events`, one row per reason and key, so nothing counts twice).
+  `app/xp.py`: 10 XP right first time without help, 3 for a lucky guess, 5 after a hint,
+  nothing after the working or for the same question again that day; +5 every third in a row
+  without help; lesson 20, check-up 30, mock 100; +25 when today's roadmap is all done; levels
+  from the total (100, then 50 more each level). Awarded in the practice answer (with
+  `xp_gained`, `xp_combo`, `xp_run`, and `xp_session`/`xp_daily_goal` at the end), the lesson
+  finished, the check-up finished and the mock marked. `GET /v1/student/{id}/game`: XP, level,
+  XP today, the streak, today's roadmap done/total. Web: "+10 XP" springs out of the
+  right-answer counter, a "3 in a row" combo badge; the reward at the end of a run and of a
+  lesson shows the real XP, right-first-time accuracy, the streak and today's plan filling.
+  `/dev/motion` has Right answer and Three in a row. Tests: `test_xp.py`, practice XP test.
+- **Why:** founder, 18 Nov 2026 (docs/gamification-plan.md).
+- **Status:** committed, not pushed.
+
 ### The reward moment, rebuilt as a sequence
 - **What:** `Celebrate.tsx` redone (founder: the first was flat, not like Brilliant or
   Duolingo): the card springs in; the badge pops and its tick draws itself, light turning

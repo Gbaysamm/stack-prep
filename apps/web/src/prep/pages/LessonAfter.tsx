@@ -12,6 +12,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { friendly, request } from '../../lib/friendlyError.js';
 import { Maths } from '../../Maths.js';
 import { Celebrate } from '../Celebrate.js';
+import { dayRing, loadGame, streakGain, type Game } from '../gameApi.js';
 import { IconCamera, IconCheck, IconClose, IconLock, IconReplay, IconSend } from '../icons.js';
 import { Button, PageHero, Skeleton, cx } from '../ui.js';
 import { PlainShell } from '../shell.js';
@@ -182,14 +183,18 @@ export function LessonAfterPage() {
   const item = search.get('item');
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState<{ title: string; next: string | null } | null>(null);
+  const [game, setGame] = useState<{ before: Game | null; after: Game | null } | null>(null);
   const finish = async (what: { title: string; next: string | null }) => {
     setSaving(true);
     try {
+      const before = await loadGame(student.studentId);
       await request<void>(`/v1/roadmap/${student.studentId}/lessons/${subtopicId}/done`, {
         method: 'POST',
         body: JSON.stringify({ item_id: item, part }),
       });
-      // The reward first, then the roadmap (it goes on by itself, or on a tap).
+      const after = await loadGame(student.studentId);
+      setGame({ before, after });
+      // The reward first, then the roadmap, on a tap.
       setDone(what);
     } finally {
       setSaving(false);
@@ -226,6 +231,13 @@ export function LessonAfterPage() {
         }
         next="Back to your roadmap"
         onDone={() => navigate('/roadmap')}
+        gains={[
+          ...(game?.before && game.after && game.after.xp_total > game.before.xp_total
+            ? [{ kind: 'xp' as const, label: 'XP', value: game.after.xp_total - game.before.xp_total, prefix: '+' }]
+            : []),
+          ...streakGain(game?.after ?? null),
+        ]}
+        ring={dayRing(game?.before ?? null, game?.after ?? null)}
       />
     ) : null}
     </PlainShell>
