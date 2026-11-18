@@ -181,7 +181,9 @@ function Conversation({ threadId, onChanged, onBack }: { threadId: string; onCha
       .then(setThread)
       .catch((error) => setProblem(friendly(error)));
   }, [threadId]);
-  useEffect(() => end.current?.scrollIntoView({ block: 'nearest' }), [thread?.thread_messages.length]);
+  useEffect(() => {
+    end.current?.scrollIntoView({ block: 'nearest' });
+  }, [thread?.thread_messages.length]);
 
   const act = (path: string, init: RequestInit, after?: () => void) => {
     setBusy(true);

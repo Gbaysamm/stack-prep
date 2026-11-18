@@ -269,7 +269,11 @@ export function SupportThread() {
   const [thread, setThread] = useState<Thread | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   const [reply, setReply] = useState("");
-  const [busy, setBusy] = useState(false);
+  // Optimistic (founder, 18 Nov 2026): a message shows the moment it is sent, "Sending…" under
+  // it until the server has it, and "Not sent · tap to try again" if it could not go.
+  const [outbox, setOutbox] = useState<
+    { key: string; body: string; failed: boolean }[]
+  >([]);
   const end = useRef<HTMLDivElement>(null);
   usePageTitle(thread?.subject ?? "Messages");
 
@@ -279,24 +283,39 @@ export function SupportThread() {
       .then(setThread)
       .catch((failure) => setProblem(friendly(failure)));
   }, [studentId, threadId]);
-  useEffect(
-    () => end.current?.scrollIntoView({ block: "end" }),
-    [thread?.thread_messages.length],
-  );
+  // A body, not an arrow that returns: newer browsers' scrollIntoView returns a promise, and React
+  // would take it for a clean-up function and crash when the effect runs again.
+  useEffect(() => {
+    end.current?.scrollIntoView({ block: "end" });
+  }, [thread?.thread_messages.length, outbox.length]);
+
+
+  const deliver = (key: string, body: string) => {
+    setOutbox((now) =>
+      now.map((m) => (m.key === key ? { ...m, failed: false } : m)),
+    );
+    supportApi
+      .reply(studentId, threadId, body)
+      .then((next) => {
+        setThread(next);
+        setOutbox((now) => now.filter((m) => m.key !== key));
+        setProblem(null);
+      })
+      .catch(() =>
+        setOutbox((now) =>
+          now.map((m) => (m.key === key ? { ...m, failed: true } : m)),
+        ),
+      );
+  };
 
   const send = (event?: FormEvent) => {
     event?.preventDefault();
-    if (!reply.trim() || busy) return;
-    setBusy(true);
-    supportApi
-      .reply(studentId, threadId, reply.trim())
-      .then((next) => {
-        setThread(next);
-        setReply("");
-        setProblem(null);
-      })
-      .catch((failure) => setProblem(friendly(failure)))
-      .finally(() => setBusy(false));
+    const body = reply.trim();
+    if (!body) return;
+    const key = `out-${Date.now()}`;
+    setOutbox((now) => [...now, { key, body, failed: false }]);
+    setReply("");
+    deliver(key, body);
   };
 
   return (
@@ -305,7 +324,11 @@ export function SupportThread() {
         <Link to="/messages" className="mc-back">
           <IconArrowLeft size={16} /> All messages
         </Link>
-        {thread ? <span className={`mc-status ${thread.status}`}>{STATUS_WORD[thread.status]}</span> : null}
+        {thread ? (
+          <span className={`mc-status ${thread.status}`}>
+            {STATUS_WORD[thread.status]}
+          </span>
+        ) : null}
       </div>
 
       {thread ? (
@@ -318,6 +341,22 @@ export function SupportThread() {
                   ? `${message.author_name} · `
                   : ""}
                 {short(message.created_at)}
+              </small>
+            </li>
+          ))}
+          {outbox.map((message) => (
+            <li
+              key={message.key}
+              className={`me ${message.failed ? "failed" : "pending"}`}
+              onClick={
+                message.failed
+                  ? () => deliver(message.key, message.body)
+                  : undefined
+              }
+            >
+              <p>{message.body}</p>
+              <small>
+                {message.failed ? "Not sent · tap to try again" : "Sending…"}
               </small>
             </li>
           ))}
@@ -369,7 +408,7 @@ export function SupportThread() {
             <button
               type="submit"
               className="mc-send"
-              disabled={busy || !reply.trim()}
+              disabled={!reply.trim()}
               aria-label="Send"
             >
               <IconSend size={18} />

@@ -15,6 +15,17 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-18
 
+### Messages: replies send optimistically
+- **What:** a reply shows in the chat the moment Send is pressed, a little faded with "Sending…"
+  under it, and settles when the server has it. If it cannot go it turns red, "Not sent · tap to
+  try again", and a tap resends it. The reply box clears at once and is never blocked while a
+  message is on its way. Also fixed: the chat's scroll-to-bottom effect returned the browser's
+  `scrollIntoView` result, which newer browsers make a promise; React took it for a clean-up and
+  the page crashed when the effect ran again. Same fix on staff's message page.
+- **Where:** `apps/web/src/prep/pages/Support.tsx`, `Support.css`, `apps/web/src/admin/SupportPages.tsx`.
+- **Why:** founder, 18 Nov 2026: "Let the sending also be optimistic sending."
+- **Status:** committed, not pushed.
+
 ### Messages as a chat app
 - **What:** `/messages` opens on a short dark header (Talk to us, New message on laptops) and the
   conversations as cards, newest first, an unread reply in bold with a green dot; with none, a
