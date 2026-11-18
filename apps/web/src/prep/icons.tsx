@@ -228,6 +228,14 @@ export const IconSnow = make(
     <path d="m9 3.5 3 2 3-2M9 20.5l3-2 3 2M3 10l3.4-.6L5 6.2M21 10l-3.4-.6L19 6.2M3 14l3.4.6L5 17.8M21 14l-3.4.6 1.4 3.2" />
   </>,
 );
+export const IconGrid = make(
+  <>
+    <rect x="4" y="4" width="6.5" height="6.5" rx="1.6" />
+    <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6" />
+    <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6" />
+    <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6" />
+  </>,
+);
 export const IconBell = make(
   <>
     <path d="M6 9a6 6 0 0 1 12 0c0 5 2 6.5 2 6.5H4S6 14 6 9Z" />

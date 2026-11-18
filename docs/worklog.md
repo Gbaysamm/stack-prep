@@ -15,6 +15,16 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-18
 
+### Phones: no hamburger; Home, Roadmap, Practice, Progress, More
+- **What:** the phone's bottom bar is Home, Roadmap, Practice, Progress and More (check-ups and
+  mocks come from the roadmap, so they live in More). More (`MoreSheet.tsx`) rises from the
+  bottom: the student (avatar, name, level, streak, XP to the next level), the study pages as
+  coloured tiles (Check-up, Mock exam, Subjects, Saved), the account pages as a list, Sign
+  out. The hamburger and side drawer are gone. The sheet's wrapper takes no room (it had added
+  a screen of empty space under every page).
+- **Why:** founder, 18 Nov 2026.
+- **Status:** committed, not pushed.
+
 ### Gamification steps 3 and 4: badges and levels; a tidier top bar
 - **What:** migration 070 (`student_badges`, with `seen_at`). `app/badges.py`: 13 badges
   measured from what was done (first check-up, lesson and mock; day done; 7, 30 and 100-day

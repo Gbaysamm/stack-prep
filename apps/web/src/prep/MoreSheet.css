@@ -1,0 +1,255 @@
+/* The phone's More sheet (MoreSheet.tsx): rises from the bottom over a dimmed page. */
+.sj.ms-root {
+  display: contents;
+}
+.sj .ms-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(31, 0, 80, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.sj .ms-scrim.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.sj .ms-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 81;
+  display: grid;
+  gap: 12px;
+  max-height: 88vh;
+  padding: 10px 16px calc(16px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  border-radius: 18px 18px 0 0;
+  background: #f6f3fb;
+  box-shadow: 0 -10px 30px rgba(31, 0, 80, 0.18);
+  transform: translateY(105%);
+  transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+  visibility: hidden;
+}
+.sj .ms-sheet.open {
+  transform: none;
+  visibility: visible;
+}
+.sj .ms-handle {
+  justify-self: center;
+  width: 40px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--gray-300);
+}
+.sj .ms-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sj .ms-head b {
+  color: var(--ink-900);
+  font-size: 19px;
+}
+.sj .ms-close {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--gray-200);
+  color: var(--gray-700);
+}
+
+/* The student: a dark card like the app's heroes. */
+.sj .ms-me {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 16px 16px 14px;
+  border-radius: 14px;
+  background:
+    radial-gradient(70% 90% at 100% 0%, rgba(107, 11, 255, 0.55), transparent 65%),
+    var(--ink-900);
+  color: #fff;
+  text-decoration: none;
+}
+.sj .ms-avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border: 2px solid var(--green-400);
+  border-radius: 50%;
+  background: var(--purple-600);
+  font-weight: 700;
+}
+.sj .ms-me-text {
+  display: grid;
+  flex: 1;
+  gap: 6px;
+  min-width: 0;
+}
+.sj .ms-me-text b {
+  overflow: hidden;
+  font-size: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sj .ms-me-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 12.5px;
+}
+.sj .ms-lvl {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--green-400);
+  color: var(--ink-900);
+  font-family: var(--f-mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+.sj .ms-streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #ffb36b;
+  font-weight: 700;
+}
+.sj .ms-xp {
+  display: block;
+  height: 6px;
+  max-width: 220px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+.sj .ms-xp i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--green-400);
+}
+.sj .ms-me-go {
+  flex: none;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Study pages: coloured tiles, two by two. */
+.sj .ms-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.sj .ms-tile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1.5px solid var(--ink-900);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 3px 3px 0 var(--purple-200);
+  color: var(--ink-900);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.sj .ms-tile:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--purple-200);
+}
+.sj .ms-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+.sj .ms-tile.lime .ms-icon {
+  background: var(--green-100);
+  color: var(--green-600);
+}
+.sj .ms-tile.yellow .ms-icon {
+  background: var(--yellow-100);
+  color: #8a6400;
+}
+.sj .ms-tile.purple .ms-icon {
+  background: var(--purple-050);
+  color: var(--purple-700);
+}
+.sj .ms-tile.pink .ms-icon {
+  background: var(--pink-100);
+  color: #c2185b;
+}
+.sj .ms-tile.here {
+  background: var(--purple-050);
+}
+
+/* Account pages: a plain list on one white card. */
+.sj .ms-list {
+  display: grid;
+  padding: 4px 6px;
+  border-radius: 12px;
+  background: #fff;
+}
+.sj .ms-list a,
+.sj .ms-list button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 0 8px;
+  border: 0;
+  border-bottom: 1px solid var(--gray-100);
+  background: none;
+  color: var(--ink-900);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+}
+.sj .ms-list a > svg:first-child {
+  color: var(--purple-700);
+}
+.sj .ms-list span {
+  flex: 1;
+}
+.sj .ms-list .ms-go {
+  color: var(--gray-300);
+}
+.sj .ms-list a.here {
+  font-weight: 700;
+}
+.sj .ms-list .ms-out {
+  border-bottom: 0;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+@media (min-width: 861px) {
+  .sj .ms-scrim,
+  .sj .ms-sheet {
+    display: none;
+  }
+}
+
+/* The More tab is a button, styled like the tab links beside it. */
+.sj button.sj-tab {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}

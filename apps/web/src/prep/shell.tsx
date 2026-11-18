@@ -18,6 +18,7 @@ import {
 import { Notices } from "./Notices.js";
 import { BadgeWatcher } from "./Badges.js";
 import { Bell } from "./Bell.js";
+import { MoreSheet, inMore } from "./MoreSheet.js";
 import { HelpFab } from "./HelpFab.js";
 import { ClaimDialog } from "./AuthForms.js";
 import {
@@ -37,7 +38,7 @@ import {
   IconLock,
   IconMail,
   IconLogout,
-  IconMenu,
+  IconGrid,
   IconTarget,
   IconSettings,
   IconSparkles,
@@ -55,7 +56,7 @@ import {
 import { progressApi, type Overview } from "./progressApi.js";
 import { StreakChip } from "./Streak.js";
 import { TitleProvider, useIdentity, useLoad, useStudent } from "./store.js";
-import { Dialog, Button, IconButton, PageSkeleton, initials } from "./ui.js";
+import { Dialog, Button, PageSkeleton, initials } from "./ui.js";
 
 const NAV = [
   { to: "/home", label: "Home", icon: IconHome },
@@ -431,14 +432,6 @@ export function AppShell() {
         <div className="sj-main">
           <header className={`sj-topbar ${scrolled ? "scrolled" : ""}`}>
             <div className="sj-topbar-in">
-              <IconButton
-                label="Menu"
-                className="sj-menubtn"
-                onClick={() => setMenu(true)}
-                aria-expanded={menu}
-              >
-                <IconMenu size={20} />
-              </IconButton>
               <Link
                 to="/home"
                 className="brandmark"
@@ -494,41 +487,22 @@ export function AppShell() {
           </main>
         </div>
 
-        {/* The phone menu: the sidebar, slid in from the left over a dimmed page. */}
-        <div
-          className={`sj-drawer-scrim ${menu ? "open" : ""}`}
-          onClick={() => setMenu(false)}
-          aria-hidden="true"
+        {/* The phone's More: every page the four tabs leave out, from the bottom. */}
+        <MoreSheet
+          open={menu}
+          onClose={() => setMenu(false)}
+          name={student.displayName}
+          initials={initials(student.displayName)}
+          studentId={sandbox ? null : student.studentId}
+          onSignOut={leave}
         />
-        <aside
-          className={`sj-drawer sj-glass dark ${menu ? "open" : ""}`}
-          aria-label="Menu"
-          aria-hidden={!menu}
-        >
-          <div className="sj-drawer-head">
-            <Brand />
-            <button
-              type="button"
-              className="sj-drawer-close"
-              aria-label="Close menu"
-              onClick={() => setMenu(false)}
-              tabIndex={menu ? 0 : -1}
-            >
-              <IconClose size={20} />
-            </button>
-          </div>
-          {menu ? <NavList onPick={() => setMenu(false)} /> : null}
-          <div className="spacer" />
-          {menu ? <Countdown /> : null}
-          <SidebarAccount name={student.displayName} onSignOut={leave} />
-        </aside>
 
         <ClaimDialog open={claiming} onClose={closeClaim} />
 
         <nav className="sj-bottomnav sj-glass dark" aria-label="Main">
-          {/* Five tabs fit a phone. Profile is the avatar in the top bar there, so the mock exam
-              gets its own tab: a candidate should never have to hunt for it. */}
-          {NAV.filter(({ to }) => to !== "/profile" && to !== "/subjects").map(({ to, label, icon: Icon }) => (
+          {/* Five tabs fit a phone (founder, 18 Nov 2026): Home, Roadmap, Practice, Progress, and
+              More for the rest (check-ups and mocks come from the roadmap). No hamburger at the top. */}
+          {NAV.filter(({ to }) => ["/home", "/roadmap", "/practice", "/progress"].includes(to)).map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
@@ -542,6 +516,18 @@ export function AppShell() {
               <span>{to === "/mock" ? "Mock" : label}</span>
             </NavLink>
           ))}
+          <button
+            type="button"
+            className={`sj-tab ${menu || inMore(location.pathname) ? "active" : ""}`}
+            onClick={() => setMenu((now) => !now)}
+            aria-haspopup="dialog"
+            aria-expanded={menu}
+          >
+            <span className="pip">
+              <IconGrid size={20} />
+            </span>
+            <span>More</span>
+          </button>
         </nav>
       </div>
     </TitleProvider>
