@@ -29,7 +29,11 @@ WEB_PORT="${WEB_PORT:-5173}"
 
 # PATH for uv, Node and PostgreSQL 18, plus every cache redirected inside $ROOT.
 # shellcheck source=/dev/null
+# Kept across the source: the sandbox's env.sh loads the integration copy's, which sets ROOT
+# to its own folder, and every path below must stay this copy's.
+WANT_ROOT="$ROOT"
 source "$ROOT/env.sh"
+ROOT="$WANT_ROOT"
 
 mkdir -p "$ROOT/logs"
 cd "$APP"
