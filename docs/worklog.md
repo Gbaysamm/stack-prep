@@ -21,8 +21,8 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
   Earlier; the path's stop limit counts only what is ahead, not Earlier.
 - **Why:** founder, 18 Nov 2026: Carry on was at the bottom under locked stops, so nothing could
   be done.
-- **Status:** committed, not pushed. Still to fix (found by the same check): every subject's
-  weekly check-up falls on one day, and a weak topic's lessons all land on one day.
+- **Status:** committed, not pushed. Kept as designed (founder): a subtopic's lessons stay
+  together on one day, and several check-ups on one day is fine.
 
 ### Phones: no hamburger; Home, Roadmap, Practice, Progress, More
 - **What:** the phone's bottom bar is Home, Roadmap, Practice, Progress and More (check-ups and
