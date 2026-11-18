@@ -1,4 +1,4 @@
-"""Notifications by email, and the weekly report (founder, 17 Nov 2026; migration 062).
+"""Notifications by email, and the weekly report (founder, 17 Nov 2026; migration 063).
 
 After each hourly run the worker calls `send_due`: every notification of the last day that goes
 by email, to every student with an email address. None of it can be turned off (founder, 17 Nov

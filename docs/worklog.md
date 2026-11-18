@@ -13,6 +13,15 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ---
 
+## 2026-11-18
+
+### Today's plan on the tracker
+- **What:** migration 062: finish the notifications, then gamification; both planned for
+  today and at the top of the tracker (notifications, weekly reports, push and settings,
+  gamification). Deployed on its own; the email work's migration is now 063.
+- **Why:** founder, 18 Nov 2026.
+- **Status:** pushed.
+
 ## 2026-11-17
 
 ### Email templates, one file each; instant emails; account emails
@@ -35,7 +44,7 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 - **Status:** committed, not pushed.
 
 ### Notifications by email, and the weekly report
-- **What:** migration 062 (`notification_email_state` for the last reminder email;
+- **What:** migration 063 (`notification_email_state` for the last reminder email;
   `notifications.emailed_at`). `notification_email.py`: after each hourly run the worker emails
   what is due. Reminders are one email a day at most (what is due goes in one email, later ones
   stay in the app); reports and account emails always go; rewards, the welcome and replies
