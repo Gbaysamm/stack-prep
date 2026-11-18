@@ -3,7 +3,10 @@
  * roadmap, for the reward moment and, later, the top bar and Home. `before`/`after` lets a
  * reward fill the day's ring from where it was to where it is now.
  */
+import { useEffect, useState } from 'react';
+
 import { failure, reach } from '../lib/friendlyError.js';
+import { shared } from '../lib/shared.js';
 import type { DayRing, Gain } from './Celebrate.js';
 
 export interface Game {
@@ -16,6 +19,7 @@ export interface Game {
   active_today: boolean;
   plan_done: number;
   plan_total: number;
+  freezes: number;
 }
 
 export async function loadGame(studentId: string): Promise<Game | null> {
@@ -42,4 +46,23 @@ export function dayRing(before: Game | null, after: Game | null): DayRing | unde
 /** The streak as a gain, when there is one. */
 export function streakGain(after: Game | null): Gain[] {
   return after && after.streak_days > 0 ? [{ kind: 'streak', label: 'Day streak', value: after.streak_days }] : [];
+}
+
+/** The game state, kept for 20 seconds and refetched when `refreshKey` changes (a page move). */
+export function useGame(studentId: string, refreshKey?: unknown): Game | null {
+  const [game, setGame] = useState<Game | null>(null);
+  useEffect(() => {
+    let live = true;
+    shared(`game:${studentId}`, 20_000, async () => {
+      const response = await reach(`/v1/student/${studentId}/game`);
+      if (!response.ok) throw await failure(response);
+      return (await response.json()) as Game;
+    })
+      .then((next) => live && setGame(next))
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [studentId, refreshKey]);
+  return game;
 }

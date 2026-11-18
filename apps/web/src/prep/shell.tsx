@@ -17,6 +17,7 @@ import {
 
 import { Notices } from "./Notices.js";
 import { Bell } from "./Bell.js";
+import { DayChip } from "./DayChip.js";
 import { HelpFab } from "./HelpFab.js";
 import { ClaimDialog } from "./AuthForms.js";
 import {
@@ -454,6 +455,7 @@ export function AppShell() {
             </span>
               <TopContext overview={check.data} />
               <div className="right">
+                {sandbox ? null : <DayChip studentId={student.studentId} />}
                 {check.data ? (
                   <StreakChip overview={check.data} studentId={student.studentId} />
                 ) : null}

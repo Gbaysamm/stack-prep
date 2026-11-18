@@ -14,7 +14,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { IconArrowRight, IconCheck, IconFlame } from './icons.js';
+import { IconArrowRight, IconCheck, IconFlame, IconSnow } from './icons.js';
+import { useGame } from './gameApi.js';
 import { progressApi, type Overview, type PracticeRun } from './progressApi.js';
 import { Button, Dialog, cx } from './ui.js';
 import './Streak.css';
@@ -120,6 +121,7 @@ function StreakDialog({
   const streak = overview.streak_days;
   const today = overview.active_today;
   const days = streakDays(streak, today, runs);
+  const freezes = useGame(studentId, open)?.freezes ?? 0;
   const status = today
     ? { tone: 'done', text: 'Today counts. You’ve answered a question today.' }
     : streak > 0
@@ -187,6 +189,15 @@ function StreakDialog({
           </ol>
         </div>
 
+        <p className="sk-freeze">
+          <IconSnow size={16} aria-hidden="true" />
+          <span>
+            <b>
+              {freezes === 1 ? '1 streak freeze' : `${freezes} streak freezes`} ready
+            </b>{' '}
+            You earn one every 7 days in a row, and hold two. Miss a day and one keeps your streak alive.
+          </span>
+        </p>
         <p className="sk-rule">
           A day counts when you answer at least one question, in practice or a check-up. Yesterday still counts until
           today ends, so answer one before midnight to keep your streak going.

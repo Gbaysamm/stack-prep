@@ -151,10 +151,15 @@ def decide(facts: Facts, now: datetime) -> list[Note]:
 FACTS = """
     SELECT s.id, s.display_name, s.timezone,
            (coalesce(CAST(:now AS timestamptz), now()) AT TIME ZONE s.timezone) AS local_now,
-           coalesce((SELECT array_agg(DISTINCT (a.answered_at_client AT TIME ZONE s.timezone)::date)
-                     FROM attempts a
-                     WHERE a.student_id = s.id AND a.context = ANY (CAST(:contexts AS text[]))
-                       AND a.answered_at_client >= now() - interval '400 days'), '{}') AS days,
+           coalesce((SELECT array_agg(d) FROM (
+                       SELECT (a.answered_at_client AT TIME ZONE s.timezone)::date AS d
+                       FROM attempts a
+                       WHERE a.student_id = s.id AND a.context = ANY (CAST(:contexts AS text[]))
+                         AND a.answered_at_client >= now() - interval '400 days'
+                       UNION
+                       -- Days a streak freeze covered count as studied (migration 069).
+                       SELECT f.used_on FROM streak_freezes f
+                       WHERE f.student_id = s.id AND f.used_on IS NOT NULL) x), '{}') AS days,
            coalesce((SELECT array_agg(
                               extract(hour FROM a.answered_at_client AT TIME ZONE s.timezone)::int)
                      FROM attempts a
@@ -380,6 +385,83 @@ PLAN_RULES: dict[str, str] = {
 }
 
 
+FREEZE_EVERY = 7
+FREEZES_HELD = 2
+
+
+async def freezes(
+    conn: AsyncConnection, student_id: UUID, days: list[date], today: date
+) -> list[date]:
+    """Streak freezes (migration 069): use one on yesterday when it was missed and the day
+    before was studied, and earn one at every 7 days of streak (two held at most).
+
+    Returns the study days with any day a freeze now covers. Each is told in the bell.
+    """
+    seen = set(days)
+    yesterday = today - timedelta(days=1)
+    held = int(
+        await conn.scalar(
+            text("SELECT count(*) FROM streak_freezes WHERE student_id = :s AND used_on IS NULL"),
+            {"s": student_id},
+        )
+        or 0
+    )
+    if held and yesterday not in seen and (yesterday - timedelta(days=1)) in seen:
+        before = streak(seen, yesterday - timedelta(days=1))
+        used = await conn.scalar(
+            text(
+                """
+                UPDATE streak_freezes SET used_on = :d
+                 WHERE id = (SELECT id FROM streak_freezes
+                             WHERE student_id = :s AND used_on IS NULL
+                             ORDER BY earned_on LIMIT 1)
+                   AND NOT EXISTS (SELECT 1 FROM streak_freezes
+                                   WHERE student_id = :s AND used_on = :d)
+                RETURNING 1
+                """
+            ),
+            {"s": student_id, "d": yesterday},
+        )
+        if used:
+            seen.add(yesterday)
+            held -= 1
+            await notify(
+                conn,
+                student_id,
+                kind="streak_freeze_used",
+                category="reward",
+                title=f"A streak freeze saved your {before}-day streak",
+                body="You missed yesterday, so one of your freezes covered it. "
+                "Practise today to keep the streak going.",
+                link_url="/home",
+                key=f"freeze-used-{yesterday}",
+            )
+    run = streak(seen, today)
+    if today in seen and run and run % FREEZE_EVERY == 0 and held < FREEZES_HELD:
+        earned = await conn.scalar(
+            text(
+                """
+                INSERT INTO streak_freezes (student_id, earned_on) VALUES (:s, :d)
+                ON CONFLICT DO NOTHING RETURNING 1
+                """
+            ),
+            {"s": student_id, "d": today},
+        )
+        if earned:
+            await notify(
+                conn,
+                student_id,
+                kind="streak_freeze_earned",
+                category="reward",
+                title="You earned a streak freeze",
+                body=f"{run} days in a row. If you miss a day, a freeze keeps your streak "
+                "alive. You can hold two.",
+                link_url="/home",
+                key=f"freeze-earned-{today}",
+            )
+    return sorted(seen, reverse=True)
+
+
 async def run_hourly(conn: AsyncConnection, now: datetime | None = None) -> int:
     """Decide and store what is due for every student; returns how many were added.
 
@@ -394,11 +476,13 @@ async def run_hourly(conn: AsyncConnection, now: datetime | None = None) -> int:
     added = 0
     for row in rows:
         local: datetime = row["local_now"]  # their wall clock, worked out by Postgres
+        days = sorted(row["days"], reverse=True)
+        days = await freezes(conn, row["id"], days, local.date())
         facts = Facts(
             student_id=row["id"],
             first_name=(row["display_name"] or "there").split()[0],
             timezone=row["timezone"],
-            days=sorted(row["days"], reverse=True),
+            days=days,
             hours=list(row["hours"]),
         )
         for note in decide(facts, local):

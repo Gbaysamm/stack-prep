@@ -441,6 +441,10 @@ async def build_overview(conn: AsyncConnection, student_id: UUID) -> Overview:
         FROM attempts a
         WHERE a.student_id = :student AND a.context = ANY (CAST(:contexts AS text[]))
           AND a.answered_at_client >= now() - interval '400 days'
+        UNION
+        -- A day a streak freeze covered counts for the streak (migration 069).
+        SELECT f.used_on FROM streak_freezes f
+        WHERE f.student_id = :student AND f.used_on IS NOT NULL
         """,
         student=student_id,
         tz=student["timezone"],

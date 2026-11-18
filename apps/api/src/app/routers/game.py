@@ -34,6 +34,8 @@ class Game(BaseModel):
     #: Today's roadmap: items done and planned (the daily goal). No plan today: both 0.
     plan_done: int
     plan_total: int
+    #: Streak freezes held (migration 069): a missed day uses one.
+    freezes: int
 
 
 @router.get("/{student_id}/game", response_model=Game, summary="XP, level, streak and today")
@@ -69,6 +71,8 @@ async def game(
         FROM attempts a
         WHERE a.student_id = :s AND a.context = ANY (CAST(:contexts AS text[]))
           AND a.answered_at_client >= now() - interval '400 days'
+        UNION
+        SELECT f.used_on FROM streak_freezes f WHERE f.student_id = :s AND f.used_on IS NOT NULL
         """,
         s=student_id,
         tz=row["timezone"],
@@ -77,6 +81,13 @@ async def game(
     run, active = streak([d["day"] for d in days], row["today"])
     level = xp.level_for(int(row["total"]))
     done, planned = await xp.today_plan(conn, student_id)
+    freezes = int(
+        await conn.scalar(
+            text("SELECT count(*) FROM streak_freezes WHERE student_id = :s AND used_on IS NULL"),
+            {"s": student_id},
+        )
+        or 0
+    )
     return Game(
         xp_total=level.total,
         xp_today=int(row["today_xp"]),
@@ -87,4 +98,5 @@ async def game(
         active_today=active,
         plan_done=done,
         plan_total=planned,
+        freezes=freezes,
     )

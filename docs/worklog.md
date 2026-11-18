@@ -15,6 +15,16 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-18
 
+### Gamification step 2: the day's ring and streak freezes
+- **What:** migration 069 (`streak_freezes`). The hourly job (`notifications.freezes`) earns a
+  freeze at every 7 days of streak (two held at most) and uses one on a missed day, which then
+  counts for the streak everywhere (Home, the game endpoint, the job); both are told in the
+  bell. `/game` reports freezes held. Web: `DayChip` in the top bar (today's roadmap as a ring,
+  green when done; hidden on phones, where Home's hero already shows the day); the streak
+  dialog shows the freezes ready. Tests: `tests/test_streak_freeze.py`.
+- **Why:** founder, 18 Nov 2026 (docs/gamification-plan.md).
+- **Status:** committed, not pushed.
+
 ### Gamification step 1: XP and the answer loop
 - **What:** migration 068 (`xp_events`, one row per reason and key, so nothing counts twice).
   `app/xp.py`: 10 XP right first time without help, 3 for a lucky guess, 5 after a hint,

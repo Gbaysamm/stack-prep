@@ -1,0 +1,53 @@
+/* The day's ring in the top bar (DayChip.tsx): the same chip shape as the streak beside it. */
+.sj .dc {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 6px 12px 6px 9px;
+  border-radius: var(--r-sm);
+  background: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--gray-200);
+  color: var(--ink-900);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.sj .dc:hover {
+  box-shadow: inset 0 0 0 1.5px var(--ink-900);
+}
+.sj .dc svg {
+  width: 24px;
+  height: 24px;
+  transform: rotate(-90deg);
+}
+.sj .dc-track {
+  fill: none;
+  stroke: var(--purple-050);
+  stroke-width: 3.5;
+}
+.sj .dc-fill {
+  fill: none;
+  stroke: var(--purple-600);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.sj .dc.done {
+  background: var(--green-100);
+  box-shadow: inset 0 0 0 1.5px #9fe07a;
+  color: var(--green-600);
+}
+.sj .dc.done .dc-fill {
+  stroke: var(--green-500);
+}
+.sj .dc b {
+  font-size: 13.5px;
+}
+/* On a phone the top bar has no room; Home shows the day's progress there. */
+@media (max-width: 640px) {
+  .sj .dc {
+    display: none;
+  }
+}
