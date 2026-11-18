@@ -15,6 +15,15 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-18
 
+### Animations: a review page and recordings
+- **What:** `/dev/motion` (`src/dev/Motion.tsx`): every animation, played on demand; starts with
+  the lesson reward (Celebrate); each gamification moment is added as it is built.
+  `scripts/record-motion.mjs`: opens the page in headless Edge, waits until it has loaded and
+  settled, then records the animation frame by frame at its real timing into
+  `recordings/<name>-<laptop|phone>.mp4` (ignored by git). Needs ffmpeg (`FFMPEG=<path>`).
+- **Why:** founder, 18 Nov 2026: record the animations after rendering, to judge them.
+- **Status:** committed, not pushed.
+
 ### Notifications noted as done; gamification planned
 - **What:** `docs/notifications-pending.md`: the server settings email and push still need
   (SMTP, PUBLIC_URL, VAPID keys, SPF and DKIM) and what was left for later. Migration 067:
