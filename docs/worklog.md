@@ -15,6 +15,19 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-18
 
+### Messages as a chat app
+- **What:** `/messages` opens on a short dark header (Talk to us, New message on laptops) and the
+  conversations as cards, newest first, an unread reply in bold with a green dot; with none, a
+  quiet empty screen and Write to us. On phones a round + starts one. A new message is a sheet
+  (bottom on phones): what it is about as chips, and the message; its title is the first line
+  (no title field). A conversation is a chat: the title in the top bar, a slim "All messages"
+  line with its status, our messages left, theirs right in purple, the reply box at the bottom
+  (above the tab bar on phones). The green "Stack Prep replied" banner no longer shows on
+  Messages itself. The help button's panel uses the same form.
+- **Why:** founder, 18 Nov 2026: the old page was verbose and scattered; then no second header
+  in a conversation, a title at the top, each conversation its own card.
+- **Status:** committed, not pushed.
+
 ### Roadmap: the unfinished run comes first
 - **What:** an unfinished sitting carried into today leads the day (the API orders it first,
   so it is the one with Carry on, before the check-ups); it is no longer repeated under

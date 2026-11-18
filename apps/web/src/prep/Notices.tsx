@@ -5,7 +5,7 @@
  * comes back; the notice can't be closed (it's for things like planned downtime).
  */
 import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import { IconArrowRight, IconClose, IconMail, IconMegaphone, IconSparkles } from './icons.js';
 import { useStudent } from './store.js';
@@ -61,7 +61,9 @@ export function Notices() {
 
   const banners = items.filter((item) => item.kind === 'banner');
   const popup = items.find((item) => item.kind === 'popup');
-  const reply = replies[0];
+  // On Messages the list and the chat already show the reply: no banner there.
+  const { pathname } = useLocation();
+  const reply = pathname.startsWith('/messages') ? undefined : replies[0];
   if (!notice && banners.length === 0 && !popup && !reply) return null;
 
   return (
@@ -86,7 +88,7 @@ export function Notices() {
                 <span className="nt-more"> to “{reply.subject}”</span>
                 {replies.length > 1 ? <span className="nt-more"> and {replies.length - 1} more</span> : null}
               </p>
-              <Go label="Read it" url={`/help/messages/${reply.id}`} />
+              <Go label="Read it" url={`/messages/${reply.id}`} />
             </aside>
           ) : null}
           {banners.map((item) => (

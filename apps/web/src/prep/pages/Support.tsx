@@ -1,49 +1,78 @@
 /**
- * Writing to Stack Prep from inside the app (routers/support.py): the "Write to us" section at
- * the foot of Help & guides, with the student's conversations beside it, and one conversation
- * at /help/messages/:threadId where they read replies and answer.
+ * Messages with Stack Prep (routers/support.py), as a chat app (founder, 18 Nov 2026: the form on
+ * the page every time was too much). /messages lists the conversations, newest first, with the
+ * last line and a dot for a reply not yet read; with none, a quiet empty screen. A round + starts
+ * one in a sheet (what it is about, and the message). /messages/:threadId is the chat: our
+ * messages on the left, theirs on the right, a reply box always at the bottom.
  */
-import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import { createPortal } from "react-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
-import { friendly } from '../../lib/friendlyError.js';
-import { Select } from '../../lib/Select.js';
-import { IconArrowLeft, IconArrowRight, IconMail, IconSend } from '../icons.js';
-import { useLoad, usePageTitle, useStudent } from '../store.js';
+import { friendly } from "../../lib/friendlyError.js";
+import { IconArrowLeft, IconClose, IconMail, IconSend } from "../icons.js";
+import { useLoad, usePageTitle, useStudent } from "../store.js";
 import {
   SUPPORT_TOPICS,
   supportApi,
-  topicWord,
-  when,
   type SupportTopic,
   type Thread,
-} from '../supportApi.js';
-import { Button, PageHero, Skeleton } from '../ui.js';
-import './Support.css';
+} from "../supportApi.js";
+import { Button, PageHero, Skeleton } from "../ui.js";
+import "./Support.css";
 
-const STATUS_WORD = { open: 'Waiting for us', answered: 'Replied', closed: 'Closed' } as const;
+const STATUS_WORD = {
+  open: "Waiting for us",
+  answered: "Replied",
+  closed: "Closed",
+} as const;
+
+/** A short time: today's as a clock, this week's as a day, older as a date. */
+function short(iso: string): string {
+  const at = new Date(iso);
+  const now = new Date();
+  const days = Math.floor((now.getTime() - at.getTime()) / 86_400_000);
+  if (at.toDateString() === now.toDateString())
+    return at.toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  if (days < 7) return at.toLocaleDateString("en-GB", { weekday: "short" });
+  return at.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+}
+
+/** The title of a new conversation: the message's first line, cut short. */
+const titleFrom = (body: string) => {
+  const line = body.trim().split("\n")[0] ?? "";
+  return line.length > 70 ? `${line.slice(0, 67).trimEnd()}…` : line;
+};
 
 /**
- * Write to us: what it is about, a title, the message. On the Messages page and in the floating
- * help popup (founder, 17 Nov 2026). `onSent` hears where the new conversation lives.
+ * A new message: what it is about (one tap) and the message. In the + sheet here and in the help
+ * button's panel. `onSent` hears where the new conversation lives.
  */
-export function WriteForm({ onSent, compact = false }: { onSent: (threadId: string) => void; compact?: boolean }) {
+export function WriteForm({
+  onSent,
+  compact = false,
+}: {
+  onSent: (threadId: string) => void;
+  compact?: boolean;
+}) {
   const { studentId } = useStudent();
   const ids = useId();
-  const [topic, setTopic] = useState<SupportTopic | ''>('');
-  const [subject, setSubject] = useState('');
-  const [body, setBody] = useState('');
+  const [topic, setTopic] = useState<SupportTopic | "">("");
+  const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const send = (event: FormEvent) => {
     event.preventDefault();
-    if (!topic) return setError('Choose what it’s about.');
-    if (!subject.trim() || !body.trim()) return setError('Add a short title and your message.');
+    if (!topic) return setError("Choose what it’s about.");
+    if (!body.trim()) return setError("Write your message.");
     setBusy(true);
     setError(null);
     supportApi
-      .start(studentId, { topic, subject: subject.trim(), body: body.trim() })
+      .start(studentId, { topic, subject: titleFrom(body), body: body.trim() })
       .then((thread) => onSent(thread.id))
       .catch((failure) => {
         setError(friendly(failure));
@@ -52,158 +81,197 @@ export function WriteForm({ onSent, compact = false }: { onSent: (threadId: stri
   };
 
   return (
-    <form className={compact ? 'su-form compact' : 'sj-card su-form'} onSubmit={send} noValidate>
-      {compact ? null : (
-        <div className="su-head">
-          <span className="su-icon" aria-hidden="true">
-            <IconMail size={22} />
-          </span>
-          <div>
-            <h2 id="su-title" className="sj-display sj-h3">
-              Write to us
-            </h2>
-            <p>A person at Stack Prep reads every message and replies here, usually within a day.</p>
-          </div>
-        </div>
-      )}
-      <div className="sj-field">
-        <label htmlFor={`${ids}-topic`}>What is it about?</label>
-        <Select
-          id={`${ids}-topic`}
-          value={topic}
-          onChange={(value) => {
-            setTopic(value as SupportTopic);
-            setError(null);
-          }}
-          placeholder="Choose one"
-          options={SUPPORT_TOPICS}
-        />
+    <form
+      className={`mc-form ${compact ? "compact" : ""}`}
+      onSubmit={send}
+      noValidate
+    >
+      <div
+        className="mc-topics"
+        role="radiogroup"
+        aria-label="What is it about?"
+      >
+        {SUPPORT_TOPICS.map((choice) => (
+          <button
+            key={choice.value}
+            type="button"
+            role="radio"
+            aria-checked={topic === choice.value}
+            className={topic === choice.value ? "on" : undefined}
+            onClick={() => {
+              setTopic(choice.value);
+              setError(null);
+            }}
+          >
+            {choice.label}
+          </button>
+        ))}
       </div>
-      <div className="sj-field">
-        <label htmlFor={`${ids}-subject`}>Title</label>
-        <input
-          id={`${ids}-subject`}
-          className="sj-input"
-          maxLength={120}
-          value={subject}
-          placeholder="For example: my plan didn’t start"
-          onChange={(event) => {
-            setSubject(event.target.value);
-            setError(null);
-          }}
-        />
-      </div>
-      <div className="sj-field">
-        <label htmlFor={`${ids}-body`}>Your message</label>
-        <textarea
-          id={`${ids}-body`}
-          className="sj-input su-text"
-          rows={compact ? 4 : 5}
-          maxLength={4000}
-          value={body}
-          placeholder="Tell us what happened, and what you expected."
-          onChange={(event) => {
-            setBody(event.target.value);
-            setError(null);
-          }}
-        />
-      </div>
+      <label htmlFor={`${ids}-body`} className="mc-sr">
+        Your message
+      </label>
+      <textarea
+        id={`${ids}-body`}
+        className="sj-input mc-text"
+        rows={compact ? 4 : 5}
+        maxLength={4000}
+        value={body}
+        placeholder="Write your message…"
+        onChange={(event) => {
+          setBody(event.target.value);
+          setError(null);
+        }}
+      />
       {error ? (
-        <p className="su-error" role="alert">
+        <p className="mc-error" role="alert">
           {error}
         </p>
       ) : null}
-      <Button type="submit" size="sm" busy={busy} icon={<IconSend size={16} />} className="su-send">
-        Send
-      </Button>
+      <button type="submit" className="mc-send-wide" disabled={busy}>
+        <IconSend size={16} /> {busy ? "Sending…" : "Send"}
+      </button>
     </form>
   );
 }
 
-export function SupportBox() {
+/** /messages: the conversations, and a + to start one. */
+export function Messages() {
+  usePageTitle("Messages");
   const { studentId } = useStudent();
   const navigate = useNavigate();
   const threads = useLoad(() => supportApi.threads(studentId), [studentId]);
-  const settings = useLoad(() => supportApi.settings(), []);
+  const [writing, setWriting] = useState(false);
+  const list = [...(threads.data ?? [])].sort((a, b) =>
+    b.updated_at.localeCompare(a.updated_at),
+  );
 
-  const list = threads.data ?? [];
   return (
-    <section className="hp-sec su-sec" aria-labelledby="su-title">
-      <div className="su-grid">
-        <WriteForm onSent={(id) => navigate(`/messages/${id}`)} />
-
-        <div className="sj-card su-list">
-          <h3 className="sj-display su-list-title">Your conversations</h3>
-          {list.length === 0 && threads.loading ? (
-            <div className="su-skel" aria-busy="true">
-              {[0, 1, 2].map((key) => (
-                <Skeleton key={key} height={58} radius={8} />
-              ))}
-            </div>
-          ) : list.length === 0 ? (
-            <p className="su-empty">Nothing yet. When you write to us, the conversation stays here with our replies.</p>
-          ) : (
-            <ul>
-              {list.map((thread) => (
-                <li key={thread.id}>
-                  <Link to={`/messages/${thread.id}`} className={`su-line ${thread.unread ? 'unread' : ''}`}>
-                    <span className="su-line-top">
-                      <strong>{thread.subject}</strong>
-                      <span className={`su-status ${thread.status}`}>
-                        {thread.unread ? 'New reply' : STATUS_WORD[thread.status]}
-                      </span>
-                    </span>
-                    <span className="su-line-last">
-                      {thread.last_from_staff ? 'Stack Prep: ' : 'You: '}
+    <div className="sj-page mc">
+      <PageHero
+        eyebrow="Messages"
+        title="Talk to us"
+        sub="A person at Stack Prep replies, usually within a day."
+        actions={
+          <Button className="mc-new" onClick={() => setWriting(true)}>
+            New message
+          </Button>
+        }
+      />
+      {threads.loading && !threads.data ? (
+        <div className="mc-list" aria-busy="true">
+          {[0, 1, 2].map((key) => (
+            <Skeleton key={key} height={68} radius={10} />
+          ))}
+        </div>
+      ) : list.length === 0 ? (
+        <div className="mc-empty">
+          <span className="mc-empty-icon" aria-hidden="true">
+            <IconMail size={28} />
+          </span>
+          <b className="sj-display">No messages yet</b>
+          <p>
+            Something not working, or a question? A person at Stack Prep
+            replies, usually within a day.
+          </p>
+          <button
+            type="button"
+            className="sj-btn"
+            onClick={() => setWriting(true)}
+          >
+            Write to us
+          </button>
+        </div>
+      ) : (
+        <ul className="mc-list">
+          {list.map((thread) => (
+            <li key={thread.id}>
+              <Link
+                to={`/messages/${thread.id}`}
+                className={`mc-row ${thread.unread ? "unread" : ""}`}
+              >
+                <span className="mc-avatar" aria-hidden="true">
+                  <img src="/brand/mark-96.png" alt="" width={26} height={26} />
+                </span>
+                <span className="mc-row-text">
+                  <span className="mc-row-top">
+                    <b>{thread.subject}</b>
+                    <small>{short(thread.updated_at)}</small>
+                  </span>
+                  <span className="mc-row-last">
+                    <span>
+                      {thread.last_from_staff ? "" : "You: "}
                       {thread.last_body}
                     </span>
-                    <span className="su-line-when">{when(thread.updated_at)}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-          <div className="su-other">
-            <strong>Replies come here.</strong> When we answer, a green note shows at the top of the app until you read
-            it.
-            {settings.data?.support_email || settings.data?.support_whatsapp ? (
-              <span className="su-ways">
-                You can also reach us
-                {settings.data.support_email ? (
-                  <>
-                    {' '}
-                    at <a href={`mailto:${settings.data.support_email}`}>{settings.data.support_email}</a>
-                  </>
-                ) : null}
-                {settings.data.support_email && settings.data.support_whatsapp ? ' or' : ''}
-                {settings.data.support_whatsapp ? (
-                  <>
-                    {' '}
-                    on WhatsApp at{' '}
-                    <a href={`https://wa.me/${settings.data.support_whatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer">
-                      {settings.data.support_whatsapp}
-                    </a>
-                  </>
-                ) : null}
-                .
-              </span>
-            ) : null}
-          </div>
-        </div>
-      </div>
-    </section>
+                    {thread.unread ? (
+                      <i className="mc-dot" aria-label="New reply" />
+                    ) : null}
+                  </span>
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* Outside the page (a portal): the page's entrance motion would carry them with it. */}
+      {createPortal(
+        <div className="sj mc-layer">
+          <button
+            type="button"
+            className="mc-fab"
+            onClick={() => setWriting(true)}
+            aria-label="New message"
+          >
+            <span aria-hidden="true">+</span>
+          </button>
+          {writing ? (
+            <div className="mc-sheet-root">
+              <div
+                className="mc-scrim"
+                onClick={() => setWriting(false)}
+                aria-hidden="true"
+              />
+              <section
+                className="mc-sheet"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="mc-new"
+              >
+                <span className="mc-handle" aria-hidden="true" />
+                <div className="mc-sheet-head">
+                  <b id="mc-new" className="sj-display">
+                    New message
+                  </b>
+                  <button
+                    type="button"
+                    className="mc-close"
+                    onClick={() => setWriting(false)}
+                    aria-label="Close"
+                  >
+                    <IconClose size={18} />
+                  </button>
+                </div>
+                <WriteForm onSent={(id) => navigate(`/messages/${id}`)} />
+              </section>
+            </div>
+          ) : null}
+        </div>,
+        document.body,
+      )}
+    </div>
   );
 }
 
+/** /messages/:threadId: one conversation as a chat, the reply box always at the bottom. */
 export function SupportThread() {
   const { studentId } = useStudent();
-  const { threadId = '' } = useParams();
+  const { threadId = "" } = useParams();
   const [thread, setThread] = useState<Thread | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
-  const [reply, setReply] = useState('');
+  const [reply, setReply] = useState("");
   const [busy, setBusy] = useState(false);
   const end = useRef<HTMLDivElement>(null);
-  usePageTitle('Help & guides');
+  usePageTitle(thread?.subject ?? "Messages");
 
   useEffect(() => {
     supportApi
@@ -211,17 +279,20 @@ export function SupportThread() {
       .then(setThread)
       .catch((failure) => setProblem(friendly(failure)));
   }, [studentId, threadId]);
-  useEffect(() => end.current?.scrollIntoView({ block: 'nearest' }), [thread?.thread_messages.length]);
+  useEffect(
+    () => end.current?.scrollIntoView({ block: "end" }),
+    [thread?.thread_messages.length],
+  );
 
-  const send = (event: FormEvent) => {
-    event.preventDefault();
-    if (!reply.trim()) return;
+  const send = (event?: FormEvent) => {
+    event?.preventDefault();
+    if (!reply.trim() || busy) return;
     setBusy(true);
     supportApi
       .reply(studentId, threadId, reply.trim())
       .then((next) => {
         setThread(next);
-        setReply('');
+        setReply("");
         setProblem(null);
       })
       .catch((failure) => setProblem(friendly(failure)))
@@ -229,82 +300,83 @@ export function SupportThread() {
   };
 
   return (
-    <div className="sj-page su-page">
-      <Link to="/messages" className="su-back">
-        <IconArrowLeft size={16} /> Messages
-      </Link>
+    <div className="sj-page mc mc-chat">
+      <div className="mc-chat-bar">
+        <Link to="/messages" className="mc-back">
+          <IconArrowLeft size={16} /> All messages
+        </Link>
+        {thread ? <span className={`mc-status ${thread.status}`}>{STATUS_WORD[thread.status]}</span> : null}
+      </div>
+
       {thread ? (
-        <>
-          <header className="su-thread-head">
-            <span className="sj-eyebrow">{topicWord(thread.topic)}</span>
-            <h1 className="sj-display sj-h2">{thread.subject}</h1>
-            <span className={`su-status ${thread.status}`}>{STATUS_WORD[thread.status]}</span>
-          </header>
-          <ol className="su-messages">
-            {thread.thread_messages.map((message) => (
-              <li key={message.id} className={message.from_staff ? 'them' : 'me'}>
-                <span className="su-who">
-                  {message.from_staff ? `${message.author_name ?? 'Stack Prep'} · Stack Prep` : 'You'} ·{' '}
-                  {when(message.created_at)}
-                </span>
-                <p>{message.body}</p>
-              </li>
-            ))}
-          </ol>
+        <ol className="mc-bubbles">
+          {thread.thread_messages.map((message) => (
+            <li key={message.id} className={message.from_staff ? "them" : "me"}>
+              <p>{message.body}</p>
+              <small>
+                {message.from_staff && message.author_name
+                  ? `${message.author_name} · `
+                  : ""}
+                {short(message.created_at)}
+              </small>
+            </li>
+          ))}
           <div ref={end} />
-          <form className="sj-card su-reply" onSubmit={send}>
-            <label htmlFor="su-reply" className="su-reply-label">
-              {thread.status === 'closed' ? 'Write again to open it' : 'Add to this conversation'}
-            </label>
-            <textarea
-              id="su-reply"
-              className="sj-input su-text"
-              rows={3}
-              maxLength={4000}
-              value={reply}
-              onChange={(event) => setReply(event.target.value)}
-            />
-            {problem ? (
-              <p className="su-error" role="alert">
-                {problem}
-              </p>
-            ) : null}
-            <div className="su-reply-actions">
-              <Button type="submit" busy={busy} disabled={!reply.trim()} icon={<IconSend size={18} />}>
-                Send
-              </Button>
-            </div>
-          </form>
-        </>
+        </ol>
       ) : problem ? (
-        <div className="sj-card su-missing">
-          <p>{problem}</p>
-          <Link to="/messages" className="su-back">
-            Back to Messages <IconArrowRight size={14} />
-          </Link>
-        </div>
+        <p className="mc-problem">{problem}</p>
       ) : (
-        <div className="su-skel" aria-busy="true" aria-label="Loading the conversation">
-          <Skeleton height={28} width="50%" />
-          <Skeleton height={80} width="75%" radius={10} />
-          <Skeleton height={64} width="65%" radius={10} />
+        <div className="mc-bubbles" aria-busy="true">
+          <Skeleton height={64} width="70%" radius={14} />
+          <Skeleton height={48} width="55%" radius={14} />
         </div>
       )}
-    </div>
-  );
-}
 
-/** /messages: the student's own page for writing to the team and reading the replies. */
-export function Messages() {
-  usePageTitle('Messages');
-  return (
-    <div className="sj-page su-msgs">
-      <PageHero
-        eyebrow="Messages"
-        title="Talk to a person"
-        sub="Anything not working, a question about your plan, or a payment: write to us here and the reply comes back here."
-      />
-      <SupportBox />
+      {thread ? (
+        <form className="mc-composer" onSubmit={send}>
+          {problem ? (
+            <p className="mc-error" role="alert">
+              {problem}
+            </p>
+          ) : null}
+          <div className="mc-composer-row">
+            <label htmlFor="mc-reply" className="mc-sr">
+              Your reply
+            </label>
+            <textarea
+              id="mc-reply"
+              className="mc-input"
+              rows={1}
+              maxLength={4000}
+              value={reply}
+              placeholder={
+                thread.status === "closed"
+                  ? "Write to open it again…"
+                  : "Message"
+              }
+              onChange={(event) => setReply(event.target.value)}
+              onKeyDown={(event) => {
+                if (
+                  event.key === "Enter" &&
+                  !event.shiftKey &&
+                  window.matchMedia("(min-width: 861px)").matches
+                ) {
+                  event.preventDefault();
+                  send();
+                }
+              }}
+            />
+            <button
+              type="submit"
+              className="mc-send"
+              disabled={busy || !reply.trim()}
+              aria-label="Send"
+            >
+              <IconSend size={18} />
+            </button>
+          </div>
+        </form>
+      ) : null}
     </div>
   );
 }
