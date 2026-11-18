@@ -25,8 +25,11 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 - **Why:** founder, 18 Nov 2026: the admins want their own copy to make changes on, on the Stack
   Junior server; its own branch; the current database. Named `sandbox` to keep `uat` for a
   later main/uat flow.
-- **Status:** committed, not pushed. Waiting on the founder to run the one-time setup; then the
-  branch is pushed.
+- **Status:** live 18 Nov 2026: the founder ran the setup with us (database copied, 2 students,
+  6,877 question versions, 64 lessons; mail and push off), `sandbox` pushed and deployed, opened
+  at localhost:5181 through the tunnel. The first deploy wrote its record into the integration
+  folder (the sandbox's env.sh loads the integration one, which set ROOT back); fixed in
+  3d755c1. The sandbox shares the integration copy's tools (uv, Node, caches).
 
 ### Lessons for every subtopic: limits set, English pilot (Synonyms, Vowels), board fixes
 - **What:** only 13 of about 620 subtopics had lessons. New limits: a lesson at most about four
