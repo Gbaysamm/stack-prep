@@ -210,3 +210,6 @@ the lawyer, the Lagos and Ibadan pronunciation, the Mock exam room (migration 05
 | Carry on was at the bottom of today under locked stops | The unfinished run leads the day; not repeated under Earlier; the limit counts only what is ahead | `routers/roadmap.py`, `Roadmap.tsx` | Committed |
 | Messages like WhatsApp: no form every time, + to start, reply inside the chat | Card list with a short header, + / New message sheet, a chat with the reply box at the bottom | `pages/Support.tsx` | Committed |
 | Messages: optimistic sending | A reply shows at once with Sending…; a failed one turns red, tap to try again | `pages/Support.tsx` | Committed |
+| Lessons for every subtopic, concise (about 4 min a lesson, 1–3 a subtopic), written with Claude Code | Limits in the guide; English pilot: Synonyms (3) and Vowels (4) after two reviews; ~600 subtopics to go | `docs/lessons/` | In progress |
+| Board: pen tracing lines already drawn; underlines before their words | Drawings traced line by line; marks wait for their line | `drawIn.ts`, `Board.tsx` | Committed |
+| Remove the "Asking in lessons is coming next" bar | Gone from the lesson page | `pages/Lesson.tsx` | Committed |

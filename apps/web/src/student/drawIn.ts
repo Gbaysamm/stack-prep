@@ -216,52 +216,42 @@ export function planDrawing(svg: SVGSVGElement, elements: SVGGraphicsElement[]):
       };
     } else if (filled) carrier = element;
 
-    if (stroked && length > 0) {
-      const dashed = style.strokeDasharray && style.strokeDasharray !== "none";
-      if (dashed) {
-        const box = boxOf(element);
-        if (box) {
-          const copy = geometryCopy(element);
-          copy.setAttribute("fill", "none");
-          copy.setAttribute("stroke", "#fff");
-          copy.setAttribute("stroke-width", String(width + 6 / k));
-          copy.setAttribute("stroke-linecap", "round");
-          copy.setAttribute("stroke-linejoin", "round");
-          copy.style.strokeDasharray = `${length + 1} ${length + 1}`;
-          copy.style.strokeDashoffset = String(length + 1);
-          const unmask = maskOver(defs, element, box, width + 12 / k, copy);
-          strokes.push({
-            kind: "stroke",
-            ms: 60 + (length * k) / PACE,
-            show: (p) => (copy.style.strokeDashoffset = String((length + 1) * (1 - p))),
-            tip: (p) => tipAlong(element, length * p),
-            finish: unmask,
-          });
+    // A path of several pieces (a grid's lines, a box's four sides) is traced piece by piece, a
+    // copy of each drawn in turn with the pen lifting between them: a dash pattern starts again
+    // at every piece, so one dash offset over the whole path would show the start of every
+    // piece at once, all of them drawn long before the pen gets there.
+    const pieces = stroked && length > 0 ? piecesOf(element, defs) : null;
+    if (pieces) {
+      const visibility = element.style.visibility;
+      element.style.visibility = "hidden";
+      let left = pieces.length;
+      for (const d of pieces) {
+        const piece = element.cloneNode(false) as SVGGraphicsElement;
+        piece.removeAttribute("id");
+        piece.setAttribute("d", d);
+        piece.style.fill = "none";
+        piece.style.visibility = visibility;
+        element.parentNode?.insertBefore(piece, element);
+        const own = lengthOf(piece);
+        const traced = own > 0 ? traceStroke(defs, piece, own, width, k, style) : null;
+        if (!traced) {
+          piece.remove();
+          left -= 1;
+          continue;
         }
-      } else {
-        const was = {
-          dash: element.style.strokeDasharray,
-          offset: element.style.strokeDashoffset,
-          visibility: element.style.visibility,
+        const finish = traced.finish;
+        traced.finish = () => {
+          finish();
+          piece.remove();
+          left -= 1;
+          if (left === 0) element.style.visibility = visibility;
         };
-        element.style.strokeDasharray = `${length + 1} ${length + 1}`;
-        element.style.strokeDashoffset = String(length + 1);
-        element.style.visibility = "hidden";
-        strokes.push({
-          kind: "stroke",
-          ms: 60 + (length * k) / PACE,
-          show: (p) => {
-            element.style.visibility = p > 0 ? was.visibility : "hidden";
-            element.style.strokeDashoffset = String((length + 1) * (1 - p));
-          },
-          tip: (p) => tipAlong(element, length * p),
-          finish: () => {
-            element.style.strokeDasharray = was.dash;
-            element.style.strokeDashoffset = was.offset;
-            element.style.visibility = was.visibility;
-          },
-        });
+        strokes.push(traced);
       }
+      if (left === 0) element.style.visibility = visibility;
+    } else if (stroked && length > 0) {
+      const traced = traceStroke(defs, element, length, width, k, style);
+      if (traced) strokes.push(traced);
     }
 
     if (carrier) {
@@ -309,6 +299,106 @@ export function planDrawing(svg: SVGSVGElement, elements: SVGGraphicsElement[]):
     };
   } else defs.remove();
   return plan;
+}
+
+/**
+ * An outline traced along its own length with the nib on the end of it: a dash offset, or for a
+ * dashed line a mask carrying a solid copy of it. Null where a dashed line has no box to mask.
+ */
+function traceStroke(
+  defs: SVGDefsElement,
+  element: SVGGraphicsElement,
+  length: number,
+  width: number,
+  k: number,
+  style: CSSStyleDeclaration,
+): DrawItem | null {
+  const dashed = style.strokeDasharray && style.strokeDasharray !== "none";
+  if (dashed) {
+    const box = boxOf(element);
+    if (!box) return null;
+    const copy = geometryCopy(element);
+    copy.setAttribute("fill", "none");
+    copy.setAttribute("stroke", "#fff");
+    copy.setAttribute("stroke-width", String(width + 6 / k));
+    copy.setAttribute("stroke-linecap", "round");
+    copy.setAttribute("stroke-linejoin", "round");
+    copy.style.strokeDasharray = `${length + 1} ${length + 1}`;
+    copy.style.strokeDashoffset = String(length + 1);
+    const unmask = maskOver(defs, element, box, width + 12 / k, copy);
+    return {
+      kind: "stroke",
+      ms: 60 + (length * k) / PACE,
+      show: (p) => (copy.style.strokeDashoffset = String((length + 1) * (1 - p))),
+      tip: (p) => tipAlong(element, length * p),
+      finish: unmask,
+    };
+  }
+  const was = {
+    dash: element.style.strokeDasharray,
+    offset: element.style.strokeDashoffset,
+    visibility: element.style.visibility,
+  };
+  element.style.strokeDasharray = `${length + 1} ${length + 1}`;
+  element.style.strokeDashoffset = String(length + 1);
+  element.style.visibility = "hidden";
+  return {
+    kind: "stroke",
+    ms: 60 + (length * k) / PACE,
+    show: (p) => {
+      element.style.visibility = p > 0 ? was.visibility : "hidden";
+      element.style.strokeDashoffset = String((length + 1) * (1 - p));
+    },
+    tip: (p) => tipAlong(element, length * p),
+    finish: () => {
+      element.style.strokeDasharray = was.dash;
+      element.style.strokeDashoffset = was.offset;
+      element.style.visibility = was.visibility;
+    },
+  };
+}
+
+const NUMBER = /^[\s,]*([-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?)/;
+
+/**
+ * A path's pieces (its subpaths) as path data each can be drawn on its own, or null for a path
+ * of one piece. A piece begun with a relative move is made to start where the pen was.
+ */
+function piecesOf(element: SVGGraphicsElement, defs: SVGDefsElement): string[] | null {
+  if (element.localName !== "path") return null;
+  const parts = (element.getAttribute("d") ?? "").match(/[Mm][^Mm]*/g);
+  if (!parts || parts.length < 2) return null;
+  const probe = document.createElementNS(SVG_NS, "path");
+  defs.appendChild(probe);
+  const out: string[] = [];
+  let before = "";
+  for (const part of parts) {
+    let own = part;
+    if (part[0] === "m" && before) {
+      // Relative to where the pieces before it left the pen.
+      const x = NUMBER.exec(part.slice(1));
+      const y = x ? NUMBER.exec(part.slice(1 + x[0].length)) : null;
+      if (!x || !y) {
+        probe.remove();
+        return null;
+      }
+      probe.setAttribute("d", before);
+      let at: DOMPoint;
+      try {
+        at = probe.getPointAtLength(probe.getTotalLength());
+      } catch {
+        probe.remove();
+        return null;
+      }
+      const rest = part.slice(1 + x[0].length + y[0].length);
+      // Further pairs after a move are lines, relative as the move was.
+      own = `M${at.x + Number(x[1])} ${at.y + Number(y[1])}${NUMBER.test(rest) ? "l" : ""}${rest}`;
+    }
+    before += own;
+    out.push(own);
+  }
+  probe.remove();
+  return out;
 }
 
 function tipAlong(element: SVGGraphicsElement, s: number): Pt | null {

@@ -10,6 +10,14 @@ needs. The founder's rules (11 Nov 2026):
 
 ## Short lessons: a subtopic may have several (founder, 12 Nov 2026)
 
+**Length limits (founder, 18 Nov 2026).** A lesson is at most about **four minutes**: about 550
+spoken words, usually 16 to 24 moments. A subtopic has **one to three lessons**, so it is taught
+in about 12 minutes; a fourth only when the subtopic truly holds four separate ideas (a broad
+Mathematics subtopic, for example). The student meets these lessons after a weak run and goes
+back to questions straight after, so teach the core JAMB tests, in full and without gaps, and
+leave the rare corners to the past-question lessons. Where this and the older text below
+disagree (18 to 30 moments, two to four lessons), these limits win.
+
 A lesson is **short: about three or four minutes, one main idea** (founder, 12 Nov 2026: the
 length a student watches without losing attention). That is a guide, not a limit: a lesson
 runs a little longer when its idea needs it, and roughly 18 to 30 moments is usual. Never cut
@@ -145,5 +153,69 @@ not repeat an earlier one: it may say "In the last lesson you met …" in one li
     at…"); a section ends by saying where it leads.
   - *Sentences a teacher says:* whole, plain sentences that run on from each other, with the
     linking words ("so", "because", "for example", "yet") that make the reasoning heard.
+- **A JAMB question on the board looks like one:** the question on one line, written as JAMB
+  prints it ("Which option has the same vowel sound as the underlined letters in key?", the
+  letters underlined), then the options on their own line; never squeezed into "key: A. sit…".
 - **Plain section titles:** "Welcome", "Objectives", "Element", "Compound", "Comparison",
   "JAMB traps", "Check yourself", "Recap".
+
+## English sound lessons (founder, 18 Nov 2026, on the Vowels pilot)
+
+Vowels, consonants, rhymes and stress. These lessons teach the student to **recognise** sounds
+in written words, which is what JAMB tests on paper, not to pronounce them.
+
+- **The model is British English**, the one Nigerian schools teach (12 pure vowels and 8
+  diphthongs, 20 vowel sounds in all). The first lesson of a sound subtopic says so once.
+- **No pronunciation demonstrations.** The voice never performs a sound for the student to
+  copy ("Sit. Seat."), there is no talking mouth and no audio map: our voices are not British
+  and a demonstration teaches the wrong sound. The voice names a sound by its symbol and its
+  key word ("the vowel sound in seat, written /iː/").
+- **One key word per sound, the same in every lesson**, from the table below. Every later
+  mention of a sound uses its key word; a new example word is always tied back to it ("Key has
+  the vowel sound of seat").
+- **Teach how to tell the sounds apart in a word the student has never heard**: spelling misleads
+  (same letters, different sounds; different letters, same sound); then the spelling clues as
+  clues, never rules, each with an exception said (a final silent e, common vowel pairs, a vowel
+  before r); then the method for the question.
+- **Spelling families, so a student can work out a word the lesson never showed** (founder,
+  18 Nov 2026: "how do I know cook or crook is short?"). Teach the families JAMB actually tests,
+  found from the bank's questions: each family's usual sound, the rule that decides it (e.g. an
+  open or closed syllable for a single a or o; oo is long unless before k or in a short list),
+  and the short list of exceptions to learn by heart, with a JAMB question on it. Say plainly
+  that a few words are true exceptions (indict, coup, colonel) and are learned as words.
+- **The method for "same vowel sound" questions:** find the sound in the given word; name it by
+  its key word and symbol; give each option its sound, one option per moment, with its symbol
+  written; choose the option whose sound matches. Compare sounds, never letters.
+- **Short and long differ in quality as well as length.** Say so when the length mark is taught.
+  Never pair sounds that are not partners (schwa is not "the short /ɜː/").
+- **Weak endings:** a final unstressed -y or -ey (money, happy, valley) is the weak /i/, "a
+  weak, short form of the vowel sound in seat", never the vowel sound of sit. A clue is "usually"
+  or "often", never "always". Accent-dependent words (aunt, laugh, glass) are taught "in the
+  British model we use".
+- **Exact terms:** "vowel sound" (not "vowel") when a sound is meant; the length mark is "the
+  length mark, two small dots", never "a colon".
+- **The tested letter is underlined in the word,** never spelt out: write `patch` and mark it
+  `{kind: underline, at: 'p[[a]]tch'}`; never "p-a-tch".
+- **One table that stays:** the sounds go into one table, filled as each is taught and
+  highlighted when a later moment refers to it. Its rows organise the sounds; they do not claim
+  that each short sound has a long partner.
+- **Never generalise about Nigerian speakers.** "Some learners say sit and seat alike", not
+  "Nigerian speakers do".
+
+Key words (use these, always):
+
+| Sound | Key word | Sound | Key word |
+|---|---|---|---|
+| /ɪ/ | sit | /iː/ | seat |
+| /e/ | bed | /æ/ | cat |
+| /ʌ/ | cup | /ɑː/ | car |
+| /ɒ/ | hot | /ɔː/ | saw |
+| /ʊ/ | book | /uː/ | food |
+| /ə/ | about (first sound) | /ɜː/ | bird |
+| /eɪ/ | day | /aɪ/ | my |
+| /ɔɪ/ | boy | /əʊ/ | go |
+| /aʊ/ | cow | /ɪə/ | here |
+| /eə/ | hair | /ʊə/ | tour |
+
+Triphthongs: /eɪə/ player, /aɪə/ fire, /ɔɪə/ employer, /əʊə/ lower, /aʊə/ power. The voice
+does not read IPA symbols: it says "the vowel sound in seat" while the board writes /iː/.

@@ -151,11 +151,8 @@ export function Lesson() {
             finishedLine="That is the end of the lesson. Next, tell us how well you understood it, and try the problem."
             steps={board.lesson.beats.flatMap((beat) => beat.write)}
             loadLesson={heard ? () => Promise.resolve(board.lesson) : undefined}
-            askLocked={
-              <span className="sj-small sj-muted">
-                Asking in lessons is coming next.
-              </span>
-            }
+            // No placeholder for asking while it is not built (founder, 18 Nov 2026).
+            noAsk
             answerLine="Now try it on new questions."
             onAsk={() =>
               Promise.reject(

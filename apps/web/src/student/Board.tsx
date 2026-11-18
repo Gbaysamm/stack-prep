@@ -213,6 +213,21 @@ function whenReady(
   });
 }
 
+/** The line a mark points at, in a lesson where it is said at moment `index`. */
+function targetOf(point: LessonPoint, index: number): number | null {
+  return point.line == null ? null : point.line < 0 ? index + point.line : point.line;
+}
+
+/** Whether a mark carries a piece down into the line of its own moment (a move or an arrow). */
+function carriedInto(point: LessonPoint, index: number): boolean {
+  return (
+    point.figure == null &&
+    targetOf(point, index) === index &&
+    (point.kind === "move" || point.kind === "arrow") &&
+    Boolean(point.from)
+  );
+}
+
 /** How long after a silent line goes up before its marks are drawn back over the board. */
 const MARK_LEAD_MS = 900;
 
@@ -1494,14 +1509,7 @@ export function Board({
       // Hand time is real time; the plan is in the voice's time, which runs `speed` times as fast.
       const seconds = (ms: number) => (ms / 1000) * speed;
       const written = seconds(Math.max(0, ...timing.map((one) => one?.done ?? 0)));
-      const carries = entry.point.map(
-        (point) =>
-          point.line != null &&
-          point.figure == null &&
-          (point.line < 0 ? index + point.line : point.line) === index &&
-          (point.kind === "move" || point.kind === "arrow") &&
-          Boolean(point.from),
-      );
+      const carries = entry.point.map((point) => carriedInto(point, index));
       const reach = entry.point.map((point, k): number | null => {
         if (!carries[k] || !row || written <= 0) return null;
         const box = inkBox(row, point.at ?? null);
@@ -1553,6 +1561,14 @@ export function Board({
     // On its way: every piece of the line is up, and the hand is writing it or has it next.
     const coming =
       all && sheet !== null && items.length > 0 && items.every((item) => penTiming(sheet, item, null) !== null);
+    // A mark over the line's own words goes up once the hand has finished the line — on the
+    // hand's own word that it has (WRITTEN_EVENT), never on a guess of when it will have, which
+    // a busy machine makes wrong. Only a piece carried into the line goes up while it is being
+    // written, to land as the pen reaches the piece it becomes.
+    const marksOwn = (entry?.point ?? []).some(
+      (point) => point.line != null && point.figure == null && targetOf(point, wantPoint) === wantPoint,
+    );
+    const carried = (entry?.point ?? []).some((point) => carriedInto(point, wantPoint));
     const at = wantPoint;
     const timer = window.setTimeout(
       () => {
@@ -1561,7 +1577,7 @@ export function Board({
         setMarkPlan(plan ? { ...plan, index: at } : null);
         setPointing(at);
       },
-      done ? MARK_AFTER_WRITE_MS : coming ? 0 : MARK_SAFETY_MS,
+      done ? MARK_AFTER_WRITE_MS : coming && (carried || !marksOwn) ? 0 : MARK_SAFETY_MS,
     );
     return () => window.clearTimeout(timer);
   }, [wantPoint, pointing, writtenTick, itemsShown, lines, paused, planFor]);

@@ -15,6 +15,26 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-18
 
+### Lessons for every subtopic: limits set, English pilot (Synonyms, Vowels), board fixes
+- **What:** only 13 of about 620 subtopics had lessons. New limits: a lesson at most about four
+  minutes (about 550 spoken words), a subtopic one to three lessons (a fourth for four truly
+  separate ideas). English pilot written with Claude Code: Synonyms (3 lessons) and Vowels
+  (4 lessons, rewritten twice from the founder's reviews: recognition not pronunciation, no
+  voice demonstrations or talking mouth, British model stated, fixed key words, spelling
+  families with their usual sound and the exceptions to learn, JAMB questions laid out as JAMB
+  prints them, tested letters underlined). The guide gained "English sound lessons".
+  Board: a drawing made of several lines is now traced line by line (every piece had been
+  revealed at once while the pen moved over finished lines); a mark on a moment's own line
+  waits until the pen has written it. The lesson page no longer shows the "Asking in lessons
+  is coming next" placeholder.
+- **Where:** `docs/lessons/subtopics/english/`, `docs/lessons/subtopic-lesson-guide.md`,
+  `docs/lessons/writer-brief.md`, `docs/lessons/reviews/eng_vowels_2026-11-18.md`,
+  `apps/web/src/student/drawIn.ts`, `Board.tsx`, `apps/web/src/prep/pages/Lesson.tsx`.
+- **Why:** founder, 18 Nov 2026: every subtopic must have lessons, concise; written with Claude
+  Code inside the session so they can be reviewed together.
+- **Status:** committed, not pushed. Loaded locally. Next: the rest of English, then the other
+  subjects. Lesson 3 of Vowels is 635 words (a little over).
+
 ### Messages: replies send optimistically
 - **What:** a reply shows in the chat the moment Send is pressed, a little faded with "Sending…"
   under it, and settles when the server has it. If it cannot go it turns red, "Not sent · tap to
