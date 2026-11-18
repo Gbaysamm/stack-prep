@@ -12,10 +12,11 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from app.auth import require_student
+from app.config import get_settings
 from app.db import connection, fetch_all
 
 router = APIRouter(prefix="/v1/student", tags=["notifications"])
@@ -137,4 +138,86 @@ async def dismiss(
     )
     if not rows:
         raise HTTPException(status_code=404, detail=NOT_FOUND)
+    await conn.commit()
+
+
+# ------------------------------------------------------------------ push to phones
+
+push_router = APIRouter(prefix="/v1/push", tags=["notifications"])
+
+
+class PushKey(BaseModel):
+    #: The server's public key for subscribing; none when push is not set up here.
+    key: str | None
+
+
+class PushKeys(BaseModel):
+    p256dh: str = Field(max_length=200)
+    auth: str = Field(max_length=100)
+
+
+class PushSubscription(BaseModel):
+    endpoint: str = Field(min_length=10, max_length=1000)
+    keys: PushKeys
+
+
+@push_router.get("/key", response_model=PushKey, summary="The key for turning push on")
+async def push_key() -> PushKey:
+    from app import push
+
+    return PushKey(key=get_settings().vapid_public_key if push.configured() else None)
+
+
+@router.post(
+    "/{student_id}/push-subscriptions", status_code=204, summary="Turn push on for this device"
+)
+async def subscribe(
+    request: Request,
+    student_id: UUID,
+    body: PushSubscription,
+    conn: Annotated[AsyncConnection, Depends(connection)],
+) -> None:
+    await require_student(request, conn, student_id)
+    if not body.endpoint.startswith("https://"):
+        raise HTTPException(status_code=422, detail="That is not a push address.")
+    await fetch_all(
+        conn,
+        """
+        INSERT INTO push_subscriptions (student_id, endpoint, p256dh, auth, user_agent)
+        VALUES (:s, :e, :p, :a, :ua)
+        ON CONFLICT (endpoint) DO UPDATE SET student_id = EXCLUDED.student_id,
+          p256dh = EXCLUDED.p256dh, auth = EXCLUDED.auth, user_agent = EXCLUDED.user_agent
+        RETURNING id
+        """,
+        s=student_id,
+        e=body.endpoint,
+        p=body.keys.p256dh,
+        a=body.keys.auth,
+        ua=(request.headers.get("user-agent") or "")[:300],
+    )
+    await conn.commit()
+
+
+class Endpoint(BaseModel):
+    endpoint: str = Field(min_length=10, max_length=1000)
+
+
+@router.post(
+    "/{student_id}/push-subscriptions/remove",
+    status_code=204,
+    summary="Forget this device (signing out)",
+)
+async def unsubscribe(
+    request: Request,
+    student_id: UUID,
+    body: Endpoint,
+    conn: Annotated[AsyncConnection, Depends(connection)],
+) -> None:
+    await require_student(request, conn, student_id)
+    await fetch_all(
+        conn,
+        "DELETE FROM push_subscriptions WHERE student_id = :s AND endpoint = :e RETURNING id",
+        s=student_id,
+        e=body.endpoint,
+    )
     await conn.commit()

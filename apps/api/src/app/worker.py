@@ -27,7 +27,7 @@ async def ping(ctx: dict[str, Any]) -> str:
 async def notify(ctx: dict[str, Any]) -> int:
     """Every hour: decide and store what each student is told, the Sunday report, then email
     what goes by email (app/notifications.py, app/notification_email.py)."""
-    from app import notification_email, notifications, parent_email
+    from app import notification_email, notifications, parent_email, push
 
     async with get_engine().connect() as conn:
         added = await notifications.run_hourly(conn)
@@ -35,6 +35,7 @@ async def notify(ctx: dict[str, Any]) -> int:
         await notification_email.send_due(conn)
         await parent_email.weekly(conn)
         await parent_email.missed_days(conn)
+        await push.send_due(conn)
         return added
 
 

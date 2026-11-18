@@ -15,6 +15,23 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-18
 
+### Push notifications to phones; a compact bell; today's check-ups as one
+- **What:** migration 066 (`push_subscriptions`; `notifications.pushed_at`). `app/push.py`
+  (pywebpush): every notification of the last day goes to each device that turned push on,
+  once; a device the push service calls gone (404, 410) is dropped; off until VAPID keys are
+  set (`python -m app.cli vapid-keys` makes them on the server). Pushed at the hourly run, and
+  within seconds for anything that just happened. Endpoints: `GET /v1/push/key`, save and
+  forget a device. Web: `public/sw.js` (shows the push; a tap opens its page),
+  `public/manifest.webmanifest` (add to home screen; iPhone needs it for push),
+  `pushClient.ts`, and a one-line "Get these on your phone · Turn on" in the bell (on an
+  iPhone in the browser: how to add it to the home screen). The bell is tighter: one line per
+  message, smaller rows, so five and See all fit without scrolling. Today's check-ups are one
+  notification ("4 check-ups are on today's plan", the subjects listed), not one per subject.
+  Tests: `tests/test_push.py`.
+- **Why:** founder, 18 Nov 2026: push notifications; the bell was too long; four check-up
+  notifications at once.
+- **Status:** committed, not pushed. Push needs VAPID keys on each server.
+
 ### Reminder emails say more
 - **What:** `emails/reminder.py`: each kind adds what to do now, in steps, and what it is
   worth or what to expect: streak at risk (three steps, why daily practice matters), missed a

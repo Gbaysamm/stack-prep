@@ -124,6 +124,12 @@ class Settings(BaseSettings):
     #: never in the database itself; set this to keep stored keys working across a change of
     #: database password.
     secrets_key: str = ""
+    #: Push notifications to phones (app/push.py). A key pair made once with
+    #: `python -m app.cli vapid-keys`; empty means push is off and the app does not offer it.
+    vapid_public_key: str = ""
+    vapid_private_key: str = ""
+    #: Who browsers' push services can contact about our pushes.
+    vapid_subject: str = "mailto:support@stackjunior.com"
 
     @field_validator("database_schema")
     @classmethod

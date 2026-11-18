@@ -232,9 +232,11 @@ async def notify(
             "key": key[:120],
         },
     )
-    from app import notification_email
+    from app import notification_email, push
 
-    if kind in notification_email.INSTANT_KINDS:
+    # Instant kinds email within seconds; with push on, anything that just happened reaches
+    # the phone within seconds too.
+    if kind in notification_email.INSTANT_KINDS or push.configured():
         notification_email.send_soon(student_id)
 
 
@@ -312,21 +314,38 @@ PLAN_RULES: dict[str, str] = {
     """
     + _THEIR_MOCK
     + _DONE,
-    "roadmap_today": _LOCAL
+    # Today's check-ups as one notification, however many subjects (founder, 18 Nov 2026:
+    # four at once was noise); the weekly mock on its own.
+    "roadmap_checkups": _LOCAL
     + _INSERT
     + """
-        SELECT day.id, 'roadmap_' || ri.kind, 'plan',
-               CASE ri.kind WHEN 'mock' THEN 'Your weekly mock is today'
-                    ELSE 'A ' || sj.name || ' check-up is on today''s plan' END,
-               CASE ri.kind WHEN 'mock' THEN 'It shows your score out of 400 and what to fix.'
-                    ELSE 'It takes about ten minutes and updates your roadmap.' END,
-               '/roadmap', 'roadmap-' || ri.id
+        SELECT day.id, 'roadmap_checkup', 'plan',
+               CASE WHEN count(*) = 1 THEN 'A ' || min(sj.name) || ' check-up is on today''s plan'
+                    ELSE count(*) || ' check-ups are on today''s plan' END,
+               CASE WHEN count(*) = 1
+                    THEN 'It takes about ten minutes and updates your roadmap.'
+                    ELSE string_agg(sj.name, ', ' ORDER BY sj.name)
+                         || ': about ten minutes each, and your roadmap updates.' END,
+               '/roadmap', 'roadmap-checkups-' || day.today
         FROM day
         JOIN roadmaps r ON r.student_id = day.id AND r.status = 'active'
         JOIN roadmap_items ri ON ri.roadmap_id = r.id AND ri.day = day.today
-                             AND ri.kind IN ('checkup', 'mock')
+                             AND ri.kind = 'checkup'
                              AND ri.session_id IS NULL AND ri.started_at IS NULL
-        LEFT JOIN subjects sj ON sj.id = ri.subject_id
+        JOIN subjects sj ON sj.id = ri.subject_id
+        GROUP BY day.id, day.today
+    """
+    + _DONE,
+    "roadmap_mock": _LOCAL
+    + _INSERT
+    + """
+        SELECT day.id, 'roadmap_mock', 'plan', 'Your weekly mock is today',
+               'It shows your score out of 400 and what to fix.', '/roadmap', 'roadmap-' || ri.id
+        FROM day
+        JOIN roadmaps r ON r.student_id = day.id AND r.status = 'active'
+        JOIN roadmap_items ri ON ri.roadmap_id = r.id AND ri.day = day.today
+                             AND ri.kind = 'mock'
+                             AND ri.session_id IS NULL AND ri.started_at IS NULL
     """
     + _DONE,
     "plan_ending": _LOCAL

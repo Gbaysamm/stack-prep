@@ -21,6 +21,7 @@ import {
   IconTrophy,
 } from './icons.js';
 import { ago, notes, useInbox, type Notification } from './notificationsApi.js';
+import { pushState, turnOnPush, type PushState } from './pushClient.js';
 import './Bell.css';
 
 /** How many the bell shows before "See all notifications". */
@@ -108,6 +109,7 @@ export function Bell({ studentId }: { studentId: string }) {
               <IconClose size={18} />
             </button>
           </div>
+          <PushPrompt studentId={studentId} />
           {shown.length ? (
             <ul className="bl-list">
               {shown.map((note) => (
@@ -154,6 +156,67 @@ export function Bell({ studentId }: { studentId: string }) {
           ) : null}
         </div>
       ) : null}
+    </div>
+  );
+}
+
+/**
+ * The line at the top of the bell panel that brings notifications to the phone (pushClient.ts):
+ * Turn on while push is off, how to get it on an iPhone, nothing once it is on or unavailable.
+ */
+function PushPrompt({ studentId }: { studentId: string }) {
+  const [state, setState] = useState<PushState | null>(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    let live = true;
+    void pushState(studentId).then((now) => live && setState(now));
+    return () => {
+      live = false;
+    };
+  }, [studentId]);
+
+  if (state === 'install') {
+    return (
+      <p className="bl-push">
+        <IconBell size={16} aria-hidden="true" />
+        <span>
+          <b>Get these on your iPhone</b> Tap Share, then Add to Home Screen. Open Stack Prep from there and turn
+          them on.
+        </span>
+      </p>
+    );
+  }
+  if (state === 'blocked') {
+    return (
+      <p className="bl-push">
+        <IconBell size={16} aria-hidden="true" />
+        <span>
+          <b>Notifications are blocked</b> Allow them for Stack Prep in your browser's site settings.
+        </span>
+      </p>
+    );
+  }
+  if (state !== 'off') return null;
+  return (
+    <div className="bl-push">
+      <IconBell size={16} aria-hidden="true" />
+      <span>
+        <b>Get these on your phone</b>
+      </span>
+      <button
+        type="button"
+        className="bl-push-on"
+        disabled={busy}
+        onClick={() => {
+          setBusy(true);
+          void turnOnPush(studentId)
+            .then(setState)
+            .catch(() => setState('off'))
+            .finally(() => setBusy(false));
+        }}
+      >
+        {busy ? 'Turning on…' : 'Turn on'}
+      </button>
     </div>
   );
 }

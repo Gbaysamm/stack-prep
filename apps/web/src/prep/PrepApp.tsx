@@ -17,6 +17,7 @@ import { AboutPage, ContactPage, HowItWorksPage, PricingPage } from '../site/Pag
 import { NotFound } from './pages/NotFound.js';
 import { Welcome } from './pages/Welcome.js';
 import { PremiumProvider } from './premium.js';
+import { registerWorker } from './pushClient.js';
 import { AppShell } from './shell.js';
 import { IdentityProvider, RequireStudent, useIdentity } from './store.js';
 import { ToastProvider } from './ui.js';
@@ -105,6 +106,8 @@ function Start() {
 
 export function PrepApp() {
   usePreloadPages();
+  // The service worker that shows push notifications (pushClient.ts).
+  useEffect(registerWorker, []);
   return (
     <BrowserRouter>
       <IdentityProvider>

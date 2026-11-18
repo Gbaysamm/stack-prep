@@ -198,3 +198,5 @@ the lawyer, the Lagos and Ibadan pronunciation, the Mock exam room (migration 05
 | Add the lesson and question expansion to the tracker | More subject lessons and More questions on today's plan, after gamification | migration 064 | Committed |
 | Parents told when students default; reports to parents | A student adds a parent in Settings; the parent confirms by email; then a weekly report on Sunday and an alert after 3 and 7 days without study; a confirmed parent stays | `routers/parents.py`, `parent_email.py`, `/parent/<token>`, migration 065 | Committed |
 | The reminder email is too short | Each reminder adds steps for what to do now, and why it matters or what to expect | `emails/reminder.py` | Committed |
+| Push notifications | Service worker, manifest, Turn on in the bell; every notification pushed once to each device; needs VAPID keys on the servers | `app/push.py`, `public/sw.js`, `pushClient.ts`, migration 066 | Committed |
+| The bell is too long; four check-up notifications at once | One line per message, tighter rows; today's check-ups as one notification | `Bell.css`, `notifications.PLAN_RULES` | Committed |

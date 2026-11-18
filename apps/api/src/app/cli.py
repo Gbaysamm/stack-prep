@@ -97,7 +97,7 @@ def _openapi() -> int:
 
 def _notify() -> int:
     """Run the hourly notifications job once now (the worker runs it every hour)."""
-    from app import notification_email, notifications, parent_email
+    from app import notification_email, notifications, parent_email, push
     from app.db import get_engine
 
     async def run() -> int:
@@ -107,10 +107,22 @@ def _notify() -> int:
             sent = await notification_email.send_due(conn)
             sent += await parent_email.weekly(conn)
             sent += await parent_email.missed_days(conn)
+            sent += await push.send_due(conn)
         print(f"{added} notifications added, {sent} emailed.")
         return 0
 
     return asyncio.run(run())
+
+
+def _vapid_keys() -> int:
+    """Make the key pair for push notifications; prints the two lines for .env.local."""
+    from app.push import make_keys
+
+    public, private = make_keys()
+    print("Add these two lines to .env.local on this server, then restart the api and worker:")
+    print(f"VAPID_PUBLIC_KEY={public}")
+    print(f"VAPID_PRIVATE_KEY={private}")
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -121,6 +133,7 @@ def main(argv: list[str] | None = None) -> int:
         "openapi": _openapi,
         "voice-lessons": _voice_lessons,
         "notify": _notify,
+        "vapid-keys": _vapid_keys,
     }
     parser.add_argument("command", choices=list(commands))
     args = parser.parse_args(argv)

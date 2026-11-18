@@ -34,7 +34,7 @@ from uuid import UUID
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import emails, mailer
+from app import emails, mailer, push
 from app.config import get_settings
 
 log = logging.getLogger(__name__)
@@ -160,7 +160,7 @@ def send_soon(student_id: UUID) -> None:
 
     Only where email is set up; elsewhere the hourly job finds them (and logs them locally).
     """
-    if not get_settings().smtp_host:
+    if not get_settings().smtp_host and not push.configured():
         return
 
     async def run() -> None:
@@ -170,6 +170,7 @@ def send_soon(student_id: UUID) -> None:
         try:
             async with get_engine().connect() as conn:
                 await send_due(conn, student_id)
+                await push.send_due(conn, student_id)
         except Exception:  # never let an email break the request that caused it
             log.exception("sending instant notification emails failed")
 
