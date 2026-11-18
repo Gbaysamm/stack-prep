@@ -817,7 +817,10 @@ async def read(
     await _lessons_after_weak_runs(conn, student_id, active["id"], today)
     items = await fetch_all(
         conn,
-        ITEM_SQL + " WHERE i.roadmap_id = :r ORDER BY i.day, i.position",
+        # An unfinished sitting carried into a day leads that day (founder, 18 Nov 2026): it is
+        # the outstanding thing, so it comes before the day's check-ups and everything else.
+        ITEM_SQL + " WHERE i.roadmap_id = :r ORDER BY i.day,"
+        " (i.done_at IS NULL AND ss.id IS NOT NULL AND ss.ended_at IS NULL) DESC, i.position",
         r=active["id"],
         today=today,
     )
@@ -860,9 +863,12 @@ async def read(
         since=today - timedelta(days=EARLIER_DAYS),
     )
     # A sitting carried from one morning's plan to the next is on each: shown once.
+    # And one carried into today is on today's list, not also under Earlier.
+    carried = {row["session_id"] for row in items if row["session_id"] is not None}
     earlier: dict[Any, dict[str, Any]] = {}
     for row in taken:
-        earlier[row["session_id"]] = row
+        if row["session_id"] not in carried:
+            earlier[row["session_id"]] = row
     levels, still = await _levels(conn, student_id, items + list(earlier.values()))
     summary = active["summary"]
     return RoadmapOut(

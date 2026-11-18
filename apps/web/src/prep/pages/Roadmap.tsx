@@ -169,7 +169,7 @@ function shortDay(day: string, today: string): string {
 /** How many of the last days' stops the path shows above today. */
 const EARLIER_STOPS = 4;
 
-/** Days shown on the path, and stops at most; the rest is implied by the path fading out. */
+/** Days shown on the path, and stops ahead at most; the rest is implied by the path fading out. */
 const PATH_DAYS = 3;
 const PATH_STOPS = 14;
 
@@ -224,7 +224,8 @@ export function pathStops(roadmap: RoadmapData, next: RoadmapItem | null): Stop[
       groups.push(group);
     }
     for (const { first: item, items } of groups) {
-      if (stops.filter((stop) => !stop.heading).length >= PATH_STOPS) return stops;
+      // The limit is for what is ahead: Earlier's stops do not count toward it.
+      if (stops.filter((stop) => !stop.heading && !stop.key.startsWith('earlier-')).length >= PATH_STOPS) return stops;
       const done = items.every((i) => i.state === 'done');
       const holdsNext = next != null && items.some((i) => i.id === next.id);
       const level = item.level ?? undefined;

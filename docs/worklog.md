@@ -15,6 +15,15 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-18
 
+### Roadmap: the unfinished run comes first
+- **What:** an unfinished sitting carried into today leads the day (the API orders it first,
+  so it is the one with Carry on, before the check-ups); it is no longer repeated under
+  Earlier; the path's stop limit counts only what is ahead, not Earlier.
+- **Why:** founder, 18 Nov 2026: Carry on was at the bottom under locked stops, so nothing could
+  be done.
+- **Status:** committed, not pushed. Still to fix (found by the same check): every subject's
+  weekly check-up falls on one day, and a weak topic's lessons all land on one day.
+
 ### Phones: no hamburger; Home, Roadmap, Practice, Progress, More
 - **What:** the phone's bottom bar is Home, Roadmap, Practice, Progress and More (check-ups and
   mocks come from the roadmap, so they live in More). More (`MoreSheet.tsx`) rises from the
