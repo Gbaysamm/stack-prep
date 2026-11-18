@@ -18,6 +18,11 @@ export default defineConfig({
       '/v1': api,
     },
   },
+  // The deployed copies run `vite preview`; said again here so it never rests on preview
+  // inheriting the server's list.
+  preview: {
+    allowedHosts: ['.stackjunior.com'],
+  },
   build: {
     target: 'es2020',
     sourcemap: true,
