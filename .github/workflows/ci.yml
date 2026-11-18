@@ -23,7 +23,7 @@ on:
     # integration is where the work happens, so it is where the checks belong. Without
     # it a fortnight of commits goes unchecked and every problem surfaces at once on
     # the merge into main, which is how nine type errors arrived in a single run.
-    branches: [main, integration, dev]
+    branches: [main, integration, dev, sandbox]
   pull_request:
   workflow_dispatch:
 
@@ -227,6 +227,59 @@ jobs:
           SHA: ${{ github.sha }}
         run: |
           recorded=$(ssh target "head -1 ~/score-pilot/.deployed 2>/dev/null || true")
+          echo "recorded: ${recorded:-<nothing>}"
+          if [ "$recorded" != "$SHA" ]; then
+            echo "::error::The release did not run to completion. Expected $SHA."
+            exit 1
+          fi
+
+  deploy-sandbox:
+    name: Deploy · sandbox to the Stack Junior server
+    # The admins' own copy (deploy/stackjunior/SANDBOX.md): the sandbox branch, its own folder,
+    # database and ports on the same server and account as the integration copy. Shares that
+    # copy's concurrency group, so the two never build at once on one box.
+    needs: [python, javascript, schema, image]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/sandbox'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    concurrency:
+      group: deploy-stackjunior
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authorise SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          install -m 700 -d ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          {
+            echo "Host target"
+            echo "  HostName $SSH_HOST"
+            echo "  User $SSH_USER"
+            echo "  IdentityFile ~/.ssh/id_deploy"
+            echo "  IdentitiesOnly yes"
+            echo "  StrictHostKeyChecking yes"
+          } >> ~/.ssh/config
+
+      - name: Release
+        env:
+          SHA: ${{ github.sha }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          ssh target "SHA='$SHA' BRANCH='$BRANCH' ROOT=\$HOME/score-pilot-sandbox API_PORT=8011 WEB_PORT=5174 bash -euo pipefail -s" < deploy/stackjunior/release.sh
+
+      - name: Confirm the release actually finished
+        env:
+          SHA: ${{ github.sha }}
+        run: |
+          recorded=$(ssh target "head -1 ~/score-pilot-sandbox/.deployed 2>/dev/null || true")
           echo "recorded: ${recorded:-<nothing>}"
           if [ "$recorded" != "$SHA" ]; then
             echo "::error::The release did not run to completion. Expected $SHA."

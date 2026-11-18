@@ -213,3 +213,4 @@ the lawyer, the Lagos and Ibadan pronunciation, the Mock exam room (migration 05
 | Lessons for every subtopic, concise (about 4 min a lesson, 1–3 a subtopic), written with Claude Code | Limits in the guide; English pilot: Synonyms (3) and Vowels (4) after two reviews; ~600 subtopics to go | `docs/lessons/` | In progress |
 | Board: pen tracing lines already drawn; underlines before their words | Drawings traced line by line; marks wait for their line | `drawIn.ts`, `Board.tsx` | Committed |
 | Remove the "Asking in lessons is coming next" bar | Gone from the lesson page | `pages/Lesson.tsx` | Committed |
+| A second copy for the admins on the Stack Junior server, own branch, current data | `sandbox` branch, own folder, database and ports; mail and push off | `deploy/stackjunior/SANDBOX.md`, `ci.yml` | Waiting on server setup |

@@ -15,6 +15,19 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-18
 
+### A sandbox copy for the admins on the Stack Junior server
+- **What:** the `sandbox` branch deploys to a second copy on the Stack Junior server
+  (`~/score-pilot-sandbox`, database 55441, API 8011, web 5174), started from a copy of the
+  integration database, with mail and push off so copied students are never contacted. The
+  release script takes its folder and ports as settings, and stops only its own web server
+  (a bare `vite preview` match would have stopped the other copy). New CI job; setup steps in
+  `deploy/stackjunior/SANDBOX.md`.
+- **Why:** founder, 18 Nov 2026: the admins want their own copy to make changes on, on the Stack
+  Junior server; its own branch; the current database. Named `sandbox` to keep `uat` for a
+  later main/uat flow.
+- **Status:** committed, not pushed. Waiting on the founder to run the one-time setup; then the
+  branch is pushed.
+
 ### Lessons for every subtopic: limits set, English pilot (Synonyms, Vowels), board fixes
 - **What:** only 13 of about 620 subtopics had lessons. New limits: a lesson at most about four
   minutes (about 550 spoken words), a subtopic one to three lessons (a fourth for four truly

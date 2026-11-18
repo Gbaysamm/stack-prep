@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Runs on the Stack Junior server, piped in over SSH by the deploy workflow.
 #
-# Expects SHA and BRANCH in the environment.
+# Expects SHA and BRANCH in the environment. ROOT, API_PORT and WEB_PORT default to the
+# integration copy; the sandbox copy (deploy/stackjunior/SANDBOX.md) passes its own, so one
+# script serves both copies on this server.
 #
 # WHY THIS EXISTS ALONGSIDE ../release.sh. That one deploys a GHCR image with
 # docker compose into /opt, which needs root or membership of the docker group.
@@ -20,10 +22,10 @@
 
 set -euo pipefail
 
-ROOT="$HOME/score-pilot"
+ROOT="${ROOT:-$HOME/score-pilot}"
 APP="$ROOT/app"
-API_PORT=8010
-WEB_PORT=5173
+API_PORT="${API_PORT:-8010}"
+WEB_PORT="${WEB_PORT:-5173}"
 
 # PATH for uv, Node and PostgreSQL 18, plus every cache redirected inside $ROOT.
 # shellcheck source=/dev/null
@@ -151,7 +153,9 @@ echo "==> Restarting the web client"
 # `preview` rather than `dev`: it serves the built assets and starts no file
 # watchers, which matters on a machine that is not ours alone. Vite's preview
 # server inherits server.proxy, so /health and /v1 still reach the API.
-pkill -f "vite preview" 2>/dev/null || true
+# Only this copy's own server: a bare "vite preview" pattern would also stop the other copy
+# on this server.
+pkill -f "vite preview --host 127.0.0.1 --port $WEB_PORT" 2>/dev/null || true
 pkill -f "vite --host 127.0.0.1 --port $WEB_PORT" 2>/dev/null || true
 # Wait for the port, not for the process. --strictPort means preview refuses to
 # start if the old server still holds 5173, and a dying process can go on
