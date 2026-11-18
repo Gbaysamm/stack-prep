@@ -15,6 +15,14 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-18
 
+### Reminder emails say more
+- **What:** `emails/reminder.py`: each kind adds what to do now, in steps, and what it is
+  worth or what to expect: streak at risk (three steps, why daily practice matters), missed a
+  day and away (how to restart, nothing is lost), the exam countdown (advice for 30, 14, 7
+  days and the day before), mocks and today's check-up (what to expect).
+- **Why:** founder, 18 Nov 2026: the reminder email was too short.
+- **Status:** committed, not pushed.
+
 ### Parents: add, confirm, weekly report, missed-days alert
 - **What:** migration 065 (`guardian_students.invite_token`, `invited_at`; `parent_emails`, one
   row per email so none goes twice). `routers/parents.py`: a student adds up to two parents
