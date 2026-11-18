@@ -139,6 +139,7 @@ export function Celebrate({
   onDone,
   gains = [],
   ring,
+  art,
 }: {
   title: string;
   sub?: ReactNode;
@@ -149,6 +150,8 @@ export function Celebrate({
   gains?: Gain[];
   /** The day's progress, filling from `from` to `to`. */
   ring?: DayRing;
+  /** What pops in the middle instead of the tick: a badge, a level. */
+  art?: ReactNode;
 }) {
   const still = reduced();
   // The beat the sequence has reached: 0 card, 1 badge, 2 burst, 3 title, 4.. gains, then ring, then button.
@@ -187,10 +190,12 @@ export function Celebrate({
         <div className={`cb-card ${beat >= 0 ? 'in' : ''}`}>
           <div className="cb-top">
             <span className="cb-rays" aria-hidden="true" />
-            <span ref={badge} className={`cb-badge ${beat >= 1 ? 'pop' : ''}`}>
-              <svg viewBox="0 0 40 40" aria-hidden="true">
-                <path className={`cb-tick ${beat >= 1 ? 'draw' : ''}`} d="M11 21 l6 6 l12 -14" />
-              </svg>
+            <span ref={badge} className={`cb-badge ${beat >= 1 ? 'pop' : ''} ${art ? 'art' : ''}`}>
+              {art ?? (
+                <svg viewBox="0 0 40 40" aria-hidden="true">
+                  <path className={`cb-tick ${beat >= 1 ? 'draw' : ''}`} d="M11 21 l6 6 l12 -14" />
+                </svg>
+              )}
             </span>
           </div>
           <div className={`cb-words ${beat >= 3 ? 'in' : ''}`}>

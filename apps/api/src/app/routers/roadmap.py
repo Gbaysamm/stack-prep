@@ -24,7 +24,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import premium, scoring, voice_store, xp
+from app import badges, premium, scoring, voice_store, xp
 from app.auth import require_student
 from app.config import Settings, get_settings
 from app.db import connection, fetch_all
@@ -1126,6 +1126,7 @@ async def lesson_done(
         key=f"lesson-{subtopic_id}-{body.part}-{day}",
     )
     await xp.check_daily_goal(conn, student_id)
+    await badges.check_now(conn, student_id)
     await conn.commit()
 
 

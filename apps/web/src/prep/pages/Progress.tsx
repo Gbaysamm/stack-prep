@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 
 import type { CheckupResult, SubjectScore, TopicScore, TopicStatus } from "../../student/api.js";
 import { IconArrowRight, IconBolt, IconChart, IconChevronDown, IconChevronRight, IconTarget } from "../icons.js";
+import { BadgeShelf } from '../Badges.js';
 import { progressApi, type PracticeRunPage, type SubjectOverview } from "../progressApi.js";
 import { useLoad, usePageTitle, useStudent } from "../store.js";
 import { Button, PageHero, Skeleton, cx } from "../ui.js";
@@ -722,6 +723,10 @@ export function Progress() {
           <StrengthsCard key={focus.subject_id} subject={focus} onPractise={gate.openTopic} />
         </Section>
       ) : null}
+
+      <Section eyebrow="Badges" title="What you have earned" id="badges" className="sj-rise d3">
+        <BadgeShelf studentId={student.studentId} />
+      </Section>
 
       {gate.popup}
       {allRuns ? (

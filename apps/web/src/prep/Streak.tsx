@@ -12,7 +12,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { IconArrowRight, IconCheck, IconFlame, IconSnow } from './icons.js';
 import { useGame } from './gameApi.js';
@@ -72,6 +72,11 @@ export function StreakChip({ overview, studentId }: { overview: Overview; studen
     () => import.meta.env.DEV && new URLSearchParams(window.location.search).get('demo') === 'streak',
   );
   const streak = overview.streak_days;
+  // Today's plan as a ring around the flame (founder, 18 Nov 2026: one chip, not two).
+  const { pathname } = useLocation();
+  const game = useGame(studentId, pathname);
+  const plan = game && game.plan_total > 0 ? Math.min(1, game.plan_done / game.plan_total) : null;
+  const C = 2 * Math.PI * 11;
   return (
     <>
       <button
@@ -79,9 +84,20 @@ export function StreakChip({ overview, studentId }: { overview: Overview; studen
         className={cx('sj-streak sj-topstreak', overview.active_today && 'on')}
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
-        aria-label={streak > 0 ? `${streak}-day streak. Open your streak` : 'No streak yet. Open your streak'}
+        aria-label={`${streak > 0 ? `${streak}-day streak` : 'No streak yet'}${
+          game && game.plan_total > 0 ? `. Today's plan ${game.plan_done} of ${game.plan_total}` : ''
+        }. Open your streak`}
+        title={game && game.plan_total > 0 ? `Today's plan: ${game.plan_done} of ${game.plan_total}` : undefined}
       >
-        <IconFlame size={17} />
+        <span className={cx('sj-topstreak-ring', plan === 1 && 'done')} aria-hidden="true">
+          {plan !== null ? (
+            <svg className="ring" viewBox="0 0 26 26">
+              <circle className="track" cx="13" cy="13" r="11" />
+              <circle className="fill" cx="13" cy="13" r="11" style={{ strokeDasharray: C, strokeDashoffset: C * (1 - plan) }} />
+            </svg>
+          ) : null}
+          <IconFlame size={15} />
+        </span>
         <span className="sj-topstreak-long">{streak > 0 ? `${streak}-day streak` : 'No streak yet'}</span>
         <span className="sj-topstreak-short" aria-hidden="true">
           {streak}
@@ -121,7 +137,9 @@ function StreakDialog({
   const streak = overview.streak_days;
   const today = overview.active_today;
   const days = streakDays(streak, today, runs);
-  const freezes = useGame(studentId, open)?.freezes ?? 0;
+  const game = useGame(studentId, open);
+  const freezes = game?.freezes ?? 0;
+  const plan = game && game.plan_total > 0 ? game.plan_done / game.plan_total : null;
   const status = today
     ? { tone: 'done', text: 'Today counts. You’ve answered a question today.' }
     : streak > 0
@@ -160,6 +178,12 @@ function StreakDialog({
           </span>
         </div>
 
+        {plan !== null && game ? (
+          <p className="sk-plan">
+            Today's plan: <b>{game.plan_done} of {game.plan_total}</b> done
+            {game.plan_done >= game.plan_total ? ' · +25 XP earned' : ' · +25 XP when it is all done'}
+          </p>
+        ) : null}
         <p className={cx('sk-status', status.tone)}>
           <span className="sk-status-ico" aria-hidden="true">
             {status.tone === 'done' ? <IconCheck size={14} /> : null}

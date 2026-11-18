@@ -37,7 +37,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import notifications, premium, xp
+from app import badges, notifications, premium, xp
 from app.auth import require_student
 from app.db import connection, fetch_all
 from app.figures import DISPLAYABLE, OptionFigure, QuestionFigure, option_figure
@@ -667,6 +667,7 @@ async def _finalize(conn: AsyncConnection, mock_id: UUID, *, auto: bool) -> None
             conn, student_id, reason="mock", amount=xp.MOCK, key=f"mock-{mock_id}"
         )
         await xp.check_daily_goal(conn, student_id)
+        await badges.check_now(conn, student_id)
     await conn.commit()
 
 

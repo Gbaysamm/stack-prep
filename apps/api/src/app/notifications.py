@@ -478,6 +478,9 @@ async def run_hourly(conn: AsyncConnection, now: datetime | None = None) -> int:
         local: datetime = row["local_now"]  # their wall clock, worked out by Postgres
         days = sorted(row["days"], reverse=True)
         days = await freezes(conn, row["id"], days, local.date())
+        from app import badges
+
+        await badges.check(conn, row["id"], streak(set(days), local.date()))
         facts = Facts(
             student_id=row["id"],
             first_name=(row["display_name"] or "there").split()[0],

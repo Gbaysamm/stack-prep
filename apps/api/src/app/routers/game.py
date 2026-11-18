@@ -6,6 +6,7 @@ and the reward moment after a run, a lesson or a check-up.
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Annotated
 from uuid import UUID
 
@@ -14,12 +15,30 @@ from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import xp
+from app import badges, xp
 from app.auth import require_student
 from app.db import connection, fetch_all
 from app.routers.progress import STREAK_CONTEXTS, streak
 
 router = APIRouter(prefix="/v1/student", tags=["game"])
+
+
+class BadgeView(BaseModel):
+    id: str
+    name: str
+    line: str
+    tone: str
+    icon: str
+
+
+class ShelfBadge(BadgeView):
+    unlocked_at: datetime | None
+    progress: int
+    target: int
+
+
+class Seen(BaseModel):
+    ids: list[str]
 
 
 class Game(BaseModel):
@@ -36,6 +55,8 @@ class Game(BaseModel):
     plan_total: int
     #: Streak freezes held (migration 069): a missed day uses one.
     freezes: int
+    #: Badges unlocked and not yet shown (the app shows each once, then marks it seen).
+    badges_new: list[BadgeView] = []
 
 
 @router.get("/{student_id}/game", response_model=Game, summary="XP, level, streak and today")
@@ -99,4 +120,63 @@ async def game(
         plan_done=done,
         plan_total=planned,
         freezes=freezes,
+        badges_new=[
+            BadgeView(**_view(badges.BY_ID[row[0]]))
+            for row in (
+                await conn.execute(
+                    text(
+                        "SELECT badge FROM student_badges WHERE student_id = :s"
+                        " AND seen_at IS NULL ORDER BY unlocked_at"
+                    ),
+                    {"s": student_id},
+                )
+            ).all()
+            if row[0] in badges.BY_ID
+        ],
     )
+
+
+def _view(badge: badges.Badge) -> dict[str, str]:
+    return {
+        "id": badge.id,
+        "name": badge.name,
+        "line": badge.line,
+        "tone": badge.tone,
+        "icon": badge.icon,
+    }
+
+
+@router.get("/{student_id}/badges", response_model=list[ShelfBadge], summary="Every badge")
+async def badge_shelf(
+    request: Request, student_id: UUID, conn: Annotated[AsyncConnection, Depends(connection)]
+) -> list[ShelfBadge]:
+    await require_student(request, conn, student_id)
+    unlocked = {
+        row[0]: row[1]
+        for row in (
+            await conn.execute(
+                text("SELECT badge, unlocked_at FROM student_badges WHERE student_id = :s"),
+                {"s": student_id},
+            )
+        ).all()
+    }
+    numbers = await badges.figures(conn, student_id, await badges.streak_now(conn, student_id))
+    return [ShelfBadge(**item) for item in badges.shelf(numbers, unlocked)]
+
+
+@router.post("/{student_id}/badges/seen", status_code=204, summary="Badges shown")
+async def badges_seen(
+    request: Request,
+    student_id: UUID,
+    body: Seen,
+    conn: Annotated[AsyncConnection, Depends(connection)],
+) -> None:
+    await require_student(request, conn, student_id)
+    await fetch_all(
+        conn,
+        "UPDATE student_badges SET seen_at = now() WHERE student_id = :s"
+        " AND badge = ANY(CAST(:b AS text[])) AND seen_at IS NULL RETURNING badge",
+        s=student_id,
+        b=body.ids,
+    )
+    await conn.commit()

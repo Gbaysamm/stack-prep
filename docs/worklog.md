@@ -15,6 +15,21 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-18
 
+### Gamification steps 3 and 4: badges and levels; a tidier top bar
+- **What:** migration 070 (`student_badges`, with `seen_at`). `app/badges.py`: 13 badges
+  measured from what was done (first check-up, lesson and mock; day done; 7, 30 and 100-day
+  streaks; 100, 500 and 1,000 right without help; a perfect run; levels 5 and 10), checked when
+  a run, lesson, check-up or mock ends and in the hourly job, each unlocked once and told in the
+  bell. `/game` lists badges not yet shown; `GET /badges` the shelf; `POST /badges/seen`. Web:
+  `Badges.tsx`: the badge art, a watcher that shows each new badge (and a new level, kept per
+  device) once on the next ordinary page, the shelf on Progress with the level and XP to the
+  next. Top bar (founder: cluttered): today's plan is now a ring around the streak flame (one
+  chip), the separate day chip and the level pill are gone; on phones the chip is the bell's
+  height. `/dev/motion` has New badge and Level up. Tests: `tests/test_badges.py`.
+- **Why:** founder, 18 Nov 2026 (docs/gamification-plan.md).
+- **Status:** committed, not pushed. Not built: "first topic strong" and "score up 20"
+  badges (need score calculations), leagues (later).
+
 ### Gamification step 2: the day's ring and streak freezes
 - **What:** migration 069 (`streak_freezes`). The hourly job (`notifications.freezes`) earns a
   freeze at every 7 days of streak (two held at most) and uses one on a missed day, which then

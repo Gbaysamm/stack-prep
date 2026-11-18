@@ -199,8 +199,10 @@
   /* On a phone the chip sits in the top bar too, as the flame and the number. */
   .sj .sj-topbar button.sj-topstreak {
     display: inline-flex !important;
-    min-height: 36px;
-    padding: 6px 10px 6px 8px;
+    /* The bell beside it is 40px: the same height, so they line up. */
+    height: 40px;
+    min-height: 40px;
+    padding: 6px 10px 6px 7px;
     gap: 4px;
   }
   .sj .sj-topstreak-long {
@@ -240,4 +242,41 @@
 }
 .sk-freeze b {
   color: #123a5e;
+}
+
+/* Today's plan as a ring around the flame in the top bar (one chip, not two). */
+.sj .sj-topstreak-ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+}
+.sj .sj-topstreak-ring svg.ring {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+.sj .sj-topstreak-ring .track {
+  fill: none;
+  stroke: rgba(31, 0, 80, 0.1);
+  stroke-width: 2.5;
+}
+.sj .sj-topstreak-ring .fill {
+  fill: none;
+  stroke: var(--purple-600);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.sj .sj-topstreak-ring.done .fill {
+  stroke: var(--green-500);
+}
+.sk-plan {
+  margin: 0;
+  color: var(--gray-700);
+  font-size: 13.5px;
+}
+.sk-plan b {
+  color: var(--ink-900);
 }

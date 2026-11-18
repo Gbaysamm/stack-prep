@@ -5,6 +5,7 @@
  */
 import { useEffect, useState, type ReactNode } from 'react';
 
+import { BadgeArt, LevelArt } from '../prep/Badges.js';
 import { Celebrate } from '../prep/Celebrate.js';
 import { IconCheck, IconFlame } from '../prep/icons.js';
 import '../prep/pages/PracticeRoom.css';
@@ -90,6 +91,34 @@ const MOMENTS: Moment[] = [
           { kind: 'streak', label: 'Day streak', value: 7 },
         ]}
         ring={{ from: 1, to: 2, of: 3, label: "today's plan" }}
+      />
+    ),
+  },
+  {
+    name: 'badge',
+    label: 'New badge',
+    where: 'The next ordinary page after a badge unlocks (never mid-run), once.',
+    play: (done) => (
+      <Celebrate
+        title="One week"
+        sub="New badge · 7 days in a row."
+        next="Nice"
+        onDone={done}
+        art={<BadgeArt badge={{ tone: 'orange', icon: 'flame' }} />}
+      />
+    ),
+  },
+  {
+    name: 'level',
+    label: 'Level up',
+    where: 'The next ordinary page after reaching a new level, once.',
+    play: (done) => (
+      <Celebrate
+        title="Level 5"
+        sub="You levelled up. Keep learning to reach the next one."
+        next="Keep going"
+        onDone={done}
+        art={<LevelArt level={5} />}
       />
     ),
   },

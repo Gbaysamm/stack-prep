@@ -20,6 +20,8 @@ export interface Game {
   plan_done: number;
   plan_total: number;
   freezes: number;
+  /** Badges unlocked and not yet shown. */
+  badges_new?: { id: string; name: string; line: string; tone: string; icon: string }[];
 }
 
 export async function loadGame(studentId: string): Promise<Game | null> {

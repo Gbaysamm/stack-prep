@@ -16,8 +16,8 @@ import {
 } from "react-router-dom";
 
 import { Notices } from "./Notices.js";
+import { BadgeWatcher } from "./Badges.js";
 import { Bell } from "./Bell.js";
-import { DayChip } from "./DayChip.js";
 import { HelpFab } from "./HelpFab.js";
 import { ClaimDialog } from "./AuthForms.js";
 import {
@@ -455,7 +455,6 @@ export function AppShell() {
             </span>
               <TopContext overview={check.data} />
               <div className="right">
-                {sandbox ? null : <DayChip studentId={student.studentId} />}
                 {check.data ? (
                   <StreakChip overview={check.data} studentId={student.studentId} />
                 ) : null}
@@ -482,6 +481,7 @@ export function AppShell() {
           {sandbox ? <SandboxBanner onCreate={() => setClaiming(true)} /> : null}
           <Notices />
           <HelpFab />
+          {sandbox ? null : <BadgeWatcher studentId={student.studentId} />}
           <main id="main">
             {/* A page opened for the first time loads here, inside the frame. */}
             <Suspense

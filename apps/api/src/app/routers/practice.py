@@ -68,7 +68,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app import inworld_voice, kokoro_voice, premium, scoring, tutor, voice_store, xp
+from app import badges, inworld_voice, kokoro_voice, premium, scoring, tutor, voice_store, xp
 from app.auth import require_session_owner, require_student
 from app.config import Settings, get_settings
 from app.db import connection, fetch_all
@@ -1376,6 +1376,7 @@ async def _with_xp(
     if finished:
         session = await _session(conn, session_id)
         daily = await xp.check_daily_goal(conn, session["student_id"])
+        await badges.check_now(conn, session["student_id"])
         await conn.commit()
     return state.model_copy(
         update={
