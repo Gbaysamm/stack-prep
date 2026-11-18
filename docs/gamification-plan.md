@@ -1,6 +1,6 @@
 # Gamification plan
 
-Draft for the founder, 18 Nov 2026. To agree before building.
+Agreed with the founder, 18 Nov 2026.
 
 ## The aim
 
@@ -39,7 +39,7 @@ Three loops, each with its own feedback, from seconds to weeks.
 
 ## The pieces
 
-### Points (working name: "XP")
+### Points: XP
 
 | Earned for | Points |
 |---|---|
@@ -56,11 +56,12 @@ Nothing for: answers after viewing the solution, questions answered again within
 Kept in a ledger (`xp_events`), one row per reason, so it can never double-count and can be
 explained.
 
-### Daily goal
+### Daily goal: today's roadmap
 
-Questions per day (default 20), or minutes, set from the study time at onboarding and changeable
-in Settings. Ring on Home and next to the streak. Meeting it: a short moment, +25, and the
-streak day counts.
+The goal is the day's roadmap (founder, 18 Nov 2026): the ring fills as the student finishes
+each of today's items (a run, a lesson, a check-up, the weekly mock). A student with no roadmap
+yet has 20 questions instead. Ring on Home and next to the streak. Finishing the day: a short
+moment, +25.
 
 ### Streak freeze
 
@@ -94,11 +95,11 @@ When a topic's status moves up (needs work → getting there → strong), say so
 the session, and "strong" is a small celebration of its own. This ties the game straight to the
 score.
 
-### Leagues (decide)
+### Leagues: later
 
-Weekly leaderboard of 20-30 students by points, top ones move up a league. Strong for
-motivation (Duolingo's biggest lever) but for minors it needs care: first names and avatars
-only, no chat, opt-out. Suggest later, after the rest proves itself.
+Weekly leaderboard of 20-30 students by XP, top ones move up a league. Strong for motivation
+(Duolingo's biggest lever) but for minors it needs care: first names and avatars only, no chat,
+opt-out. Later, once the rest proves itself (founder, 18 Nov 2026).
 
 ## One motion language
 
@@ -111,8 +112,8 @@ only, no chat, opt-out. Suggest later, after the rest proves itself.
 | Badge | medium | badge flips in on its card | chime |
 | Level up | large | full-screen card, confetti, level number counts up | longer chime |
 
-All in our colours, all skippable with a tap, all off with reduced motion. Sound: off by default
-with a switch in Settings, or on by default (decide). Android buzz on right answers and
+All in our colours, all skippable with a tap, all off with reduced motion. Sound: off by default,
+with a switch in Settings to turn it on (founder, 18 Nov 2026). Android buzz on right answers and
 moments; iPhone browsers do not allow it.
 
 ## Where it shows
@@ -136,10 +137,10 @@ moments; iPhone browsers do not allow it.
 
 Each step is used and screenshotted on phone and laptop before the next.
 
-## Decisions for the founder
+## Decided (founder, 18 Nov 2026)
 
-1. Name for points: "XP", "Stack points", or something else.
-2. Daily goal in questions or in minutes.
-3. Sound on by default, or off with a switch.
-4. Streak freeze: yes (recommended) or no.
-5. Leagues: later (recommended), now, or never.
+1. Points are called XP.
+2. The daily goal is today's roadmap (20 questions when there is no roadmap yet).
+3. Sound is off by default, with a switch in Settings.
+4. Streak freeze: yes, as planned.
+5. Leagues: later.
