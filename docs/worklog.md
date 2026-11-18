@@ -15,6 +15,18 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-18
 
+### The reward moment, rebuilt as a sequence
+- **What:** `Celebrate.tsx` redone (founder: the first was flat, not like Brilliant or
+  Duolingo): the card springs in; the badge pops and its tick draws itself, light turning
+  behind it; confetti bursts out of the badge on a canvas with speed, gravity, spin and drag;
+  the gains (XP, accuracy, streak) drop in one after another and count up; the day's ring fills
+  and pulses green when the day is done; the button rises last; the badge floats while it
+  waits. It now waits for a tap (a first tap finishes the sequence). Reduced motion: all at once,
+  nothing flies. `/dev/motion` has Run finished, Lesson finished and Plan saved;
+  recordings made with `scripts/record-motion.mjs`.
+- **Why:** founder, 18 Nov 2026.
+- **Status:** committed, not pushed. The real XP figures come with step 1 (in progress).
+
 ### Animations: a review page and recordings
 - **What:** `/dev/motion` (`src/dev/Motion.tsx`): every animation, played on demand; starts with
   the lesson reward (Celebrate); each gamification moment is added as it is built.

@@ -1,4 +1,4 @@
-/* The reward moment (Celebrate.tsx). Prefix cb-. */
+/* The reward moment (Celebrate.tsx): a sequence on one sticker card. Our colours only. */
 .sj .cb-scrim {
   position: fixed;
   inset: 0;
@@ -6,103 +6,350 @@
   display: grid;
   place-items: center;
   padding: 16px;
-  overflow: hidden;
   background: rgba(31, 0, 80, 0.55);
-  animation: cb-fade 0.2s ease both;
+  animation: cb-fade 0.25s ease-out both;
+  cursor: pointer;
 }
-.sj .cb-confetti {
-  position: absolute;
+.sj .cb-burst {
+  position: fixed;
   inset: 0;
+  width: 100vw;
+  height: 100vh;
   pointer-events: none;
-}
-.sj .cb-confetti i {
-  position: absolute;
-  top: -20px;
-  left: var(--x);
-  width: 9px;
-  height: 14px;
-  border-radius: 2px;
-  opacity: 0;
-  animation: cb-fall var(--t) cubic-bezier(0.25, 0.6, 0.4, 1) var(--d) forwards;
-}
-.sj .cb-confetti i.round {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+  z-index: 2;
 }
 .sj .cb-card {
   position: relative;
+  z-index: 1;
   display: grid;
   justify-items: center;
-  gap: 10px;
-  width: min(360px, 100%);
-  padding: 30px 26px 24px;
-  border: 1.5px solid var(--gray-900, #160b2e);
+  gap: 14px;
+  width: min(380px, 100%);
+  padding: 26px 24px 22px;
+  border: 1.5px solid var(--ink-900);
   border-radius: 12px;
-  background: var(--white, #fff);
-  box-shadow: 5px 5px 0 var(--green-400, #85de4c);
+  background: #fff;
+  box-shadow: 6px 6px 0 var(--green-400);
   text-align: center;
-  animation: cb-pop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) 0.05s both;
+  cursor: default;
+  opacity: 0;
+  transform: scale(0.6) translateY(24px);
 }
-.sj .cb-tick {
+.sj .cb-card.in {
+  animation: cb-spring 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* The badge: light turning behind it, the lime disc popping, the tick drawing itself. */
+.sj .cb-top {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 72px;
-  height: 72px;
-  margin-bottom: 4px;
-  border: 1.5px solid var(--gray-900, #160b2e);
-  border-radius: 50%;
-  background: var(--green-400, #85de4c);
-  color: var(--ink-900, #1f0050);
-  animation: cb-tick 0.5s cubic-bezier(0.2, 1.6, 0.4, 1) 0.25s both;
+  width: 120px;
+  height: 104px;
 }
-.sj .cb-card > b {
-  font-size: 26px;
-  line-height: 1.1;
-  color: var(--ink-900, #1f0050);
+.sj .cb-rays {
+  position: absolute;
+  inset: -18px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(from 0deg, rgba(133, 222, 76, 0.35) 0deg 9deg, transparent 9deg 24deg);
+  -webkit-mask: radial-gradient(circle, #000 30%, transparent 70%);
+  mask: radial-gradient(circle, #000 30%, transparent 70%);
+  animation: cb-turn 9s linear infinite;
+}
+.sj .cb-badge {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 78px;
+  height: 78px;
+  border: 1.5px solid var(--ink-900);
+  border-radius: 50%;
+  background: var(--green-400);
+  box-shadow: 0 6px 0 var(--green-600);
+  transform: scale(0);
+}
+.sj .cb-badge.pop {
+  animation:
+    cb-pop 0.5s cubic-bezier(0.34, 1.8, 0.64, 1) both,
+    cb-float 2.8s ease-in-out 1s infinite;
+}
+.sj .cb-badge svg {
+  width: 44px;
+  height: 44px;
+}
+.sj .cb-tick {
+  fill: none;
+  stroke: var(--ink-900);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+}
+.sj .cb-tick.draw {
+  animation: cb-draw 0.35s ease-out 0.25s both;
+}
+
+.sj .cb-words {
+  display: grid;
+  gap: 4px;
+  opacity: 0;
+  transform: translateY(10px);
+}
+.sj .cb-words.in {
+  animation: cb-rise 0.35s ease-out both;
+}
+.sj .cb-words b {
+  color: var(--ink-900);
+  font-size: 24px;
+  line-height: 1.2;
 }
 .sj .cb-sub {
-  color: var(--ink-600, #4b4566);
-  font-size: 14.5px;
-  line-height: 1.45;
+  color: var(--gray-600);
+  font-size: 14px;
 }
+
+/* The gains: tiles that drop in one after another, the number counting up. */
+.sj .cb-gains {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 8px;
+  width: 100%;
+}
+.sj .cb-gain {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 10px 6px 9px;
+  border: 1.5px solid var(--ink-900);
+  border-radius: 10px;
+  background: #fff;
+  opacity: 0;
+  transform: translateY(14px) scale(0.9);
+}
+.sj .cb-gain.in {
+  animation: cb-drop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.sj .cb-gain-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+}
+.sj .cb-gain.xp .cb-gain-icon {
+  background: var(--yellow-100);
+  color: #8a6400;
+}
+.sj .cb-gain.accuracy .cb-gain-icon {
+  background: var(--green-100);
+  color: var(--green-600);
+}
+.sj .cb-gain.streak .cb-gain-icon {
+  background: var(--orange-100, #ffe9d6);
+  color: #c2410c;
+}
+.sj .cb-gain.streak.in .cb-gain-icon {
+  animation: cb-flame 0.6s ease-out 0.15s both;
+}
+.sj .cb-gain-value {
+  color: var(--ink-900);
+  font-family: var(--f-display);
+  font-size: 20px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.sj .cb-gain-label {
+  color: var(--gray-600);
+  font-family: var(--f-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* The day's ring. */
+.sj .cb-ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 112px;
+  height: 112px;
+  opacity: 0;
+  transform: scale(0.85);
+}
+.sj .cb-ring.in {
+  animation: cb-drop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.sj .cb-ring svg {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+.sj .cb-ring-track {
+  fill: none;
+  stroke: var(--purple-050);
+  stroke-width: 6;
+}
+.sj .cb-ring-fill {
+  fill: none;
+  stroke: var(--purple-600);
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s;
+}
+.sj .cb-ring.done .cb-ring-fill {
+  stroke: var(--green-500);
+}
+.sj .cb-ring.done {
+  animation:
+    cb-drop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+    cb-pulse 0.7s ease-out 1.05s 2;
+}
+.sj .cb-ring-text {
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  line-height: 1.1;
+}
+.sj .cb-ring-text b {
+  color: var(--ink-900);
+  font-family: var(--f-display);
+  font-size: 18px;
+}
+.sj .cb-ring-text small {
+  color: var(--gray-600);
+  font-size: 9.5px;
+  max-width: 64px;
+}
+
 .sj .cb-next {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 10px;
-  padding: 10px 18px;
+  gap: 8px;
+  height: 44px;
+  margin-top: 4px;
+  padding: 0 22px;
   border: 0;
   border-radius: 8px;
-  background: var(--purple-600, #6b0bff);
+  background: var(--purple-600);
   color: #fff;
   font: inherit;
-  font-size: 14.5px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+}
+.sj .cb-next.in {
+  animation: cb-rise 0.35s ease-out both;
+  pointer-events: auto;
+}
+.sj .cb-next:hover {
+  background: var(--purple-700);
+}
+
+/* Reduced motion: everything in place at once, nothing moving. */
+.sj .cb-scrim.still *,
+.sj .cb-scrim.still {
+  animation: none !important;
+  transition: none !important;
+}
+.sj .cb-scrim.still .cb-card,
+.sj .cb-scrim.still .cb-badge,
+.sj .cb-scrim.still .cb-words,
+.sj .cb-scrim.still .cb-gain,
+.sj .cb-scrim.still .cb-ring,
+.sj .cb-scrim.still .cb-next {
+  opacity: 1;
+  transform: none;
+}
+.sj .cb-scrim.still .cb-tick {
+  stroke-dashoffset: 0;
 }
 
 @keyframes cb-fade {
-  from { opacity: 0; }
+  from {
+    opacity: 0;
+  }
+}
+@keyframes cb-spring {
+  from {
+    opacity: 0;
+    transform: scale(0.6) translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 @keyframes cb-pop {
-  from { opacity: 0; transform: scale(0.7) translateY(16px); }
-}
-@keyframes cb-tick {
-  from { transform: scale(0) rotate(-30deg); }
-}
-@keyframes cb-fall {
-  0% { opacity: 1; transform: translate(0, 0) rotate(0deg); }
-  100% { opacity: 0.9; transform: translate(var(--drift), 105vh) rotate(calc(var(--r) + 540deg)); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .sj .cb-confetti {
-    display: none;
+  0% {
+    transform: scale(0) rotate(-20deg);
   }
-  .sj .cb-scrim,
-  .sj .cb-card,
-  .sj .cb-tick {
-    animation: none;
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+@keyframes cb-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+@keyframes cb-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes cb-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes cb-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes cb-drop {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes cb-flame {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.35) rotate(-8deg);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes cb-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 170, 15, 0.45);
+    border-radius: 50%;
+  }
+  100% {
+    box-shadow: 0 0 0 18px rgba(0, 170, 15, 0);
+    border-radius: 50%;
   }
 }

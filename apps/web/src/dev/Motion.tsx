@@ -18,12 +18,47 @@ interface Moment {
 
 const MOMENTS: Moment[] = [
   {
+    name: 'run',
+    label: 'Run finished',
+    where: 'The end of a practice run: XP, accuracy and the streak count up; the day fills.',
+    play: (done) => (
+      <Celebrate
+        title="Run complete"
+        sub="Electrolysis · 10 questions"
+        next="Continue"
+        onDone={done}
+        gains={[
+          { kind: 'xp', label: 'XP', value: 45, prefix: '+' },
+          { kind: 'accuracy', label: 'Accuracy', value: 80, suffix: '%' },
+          { kind: 'streak', label: 'Day streak', value: 7 },
+        ]}
+        ring={{ from: 2, to: 3, of: 3, label: "today's plan" }}
+      />
+    ),
+  },
+  {
     name: 'celebrate',
     label: 'Lesson finished',
-    where: 'After a lesson, and when onboarding is saved. The reward we have today.',
+    where: 'After a lesson: XP and the streak, and the day moving on.',
     play: (done) => (
-      <Celebrate title="Lesson complete" sub="Electrolysis of brine · 12 minutes" next="Practise it" onDone={done} />
+      <Celebrate
+        title="Lesson complete"
+        sub="Electrolysis of brine · 12 minutes"
+        next="Practise it"
+        onDone={done}
+        gains={[
+          { kind: 'xp', label: 'XP', value: 20, prefix: '+' },
+          { kind: 'streak', label: 'Day streak', value: 7 },
+        ]}
+        ring={{ from: 1, to: 2, of: 3, label: "today's plan" }}
+      />
     ),
+  },
+  {
+    name: 'plain',
+    label: 'Plan saved',
+    where: 'When onboarding is saved: the badge and the words, no figures.',
+    play: (done) => <Celebrate title="Your plan is ready" sub="Your roadmap starts today" next="See it" onDone={done} />,
   },
 ];
 
