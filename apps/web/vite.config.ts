@@ -10,6 +10,9 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: Number(process.env.PORT ?? 5173),
+    // Vite answers only the hosts it knows. The sandbox copy is served at a stackjunior.com
+    // address through Cloudflare (deploy/stackjunior/SANDBOX.md); preview inherits this.
+    allowedHosts: ['.stackjunior.com'],
     proxy: {
       '/health': api,
       '/v1': api,
