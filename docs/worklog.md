@@ -15,6 +15,21 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-18
 
+### Parents: add, confirm, weekly report, missed-days alert
+- **What:** migration 065 (`guardian_students.invite_token`, `invited_at`; `parent_emails`, one
+  row per email so none goes twice). `routers/parents.py`: a student adds up to two parents
+  (name, email, relationship); the parent gets an invitation email and confirms at
+  `/parent/<token>` (no sign-in, one tap, the consent recorded as `guardian_digest`). A waiting
+  invitation can be sent again or taken back; a confirmed parent cannot be removed by the
+  student (they would hide from the reports): that goes through us. `parent_email.py`: the
+  weekly report to confirmed parents on Sunday from 6 pm the student's time, and an alert
+  after 3 and 7 days without study (8 am to 9 pm), both on the hourly job. Emails
+  `parent_invite.py`, `parent_weekly_report.py`, `parent_missed_days.py`, also on `/dev/emails`.
+  Settings has a Parent or guardian section (`ParentSettings.tsx`, classes `pp-`: `ps-` is the
+  public site's). Tests: `tests/test_parents.py`.
+- **Why:** founder, 17 Nov 2026: parents told when students default; reports to parents.
+- **Status:** committed, not pushed.
+
 ### Lessons and questions expansion on today's plan
 - **What:** migration 064: More subject lessons and More questions planned for today, after
   the notifications and gamification.

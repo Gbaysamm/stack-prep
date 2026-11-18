@@ -49,6 +49,17 @@ async def remove(people: list[Person], keep: str | None = None) -> None:
         # The reviewer row the dashboard made for the account the first time it was used.
         await conn.execute(text(f"DELETE FROM academic_reviewers WHERE {mine}"), {"i": ids})
         await conn.execute(text(f"DELETE FROM consents WHERE {mine}"), {"i": ids})
+        # Parents the student added: the links, then the parents no one else links to.
+        await conn.execute(
+            text("DELETE FROM guardian_students WHERE student_id::text = ANY(:i)"),
+            {"i": ids},
+        )
+        await conn.execute(
+            text(
+                "DELETE FROM guardians g WHERE NOT EXISTS "
+                "(SELECT 1 FROM guardian_students gs WHERE gs.guardian_id = g.id)"
+            )
+        )
         await conn.execute(text("DELETE FROM students WHERE id::text = ANY(:i)"), {"i": ids})
         logins = [p.login for p in people]
         await conn.execute(text("DELETE FROM auth_attempts WHERE login = ANY(:l)"), {"l": logins})

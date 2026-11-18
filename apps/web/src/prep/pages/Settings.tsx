@@ -13,6 +13,7 @@ import { IconArrowRight, IconLock } from '../icons.js';
 import { useIdentity, useLoad, usePageTitle, useStudent } from '../store.js';
 import { Button, PageHero, Skeleton, useToast } from '../ui.js';
 import { Note, Section } from './Home.js';
+import { ParentSettings } from './ParentSettings.js';
 import { ResultSettings } from './ResultSettings.js';
 import './Settings.css';
 
@@ -348,7 +349,7 @@ export function Settings() {
       <PageHero
         eyebrow="Account settings"
         title="Your account"
-        sub="Your details, how your results are shown, and how you sign in."
+        sub="Your details, how your results are shown, your parent, and how you sign in."
       />
 
       <Section eyebrow="About you" title="Your school and your aim" id="set-about" className="sj-rise d1">
@@ -358,6 +359,12 @@ export function Settings() {
       <Section eyebrow="Mock results" title="How your scores are shown" id="set-results" className="sj-rise d2">
         <ResultSettings studentId={student.studentId} />
       </Section>
+
+      {sandbox ? null : (
+        <Section eyebrow="Parent or guardian" title="Who gets your weekly report" id="set-parents" className="sj-rise d3">
+          <ParentSettings studentId={student.studentId} />
+        </Section>
+      )}
 
       <Section eyebrow="Signing in" title="Email, phone and password" id="set-signin" className="sj-rise d3">
         {sandbox ? (

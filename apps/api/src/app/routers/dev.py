@@ -321,7 +321,7 @@ async def email_previews(
 ) -> list[EmailPreview]:
     """For the /dev/emails page: each email as it is sent, rendered from app/emails."""
     from app.emails import render
-    from app.emails.previews import SAMPLES
+    from app.emails.previews import SAMPLES, parent_samples
     from app.notification_email import app_address
 
     _require_dev(settings)
@@ -330,6 +330,12 @@ async def email_previews(
     out = []
     for name, when, notes in SAMPLES:
         email = render(notes, base)
+        out.append(
+            EmailPreview(
+                name=name, when=when, subject=email.subject, html=email.html, text=email.text
+            )
+        )
+    for name, when, email in parent_samples(base):
         out.append(
             EmailPreview(
                 name=name, when=when, subject=email.subject, html=email.html, text=email.text

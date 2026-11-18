@@ -97,7 +97,7 @@ def _openapi() -> int:
 
 def _notify() -> int:
     """Run the hourly notifications job once now (the worker runs it every hour)."""
-    from app import notification_email, notifications
+    from app import notification_email, notifications, parent_email
     from app.db import get_engine
 
     async def run() -> int:
@@ -105,6 +105,8 @@ def _notify() -> int:
             added = await notifications.run_hourly(conn)
             added += await notification_email.weekly_reports(conn)
             sent = await notification_email.send_due(conn)
+            sent += await parent_email.weekly(conn)
+            sent += await parent_email.missed_days(conn)
         print(f"{added} notifications added, {sent} emailed.")
         return 0
 

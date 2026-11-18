@@ -7,6 +7,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from app.emails.layout import Email
+
 
 def note(
     kind: str,
@@ -276,3 +278,35 @@ SAMPLES: list[tuple[str, str, list[dict[str, Any]]]] = [
         ],
     ),
 ]
+
+
+def parent_samples(base: str) -> list[tuple[str, str, Email]]:
+    """The emails to parents, with sample data (they are not notifications)."""
+    from app.emails import parent_invite, parent_missed_days, parent_weekly_report
+
+    week = {
+        "days": 4,
+        "time": "1 h 35 min",
+        "answered": 86,
+        "accuracy": 72,
+        "change": "Up from 64%",
+        "most": ["Cell structure", "Indices"],
+        "focus": "Electrolysis",
+    }
+    return [
+        (
+            "Parent: confirm",
+            "When a student adds a parent or guardian in Settings.",
+            parent_invite.build("Ngozi Okafor", "Chiamaka Okafor", f"{base}/parent/sample", base),
+        ),
+        (
+            "Parent: weekly report",
+            "Sunday evening, to every parent who confirmed.",
+            parent_weekly_report.build("Ngozi Okafor", "Chiamaka Okafor", week, base),
+        ),
+        (
+            "Parent: missed days",
+            "After 3 days without study, and again at 7, to every parent who confirmed.",
+            parent_missed_days.build("Ngozi Okafor", "Chiamaka Okafor", 3, base),
+        ),
+    ]

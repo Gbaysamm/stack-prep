@@ -196,3 +196,4 @@ the lawyer, the Lagos and Ibadan pronunciation, the Mock exam room (migration 05
 |---|---|---|---|
 | Today: complete the notification engine and gamification first; put it on the tracker and deploy it | Both planned for today, at the top, notifications first | migration 062 | Pushed |
 | Add the lesson and question expansion to the tracker | More subject lessons and More questions on today's plan, after gamification | migration 064 | Committed |
+| Parents told when students default; reports to parents | A student adds a parent in Settings; the parent confirms by email; then a weekly report on Sunday and an alert after 3 and 7 days without study; a confirmed parent stays | `routers/parents.py`, `parent_email.py`, `/parent/<token>`, migration 065 | Committed |

@@ -37,6 +37,7 @@ from app.routers import (
     mock,
     mouth,
     notifications,
+    parents,
     pool,
     practice,
     progress,
@@ -122,6 +123,8 @@ def create_app() -> FastAPI:
     app.include_router(announcements.student_router)
     app.include_router(announcements.admin_router)
     app.include_router(notifications.router)
+    app.include_router(parents.router)
+    app.include_router(parents.public_router)
     app.include_router(progress.router)
     app.include_router(roadmap.router)
     app.include_router(runs.router)
