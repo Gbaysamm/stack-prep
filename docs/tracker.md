@@ -200,3 +200,5 @@ the lawyer, the Lagos and Ibadan pronunciation, the Mock exam room (migration 05
 | The reminder email is too short | Each reminder adds steps for what to do now, and why it matters or what to expect | `emails/reminder.py` | Committed |
 | Push notifications | Service worker, manifest, Turn on in the bell; every notification pushed once to each device; needs VAPID keys on the servers | `app/push.py`, `public/sw.js`, `pushClient.ts`, migration 066 | Committed |
 | The bell is too long; four check-up notifications at once | One line per message, tighter rows; today's check-ups as one notification | `Bell.css`, `notifications.PLAN_RULES` | Committed |
+| Note what is pending for notifications (credentials, settings) | `docs/notifications-pending.md`; a waiting item on the tracker | migration 067 | Committed |
+| Gamification: a plan first, with animations and feedback loops that make sense | `docs/gamification-plan.md`, decisions open | docs | In progress |

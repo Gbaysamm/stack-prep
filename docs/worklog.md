@@ -15,6 +15,15 @@ Older history, before this log started, is in `git log` and `docs/roadmap.md`.
 
 ## 2026-11-18
 
+### Notifications noted as done; gamification planned
+- **What:** `docs/notifications-pending.md`: the server settings email and push still need
+  (SMTP, PUBLIC_URL, VAPID keys, SPF and DKIM) and what was left for later. Migration 067:
+  the three notifications items committed, a waiting item for the server settings, gamification
+  in progress. `docs/gamification-plan.md`: the plan to agree (loops, points, daily goal,
+  streak freeze, levels, badges, mastery moments, one motion language, build order, decisions).
+- **Why:** founder, 18 Nov 2026.
+- **Status:** committed, not pushed.
+
 ### Push notifications to phones; a compact bell; today's check-ups as one
 - **What:** migration 066 (`push_subscriptions`; `notifications.pushed_at`). `app/push.py`
   (pywebpush): every notification of the last day goes to each device that turned push on,
